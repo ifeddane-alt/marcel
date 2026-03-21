@@ -104,6 +104,7 @@ export default function Governance() {
             >
               <div
                 className="flex items-center gap-4 px-5 py-4 cursor-pointer hover:bg-gray-50/50 transition-colors"
+                data-testid={`governance-expand-btn-${g.governance_id}`}
                 onClick={() => setExpanded(isExpanded ? null : g.governance_id)}
               >
                 {/* Type badge */}

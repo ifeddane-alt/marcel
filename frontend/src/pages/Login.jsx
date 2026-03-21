@@ -50,7 +50,7 @@ export default function Login() {
             {[
               { val: "8", label: "Projets actifs" },
               { val: "17,3M€", label: "Budget portefeuille" },
-              { val: "3", label: "Instances gouvernance" },
+              { val: "5", label: "Instances gouvernance" },
               { val: "10", label: "Ressources allouées" },
             ].map((item) => (
               <div key={item.label} className="bg-white/5 rounded p-3 border border-white/10">
