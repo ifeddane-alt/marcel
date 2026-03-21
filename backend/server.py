@@ -1,4 +1,5 @@
-from fastapi import FastAPI, APIRouter
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Body
+from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -6,67 +7,287 @@ import os
 import logging
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
-from typing import List
+from typing import List, Optional, Any
 import uuid
-from datetime import datetime, timezone
-
+from datetime import datetime, timezone, timedelta
+from jose import jwt, JWTError
+import bcrypt
 
 ROOT_DIR = Path(__file__).parent
 load_dotenv(ROOT_DIR / '.env')
 
-# MongoDB connection
+JWT_SECRET = os.environ.get('JWT_SECRET', 'projetenne-secret-key-2025')
+JWT_ALGORITHM = 'HS256'
+
 mongo_url = os.environ['MONGO_URL']
 client = AsyncIOMotorClient(mongo_url)
 db = client[os.environ['DB_NAME']]
 
-# Create the main app without a prefix
-app = FastAPI()
-
-# Create a router with the /api prefix
+app = FastAPI(title="Projetenne API")
 api_router = APIRouter(prefix="/api")
+security = HTTPBearer()
+
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 
-# Define Models
-class StatusCheck(BaseModel):
-    model_config = ConfigDict(extra="ignore")  # Ignore MongoDB's _id field
-    
-    id: str = Field(default_factory=lambda: str(uuid.uuid4()))
-    client_name: str
-    timestamp: datetime = Field(default_factory=lambda: datetime.now(timezone.utc))
+# ---------- Auth utilities ----------
 
-class StatusCheckCreate(BaseModel):
-    client_name: str
+class TokenPayload(BaseModel):
+    tenant_id: str
+    user_id: str
+    email: str
+    role: str
+    name: str
 
-# Add your routes to the router instead of directly to app
-@api_router.get("/")
-async def root():
-    return {"message": "Hello World"}
 
-@api_router.post("/status", response_model=StatusCheck)
-async def create_status_check(input: StatusCheckCreate):
-    status_dict = input.model_dump()
-    status_obj = StatusCheck(**status_dict)
-    
-    # Convert to dict and serialize datetime to ISO string for MongoDB
-    doc = status_obj.model_dump()
-    doc['timestamp'] = doc['timestamp'].isoformat()
-    
-    _ = await db.status_checks.insert_one(doc)
-    return status_obj
+def create_token(payload: dict) -> str:
+    data = {**payload, 'exp': datetime.now(timezone.utc) + timedelta(hours=24)}
+    return jwt.encode(data, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
-@api_router.get("/status", response_model=List[StatusCheck])
-async def get_status_checks():
-    # Exclude MongoDB's _id field from the query results
-    status_checks = await db.status_checks.find({}, {"_id": 0}).to_list(1000)
-    
-    # Convert ISO string timestamps back to datetime objects
-    for check in status_checks:
-        if isinstance(check['timestamp'], str):
-            check['timestamp'] = datetime.fromisoformat(check['timestamp'])
-    
-    return status_checks
 
-# Include the router in the main app
+async def get_current_user(
+    creds: HTTPAuthorizationCredentials = Depends(security),
+) -> TokenPayload:
+    try:
+        payload = jwt.decode(creds.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return TokenPayload(**payload)
+    except (JWTError, Exception):
+        raise HTTPException(status_code=401, detail="Token invalide ou expiré")
+
+
+def require_write(user: TokenPayload):
+    if user.role == "READ_ONLY":
+        raise HTTPException(status_code=403, detail="Droits insuffisants")
+
+
+# ---------- Request models ----------
+
+class LoginRequest(BaseModel):
+    email: str
+    password: str
+
+
+class ProjectCreate(BaseModel):
+    name: str
+    methodology: str
+    status_rag: str
+    budget_total: float
+    budget_consumed: float = 0
+    budget_forecast: float
+    jh_planned: float
+    jh_consumed: float = 0
+    start_date: str
+    end_date_baseline: str
+    end_date_forecast: str
+    source_id: Optional[str] = None
+    source_tool: Optional[str] = None
+    metadata: dict = {}
+
+
+class ProjectUpdate(BaseModel):
+    name: Optional[str] = None
+    methodology: Optional[str] = None
+    status_rag: Optional[str] = None
+    budget_total: Optional[float] = None
+    budget_consumed: Optional[float] = None
+    budget_forecast: Optional[float] = None
+    jh_planned: Optional[float] = None
+    jh_consumed: Optional[float] = None
+    start_date: Optional[str] = None
+    end_date_baseline: Optional[str] = None
+    end_date_forecast: Optional[str] = None
+
+
+# ---------- AUTH ----------
+
+@api_router.post("/auth/login")
+async def login(req: LoginRequest):
+    user = await db.users.find_one({"email": req.email}, {"_id": 0})
+    if not user:
+        raise HTTPException(status_code=401, detail="Identifiants invalides")
+    if not bcrypt.checkpw(req.password.encode(), user['password_hash'].encode()):
+        raise HTTPException(status_code=401, detail="Identifiants invalides")
+    token = create_token({
+        "tenant_id": user["tenant_id"],
+        "user_id": user["user_id"],
+        "email": user["email"],
+        "role": user["role"],
+        "name": user["name"],
+    })
+    return {
+        "access_token": token,
+        "token_type": "bearer",
+        "user": {k: user[k] for k in ("user_id", "email", "name", "role", "tenant_id")},
+    }
+
+
+@api_router.get("/auth/me")
+async def get_me(current_user: TokenPayload = Depends(get_current_user)):
+    return current_user.model_dump()
+
+
+# ---------- PROJECTS ----------
+
+@api_router.get("/projects")
+async def list_projects(current_user: TokenPayload = Depends(get_current_user)):
+    projects = await db.projects.find(
+        {"tenant_id": current_user.tenant_id}, {"_id": 0}
+    ).to_list(None)
+    return projects
+
+
+@api_router.get("/projects/{project_id}")
+async def get_project(project_id: str, current_user: TokenPayload = Depends(get_current_user)):
+    project = await db.projects.find_one(
+        {"project_id": project_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
+    )
+    if not project:
+        raise HTTPException(status_code=404, detail="Projet introuvable")
+    return project
+
+
+@api_router.post("/projects", status_code=201)
+async def create_project(data: ProjectCreate, current_user: TokenPayload = Depends(get_current_user)):
+    require_write(current_user)
+    project = {
+        "project_id": str(uuid.uuid4()),
+        "tenant_id": current_user.tenant_id,
+        **data.model_dump(),
+        "last_sync_at": None,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.projects.insert_one(project)
+    project.pop("_id", None)
+    return project
+
+
+@api_router.put("/projects/{project_id}")
+async def update_project(
+    project_id: str,
+    data: ProjectUpdate,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    require_write(current_user)
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    result = await db.projects.update_one(
+        {"project_id": project_id, "tenant_id": current_user.tenant_id},
+        {"$set": update_data},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Projet introuvable")
+    updated = await db.projects.find_one({"project_id": project_id}, {"_id": 0})
+    return updated
+
+
+# ---------- RESOURCES ----------
+
+@api_router.get("/resources")
+async def list_resources(current_user: TokenPayload = Depends(get_current_user)):
+    resources = await db.resources.find(
+        {"tenant_id": current_user.tenant_id}, {"_id": 0}
+    ).to_list(None)
+    return resources
+
+
+# ---------- ALLOCATIONS ----------
+
+@api_router.get("/allocations")
+async def list_allocations(
+    project_id: Optional[str] = None,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    if project_id:
+        proj = await db.projects.find_one(
+            {"project_id": project_id, "tenant_id": current_user.tenant_id}
+        )
+        if not proj:
+            raise HTTPException(status_code=404, detail="Projet introuvable")
+        allocs = await db.allocations.find({"project_id": project_id}, {"_id": 0}).to_list(None)
+    else:
+        projects = await db.projects.find(
+            {"tenant_id": current_user.tenant_id}, {"project_id": 1, "_id": 0}
+        ).to_list(None)
+        pids = [p["project_id"] for p in projects]
+        allocs = await db.allocations.find({"project_id": {"$in": pids}}, {"_id": 0}).to_list(None)
+    return allocs
+
+
+# ---------- MILESTONES ----------
+
+@api_router.get("/milestones")
+async def list_milestones(
+    project_id: Optional[str] = None,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    if project_id:
+        proj = await db.projects.find_one(
+            {"project_id": project_id, "tenant_id": current_user.tenant_id}
+        )
+        if not proj:
+            raise HTTPException(status_code=404, detail="Projet introuvable")
+        milestones = await db.milestones.find({"project_id": project_id}, {"_id": 0}).to_list(None)
+    else:
+        projects = await db.projects.find(
+            {"tenant_id": current_user.tenant_id}, {"project_id": 1, "_id": 0}
+        ).to_list(None)
+        pids = [p["project_id"] for p in projects]
+        milestones = await db.milestones.find({"project_id": {"$in": pids}}, {"_id": 0}).to_list(None)
+    return milestones
+
+
+# ---------- GOVERNANCE ----------
+
+@api_router.get("/governance")
+async def list_governance(current_user: TokenPayload = Depends(get_current_user)):
+    instances = await db.governance.find(
+        {"tenant_id": current_user.tenant_id}, {"_id": 0}
+    ).to_list(None)
+    return instances
+
+
+# ---------- DASHBOARD ----------
+
+@api_router.get("/dashboard/summary")
+async def dashboard_summary(current_user: TokenPayload = Depends(get_current_user)):
+    projects = await db.projects.find(
+        {"tenant_id": current_user.tenant_id}, {"_id": 0}
+    ).to_list(None)
+
+    total = len(projects)
+    green = sum(1 for p in projects if p.get("status_rag") == "green")
+    orange = sum(1 for p in projects if p.get("status_rag") == "orange")
+    red = sum(1 for p in projects if p.get("status_rag") == "red")
+
+    total_budget = sum(p.get("budget_total", 0) for p in projects)
+    total_consumed = sum(p.get("budget_consumed", 0) for p in projects)
+    total_forecast = sum(p.get("budget_forecast", 0) for p in projects)
+    total_jh_planned = sum(p.get("jh_planned", 0) for p in projects)
+    total_jh_consumed = sum(p.get("jh_consumed", 0) for p in projects)
+
+    methodology_counts = {
+        "waterfall": sum(1 for p in projects if p.get("methodology") == "waterfall"),
+        "agile": sum(1 for p in projects if p.get("methodology") == "agile"),
+        "safe": sum(1 for p in projects if p.get("methodology") == "safe"),
+    }
+
+    return {
+        "total_projects": total,
+        "rag_counts": {"green": green, "orange": orange, "red": red},
+        "budget": {
+            "total": total_budget,
+            "consumed": total_consumed,
+            "forecast": total_forecast,
+            "consumption_rate": round(total_consumed / total_budget * 100, 1) if total_budget else 0,
+        },
+        "jh": {"planned": total_jh_planned, "consumed": total_jh_consumed},
+        "methodology_counts": methodology_counts,
+        "recent_projects": projects[:5],
+    }
+
+
+# ---------- App setup ----------
+
 app.include_router(api_router)
 
 app.add_middleware(
@@ -77,12 +298,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# Configure logging
-logging.basicConfig(
-    level=logging.INFO,
-    format='%(asctime)s - %(name)s - %(levelname)s - %(message)s'
-)
-logger = logging.getLogger(__name__)
 
 @app.on_event("shutdown")
 async def shutdown_db_client():
