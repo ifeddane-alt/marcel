@@ -35,7 +35,9 @@ Tenant démo : **Groupe Altair Industries**
 - [x] GET /api/auth/me
 - [x] GET/POST /api/projects
 - [x] GET/PUT /api/projects/:id
-- [x] GET /api/resources
+- [x] GET/POST /api/tasks (avec project_id obligatoire + validation tenant)
+- [x] PUT /api/tasks/:id
+- [x] 46 tâches seedées (5-7 par projet, types variés, données cohérentes)
 - [x] GET /api/allocations?project_id=
 - [x] GET /api/milestones?project_id=
 - [x] GET /api/governance

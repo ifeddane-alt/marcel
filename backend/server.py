@@ -239,6 +239,7 @@ async def list_milestones(
 # ---------- TASKS ----------
 
 class TaskCreate(BaseModel):
+    project_id: str
     name: str
     type: str  # tâche | feature | epic | user_story
     status: str = "not_started"  # not_started | in_progress | completed | delayed | cancelled
@@ -292,7 +293,12 @@ async def list_tasks(
 @api_router.post("/tasks", status_code=201)
 async def create_task(data: TaskCreate, current_user: TokenPayload = Depends(get_current_user)):
     require_write(current_user)
-    # Validate project belongs to tenant (project_id must come from request body via metadata)
+    # Validate project belongs to tenant
+    proj = await db.projects.find_one(
+        {"project_id": data.project_id, "tenant_id": current_user.tenant_id}
+    )
+    if not proj:
+        raise HTTPException(status_code=404, detail="Projet introuvable ou accès refusé")
     task = {
         "task_id": str(uuid.uuid4()),
         "tenant_id": current_user.tenant_id,
