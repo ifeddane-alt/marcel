@@ -1,0 +1,35 @@
+{
+  "summary": "Tested the tasks-table column alignment fix in ProjectDetail. Verified that the extra <td> date_start_planned has been removed, resulting in correct 11-column alignment.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_4.json"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Col9 (JH prévus) displays a plain number (e.g. '240') without 'JH' suffix — per code this is expected as `{t.jh_planned > 0 ? t.jh_planned : '—'}`. Minor cosmetic inconsistency vs Col10 which shows 'JH'."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A", "frontend": "100%"},
+  "seed_data_creation": "",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Tasks table in ProjectDetail now has 11 correctly aligned columns: RAG | Nom | Type | Statut | Fin prévue | Fin réelle | Budget prévu (K€) | Budget landing (K€) | JH prévus | JH landing | Responsable. Col5 shows date in French format (e.g. '31 mars 2025'). Col7=Budget prévu in K€. Totals row verified with 6 cells (colSpan=6 label + 4 data cells + 1 empty). Fix from iteration_3 (extra date_start_planned td) confirmed resolved.",
+  "test_results": {
+    "thead_columns": "PASS - 11 columns confirmed",
+    "headers_order": "PASS - RAG, Nom, Type, Statut, Fin prévue, Fin réelle, Budget prévu, Budget landing, JH prévus, JH landing, Responsable",
+    "col5_fin_prevue": "PASS - '31 mars 2025' is a date (French locale format)",
+    "col6_fin_reelle": "PASS - '28 mars 2025' or '—'",
+    "col7_budget_prevu": "PASS - '120 K€'",
+    "col8_budget_landing": "PASS - '115 K€'",
+    "col9_jh_prevus": "INFO - displays number only '240' (no JH suffix - minor)",
+    "col10_jh_landing": "PASS - '230 JH'",
+    "col11_responsable": "PASS - 'Ressource_05'",
+    "totals_row": "PASS - Budget prévu: 780 K€, Budget landing: 773 K€ (99%), JH prévus: 1560 JH, JH landing: 1545 JH (99%)"
+  }
+}

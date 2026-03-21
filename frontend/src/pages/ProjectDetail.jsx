@@ -290,11 +290,6 @@ export default function ProjectDetail() {
                             <TaskStatusBadge status={t.status} />
                           </td>
 
-                          {/* Début prévu */}
-                          <td className="px-3 py-2.5 font-mono-data text-slate-500">
-                            {formatDate(t.date_start_planned)}
-                          </td>
-
                           {/* Fin prévue */}
                           <td className="px-3 py-2.5 font-mono-data">
                             <span className={dateAtRisk ? "text-rose-600 font-semibold" : "text-slate-500"}>
