@@ -337,7 +337,7 @@ export default function ProjectDetail() {
 
                           {/* JH prévus */}
                           <td className="px-3 py-2.5 text-right font-mono-data text-slate-500">
-                            {t.jh_planned > 0 ? t.jh_planned : <span className="text-slate-300">—</span>}
+                            {t.jh_planned > 0 ? `${t.jh_planned} JH` : <span className="text-slate-300">—</span>}
                           </td>
 
                           {/* JH landing */}
