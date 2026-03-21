@@ -1,0 +1,199 @@
+{
+  "design_system": {
+    "identity": {
+      "name": "Projetenne",
+      "personality": "The Swiss Architect",
+      "core_values": [
+        "Precision",
+        "Authority",
+        "Clarity",
+        "Density"
+      ],
+      "aesthetic": "Swiss International Style meets Enterprise functionality. Rigid grids, high contrast, information density, and absolute typographical hierarchy."
+    },
+    "typography": {
+      "font_family": {
+        "headings": "Barlow Condensed, sans-serif",
+        "body": "Inter, sans-serif",
+        "mono": "JetBrains Mono, monospace"
+      },
+      "weights": {
+        "headings": "700",
+        "subheadings": "500",
+        "body": "400",
+        "bold": "600"
+      },
+      "scale": {
+        "h1": "text-4xl tracking-tight font-bold uppercase",
+        "h2": "text-2xl tracking-tight font-semibold",
+        "h3": "text-xl font-medium",
+        "body": "text-sm leading-relaxed",
+        "small": "text-xs tracking-wide text-muted-foreground",
+        "label": "text-[10px] uppercase tracking-widest font-bold text-muted-foreground"
+      },
+      "imports": [
+        "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
+      ]
+    },
+    "colors": {
+      "palette": {
+        "primary": {
+          "DEFAULT": "#0F172A",
+          "foreground": "#F8FAFC"
+        },
+        "secondary": {
+          "DEFAULT": "#F1F5F9",
+          "foreground": "#0F172A"
+        },
+        "accent": {
+          "DEFAULT": "#0052CC",
+          "foreground": "#FFFFFF"
+        },
+        "background": "#F8F9FA",
+        "card": "#FFFFFF",
+        "border": "#E2E8F0",
+        "muted": "#64748B",
+        "functional": {
+          "success": "#10B981",
+          "warning": "#F59E0B",
+          "danger": "#EF4444",
+          "info": "#3B82F6"
+        }
+      },
+      "usage": {
+        "sidebar": "bg-[#0F172A] text-white",
+        "header": "bg-white border-b border-gray-200",
+        "app_bg": "bg-[#F8F9FA]",
+        "cards": "bg-white border border-gray-200 shadow-sm"
+      }
+    },
+    "spacing": {
+      "container_padding": "p-8",
+      "section_gap": "gap-8",
+      "element_gap": "gap-4",
+      "dense_padding": "p-2",
+      "card_padding": "p-6"
+    },
+    "borders": {
+      "radius": "rounded-sm",
+      "width": "border",
+      "color": "border-gray-200",
+      "style": "solid"
+    },
+    "shadows": {
+      "card": "shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]",
+      "dropdown": "shadow-lg border border-gray-100",
+      "hover": "shadow-md"
+    },
+    "motion": {
+      "duration": "duration-200",
+      "ease": "ease-out",
+      "hover_transform": "hover:-translate-y-[1px]"
+    }
+  },
+  "layout_strategies": {
+    "dashboard": {
+      "type": "bento_grid_dense",
+      "columns": "grid-cols-1 md:grid-cols-4 lg:grid-cols-12",
+      "gap": "gap-4",
+      "areas": [
+        {
+          "name": "summary_metrics",
+          "span": "col-span-12 lg:col-span-12 h-auto"
+        },
+        {
+          "name": "main_chart",
+          "span": "col-span-12 lg:col-span-8 row-span-2"
+        },
+        {
+          "name": "status_breakdown",
+          "span": "col-span-12 lg:col-span-4 row-span-1"
+        },
+        {
+          "name": "recent_activity",
+          "span": "col-span-12 lg:col-span-4 row-span-1"
+        }
+      ]
+    },
+    "project_detail": {
+      "type": "sidebar_content",
+      "structure": "Fixed sidebar, scrollable content area. Header contains breadcrumbs and primary actions."
+    }
+  },
+  "components": {
+    "buttons": {
+      "primary": "bg-[#0F172A] text-white hover:bg-[#1E293B] rounded-sm px-4 py-2 text-sm font-medium transition-colors",
+      "secondary": "bg-white text-[#0F172A] border border-gray-300 hover:bg-gray-50 rounded-sm px-4 py-2 text-sm font-medium transition-colors",
+      "ghost": "hover:bg-gray-100 text-gray-700 rounded-sm px-3 py-2 text-sm font-medium transition-colors",
+      "danger": "bg-red-600 text-white hover:bg-red-700 rounded-sm px-4 py-2 text-sm font-medium transition-colors"
+    },
+    "cards": {
+      "default": "bg-white border border-gray-200 rounded-sm shadow-sm p-6 hover:shadow-md transition-shadow",
+      "metric": "flex flex-col justify-between p-6 bg-white border-l-4 border-l-[#0F172A] border-y border-r border-gray-200 rounded-sm shadow-sm"
+    },
+    "tables": {
+      "container": "w-full border-collapse text-sm",
+      "header": "bg-gray-50 text-left font-semibold text-gray-900 border-b border-gray-200",
+      "row": "border-b border-gray-100 hover:bg-gray-50/50 transition-colors",
+      "cell": "py-3 px-4 text-gray-700 align-middle",
+      "status_badge": "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize"
+    },
+    "badges": {
+      "styles": {
+        "success": "bg-emerald-100 text-emerald-800",
+        "warning": "bg-amber-100 text-amber-800",
+        "danger": "bg-rose-100 text-rose-800",
+        "neutral": "bg-gray-100 text-gray-800"
+      }
+    },
+    "inputs": {
+      "default": "flex h-10 w-full rounded-sm border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+    }
+  },
+  "assets": {
+    "libraries": [
+      {
+        "name": "lucide-react",
+        "usage": "For all icons. Use strict 1.5px stroke width for consistency."
+      },
+      {
+        "name": "recharts",
+        "usage": "For data visualization (budget trends, status distribution)."
+      },
+      {
+        "name": "clsx",
+        "usage": "For conditional class merging."
+      },
+      {
+        "name": "tailwind-merge",
+        "usage": "For safe tailwind class merging."
+      }
+    ],
+    "images": {
+      "logo": "placeholder",
+      "avatars": "placeholder"
+    }
+  },
+  "accessibility": {
+    "contrast": "Strict WCAG AA compliance. Text on colored badges must check contrast.",
+    "focus": "Visible focus rings on all interactive elements.",
+    "aria": "All icon-only buttons must have aria-label."
+  },
+  "universal_guidelines": [
+    "Do not use gradients for backgrounds. Stick to flat, solid colors.",
+    "Use 'Barlow Condensed' for all headings to give a distinct 'Projetenne' look.",
+    "Data density is key. Avoid excessive padding in tables. Use 'p-3' or 'p-2' for table cells.",
+    "All financial figures must be right-aligned and monospaced (JetBrains Mono).",
+    "Dates should be formatted as 'DD MMM YYYY' (e.g., 12 Oct 2025).",
+    "Status badges (RAG) are the primary visual indicator in lists.",
+    "Sidebar should remain dark (#0F172A) to anchor the layout.",
+    "Use a 'breadcrumb' navigation on all detail pages."
+  ],
+  "instructions_to_main_agent": {
+    "setup": "Install fonts via Google Fonts import in index.css. Configure tailwind.config.js with the custom colors.",
+    "layout": "Create a persistent Layout component with the Sidebar and Topbar.",
+    "routing": "Use React Router. Protect routes based on roles.",
+    "mocking": "Mock all API calls with realistic French enterprise data (e.g., 'Projet Phoenix', 'Transformation Digitale 2025').",
+    "charts": "Use Recharts for the Dashboard. Keep them simple: Bar Charts and Pie Charts only."
+  }
+}
