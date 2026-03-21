@@ -236,6 +236,92 @@ async def list_milestones(
     return milestones
 
 
+# ---------- TASKS ----------
+
+class TaskCreate(BaseModel):
+    name: str
+    type: str  # tâche | feature | epic | user_story
+    status: str = "not_started"  # not_started | in_progress | completed | delayed | cancelled
+    date_start_planned: Optional[str] = None
+    date_end_planned: Optional[str] = None
+    date_start_actual: Optional[str] = None
+    date_end_actual: Optional[str] = None
+    budget_planned_k: float = 0
+    budget_consumed_k: float = 0
+    jh_planned: float = 0
+    jh_consumed: float = 0
+    resource_id: Optional[str] = None
+
+
+class TaskUpdate(BaseModel):
+    name: Optional[str] = None
+    type: Optional[str] = None
+    status: Optional[str] = None
+    date_start_planned: Optional[str] = None
+    date_end_planned: Optional[str] = None
+    date_start_actual: Optional[str] = None
+    date_end_actual: Optional[str] = None
+    budget_planned_k: Optional[float] = None
+    budget_consumed_k: Optional[float] = None
+    jh_planned: Optional[float] = None
+    jh_consumed: Optional[float] = None
+    resource_id: Optional[str] = None
+
+
+@api_router.get("/tasks")
+async def list_tasks(
+    project_id: Optional[str] = None,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    if project_id:
+        proj = await db.projects.find_one(
+            {"project_id": project_id, "tenant_id": current_user.tenant_id}
+        )
+        if not proj:
+            raise HTTPException(status_code=404, detail="Projet introuvable")
+        tasks = await db.tasks.find({"project_id": project_id}, {"_id": 0}).to_list(None)
+    else:
+        projects = await db.projects.find(
+            {"tenant_id": current_user.tenant_id}, {"project_id": 1, "_id": 0}
+        ).to_list(None)
+        pids = [p["project_id"] for p in projects]
+        tasks = await db.tasks.find({"project_id": {"$in": pids}}, {"_id": 0}).to_list(None)
+    return tasks
+
+
+@api_router.post("/tasks", status_code=201)
+async def create_task(data: TaskCreate, current_user: TokenPayload = Depends(get_current_user)):
+    require_write(current_user)
+    # Validate project belongs to tenant (project_id must come from request body via metadata)
+    task = {
+        "task_id": str(uuid.uuid4()),
+        "tenant_id": current_user.tenant_id,
+        **data.model_dump(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.tasks.insert_one(task)
+    task.pop("_id", None)
+    return task
+
+
+@api_router.put("/tasks/{task_id}")
+async def update_task(
+    task_id: str,
+    data: TaskUpdate,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    require_write(current_user)
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    result = await db.tasks.update_one(
+        {"task_id": task_id, "tenant_id": current_user.tenant_id},
+        {"$set": update_data},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Tâche introuvable")
+    updated = await db.tasks.find_one({"task_id": task_id}, {"_id": 0})
+    return updated
+
+
 # ---------- GOVERNANCE ----------
 
 @api_router.get("/governance")

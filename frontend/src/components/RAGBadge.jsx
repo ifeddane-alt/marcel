@@ -87,3 +87,36 @@ export function GovernanceTypeBadge({ type }) {
     </span>
   );
 }
+
+const TASK_TYPE_CONFIG = {
+  "tâche": { label: "Tâche", classes: "bg-slate-100 text-slate-700 border-slate-200" },
+  "feature": { label: "Feature", classes: "bg-cyan-50 text-cyan-700 border-cyan-200" },
+  "epic": { label: "Epic", classes: "bg-purple-50 text-purple-700 border-purple-200" },
+  "user_story": { label: "User Story", classes: "bg-sky-50 text-sky-700 border-sky-200" },
+};
+
+export function TaskTypeBadge({ type }) {
+  const config = TASK_TYPE_CONFIG[type] || { label: type, classes: "bg-gray-100 text-gray-700 border-gray-200" };
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${config.classes}`}>
+      {config.label}
+    </span>
+  );
+}
+
+const TASK_STATUS_CONFIG = {
+  not_started: { label: "Non démarré", classes: "bg-slate-100 text-slate-600 border-slate-200" },
+  in_progress: { label: "En cours", classes: "bg-blue-100 text-blue-700 border-blue-200" },
+  completed: { label: "Terminé", classes: "bg-emerald-100 text-emerald-800 border-emerald-200" },
+  delayed: { label: "En retard", classes: "bg-rose-100 text-rose-800 border-rose-200" },
+  cancelled: { label: "Annulé", classes: "bg-gray-100 text-gray-500 border-gray-200 line-through" },
+};
+
+export function TaskStatusBadge({ status }) {
+  const config = TASK_STATUS_CONFIG[status] || { label: status, classes: "bg-gray-100 text-gray-700 border-gray-200" };
+  return (
+    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${config.classes}`} data-testid={`task-status-badge-${status}`}>
+      {config.label}
+    </span>
+  );
+}

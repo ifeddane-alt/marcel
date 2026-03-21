@@ -266,8 +266,7 @@ MILESTONES = [
     {"milestone_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[7], "name": "Plan de remédiation approuvé COMEX", "date_baseline": "2025-07-31", "date_forecast": "2025-07-31", "date_actual": None, "status": "planned", "is_governance": True},
 ]
 
-GOVERNANCE = [
-    {
+GOVERNANCE = [    {
         "governance_id": str(uuid.uuid4()),
         "tenant_id": TENANT_ID,
         "name": "COPIL Mensuel Avril 2025 — Portefeuille Projets",
@@ -331,6 +330,338 @@ GOVERNANCE = [
     },
 ]
 
+TASKS = [
+    # ===== P0 — Projet Phoenix (SAFe) =====
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[0],
+     "name": "Epic — Cadrage & Architecture SAFe", "type": "epic", "status": "in_progress",
+     "date_start_planned": "2025-01-15", "date_end_planned": "2025-03-31",
+     "date_start_actual": "2025-01-15", "date_end_actual": None,
+     "budget_planned_k": 350, "budget_consumed_k": 200, "jh_planned": 700, "jh_consumed": 400,
+     "resource_id": RESOURCE_IDS[0], "created_at": "2025-01-10T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[0],
+     "name": "Feature — Plateforme Data Unifiée v1", "type": "feature", "status": "in_progress",
+     "date_start_planned": "2025-02-01", "date_end_planned": "2025-08-31",
+     "date_start_actual": "2025-02-03", "date_end_actual": None,
+     "budget_planned_k": 1100, "budget_consumed_k": 700, "jh_planned": 2200, "jh_consumed": 1400,
+     "resource_id": RESOURCE_IDS[7], "created_at": "2025-01-10T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[0],
+     "name": "User Story — Intégration ERP → Data Lake", "type": "user_story", "status": "delayed",
+     "date_start_planned": "2025-03-01", "date_end_planned": "2025-06-30",
+     "date_start_actual": "2025-03-10", "date_end_actual": None,
+     "budget_planned_k": 800, "budget_consumed_k": 550, "jh_planned": 1600, "jh_consumed": 1000,
+     "resource_id": RESOURCE_IDS[1], "created_at": "2025-01-10T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[0],
+     "name": "Feature — Portail Client Digital", "type": "feature", "status": "not_started",
+     "date_start_planned": "2025-09-01", "date_end_planned": "2025-12-31",
+     "date_start_actual": None, "date_end_actual": None,
+     "budget_planned_k": 900, "budget_consumed_k": 0, "jh_planned": 1800, "jh_consumed": 0,
+     "resource_id": RESOURCE_IDS[8], "created_at": "2025-01-10T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[0],
+     "name": "Tâche — Sécurisation Infrastructure Production", "type": "tâche", "status": "completed",
+     "date_start_planned": "2025-01-20", "date_end_planned": "2025-02-28",
+     "date_start_actual": "2025-01-20", "date_end_actual": "2025-02-27",
+     "budget_planned_k": 250, "budget_consumed_k": 250, "jh_planned": 500, "jh_consumed": 500,
+     "resource_id": RESOURCE_IDS[4], "created_at": "2025-01-10T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[0],
+     "name": "User Story — Module Reporting Exécutif", "type": "user_story", "status": "in_progress",
+     "date_start_planned": "2025-04-01", "date_end_planned": "2025-07-31",
+     "date_start_actual": "2025-04-05", "date_end_actual": None,
+     "budget_planned_k": 650, "budget_consumed_k": 380, "jh_planned": 1300, "jh_consumed": 700,
+     "resource_id": RESOURCE_IDS[7], "created_at": "2025-01-10T10:00:00Z"},
+
+    # ===== P1 — SI Finance (Waterfall) =====
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[1],
+     "name": "Tâche — Analyse des Besoins Fonctionnels Finance", "type": "tâche", "status": "completed",
+     "date_start_planned": "2024-09-01", "date_end_planned": "2024-10-15",
+     "date_start_actual": "2024-09-01", "date_end_actual": "2024-10-14",
+     "budget_planned_k": 200, "budget_consumed_k": 190, "jh_planned": 400, "jh_consumed": 380,
+     "resource_id": RESOURCE_IDS[3], "created_at": "2024-08-15T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[1],
+     "name": "Tâche — Conception Architecture SI Finance", "type": "tâche", "status": "completed",
+     "date_start_planned": "2024-10-16", "date_end_planned": "2024-12-15",
+     "date_start_actual": "2024-10-16", "date_end_actual": "2024-12-20",
+     "budget_planned_k": 350, "budget_consumed_k": 340, "jh_planned": 700, "jh_consumed": 680,
+     "resource_id": RESOURCE_IDS[0], "created_at": "2024-08-15T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[1],
+     "name": "Tâche — Développement Module Comptabilité Générale", "type": "tâche", "status": "in_progress",
+     "date_start_planned": "2025-01-02", "date_end_planned": "2025-04-30",
+     "date_start_actual": "2025-01-06", "date_end_actual": None,
+     "budget_planned_k": 480, "budget_consumed_k": 380, "jh_planned": 960, "jh_consumed": 720,
+     "resource_id": RESOURCE_IDS[2], "created_at": "2024-08-15T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[1],
+     "name": "Tâche — Développement Module Contrôle de Gestion", "type": "tâche", "status": "in_progress",
+     "date_start_planned": "2025-01-15", "date_end_planned": "2025-05-15",
+     "date_start_actual": "2025-01-20", "date_end_actual": None,
+     "budget_planned_k": 400, "budget_consumed_k": 260, "jh_planned": 800, "jh_consumed": 560,
+     "resource_id": RESOURCE_IDS[3], "created_at": "2024-08-15T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[1],
+     "name": "Tâche — Recette & Tests d'Intégration", "type": "tâche", "status": "not_started",
+     "date_start_planned": "2025-05-16", "date_end_planned": "2025-06-15",
+     "date_start_actual": None, "date_end_actual": None,
+     "budget_planned_k": 200, "budget_consumed_k": 0, "jh_planned": 400, "jh_consumed": 0,
+     "resource_id": RESOURCE_IDS[3], "created_at": "2024-08-15T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[1],
+     "name": "Tâche — Formation Équipes Finance & Déploiement", "type": "tâche", "status": "not_started",
+     "date_start_planned": "2025-06-16", "date_end_planned": "2025-07-31",
+     "date_start_actual": None, "date_end_actual": None,
+     "budget_planned_k": 120, "budget_consumed_k": 0, "jh_planned": 240, "jh_consumed": 0,
+     "resource_id": RESOURCE_IDS[1], "created_at": "2024-08-15T10:00:00Z"},
+
+    # ===== P2 — SAP S/4HANA (Waterfall — RED) =====
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[2],
+     "name": "Tâche — Blueprint FICO/CO", "type": "tâche", "status": "completed",
+     "date_start_planned": "2024-03-01", "date_end_planned": "2024-05-31",
+     "date_start_actual": "2024-03-01", "date_end_actual": "2024-06-15",
+     "budget_planned_k": 400, "budget_consumed_k": 430, "jh_planned": 800, "jh_consumed": 860,
+     "resource_id": RESOURCE_IDS[3], "created_at": "2024-02-15T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[2],
+     "name": "Tâche — Blueprint MM/SD/PP", "type": "tâche", "status": "completed",
+     "date_start_planned": "2024-05-01", "date_end_planned": "2024-08-31",
+     "date_start_actual": "2024-05-10", "date_end_actual": "2024-09-20",
+     "budget_planned_k": 450, "budget_consumed_k": 480, "jh_planned": 900, "jh_consumed": 960,
+     "resource_id": RESOURCE_IDS[3], "created_at": "2024-02-15T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[2],
+     "name": "Tâche — Développement RICEFW & Spécifiques Métier", "type": "tâche", "status": "delayed",
+     "date_start_planned": "2024-07-01", "date_end_planned": "2025-03-31",
+     "date_start_actual": "2024-07-15", "date_end_actual": None,
+     "budget_planned_k": 1800, "budget_consumed_k": 1950, "jh_planned": 3600, "jh_consumed": 3800,
+     "resource_id": RESOURCE_IDS[2], "created_at": "2024-02-15T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[2],
+     "name": "Tâche — Migration & Reprise de Données Historiques", "type": "tâche", "status": "delayed",
+     "date_start_planned": "2024-09-01", "date_end_planned": "2025-02-28",
+     "date_start_actual": "2024-09-20", "date_end_actual": None,
+     "budget_planned_k": 700, "budget_consumed_k": 820, "jh_planned": 1400, "jh_consumed": 1500,
+     "resource_id": RESOURCE_IDS[7], "created_at": "2024-02-15T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[2],
+     "name": "Tâche — Tests de Régression & Intégration SI", "type": "tâche", "status": "in_progress",
+     "date_start_planned": "2025-01-15", "date_end_planned": "2025-05-31",
+     "date_start_actual": "2025-02-01", "date_end_actual": None,
+     "budget_planned_k": 600, "budget_consumed_k": 380, "jh_planned": 1200, "jh_consumed": 700,
+     "resource_id": RESOURCE_IDS[2], "created_at": "2024-02-15T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[2],
+     "name": "Tâche — Préparation Go-Live & Plan Cutover", "type": "tâche", "status": "not_started",
+     "date_start_planned": "2025-10-01", "date_end_planned": "2026-01-31",
+     "date_start_actual": None, "date_end_actual": None,
+     "budget_planned_k": 500, "budget_consumed_k": 0, "jh_planned": 1000, "jh_consumed": 0,
+     "resource_id": RESOURCE_IDS[1], "created_at": "2024-02-15T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[2],
+     "name": "Tâche — Hypercare & Support Post-Go-Live", "type": "tâche", "status": "not_started",
+     "date_start_planned": "2026-02-01", "date_end_planned": "2026-03-31",
+     "date_start_actual": None, "date_end_actual": None,
+     "budget_planned_k": 400, "budget_consumed_k": 0, "jh_planned": 800, "jh_consumed": 0,
+     "resource_id": RESOURCE_IDS[1], "created_at": "2024-02-15T10:00:00Z"},
+
+    # ===== P3 — Digital Workplace (Agile) =====
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[3],
+     "name": "Feature — Déploiement Teams & Exchange Online", "type": "feature", "status": "completed",
+     "date_start_planned": "2025-02-01", "date_end_planned": "2025-03-31",
+     "date_start_actual": "2025-02-01", "date_end_actual": "2025-03-28",
+     "budget_planned_k": 120, "budget_consumed_k": 115, "jh_planned": 240, "jh_consumed": 230,
+     "resource_id": RESOURCE_IDS[4], "created_at": "2025-01-20T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[3],
+     "name": "Feature — Intranet SharePoint Nouvelle Génération", "type": "feature", "status": "in_progress",
+     "date_start_planned": "2025-03-01", "date_end_planned": "2025-07-31",
+     "date_start_actual": "2025-03-03", "date_end_actual": None,
+     "budget_planned_k": 250, "budget_consumed_k": 170, "jh_planned": 500, "jh_consumed": 330,
+     "resource_id": RESOURCE_IDS[8], "created_at": "2025-01-20T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[3],
+     "name": "User Story — Workflows Power Automate RH & Finance", "type": "user_story", "status": "in_progress",
+     "date_start_planned": "2025-04-01", "date_end_planned": "2025-07-31",
+     "date_start_actual": "2025-04-07", "date_end_actual": None,
+     "budget_planned_k": 150, "budget_consumed_k": 95, "jh_planned": 300, "jh_consumed": 190,
+     "resource_id": RESOURCE_IDS[5], "created_at": "2025-01-20T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[3],
+     "name": "Feature — Power BI Dashboards Métier", "type": "feature", "status": "not_started",
+     "date_start_planned": "2025-07-01", "date_end_planned": "2025-10-15",
+     "date_start_actual": None, "date_end_actual": None,
+     "budget_planned_k": 180, "budget_consumed_k": 0, "jh_planned": 360, "jh_consumed": 0,
+     "resource_id": RESOURCE_IDS[7], "created_at": "2025-01-20T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[3],
+     "name": "Tâche — Formation Utilisateurs Wave 1 (500 users)", "type": "tâche", "status": "completed",
+     "date_start_planned": "2025-04-01", "date_end_planned": "2025-04-30",
+     "date_start_actual": "2025-04-01", "date_end_actual": "2025-04-25",
+     "budget_planned_k": 80, "budget_consumed_k": 78, "jh_planned": 160, "jh_consumed": 155,
+     "resource_id": RESOURCE_IDS[6], "created_at": "2025-01-20T10:00:00Z"},
+
+    # ===== P4 — CRM Salesforce (SAFe) =====
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[4],
+     "name": "Epic — Architecture & Gouvernance Data CRM", "type": "epic", "status": "completed",
+     "date_start_planned": "2025-03-01", "date_end_planned": "2025-04-15",
+     "date_start_actual": "2025-03-01", "date_end_actual": "2025-04-18",
+     "budget_planned_k": 200, "budget_consumed_k": 205, "jh_planned": 400, "jh_consumed": 410,
+     "resource_id": RESOURCE_IDS[0], "created_at": "2025-02-10T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[4],
+     "name": "Feature — Implémentation Sales Cloud", "type": "feature", "status": "in_progress",
+     "date_start_planned": "2025-04-01", "date_end_planned": "2025-10-31",
+     "date_start_actual": "2025-04-07", "date_end_actual": None,
+     "budget_planned_k": 750, "budget_consumed_k": 420, "jh_planned": 1500, "jh_consumed": 800,
+     "resource_id": RESOURCE_IDS[5], "created_at": "2025-02-10T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[4],
+     "name": "Feature — Intégration CRM-SAP ERP", "type": "feature", "status": "not_started",
+     "date_start_planned": "2025-09-01", "date_end_planned": "2026-01-31",
+     "date_start_actual": None, "date_end_actual": None,
+     "budget_planned_k": 600, "budget_consumed_k": 0, "jh_planned": 1200, "jh_consumed": 0,
+     "resource_id": RESOURCE_IDS[2], "created_at": "2025-02-10T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[4],
+     "name": "User Story — Dashboard Performance Commerciale", "type": "user_story", "status": "in_progress",
+     "date_start_planned": "2025-05-01", "date_end_planned": "2025-08-31",
+     "date_start_actual": "2025-05-05", "date_end_actual": None,
+     "budget_planned_k": 300, "budget_consumed_k": 195, "jh_planned": 600, "jh_consumed": 380,
+     "resource_id": RESOURCE_IDS[5], "created_at": "2025-02-10T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[4],
+     "name": "Feature — Service Cloud — Gestion Tickets Clients", "type": "feature", "status": "not_started",
+     "date_start_planned": "2025-11-01", "date_end_planned": "2026-03-31",
+     "date_start_actual": None, "date_end_actual": None,
+     "budget_planned_k": 450, "budget_consumed_k": 0, "jh_planned": 900, "jh_consumed": 0,
+     "resource_id": RESOURCE_IDS[6], "created_at": "2025-02-10T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[4],
+     "name": "Tâche — Migration Données CRM Legacy → Salesforce", "type": "tâche", "status": "in_progress",
+     "date_start_planned": "2025-06-01", "date_end_planned": "2025-09-30",
+     "date_start_actual": "2025-06-10", "date_end_actual": None,
+     "budget_planned_k": 180, "budget_consumed_k": 150, "jh_planned": 360, "jh_consumed": 300,
+     "resource_id": RESOURCE_IDS[7], "created_at": "2025-02-10T10:00:00Z"},
+
+    # ===== P5 — Cloud Azure (Agile) =====
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[5],
+     "name": "Tâche — Architecture Azure Landing Zone", "type": "tâche", "status": "completed",
+     "date_start_planned": "2025-01-01", "date_end_planned": "2025-01-31",
+     "date_start_actual": "2025-01-01", "date_end_actual": "2025-01-28",
+     "budget_planned_k": 100, "budget_consumed_k": 95, "jh_planned": 200, "jh_consumed": 190,
+     "resource_id": RESOURCE_IDS[0], "created_at": "2024-12-01T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[5],
+     "name": "Feature — Migration Wave 1 — Services Non-Critiques", "type": "feature", "status": "completed",
+     "date_start_planned": "2025-02-01", "date_end_planned": "2025-03-31",
+     "date_start_actual": "2025-02-01", "date_end_actual": "2025-03-28",
+     "budget_planned_k": 200, "budget_consumed_k": 195, "jh_planned": 400, "jh_consumed": 395,
+     "resource_id": RESOURCE_IDS[4], "created_at": "2024-12-01T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[5],
+     "name": "Feature — Migration Wave 2 — Applications Critiques", "type": "feature", "status": "in_progress",
+     "date_start_planned": "2025-04-01", "date_end_planned": "2025-08-31",
+     "date_start_actual": "2025-04-03", "date_end_actual": None,
+     "budget_planned_k": 380, "budget_consumed_k": 210, "jh_planned": 760, "jh_consumed": 400,
+     "resource_id": RESOURCE_IDS[4], "created_at": "2024-12-01T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[5],
+     "name": "Tâche — Sécurité & IAM — Configuration Zero Trust", "type": "tâche", "status": "completed",
+     "date_start_planned": "2025-02-15", "date_end_planned": "2025-04-15",
+     "date_start_actual": "2025-02-15", "date_end_actual": "2025-04-12",
+     "budget_planned_k": 160, "budget_consumed_k": 155, "jh_planned": 320, "jh_consumed": 310,
+     "resource_id": RESOURCE_IDS[9], "created_at": "2024-12-01T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[5],
+     "name": "Feature — FinOps & Optimisation Coûts Azure", "type": "feature", "status": "in_progress",
+     "date_start_planned": "2025-06-01", "date_end_planned": "2025-11-30",
+     "date_start_actual": "2025-06-05", "date_end_actual": None,
+     "budget_planned_k": 100, "budget_consumed_k": 25, "jh_planned": 200, "jh_consumed": 50,
+     "resource_id": RESOURCE_IDS[7], "created_at": "2024-12-01T10:00:00Z"},
+
+    # ===== P6 — Portail RH (Agile — RED) =====
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[6],
+     "name": "Feature — Module Congés & Absences Self-Service", "type": "feature", "status": "delayed",
+     "date_start_planned": "2024-11-01", "date_end_planned": "2025-01-31",
+     "date_start_actual": "2024-11-04", "date_end_actual": None,
+     "budget_planned_k": 130, "budget_consumed_k": 145, "jh_planned": 260, "jh_consumed": 285,
+     "resource_id": RESOURCE_IDS[8], "created_at": "2024-10-15T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[6],
+     "name": "Feature — Fiche de Paie Dématérialisée", "type": "feature", "status": "delayed",
+     "date_start_planned": "2024-11-15", "date_end_planned": "2025-02-28",
+     "date_start_actual": "2024-11-18", "date_end_actual": None,
+     "budget_planned_k": 150, "budget_consumed_k": 170, "jh_planned": 300, "jh_consumed": 340,
+     "resource_id": RESOURCE_IDS[8], "created_at": "2024-10-15T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[6],
+     "name": "User Story — Parcours Onboarding Digital Collaborateur", "type": "user_story", "status": "delayed",
+     "date_start_planned": "2025-01-01", "date_end_planned": "2025-03-31",
+     "date_start_actual": "2025-01-10", "date_end_actual": None,
+     "budget_planned_k": 120, "budget_consumed_k": 130, "jh_planned": 240, "jh_consumed": 260,
+     "resource_id": RESOURCE_IDS[8], "created_at": "2024-10-15T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[6],
+     "name": "Tâche — Tests de Performance & Charge", "type": "tâche", "status": "in_progress",
+     "date_start_planned": "2025-03-01", "date_end_planned": "2025-04-30",
+     "date_start_actual": "2025-03-15", "date_end_actual": None,
+     "budget_planned_k": 80, "budget_consumed_k": 60, "jh_planned": 160, "jh_consumed": 120,
+     "resource_id": RESOURCE_IDS[2], "created_at": "2024-10-15T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[6],
+     "name": "Feature — Intégration SIRH Workday", "type": "feature", "status": "delayed",
+     "date_start_planned": "2025-02-01", "date_end_planned": "2025-05-31",
+     "date_start_actual": "2025-02-10", "date_end_actual": None,
+     "budget_planned_k": 150, "budget_consumed_k": 165, "jh_planned": 300, "jh_consumed": 330,
+     "resource_id": RESOURCE_IDS[9], "created_at": "2024-10-15T10:00:00Z"},
+
+    # ===== P7 — DORA & NIS2 (Waterfall) =====
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[7],
+     "name": "Tâche — GAP Analysis DORA & NIS2", "type": "tâche", "status": "in_progress",
+     "date_start_planned": "2025-04-01", "date_end_planned": "2025-05-31",
+     "date_start_actual": "2025-04-02", "date_end_actual": None,
+     "budget_planned_k": 150, "budget_consumed_k": 120, "jh_planned": 300, "jh_consumed": 230,
+     "resource_id": RESOURCE_IDS[9], "created_at": "2025-03-01T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[7],
+     "name": "Tâche — Cartographie Actifs & Processus Critiques", "type": "tâche", "status": "in_progress",
+     "date_start_planned": "2025-04-15", "date_end_planned": "2025-06-30",
+     "date_start_actual": "2025-04-15", "date_end_actual": None,
+     "budget_planned_k": 200, "budget_consumed_k": 90, "jh_planned": 400, "jh_consumed": 170,
+     "resource_id": RESOURCE_IDS[0], "created_at": "2025-03-01T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[7],
+     "name": "Tâche — Politique Sécurité & PCA/PRA", "type": "tâche", "status": "not_started",
+     "date_start_planned": "2025-07-01", "date_end_planned": "2025-09-30",
+     "date_start_actual": None, "date_end_actual": None,
+     "budget_planned_k": 200, "budget_consumed_k": 0, "jh_planned": 400, "jh_consumed": 0,
+     "resource_id": RESOURCE_IDS[9], "created_at": "2025-03-01T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[7],
+     "name": "Tâche — Plan de Remédiation NIS2", "type": "tâche", "status": "not_started",
+     "date_start_planned": "2025-08-01", "date_end_planned": "2025-10-31",
+     "date_start_actual": None, "date_end_actual": None,
+     "budget_planned_k": 180, "budget_consumed_k": 0, "jh_planned": 360, "jh_consumed": 0,
+     "resource_id": RESOURCE_IDS[9], "created_at": "2025-03-01T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[7],
+     "name": "Tâche — Tests Résilience Opérationnelle", "type": "tâche", "status": "not_started",
+     "date_start_planned": "2025-11-01", "date_end_planned": "2026-01-31",
+     "date_start_actual": None, "date_end_actual": None,
+     "budget_planned_k": 130, "budget_consumed_k": 0, "jh_planned": 260, "jh_consumed": 0,
+     "resource_id": RESOURCE_IDS[4], "created_at": "2025-03-01T10:00:00Z"},
+
+    {"task_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "project_id": PROJECT_IDS[7],
+     "name": "Tâche — Rapport DORA — Soumission Régulateur", "type": "tâche", "status": "not_started",
+     "date_start_planned": "2026-01-01", "date_end_planned": "2026-03-31",
+     "date_start_actual": None, "date_end_actual": None,
+     "budget_planned_k": 80, "budget_consumed_k": 0, "jh_planned": 160, "jh_consumed": 0,
+     "resource_id": RESOURCE_IDS[1], "created_at": "2025-03-01T10:00:00Z"},
+]
+
 
 async def seed():
     print("=== Seed Projetenne ===")
@@ -379,6 +710,11 @@ async def seed():
 
     await db.governance.insert_many(GOVERNANCE)
     print(f"Instances de gouvernance créées : {len(GOVERNANCE)}")
+
+    # Tasks seed
+    await db.tasks.delete_many({})
+    await db.tasks.insert_many(TASKS)
+    print(f"Tâches créées : {len(TASKS)}")
 
     print("\n=== Comptes disponibles ===")
     print("  admin@altair.fr    / Admin1234!  (TENANT_ADMIN)")

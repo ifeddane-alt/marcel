@@ -50,6 +50,12 @@ export const milestonesAPI = {
   list: (projectId) => api.get(`/milestones${projectId ? `?project_id=${projectId}` : ""}`),
 };
 
+export const tasksAPI = {
+  list: (projectId) => api.get(`/tasks${projectId ? `?project_id=${projectId}` : ""}`),
+  create: (data) => api.post("/tasks", data),
+  update: (id, data) => api.put(`/tasks/${id}`, data),
+};
+
 export const governanceAPI = {
   list: () => api.get("/governance"),
 };
