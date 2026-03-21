@@ -28,9 +28,20 @@ Tenant démo : **Groupe Altair Industries**
 | milestones | milestone_id, project_id, name, date_baseline, date_forecast, status, is_governance |
 | governance | governance_id, tenant_id, name, type, date_scheduled, projects_scope, sanity_check_* |
 
-## Ce qui est implémenté (v1.0 — 21/03/2025)
+## Ce qui est implémenté (v1.1 — 03/02/2026)
 
-### Backend API (FastAPI + MongoDB)
+### Phase 3 — Mini-RAG Task Health Indicator (v1.1 — 03/02/2026)
+- [x] Collection `tasks` avec champs `budget_landing`, `jh_landing`, `task_rag`, `rag_details`
+- [x] Calcul RAG automatique côté backend (GET /api/tasks) basé sur seuils configurables/tenant
+- [x] GET/PUT /api/tenants/settings — seuils budget_threshold_pct et delay_threshold_days
+- [x] Badges RAG colorés par tâche (vert/orange/rouge) dans la table ProjectDetail
+- [x] Résumé RAG (compteurs verts/orange/rouges) + couverture budget/JH en en-tête de section
+- [x] Footer TOTAUX : Budget landing (taskTotals.budget_landing) et JH landing (taskTotals.jh_landing) **[FIXÉ P0]**
+- [x] Footer DONNÉES PROJET : budget forecast projet au lieu de budget consommé **[FIXÉ P0]**
+- [x] Coloration conditionnelle rose si landing > prévu, vert sinon
+- [x] Tests 100% — frontend validé par testing agent (iteration_3.json)
+
+
 - [x] POST /api/auth/login — JWT avec rôles
 - [x] GET /api/auth/me
 - [x] GET/POST /api/projects
@@ -70,9 +81,12 @@ Tenant démo : **Groupe Altair Industries**
 ## Backlog prioritaire
 
 ### P0 — Critique
-- [ ] Aucun élément bloquant
+- [x] ~~Mini-RAG footer totaux (budget_landing, jh_landing)~~ — **TERMINÉ**
 
-### P1 — Important pour prochaine version
+### P1 — Migration stack (planifiée, non urgente)
+- [ ] **Migration Node.js + PostgreSQL + TypeScript** — à faire après validation complète MVP. Le user a confirmé vouloir migrer mais pas maintenant.
+
+### P1 — Features importantes
 - [ ] Création/édition de projet via formulaire UI (modal)
 - [ ] Filtrage portfolio par date/sponsor/programme
 - [ ] Export PDF/Excel du rapport de portefeuille
