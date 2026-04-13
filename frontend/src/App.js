@@ -4,6 +4,8 @@ import { AuthProvider, useAuth } from "@/contexts/AuthContext";
 import Layout from "@/components/Layout";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
+import Programs from "@/pages/Programs";
+import ProgramDetail from "@/pages/ProgramDetail";
 import Portfolio from "@/pages/Portfolio";
 import ProjectDetail from "@/pages/ProjectDetail";
 import Resources from "@/pages/Resources";
@@ -30,6 +32,8 @@ function AppRoutes() {
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<Dashboard />} />
+        <Route path="programmes" element={<Programs />} />
+        <Route path="programmes/:id" element={<ProgramDetail />} />
         <Route path="portfolio" element={<Portfolio />} />
         <Route path="projects/:id" element={<ProjectDetail />} />
         <Route path="resources" element={<Resources />} />

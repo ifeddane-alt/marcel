@@ -8,6 +8,7 @@ import {
   LogOut,
   ChevronRight,
   Building2,
+  FolderKanban,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -19,6 +20,7 @@ const ROLE_LABELS = {
 
 const navItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Tableau de bord" },
+  { to: "/programmes", icon: FolderKanban, label: "Programmes" },
   { to: "/portfolio", icon: Briefcase, label: "Portefeuille" },
   { to: "/resources", icon: Users, label: "Ressources" },
   { to: "/governance", icon: ShieldCheck, label: "Gouvernance" },

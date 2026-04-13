@@ -54,6 +54,15 @@ export const tasksAPI = {
   list: (projectId) => api.get(`/tasks${projectId ? `?project_id=${projectId}` : ""}`),
   create: (data) => api.post("/tasks", data),
   update: (id, data) => api.put(`/tasks/${id}`, data),
+  delete: (id) => api.delete(`/tasks/${id}`),
+};
+
+export const programsAPI = {
+  list: () => api.get("/programs"),
+  get: (id) => api.get(`/programs/${id}`),
+  create: (data) => api.post("/programs", data),
+  update: (id, data) => api.put(`/programs/${id}`, data),
+  delete: (id) => api.delete(`/programs/${id}`),
 };
 
 export const governanceAPI = {

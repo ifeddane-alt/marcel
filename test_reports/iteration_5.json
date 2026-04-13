@@ -1,0 +1,37 @@
+{
+  "summary": "Tested Chantier 4 — Programmes feature: backend API, programs page, program detail page, portfolio filter, viewer access. All tests passed.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/test_reports/iteration_5.json"],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "seed_data_creation": "",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Chantier 4 fully validated. Programs page at /programmes shows 3 cards (Transformation Digitale & Métiers=orange, Modernisation SI & Infrastructure=red, Conformité RH & Sécurité=red). Program detail has projects table, TOTAUX PROGRAMME row, milestones section (9 jalons for first program). Portfolio has program filter with 3 options; filtering by program correctly reduces rows (e.g. 3 for Transformation Digitale). Project rows in portfolio show program name subtitle. Viewer (viewer@altair.fr/View1234!) can access programs page. Sidebar order: Tableau de bord > Programmes > Portefeuille confirmed.",
+  "test_results": {
+    "sidebar_programmes_item": "PASS - Programmes appears between Tableau de bord and Portefeuille",
+    "programs_page": "PASS - data-testid=programs-page found, 3 cards displayed",
+    "program_cards_names": "PASS - Transformation Digitale & Métiers, Modernisation SI & Infrastructure, Conformité RH & Sécurité",
+    "program_cards_rag_badge": "PASS - RAG badges visible (orange, red, red)",
+    "program_cards_project_count": "PASS - 3, 3, 2 projets",
+    "program_cards_budget_keur": "PASS - 7500, 8000, 1550 K€",
+    "program_detail_navigation": "PASS - /programmes/:id loads correctly",
+    "program_projects_table": "PASS - data-testid=program-projects-table found",
+    "program_totals_row": "PASS - TOTAUX PROGRAMME row with budget values",
+    "program_milestones_section": "PASS - data-testid=program-milestones-section with 9 jalons",
+    "portfolio_filter_program": "PASS - data-testid=portfolio-filter-program with 3 program options",
+    "portfolio_filter_works": "PASS - filtering by Transformation Digitale shows 3 projects",
+    "portfolio_program_subtitle": "PASS - program name shown as subtitle under project name",
+    "viewer_programs_access": "PASS - viewer can read programs page"
+  }
+}

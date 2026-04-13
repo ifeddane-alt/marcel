@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Search, Filter, ArrowUpDown } from "lucide-react";
-import { projectsAPI } from "@/api";
+import { projectsAPI, programsAPI } from "@/api";
 import RAGBadge, { MethodologyBadge } from "@/components/RAGBadge";
 import { formatEuro, formatDate } from "@/utils/format";
 
@@ -10,16 +10,19 @@ const METHOD_OPTIONS = ["", "waterfall", "agile", "safe"];
 
 export default function Portfolio() {
   const [projects, setProjects] = useState([]);
+  const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
   const [filterRag, setFilterRag] = useState("");
   const [filterMethod, setFilterMethod] = useState("");
+  const [filterProgram, setFilterProgram] = useState("");
   const [sortKey, setSortKey] = useState("name");
   const [sortDir, setSortDir] = useState("asc");
 
   useEffect(() => {
-    projectsAPI.list().then((r) => {
-      setProjects(r.data);
+    Promise.all([projectsAPI.list(), programsAPI.list()]).then(([pRes, progRes]) => {
+      setProjects(pRes.data);
+      setPrograms(progRes.data);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, []);
@@ -39,7 +42,8 @@ export default function Portfolio() {
       return (
         (!search || p.name.toLowerCase().includes(q) || (p.source_id || "").toLowerCase().includes(q)) &&
         (!filterRag || p.status_rag === filterRag) &&
-        (!filterMethod || p.methodology === filterMethod)
+        (!filterMethod || p.methodology === filterMethod) &&
+        (!filterProgram || p.program_id === filterProgram)
       );
     })
     .sort((a, b) => {
@@ -122,6 +126,20 @@ export default function Portfolio() {
           <option value="agile">Agile</option>
           <option value="safe">SAFe</option>
         </select>
+
+        {programs.length > 0 && (
+          <select
+            value={filterProgram}
+            onChange={(e) => setFilterProgram(e.target.value)}
+            data-testid="portfolio-filter-program"
+            className="text-sm border border-gray-200 rounded px-3 py-2 bg-white focus:outline-none focus:border-[#0052CC] cursor-pointer"
+          >
+            <option value="">Tous programmes</option>
+            {programs.map((prog) => (
+              <option key={prog.program_id} value={prog.program_id}>{prog.name}</option>
+            ))}
+          </select>
+        )}
       </div>
 
       {/* Table */}
@@ -175,6 +193,14 @@ export default function Portfolio() {
                     >
                       {p.name}
                     </Link>
+                    {p.program_id && (() => {
+                      const prog = programs.find((pr) => pr.program_id === p.program_id);
+                      return prog ? (
+                        <div className="text-[10px] text-slate-400 mt-0.5 truncate">
+                          {prog.name}
+                        </div>
+                      ) : null;
+                    })()}
                   </td>
                   <td className="px-4 py-3">
                     <MethodologyBadge methodology={p.methodology} />
