@@ -93,6 +93,10 @@ export const decisionsAPI = {
   delete: (id) => api.delete(`/decisions/${id}`),
 };
 
+export const exportAPI = {
+  copil: (data) => api.post("/export/copil", data, { responseType: "arraybuffer" }),
+};
+
 export const dashboardAPI = {
   summary: () => api.get("/dashboard/summary"),
   topRisks: () => api.get("/dashboard/top-risks"),

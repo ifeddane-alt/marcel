@@ -1,10 +1,11 @@
-import React, { useEffect, useState } from "react";
-import { Link } from "react-router-dom";
-import { Search, Plus, Pencil, Trash2 } from "lucide-react";
+import React, { useEffect, useState, useRef } from "react";
+import { Link, useSearchParams } from "react-router-dom";
+import { Search, Plus, Pencil, Trash2, Presentation } from "lucide-react";
 import { projectsAPI, programsAPI, resourcesAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import RAGBadge, { MethodologyBadge, ProjectStatusBadge } from "@/components/RAGBadge";
 import ProjectModal from "@/components/ProjectModal";
+import ExportCopilModal from "@/components/ExportCopilModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { formatEuro, formatDate } from "@/utils/format";
 
@@ -14,6 +15,7 @@ export default function Portfolio() {
   const { user } = useAuth();
   const canWrite = user?.role === "TENANT_ADMIN" || user?.role === "PMO_USER";
   const isAdmin = user?.role === "TENANT_ADMIN";
+  const [searchParams, setSearchParams] = useSearchParams();
 
   const [projects, setProjects] = useState([]);
   const [programs, setPrograms] = useState([]);
@@ -26,6 +28,12 @@ export default function Portfolio() {
   const [filterStatus, setFilterStatus] = useState("");
   const [sortKey, setSortKey] = useState("name");
   const [sortDir, setSortDir] = useState("asc");
+
+  // Selection state
+  const [selectedProjects, setSelectedProjects] = useState(new Set());
+  const [preGovernanceId, setPreGovernanceId] = useState(null);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const selectAllRef = useRef(null);
 
   // Modal state
   const [modalOpen, setModalOpen] = useState(false);
@@ -45,6 +53,15 @@ export default function Portfolio() {
   };
 
   useEffect(() => { fetchAll(); }, []);
+
+  // Read URL pre-selection params (from ProgramDetail / ProjectDetail / Governance shortcuts)
+  useEffect(() => {
+    const sel = searchParams.get("selected");
+    const govId = searchParams.get("governance_id");
+    if (sel) setSelectedProjects(new Set(sel.split(",").filter(Boolean)));
+    if (govId) setPreGovernanceId(govId);
+    if (sel || govId) setSearchParams({}, { replace: true });
+  }, []); // Run once on mount
 
   const openCreate = () => { setSelectedProject(null); setModalOpen(true); };
   const openEdit = (e, p) => { e.stopPropagation(); setSelectedProject(p); setModalOpen(true); };
@@ -84,6 +101,29 @@ export default function Portfolio() {
     else { setSortKey(key); setSortDir("asc"); }
   };
 
+  // Update the "select all" checkbox indeterminate state
+  useEffect(() => {
+    if (selectAllRef.current) {
+      const indeterminate = selectedProjects.size > 0 && selectedProjects.size < filtered.length;
+      selectAllRef.current.indeterminate = indeterminate;
+    }
+  });
+
+  const toggleSelect = (pid) => {
+    const next = new Set(selectedProjects);
+    if (next.has(pid)) next.delete(pid);
+    else next.add(pid);
+    setSelectedProjects(next);
+  };
+
+  const toggleSelectAll = () => {
+    if (selectedProjects.size === filtered.length && filtered.length > 0) {
+      setSelectedProjects(new Set());
+    } else {
+      setSelectedProjects(new Set(filtered.map((p) => p.project_id)));
+    }
+  };
+
   if (loading) return <div className="p-8 text-slate-400 text-sm">Chargement...</div>;
 
   const ragCounts = { green: 0, orange: 0, red: 0 };
@@ -106,6 +146,32 @@ export default function Portfolio() {
           </button>
         )}
       </div>
+
+      {/* Export COPIL action bar */}
+      {selectedProjects.size > 0 && (
+        <div
+          className="flex items-center gap-4 px-5 py-3 mb-4 bg-[#0052CC] rounded-lg shadow-md"
+          data-testid="export-action-bar"
+        >
+          <span className="text-white font-semibold text-sm">
+            {selectedProjects.size} projet{selectedProjects.size > 1 ? "s" : ""} sélectionné{selectedProjects.size > 1 ? "s" : ""}
+          </span>
+          <button
+            onClick={() => setExportModalOpen(true)}
+            data-testid="btn-export-copil"
+            className="flex items-center gap-2 px-4 py-1.5 bg-white text-[#0052CC] text-sm font-bold rounded hover:bg-blue-50 transition-colors"
+          >
+            <Presentation size={14} /> Export COPIL
+          </button>
+          <button
+            onClick={() => { setSelectedProjects(new Set()); setPreGovernanceId(null); }}
+            data-testid="btn-clear-selection"
+            className="ml-auto text-sm text-blue-100 hover:text-white transition-colors"
+          >
+            Annuler la sélection
+          </button>
+        </div>
+      )}
 
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
