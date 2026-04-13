@@ -109,7 +109,7 @@ Tenant démo : **Groupe Altair Industries**
 
 ### P0 — En cours
 - [x] **Chantier 3** — CRUD complet ✅ (livré v1.3)
-- [ ] **Chantier 2** — Import CSV (câblage terminé, en test)
+- [x] **Chantier 2** — Import CSV ✅ (livré v1.3)
 - [ ] **Chantier 6** — Budget CAPEX/OPEX + EAC + historique révisions
 - [ ] **Chantier 7** — Registre des risques
 - [ ] **Chantier 8** — Registre des décisions
