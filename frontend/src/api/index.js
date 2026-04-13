@@ -73,8 +73,16 @@ export const governanceAPI = {
   list: () => api.get("/governance"),
 };
 
+export const risksAPI = {
+  list: (projectId) => api.get(`/risks${projectId ? `?project_id=${projectId}` : ""}`),
+  create: (data) => api.post("/risks", data),
+  update: (id, data) => api.put(`/risks/${id}`, data),
+  delete: (id) => api.delete(`/risks/${id}`),
+};
+
 export const dashboardAPI = {
   summary: () => api.get("/dashboard/summary"),
+  topRisks: () => api.get("/dashboard/top-risks"),
 };
 
 export default api;

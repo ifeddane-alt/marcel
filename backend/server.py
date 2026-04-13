@@ -1199,6 +1199,118 @@ async def import_commit(
     }
 
 
+# ---------- RISKS ----------
+
+class RiskCreate(BaseModel):
+    project_id: str
+    title: str
+    description: Optional[str] = None
+    category: str  # technique | budget | planning | ressource | externe | conformité
+    probability: int    # 1-5
+    impact: int         # 1-5
+    status: str = "identifié"  # identifié | traité | clos | accepté
+    mitigation_plan: Optional[str] = None
+    owner: Optional[str] = None
+    due_date: Optional[str] = None
+
+
+class RiskUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    probability: Optional[int] = None
+    impact: Optional[int] = None
+    status: Optional[str] = None
+    mitigation_plan: Optional[str] = None
+    owner: Optional[str] = None
+    due_date: Optional[str] = None
+
+
+@api_router.get("/risks")
+async def list_risks(
+    project_id: Optional[str] = None,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    query: dict = {"tenant_id": current_user.tenant_id}
+    if project_id:
+        query["project_id"] = project_id
+    risks = await db.risks.find(query, {"_id": 0}).sort("criticality", -1).to_list(None)
+    return risks
+
+
+@api_router.post("/risks", status_code=201)
+async def create_risk(data: RiskCreate, current_user: TokenPayload = Depends(get_current_user)):
+    require_write(current_user)
+    project = await db.projects.find_one(
+        {"project_id": data.project_id, "tenant_id": current_user.tenant_id}, {"_id": 0, "project_id": 1}
+    )
+    if not project:
+        raise HTTPException(status_code=404, detail="Projet introuvable")
+    doc = {
+        "risk_id": str(uuid.uuid4()),
+        "tenant_id": current_user.tenant_id,
+        **data.model_dump(),
+        "criticality": data.probability * data.impact,
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.risks.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@api_router.put("/risks/{risk_id}")
+async def update_risk(
+    risk_id: str,
+    data: RiskUpdate,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    require_write(current_user)
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    # Recompute criticality when probability or impact changes
+    if "probability" in update_data or "impact" in update_data:
+        existing = await db.risks.find_one(
+            {"risk_id": risk_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
+        )
+        if not existing:
+            raise HTTPException(status_code=404, detail="Risque introuvable")
+        prob = update_data.get("probability", existing["probability"])
+        imp = update_data.get("impact", existing["impact"])
+        update_data["criticality"] = prob * imp
+    result = await db.risks.update_one(
+        {"risk_id": risk_id, "tenant_id": current_user.tenant_id},
+        {"$set": update_data},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Risque introuvable")
+    updated = await db.risks.find_one({"risk_id": risk_id}, {"_id": 0})
+    return updated
+
+
+@api_router.delete("/risks/{risk_id}", status_code=204)
+async def delete_risk(risk_id: str, current_user: TokenPayload = Depends(get_current_user)):
+    if current_user.role != "TENANT_ADMIN":
+        raise HTTPException(status_code=403, detail="Réservé au TENANT_ADMIN")
+    result = await db.risks.delete_one({"risk_id": risk_id, "tenant_id": current_user.tenant_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Risque introuvable")
+
+
+@api_router.get("/dashboard/top-risks")
+async def dashboard_top_risks(current_user: TokenPayload = Depends(get_current_user)):
+    risks = await db.risks.find(
+        {"tenant_id": current_user.tenant_id}, {"_id": 0}
+    ).sort("criticality", -1).to_list(None)
+    project_ids = list({r["project_id"] for r in risks})
+    projects = await db.projects.find(
+        {"project_id": {"$in": project_ids}}, {"_id": 0, "project_id": 1, "name": 1}
+    ).to_list(None)
+    project_map = {p["project_id"]: p["name"] for p in projects}
+    return [
+        {**r, "project_name": project_map.get(r["project_id"], "—")}
+        for r in risks[:10]
+    ]
+
+
 # ---------- App setup ----------
 
 app.include_router(api_router)

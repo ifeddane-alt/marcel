@@ -1,0 +1,55 @@
+{
+  "summary": "Chantier 7 — Registre des risques. All 24 test points validated. 18/18 backend tests pass, all UI flows working correctly. No issues found.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_chantier7.py",
+    "/app/test_reports/pytest/chantier7.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": ["/app/backend/tests/test_chantier7.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": {
+    "admin": "admin@altair.fr / Admin1234! (TENANT_ADMIN)",
+    "pmo": "pmo@altair.fr / Pmo1234! (PMO_USER)",
+    "viewer": "viewer@altair.fr / View1234! (READ_ONLY)"
+  },
+  "seed_data_creation": "Backend tests created TEST_Risque chantier 7 (deleted), TEST_Risque PMO creation (remains in SAP project with criticality=4). SAP project now shows 7 risks total (6 seed + 1 PMO test risk).",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Chantier 7 fully validated. SAP project has 7 risks. Heatmap working with P4×I5=2 risks tooltip, criticality badges red/orange/green. READ_ONLY cannot see +Nouveau risque or trash buttons. PMO can create/update but not delete (403). TENANT_ADMIN can delete (204). Dashboard top-risks widget shows 10 risks sorted desc with project links. Chantier 6 Budget CAPEX/OPEX section still present (regression OK). Test PMO risk 'TEST_Risque PMO creation' (criticality=4) remains in SAP project.",
+  "test_results": {
+    "api_get_risks_sorted_criticality": "PASS — risks returned sorted by criticality descending",
+    "api_post_risks_criticality_auto": "PASS — POST /api/risks calculates criticality = probability × impact (4×3=12)",
+    "api_put_risks_recalculates_criticality": "PASS — PUT /api/risks recalculates criticality (5×4=20)",
+    "api_delete_admin_only": "PASS — TENANT_ADMIN gets 204, PMO gets 403, READ_ONLY gets 403",
+    "api_dashboard_top_risks": "PASS — returns max 10 risks sorted by criticality desc with project_name",
+    "viewer_403_post": "PASS — READ_ONLY gets 403 on POST /api/risks",
+    "viewer_403_put": "PASS — READ_ONLY gets 403 on PUT /api/risks",
+    "viewer_403_delete": "PASS — READ_ONLY gets 403 on DELETE /api/risks",
+    "pmo_can_create_update": "PASS — PMO gets 201 on POST, 200 on PUT",
+    "pmo_cannot_delete": "PASS — PMO gets 403 on DELETE",
+    "cross_tenant_isolation": "PASS — same-tenant users see same risks, tenant_id scoping verified",
+    "sap_project_6_risks": "PASS — SAP has 7 risks (6 seed + 1 PMO test)",
+    "project_detail_risks_section": "PASS — 'REGISTRE DES RISQUES (7)' visible",
+    "project_detail_criticality_badges": "PASS — red badges (≥16), orange (7-15), green (1-6)",
+    "project_detail_heatmap_visible": "PASS — 5×5 heatmap with colored cells and pastilles",
+    "heatmap_tooltip_hover": "PASS — P4×I5=20 tooltip shows 2 risks with titles",
+    "btn_new_risk_admin_pmo": "PASS — '+ Nouveau risque' button present for ADMIN",
+    "btn_new_risk_absent_readonly": "PASS — button absent for READ_ONLY",
+    "risk_modal_criticality_auto": "PASS — modal shows criticité auto-calculée = 12 (prob=4, impact=3)",
+    "risk_modal_edit_prefilled": "PASS — click on risk row opens modal pre-filled with risk data",
+    "trash_btn_admin_only": "PASS — delete buttons visible for ADMIN, absent for READ_ONLY",
+    "dashboard_widget_top_risks": "PASS — 'TOP RISQUES CRITIQUES — PORTEFEUILLE' widget with 10 risks",
+    "dashboard_project_links": "PASS — project links present on each risk row",
+    "chantier6_regression": "PASS — Budget CAPEX/OPEX section still present on ProjectDetail"
+  }
+}

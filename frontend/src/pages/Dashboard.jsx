@@ -5,11 +5,11 @@ import {
   Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import {
-  Briefcase, TrendingUp, AlertTriangle, CheckCircle, ArrowRight,
+  Briefcase, TrendingUp, AlertTriangle, CheckCircle, ArrowRight, ShieldAlert,
 } from "lucide-react";
 import { dashboardAPI } from "@/api";
 import RAGBadge from "@/components/RAGBadge";
-import { formatEuro, formatDate, formatJH } from "@/utils/format";
+import { formatEuro, formatDate } from "@/utils/format";
 
 const RAG_COLORS = { green: "#10B981", orange: "#F59E0B", red: "#EF4444" };
 const METHOD_COLORS = { waterfall: "#3B82F6", agile: "#8B5CF6", safe: "#6366F1" };
@@ -51,13 +51,16 @@ function CustomTooltip({ active, payload, label }) {
 
 export default function Dashboard() {
   const [summary, setSummary] = useState(null);
+  const [topRisks, setTopRisks] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    dashboardAPI.summary().then((r) => {
-      setSummary(r.data);
-      setLoading(false);
-    }).catch(() => setLoading(false));
+    Promise.all([dashboardAPI.summary(), dashboardAPI.topRisks()])
+      .then(([sRes, rRes]) => {
+        setSummary(sRes.data);
+        setTopRisks(rRes.data);
+        setLoading(false);
+      }).catch(() => setLoading(false));
   }, []);
 
   if (loading) {
@@ -222,7 +225,7 @@ export default function Dashboard() {
       </div>
 
       {/* Recent projects */}
-      <div className="bg-white border border-gray-200 rounded shadow-sm">
+      <div className="bg-white border border-gray-200 rounded shadow-sm mb-6">
         <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
           <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold">
             Projets récents
@@ -283,6 +286,83 @@ export default function Dashboard() {
           </table>
         </div>
       </div>
+
+      {/* Top 10 risques critiques portefeuille */}
+      {topRisks.length > 0 && (
+        <div className="bg-white border border-gray-200 rounded shadow-sm" data-testid="top-risks-widget">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-500 font-semibold">
+              <ShieldAlert size={13} className="text-rose-400" />
+              Top risques critiques — Portefeuille
+            </div>
+            <span className="text-[10px] text-slate-400 font-mono-data">{topRisks.length} risques prioritaires</span>
+          </div>
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm" data-testid="top-risks-table">
+              <thead>
+                <tr className="bg-gray-50 text-left">
+                  {["Crit.", "Risque", "Catégorie", "Projet", "Statut", "Échéance"].map((h) => (
+                    <th key={h} className="px-4 py-2.5 text-xs font-semibold text-slate-600 border-b border-gray-200">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {topRisks.map((r) => {
+                  const critCls = r.criticality >= 16
+                    ? "bg-rose-100 text-rose-700 border-rose-300"
+                    : r.criticality >= 7
+                    ? "bg-amber-100 text-amber-700 border-amber-200"
+                    : "bg-emerald-100 text-emerald-700 border-emerald-200";
+                  const catColors = {
+                    technique: "text-blue-600", budget: "text-violet-600", planning: "text-sky-600",
+                    ressource: "text-indigo-600", externe: "text-slate-500", "conformité": "text-teal-600",
+                  };
+                  const statusCls = { identifié: "text-blue-600", traité: "text-amber-600", clos: "text-emerald-600", accepté: "text-slate-500" };
+                  return (
+                    <tr
+                      key={r.risk_id}
+                      className="border-b border-gray-100 hover:bg-gray-50/60 transition-colors"
+                      data-testid={`top-risk-row-${r.risk_id}`}
+                    >
+                      <td className="px-4 py-2.5">
+                        <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold border ${critCls}`}>
+                          {r.criticality}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2.5 max-w-xs">
+                        <div className="font-medium text-xs text-slate-800 line-clamp-2 leading-snug">{r.title}</div>
+                        {r.owner && <div className="text-[10px] text-slate-400 mt-0.5">{r.owner}</div>}
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <span className={`text-xs font-semibold capitalize ${catColors[r.category] || "text-slate-500"}`}>
+                          {r.category}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <Link
+                          to={`/projects/${r.project_id}`}
+                          className="text-[#0052CC] hover:text-[#0047B3] text-xs font-medium line-clamp-1"
+                          data-testid={`top-risk-project-link-${r.risk_id}`}
+                        >
+                          {r.project_name}
+                        </Link>
+                      </td>
+                      <td className="px-4 py-2.5">
+                        <span className={`text-xs font-semibold capitalize ${statusCls[r.status] || "text-slate-500"}`}>
+                          {r.status}
+                        </span>
+                      </td>
+                      <td className="px-4 py-2.5 text-xs text-slate-500 whitespace-nowrap">
+                        {r.due_date ? formatDate(r.due_date) : "—"}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      )}
     </div>
   );
 }

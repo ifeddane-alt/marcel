@@ -2,14 +2,15 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Calendar, ChevronRight, Flag, AlertTriangle, Clock, TrendingUp,
-  Pencil, Trash2, Plus, History,
+  Pencil, Trash2, Plus, History, ShieldAlert,
 } from "lucide-react";
-import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI } from "@/api";
+import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import RAGBadge, { MethodologyBadge, MilestoneBadge, TaskTypeBadge, TaskStatusBadge, ProjectStatusBadge } from "@/components/RAGBadge";
 import ProjectModal from "@/components/ProjectModal";
 import TaskModal from "@/components/TaskModal";
 import BudgetRevisionModal from "@/components/BudgetRevisionModal";
+import RiskModal from "@/components/RiskModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { formatEuro, formatDate, formatJH } from "@/utils/format";
 
@@ -29,6 +30,106 @@ function BudgetBar({ label, value, total, color }) {
   );
 }
 
+function RiskHeatmap({ risks }) {
+  const [hoveredCell, setHoveredCell] = useState(null);
+
+  const getCellColor = (crit) => {
+    if (crit >= 16) return "bg-rose-100 border-rose-200 hover:bg-rose-200";
+    if (crit >= 7)  return "bg-amber-50 border-amber-200 hover:bg-amber-100";
+    return "bg-emerald-50 border-emerald-200 hover:bg-emerald-100";
+  };
+
+  const getRisks = (prob, impact) => risks.filter((r) => r.probability === prob && r.impact === impact);
+
+  const hoveredRisks = hoveredCell ? getRisks(hoveredCell.prob, hoveredCell.impact) : [];
+
+  return (
+    <div>
+      <div className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-3">
+        Heatmap P × I
+      </div>
+      <div className="flex gap-2">
+        {/* Y-axis label */}
+        <div className="flex flex-col items-center justify-center gap-0 w-3">
+          <span className="text-[8px] text-slate-400 -rotate-90 whitespace-nowrap mt-4" style={{ writingMode: "vertical-rl", textOrientation: "mixed", transform: "rotate(180deg)" }}>
+            Probabilité
+          </span>
+        </div>
+        <div className="flex-1">
+          {/* Y axis ticks + grid */}
+          <div className="flex flex-col gap-0.5">
+            {[5, 4, 3, 2, 1].map((prob) => (
+              <div key={prob} className="flex items-center gap-0.5">
+                <span className="text-[9px] text-slate-400 w-3 text-right flex-shrink-0">{prob}</span>
+                <div className="flex gap-0.5 flex-1">
+                  {[1, 2, 3, 4, 5].map((impact) => {
+                    const crit = prob * impact;
+                    const cellRisks = getRisks(prob, impact);
+                    const isHovered = hoveredCell?.prob === prob && hoveredCell?.impact === impact;
+                    return (
+                      <div
+                        key={impact}
+                        className={`relative flex-1 h-8 flex items-center justify-center rounded border text-[10px] font-bold cursor-default transition-colors ${getCellColor(crit)} ${isHovered ? "ring-2 ring-[#0052CC] ring-offset-0" : ""}`}
+                        onMouseEnter={() => cellRisks.length > 0 && setHoveredCell({ prob, impact })}
+                        onMouseLeave={() => setHoveredCell(null)}
+                        data-testid={`heatmap-cell-${prob}-${impact}`}
+                      >
+                        {cellRisks.length > 0 && (
+                          <span className={`w-4 h-4 rounded-full flex items-center justify-center text-[9px] font-bold ${crit >= 16 ? "bg-rose-500 text-white" : crit >= 7 ? "bg-amber-500 text-white" : "bg-emerald-500 text-white"}`}>
+                            {cellRisks.length}
+                          </span>
+                        )}
+                      </div>
+                    );
+                  })}
+                </div>
+              </div>
+            ))}
+          </div>
+          {/* X-axis */}
+          <div className="flex gap-0.5 mt-0.5 pl-4">
+            {[1, 2, 3, 4, 5].map((i) => (
+              <div key={i} className="flex-1 text-center text-[9px] text-slate-400">{i}</div>
+            ))}
+          </div>
+          <div className="text-[8px] text-slate-400 text-center mt-0.5">Impact →</div>
+        </div>
+      </div>
+
+      {/* Légende */}
+      <div className="flex items-center gap-2 mt-3 flex-wrap">
+        {[{ label: "Faible (1-6)", cls: "bg-emerald-100 border-emerald-300" },
+          { label: "Modéré (7-15)", cls: "bg-amber-100 border-amber-300" },
+          { label: "Élevé (16-25)", cls: "bg-rose-100 border-rose-300" }].map((item) => (
+          <div key={item.label} className="flex items-center gap-1">
+            <span className={`w-3 h-3 rounded border ${item.cls}`} />
+            <span className="text-[9px] text-slate-500">{item.label}</span>
+          </div>
+        ))}
+      </div>
+
+      {/* Tooltip cellule survolée */}
+      {hoveredCell && hoveredRisks.length > 0 && (
+        <div className="mt-3 border border-gray-200 rounded-lg bg-slate-50 p-2.5">
+          <div className="text-[10px] font-bold text-slate-600 mb-1.5">
+            P{hoveredCell.prob} × I{hoveredCell.impact} = {hoveredCell.prob * hoveredCell.impact}
+          </div>
+          {hoveredRisks.map((r) => {
+            const crit = r.criticality;
+            const cls = crit >= 16 ? "text-rose-600" : crit >= 7 ? "text-amber-600" : "text-emerald-600";
+            return (
+              <div key={r.risk_id} className="text-[11px] text-slate-700 py-0.5 border-b border-gray-100 last:border-0 flex items-start gap-1.5">
+                <span className={`font-bold flex-shrink-0 ${cls}`}>{crit}</span>
+                <span className="line-clamp-2">{r.title}</span>
+              </div>
+            );
+          })}
+        </div>
+      )}
+    </div>
+  );
+}
+
 
 export default function ProjectDetail() {
   const { id } = useParams();
@@ -41,6 +142,7 @@ export default function ProjectDetail() {
   const [milestones, setMilestones] = useState([]);
   const [allocations, setAllocations] = useState([]);
   const [tasks, setTasks] = useState([]);
+  const [risks, setRisks] = useState([]);
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -48,8 +150,10 @@ export default function ProjectDetail() {
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [budgetRevisionOpen, setBudgetRevisionOpen] = useState(false);
+  const [riskModalOpen, setRiskModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
-  const [confirmDelete, setConfirmDelete] = useState(null); // {type: 'project'|'task', item}
+  const [selectedRisk, setSelectedRisk] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null); // {type: 'project'|'task'|'risk', item}
   const [deleting, setDeleting] = useState(false);
 
   const fetchAll = useCallback(() => {
@@ -59,12 +163,14 @@ export default function ProjectDetail() {
       allocationsAPI.list(id),
       tasksAPI.list(id),
       resourcesAPI.list(),
-    ]).then(([pRes, mRes, aRes, tRes, rRes]) => {
+      risksAPI.list(id),
+    ]).then(([pRes, mRes, aRes, tRes, rRes, rkRes]) => {
       setProject(pRes.data);
       setMilestones(mRes.data);
       setAllocations(aRes.data);
       setTasks(tRes.data);
       setResources(rRes.data);
+      setRisks(rkRes.data);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [id]);
@@ -80,6 +186,10 @@ export default function ProjectDetail() {
         navigate("/portfolio");
       } else if (confirmDelete.type === "task") {
         await tasksAPI.delete(confirmDelete.item.task_id);
+        setConfirmDelete(null);
+        fetchAll();
+      } else if (confirmDelete.type === "risk") {
+        await risksAPI.delete(confirmDelete.item.risk_id);
         setConfirmDelete(null);
         fetchAll();
       }
@@ -704,6 +814,110 @@ export default function ProjectDetail() {
             )}
           </div>
 
+          {/* Registre des risques */}
+          <div className="bg-white border border-gray-200 rounded shadow-sm" data-testid="risks-section">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-500 font-semibold">
+                <ShieldAlert size={13} className="text-rose-400" />
+                Registre des risques ({risks.length})
+              </div>
+              {canWrite && (
+                <button
+                  onClick={() => { setSelectedRisk(null); setRiskModalOpen(true); }}
+                  data-testid="btn-new-risk"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0052CC] text-white text-xs font-semibold rounded hover:bg-[#0047B3] transition-colors"
+                >
+                  <Plus size={12} /> Nouveau risque
+                </button>
+              )}
+            </div>
+
+            {risks.length === 0 ? (
+              <div className="px-5 py-8 text-center text-sm text-slate-400">
+                Aucun risque enregistré pour ce projet.
+              </div>
+            ) : (
+              <div className="grid grid-cols-12 gap-0">
+                {/* Table des risques */}
+                <div className="col-span-12 lg:col-span-8 overflow-x-auto border-r border-gray-100">
+                  <table className="w-full text-sm" data-testid="risks-table">
+                    <thead>
+                      <tr className="bg-gray-50 text-left">
+                        {["Crit.", "Risque", "Catégorie", "P", "I", "Statut", "Échéance", ""].map((h) => (
+                          <th key={h} className="px-3 py-2 text-xs font-semibold text-slate-500 border-b border-gray-200 whitespace-nowrap">{h}</th>
+                        ))}
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {risks.map((r) => {
+                        const critCls = r.criticality >= 16
+                          ? "bg-rose-100 text-rose-700 border-rose-200"
+                          : r.criticality >= 7
+                          ? "bg-amber-100 text-amber-700 border-amber-200"
+                          : "bg-emerald-100 text-emerald-700 border-emerald-200";
+                        const catColors = {
+                          technique: "bg-blue-50 text-blue-700", budget: "bg-violet-50 text-violet-700",
+                          planning: "bg-sky-50 text-sky-700", ressource: "bg-indigo-50 text-indigo-700",
+                          externe: "bg-slate-50 text-slate-600", "conformité": "bg-teal-50 text-teal-700",
+                        };
+                        const statusCls = { identifié: "text-blue-600", traité: "text-amber-600", clos: "text-emerald-600", accepté: "text-slate-500" };
+                        return (
+                          <tr
+                            key={r.risk_id}
+                            className="border-b border-gray-50 hover:bg-gray-50/60 transition-colors cursor-pointer"
+                            onClick={() => { if (canWrite) { setSelectedRisk(r); setRiskModalOpen(true); } }}
+                            data-testid={`risk-row-${r.risk_id}`}
+                          >
+                            <td className="px-3 py-2.5">
+                              <span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold border ${critCls}`}>
+                                {r.criticality}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2.5 max-w-xs">
+                              <div className="font-medium text-xs text-slate-800 leading-snug line-clamp-2">{r.title}</div>
+                              {r.owner && <div className="text-[10px] text-slate-400 mt-0.5">{r.owner}</div>}
+                            </td>
+                            <td className="px-3 py-2.5">
+                              <span className={`inline-flex items-center px-1.5 py-0.5 rounded text-[10px] font-semibold capitalize ${catColors[r.category] || "bg-gray-50 text-gray-600"}`}>
+                                {r.category}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2.5 text-center font-mono-data text-xs font-bold text-slate-600">{r.probability}</td>
+                            <td className="px-3 py-2.5 text-center font-mono-data text-xs font-bold text-slate-600">{r.impact}</td>
+                            <td className="px-3 py-2.5">
+                              <span className={`text-xs font-semibold capitalize ${statusCls[r.status] || "text-slate-500"}`}>
+                                {r.status}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2.5 text-xs text-slate-500 whitespace-nowrap">
+                              {r.due_date ? formatDate(r.due_date) : "—"}
+                            </td>
+                            <td className="px-3 py-2.5">
+                              {user?.role === "TENANT_ADMIN" && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setConfirmDelete({ type: "risk", item: r }); }}
+                                  data-testid={`btn-delete-risk-${r.risk_id}`}
+                                  className="text-slate-300 hover:text-rose-500 transition-colors"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        );
+                      })}
+                    </tbody>
+                  </table>
+                </div>
+
+                {/* Heatmap 5×5 */}
+                <div className="col-span-12 lg:col-span-4 p-4" data-testid="risk-heatmap">
+                  <RiskHeatmap risks={risks} />
+                </div>
+              </div>
+            )}
+          </div>
+
           {/* Allocations */}
           {allocations.length > 0 && (
             <div className="bg-white border border-gray-200 rounded shadow-sm" data-testid="allocations-section">
@@ -818,6 +1032,13 @@ export default function ProjectDetail() {
         resources={resources}
         onSaved={fetchAll}
       />
+      <RiskModal
+        isOpen={riskModalOpen}
+        onClose={() => setRiskModalOpen(false)}
+        risk={selectedRisk}
+        projectId={id}
+        onSaved={fetchAll}
+      />
       <BudgetRevisionModal
         isOpen={budgetRevisionOpen}
         onClose={() => setBudgetRevisionOpen(false)}
@@ -829,11 +1050,17 @@ export default function ProjectDetail() {
         onClose={() => setConfirmDelete(null)}
         onConfirm={handleDelete}
         loading={deleting}
-        title={confirmDelete?.type === "project" ? "Supprimer le projet" : "Supprimer la tâche"}
+        title={
+          confirmDelete?.type === "project" ? "Supprimer le projet"
+          : confirmDelete?.type === "task" ? "Supprimer la tâche"
+          : "Supprimer le risque"
+        }
         message={
           confirmDelete?.type === "project"
             ? `Supprimer "${confirmDelete?.item?.name}" ? Toutes les tâches et jalons associés seront également supprimés.`
-            : `Supprimer la tâche "${confirmDelete?.item?.name}" ?`
+            : confirmDelete?.type === "task"
+            ? `Supprimer la tâche "${confirmDelete?.item?.name}" ?`
+            : `Supprimer le risque "${confirmDelete?.item?.title}" ?`
         }
       />
     </div>
