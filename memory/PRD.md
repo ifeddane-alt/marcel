@@ -27,6 +27,69 @@ Tenant démo : **Groupe Altair Industries**
 | allocations | allocation_id, project_id, resource_id, period_month, jh_allocated, jh_consumed |
 | milestones | milestone_id, project_id, name, date_baseline, date_forecast, status, is_governance |
 | governance | governance_id, tenant_id, name, type, date_scheduled, projects_scope, sanity_check_* |
+| risks | risk_id, project_id, tenant_id, title, description, category, probability(1-5), impact(1-5), criticality(P×I), status, mitigation_plan, owner, due_date |
+| decisions | decision_id, project_id, tenant_id, title, description, category(8 options), status(6 options), decision_date, due_date, owner, impact, governance_id |
+
+---
+
+## Ce qui est implémenté (v1.5 — 13/04/2026)
+
+### Heatmap Dashboard — Cartographie des risques P × I (COMPLET ✅ — 13/04/2026)
+- [x] GET /api/dashboard/heatmap-risks — tous les risques tenant enrichis (project_name + program_id/program_name)
+- [x] `Dashboard.jsx` : section "Cartographie des risques P × I" sous le widget Top Risques
+- [x] Filtres dropdowns : Programme + Projet (cascadé, bouton Réinitialiser si filtre actif)
+- [x] Layout : heatmap 5×5 côté gauche + barres distribution criticité (Élevés/Modérés/Faibles %) + top 3 risques critiques côté droit
+- [x] Composant `RiskHeatmap.jsx` partagé (utilisé dans ProjectDetail + Dashboard)
+
+### Chantier 8 — Registre des décisions (COMPLET ✅ — 13/04/2026)
+- [x] Collection `decisions` : 8 catégories (stratégique | périmètre | planning | budgétaire | technique | ressources | conformité | gouvernance)
+- [x] 6 statuts cycle de vie : proposée | prise | en_cours | appliquée | reportée | annulée
+- [x] CRUD complet : GET/POST/PUT/DELETE /api/decisions — tenant isolation, RBAC (READ_ONLY=403, PMO=créer/modifier, ADMIN=supprimer)
+- [x] Optionnel : `governance_id` pour lier une décision à une instance de gouvernance
+- [x] `DecisionModal.jsx` : formulaire complet (titre, description, catégorie, statut, dates, responsable, impact), sélecteur projet si contexte governance
+- [x] `ProjectDetail.jsx` : section "Registre des décisions" — tableau (Date, Décision, Catégorie, Statut, Responsable, Échéance), clic=édition, poubelle ADMIN
+- [x] `Governance.jsx` entièrement réécrit : tableau global cross-projets avec 3 filtres (statut/catégorie/projet) + bouton Nouvelle décision + colonne projet linkée + vue par instance (décisions liées + bouton Ajouter dans l'instance expandée)
+- [x] Seed : 32 décisions réalistes (4 par projet × 8 projets), catégories variées, certaines liées à des instances governance
+- [x] Governance IDs fixés en constantes (GOVERNANCE_IDS[0..4]) pour cohérence des liens decisions↔instances
+- [x] Tests 100% — 15/15 (iteration_11.json)
+
+### Chantier 7 — Registre des risques (COMPLET ✅ — 13/04/2026)
+- [x] Collection `risks` : risk_id, project_id, tenant_id, title, description, category, probability(1-5), impact(1-5), criticality(auto = P×I), status, mitigation_plan, owner, due_date
+- [x] GET/POST/PUT/DELETE /api/risks — isolation tenant, recalcul criticité auto, RBAC
+- [x] GET /api/dashboard/top-risks — top 10 cross-projets enrichis
+- [x] `ProjectDetail.jsx` : section "Registre des risques" — table, heatmap 5×5, RiskModal
+- [x] `Dashboard.jsx` : widget "TOP RISQUES CRITIQUES — PORTEFEUILLE"
+- [x] Seed : 38 risques (4-6 par projet)
+- [x] Tests 100% — 24/24 (iteration_9.json)
+
+### Chantier 6 — Budget CAPEX/OPEX + EAC + Révisions (COMPLET ✅)
+- [x] Schema `projects` enrichi : capex_*, opex_*, eac, budget_revision_history[]
+- [x] Tests 100% — 11/11 (iteration_10.json)
+
+---
+
+## Roadmap / Backlog priorisé
+
+### P0 — Prochaine livraison
+| Chantier | Description | Complexité |
+|---------|-------------|------------|
+| **Chantier 5** | Export PowerPoint COPIL via python-pptx | Élevée |
+
+### P1 — Futur
+| Chantier | Description |
+|---------|-------------|
+| Notif email | Alertes sur risques critiques ou budget dépassé |
+| BI / Export | Export CSV cross-projets depuis Dashboard |
+| Audit trail | Journal des modifications (qui a changé quoi quand) |
+
+---
+
+## Fichiers de référence principaux
+- `/app/backend/server.py` : ~1500 lignes — à découper en routers/ si Chantier 5 grossit
+- `/app/backend/seed.py` : Données de démo complètes
+- `/app/frontend/src/api/index.js` : Client API Axios complet
+- `/app/frontend/src/pages/` : Dashboard, Portfolio, ProjectDetail, Governance, Programs, Resources
+- `/app/frontend/src/components/` : RiskModal, DecisionModal, RiskHeatmap, BudgetRevisionModal, TaskModal, etc.
 
 ---
 
