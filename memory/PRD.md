@@ -43,7 +43,10 @@ Tenant démo : **Groupe Altair Industries**
 - [x] Seed : 38 risques (4-6 par projet), variété catégories et criticités
 - [x] Tests 100% — 24/24 (iteration_9.json)
 
-### Chantier 6 — Budget CAPEX/OPEX + EAC + Révisions (COMPLET ✅)
+### Chantier 6 — Budget CAPEX/OPEX + EAC + Révisions (COMPLET ✅ — bug fix 13/04/2026)
+- [x] Bug fix critique : `current_user.sub` → `current_user.email` dans fallback author du budget-revision
+- [x] Tooltip "?" sur Total budget dans ProjectModal (Option A validée par user)
+- [x] Tests 100% — 11/11 (iteration_10.json)
 - [x] Schema `projects` enrichi : `capex_planned`, `capex_consumed`, `opex_planned`, `opex_consumed`, `eac`, `budget_revision_history[]`, `end_date_actual`, `status`
 - [x] `_sync_budget_aggregates()` : calcul auto `budget_total/consumed/forecast` depuis CAPEX+OPEX
 - [x] `POST /api/projects/:id/budget-revision` : création entrée historique + mise à jour EAC
