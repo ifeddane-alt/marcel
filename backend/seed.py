@@ -29,6 +29,60 @@ def pw(password: str) -> str:
 PROJECT_IDS = [str(uuid.uuid4()) for _ in range(8)]
 RESOURCE_IDS = [str(uuid.uuid4()) for _ in range(10)]
 GOVERNANCE_IDS = [str(uuid.uuid4()) for _ in range(5)]
+PROGRAM_IDS = [str(uuid.uuid4()) for _ in range(4)]
+
+# Mapping programmes :
+# PROGRAM_IDS[0] = Transformation Digitale & Métiers  → P0 Phoenix, P4 CRM Salesforce
+# PROGRAM_IDS[1] = Modernisation SI & Infrastructure  → P2 ERP SAP, P5 Cloud Azure
+# PROGRAM_IDS[2] = Pilotage Finance & Expérience Coll → P1 SI Finance, P3 Digital Workplace
+# PROGRAM_IDS[3] = Conformité, RH & Résilience        → P6 Portail RH, P7 DORA NIS2
+
+PROGRAMS = [
+    {
+        "program_id": PROGRAM_IDS[0],
+        "tenant_id": TENANT_ID,
+        "name": "Transformation Digitale & Métiers",
+        "description": "Refonte des processus métiers via le digital : CRM, collaboration, expérience client et groupe.",
+        "owner": "Sophie Martin",
+        "start_date": "2025-01-01",
+        "end_date": "2026-12-31",
+        "budget_keur": 6750,
+        "status": "active",
+    },
+    {
+        "program_id": PROGRAM_IDS[1],
+        "tenant_id": TENANT_ID,
+        "name": "Modernisation SI & Infrastructure",
+        "description": "Migration vers une architecture Cloud-first et déploiement ERP SAP S/4HANA groupe.",
+        "owner": "Jean-Philippe Moreau",
+        "start_date": "2024-03-01",
+        "end_date": "2026-06-30",
+        "budget_keur": 6200,
+        "status": "active",
+    },
+    {
+        "program_id": PROGRAM_IDS[2],
+        "tenant_id": TENANT_ID,
+        "name": "Pilotage Finance & Expérience Collaborateur",
+        "description": "Modernisation du SI Finance, du contrôle de gestion et des outils de travail M365.",
+        "owner": "Marie-Christine Dupont",
+        "start_date": "2024-09-01",
+        "end_date": "2026-03-31",
+        "budget_keur": 2600,
+        "status": "active",
+    },
+    {
+        "program_id": PROGRAM_IDS[3],
+        "tenant_id": TENANT_ID,
+        "name": "Conformité, RH & Résilience",
+        "description": "Conformité DORA/NIS2, refonte portail RH collaborateur et résilience opérationnelle.",
+        "owner": "Isabelle Fontaine",
+        "start_date": "2024-11-01",
+        "end_date": "2026-03-31",
+        "budget_keur": 1550,
+        "status": "active",
+    },
+]
 
 PROJECTS = [
     {
@@ -60,6 +114,7 @@ PROJECTS = [
         "end_date_actual": None,
         "last_sync_at": "2025-04-20T08:00:00Z",
         "metadata": {"sponsor": "DG", "program": "PHOENIX"},
+        "program_id": PROGRAM_IDS[0],
         "created_at": "2025-01-10T10:00:00Z",
     },
     {
@@ -91,6 +146,7 @@ PROJECTS = [
         "end_date_actual": None,
         "last_sync_at": "2025-04-19T08:00:00Z",
         "metadata": {"sponsor": "CFO", "program": "FIN2025"},
+        "program_id": PROGRAM_IDS[2],
         "created_at": "2024-08-15T10:00:00Z",
     },
     {
@@ -124,6 +180,7 @@ PROJECTS = [
         "end_date_actual": None,
         "last_sync_at": "2025-04-20T08:00:00Z",
         "metadata": {"sponsor": "DSI", "program": "ERP-SAP"},
+        "program_id": PROGRAM_IDS[1],
         "created_at": "2024-02-15T10:00:00Z",
     },
     {
@@ -152,6 +209,7 @@ PROJECTS = [
         "end_date_actual": None,
         "last_sync_at": "2025-04-18T08:00:00Z",
         "metadata": {"sponsor": "DRH", "program": "DW2025"},
+        "program_id": PROGRAM_IDS[2],
         "created_at": "2025-01-20T10:00:00Z",
     },
     {
@@ -183,6 +241,7 @@ PROJECTS = [
         "end_date_actual": None,
         "last_sync_at": "2025-04-20T08:00:00Z",
         "metadata": {"sponsor": "CCO", "program": "CRM-SF"},
+        "program_id": PROGRAM_IDS[0],
         "created_at": "2025-02-10T10:00:00Z",
     },
     {
@@ -211,6 +270,7 @@ PROJECTS = [
         "end_date_actual": None,
         "last_sync_at": "2025-04-19T08:00:00Z",
         "metadata": {"sponsor": "DSI", "program": "CLOUD-AZ"},
+        "program_id": PROGRAM_IDS[1],
         "created_at": "2024-12-01T10:00:00Z",
     },
     {
@@ -244,6 +304,7 @@ PROJECTS = [
         "end_date_actual": None,
         "last_sync_at": "2025-04-18T08:00:00Z",
         "metadata": {"sponsor": "DRH", "program": "RH-PORTAIL"},
+        "program_id": PROGRAM_IDS[3],
         "created_at": "2024-10-15T10:00:00Z",
     },
     {
@@ -272,6 +333,7 @@ PROJECTS = [
         "end_date_actual": None,
         "last_sync_at": "2025-04-20T08:00:00Z",
         "metadata": {"sponsor": "CISO", "program": "DORA-NIS2"},
+        "program_id": PROGRAM_IDS[3],
         "created_at": "2025-03-01T10:00:00Z",
     },
 ]
@@ -1308,6 +1370,7 @@ async def seed():
         await db.allocations.delete_many({})
         await db.milestones.delete_many({})
         await db.governance.delete_many({"tenant_id": TENANT_ID})
+        await db.programs.delete_many({"tenant_id": TENANT_ID})
 
     await db.tenants.insert_one({
         "tenant_id": TENANT_ID,
@@ -1337,6 +1400,9 @@ async def seed():
 
     await db.projects.insert_many(PROJECTS)
     print(f"Projets créés : {len(PROJECTS)}")
+
+    await db.programs.insert_many(PROGRAMS)
+    print(f"Programmes créés : {len(PROGRAMS)}")
 
     await db.resources.insert_many(RESOURCES)
     print(f"Ressources créées : {len(RESOURCES)}")

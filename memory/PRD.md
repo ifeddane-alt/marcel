@@ -43,7 +43,16 @@ Tenant démo : **Groupe Altair Industries**
 
 ## Ce qui est implémenté (v1.6 — 14/02/2026)
 
-### Chantier 5 — Export PowerPoint COPIL (COMPLET ✅ — 14/02/2026)
+### Seed données (COMPLET ✅ — 13/04/2026)
+- [x] 4 programmes Altair créés avec owners, dates, budgets
+- [x] 8 projets rattachés — 2 par programme (mapping cohérent métier)
+  - Transformation Digitale & Métiers : Phoenix + CRM Salesforce
+  - Modernisation SI & Infrastructure : ERP SAP + Cloud Azure
+  - Pilotage Finance & Expérience Collaborateur : SI Finance + Digital Workplace
+  - Conformité, RH & Résilience : Portail RH + DORA NIS2
+- [x] `db.programs.delete_many` + `db.programs.insert_many` dans `seed()` — reproductible
+
+### Chantier 5 — Export PowerPoint COPIL (COMPLET ✅ — 13/04/2026)
 - [x] Backend `pptx_generator.py` : 6 slides (Garde, Synthèse, Heatmap P×I matplotlib, Top Risques, Décisions Clés, Fiches Projet par projet)
 - [x] Palette "Option B" : fond blanc, accents Navy Blue (#0F172A) uniquement dans titres/badges/séparateurs — compatible impression
 - [x] `POST /api/export/copil` : reçoit `{project_ids[], instance_name, instance_date, governance_id?}`, retourne fichier PPTX binaire, accessible aux 3 rôles (READ_ONLY inclus)
