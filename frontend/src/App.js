@@ -10,6 +10,7 @@ import Portfolio from "@/pages/Portfolio";
 import ProjectDetail from "@/pages/ProjectDetail";
 import Resources from "@/pages/Resources";
 import Governance from "@/pages/Governance";
+import Import from "@/pages/Import";
 import "@/App.css";
 
 function ProtectedRoute({ children }) {
@@ -38,6 +39,7 @@ function AppRoutes() {
         <Route path="projects/:id" element={<ProjectDetail />} />
         <Route path="resources" element={<Resources />} />
         <Route path="governance" element={<Governance />} />
+        <Route path="import" element={<Import />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
     </Routes>

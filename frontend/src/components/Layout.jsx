@@ -9,6 +9,7 @@ import {
   ChevronRight,
   Building2,
   FolderKanban,
+  Upload,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -74,6 +75,25 @@ export default function Layout() {
               <span>{label}</span>
             </NavLink>
           ))}
+
+          {/* Import — TENANT_ADMIN + PMO_USER uniquement */}
+          {user?.role !== "READ_ONLY" && (
+            <>
+              <div className="text-[10px] uppercase tracking-widest text-slate-500 px-3 pt-3 pb-1 font-semibold">
+                Outils
+              </div>
+              <NavLink
+                to="/import"
+                data-testid="nav-import"
+                className={({ isActive }) =>
+                  `sidebar-item ${isActive ? "sidebar-item-active" : ""}`
+                }
+              >
+                <Upload size={16} strokeWidth={1.75} className="flex-shrink-0" />
+                <span>Import CSV</span>
+              </NavLink>
+            </>
+          )}
         </nav>
 
         {/* User footer */}

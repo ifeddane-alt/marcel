@@ -108,14 +108,14 @@ Tenant démo : **Groupe Altair Industries**
 ## Ce qui est implémenté (v1.3 — 03/02/2026)
 
 ### P0 — En cours
-- [ ] **Chantier 2** — Import CSV (upload, mapping, preview, validation, commit)
-- [ ] **Chantier 3** — CRUD modaux complets (projets, tâches, ressources)
+- [x] **Chantier 3** — CRUD complet ✅ (livré v1.3)
+- [ ] **Chantier 2** — Import CSV (câblage terminé, en test)
 - [ ] **Chantier 6** — Budget CAPEX/OPEX + EAC + historique révisions
 - [ ] **Chantier 7** — Registre des risques
 - [ ] **Chantier 8** — Registre des décisions
 - [ ] **Chantier 5** — Export PowerPoint COPIL (python-pptx)
 
 ## Notes architecture importantes
-- La solution utilise MongoDB (au lieu de PostgreSQL demandé) pour respecter les contraintes d'environnement
-- L'isolation multi-tenant est assurée par filtrage `tenant_id` sur chaque requête (vs séparation de schémas PostgreSQL)
+- Stack définitive : FastAPI + MongoDB + React/JSX (pas de migration)
+- L'isolation multi-tenant est assurée par filtrage `tenant_id` sur chaque requête
 - JWT local sans AWS Cognito réel — signature HS256 avec secret en .env
