@@ -2,13 +2,14 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Calendar, ChevronRight, Flag, AlertTriangle, Clock, TrendingUp,
-  Pencil, Trash2, Plus,
+  Pencil, Trash2, Plus, History,
 } from "lucide-react";
 import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
-import RAGBadge, { MethodologyBadge, MilestoneBadge, TaskTypeBadge, TaskStatusBadge } from "@/components/RAGBadge";
+import RAGBadge, { MethodologyBadge, MilestoneBadge, TaskTypeBadge, TaskStatusBadge, ProjectStatusBadge } from "@/components/RAGBadge";
 import ProjectModal from "@/components/ProjectModal";
 import TaskModal from "@/components/TaskModal";
+import BudgetRevisionModal from "@/components/BudgetRevisionModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { formatEuro, formatDate, formatJH } from "@/utils/format";
 
@@ -28,6 +29,7 @@ function BudgetBar({ label, value, total, color }) {
   );
 }
 
+
 export default function ProjectDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
@@ -45,6 +47,7 @@ export default function ProjectDetail() {
   // Modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
   const [taskModalOpen, setTaskModalOpen] = useState(false);
+  const [budgetRevisionOpen, setBudgetRevisionOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null); // {type: 'project'|'task', item}
   const [deleting, setDeleting] = useState(false);
@@ -189,34 +192,159 @@ export default function ProjectDetail() {
       <div className="grid grid-cols-12 gap-4">
         {/* Left column */}
         <div className="col-span-12 lg:col-span-8 space-y-4">
-          {/* Budget section */}
+          {/* Budget CAPEX / OPEX + EAC */}
           <div className="bg-white border border-gray-200 rounded shadow-sm p-5" data-testid="budget-section">
-            <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4">
-              Budget & Charges
-            </div>
-            <div className="grid grid-cols-2 gap-6">
-              <div className="space-y-4">
-                <BudgetBar label="Budget consommé" value={project.budget_consumed} total={project.budget_total} color="bg-[#0052CC]" />
-                <BudgetBar label="Budget forecast" value={project.budget_forecast} total={project.budget_total} color={project.budget_forecast > project.budget_total ? "bg-rose-500" : "bg-amber-400"} />
+            <div className="flex items-center justify-between mb-4">
+              <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold">
+                Budget CAPEX / OPEX & EAC
               </div>
-              <div className="grid grid-cols-2 gap-3">
-                {[
-                  { label: "Budget total", value: formatEuro(project.budget_total), mono: true },
-                  { label: "Consommé", value: formatEuro(project.budget_consumed), mono: true },
-                  { label: "Forecast", value: formatEuro(project.budget_forecast), mono: true, alert: project.budget_forecast > project.budget_total },
-                  { label: "Reste à faire", value: formatEuro(project.budget_total - project.budget_consumed), mono: true },
-                  { label: "JH planifiés", value: formatJH(project.jh_planned), mono: true },
-                  { label: "JH consommés", value: formatJH(project.jh_consumed), mono: true },
-                ].map((item) => (
-                  <div key={item.label} className="bg-gray-50 rounded p-3 border border-gray-100">
-                    <div className="text-[10px] uppercase tracking-wide text-slate-400 mb-1">{item.label}</div>
-                    <div className={`font-mono-data text-sm font-bold ${item.alert ? "text-rose-600" : "text-[#0F172A]"}`}>
-                      {item.value}
+              {canWrite && (
+                <button
+                  onClick={() => setBudgetRevisionOpen(true)}
+                  data-testid="btn-budget-revision"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0052CC] text-white text-xs font-semibold rounded hover:bg-[#0047B3] transition-colors"
+                >
+                  <TrendingUp size={12} /> Réviser l'EAC
+                </button>
+              )}
+            </div>
+
+            {/* 4 cards CAPEX + OPEX */}
+            <div className="grid grid-cols-2 gap-4 mb-4">
+              {/* CAPEX */}
+              <div className="border border-blue-100 rounded-lg p-4 bg-blue-50/30">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-[#0052CC] mb-3">CAPEX</div>
+                <div className="space-y-1.5 mb-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-500">Prévu</span>
+                    <span className="font-mono-data text-sm font-bold text-slate-800" data-testid="capex-planned">
+                      {Math.round((project.capex_planned || 0) / 1000).toLocaleString("fr-FR")} K€
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-500">Consommé</span>
+                    <span className="font-mono-data text-sm font-bold text-[#0052CC]" data-testid="capex-consumed">
+                      {Math.round((project.capex_consumed || 0) / 1000).toLocaleString("fr-FR")} K€
+                    </span>
+                  </div>
+                </div>
+                <div className="h-1.5 bg-blue-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-[#0052CC] rounded-full transition-all duration-700"
+                    style={{ width: `${Math.min(((project.capex_consumed || 0) / (project.capex_planned || 1)) * 100, 100)}%` }}
+                  />
+                </div>
+                <div className="text-[10px] text-slate-400 mt-1 text-right">
+                  {project.capex_planned ? Math.round((project.capex_consumed || 0) / project.capex_planned * 100) : 0}% consommé
+                </div>
+              </div>
+
+              {/* OPEX */}
+              <div className="border border-amber-100 rounded-lg p-4 bg-amber-50/30">
+                <div className="text-[10px] font-bold uppercase tracking-widest text-amber-600 mb-3">OPEX</div>
+                <div className="space-y-1.5 mb-2">
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-500">Prévu</span>
+                    <span className="font-mono-data text-sm font-bold text-slate-800" data-testid="opex-planned">
+                      {Math.round((project.opex_planned || 0) / 1000).toLocaleString("fr-FR")} K€
+                    </span>
+                  </div>
+                  <div className="flex items-center justify-between">
+                    <span className="text-xs text-slate-500">Consommé</span>
+                    <span className="font-mono-data text-sm font-bold text-amber-600" data-testid="opex-consumed">
+                      {Math.round((project.opex_consumed || 0) / 1000).toLocaleString("fr-FR")} K€
+                    </span>
+                  </div>
+                </div>
+                <div className="h-1.5 bg-amber-100 rounded-full overflow-hidden">
+                  <div
+                    className="h-full bg-amber-500 rounded-full transition-all duration-700"
+                    style={{ width: `${Math.min(((project.opex_consumed || 0) / (project.opex_planned || 1)) * 100, 100)}%` }}
+                  />
+                </div>
+                <div className="text-[10px] text-slate-400 mt-1 text-right">
+                  {project.opex_planned ? Math.round((project.opex_consumed || 0) / project.opex_planned * 100) : 0}% consommé
+                </div>
+              </div>
+            </div>
+
+            {/* EAC Block */}
+            {(() => {
+              const eac = project.eac || project.budget_forecast || 0;
+              const budgetTotal = project.budget_total || 0;
+              const diff = eac - budgetTotal;
+              const diffPct = budgetTotal ? (diff / budgetTotal) * 100 : 0;
+              const isOver = diff > 0;
+              return (
+                <div
+                  className={`rounded-lg border p-4 mb-4 ${isOver ? "bg-rose-50 border-rose-200" : "bg-emerald-50 border-emerald-200"}`}
+                  data-testid="eac-block"
+                >
+                  <div className="flex items-start justify-between">
+                    <div>
+                      <div className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-1">
+                        EAC — Estimate At Completion
+                      </div>
+                      <div className={`font-mono-data text-2xl font-bold leading-none ${isOver ? "text-rose-700" : "text-emerald-700"}`} data-testid="eac-value">
+                        {Math.round(eac / 1000).toLocaleString("fr-FR")} K€
+                      </div>
+                    </div>
+                    <div className="text-right">
+                      <div className="text-[10px] text-slate-500 mb-0.5">Écart vs budget</div>
+                      <div className={`font-mono-data text-sm font-bold ${isOver ? "text-rose-600" : "text-emerald-600"}`} data-testid="eac-deviation">
+                        {diff > 0 ? "+" : ""}{Math.round(diff / 1000).toLocaleString("fr-FR")} K€
+                      </div>
+                      <div className={`text-[11px] font-semibold ${isOver ? "text-rose-500" : "text-emerald-500"}`}>
+                        {diff > 0 ? "+" : ""}{diffPct.toFixed(1)}%
+                      </div>
                     </div>
                   </div>
-                ))}
+                  <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-slate-500 border-t border-current border-opacity-20 pt-2">
+                    <span>Budget total : <span className="font-mono-data font-bold text-slate-700">{Math.round(budgetTotal / 1000).toLocaleString("fr-FR")} K€</span></span>
+                    <span>Consommé total : <span className="font-mono-data font-bold text-slate-700">{Math.round((project.budget_consumed || 0) / 1000).toLocaleString("fr-FR")} K€</span></span>
+                    <span>JH : <span className="font-mono-data font-bold text-slate-700">{(project.jh_consumed || 0).toLocaleString("fr-FR")}/{(project.jh_planned || 0).toLocaleString("fr-FR")}</span></span>
+                  </div>
+                </div>
+              );
+            })()}
+
+            {/* Historique révisions */}
+            {(project.budget_revision_history || []).length > 0 && (
+              <div data-testid="budget-revision-history">
+                <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-2">
+                  <History size={11} /> Historique révisions ({project.budget_revision_history.length})
+                </div>
+                <div className="space-y-0 border border-gray-100 rounded-lg overflow-hidden">
+                  {[...project.budget_revision_history].reverse().map((rev, i) => {
+                    const isIncrease = rev.new_eac > rev.old_eac;
+                    return (
+                      <div key={i} className="flex items-start gap-3 px-4 py-2.5 border-b border-gray-50 last:border-0 hover:bg-gray-50/50 transition-colors">
+                        <div className={`w-1.5 h-1.5 rounded-full mt-1.5 flex-shrink-0 ${isIncrease ? "bg-rose-400" : "bg-emerald-400"}`} />
+                        <div className="flex-1 min-w-0">
+                          <div className="flex items-center gap-3 mb-0.5">
+                            <span className="font-mono-data text-[11px] text-slate-400 flex-shrink-0">{rev.date}</span>
+                            <span className="flex items-center gap-1.5 text-xs font-mono-data">
+                              <span className="text-slate-500">{Math.round((rev.old_eac || 0) / 1000).toLocaleString("fr-FR")} K€</span>
+                              <span className="text-slate-300">→</span>
+                              <span className={`font-bold ${isIncrease ? "text-rose-600" : "text-emerald-600"}`}>
+                                {Math.round((rev.new_eac || 0) / 1000).toLocaleString("fr-FR")} K€
+                              </span>
+                              <span className={`text-[10px] font-semibold ${isIncrease ? "text-rose-400" : "text-emerald-400"}`}>
+                                ({isIncrease ? "+" : ""}{Math.round(((rev.new_eac - rev.old_eac) / (rev.old_eac || 1)) * 100)}%)
+                              </span>
+                            </span>
+                            {rev.author && (
+                              <span className="text-[10px] text-slate-400 ml-auto flex-shrink-0">{rev.author}</span>
+                            )}
+                          </div>
+                          <div className="text-[11px] text-slate-500 truncate">{rev.reason}</div>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
               </div>
-            </div>
+            )}
           </div>
 
           {/* Tasks — Décomposition du projet */}
@@ -627,6 +755,10 @@ export default function ProjectDetail() {
               Informations projet
             </div>
             <dl className="space-y-3 text-sm">
+              <div className="flex justify-between gap-2 border-b border-gray-50 pb-2">
+                <dt className="text-xs text-slate-400 font-medium">Statut</dt>
+                <dd><ProjectStatusBadge status={project.status} /></dd>
+              </div>
               {[
                 { label: "Sponsor", value: project.metadata?.sponsor || "—" },
                 { label: "Programme", value: project.metadata?.program || "—" },
@@ -640,6 +772,12 @@ export default function ProjectDetail() {
                   <dd className="text-xs text-slate-700 font-medium text-right">{value}</dd>
                 </div>
               ))}
+              {project.end_date_actual && (
+                <div className="flex justify-between gap-2 pt-1">
+                  <dt className="text-xs text-slate-400 font-medium">Fin réelle</dt>
+                  <dd className="text-xs font-mono-data font-bold text-emerald-700">{formatDate(project.end_date_actual)}</dd>
+                </div>
+              )}
             </dl>
           </div>
 
@@ -678,6 +816,12 @@ export default function ProjectDetail() {
         task={selectedTask}
         projectId={id}
         resources={resources}
+        onSaved={fetchAll}
+      />
+      <BudgetRevisionModal
+        isOpen={budgetRevisionOpen}
+        onClose={() => setBudgetRevisionOpen(false)}
+        project={project}
         onSaved={fetchAll}
       />
       <ConfirmDialog

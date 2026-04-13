@@ -1,0 +1,57 @@
+{
+  "summary": "Chantier 6 — Budget CAPEX/OPEX + EAC + Revision History. All 15 test points validated. 14/14 backend tests pass, all UI flows working correctly.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_chantier6.py",
+    "/app/test_reports/pytest/chantier6.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": ["/app/backend/tests/test_chantier6.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": {
+    "admin": "admin@altair.fr / Admin1234! (TENANT_ADMIN)",
+    "pmo": "pmo@altair.fr / Pmo1234! (PMO_USER)",
+    "viewer": "viewer@altair.fr / View1234! (READ_ONLY)"
+  },
+  "seed_data_creation": "Backend tests added test revisions to SAP project (TEST revision admin, TEST PMO revert) — history now has 6 entries instead of original 3",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Chantier 6 fully validated. All 15 test points pass. SAP project now has 6 revision history entries (original 3 + 3 from tests). Budget forecast now shows 6800K€ due to UI test revision.",
+  "test_results": {
+    "portfolio_filter_status_present": "PASS - portfolio-filter-status dropdown with Tous statuts, En préparation, Actif, En pause, Clôturé, Archivé",
+    "portfolio_filter_en_pause_portail_rh": "PASS - filtering by en_pause shows 'Refonte Portail RH & Self-Service Collaborateur'",
+    "portfolio_filter_en_preparation_dora": "PASS - filtering by en_preparation shows 'Programme Conformité DORA & NIS2'",
+    "portfolio_status_badges_visible": "PASS - badges Actif/En pause/En préparation visible under project names",
+    "sap_budget_section_present": "PASS - 'BUDGET CAPEX / OPEX & EAC' section present",
+    "sap_capex_bleu_opex_orange": "PASS - CAPEX block blue, OPEX block amber/orange",
+    "sap_capex_planned_2000k": "PASS - CAPEX prévu: 2 000 K€",
+    "sap_capex_consumed_1640k": "PASS - CAPEX consommé: 1 640 K€",
+    "sap_opex_planned_3000k": "PASS - OPEX prévu: 3 000 K€",
+    "sap_opex_consumed_2460k": "PASS - OPEX consommé: 2 460 K€",
+    "sap_eac_value_6500k": "PASS - EAC 6 500 K€ (backend); UI test moved it to 6 800 K€",
+    "sap_eac_deviation_30pct": "PASS - Écart vs budget +1 500 K€ (+30.0%) initially",
+    "sap_revision_history_present": "PASS - Historique révisions visible (5 entries from seed+tests)",
+    "btn_budget_revision_admin_pmo": "PASS - Réviser l'EAC button present for TENANT_ADMIN",
+    "btn_budget_revision_absent_readonly": "PASS - button absent for READ_ONLY (viewer)",
+    "budget_revision_modal_flow": "PASS - modal opens, EAC+reason+author form, submit closes modal and updates EAC",
+    "revision_added_to_history": "PASS - new revision entry appears in historique after submit",
+    "right_column_status_badge": "PASS - 'Statut' row with ProjectStatusBadge (Actif) in Informations projet",
+    "project_modal_date_labels": "PASS - 'Fin prévue initiale (baseline)', 'Fin prévue actuelle (forecast)', 'Fin réelle'",
+    "project_modal_capex_opex_4_fields": "PASS - capex_planned, capex_consumed, opex_planned, opex_consumed fields present",
+    "project_modal_budget_total_auto": "PASS - total auto-calculated preview shown",
+    "project_modal_status_dropdown": "PASS - 5 status options: En préparation, Actif, En pause, Clôturé, Archivé",
+    "create_project_budget_1500k": "PASS - backend: capex=500K + opex=1000K → budget_total=1 500 000€",
+    "readonly_no_revision_button": "PASS - btn-budget-revision absent, btn-edit-project absent, btn-new-project absent",
+    "budget_alert_sap": "PASS - Dépassement budgétaire forecast banner visible for SAP project",
+    "viewer_403_budget_revision": "PASS - API returns 403 for viewer trying to revise budget"
+  }
+}

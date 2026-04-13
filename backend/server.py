@@ -90,6 +90,8 @@ class ProjectCreate(BaseModel):
     start_date: str
     end_date_baseline: str
     end_date_forecast: str
+    end_date_actual: Optional[str] = None
+    status: str = "actif"  # en_preparation | actif | en_pause | cloture | archive
     description: Optional[str] = None
     owner_id: Optional[str] = None
     program_id: Optional[str] = None
@@ -102,6 +104,7 @@ class ProjectUpdate(BaseModel):
     name: Optional[str] = None
     methodology: Optional[str] = None
     status_rag: Optional[str] = None
+    status: Optional[str] = None
     capex_planned: Optional[float] = None
     capex_consumed: Optional[float] = None
     opex_planned: Optional[float] = None
@@ -115,6 +118,7 @@ class ProjectUpdate(BaseModel):
     start_date: Optional[str] = None
     end_date_baseline: Optional[str] = None
     end_date_forecast: Optional[str] = None
+    end_date_actual: Optional[str] = None
     description: Optional[str] = None
     owner_id: Optional[str] = None
     program_id: Optional[str] = None

@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import { Search, Plus, Pencil, Trash2 } from "lucide-react";
 import { projectsAPI, programsAPI, resourcesAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
-import RAGBadge, { MethodologyBadge } from "@/components/RAGBadge";
+import RAGBadge, { MethodologyBadge, ProjectStatusBadge } from "@/components/RAGBadge";
 import ProjectModal from "@/components/ProjectModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { formatEuro, formatDate } from "@/utils/format";
@@ -23,6 +23,7 @@ export default function Portfolio() {
   const [filterRag, setFilterRag] = useState("");
   const [filterMethod, setFilterMethod] = useState("");
   const [filterProgram, setFilterProgram] = useState("");
+  const [filterStatus, setFilterStatus] = useState("");
   const [sortKey, setSortKey] = useState("name");
   const [sortDir, setSortDir] = useState("asc");
 
@@ -67,7 +68,8 @@ export default function Portfolio() {
         (!search || p.name.toLowerCase().includes(q) || (p.source_id || "").toLowerCase().includes(q)) &&
         (!filterRag || p.status_rag === filterRag) &&
         (!filterMethod || p.methodology === filterMethod) &&
-        (!filterProgram || p.program_id === filterProgram)
+        (!filterProgram || p.program_id === filterProgram) &&
+        (!filterStatus || p.status === filterStatus)
       );
     })
     .sort((a, b) => {
@@ -134,6 +136,15 @@ export default function Portfolio() {
             {programs.map((prog) => <option key={prog.program_id} value={prog.program_id}>{prog.name}</option>)}
           </select>
         )}
+        <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} data-testid="portfolio-filter-status"
+          className="text-sm border border-gray-200 rounded px-3 py-2 bg-white focus:outline-none focus:border-[#0052CC]">
+          <option value="">Tous statuts</option>
+          <option value="en_preparation">En préparation</option>
+          <option value="actif">Actif</option>
+          <option value="en_pause">En pause</option>
+          <option value="cloture">Clôturé</option>
+          <option value="archive">Archivé</option>
+        </select>
       </div>
 
       {/* Table */}
@@ -161,7 +172,11 @@ export default function Portfolio() {
                     <Link to={`/projects/${p.project_id}`} className="text-[#0052CC] hover:text-[#0047B3] font-medium text-sm leading-snug" data-testid={`project-link-${p.project_id}`}>
                       {p.name}
                     </Link>
-                    {prog && <div className="text-[10px] text-slate-400 mt-0.5 truncate">{prog.name}</div>}
+                    <div className="flex items-center gap-2 mt-0.5">
+                      {prog && <div className="text-[10px] text-slate-400 truncate">{prog.name}</div>}
+                      {prog && p.status && <span className="text-slate-200">·</span>}
+                      {p.status && <ProjectStatusBadge status={p.status} />}
+                    </div>
                   </td>
                   <td className="px-4 py-3"><MethodologyBadge methodology={p.methodology} /></td>
                   <td className="px-4 py-3 font-mono-data text-xs text-slate-700">{formatEuro(p.budget_total)}</td>
