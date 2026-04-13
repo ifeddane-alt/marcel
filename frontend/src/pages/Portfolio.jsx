@@ -218,6 +218,16 @@ export default function Portfolio() {
         <table className="w-full text-sm" data-testid="portfolio-table">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200 text-left">
+              <th className="px-4 py-3 w-8">
+                <input
+                  ref={selectAllRef}
+                  type="checkbox"
+                  checked={selectedProjects.size === filtered.length && filtered.length > 0}
+                  onChange={toggleSelectAll}
+                  data-testid="checkbox-select-all"
+                  className="w-4 h-4 rounded border-gray-300 text-[#0052CC] focus:ring-[#0052CC] cursor-pointer"
+                />
+              </th>
               {[["status_rag","RAG"],["name","Nom"],["methodology","Méthodo"],["budget_total","Budget total"],["budget_forecast","Forecast"],["end_date_forecast","Fin prévue"]].map(([key, label]) => (
                 <th key={key} onClick={() => toggleSort(key)}
                   className="px-4 py-3 text-xs font-semibold text-slate-600 cursor-pointer hover:text-[#0052CC] select-none whitespace-nowrap">
@@ -233,6 +243,16 @@ export default function Portfolio() {
               const overBudget = p.budget_forecast > p.budget_total * 1.05;
               return (
                 <tr key={p.project_id} className="border-b border-gray-100 hover:bg-blue-50/30 transition-colors" data-testid={`project-row-${p.project_id}`}>
+                  <td className="px-4 py-3 w-8">
+                    <input
+                      type="checkbox"
+                      checked={selectedProjects.has(p.project_id)}
+                      onChange={() => toggleSelect(p.project_id)}
+                      onClick={(e) => e.stopPropagation()}
+                      data-testid={`checkbox-project-${p.project_id}`}
+                      className="w-4 h-4 rounded border-gray-300 text-[#0052CC] focus:ring-[#0052CC] cursor-pointer"
+                    />
+                  </td>
                   <td className="px-4 py-3"><RAGBadge status={p.status_rag} /></td>
                   <td className="px-4 py-3 max-w-xs">
                     <Link to={`/projects/${p.project_id}`} className="text-[#0052CC] hover:text-[#0047B3] font-medium text-sm leading-snug" data-testid={`project-link-${p.project_id}`}>
@@ -270,12 +290,19 @@ export default function Portfolio() {
               );
             })}
             {filtered.length === 0 && (
-              <tr><td colSpan={canWrite ? 7 : 6} className="text-center py-12 text-slate-400 text-sm">Aucun projet correspondant aux filtres</td></tr>
+              <tr><td colSpan={canWrite ? 8 : 7} className="text-center py-12 text-slate-400 text-sm">Aucun projet correspondant aux filtres</td></tr>
             )}
           </tbody>
         </table>
       </div>
 
+      <ExportCopilModal
+        isOpen={exportModalOpen}
+        onClose={() => { setExportModalOpen(false); setPreGovernanceId(null); }}
+        selectedProjectIds={[...selectedProjects]}
+        selectedProjectNames={projects.filter((p) => selectedProjects.has(p.project_id)).map((p) => p.name)}
+        preGovernanceId={preGovernanceId}
+      />
       <ProjectModal
         isOpen={modalOpen}
         onClose={() => setModalOpen(false)}

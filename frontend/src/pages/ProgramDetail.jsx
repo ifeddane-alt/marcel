@@ -1,9 +1,10 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
-  ArrowLeft, ChevronRight, AlertTriangle, TrendingUp, Calendar, Flag,
+  ArrowLeft, ChevronRight, AlertTriangle, TrendingUp, Calendar, Flag, Presentation,
 } from "lucide-react";
 import { programsAPI } from "@/api";
+import ExportCopilModal from "@/components/ExportCopilModal";
 import RAGBadge, { MethodologyBadge, MilestoneBadge } from "@/components/RAGBadge";
 import { formatEuro, formatDate } from "@/utils/format";
 
@@ -19,6 +20,7 @@ export default function ProgramDetail() {
   const { id } = useParams();
   const [program, setProgram] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
 
   useEffect(() => {
     programsAPI.get(id).then((r) => {
@@ -78,6 +80,15 @@ export default function ProgramDetail() {
               </span>
             )}
           </div>
+        </div>
+        <div className="flex-shrink-0 ml-4">
+          <button
+            onClick={() => setExportModalOpen(true)}
+            data-testid="btn-export-copil-program"
+            className="flex items-center gap-2 px-4 py-2 border border-[#0052CC] text-[#0052CC] text-sm font-semibold rounded hover:bg-[#EBF2FF] transition-colors"
+          >
+            <Presentation size={14} /> Export COPIL
+          </button>
         </div>
       </div>
 
@@ -325,6 +336,12 @@ export default function ProgramDetail() {
           </div>
         </div>
       </div>
+      <ExportCopilModal
+        isOpen={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+        selectedProjectIds={projects.map((p) => p.project_id)}
+        selectedProjectNames={projects.map((p) => p.name)}
+      />
     </div>
   );
 }

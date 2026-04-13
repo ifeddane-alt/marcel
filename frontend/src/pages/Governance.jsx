@@ -2,13 +2,14 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   Shield, Calendar, AlertTriangle, CheckCircle, Clock, XCircle,
-  ClipboardList, Plus, Trash2, ChevronDown, ChevronUp,
+  ClipboardList, Plus, Trash2, ChevronDown, ChevronUp, Presentation,
 } from "lucide-react";
 import { governanceAPI, projectsAPI, decisionsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { GovernanceTypeBadge, SanityBadge } from "@/components/RAGBadge";
 import DecisionModal from "@/components/DecisionModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import ExportCopilModal from "@/components/ExportCopilModal";
 import { formatDate } from "@/utils/format";
 
 const DECISION_STATUS_COLORS = {
@@ -66,6 +67,11 @@ export default function Governance() {
   // Confirm delete
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [exportProjectIds, setExportProjectIds] = useState([]);
+  const [exportProjectNames, setExportProjectNames] = useState([]);
+  const [exportGovId, setExportGovId] = useState(null);
 
   // Global decisions filters
   const [filterStatus, setFilterStatus] = useState("");
@@ -353,6 +359,22 @@ export default function Governance() {
 
               {isExpanded && (
                 <div className="border-t border-gray-100 px-5 py-4 bg-gray-50/50">
+                  {/* Export COPIL shortcut */}
+                  <div className="flex justify-end mb-3">
+                    <button
+                      onClick={() => {
+                        const pids = g.projects_scope || [];
+                        setExportProjectIds(pids);
+                        setExportProjectNames(pids.map((pid) => getProjectName(pid)));
+                        setExportGovId(g.governance_id);
+                        setExportModalOpen(true);
+                      }}
+                      data-testid={`btn-export-copil-instance-${g.governance_id}`}
+                      className="flex items-center gap-1.5 px-3 py-1.5 border border-[#0052CC] text-[#0052CC] text-xs font-semibold rounded hover:bg-[#EBF2FF] transition-colors"
+                    >
+                      <Presentation size={12} /> Export COPIL
+                    </button>
+                  </div>
                   {/* Projects + Sanity */}
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4">
                     <div>
@@ -460,6 +482,13 @@ export default function Governance() {
         )}
       </div>
 
+      <ExportCopilModal
+        isOpen={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+        selectedProjectIds={exportProjectIds}
+        selectedProjectNames={exportProjectNames}
+        preGovernanceId={exportGovId}
+      />
       {/* Decision Modal */}
       <DecisionModal
         isOpen={decisionModalOpen}

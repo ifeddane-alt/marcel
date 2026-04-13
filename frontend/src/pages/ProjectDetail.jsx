@@ -2,7 +2,7 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Calendar, ChevronRight, Flag, AlertTriangle, Clock, TrendingUp,
-  Pencil, Trash2, Plus, History, ShieldAlert, ClipboardList,
+  Pencil, Trash2, Plus, History, ShieldAlert, ClipboardList, Presentation,
 } from "lucide-react";
 import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI, decisionsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -14,6 +14,7 @@ import RiskModal from "@/components/RiskModal";
 import DecisionModal from "@/components/DecisionModal";
 import RiskHeatmap from "@/components/RiskHeatmap";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import ExportCopilModal from "@/components/ExportCopilModal";
 import { formatEuro, formatDate, formatJH } from "@/utils/format";
 
 function BudgetBar({ label, value, total, color }) {
@@ -56,6 +57,7 @@ export default function ProjectDetail() {
   const [budgetRevisionOpen, setBudgetRevisionOpen] = useState(false);
   const [riskModalOpen, setRiskModalOpen] = useState(false);
   const [decisionModalOpen, setDecisionModalOpen] = useState(false);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectedRisk, setSelectedRisk] = useState(null);
   const [selectedDecision, setSelectedDecision] = useState(null);
@@ -171,26 +173,35 @@ export default function ProjectDetail() {
             </p>
           )}
         </div>
-        {canWrite && (
-          <div className="flex items-center gap-2 flex-shrink-0">
-            <button
-              onClick={() => setEditModalOpen(true)}
-              data-testid="btn-edit-project"
-              className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded text-sm text-slate-600 hover:bg-gray-50 hover:text-[#0052CC] transition-colors"
-            >
-              <Pencil size={13} /> Modifier
-            </button>
-            {isAdmin && (
+        <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={() => setExportModalOpen(true)}
+            data-testid="btn-export-copil-project"
+            className="flex items-center gap-1.5 px-3 py-2 border border-[#0052CC] text-[#0052CC] text-sm font-semibold rounded hover:bg-[#EBF2FF] transition-colors"
+          >
+            <Presentation size={13} /> Export COPIL
+          </button>
+          {canWrite && (
+            <>
               <button
-                onClick={() => setConfirmDelete({ type: "project", item: project })}
-                data-testid="btn-delete-project"
-                className="flex items-center gap-1.5 px-3 py-2 border border-rose-200 rounded text-sm text-rose-600 hover:bg-rose-50 transition-colors"
+                onClick={() => setEditModalOpen(true)}
+                data-testid="btn-edit-project"
+                className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded text-sm text-slate-600 hover:bg-gray-50 hover:text-[#0052CC] transition-colors"
               >
-                <Trash2 size={13} /> Supprimer
+                <Pencil size={13} /> Modifier
               </button>
-            )}
-          </div>
-        )}
+              {isAdmin && (
+                <button
+                  onClick={() => setConfirmDelete({ type: "project", item: project })}
+                  data-testid="btn-delete-project"
+                  className="flex items-center gap-1.5 px-3 py-2 border border-rose-200 rounded text-sm text-rose-600 hover:bg-rose-50 transition-colors"
+                >
+                  <Trash2 size={13} /> Supprimer
+                </button>
+              )}
+            </>
+          )}
+        </div>
       </div>
 
       {/* Alert banners */}
@@ -1061,6 +1072,12 @@ export default function ProjectDetail() {
         onClose={() => setBudgetRevisionOpen(false)}
         project={project}
         onSaved={fetchAll}
+      />
+      <ExportCopilModal
+        isOpen={exportModalOpen}
+        onClose={() => setExportModalOpen(false)}
+        selectedProjectIds={project ? [project.project_id] : []}
+        selectedProjectNames={project ? [project.name] : []}
       />
       <ConfirmDialog
         isOpen={!!confirmDelete}
