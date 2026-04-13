@@ -36,10 +36,14 @@ export const projectsAPI = {
   get: (id) => api.get(`/projects/${id}`),
   create: (data) => api.post("/projects", data),
   update: (id, data) => api.put(`/projects/${id}`, data),
+  delete: (id) => api.delete(`/projects/${id}`),
 };
 
 export const resourcesAPI = {
   list: () => api.get("/resources"),
+  create: (data) => api.post("/resources", data),
+  update: (id, data) => api.put(`/resources/${id}`, data),
+  delete: (id) => api.delete(`/resources/${id}`),
 };
 
 export const allocationsAPI = {

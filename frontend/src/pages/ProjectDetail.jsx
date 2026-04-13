@@ -1,10 +1,15 @@
-import React, { useEffect, useState } from "react";
-import { useParams, Link } from "react-router-dom";
+import React, { useEffect, useState, useCallback } from "react";
+import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Calendar, ChevronRight, Flag, AlertTriangle, Clock, TrendingUp,
+  Pencil, Trash2, Plus,
 } from "lucide-react";
 import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI } from "@/api";
+import { useAuth } from "@/contexts/AuthContext";
 import RAGBadge, { MethodologyBadge, MilestoneBadge, TaskTypeBadge, TaskStatusBadge } from "@/components/RAGBadge";
+import ProjectModal from "@/components/ProjectModal";
+import TaskModal from "@/components/TaskModal";
+import ConfirmDialog from "@/components/ConfirmDialog";
 import { formatEuro, formatDate, formatJH } from "@/utils/format";
 
 function BudgetBar({ label, value, total, color }) {
@@ -25,6 +30,11 @@ function BudgetBar({ label, value, total, color }) {
 
 export default function ProjectDetail() {
   const { id } = useParams();
+  const navigate = useNavigate();
+  const { user } = useAuth();
+  const canWrite = user?.role === "TENANT_ADMIN" || user?.role === "PMO_USER";
+  const isAdmin = user?.role === "TENANT_ADMIN";
+
   const [project, setProject] = useState(null);
   const [milestones, setMilestones] = useState([]);
   const [allocations, setAllocations] = useState([]);
@@ -32,7 +42,14 @@ export default function ProjectDetail() {
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  useEffect(() => {
+  // Modal state
+  const [editModalOpen, setEditModalOpen] = useState(false);
+  const [taskModalOpen, setTaskModalOpen] = useState(false);
+  const [selectedTask, setSelectedTask] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null); // {type: 'project'|'task', item}
+  const [deleting, setDeleting] = useState(false);
+
+  const fetchAll = useCallback(() => {
     Promise.all([
       projectsAPI.get(id),
       milestonesAPI.list(id),
@@ -48,6 +65,24 @@ export default function ProjectDetail() {
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [id]);
+
+  useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  const handleDelete = async () => {
+    if (!confirmDelete) return;
+    setDeleting(true);
+    try {
+      if (confirmDelete.type === "project") {
+        await projectsAPI.delete(confirmDelete.item.project_id);
+        navigate("/portfolio");
+      } else if (confirmDelete.type === "task") {
+        await tasksAPI.delete(confirmDelete.item.task_id);
+        setConfirmDelete(null);
+        fetchAll();
+      }
+    } catch { /* ignore */ }
+    finally { setDeleting(false); }
+  };
 
   if (loading) {
     return <div className="p-8 text-slate-400 text-sm">Chargement du projet...</div>;
@@ -102,12 +137,35 @@ export default function ProjectDetail() {
           <h1 className="font-heading text-3xl font-bold text-[#0F172A] leading-tight" data-testid="project-name">
             {project.name}
           </h1>
+          {project.description && (
+            <p className="text-sm text-slate-500 mt-1 max-w-2xl">{project.description}</p>
+          )}
           {project.source_tool && (
             <p className="text-xs text-slate-400 mt-1">
               Source : {project.source_tool} · Sync : {formatDate(project.last_sync_at)}
             </p>
           )}
         </div>
+        {canWrite && (
+          <div className="flex items-center gap-2 flex-shrink-0">
+            <button
+              onClick={() => setEditModalOpen(true)}
+              data-testid="btn-edit-project"
+              className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded text-sm text-slate-600 hover:bg-gray-50 hover:text-[#0052CC] transition-colors"
+            >
+              <Pencil size={13} /> Modifier
+            </button>
+            {isAdmin && (
+              <button
+                onClick={() => setConfirmDelete({ type: "project", item: project })}
+                data-testid="btn-delete-project"
+                className="flex items-center gap-1.5 px-3 py-2 border border-rose-200 rounded text-sm text-rose-600 hover:bg-rose-50 transition-colors"
+              >
+                <Trash2 size={13} /> Supprimer
+              </button>
+            )}
+          </div>
+        )}
       </div>
 
       {/* Alert banners */}
@@ -168,7 +226,6 @@ export default function ProjectDetail() {
                 <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold">
                   Décomposition du Projet ({tasks.length} tâches / features)
                 </div>
-
                 {/* Mini-RAG summary + coverage */}
                 {tasks.length > 0 && (() => {
                   const ragCounts = tasks.reduce(
@@ -210,6 +267,15 @@ export default function ProjectDetail() {
                   );
                 })()}
               </div>
+              {canWrite && (
+                <button
+                  onClick={() => { setSelectedTask(null); setTaskModalOpen(true); }}
+                  data-testid="btn-new-task"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0052CC] text-white text-xs font-semibold rounded hover:bg-[#0047B3] transition-colors flex-shrink-0"
+                >
+                  <Plus size={13} /> Nouvelle tâche
+                </button>
+              )}
             </div>
 
             {tasks.length === 0 ? (
@@ -232,6 +298,7 @@ export default function ProjectDetail() {
                       <th className="px-3 py-2.5 font-semibold text-slate-600 text-right">JH prévus</th>
                       <th className="px-3 py-2.5 font-semibold text-slate-600 text-right">JH landing</th>
                       <th className="px-3 py-2.5 font-semibold text-slate-600">Responsable</th>
+                      {canWrite && <th className="px-3 py-2.5 w-16"></th>}
                     </tr>
                   </thead>
                   <tbody>
@@ -363,6 +430,32 @@ export default function ProjectDetail() {
                           <td className="px-3 py-2.5">
                             <span className="text-slate-600 font-medium">{getResourceName(t.resource_id)}</span>
                           </td>
+
+                          {/* Actions */}
+                          {canWrite && (
+                            <td className="px-2 py-2.5">
+                              <div className="flex items-center gap-0.5">
+                                <button
+                                  onClick={() => { setSelectedTask(t); setTaskModalOpen(true); }}
+                                  data-testid={`btn-edit-task-${t.task_id}`}
+                                  className="p-1 text-slate-400 hover:text-[#0052CC] hover:bg-blue-50 rounded transition-colors"
+                                  title="Modifier"
+                                >
+                                  <Pencil size={12} />
+                                </button>
+                                {isAdmin && (
+                                  <button
+                                    onClick={() => setConfirmDelete({ type: "task", item: t })}
+                                    data-testid={`btn-delete-task-${t.task_id}`}
+                                    className="p-1 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors"
+                                    title="Supprimer"
+                                  >
+                                    <Trash2 size={12} />
+                                  </button>
+                                )}
+                              </div>
+                            </td>
+                          )}
                         </tr>
                       );
                     })}
@@ -371,7 +464,7 @@ export default function ProjectDetail() {
                   {/* Totals row */}
                   <tfoot>
                     <tr className="bg-[#0F172A] text-white" data-testid="tasks-totals-row">
-                      <td className="px-3 py-3 font-bold text-sm" colSpan={6}>
+                      <td className="px-3 py-3 font-bold text-sm" colSpan={canWrite ? 7 : 6}>
                         TOTAUX DÉCOMPOSITION ({tasks.length} éléments)
                       </td>
                       <td className="px-3 py-3 text-right font-mono-data font-bold text-sm">
@@ -404,7 +497,7 @@ export default function ProjectDetail() {
 
                     {/* Coherence check vs project-level */}
                     <tr className="bg-slate-50 border-t-2 border-[#0052CC]" data-testid="tasks-coherence-row">
-                      <td className="px-3 py-2.5 text-[10px] text-slate-500 font-semibold uppercase tracking-wide" colSpan={6}>
+                      <td className="px-3 py-2.5 text-[10px] text-slate-500 font-semibold uppercase tracking-wide" colSpan={canWrite ? 7 : 6}>
                         DONNÉES PROJET (référentiel)
                       </td>
                       <td className="px-3 py-2.5 text-right font-mono-data text-xs text-slate-600 font-bold">
@@ -569,6 +662,36 @@ export default function ProjectDetail() {
           </div>
         </div>
       </div>
+
+      {/* Modals */}
+      <ProjectModal
+        isOpen={editModalOpen}
+        onClose={() => setEditModalOpen(false)}
+        project={project}
+        resources={resources}
+        programs={[]}
+        onSaved={fetchAll}
+      />
+      <TaskModal
+        isOpen={taskModalOpen}
+        onClose={() => setTaskModalOpen(false)}
+        task={selectedTask}
+        projectId={id}
+        resources={resources}
+        onSaved={fetchAll}
+      />
+      <ConfirmDialog
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={handleDelete}
+        loading={deleting}
+        title={confirmDelete?.type === "project" ? "Supprimer le projet" : "Supprimer la tâche"}
+        message={
+          confirmDelete?.type === "project"
+            ? `Supprimer "${confirmDelete?.item?.name}" ? Toutes les tâches et jalons associés seront également supprimés.`
+            : `Supprimer la tâche "${confirmDelete?.item?.name}" ?`
+        }
+      />
     </div>
   );
 }

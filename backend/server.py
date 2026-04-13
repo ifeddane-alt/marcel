@@ -1,10 +1,13 @@
-from fastapi import FastAPI, APIRouter, HTTPException, Depends, Body
+from fastapi import FastAPI, APIRouter, HTTPException, Depends, Body, UploadFile, File, Form
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
+from fastapi.responses import StreamingResponse
 from dotenv import load_dotenv
 from starlette.middleware.cors import CORSMiddleware
 from motor.motor_asyncio import AsyncIOMotorClient
 import os
 import logging
+import csv
+import io
 from pathlib import Path
 from pydantic import BaseModel, Field, ConfigDict
 from typing import List, Optional, Any
@@ -80,6 +83,8 @@ class ProjectCreate(BaseModel):
     start_date: str
     end_date_baseline: str
     end_date_forecast: str
+    description: Optional[str] = None
+    owner_id: Optional[str] = None
     program_id: Optional[str] = None
     source_id: Optional[str] = None
     source_tool: Optional[str] = None
@@ -98,6 +103,8 @@ class ProjectUpdate(BaseModel):
     start_date: Optional[str] = None
     end_date_baseline: Optional[str] = None
     end_date_forecast: Optional[str] = None
+    description: Optional[str] = None
+    owner_id: Optional[str] = None
     program_id: Optional[str] = None
 
 
@@ -318,6 +325,24 @@ async def update_project(
     return updated
 
 
+@api_router.delete("/projects/{project_id}", status_code=204)
+async def delete_project(
+    project_id: str,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    if current_user.role != "TENANT_ADMIN":
+        raise HTTPException(status_code=403, detail="Réservé au TENANT_ADMIN")
+    # Cascade: delete tasks and milestones belonging to this project
+    await db.tasks.delete_many({"project_id": project_id, "tenant_id": current_user.tenant_id})
+    await db.milestones.delete_many({"project_id": project_id})
+    await db.allocations.delete_many({"project_id": project_id})
+    result = await db.projects.delete_one(
+        {"project_id": project_id, "tenant_id": current_user.tenant_id}
+    )
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Projet introuvable")
+
+
 # ---------- RESOURCES ----------
 
 @api_router.get("/resources")
@@ -326,6 +351,67 @@ async def list_resources(current_user: TokenPayload = Depends(get_current_user))
         {"tenant_id": current_user.tenant_id}, {"_id": 0}
     ).to_list(None)
     return resources
+
+
+class ResourceCreate(BaseModel):
+    name: str
+    role: str
+    team: Optional[str] = None
+    capacity_jh_month: float = 15
+    email: Optional[str] = None
+
+
+class ResourceUpdate(BaseModel):
+    name: Optional[str] = None
+    role: Optional[str] = None
+    team: Optional[str] = None
+    capacity_jh_month: Optional[float] = None
+    email: Optional[str] = None
+
+
+@api_router.post("/resources", status_code=201)
+async def create_resource(data: ResourceCreate, current_user: TokenPayload = Depends(get_current_user)):
+    require_write(current_user)
+    doc = {
+        "resource_id": str(uuid.uuid4()),
+        "tenant_id": current_user.tenant_id,
+        **data.model_dump(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.resources.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@api_router.put("/resources/{resource_id}")
+async def update_resource(
+    resource_id: str,
+    data: ResourceUpdate,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    require_write(current_user)
+    update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    result = await db.resources.update_one(
+        {"resource_id": resource_id, "tenant_id": current_user.tenant_id},
+        {"$set": update_data},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Ressource introuvable")
+    updated = await db.resources.find_one({"resource_id": resource_id}, {"_id": 0})
+    return updated
+
+
+@api_router.delete("/resources/{resource_id}", status_code=204)
+async def delete_resource(
+    resource_id: str,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    require_write(current_user)
+    result = await db.resources.delete_one(
+        {"resource_id": resource_id, "tenant_id": current_user.tenant_id}
+    )
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Ressource introuvable")
 
 
 # ---------- ALLOCATIONS ----------
@@ -685,6 +771,345 @@ async def dashboard_summary(current_user: TokenPayload = Depends(get_current_use
         "jh": {"planned": total_jh_planned, "consumed": total_jh_consumed},
         "methodology_counts": methodology_counts,
         "recent_projects": projects[:5],
+    }
+
+
+# ---------- IMPORT CSV ----------
+
+IMPORT_TEMPLATES = {
+    "projects": {
+        "fields": ["name", "methodology", "status_rag", "budget_total", "budget_consumed",
+                   "budget_forecast", "jh_planned", "jh_consumed", "start_date",
+                   "end_date_baseline", "end_date_forecast", "program_name", "source_id"],
+        "required": ["name", "methodology", "status_rag", "budget_total", "budget_forecast",
+                     "jh_planned", "start_date", "end_date_baseline", "end_date_forecast"],
+        "sample": [["Projet Alpha","waterfall","green","500000","200000","480000","1000","400",
+                    "2025-01-01","2025-12-31","2025-12-31","Mon Programme","PRJ-001"]],
+    },
+    "tasks": {
+        "fields": ["project_name", "name", "type", "status", "date_start_planned",
+                   "date_end_planned", "date_start_actual", "date_end_actual",
+                   "budget_planned_k", "budget_consumed_k", "jh_planned", "jh_consumed",
+                   "resource_name"],
+        "required": ["project_name", "name", "type"],
+        "sample": [["Projet Alpha","Cadrage stratégique","tâche","in_progress",
+                    "2025-01-01","2025-03-31","2025-01-15","","100","40","200","80","Alice Dupont"]],
+    },
+    "resources": {
+        "fields": ["name", "role", "capacity_jh_month", "team", "email"],
+        "required": ["name", "role"],
+        "sample": [["Alice Dupont","Chef de projet","15","Équipe Digital","alice@altair.fr"]],
+    },
+}
+
+FIELD_ALIASES: dict = {
+    "projects": {
+        "name": ["name", "nom", "projet", "project", "titre", "title"],
+        "methodology": ["methodology", "méthodologie", "methodo", "method", "methodologie"],
+        "status_rag": ["status_rag", "rag", "statut_rag", "statut", "status"],
+        "budget_total": ["budget_total", "budget", "montant_total", "cout_total", "cout"],
+        "budget_consumed": ["budget_consumed", "consomme", "depense", "budget_consomme"],
+        "budget_forecast": ["budget_forecast", "forecast", "eac", "estimation"],
+        "jh_planned": ["jh_planned", "jh_prevus", "charge_prevue", "jh", "hommes_jours"],
+        "jh_consumed": ["jh_consumed", "jh_consommes", "charge_reelle"],
+        "start_date": ["start_date", "date_debut", "debut", "date_start"],
+        "end_date_baseline": ["end_date_baseline", "date_fin_baseline", "fin_baseline", "baseline"],
+        "end_date_forecast": ["end_date_forecast", "date_fin", "fin_prevue", "fin"],
+        "program_name": ["program_name", "programme", "program"],
+        "source_id": ["source_id", "id", "reference", "ref", "identifiant"],
+    },
+    "tasks": {
+        "project_name": ["project_name", "projet", "project", "nom_projet"],
+        "name": ["name", "nom", "titre", "tache", "task"],
+        "type": ["type", "type_tache", "categorie"],
+        "status": ["status", "statut", "etat"],
+        "date_start_planned": ["date_start_planned", "debut_prevu", "date_debut"],
+        "date_end_planned": ["date_end_planned", "fin_prevue", "date_fin"],
+        "date_start_actual": ["date_start_actual", "debut_reel"],
+        "date_end_actual": ["date_end_actual", "fin_reelle"],
+        "budget_planned_k": ["budget_planned_k", "budget_prevu", "budget_k", "budget"],
+        "budget_consumed_k": ["budget_consumed_k", "budget_consomme", "consomme_k"],
+        "jh_planned": ["jh_planned", "jh_prevus", "jours_hommes"],
+        "jh_consumed": ["jh_consumed", "jh_consommes"],
+        "resource_name": ["resource_name", "responsable", "ressource", "owner"],
+    },
+    "resources": {
+        "name": ["name", "nom", "prenom_nom"],
+        "role": ["role", "poste", "fonction", "titre"],
+        "capacity_jh_month": ["capacity_jh_month", "capacite", "dispo", "jh_mois"],
+        "team": ["team", "equipe", "departement", "service"],
+        "email": ["email", "mail", "adresse_email"],
+    },
+}
+
+VALID_VALUES = {
+    "projects": {
+        "methodology": ["waterfall", "agile", "safe"],
+        "status_rag": ["green", "orange", "red"],
+    },
+    "tasks": {
+        "type": ["tâche", "feature", "epic", "user_story"],
+        "status": ["not_started", "in_progress", "completed", "delayed", "cancelled"],
+    },
+}
+
+
+def _auto_suggest_mapping(csv_cols: list, entity: str) -> dict:
+    aliases = FIELD_ALIASES.get(entity, {})
+    mapping: dict = {}
+    used_fields: set = set()
+    for col in csv_cols:
+        col_lower = col.lower().strip().replace(" ", "_").replace("-", "_")
+        for field, field_aliases in aliases.items():
+            if field in used_fields:
+                continue
+            if col_lower in field_aliases or col.lower() in field_aliases:
+                mapping[col] = field
+                used_fields.add(field)
+                break
+        else:
+            mapping[col] = ""  # unmapped
+    return mapping
+
+
+def _parse_csv_bytes(content: bytes) -> tuple[list, list]:
+    """Returns (headers, rows) from CSV bytes, handles encoding."""
+    for enc in ("utf-8-sig", "utf-8", "latin-1"):
+        try:
+            text = content.decode(enc)
+            break
+        except Exception:
+            continue
+    # Detect delimiter
+    sample = text[:2048]
+    delimiter = ";" if sample.count(";") > sample.count(",") else ","
+    reader = csv.reader(io.StringIO(text), delimiter=delimiter)
+    rows = list(reader)
+    if not rows:
+        return [], []
+    headers = [h.strip() for h in rows[0]]
+    data_rows = [[cell.strip() for cell in r] for r in rows[1:] if any(c.strip() for c in r)]
+    return headers, data_rows
+
+
+def _validate_row(row_dict: dict, entity: str, row_num: int) -> list:
+    errors = []
+    tpl = IMPORT_TEMPLATES.get(entity, {})
+    for req_field in tpl.get("required", []):
+        if not row_dict.get(req_field, "").strip():
+            errors.append({"row": row_num, "field": req_field, "message": f"Champ requis manquant : {req_field}"})
+    # Date validation
+    date_fields = ["start_date", "end_date_baseline", "end_date_forecast",
+                   "date_start_planned", "date_end_planned", "date_start_actual", "date_end_actual"]
+    for df in date_fields:
+        val = row_dict.get(df, "")
+        if val:
+            try:
+                datetime.strptime(val, "%Y-%m-%d")
+            except ValueError:
+                errors.append({"row": row_num, "field": df, "message": f"Format date invalide '{val}' (attendu AAAA-MM-JJ)"})
+    # Numeric validation
+    numeric_fields = ["budget_total", "budget_consumed", "budget_forecast",
+                      "jh_planned", "jh_consumed", "budget_planned_k", "budget_consumed_k", "capacity_jh_month"]
+    for nf in numeric_fields:
+        val = row_dict.get(nf, "")
+        if val:
+            try:
+                float(val.replace(",", "."))
+            except ValueError:
+                errors.append({"row": row_num, "field": nf, "message": f"Valeur non numérique '{val}'"})
+    # Enum validation
+    for field, allowed in VALID_VALUES.get(entity, {}).items():
+        val = row_dict.get(field, "")
+        if val and val not in allowed:
+            errors.append({"row": row_num, "field": field,
+                           "message": f"Valeur invalide '{val}' (attendu : {', '.join(allowed)})"})
+    return errors
+
+
+@api_router.get("/import/template/{entity}")
+async def download_template(entity: str, current_user: TokenPayload = Depends(get_current_user)):
+    if entity not in IMPORT_TEMPLATES:
+        raise HTTPException(status_code=400, detail=f"Entité inconnue : {entity}")
+    tpl = IMPORT_TEMPLATES[entity]
+    output = io.StringIO()
+    writer = csv.writer(output, delimiter=";")
+    writer.writerow(tpl["fields"])
+    for sample_row in tpl["sample"]:
+        writer.writerow(sample_row)
+    output.seek(0)
+    return StreamingResponse(
+        iter([output.getvalue().encode("utf-8-sig")]),
+        media_type="text/csv",
+        headers={"Content-Disposition": f"attachment; filename=template_{entity}.csv"},
+    )
+
+
+@api_router.post("/import/preview")
+async def import_preview(
+    file: UploadFile = File(...),
+    entity: str = Form(...),
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    require_write(current_user)
+    if entity not in IMPORT_TEMPLATES:
+        raise HTTPException(status_code=400, detail=f"Entité inconnue : {entity}")
+    content = await file.read()
+    headers, rows = _parse_csv_bytes(content)
+    if not headers:
+        raise HTTPException(status_code=422, detail="Fichier CSV vide ou illisible")
+    suggested_mapping = _auto_suggest_mapping(headers, entity)
+    preview = []
+    for i, row in enumerate(rows[:5]):
+        row_dict = dict(zip(headers, row + [""] * max(0, len(headers) - len(row))))
+        preview.append({"row_num": i + 1, "data": row_dict})
+    return {
+        "entity": entity,
+        "columns": headers,
+        "suggested_mapping": suggested_mapping,
+        "entity_fields": IMPORT_TEMPLATES[entity]["fields"],
+        "required_fields": IMPORT_TEMPLATES[entity]["required"],
+        "preview_rows": preview,
+        "total_rows": len(rows),
+    }
+
+
+@api_router.post("/import/commit")
+async def import_commit(
+    file: UploadFile = File(...),
+    entity: str = Form(...),
+    mapping: str = Form(...),  # JSON string: {csv_col: entity_field}
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    require_write(current_user)
+    import json as _json
+    if entity not in IMPORT_TEMPLATES:
+        raise HTTPException(status_code=400, detail=f"Entité inconnue : {entity}")
+    try:
+        col_mapping: dict = _json.loads(mapping)
+    except Exception:
+        raise HTTPException(status_code=422, detail="Mapping JSON invalide")
+
+    content = await file.read()
+    headers, rows = _parse_csv_bytes(content)
+    if not headers:
+        raise HTTPException(status_code=422, detail="Fichier CSV vide ou illisible")
+
+    created = 0
+    skipped = 0
+    errors = []
+
+    # Pre-load lookups
+    projects_lookup: dict = {}
+    resources_lookup: dict = {}
+    if entity == "tasks":
+        projs = await db.projects.find(
+            {"tenant_id": current_user.tenant_id}, {"_id": 0, "project_id": 1, "name": 1}
+        ).to_list(None)
+        projects_lookup = {p["name"]: p["project_id"] for p in projs}
+    if entity in ("tasks",):
+        ress = await db.resources.find(
+            {"tenant_id": current_user.tenant_id}, {"_id": 0, "resource_id": 1, "name": 1}
+        ).to_list(None)
+        resources_lookup = {r["name"]: r["resource_id"] for r in ress}
+    programs_lookup: dict = {}
+    if entity == "projects":
+        progs = await db.programs.find(
+            {"tenant_id": current_user.tenant_id}, {"_id": 0, "program_id": 1, "name": 1}
+        ).to_list(None)
+        programs_lookup = {p["name"]: p["program_id"] for p in progs}
+
+    for row_num, row in enumerate(rows, start=1):
+        raw = dict(zip(headers, row + [""] * max(0, len(headers) - len(row))))
+        # Apply mapping
+        mapped: dict = {}
+        for csv_col, entity_field in col_mapping.items():
+            if entity_field and entity_field.strip():
+                mapped[entity_field] = raw.get(csv_col, "").strip()
+
+        row_errors = _validate_row(mapped, entity, row_num)
+        if row_errors:
+            errors.extend(row_errors)
+            skipped += 1
+            continue
+
+        try:
+            if entity == "projects":
+                program_id = programs_lookup.get(mapped.get("program_name", ""))
+                doc = {
+                    "project_id": str(uuid.uuid4()),
+                    "tenant_id": current_user.tenant_id,
+                    "name": mapped["name"],
+                    "methodology": mapped["methodology"],
+                    "status_rag": mapped["status_rag"],
+                    "budget_total": float(mapped["budget_total"].replace(",", ".")),
+                    "budget_consumed": float(mapped.get("budget_consumed", "0").replace(",", ".") or "0"),
+                    "budget_forecast": float(mapped["budget_forecast"].replace(",", ".")),
+                    "jh_planned": float(mapped["jh_planned"].replace(",", ".")),
+                    "jh_consumed": float(mapped.get("jh_consumed", "0").replace(",", ".") or "0"),
+                    "start_date": mapped["start_date"],
+                    "end_date_baseline": mapped["end_date_baseline"],
+                    "end_date_forecast": mapped["end_date_forecast"],
+                    "source_id": mapped.get("source_id") or None,
+                    "program_id": program_id,
+                    "metadata": {},
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                }
+                await db.projects.insert_one(doc)
+
+            elif entity == "tasks":
+                project_id = projects_lookup.get(mapped.get("project_name", ""))
+                if not project_id:
+                    errors.append({"row": row_num, "field": "project_name",
+                                   "message": f"Projet introuvable : '{mapped.get('project_name')}'"})
+                    skipped += 1
+                    continue
+                resource_id = resources_lookup.get(mapped.get("resource_name", ""))
+                doc = {
+                    "task_id": str(uuid.uuid4()),
+                    "tenant_id": current_user.tenant_id,
+                    "project_id": project_id,
+                    "name": mapped["name"],
+                    "type": mapped.get("type", "tâche"),
+                    "status": mapped.get("status", "not_started"),
+                    "date_start_planned": mapped.get("date_start_planned") or None,
+                    "date_end_planned": mapped.get("date_end_planned") or None,
+                    "date_start_actual": mapped.get("date_start_actual") or None,
+                    "date_end_actual": mapped.get("date_end_actual") or None,
+                    "budget_planned_k": float(mapped.get("budget_planned_k", "0").replace(",", ".") or "0"),
+                    "budget_consumed_k": float(mapped.get("budget_consumed_k", "0").replace(",", ".") or "0"),
+                    "jh_planned": float(mapped.get("jh_planned", "0").replace(",", ".") or "0"),
+                    "jh_consumed": float(mapped.get("jh_consumed", "0").replace(",", ".") or "0"),
+                    "resource_id": resource_id,
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                }
+                await db.tasks.insert_one(doc)
+
+            elif entity == "resources":
+                doc = {
+                    "resource_id": str(uuid.uuid4()),
+                    "tenant_id": current_user.tenant_id,
+                    "name": mapped["name"],
+                    "role": mapped.get("role", ""),
+                    "capacity_jh_month": float(mapped.get("capacity_jh_month", "15").replace(",", ".") or "15"),
+                    "team": mapped.get("team", ""),
+                    "email": mapped.get("email", ""),
+                    "created_at": datetime.now(timezone.utc).isoformat(),
+                }
+                await db.resources.insert_one(doc)
+
+            doc.pop("_id", None)
+            created += 1
+        except Exception as e:
+            errors.append({"row": row_num, "field": "—", "message": str(e)})
+            skipped += 1
+
+    return {
+        "entity": entity,
+        "total_rows": len(rows),
+        "created": created,
+        "skipped": skipped,
+        "errors": errors[:50],  # cap to 50 errors in response
     }
 
 
