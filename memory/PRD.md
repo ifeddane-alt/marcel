@@ -28,7 +28,19 @@ Tenant démo : **Groupe Altair Industries**
 | milestones | milestone_id, project_id, name, date_baseline, date_forecast, status, is_governance |
 | governance | governance_id, tenant_id, name, type, date_scheduled, projects_scope, sanity_check_* |
 
-## Ce qui est implémenté (v1.2 — 03/02/2026)
+### Chantier 3 — CRUD complet depuis UI (COMPLET — v1.3)
+- [x] Bouton "+ Nouveau projet" Portfolio (ADMIN + PMO) · modal création avec tous champs
+- [x] Clic ligne Portfolio → modal édition pré-rempli · bouton Supprimer avec confirmation (ADMIN)
+- [x] Bouton "Modifier" + "Supprimer" sur Détail Projet (rôles respectés)
+- [x] Bouton "+ Nouvelle tâche" sur Détail Projet · clic ligne tâche → édition · suppression (ADMIN)
+- [x] Bouton "+ Nouvelle ressource" sur page Ressources · édition · suppression (ADMIN)
+- [x] Bouton "+ Nouveau programme" sur page Programmes · édition · suppression (ADMIN)
+- [x] Backend : DELETE /api/projects (cascade tasks+milestones), POST/PUT/DELETE /api/resources
+- [x] Composants : Modal, ProjectModal, TaskModal, ResourceModal, ProgramModal, ConfirmDialog
+- [x] READ_ONLY : 0 bouton d'action · PMO : create/edit sans delete · ADMIN : CRUD complet
+- [x] Tests 100% — 22/22 (iteration_6.json)
+
+
 
 ### Chantier 1 — Tâches (COMPLET)
 - [x] GET/POST/PUT/DELETE /api/tasks — isolation tenant, READ_ONLY bloqué
@@ -93,7 +105,7 @@ Tenant démo : **Groupe Altair Industries**
 - Backend : 16/16 tests passés (100%)
 - Frontend : 90% — tous les flows principaux vérifiés
 
-## Backlog prioritaire
+## Ce qui est implémenté (v1.3 — 03/02/2026)
 
 ### P0 — En cours
 - [ ] **Chantier 2** — Import CSV (upload, mapping, preview, validation, commit)
