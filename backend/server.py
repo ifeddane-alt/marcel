@@ -1311,6 +1311,128 @@ async def dashboard_top_risks(current_user: TokenPayload = Depends(get_current_u
     ]
 
 
+@api_router.get("/dashboard/heatmap-risks")
+async def dashboard_heatmap_risks(current_user: TokenPayload = Depends(get_current_user)):
+    risks = await db.risks.find(
+        {"tenant_id": current_user.tenant_id}, {"_id": 0}
+    ).sort("criticality", -1).to_list(None)
+    if not risks:
+        return []
+    project_ids = list({r["project_id"] for r in risks})
+    projects = await db.projects.find(
+        {"project_id": {"$in": project_ids}}, {"_id": 0, "project_id": 1, "name": 1, "program_id": 1}
+    ).to_list(None)
+    project_map = {p["project_id"]: {"name": p["name"], "program_id": p.get("program_id")} for p in projects}
+    program_ids = list({p.get("program_id") for p in projects if p.get("program_id")})
+    program_map: dict = {}
+    if program_ids:
+        progs = await db.programs.find(
+            {"program_id": {"$in": program_ids}}, {"_id": 0, "program_id": 1, "name": 1}
+        ).to_list(None)
+        program_map = {p["program_id"]: p["name"] for p in progs}
+    return [
+        {
+            **r,
+            "project_name": project_map.get(r["project_id"], {}).get("name", "—"),
+            "program_id": project_map.get(r["project_id"], {}).get("program_id"),
+            "program_name": program_map.get(
+                project_map.get(r["project_id"], {}).get("program_id") or ""
+            ) or "—",
+        }
+        for r in risks
+    ]
+
+
+# ---------- DECISIONS ----------
+
+class DecisionCreate(BaseModel):
+    project_id: str
+    title: str
+    description: Optional[str] = None
+    category: str  # stratégique | périmètre | planning | budgétaire | technique | ressources | conformité | gouvernance
+    status: str = "proposée"  # proposée | prise | en_cours | appliquée | reportée | annulée
+    decision_date: Optional[str] = None
+    due_date: Optional[str] = None
+    owner: Optional[str] = None
+    impact: Optional[str] = None
+    governance_id: Optional[str] = None
+
+
+class DecisionUpdate(BaseModel):
+    title: Optional[str] = None
+    description: Optional[str] = None
+    category: Optional[str] = None
+    status: Optional[str] = None
+    decision_date: Optional[str] = None
+    due_date: Optional[str] = None
+    owner: Optional[str] = None
+    impact: Optional[str] = None
+    governance_id: Optional[str] = None
+
+
+@api_router.get("/decisions")
+async def list_decisions(
+    project_id: Optional[str] = None,
+    governance_id: Optional[str] = None,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    query: dict = {"tenant_id": current_user.tenant_id}
+    if project_id:
+        query["project_id"] = project_id
+    if governance_id:
+        query["governance_id"] = governance_id
+    decisions = await db.decisions.find(query, {"_id": 0}).sort("created_at", -1).to_list(None)
+    return decisions
+
+
+@api_router.post("/decisions", status_code=201)
+async def create_decision(data: DecisionCreate, current_user: TokenPayload = Depends(get_current_user)):
+    require_write(current_user)
+    project = await db.projects.find_one(
+        {"project_id": data.project_id, "tenant_id": current_user.tenant_id}, {"_id": 0, "project_id": 1}
+    )
+    if not project:
+        raise HTTPException(status_code=404, detail="Projet introuvable")
+    doc = {
+        "decision_id": str(uuid.uuid4()),
+        "tenant_id": current_user.tenant_id,
+        **data.model_dump(),
+        "created_at": datetime.now(timezone.utc).isoformat(),
+    }
+    await db.decisions.insert_one(doc)
+    doc.pop("_id", None)
+    return doc
+
+
+@api_router.put("/decisions/{decision_id}")
+async def update_decision(
+    decision_id: str,
+    data: DecisionUpdate,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    require_write(current_user)
+    update_data = data.model_dump(exclude_unset=True)
+    if not update_data:
+        raise HTTPException(status_code=422, detail="Aucun champ à mettre à jour")
+    result = await db.decisions.update_one(
+        {"decision_id": decision_id, "tenant_id": current_user.tenant_id},
+        {"$set": update_data},
+    )
+    if result.matched_count == 0:
+        raise HTTPException(status_code=404, detail="Décision introuvable")
+    updated = await db.decisions.find_one({"decision_id": decision_id}, {"_id": 0})
+    return updated
+
+
+@api_router.delete("/decisions/{decision_id}", status_code=204)
+async def delete_decision(decision_id: str, current_user: TokenPayload = Depends(get_current_user)):
+    if current_user.role != "TENANT_ADMIN":
+        raise HTTPException(status_code=403, detail="Réservé au TENANT_ADMIN")
+    result = await db.decisions.delete_one({"decision_id": decision_id, "tenant_id": current_user.tenant_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Décision introuvable")
+
+
 # ---------- App setup ----------
 
 app.include_router(api_router)

@@ -2,15 +2,16 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Calendar, ChevronRight, Flag, AlertTriangle, Clock, TrendingUp,
-  Pencil, Trash2, Plus, History, ShieldAlert,
+  Pencil, Trash2, Plus, History, ShieldAlert, ClipboardList,
 } from "lucide-react";
-import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI } from "@/api";
+import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI, decisionsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import RAGBadge, { MethodologyBadge, MilestoneBadge, TaskTypeBadge, TaskStatusBadge, ProjectStatusBadge } from "@/components/RAGBadge";
 import ProjectModal from "@/components/ProjectModal";
 import TaskModal from "@/components/TaskModal";
 import BudgetRevisionModal from "@/components/BudgetRevisionModal";
 import RiskModal from "@/components/RiskModal";
+import DecisionModal from "@/components/DecisionModal";
 import RiskHeatmap from "@/components/RiskHeatmap";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { formatEuro, formatDate, formatJH } from "@/utils/format";
@@ -45,6 +46,7 @@ export default function ProjectDetail() {
   const [allocations, setAllocations] = useState([]);
   const [tasks, setTasks] = useState([]);
   const [risks, setRisks] = useState([]);
+  const [decisions, setDecisions] = useState([]);
   const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
 
@@ -53,9 +55,11 @@ export default function ProjectDetail() {
   const [taskModalOpen, setTaskModalOpen] = useState(false);
   const [budgetRevisionOpen, setBudgetRevisionOpen] = useState(false);
   const [riskModalOpen, setRiskModalOpen] = useState(false);
+  const [decisionModalOpen, setDecisionModalOpen] = useState(false);
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectedRisk, setSelectedRisk] = useState(null);
-  const [confirmDelete, setConfirmDelete] = useState(null); // {type: 'project'|'task'|'risk', item}
+  const [selectedDecision, setSelectedDecision] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null); // {type: 'project'|'task'|'risk'|'decision', item}
   const [deleting, setDeleting] = useState(false);
 
   const fetchAll = useCallback(() => {
@@ -66,13 +70,15 @@ export default function ProjectDetail() {
       tasksAPI.list(id),
       resourcesAPI.list(),
       risksAPI.list(id),
-    ]).then(([pRes, mRes, aRes, tRes, rRes, rkRes]) => {
+      decisionsAPI.list(id),
+    ]).then(([pRes, mRes, aRes, tRes, rRes, rkRes, dRes]) => {
       setProject(pRes.data);
       setMilestones(mRes.data);
       setAllocations(aRes.data);
       setTasks(tRes.data);
       setResources(rRes.data);
       setRisks(rkRes.data);
+      setDecisions(dRes.data);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [id]);
@@ -92,6 +98,10 @@ export default function ProjectDetail() {
         fetchAll();
       } else if (confirmDelete.type === "risk") {
         await risksAPI.delete(confirmDelete.item.risk_id);
+        setConfirmDelete(null);
+        fetchAll();
+      } else if (confirmDelete.type === "decision") {
+        await decisionsAPI.delete(confirmDelete.item.decision_id);
         setConfirmDelete(null);
         fetchAll();
       }
@@ -820,6 +830,104 @@ export default function ProjectDetail() {
             )}
           </div>
 
+          {/* Registre des décisions */}
+          {(() => {
+            const DECISION_STATUS_COLORS = {
+              proposée:  "bg-sky-100 text-sky-700 border-sky-200",
+              prise:     "bg-indigo-100 text-indigo-700 border-indigo-200",
+              en_cours:  "bg-amber-100 text-amber-700 border-amber-200",
+              appliquée: "bg-emerald-100 text-emerald-700 border-emerald-200",
+              reportée:  "bg-slate-100 text-slate-600 border-slate-200",
+              annulée:   "bg-rose-100 text-rose-700 border-rose-200",
+            };
+            const DECISION_CATEGORY_COLORS = {
+              stratégique: "text-violet-700", périmètre: "text-sky-700",
+              planning: "text-orange-700", budgétaire: "text-emerald-700",
+              technique: "text-blue-700", ressources: "text-indigo-700",
+              conformité: "text-teal-700", gouvernance: "text-slate-600",
+            };
+            return (
+              <div className="bg-white border border-gray-200 rounded shadow-sm" data-testid="decisions-section">
+                <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+                  <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-500 font-semibold">
+                    <ClipboardList size={13} className="text-[#0052CC]" />
+                    Registre des décisions ({decisions.length})
+                  </div>
+                  {canWrite && (
+                    <button
+                      onClick={() => { setSelectedDecision(null); setDecisionModalOpen(true); }}
+                      data-testid="btn-new-decision"
+                      className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0052CC] text-white text-xs font-semibold rounded hover:bg-[#0047B3] transition-colors"
+                    >
+                      <Plus size={12} /> Nouvelle décision
+                    </button>
+                  )}
+                </div>
+
+                {decisions.length === 0 ? (
+                  <div className="px-5 py-8 text-center text-sm text-slate-400">
+                    Aucune décision enregistrée pour ce projet.
+                  </div>
+                ) : (
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-sm" data-testid="decisions-table">
+                      <thead>
+                        <tr className="bg-gray-50 text-left">
+                          {["Date", "Décision", "Catégorie", "Statut", "Responsable", "Échéance", ""].map((h) => (
+                            <th key={h} className="px-3 py-2 text-xs font-semibold text-slate-500 border-b border-gray-200 whitespace-nowrap">{h}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {decisions.map((d) => (
+                          <tr
+                            key={d.decision_id}
+                            className="border-b border-gray-50 hover:bg-gray-50/60 transition-colors cursor-pointer"
+                            onClick={() => { if (canWrite) { setSelectedDecision(d); setDecisionModalOpen(true); } }}
+                            data-testid={`decision-row-${d.decision_id}`}
+                          >
+                            <td className="px-3 py-2.5 font-mono-data text-xs text-slate-500 whitespace-nowrap">
+                              {d.decision_date ? formatDate(d.decision_date) : "—"}
+                            </td>
+                            <td className="px-3 py-2.5 max-w-xs">
+                              <div className="font-medium text-xs text-slate-800 leading-snug line-clamp-2">{d.title}</div>
+                              {d.impact && <div className="text-[10px] text-slate-400 mt-0.5 line-clamp-1">{d.impact}</div>}
+                            </td>
+                            <td className="px-3 py-2.5">
+                              <span className={`text-xs font-semibold capitalize ${DECISION_CATEGORY_COLORS[d.category] || "text-slate-500"}`}>
+                                {d.category}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2.5">
+                              <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold border ${DECISION_STATUS_COLORS[d.status] || "bg-gray-100 text-gray-700"}`}>
+                                {d.status}
+                              </span>
+                            </td>
+                            <td className="px-3 py-2.5 text-xs text-slate-500">{d.owner || "—"}</td>
+                            <td className="px-3 py-2.5 text-xs text-slate-500 whitespace-nowrap">
+                              {d.due_date ? formatDate(d.due_date) : "—"}
+                            </td>
+                            <td className="px-3 py-2.5">
+                              {isAdmin && (
+                                <button
+                                  onClick={(e) => { e.stopPropagation(); setConfirmDelete({ type: "decision", item: d }); }}
+                                  data-testid={`btn-delete-decision-${d.decision_id}`}
+                                  className="text-slate-300 hover:text-rose-500 transition-colors"
+                                >
+                                  <Trash2 size={13} />
+                                </button>
+                              )}
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            );
+          })()}
+
           {/* Allocations */}
           {allocations.length > 0 && (
             <div className="bg-white border border-gray-200 rounded shadow-sm" data-testid="allocations-section">
@@ -941,6 +1049,13 @@ export default function ProjectDetail() {
         projectId={id}
         onSaved={fetchAll}
       />
+      <DecisionModal
+        isOpen={decisionModalOpen}
+        onClose={() => setDecisionModalOpen(false)}
+        decision={selectedDecision}
+        projectId={id}
+        onSaved={fetchAll}
+      />
       <BudgetRevisionModal
         isOpen={budgetRevisionOpen}
         onClose={() => setBudgetRevisionOpen(false)}
@@ -955,14 +1070,17 @@ export default function ProjectDetail() {
         title={
           confirmDelete?.type === "project" ? "Supprimer le projet"
           : confirmDelete?.type === "task" ? "Supprimer la tâche"
-          : "Supprimer le risque"
+          : confirmDelete?.type === "risk" ? "Supprimer le risque"
+          : "Supprimer la décision"
         }
         message={
           confirmDelete?.type === "project"
             ? `Supprimer "${confirmDelete?.item?.name}" ? Toutes les tâches et jalons associés seront également supprimés.`
             : confirmDelete?.type === "task"
             ? `Supprimer la tâche "${confirmDelete?.item?.name}" ?`
-            : `Supprimer le risque "${confirmDelete?.item?.title}" ?`
+            : confirmDelete?.type === "risk"
+            ? `Supprimer le risque "${confirmDelete?.item?.title}" ?`
+            : `Supprimer la décision "${confirmDelete?.item?.title}" ?`
         }
       />
     </div>

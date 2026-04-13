@@ -5,10 +5,11 @@ import {
   Tooltip, ResponsiveContainer, Legend,
 } from "recharts";
 import {
-  Briefcase, TrendingUp, AlertTriangle, CheckCircle, ArrowRight, ShieldAlert,
+  Briefcase, TrendingUp, AlertTriangle, CheckCircle, ArrowRight, ShieldAlert, MapPin,
 } from "lucide-react";
-import { dashboardAPI } from "@/api";
+import { dashboardAPI, programsAPI, projectsAPI } from "@/api";
 import RAGBadge from "@/components/RAGBadge";
+import RiskHeatmap from "@/components/RiskHeatmap";
 import { formatEuro, formatDate } from "@/utils/format";
 
 const RAG_COLORS = { green: "#10B981", orange: "#F59E0B", red: "#EF4444" };
@@ -52,13 +53,26 @@ function CustomTooltip({ active, payload, label }) {
 export default function Dashboard() {
   const [summary, setSummary] = useState(null);
   const [topRisks, setTopRisks] = useState([]);
+  const [heatmapRisks, setHeatmapRisks] = useState([]);
+  const [programs, setPrograms] = useState([]);
+  const [allProjects, setAllProjects] = useState([]);
+  const [heatmapFilterProgram, setHeatmapFilterProgram] = useState("");
+  const [heatmapFilterProject, setHeatmapFilterProject] = useState("");
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    Promise.all([dashboardAPI.summary(), dashboardAPI.topRisks()])
-      .then(([sRes, rRes]) => {
+    Promise.all([
+      dashboardAPI.summary(),
+      dashboardAPI.topRisks(),
+      dashboardAPI.heatmapRisks(),
+      programsAPI.list(),
+      projectsAPI.list(),
+    ]).then(([sRes, rRes, hrRes, pRes, projRes]) => {
         setSummary(sRes.data);
         setTopRisks(rRes.data);
+        setHeatmapRisks(hrRes.data);
+        setPrograms(pRes.data);
+        setAllProjects(projRes.data);
         setLoading(false);
       }).catch(() => setLoading(false));
   }, []);
@@ -289,7 +303,7 @@ export default function Dashboard() {
 
       {/* Top 10 risques critiques portefeuille */}
       {topRisks.length > 0 && (
-        <div className="bg-white border border-gray-200 rounded shadow-sm" data-testid="top-risks-widget">
+        <div className="bg-white border border-gray-200 rounded shadow-sm mb-6" data-testid="top-risks-widget">
           <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
             <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-500 font-semibold">
               <ShieldAlert size={13} className="text-rose-400" />
@@ -361,6 +375,125 @@ export default function Dashboard() {
               </tbody>
             </table>
           </div>
+        </div>
+      )}
+
+      {/* Cartographie des risques P × I — portefeuille */}
+      {heatmapRisks.length > 0 && (
+        <div className="bg-white border border-gray-200 rounded shadow-sm" data-testid="dashboard-heatmap-section">
+          <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 border-b border-gray-100">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-500 font-semibold">
+              <MapPin size={13} className="text-rose-400" />
+              Cartographie des risques P × I
+            </div>
+            <div className="flex flex-wrap items-center gap-2">
+              <select
+                value={heatmapFilterProgram}
+                onChange={(e) => { setHeatmapFilterProgram(e.target.value); setHeatmapFilterProject(""); }}
+                className="text-xs border border-gray-200 rounded px-2.5 py-1.5 text-slate-600 focus:outline-none focus:border-[#0052CC] bg-white"
+                data-testid="heatmap-filter-programme"
+              >
+                <option value="">Tous programmes</option>
+                {programs.map((p) => (
+                  <option key={p.program_id} value={p.program_id}>{p.name}</option>
+                ))}
+              </select>
+              <select
+                value={heatmapFilterProject}
+                onChange={(e) => setHeatmapFilterProject(e.target.value)}
+                className="text-xs border border-gray-200 rounded px-2.5 py-1.5 text-slate-600 focus:outline-none focus:border-[#0052CC] bg-white"
+                data-testid="heatmap-filter-project"
+              >
+                <option value="">Tous projets</option>
+                {allProjects
+                  .filter((p) => !heatmapFilterProgram || p.program_id === heatmapFilterProgram)
+                  .map((p) => (
+                    <option key={p.project_id} value={p.project_id}>
+                      {p.name.split("—")[0].trim().slice(0, 45)}
+                    </option>
+                  ))}
+              </select>
+              {(heatmapFilterProgram || heatmapFilterProject) && (
+                <button
+                  onClick={() => { setHeatmapFilterProgram(""); setHeatmapFilterProject(""); }}
+                  className="text-xs text-slate-400 hover:text-slate-700 px-2 py-1 border border-gray-200 rounded"
+                  data-testid="heatmap-filter-reset"
+                >
+                  Réinitialiser
+                </button>
+              )}
+            </div>
+          </div>
+
+          {(() => {
+            const filtered = heatmapRisks.filter((r) => {
+              if (heatmapFilterProject) return r.project_id === heatmapFilterProject;
+              if (heatmapFilterProgram) return r.program_id === heatmapFilterProgram;
+              return true;
+            });
+            const critical = filtered.filter((r) => r.criticality >= 16);
+            const moderate = filtered.filter((r) => r.criticality >= 7 && r.criticality < 16);
+            const low = filtered.filter((r) => r.criticality < 7);
+            return (
+              <div className="p-5 grid grid-cols-12 gap-6">
+                <div className="col-span-12 lg:col-span-5" data-testid="dashboard-heatmap">
+                  <RiskHeatmap risks={filtered} showProjectName={!heatmapFilterProject} />
+                </div>
+                <div className="col-span-12 lg:col-span-7">
+                  <div className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-3">
+                    Distribution criticité — {filtered.length} risque{filtered.length !== 1 ? "s" : ""}
+                    {(heatmapFilterProgram || heatmapFilterProject) && (
+                      <span className="ml-2 text-[#0052CC] normal-case font-normal">
+                        (filtre actif)
+                      </span>
+                    )}
+                  </div>
+                  {[
+                    { label: "Élevés (16-25)", count: critical.length, color: "bg-rose-500", textColor: "text-rose-700" },
+                    { label: "Modérés (7-15)", count: moderate.length, color: "bg-amber-400", textColor: "text-amber-700" },
+                    { label: "Faibles (1-6)",  count: low.length,      color: "bg-emerald-500", textColor: "text-emerald-700" },
+                  ].map(({ label, count, color, textColor }) => {
+                    const pct = filtered.length ? Math.round((count / filtered.length) * 100) : 0;
+                    return (
+                      <div key={label} className="mb-3">
+                        <div className="flex justify-between text-xs mb-1">
+                          <span className={`font-semibold ${textColor}`}>{label}</span>
+                          <span className="font-mono-data text-slate-700">{count} ({pct}%)</span>
+                        </div>
+                        <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                          <div className={`h-full ${color} rounded-full transition-all duration-700`} style={{ width: `${pct}%` }} />
+                        </div>
+                      </div>
+                    );
+                  })}
+
+                  {critical.length > 0 && (
+                    <div className="mt-4 pt-3 border-t border-gray-100">
+                      <div className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-2">
+                        Risques critiques (top 3)
+                      </div>
+                      {critical.slice(0, 3).map((r) => (
+                        <div key={r.risk_id} className="flex items-start gap-2 py-1.5 border-b border-gray-50 last:border-0">
+                          <span className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200 flex-shrink-0">
+                            {r.criticality}
+                          </span>
+                          <div className="min-w-0">
+                            <div className="text-xs text-slate-700 font-medium line-clamp-1">{r.title}</div>
+                            <Link
+                              to={`/projects/${r.project_id}`}
+                              className="text-[10px] text-[#0052CC] hover:underline"
+                            >
+                              {r.project_name}
+                            </Link>
+                          </div>
+                        </div>
+                      ))}
+                    </div>
+                  )}
+                </div>
+              </div>
+            );
+          })()}
         </div>
       )}
     </div>

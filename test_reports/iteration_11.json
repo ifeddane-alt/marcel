@@ -1,0 +1,46 @@
+{
+  "summary": "Full testing of Chantier 8 (Decisions CRUD) and Dashboard Heatmap. All 15 backend tests pass (100%). All UI flows verified: heatmap visible on dashboard, decisions CRUD in ProjectDetail and Governance, viewer read-only, filters working.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_chantier8_decisions.py",
+    "/app/test_reports/pytest/chantier8_decisions.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": ["/app/backend/tests/test_chantier8_decisions.py"],
+  "success_rate": {"backend": "100% (15/15)", "frontend": "100%"},
+  "test_credentials": {
+    "admin": "admin@altair.fr / Admin1234! (TENANT_ADMIN)",
+    "pmo": "pmo@altair.fr / Pmo1234! (PMO_USER)",
+    "viewer": "viewer@altair.fr / View1234! (READ_ONLY)"
+  },
+  "seed_data_creation": "TEST_UI_Decision created and deleted during testing. 32 seeded decisions verified.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Chantier 8 fully validated. Decisions API: GET returns 32 seeded decisions, POST/PUT/DELETE CRUD works, PMO cannot delete (403), viewer cannot create (403). Dashboard heatmap: GET /api/dashboard/heatmap-risks returns flat list of risks with project_name/program_name enrichment (frontend aggregates to 5x5). UI: Dashboard heatmap section + filters visible (needs scroll), ProjectDetail 'Registre des décisions' with Nouvelle décision modal (all 8 categories, 6 statuses), Governance global table with 3 filters (statut/catégorie/projet) + Nouvelle décision button, viewer sees no buttons. Test data cleaned up.",
+  "test_results": {
+    "heatmap_api_200": "PASS",
+    "heatmap_risk_fields": "PASS - probability, impact, project_name, program_name present",
+    "decisions_list_32": "PASS - 32 seeded decisions",
+    "decisions_create": "PASS - 201",
+    "decisions_update": "PASS - 200",
+    "decisions_delete_admin": "PASS - 204",
+    "decisions_pmo_no_delete": "PASS - 403",
+    "decisions_viewer_no_create": "PASS - 403",
+    "dashboard_heatmap_ui": "PASS - section visible with distribution bars",
+    "dashboard_heatmap_filters": "PASS - 2 selects (programmes/projets) present",
+    "project_detail_decisions_section": "PASS - Registre des décisions visible",
+    "project_detail_new_decision_modal": "PASS - modal opens, submits, closes",
+    "governance_global_table": "PASS - 33 rows (32+1), 3 filter selects, Nouvelle décision button",
+    "governance_filters": "PASS - status filter reduces rows (33→6 for 'prise'), reset works",
+    "viewer_read_only": "PASS - no Nouvelle décision button in ProjectDetail or Governance"
+  }
+}

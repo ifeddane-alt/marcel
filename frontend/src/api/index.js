@@ -80,9 +80,23 @@ export const risksAPI = {
   delete: (id) => api.delete(`/risks/${id}`),
 };
 
+export const decisionsAPI = {
+  list: (projectId, governanceId) => {
+    const params = new URLSearchParams();
+    if (projectId) params.append("project_id", projectId);
+    if (governanceId) params.append("governance_id", governanceId);
+    const qs = params.toString();
+    return api.get(`/decisions${qs ? `?${qs}` : ""}`);
+  },
+  create: (data) => api.post("/decisions", data),
+  update: (id, data) => api.put(`/decisions/${id}`, data),
+  delete: (id) => api.delete(`/decisions/${id}`),
+};
+
 export const dashboardAPI = {
   summary: () => api.get("/dashboard/summary"),
   topRisks: () => api.get("/dashboard/top-risks"),
+  heatmapRisks: () => api.get("/dashboard/heatmap-risks"),
 };
 
 export default api;
