@@ -32,6 +32,17 @@ Tenant démo : **Groupe Altair Industries**
 
 ## Ce qui est implémenté (v1.4 — 13/04/2026)
 
+### Chantier 7 — Registre des risques (COMPLET ✅ — 13/04/2026)
+- [x] Collection `risks` : risk_id, project_id, tenant_id, title, description, category, probability(1-5), impact(1-5), criticality(auto = P×I), status, mitigation_plan, owner, due_date
+- [x] GET/POST/PUT/DELETE /api/risks — isolation tenant, recalcul criticité auto, RBAC (READ_ONLY=403, PMO=create/update, ADMIN=CRUD)
+- [x] GET /api/dashboard/top-risks — top 10 cross-projets, enrichis avec project_name
+- [x] `ProjectDetail.jsx` : section "Registre des risques" — table triée criticité décroissante, badges couleur (rouge≥16, orange7-15, vert≤6), catégories colorées, suppression ADMIN
+- [x] Heatmap 5×5 P×I : cellules colorées, pastilles représentant les risques, tooltip on hover
+- [x] `RiskModal.jsx` : formulaire CRUD, criticité auto-calculée live (P×I), tout créer/éditer via clic ou bouton
+- [x] `Dashboard.jsx` : widget "TOP RISQUES CRITIQUES — PORTEFEUILLE" (10 risques, tri desc, liens projets)
+- [x] Seed : 38 risques (4-6 par projet), variété catégories et criticités
+- [x] Tests 100% — 24/24 (iteration_9.json)
+
 ### Chantier 6 — Budget CAPEX/OPEX + EAC + Révisions (COMPLET ✅)
 - [x] Schema `projects` enrichi : `capex_planned`, `capex_consumed`, `opex_planned`, `opex_consumed`, `eac`, `budget_revision_history[]`, `end_date_actual`, `status`
 - [x] `_sync_budget_aggregates()` : calcul auto `budget_total/consumed/forecast` depuis CAPEX+OPEX
@@ -97,6 +108,7 @@ Tenant démo : **Groupe Altair Industries**
 
 ### P0 — En attente validation user
 - [ ] **Chantier 6** ← LIVRÉ le 13/04/2026, en attente validation user
+- [ ] **Chantier 7** ← LIVRÉ le 13/04/2026, en attente validation user
 
 ### P1 — Prochains chantiers
 - [ ] **Chantier 7** — Registre des risques
