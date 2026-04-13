@@ -1,0 +1,42 @@
+{
+  "summary": "Chantier 6 Bug Fix — POST /api/projects/:id/budget-revision + P2 Tooltip. All 8 backend tests pass (100%). All UI flows verified: budget revision modal with empty author closes successfully (no 500 error), tooltip '?' visible in ProjectModal next to 'Total budget'.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_chantier6_bugfix.py",
+    "/app/test_reports/pytest/chantier6_bugfix.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": ["/app/backend/tests/test_chantier6_bugfix.py"],
+  "success_rate": {"backend": "100% (8/8)", "frontend": "100%"},
+  "test_credentials": {
+    "admin": "admin@altair.fr / Admin1234! (TENANT_ADMIN)",
+    "pmo": "pmo@altair.fr / Pmo1234! (PMO_USER)",
+    "viewer": "viewer@altair.fr / View1234! (READ_ONLY)"
+  },
+  "seed_data_creation": "Test revisions added to first project (via backend tests). Test-Budget-02 project created and deleted.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Chantier 6 bug fix fully validated. Fix: .sub → .email in budget-revision author fallback (line 391). All 8 scenarios pass: author empty→email fallback, author=null→email fallback, explicit author kept, 404 fake project, 403 READ_ONLY, 200 PMO, history grows by 1, new project revision. UI: BudgetRevisionModal submits with empty author → modal closes (success). ProjectModal: tooltip '?' badge visible next to 'Total budget' (only appears when CAPEX/OPEX > 0). Chantier 7 (risks) not retested but no code changes were made.",
+  "test_results": {
+    "author_empty_fallback": "PASS — no author in body → author = admin@altair.fr",
+    "author_null_fallback": "PASS — author=null → author = admin@altair.fr, no 500",
+    "author_provided_kept": "PASS — author='Sophie Martin' preserved",
+    "fake_project_404": "PASS — POST to fake-uuid → 404",
+    "read_only_403": "PASS — READ_ONLY → 403",
+    "pmo_200": "PASS — PMO → 200, author = pmo@altair.fr",
+    "history_grows": "PASS — history count +1 after revision",
+    "new_project_revision": "PASS — new project created, revision applied → 200",
+    "ui_empty_author_modal": "PASS — modal closes successfully with empty author",
+    "ui_tooltip_badge": "PASS — '?' badge visible in ProjectModal Budget section (when CAPEX > 0)",
+    "ui_tooltip_text_in_dom": "PASS — 'L'EAC initial est égal au budget total' found in DOM"
+  }
+}

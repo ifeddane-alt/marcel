@@ -228,8 +228,14 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
           <div className="flex items-center justify-between mb-2">
             <div className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Budget CAPEX / OPEX</div>
             {totalKEur > 0 && (
-              <div className="text-xs text-slate-500 font-mono-data">
+              <div className="flex items-center gap-1.5 text-xs text-slate-500 font-mono-data">
                 Total budget : <span className="font-bold text-[#0052CC]">{totalKEur.toLocaleString("fr-FR")} K€</span>
+                <span className="relative group cursor-help">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-slate-500 text-[10px] font-bold">?</span>
+                  <span className="absolute right-0 bottom-full mb-2 w-64 p-2 bg-slate-800 text-white text-[11px] rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 leading-relaxed">
+                    L'EAC initial est égal au budget total (CAPEX + OPEX). Utilisez le bouton "Réviser l'EAC" sur le détail du projet pour enregistrer une révision avec historique.
+                  </span>
+                </span>
               </div>
             )}
           </div>

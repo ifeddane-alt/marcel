@@ -388,7 +388,7 @@ async def add_budget_revision(
         "old_eac": old_eac,
         "new_eac": data.eac,
         "reason": data.reason,
-        "author": data.author or current_user.sub,
+        "author": data.author or current_user.email,
     }
 
     set_fields: dict = {"eac": data.eac, "budget_forecast": data.eac}
