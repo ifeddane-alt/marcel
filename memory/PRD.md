@@ -41,6 +41,19 @@ Tenant démo : **Groupe Altair Industries**
 - [x] Layout : heatmap 5×5 côté gauche + barres distribution criticité (Élevés/Modérés/Faibles %) + top 3 risques critiques côté droit
 - [x] Composant `RiskHeatmap.jsx` partagé (utilisé dans ProjectDetail + Dashboard)
 
+## Ce qui est implémenté (v1.6 — 14/02/2026)
+
+### Chantier 5 — Export PowerPoint COPIL (COMPLET ✅ — 14/02/2026)
+- [x] Backend `pptx_generator.py` : 6 slides (Garde, Synthèse, Heatmap P×I matplotlib, Top Risques, Décisions Clés, Fiches Projet par projet)
+- [x] Palette "Option B" : fond blanc, accents Navy Blue (#0F172A) uniquement dans titres/badges/séparateurs — compatible impression
+- [x] `POST /api/export/copil` : reçoit `{project_ids[], instance_name, instance_date, governance_id?}`, retourne fichier PPTX binaire, accessible aux 3 rôles (READ_ONLY inclus)
+- [x] `ExportCopilModal.jsx` : formulaire complet (nom instance, date, rattachement gouvernance optionnel), preview des projets sélectionnés, téléchargement automatique
+- [x] `Portfolio.jsx` : colonne checkbox (select-all + cases par ligne), barre d'action bleue "X projets sélectionnés + Export COPIL" contextuelle
+- [x] `ProjectDetail.jsx` : bouton "Export COPIL" dans l'en-tête, visible pour tous les rôles, ouvre modal avec le projet courant
+- [x] `ProgramDetail.jsx` : bouton "Export COPIL" dans l'en-tête, visible pour tous les rôles, ouvre modal avec tous les projets du programme
+- [x] `Governance.jsx` : bouton "Export COPIL" dans la vue expandée de chaque instance, pré-sélectionne les projets en périmètre + rattache le governance_id automatiquement
+- [x] Tests 100% — 6/6 backend + frontend tous rôles (iteration_12.json)
+
 ### Chantier 8 — Registre des décisions (COMPLET ✅ — 13/04/2026)
 - [x] Collection `decisions` : 8 catégories (stratégique | périmètre | planning | budgétaire | technique | ressources | conformité | gouvernance)
 - [x] 6 statuts cycle de vie : proposée | prise | en_cours | appliquée | reportée | annulée
@@ -70,12 +83,12 @@ Tenant démo : **Groupe Altair Industries**
 
 ## Roadmap / Backlog priorisé
 
-### P0 — Prochaine livraison
-| Chantier | Description | Complexité |
-|---------|-------------|------------|
-| **Chantier 5** | Export PowerPoint COPIL via python-pptx | Élevée |
+### P0 — En attente validation user
+| Chantier | Description | Statut |
+|---------|-------------|--------|
+| **Chantier 5** | Export PowerPoint COPIL | LIVRÉ 14/02/2026 — validation user |
 
-### P1 — Futur
+### P1 — Prochains chantiers
 | Chantier | Description |
 |---------|-------------|
 | Notif email | Alertes sur risques critiques ou budget dépassé |
