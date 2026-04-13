@@ -28,9 +28,24 @@ Tenant démo : **Groupe Altair Industries**
 | milestones | milestone_id, project_id, name, date_baseline, date_forecast, status, is_governance |
 | governance | governance_id, tenant_id, name, type, date_scheduled, projects_scope, sanity_check_* |
 
-## Ce qui est implémenté (v1.1 — 03/02/2026)
+## Ce qui est implémenté (v1.2 — 03/02/2026)
 
-### Phase 3 — Mini-RAG Task Health Indicator (v1.1 — 03/02/2026)
+### Chantier 1 — Tâches (COMPLET)
+- [x] GET/POST/PUT/DELETE /api/tasks — isolation tenant, READ_ONLY bloqué
+- [x] 46 tâches seedées (5-7 par projet), mini-RAG calculé automatiquement
+- [x] Section "Décomposition du projet" complète : tableau 11 colonnes, badges RAG, indicateurs dérive, totaux landing
+
+### Chantier 4 — Programmes (COMPLET — v1.2)
+- [x] Collection `programs` : program_id, tenant_id, name, description, owner, dates, budget_keur, status
+- [x] Champ `program_id` optionnel sur projets
+- [x] GET/POST/PUT/DELETE /api/programs — avec agrégation auto (budget consolidé, RAG worst-case, project_count)
+- [x] GET /api/programs/:id — détail avec projects[], milestones[], metrics{}
+- [x] Page Programmes (/programmes) — cartes avec RAG, budget, barres de consommation
+- [x] Page Détail Programme (/programmes/:id) — table projets, totaux, jalons agrégés, distribution RAG
+- [x] Filtre "Programme" sur page Portfolio + sous-titre programme sur chaque ligne projet
+- [x] Seed : 3 programmes couvrant les 8 projets Altair Industries
+- [x] Tests 100% backend + frontend (iteration_5.json)
+
 - [x] Collection `tasks` avec champs `budget_landing`, `jh_landing`, `task_rag`, `rag_details`
 - [x] Calcul RAG automatique côté backend (GET /api/tasks) basé sur seuils configurables/tenant
 - [x] GET/PUT /api/tenants/settings — seuils budget_threshold_pct et delay_threshold_days
@@ -80,25 +95,13 @@ Tenant démo : **Groupe Altair Industries**
 
 ## Backlog prioritaire
 
-### P0 — Critique
-- [x] ~~Mini-RAG footer totaux (budget_landing, jh_landing)~~ — **TERMINÉ**
-
-### P1 — Migration stack (planifiée, non urgente)
-- [ ] **Migration Node.js + PostgreSQL + TypeScript** — à faire après validation complète MVP. Le user a confirmé vouloir migrer mais pas maintenant.
-
-### P1 — Features importantes
-- [ ] Création/édition de projet via formulaire UI (modal)
-- [ ] Filtrage portfolio par date/sponsor/programme
-- [ ] Export PDF/Excel du rapport de portefeuille
-- [ ] Notifications temps réel (milestones en retard)
-
-### P2 — Améliorations
-- [ ] Gestion multi-tenant admin panel
-- [ ] Timeline Gantt pour les jalons
-- [ ] Module d'import depuis Clarity PPM / Jira via CSV
-- [ ] Historique des modifications (audit log)
-- [ ] Dashboard personnalisable par utilisateur
-- [ ] Support de plusieurs tenants avec routing par sous-domaine
+### P0 — En cours
+- [ ] **Chantier 2** — Import CSV (upload, mapping, preview, validation, commit)
+- [ ] **Chantier 3** — CRUD modaux complets (projets, tâches, ressources)
+- [ ] **Chantier 6** — Budget CAPEX/OPEX + EAC + historique révisions
+- [ ] **Chantier 7** — Registre des risques
+- [ ] **Chantier 8** — Registre des décisions
+- [ ] **Chantier 5** — Export PowerPoint COPIL (python-pptx)
 
 ## Notes architecture importantes
 - La solution utilise MongoDB (au lieu de PostgreSQL demandé) pour respecter les contraintes d'environnement
