@@ -81,6 +81,23 @@ Construire et étendre en continu une application web SaaS multi-tenant appelée
 | S2-04  | Slide Roadmap dans PPT COPIL (matplotlib)            | 2026-04    |
 | UX-01  | Page Détail Équipe /teams/{id} (membres, allocs, heatmap) | 2026-04 |
 
+### Stream 3 — Timesheets & Validation (100% COMPLET — validé iteration_18)
+| ID     | Feature                                              | Date       |
+|--------|------------------------------------------------------|------------|
+| S3-01  | Grille de saisie JH (draft + auto-save debounce)     | 2026-04    |
+| S3-02  | Soumission semaine + Validation hiérarchique         | 2026-04    |
+| S3-03  | Auto-update consumed_md sur work_allocations         | 2026-04    |
+| S3-04  | Rapport croisé (ressource/équipe/projet) + CSV       | 2026-04    |
+| UX-02  | Badge sidebar Timesheets (en attente de validation)  | 2026-04    |
+
+### Améliorations démo (validé iteration_18)
+| Fix    | Description                                          | Date       |
+|--------|------------------------------------------------------|------------|
+| DX-01  | Noms ressources réalistes (Sophie Martin, Thomas Dubois, etc.) | 2026-04 |
+| DX-02  | Widget Alertes capacité remonté dans Dashboard (position haute) | 2026-04 |
+| DX-03  | Allocations Thomas Dubois + Alexandre Moreau (Dev A) | 2026-04    |
+| DX-04  | Nettoyage équipes parasites + protection seed        | 2026-04    |
+
 ---
 
 ## Backlog priorisé
@@ -89,20 +106,21 @@ Construire et étendre en continu une application web SaaS multi-tenant appelée
 *(Tout le P0 est complété)*
 
 ### P1 — Important
-*(Tout le P1 Stream 2 est complété)*
+*(Tout le P1 Stream 2 + Stream 3 est complété)*
 
 ### P2 — Futur
 | ID   | Feature                              | Description                                              |
 |------|--------------------------------------|----------------------------------------------------------|
 | P2-1 | Gestion de la Demande                | Collection `demands` + workflow de qualification         |
-| P2-2 | Gestion des Temps                    | Collection `timesheets` + validation hiérarchique        |
-| P2-3 | SAFe structurel                      | Collections `trains`, `pis`, `sprints`, `capabilities`   |
+| P2-2 | SAFe structurel                      | Collections `trains`, `pis`, `sprints`, `capabilities`   |
 
 ---
 
 ## Points techniques critiques
 - **Multi-tenancy** : Isolation stricte par `tenant_id` dans tous les modèles DB
 - **JWT Auth** : Custom (non Google Auth), rôles TENANT_ADMIN / PMO_USER / VIEWER
+- **Timesheets** : Grille saisie (debounce 500ms auto-save), soumission semaine, validation hiérarchique, rapport pivot CSV
+- **Ressources** : Noms réalistes (Sophie Martin=admin, Thomas Dubois=PMO, etc.) liés au JWT via `resource_id`
 - **frappe-gantt** : CSS importé via `src/index.css @import` (pas d'import JS direct à cause webpack 5 exports)
 - **Dates seed** : Toujours générées dynamiquement (`datetime.now(timezone.utc)`) — PAS de dates 2025 hardcodées
 - **ObjectId MongoDB** : Toujours exclu via `{"_id": 0}` dans les projections
