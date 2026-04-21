@@ -12,8 +12,9 @@ import {
   Upload,
   UsersRound,
   Map,
+  Clock,
 } from "lucide-react";
-import { teamsAPI } from "@/api";
+import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 
 const ROLE_LABELS = {
@@ -30,18 +31,23 @@ const navItems = [
   { to: "/resources", icon: Users, label: "Ressources" },
   { to: "/teams", icon: UsersRound, label: "Équipes" },
   { to: "/governance", icon: ShieldCheck, label: "Gouvernance" },
+  { to: "/timesheets", icon: Clock, label: "Timesheets" },
 ];
 
 export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [alertCount, setAlertCount] = useState(0);
+  const [alertCount, setAlertCount]     = useState(0);
+  const [pendingCount, setPendingCount] = useState(0);
 
   useEffect(() => {
     teamsAPI.capacityAlerts().then((r) => {
       setAlertCount(r.data.filter((a) => a.level === "critique" || a.level === "rouge").length);
     }).catch(() => {});
-  }, []);
+    if (user?.role !== "READ_ONLY") {
+      timesheetsAPI.getPendingCount().then((r) => setPendingCount(r.data.count || 0)).catch(() => {});
+    }
+  }, [user]);
 
   const handleLogout = () => {
     logout();
@@ -91,6 +97,14 @@ export default function Layout() {
                   data-testid="sidebar-alert-badge"
                 >
                   {alertCount}
+                </span>
+              )}
+              {label === "Timesheets" && pendingCount > 0 && (
+                <span
+                  className="ml-auto flex-shrink-0 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-amber-500 text-white text-[10px] font-bold px-1"
+                  data-testid="sidebar-ts-badge"
+                >
+                  {pendingCount}
                 </span>
               )}
             </NavLink>

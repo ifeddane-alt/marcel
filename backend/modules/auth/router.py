@@ -15,16 +15,17 @@ async def login(req: LoginRequest):
     if not bcrypt.checkpw(req.password.encode(), user['password_hash'].encode()):
         raise HTTPException(status_code=401, detail="Identifiants invalides")
     token = create_token({
-        "tenant_id": user["tenant_id"],
-        "user_id": user["user_id"],
-        "email": user["email"],
-        "role": user["role"],
-        "name": user["name"],
+        "tenant_id":   user["tenant_id"],
+        "user_id":     user["user_id"],
+        "email":       user["email"],
+        "role":        user["role"],
+        "name":        user["name"],
+        "resource_id": user.get("resource_id"),
     })
     return {
         "access_token": token,
         "token_type": "bearer",
-        "user": {k: user[k] for k in ("user_id", "email", "name", "role", "tenant_id")},
+        "user": {k: user.get(k) for k in ("user_id", "email", "name", "role", "tenant_id", "resource_id")},
     }
 
 

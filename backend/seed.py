@@ -5,7 +5,7 @@ Usage: python seed.py
 import asyncio
 import os
 import uuid
-from datetime import datetime, timezone, date
+from datetime import datetime, timezone, date, timedelta
 from dateutil.relativedelta import relativedelta
 from pathlib import Path
 
@@ -1587,8 +1587,83 @@ async def seed():
         await db.work_allocations.insert_many(work_allocs_to_insert)
     print(f"Work allocations créées : {len(work_allocs_to_insert)}")
 
+    # ── Timesheets seed (S3-01) ──────────────────────────────────────────────
+    import random as _rnd
+    _rnd.seed(42)
+    await db.timesheets.delete_many({"tenant_id": TENANT_ID})
+
+    # Lier les utilisateurs admin et pmo à des ressources
+    admin_rid = RESOURCE_IDS[0]
+    pmo_rid   = RESOURCE_IDS[1]
+    await db.users.update_one(
+        {"email": "admin@altair.fr", "tenant_id": TENANT_ID},
+        {"$set": {"resource_id": admin_rid}},
+    )
+    await db.users.update_one(
+        {"email": "pmo@altair.fr", "tenant_id": TENANT_ID},
+        {"$set": {"resource_id": pmo_rid}},
+    )
+
+    # Récupérer les work_allocations pour les 4 premières ressources
+    seed_rids = RESOURCE_IDS[:4]
+    wa_docs = await db.work_allocations.find(
+        {"resource_id": {"$in": seed_rids}, "tenant_id": TENANT_ID},
+        {"_id": 0, "work_allocation_id": 1, "resource_id": 1},
+    ).to_list(None)
+    wa_by_res: dict = {}
+    for wa in wa_docs:
+        wa_by_res.setdefault(wa["resource_id"], []).append(wa["work_allocation_id"])
+
+    ts_to_insert = []
+    today_d = date.today()
+    # Semaine courante = lundi
+    this_monday = today_d - timedelta(days=today_d.weekday())
+
+    # Statuts par semaine (offset depuis semaine courante)
+    week_cfg = [
+        (-3, "validated", True),   # il y a 3 semaines → validé
+        (-2, "validated", True),   # il y a 2 semaines → validé
+        (-1, "submitted", False),  # semaine dernière → soumis
+        (0,  "draft",     False),  # semaine courante → brouillon
+    ]
+
+    for rid in seed_rids:
+        wa_ids_for_rid = wa_by_res.get(rid, [])[:2]
+        if not wa_ids_for_rid:
+            continue
+        for (w_offset, status, accounted) in week_cfg:
+            week_mon = this_monday + timedelta(weeks=w_offset)
+            sub_at   = (datetime(week_mon.year, week_mon.month, week_mon.day,
+                                  18, 0, 0, tzinfo=timezone.utc) + timedelta(days=5)).isoformat()
+            val_at   = (datetime(week_mon.year, week_mon.month, week_mon.day,
+                                  9, 0, 0, tzinfo=timezone.utc) + timedelta(days=7)).isoformat()
+            for day_off in range(5):   # Lun–Ven
+                day_d = week_mon + timedelta(days=day_off)
+                for waid in wa_ids_for_rid:
+                    jh = round(_rnd.uniform(0.5, 2.5) * 2) / 2  # multiple de 0.5
+                    doc = {
+                        "timesheet_id":      str(uuid.uuid4()),
+                        "tenant_id":         TENANT_ID,
+                        "resource_id":       rid,
+                        "work_allocation_id": waid,
+                        "date":              day_d.isoformat(),
+                        "jh_value":          jh,
+                        "status":            status,
+                        "accounted":         accounted,
+                        "submitted_at":      sub_at if status in ("submitted", "validated") else None,
+                        "validated_at":      val_at if status == "validated" else None,
+                        "validated_by":      None,
+                        "rejection_reason":  None,
+                        "created_at":        datetime.now(timezone.utc).isoformat(),
+                    }
+                    ts_to_insert.append(doc)
+
+    if ts_to_insert:
+        await db.timesheets.insert_many(ts_to_insert)
+    print(f"Timesheets créés : {len(ts_to_insert)}")
+
     print("\n=== Comptes disponibles ===")
-    print("  admin@altair.fr    / Admin1234!  (TENANT_ADMIN)")
+    print("  admin@altair.fr    / Admin1234!  (TENANT_ADMIN)  → ressource Ressource_01")
     print("  pmo@altair.fr      / Pmo1234!    (PMO_USER)")
     print("  viewer@altair.fr   / View1234!   (READ_ONLY)")
     print("\nSeed terminé avec succès.")

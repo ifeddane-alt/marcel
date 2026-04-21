@@ -24,6 +24,7 @@ from modules.dashboard.router import router as dashboard_router
 from modules.risks.router import router as risks_router
 from modules.decisions.router import router as decisions_router
 from modules.export.router import router as export_router
+from modules.timesheets.router import router as timesheets_router
 from modules.csv_import.router import router as csv_import_router
 from modules.teams.router import router as teams_router
 from modules.work_allocations.router import router as work_allocations_router
@@ -43,6 +44,7 @@ for _router in [
     allocations_router, milestones_router, tasks_router, tenant_router,
     governance_router, dashboard_router, risks_router, decisions_router,
     export_router, csv_import_router, teams_router, work_allocations_router,
+    timesheets_router,
 ]:
     app.include_router(_router, prefix="/api")
 

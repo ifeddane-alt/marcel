@@ -1,6 +1,7 @@
 from fastapi import HTTPException, Depends
 from fastapi.security import HTTPBearer, HTTPAuthorizationCredentials
 from pydantic import BaseModel
+from typing import Optional
 from jose import jwt, JWTError
 from datetime import datetime, timezone, timedelta
 import os
@@ -17,6 +18,7 @@ class TokenPayload(BaseModel):
     email: str
     role: str
     name: str
+    resource_id: Optional[str] = None
 
 
 def create_token(payload: dict) -> str:

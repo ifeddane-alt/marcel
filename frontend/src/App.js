@@ -14,6 +14,7 @@ import Import from "@/pages/Import";
 import Teams from "@/pages/Teams";
 import TeamDetail from "@/pages/TeamDetail";
 import Roadmap from "@/pages/Roadmap";
+import Timesheets from "@/pages/Timesheets";
 import "@/App.css";
 
 function ProtectedRoute({ children }) {
@@ -44,6 +45,7 @@ function AppRoutes() {
         <Route path="teams" element={<Teams />} />
         <Route path="teams/:id" element={<TeamDetail />} />
         <Route path="roadmap" element={<Roadmap />} />
+        <Route path="timesheets" element={<Timesheets />} />
         <Route path="governance" element={<Governance />} />
         <Route path="import" element={<Import />} />
       </Route>

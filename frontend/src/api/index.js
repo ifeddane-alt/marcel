@@ -122,4 +122,16 @@ export const dashboardAPI = {
   heatmapRisks: () => api.get("/dashboard/heatmap-risks"),
 };
 
+export const timesheetsAPI = {
+  getGrid:           (resourceId, weekStart) => api.get(`/timesheets/grid?resource_id=${resourceId}&week_start=${weekStart}`),
+  upsertEntry:       (data)  => api.put("/timesheets/entry", data),
+  submitWeek:        (data)  => api.post("/timesheets/submit-week", data),
+  getPendingCount:   ()      => api.get("/timesheets/pending-count"),
+  getValidation:     (week)  => api.get(`/timesheets/validation${week ? `?week_start=${week}` : ""}`),
+  validateTimesheets:(data)  => api.post("/timesheets/validate", data),
+  rejectTimesheets:  (data)  => api.post("/timesheets/reject", data),
+  getReport:         (dim, start, end) => api.get(`/timesheets/report?dimension=${dim}&start=${start}&end=${end}`),
+  getReportCsv:      (dim, start, end) => api.get(`/timesheets/report/csv?dimension=${dim}&start=${start}&end=${end}`, { responseType: "text" }),
+};
+
 export default api;
