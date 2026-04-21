@@ -114,6 +114,9 @@ Construire et étendre en continu une application web SaaS multi-tenant appelée
 | P2-1 | Gestion de la Demande                | Collection `demands` + workflow de qualification         |
 | P2-2 | SAFe structurel                      | Collections `trains`, `pis`, `sprints`, `capabilities`   |
 
+### Stream 4 — Enrichissement Roadmap (100% COMPLET — validé iteration_19)
+| S4-01 à S4-11 | Modèle jalons 3 familles, CRUD jalons ADMIN+PMO, module project_dependencies, Roadmap filtres+flèches SVG, PPT coloré | 2026-04 |
+
 ---
 
 ## Points techniques critiques
