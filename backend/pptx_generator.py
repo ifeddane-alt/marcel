@@ -99,6 +99,21 @@ def keur(val):
     return f"{int(val / 1000):,}".replace(",", "\u202f") + " K€"
 
 
+def eur(val):
+    """Format as xxx K€ or xxx € depending on magnitude."""
+    if val is None:
+        return "—"
+    if abs(val) >= 1000:
+        return keur(val)
+    return f"{int(val):,}".replace(",", "\u202f") + " €"
+
+
+def jh_fmt(val):
+    if val is None:
+        return "—"
+    return f"{val:.1f} JH" if val != int(val) else f"{int(val)} JH"
+
+
 def fmt_date(d):
     if not d:
         return "—"
@@ -845,17 +860,117 @@ def add_slide_fiche(prs, project, milestones, risks, decisions, instance_name=""
 
 
 # ====================================================================
+# SLIDE — CONSOMMATION PAR ÉQUIPE (S1-08)
+# ====================================================================
+
+def add_slide_team_consumption(prs, project, team_rows, instance_name, instance_date):
+    """Slide additionnel par projet : tableau consommation par équipe + KPI RAF."""
+    slide = _blank_slide(prs)
+
+    # Background
+    _rect(slide, Emu(0), Emu(0), SW, SH, fill=WHITE)
+
+    proj_name = project.get("name", "?")
+    _header(slide, f"{proj_name.upper()}  ·  CONSOMMATION PAR ÉQUIPE",
+            subtitle="Répartition JH & coûts · RAF valorisé · Atterrissage", height_in=1.2)
+
+    # ---- Compute totals ----
+    total_planned_md   = sum(r.get("planned_md", 0) for r in team_rows)
+    total_consumed_md  = sum(r.get("consumed_md", 0) for r in team_rows)
+    total_raf_md       = sum(r.get("raf_md", 0) for r in team_rows)
+    total_planned_eur  = sum(r.get("planned_cost_eur", 0) for r in team_rows)
+    total_consumed_eur = sum(r.get("consumed_cost_eur", 0) for r in team_rows)
+    total_raf_eur      = sum(r.get("raf_cost_eur", 0) for r in team_rows)
+    atterrissage       = total_consumed_eur + total_raf_eur
+
+    # ---- KPI cards row ----
+    KPI_Y   = Inches(1.35)
+    KPI_H   = Inches(1.25)
+    KPI_W   = Inches(3.6)
+    KPI_PAD = Inches(0.4)
+    kpis = [
+        ("Consommé total", eur(total_consumed_eur), f"{jh_fmt(total_consumed_md)}", BLUE),
+        ("RAF valorisé",   eur(total_raf_eur),      f"{jh_fmt(total_raf_md)}",      ORANGE_C),
+        ("Atterrissage",   eur(atterrissage),        f"prev. {eur(total_planned_eur)}", NAVY),
+    ]
+    for i, (label, value, sub, accent) in enumerate(kpis):
+        kx = KPI_PAD + (KPI_W + Inches(0.3)) * i
+        _rect(slide, kx, KPI_Y, KPI_W, KPI_H, fill=RGBColor(0xF8, 0xF9, 0xFA),
+              no_line=False, line_color=BORDER, line_pt=0.5)
+        # Accent bar (top left)
+        _rect(slide, kx, KPI_Y, Inches(0.12), KPI_H, fill=accent)
+
+        lbl_tb = _tb(slide, kx + Inches(0.25), KPI_Y + Inches(0.12), KPI_W - Inches(0.35), Inches(0.3))
+        _clear(lbl_tb.text_frame)
+        _run(lbl_tb.text_frame, label.upper(), size=7, bold=True, color=MID)
+
+        val_tb = _tb(slide, kx + Inches(0.25), KPI_Y + Inches(0.4), KPI_W - Inches(0.35), Inches(0.5))
+        _clear(val_tb.text_frame)
+        _run(val_tb.text_frame, value, size=17, bold=True, color=accent)
+
+        sub_tb = _tb(slide, kx + Inches(0.25), KPI_Y + Inches(0.88), KPI_W - Inches(0.35), Inches(0.3))
+        _clear(sub_tb.text_frame)
+        _run(sub_tb.text_frame, sub, size=8, color=MID)
+
+    # ---- Table consommation par équipe ----
+    TABLE_Y = KPI_Y + KPI_H + Inches(0.3)
+    TABLE_X = Inches(0.4)
+    TABLE_W = SW - Inches(0.8)
+
+    headers = ["Équipe", "JH prévus", "JH consommés", "Coût prévu", "Coût consommé", "RAF JH", "RAF €"]
+    # col widths (must sum ≈ TABLE_W / Inches)
+    col_w = [2.8, 1.15, 1.35, 1.65, 1.65, 1.1, 1.65]
+
+    rows_data = []
+    for row in team_rows:
+        raf_md   = row.get("raf_md", 0)
+        raf_eur  = row.get("raf_cost_eur", 0)
+        rows_data.append([
+            (row.get("team_name", "?"),                    {"bold": True, "color": NAVY}),
+            (jh_fmt(row.get("planned_md", 0)),             {"align": PP_ALIGN.RIGHT, "color": DARK}),
+            (jh_fmt(row.get("consumed_md", 0)),            {"align": PP_ALIGN.RIGHT, "color": DARK, "bold": True}),
+            (eur(row.get("planned_cost_eur", 0)),          {"align": PP_ALIGN.RIGHT, "color": DARK}),
+            (eur(row.get("consumed_cost_eur", 0)),         {"align": PP_ALIGN.RIGHT, "color": DARK, "bold": True}),
+            (jh_fmt(raf_md),                               {"align": PP_ALIGN.RIGHT, "color": ORANGE_C if raf_md > 0 else MID}),
+            (eur(raf_eur),                                 {"align": PP_ALIGN.RIGHT, "color": ORANGE_C if raf_eur > 0 else MID, "bold": raf_eur > 0}),
+        ])
+
+    # Total row
+    rows_data.append([
+        ("TOTAL",                    {"bold": True, "color": WHITE, "bg": NAVY}),
+        (jh_fmt(total_planned_md),   {"align": PP_ALIGN.RIGHT, "color": WHITE, "bg": NAVY}),
+        (jh_fmt(total_consumed_md),  {"align": PP_ALIGN.RIGHT, "color": WHITE, "bg": NAVY, "bold": True}),
+        (eur(total_planned_eur),     {"align": PP_ALIGN.RIGHT, "color": WHITE, "bg": NAVY}),
+        (eur(total_consumed_eur),    {"align": PP_ALIGN.RIGHT, "color": WHITE, "bg": NAVY, "bold": True}),
+        (jh_fmt(total_raf_md),       {"align": PP_ALIGN.RIGHT, "color": ORANGE_C if total_raf_md > 0 else WHITE, "bg": NAVY, "bold": True}),
+        (eur(total_raf_eur),         {"align": PP_ALIGN.RIGHT, "color": ORANGE_C if total_raf_eur > 0 else WHITE, "bg": NAVY, "bold": True}),
+    ])
+
+    if team_rows:
+        _styled_table(slide, headers, rows_data, TABLE_X, TABLE_Y, TABLE_W, col_w, row_height_in=0.45)
+    else:
+        empty_tb = _tb(slide, TABLE_X, TABLE_Y + Inches(0.3), TABLE_W, Inches(0.5))
+        _clear(empty_tb.text_frame)
+        _run(empty_tb.text_frame, "Aucune allocation de travail enregistrée pour ce projet.",
+             size=9, color=LIGHT, italic=True)
+
+    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  Projetenne Confidentiel"
+    _footer(slide, footer_text)
+
+
+# ====================================================================
 # MAIN ENTRY POINT
 # ====================================================================
 
 def generate_copil_pptx(instance_name, instance_date, projects,
                         all_milestones, all_risks, all_decisions,
-                        governance_id=None):
+                        governance_id=None, team_consumption_by_project=None):
     prs = Presentation()
     prs.slide_width = SW
     prs.slide_height = SH
 
     proj_names = {p["project_id"]: p["name"] for p in projects}
+    tc_by_proj = team_consumption_by_project or {}
 
     # Enrich decisions with project_name
     for d in all_decisions:
@@ -879,7 +994,7 @@ def generate_copil_pptx(instance_name, instance_date, projects,
     if all_decisions:
         add_slide_decisions(prs, all_decisions[:10], governance_id, instance_name, instance_date)
 
-    # Slide 6+N — Fiche par projet
+    # Slide 6+N — Fiche par projet + slide consommation équipe
     for p in projects:
         pid = p["project_id"]
         ms = [m for m in all_milestones if m.get("project_id") == pid]
@@ -888,6 +1003,10 @@ def generate_copil_pptx(instance_name, instance_date, projects,
                         key=lambda x: -x.get("criticality", 0))
         d_proj = [d for d in all_decisions if d.get("project_id") == pid]
         add_slide_fiche(prs, p, ms_sorted, r_proj, d_proj, instance_name, instance_date)
+
+        # S1-08 — Slide consommation par équipe
+        team_rows = tc_by_proj.get(pid, [])
+        add_slide_team_consumption(prs, p, team_rows, instance_name, instance_date)
 
     buf = io.BytesIO()
     prs.save(buf)

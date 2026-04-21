@@ -93,8 +93,23 @@ Voir CHANGELOG.md pour l'historique complet.
 
 ## Backlog priorisé
 
-### P0 — En attente de validation utilisateur
-- **PPT COPIL Export** — URL: `https://project-sync-61.preview.emergentagent.com/copil_test.pptx`
+#### S1-08 — Enrichissement PPT fiche projet ✅
+- Nouveau slide par projet : "CONSOMMATION PAR ÉQUIPE"
+- Layout : 3 KPI cards (Consommé €, RAF €, Atterrissage) + tableau Équipe×métrics
+- Tableau : Équipe | JH prévus | JH consommés | Coût prévu | Coût consommé | RAF JH | RAF €
+- Ligne TOTAL avec fond Navy
+- `generate_copil_pptx` enrichi avec `team_consumption_by_project` dict
+- Export service: `_compute_team_consumption()` calcule l'agrégation par projet
+
+#### S1-09 — Heatmap capacité équipe × période ✅
+- Endpoint: `GET /api/teams/capacity-heatmap?months=6` (1–24 mois)
+- Capacité effective = SUM(capacity_jh_month × availability_rate/100) par équipe
+- Allocations via project_ids du tenant (isolation multi-tenant correcte)
+- Frontend: onglet "Heatmap capacités" dans la page Ressources
+- Composant `CapacityHeatmap.jsx`: matrice Équipe × Période avec code couleur
+  - Vert <50%, Émeraude 50–70%, Ambre 70–90%, Orange 90–100%, Rouge >100%
+  - Tooltip hover avec détails JH alloués/capacité
+  - Sélecteur 3/6/9/12 mois
   Le fichier PPT a été généré avec les 6 correctifs visuels (fond blanc, headers pleine largeur, etc.)
   **L'utilisateur doit valider visuellement avant de débloquer S1-08**
 

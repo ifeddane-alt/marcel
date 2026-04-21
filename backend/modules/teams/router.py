@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Query
 from core.auth import TokenPayload, get_current_user
 from .schemas import TeamCreate, TeamUpdate
 from . import service
@@ -9,6 +9,14 @@ router = APIRouter(tags=["teams"])
 @router.get("/teams")
 async def list_teams(current_user: TokenPayload = Depends(get_current_user)):
     return await service.list_teams(current_user)
+
+
+@router.get("/teams/capacity-heatmap")
+async def get_capacity_heatmap(
+    months: int = Query(default=6, ge=1, le=24),
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    return await service.get_capacity_heatmap(months, current_user)
 
 
 @router.post("/teams", status_code=201)

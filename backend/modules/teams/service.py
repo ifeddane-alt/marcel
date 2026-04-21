@@ -1,5 +1,6 @@
 from fastapi import HTTPException
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
+from dateutil.relativedelta import relativedelta
 import uuid
 from core.database import db
 from core.auth import TokenPayload, require_write, require_admin
@@ -23,6 +24,96 @@ async def list_teams(current_user: TokenPayload) -> list:
         for t in teams:
             t["manager_name"] = None
     return teams
+
+
+async def get_capacity_heatmap(months: int, current_user: TokenPayload) -> list:
+    """S1-09 — Heatmap capacité × période par équipe."""
+    today = date.today()
+    # Plage : mois précédent → months-1 mois futurs
+    start_month = (today.replace(day=1) - relativedelta(months=1))
+    periods = [
+        (start_month + relativedelta(months=i)).strftime("%Y-%m-%d")
+        for i in range(months + 1)
+    ]
+
+    # Équipes du tenant
+    teams = await db.teams.find(
+        {"tenant_id": current_user.tenant_id}, {"_id": 0, "team_id": 1, "name": 1}
+    ).to_list(None)
+    # Ressource sans équipe = équipe virtuelle
+    teams_list = list(teams)
+
+    # Ressources du tenant
+    resources = await db.resources.find(
+        {"tenant_id": current_user.tenant_id},
+        {"_id": 0, "resource_id": 1, "team_id": 1, "capacity_jh_month": 1, "availability_rate": 1},
+    ).to_list(None)
+    res_by_id = {r["resource_id"]: r for r in resources}
+
+    # Capacité effective par équipe
+    team_capacity: dict = {}  # team_id → capacity_jh_effective
+    for r in resources:
+        tid = r.get("team_id") or "__unassigned__"
+        capa_month = r.get("capacity_jh_month", 0) or 0
+        avail = (r.get("availability_rate") or 100) / 100
+        effective = capa_month * avail
+        team_capacity[tid] = team_capacity.get(tid, 0) + effective
+
+    # Allocations du tenant dans la plage (via project_ids du tenant)
+    tenant_projects = await db.projects.find(
+        {"tenant_id": current_user.tenant_id}, {"_id": 0, "project_id": 1}
+    ).to_list(None)
+    tenant_project_ids = [p["project_id"] for p in tenant_projects]
+
+    allocations = await db.allocations.find(
+        {"project_id": {"$in": tenant_project_ids},
+         "period_month": {"$gte": periods[0], "$lte": periods[-1]}},
+        {"_id": 0, "resource_id": 1, "period_month": 1, "jh_allocated": 1},
+    ).to_list(None)
+
+    # Allocations par (team_id, period_month)
+    alloc_matrix: dict = {}  # (team_id, period) → jh_allocated
+    for a in allocations:
+        res = res_by_id.get(a.get("resource_id", ""), {})
+        tid = res.get("team_id") or "__unassigned__"
+        period = a.get("period_month", "")[:7]  # YYYY-MM
+        key = (tid, period)
+        alloc_matrix[key] = alloc_matrix.get(key, 0) + (a.get("jh_allocated") or 0)
+
+    # Construire la matrice de résultat
+    result = []
+    display_teams = list(teams_list)
+    # Ajouter équipe virtuelle si des ressources non affectées ont des allocs
+    unassigned_resources = [r for r in resources if not r.get("team_id")]
+    if unassigned_resources:
+        display_teams.append({"team_id": "__unassigned__", "name": "Non affectées"})
+
+    period_labels = [
+        (start_month + relativedelta(months=i)).strftime("%Y-%m")
+        for i in range(months + 1)
+    ]
+
+    for team in display_teams:
+        tid = team["team_id"]
+        capa = team_capacity.get(tid, 0)
+        row = {
+            "team_id": tid if tid != "__unassigned__" else None,
+            "team_name": team["name"],
+            "capacity_jh_month": round(capa, 1),
+            "periods": [],
+        }
+        for period in period_labels:
+            allocated = alloc_matrix.get((tid, period), 0)
+            utilization_pct = round((allocated / capa * 100), 1) if capa > 0 else 0
+            row["periods"].append({
+                "period": period,
+                "capacity_jh": round(capa, 1),
+                "allocated_jh": round(allocated, 1),
+                "utilization_pct": utilization_pct,
+            })
+        result.append(row)
+
+    return result
 
 
 async def create_team(data: TeamCreate, current_user: TokenPayload) -> dict:

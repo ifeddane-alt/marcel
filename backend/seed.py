@@ -5,8 +5,17 @@ Usage: python seed.py
 import asyncio
 import os
 import uuid
-from datetime import datetime, timezone
+from datetime import datetime, timezone, date
+from dateutil.relativedelta import relativedelta
 from pathlib import Path
+
+# Helper: date relative au mois courant pour les allocations
+_today = date.today()
+
+
+def _month(delta: int = 0) -> str:
+    """Retourne le premier jour du mois relatif à aujourd'hui (YYYY-MM-DD)."""
+    return (_today.replace(day=1) + relativedelta(months=delta)).strftime("%Y-%m-%d")
 
 from dotenv import load_dotenv
 from motor.motor_asyncio import AsyncIOMotorClient
@@ -407,31 +416,31 @@ RESOURCES = [
 
 ALLOCATIONS = [
     # Phoenix (SAFe)
-    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[0], "resource_id": RESOURCE_IDS[0], "period_month": "2025-01-01", "jh_allocated": 15, "jh_consumed": 15, "allocation_rate": 75},
-    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[0], "resource_id": RESOURCE_IDS[1], "period_month": "2025-01-01", "jh_allocated": 20, "jh_consumed": 19, "allocation_rate": 91},
-    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[0], "resource_id": RESOURCE_IDS[2], "period_month": "2025-02-01", "jh_allocated": 18, "jh_consumed": 18, "allocation_rate": 90},
-    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[0], "resource_id": RESOURCE_IDS[5], "period_month": "2025-02-01", "jh_allocated": 16, "jh_consumed": 15, "allocation_rate": 89},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[0], "resource_id": RESOURCE_IDS[0], "period_month": _month(-3), "jh_allocated": 15, "jh_consumed": 15, "allocation_rate": 75},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[0], "resource_id": RESOURCE_IDS[1], "period_month": _month(-2), "jh_allocated": 20, "jh_consumed": 19, "allocation_rate": 91},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[0], "resource_id": RESOURCE_IDS[2], "period_month": _month(-1), "jh_allocated": 18, "jh_consumed": 18, "allocation_rate": 90},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[0], "resource_id": RESOURCE_IDS[5], "period_month": _month(0),  "jh_allocated": 16, "jh_consumed":  0, "allocation_rate": 89},
     # SI Finance
-    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[1], "resource_id": RESOURCE_IDS[3], "period_month": "2025-01-01", "jh_allocated": 20, "jh_consumed": 20, "allocation_rate": 100},
-    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[1], "resource_id": RESOURCE_IDS[1], "period_month": "2025-01-01", "jh_allocated": 10, "jh_consumed": 10, "allocation_rate": 45},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[1], "resource_id": RESOURCE_IDS[3], "period_month": _month(-3), "jh_allocated": 20, "jh_consumed": 20, "allocation_rate": 100},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[1], "resource_id": RESOURCE_IDS[1], "period_month": _month(-2), "jh_allocated": 10, "jh_consumed": 10, "allocation_rate": 45},
     # SAP
-    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[2], "resource_id": RESOURCE_IDS[0], "period_month": "2025-01-01", "jh_allocated": 5, "jh_consumed": 5, "allocation_rate": 25},
-    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[2], "resource_id": RESOURCE_IDS[3], "period_month": "2025-01-01", "jh_allocated": 20, "jh_consumed": 20, "allocation_rate": 100},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[2], "resource_id": RESOURCE_IDS[0], "period_month": _month(-2), "jh_allocated":  5, "jh_consumed":  5, "allocation_rate": 25},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[2], "resource_id": RESOURCE_IDS[3], "period_month": _month(-1), "jh_allocated": 20, "jh_consumed": 20, "allocation_rate": 100},
     # Digital Workplace
-    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[3], "resource_id": RESOURCE_IDS[8], "period_month": "2025-02-01", "jh_allocated": 15, "jh_consumed": 12, "allocation_rate": 83},
-    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[3], "resource_id": RESOURCE_IDS[6], "period_month": "2025-02-01", "jh_allocated": 12, "jh_consumed": 12, "allocation_rate": 80},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[3], "resource_id": RESOURCE_IDS[8], "period_month": _month(-1), "jh_allocated": 15, "jh_consumed": 12, "allocation_rate": 83},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[3], "resource_id": RESOURCE_IDS[6], "period_month": _month(0),  "jh_allocated": 12, "jh_consumed":  0, "allocation_rate": 80},
     # CRM Salesforce
-    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[4], "resource_id": RESOURCE_IDS[5], "period_month": "2025-03-01", "jh_allocated": 18, "jh_consumed": 15, "allocation_rate": 100},
-    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[4], "resource_id": RESOURCE_IDS[2], "period_month": "2025-03-01", "jh_allocated": 20, "jh_consumed": 18, "allocation_rate": 100},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[4], "resource_id": RESOURCE_IDS[5], "period_month": _month(0),  "jh_allocated": 18, "jh_consumed":  0, "allocation_rate": 100},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[4], "resource_id": RESOURCE_IDS[2], "period_month": _month(1),  "jh_allocated": 20, "jh_consumed":  0, "allocation_rate": 100},
     # Cloud Azure
-    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[5], "resource_id": RESOURCE_IDS[4], "period_month": "2025-01-01", "jh_allocated": 20, "jh_consumed": 20, "allocation_rate": 100},
-    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[5], "resource_id": RESOURCE_IDS[0], "period_month": "2025-02-01", "jh_allocated": 8, "jh_consumed": 8, "allocation_rate": 40},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[5], "resource_id": RESOURCE_IDS[4], "period_month": _month(-1), "jh_allocated": 20, "jh_consumed": 20, "allocation_rate": 100},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[5], "resource_id": RESOURCE_IDS[0], "period_month": _month(0),  "jh_allocated":  8, "jh_consumed":  0, "allocation_rate": 40},
     # Portail RH
-    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[6], "resource_id": RESOURCE_IDS[8], "period_month": "2025-01-01", "jh_allocated": 18, "jh_consumed": 18, "allocation_rate": 100},
-    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[6], "resource_id": RESOURCE_IDS[3], "period_month": "2025-01-01", "jh_allocated": 15, "jh_consumed": 15, "allocation_rate": 75},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[6], "resource_id": RESOURCE_IDS[8], "period_month": _month(1),  "jh_allocated": 18, "jh_consumed":  0, "allocation_rate": 100},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[6], "resource_id": RESOURCE_IDS[3], "period_month": _month(2),  "jh_allocated": 15, "jh_consumed":  0, "allocation_rate": 75},
     # DORA NIS2
-    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[7], "resource_id": RESOURCE_IDS[9], "period_month": "2025-04-01", "jh_allocated": 15, "jh_consumed": 10, "allocation_rate": 100},
-    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[7], "resource_id": RESOURCE_IDS[7], "period_month": "2025-04-01", "jh_allocated": 10, "jh_consumed": 8, "allocation_rate": 50},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[7], "resource_id": RESOURCE_IDS[9], "period_month": _month(0),  "jh_allocated": 15, "jh_consumed":  0, "allocation_rate": 100},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[7], "resource_id": RESOURCE_IDS[7], "period_month": _month(1),  "jh_allocated": 10, "jh_consumed":  0, "allocation_rate": 50},
 ]
 
 MILESTONES = [

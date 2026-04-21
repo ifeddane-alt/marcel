@@ -44,6 +44,7 @@ export const teamsAPI = {
   create: (data) => api.post("/teams", data),
   update: (id, data) => api.put(`/teams/${id}`, data),
   delete: (id) => api.delete(`/teams/${id}`),
+  capacityHeatmap: (months = 6) => api.get(`/teams/capacity-heatmap?months=${months}`),
 };
 
 export const workAllocationsAPI = {
