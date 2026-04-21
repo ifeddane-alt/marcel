@@ -1,23 +1,35 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
-import { Clock, CheckCircle, AlertTriangle, ChevronLeft, ChevronRight,
-  Download, Filter, Send, RefreshCw, X } from "lucide-react";
+import {
+  Clock, CheckCircle, AlertTriangle, ChevronLeft, ChevronRight,
+  Download, Filter, Send, RefreshCw, X, Users, Briefcase, Shield,
+  ArrowRight, Info,
+} from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { timesheetsAPI, resourcesAPI } from "@/api";
 import { toast } from "sonner";
 
 // ─── Constantes ─────────────────────────────────────────────────────────────
 const STATUS_CFG = {
-  draft:     { label: "Brouillon",  bg: "bg-gray-100",    text: "text-gray-600",  border: "border-gray-200" },
-  submitted: { label: "Soumis",     bg: "bg-blue-50",     text: "text-blue-700",  border: "border-blue-200" },
-  validated: { label: "Validé",     bg: "bg-emerald-50",  text: "text-emerald-700",border:"border-emerald-200"},
-  rejected:  { label: "Rejeté",     bg: "bg-rose-50",     text: "text-rose-700",  border: "border-rose-200" },
+  draft:       { label: "Brouillon",      bg: "bg-gray-100",     text: "text-gray-600",    border: "border-gray-200" },
+  submitted:   { label: "Soumis",         bg: "bg-blue-50",      text: "text-blue-700",    border: "border-blue-200" },
+  cp_reviewed: { label: "Validé N+1",     bg: "bg-amber-50",     text: "text-amber-700",   border: "border-amber-200" },
+  validated:   { label: "Validé CP",      bg: "bg-emerald-50",   text: "text-emerald-700", border: "border-emerald-200" },
+  rejected:    { label: "Rejeté",         bg: "bg-rose-50",      text: "text-rose-700",    border: "border-rose-200" },
 };
+
+// Étapes du workflow pour l'indicateur visuel
+const WORKFLOW_STEPS = [
+  { key: "draft",       label: "Brouillon" },
+  { key: "submitted",   label: "Soumis" },
+  { key: "cp_reviewed", label: "Validé N+1" },
+  { key: "validated",   label: "Validé CP" },
+];
 
 function weekLabel(weekStart) {
   if (!weekStart) return "";
   const d = new Date(weekStart + "T00:00:00");
   const end = new Date(d); end.setDate(end.getDate() + 4);
-  return `${d.toLocaleDateString("fr-FR",{day:"2-digit",month:"short"})} – ${end.toLocaleDateString("fr-FR",{day:"2-digit",month:"short",year:"numeric"})}`;
+  return `${d.toLocaleDateString("fr-FR", { day: "2-digit", month: "short" })} – ${end.toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })}`;
 }
 
 function getThisMonday() {
@@ -32,9 +44,9 @@ function shiftWeek(weekStart, delta) {
   return d.toISOString().split("T")[0];
 }
 
-const DOW = ["Lun","Mar","Mer","Jeu","Ven"];
+const DOW = ["Lun", "Mar", "Mer", "Jeu", "Ven"];
 
-// ─── StatusBadge ────────────────────────────────────────────────────────────
+// ─── StatusBadge ─────────────────────────────────────────────────────────────
 function StatusBadge({ status }) {
   const cfg = STATUS_CFG[status];
   if (!cfg) return null;
@@ -45,7 +57,31 @@ function StatusBadge({ status }) {
   );
 }
 
-// ─── ONGLET 1 : Saisie des temps ────────────────────────────────────────────
+// ─── WorkflowStepper ─────────────────────────────────────────────────────────
+function WorkflowStepper({ currentStatus }) {
+  const idx = WORKFLOW_STEPS.findIndex((s) => s.key === currentStatus);
+  return (
+    <div className="flex items-center gap-1 text-[10px]">
+      {WORKFLOW_STEPS.map((step, i) => (
+        <React.Fragment key={step.key}>
+          <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold border transition-all ${
+            i < idx  ? "bg-emerald-50 text-emerald-600 border-emerald-200" :
+            i === idx ? "bg-[#0052CC] text-white border-[#0052CC]" :
+                        "bg-gray-50 text-gray-400 border-gray-200"
+          }`}>
+            {i < idx && <CheckCircle size={9} />}
+            {step.label}
+          </div>
+          {i < WORKFLOW_STEPS.length - 1 && (
+            <ArrowRight size={10} className={i < idx ? "text-emerald-400" : "text-gray-300"} />
+          )}
+        </React.Fragment>
+      ))}
+    </div>
+  );
+}
+
+// ─── ONGLET 1 : Saisie des temps ─────────────────────────────────────────────
 function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
   const [weekStart, setWeekStart]   = useState(getThisMonday);
   const [grid, setGrid]             = useState(null);
@@ -105,33 +141,29 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
     setSubmitting(true);
     try {
       const r = await timesheetsAPI.submitWeek({ resource_id: resourceId, week_start: weekStart });
-      toast.success(`${r.data.submitted} entrée(s) soumise(s)`);
+      toast.success(`${r.data.submitted} entrée(s) soumise(s) pour validation`);
       loadGrid();
     } catch (err) { toast.error(err.response?.data?.detail || "Erreur soumission"); }
     finally { setSubmitting(false); }
   };
 
-  const canEdit = (status) => !status || status === "draft" || status === "rejected";
-  const cellBg  = (status) => {
-    if (!status || status === "draft") return "";
-    if (status === "submitted") return "bg-blue-50";
-    if (status === "validated") return "bg-emerald-50";
-    if (status === "rejected")  return "bg-rose-50/60";
+  const canEdit  = (status) => !status || status === "draft" || status === "rejected";
+  const cellBg   = (status) => {
+    if (!status || status === "draft")     return "";
+    if (status === "submitted")            return "bg-blue-50";
+    if (status === "cp_reviewed")          return "bg-amber-50";
+    if (status === "validated")            return "bg-emerald-50";
+    if (status === "rejected")             return "bg-rose-50/60";
     return "";
   };
 
   return (
     <div>
-      {/* Header */}
       <div className="flex items-center justify-between mb-4 flex-wrap gap-3">
         <div className="flex items-center gap-3">
-          {/* Resource picker */}
-          <select
-            value={resourceId || ""}
-            onChange={(e) => onResourceChange(e.target.value)}
+          <select value={resourceId || ""} onChange={(e) => onResourceChange(e.target.value)}
             data-testid="resource-picker"
-            className="text-sm border border-gray-200 rounded px-3 py-2 text-slate-700 focus:outline-none focus:border-[#0052CC] bg-white min-w-[200px]"
-          >
+            className="text-sm border border-gray-200 rounded px-3 py-2 text-slate-700 focus:outline-none focus:border-[#0052CC] bg-white min-w-[200px]">
             <option value="">— Sélectionner une ressource —</option>
             {allResources.map((r) => (
               <option key={r.resource_id} value={r.resource_id}>
@@ -139,37 +171,36 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
               </option>
             ))}
           </select>
-          {/* Week nav */}
           <div className="flex items-center gap-1 border border-gray-200 rounded overflow-hidden">
-            <button onClick={() => setWeekStart((w) => shiftWeek(w, -1))}
-              data-testid="week-prev" className="p-2 hover:bg-gray-50 text-slate-500">
-              <ChevronLeft size={14} />
-            </button>
+            <button onClick={() => setWeekStart((w) => shiftWeek(w, -1))} data-testid="week-prev"
+              className="p-2 hover:bg-gray-50 text-slate-500"><ChevronLeft size={14} /></button>
             <span className="px-3 text-sm text-slate-700 font-medium whitespace-nowrap" data-testid="week-label">
               {weekLabel(weekStart)}
             </span>
-            <button onClick={() => setWeekStart((w) => shiftWeek(w, 1))}
-              data-testid="week-next" className="p-2 hover:bg-gray-50 text-slate-500">
-              <ChevronRight size={14} />
-            </button>
+            <button onClick={() => setWeekStart((w) => shiftWeek(w, 1))} data-testid="week-next"
+              className="p-2 hover:bg-gray-50 text-slate-500"><ChevronRight size={14} /></button>
           </div>
           <button onClick={() => setWeekStart(getThisMonday())}
-            className="text-xs text-[#0052CC] hover:underline px-2">
-            Semaine en cours
-          </button>
+            className="text-xs text-[#0052CC] hover:underline px-2">Semaine en cours</button>
         </div>
-        <button
-          onClick={handleSubmit}
+        <button onClick={handleSubmit}
           disabled={!grid?.can_submit || submitting || !resourceId}
           data-testid="submit-week-btn"
-          className="flex items-center gap-2 px-4 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] disabled:opacity-40 transition-colors"
-        >
+          className="flex items-center gap-2 px-4 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] disabled:opacity-40 transition-colors">
           {submitting ? <RefreshCw size={13} className="animate-spin" /> : <Send size={13} />}
           Soumettre la semaine
         </button>
       </div>
 
-      {/* Grid */}
+      {/* Info workflow */}
+      <div className="flex items-center gap-3 mb-4 px-3 py-2 bg-blue-50 border border-blue-100 rounded-lg">
+        <Info size={13} className="text-blue-500 shrink-0" />
+        <div className="flex items-center gap-2">
+          <span className="text-[11px] text-blue-700 font-medium">Circuit de validation :</span>
+          <WorkflowStepper currentStatus="draft" />
+        </div>
+      </div>
+
       {!resourceId ? (
         <div className="py-16 text-center text-slate-400 text-sm border-2 border-dashed border-gray-200 rounded-lg">
           Sélectionnez une ressource pour saisir ses temps
@@ -218,24 +249,29 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
                     const editable = canEdit(e?.status);
                     return (
                       <td key={day} className={`px-2 py-1.5 text-center ${cellBg(e?.status)}`}>
-                        <input
-                          type="number"
-                          min={0}
-                          max={grid.daily_cap_jh * 2}
-                          step={0.5}
-                          value={cells[key] ?? 0}
-                          onChange={(ev) => handleCell(row.work_allocation_id, day, ev.target.value)}
-                          disabled={!editable}
-                          data-testid={`cell-${row.work_allocation_id}-${day}`}
-                          className={`w-16 text-center text-xs rounded border py-1 px-1 transition-colors
-                            ${editable
-                              ? "border-gray-200 focus:border-[#0052CC] focus:outline-none focus:ring-1 focus:ring-[#0052CC]/30"
-                              : "border-transparent bg-transparent text-slate-500 cursor-not-allowed"}
-                            ${e?.status === "submitted" ? "text-blue-700" : ""}
-                            ${e?.status === "validated" ? "text-emerald-700 font-semibold" : ""}
-                            ${e?.status === "rejected"  ? "text-rose-600" : ""}
-                          `}
-                        />
+                        <div className="relative group">
+                          <input type="number" min={0} max={grid.daily_cap_jh * 2} step={0.5}
+                            value={cells[key] ?? 0}
+                            onChange={(ev) => handleCell(row.work_allocation_id, day, ev.target.value)}
+                            disabled={!editable}
+                            data-testid={`cell-${row.work_allocation_id}-${day}`}
+                            className={`w-16 text-center text-xs rounded border py-1 px-1 transition-colors
+                              ${editable
+                                ? "border-gray-200 focus:border-[#0052CC] focus:outline-none focus:ring-1 focus:ring-[#0052CC]/30"
+                                : "border-transparent bg-transparent text-slate-500 cursor-not-allowed"}
+                              ${e?.status === "submitted"   ? "text-blue-700" : ""}
+                              ${e?.status === "cp_reviewed" ? "text-amber-700 font-semibold" : ""}
+                              ${e?.status === "validated"   ? "text-emerald-700 font-semibold" : ""}
+                              ${e?.status === "rejected"    ? "text-rose-600" : ""}
+                            `}
+                          />
+                          {/* Tooltip motif rejet */}
+                          {e?.status === "rejected" && e?.rejection_reason && (
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-rose-800 text-white text-[10px] rounded shadow-lg z-10 w-48 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                              Rejeté : {e.rejection_reason}
+                            </div>
+                          )}
+                        </div>
                       </td>
                     );
                   })}
@@ -244,14 +280,13 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
                   </td>
                 </tr>
               ))}
-              {/* Totaux journaliers */}
               <tr className="bg-[#EBF2FF] border-t-2 border-[#0052CC]/20">
                 <td className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-[#0052CC]">Total / jour</td>
                 {grid.days.map((day) => (
                   <td key={day} className="px-2 py-2 text-center text-xs font-bold text-[#0052CC] tabular-nums">
                     {grid.day_totals[day] > 0 ? grid.day_totals[day] : "—"}
                     {grid.daily_cap_jh > 0 && grid.day_totals[day] > grid.daily_cap_jh && (
-                      <AlertTriangle size={10} className="inline ml-1 text-rose-500" title="Dépasse la capacité journalière" />
+                      <AlertTriangle size={10} className="inline ml-1 text-rose-500" />
                     )}
                   </td>
                 ))}
@@ -270,184 +305,303 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
   );
 }
 
-// ─── ONGLET 2 : Validation ───────────────────────────────────────────────────
-function ValidationView({ refresh }) {
-  const [groups, setGroups]       = useState([]);
-  const [loading, setLoading]     = useState(false);
-  const [selected, setSelected]   = useState({});  // key→bool
-  const [rejectModal, setRejectModal] = useState(null); // {ids}
-  const [rejectReason, setRejectReason] = useState("");
-  const [open, setOpen]           = useState({});
-
-  const load = useCallback(async () => {
-    setLoading(true);
-    try {
-      const r = await timesheetsAPI.getValidation();
-      setGroups(r.data);
-      setOpen(Object.fromEntries(r.data.map((g, i) => [i, true])));
-    } catch { toast.error("Erreur chargement validation"); }
-    finally { setLoading(false); }
-  }, []);
-
-  useEffect(() => { load(); }, [load, refresh]);
-
-  const handleValidate = async (ids) => {
-    try {
-      const r = await timesheetsAPI.validateTimesheets({ timesheet_ids: ids });
-      toast.success(`${r.data.validated} timesheet(s) validé(s)`);
-      load();
-    } catch (err) { toast.error(err.response?.data?.detail || "Erreur validation"); }
-  };
-
-  const handleReject = async () => {
-    if (!rejectReason.trim()) { toast.error("Motif obligatoire"); return; }
-    try {
-      const r = await timesheetsAPI.rejectTimesheets({ timesheet_ids: rejectModal.ids, rejection_reason: rejectReason });
-      toast.success(`${r.data.rejected} timesheet(s) rejeté(s)`);
-      setRejectModal(null); setRejectReason(""); load();
-    } catch (err) { toast.error(err.response?.data?.detail || "Erreur rejet"); }
-  };
-
-  const selectedAll = groups.flatMap((g, i) => selected[i] ? g.ts_ids : []);
-
-  if (loading) return <div className="py-16 text-center text-slate-400 text-sm">Chargement...</div>;
-  if (!groups.length) return (
-    <div className="py-16 text-center border-2 border-dashed border-gray-200 rounded-lg" data-testid="validation-empty">
-      <CheckCircle size={32} className="text-emerald-300 mx-auto mb-2" />
-      <p className="text-sm text-slate-400">Aucune soumission en attente de validation</p>
-    </div>
-  );
-
+// ─── Composant partagé : carte groupe ────────────────────────────────────────
+function GroupCard({
+  g, idx, open, onToggle,
+  selected, onSelect,
+  actionLabel, actionIcon: ActionIcon, actionClass,
+  onAction, onReject,
+  showTimeout = false,
+  showStatus = false,
+}) {
   return (
-    <div data-testid="validation-view">
-      {/* Bulk actions */}
-      <div className="flex items-center justify-between mb-4">
-        <div className="flex items-center gap-2">
-          <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
-            <input type="checkbox"
-              checked={groups.every((_, i) => selected[i])}
-              onChange={(e) => setSelected(Object.fromEntries(groups.map((_, i) => [i, e.target.checked])))}
-              data-testid="bulk-select-all"
-              className="accent-[#0052CC]" />
-            Tout sélectionner
-          </label>
-          {selectedAll.length > 0 && (
-            <span className="text-xs text-[#0052CC] font-semibold">
-              {selectedAll.length} timesheet(s) sélectionné(s)
+    <div className="bg-white border border-gray-200 rounded shadow-sm mb-4"
+      data-testid={`validation-group-${g.resource_id}`}>
+      <div
+        className="flex items-center justify-between px-5 py-3 border-b border-gray-100 cursor-pointer"
+        onClick={onToggle}
+      >
+        <div className="flex items-center gap-3">
+          <input type="checkbox" checked={!!selected}
+            onChange={(e) => { e.stopPropagation(); onSelect(e.target.checked); }}
+            className="accent-[#0052CC]" data-testid={`group-check-${g.resource_id}`} />
+          <div>
+            <span className="font-semibold text-slate-800 text-sm">{g.resource_name}</span>
+            <span className="text-slate-400 text-xs ml-2">Semaine du {g.week_start}</span>
+          </div>
+          <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
+            {g.total_jh} JH
+          </span>
+          {showStatus && <StatusBadge status={g.status} />}
+          {showTimeout && g.timeout && (
+            <span className="flex items-center gap-1 text-[10px] font-bold text-rose-700 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full"
+              data-testid={`timeout-badge-${g.resource_id}`}>
+              <AlertTriangle size={10} /> Timeout {g.timeout_days}j
+            </span>
+          )}
+          {/* Projets */}
+          {g.project_names?.length > 0 && (
+            <span className="text-[10px] text-slate-400 hidden md:block truncate max-w-[160px]">
+              {g.project_names[0]}
             </span>
           )}
         </div>
-        {selectedAll.length > 0 && (
-          <div className="flex items-center gap-2">
-            <button onClick={() => handleValidate(selectedAll)}
-              data-testid="bulk-validate-btn"
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded hover:bg-emerald-700">
-              <CheckCircle size={12} /> Valider la sélection
-            </button>
-            <button onClick={() => setRejectModal({ ids: selectedAll })}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 text-white text-xs font-semibold rounded hover:bg-rose-700">
-              <X size={12} /> Rejeter la sélection
-            </button>
-          </div>
-        )}
+        <div className="flex items-center gap-2">
+          <button onClick={(e) => { e.stopPropagation(); onAction(g.ts_ids); }}
+            data-testid={`action-btn-${g.resource_id}`}
+            className={`flex items-center gap-1 px-3 py-1.5 text-white text-xs font-semibold rounded ${actionClass}`}>
+            <ActionIcon size={11} /> {actionLabel}
+          </button>
+          <button onClick={(e) => { e.stopPropagation(); onReject(g.ts_ids); }}
+            data-testid={`reject-btn-${g.resource_id}`}
+            className="flex items-center gap-1 px-3 py-1.5 bg-rose-600 text-white text-xs font-semibold rounded hover:bg-rose-700">
+            <X size={11} /> Rejeter
+          </button>
+        </div>
       </div>
-
-      {/* Groups */}
-      {groups.map((g, i) => (
-        <div key={i} className="bg-white border border-gray-200 rounded shadow-sm mb-4" data-testid={`validation-group-${g.resource_id}`}>
-          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100 cursor-pointer"
-            onClick={() => setOpen((p) => ({ ...p, [i]: !p[i] }))}>
-            <div className="flex items-center gap-3">
-              <input type="checkbox" checked={!!selected[i]}
-                onChange={(e) => { e.stopPropagation(); setSelected((p) => ({ ...p, [i]: e.target.checked })); }}
-                className="accent-[#0052CC]" />
-              <div>
-                <span className="font-semibold text-slate-800 text-sm">{g.resource_name}</span>
-                <span className="text-slate-400 text-xs ml-2">Semaine du {g.week_start}</span>
-              </div>
-              <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
-                {g.total_jh} JH soumis
-              </span>
-            </div>
-            <div className="flex items-center gap-2">
-              <button onClick={(e) => { e.stopPropagation(); handleValidate(g.ts_ids); }}
-                data-testid={`validate-btn-${g.resource_id}`}
-                className="flex items-center gap-1 px-3 py-1.5 bg-emerald-600 text-white text-xs font-semibold rounded hover:bg-emerald-700">
-                <CheckCircle size={11} /> Valider
-              </button>
-              <button onClick={(e) => { e.stopPropagation(); setRejectModal({ ids: g.ts_ids }); }}
-                data-testid={`reject-btn-${g.resource_id}`}
-                className="flex items-center gap-1 px-3 py-1.5 bg-rose-600 text-white text-xs font-semibold rounded hover:bg-rose-700">
-                <X size={11} /> Rejeter
-              </button>
-            </div>
-          </div>
-          {open[i] && (
-            <table className="w-full text-xs">
-              <thead>
-                <tr className="bg-gray-50">
-                  <th className="px-4 py-2 text-left text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Projet</th>
-                  <th className="px-3 py-2 text-left text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Tâche</th>
-                  <th className="px-3 py-2 text-left text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Phase</th>
-                  <th className="px-3 py-2 text-left text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Date</th>
-                  <th className="px-3 py-2 text-right text-[10px] uppercase tracking-widest text-slate-400 font-semibold">JH</th>
-                </tr>
-              </thead>
-              <tbody>
-                {g.entries.map((e) => (
-                  <tr key={e.timesheet_id} className="border-t border-gray-50 hover:bg-blue-50/20">
-                    <td className="px-4 py-2 text-slate-700 truncate max-w-[180px]">{e.project_name}</td>
-                    <td className="px-3 py-2 text-slate-600 truncate max-w-[160px]">{e.task_name}</td>
-                    <td className="px-3 py-2 text-slate-500">{e.phase}</td>
-                    <td className="px-3 py-2 text-slate-500 font-mono">
-                      {new Date(e.date + "T00:00:00").toLocaleDateString("fr-FR")}
-                    </td>
-                    <td className="px-3 py-2 text-right font-semibold text-amber-700 tabular-nums">{e.jh_value}</td>
-                  </tr>
-                ))}
-              </tbody>
-            </table>
-          )}
-        </div>
-      ))}
-
-      {/* Reject modal */}
-      {rejectModal && (
-        <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
-          <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md" data-testid="reject-modal">
-            <h3 className="font-bold text-slate-800 text-base mb-3 flex items-center gap-2">
-              <AlertTriangle size={16} className="text-rose-500" /> Motif du rejet
-            </h3>
-            <textarea
-              value={rejectReason}
-              onChange={(e) => setRejectReason(e.target.value)}
-              placeholder="Expliquez la raison du rejet (obligatoire)…"
-              className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-200"
-              rows={3}
-              data-testid="reject-reason-input"
-            />
-            <div className="flex justify-end gap-2 mt-4">
-              <button onClick={() => { setRejectModal(null); setRejectReason(""); }}
-                className="px-4 py-2 text-sm text-slate-600 border border-gray-200 rounded hover:bg-gray-50">
-                Annuler
-              </button>
-              <button onClick={handleReject} disabled={!rejectReason.trim()}
-                data-testid="confirm-reject-btn"
-                className="px-4 py-2 text-sm text-white bg-rose-600 rounded hover:bg-rose-700 disabled:opacity-40">
-                Confirmer le rejet
-              </button>
-            </div>
-          </div>
-        </div>
+      {open && (
+        <table className="w-full text-xs">
+          <thead>
+            <tr className="bg-gray-50">
+              <th className="px-4 py-2 text-left text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Projet</th>
+              <th className="px-3 py-2 text-left text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Tâche</th>
+              <th className="px-3 py-2 text-left text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Phase</th>
+              <th className="px-3 py-2 text-left text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Date</th>
+              <th className="px-3 py-2 text-right text-[10px] uppercase tracking-widest text-slate-400 font-semibold">JH</th>
+              {showStatus && <th className="px-3 py-2 text-center text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Statut</th>}
+            </tr>
+          </thead>
+          <tbody>
+            {g.entries.map((e) => (
+              <tr key={e.timesheet_id} className="border-t border-gray-50 hover:bg-blue-50/20">
+                <td className="px-4 py-2 text-slate-700 truncate max-w-[180px]">{e.project_name}</td>
+                <td className="px-3 py-2 text-slate-600 truncate max-w-[160px]">{e.task_name}</td>
+                <td className="px-3 py-2 text-slate-500">{e.phase}</td>
+                <td className="px-3 py-2 text-slate-500 font-mono">
+                  {new Date(e.date + "T00:00:00").toLocaleDateString("fr-FR")}
+                </td>
+                <td className="px-3 py-2 text-right font-semibold text-amber-700 tabular-nums">{e.jh_value}</td>
+                {showStatus && <td className="px-3 py-2 text-center"><StatusBadge status={e.status} /></td>}
+              </tr>
+            ))}
+          </tbody>
+        </table>
       )}
     </div>
   );
 }
 
-// ─── ONGLET 3 : Rapports ─────────────────────────────────────────────────────
+// ─── Modale de rejet ─────────────────────────────────────────────────────────
+function RejectModal({ onConfirm, onClose }) {
+  const [reason, setReason] = useState("");
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+      <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md" data-testid="reject-modal">
+        <h3 className="font-bold text-slate-800 text-base mb-3 flex items-center gap-2">
+          <AlertTriangle size={16} className="text-rose-500" /> Motif du rejet
+        </h3>
+        <p className="text-xs text-slate-500 mb-3">
+          Le motif sera transmis à la ressource. La feuille de temps sera remise en brouillon pour correction.
+        </p>
+        <textarea value={reason} onChange={(e) => setReason(e.target.value)}
+          placeholder="Expliquez la raison du rejet (obligatoire)…"
+          className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-200"
+          rows={3} data-testid="reject-reason-input" />
+        <div className="flex justify-end gap-2 mt-4">
+          <button onClick={onClose}
+            className="px-4 py-2 text-sm text-slate-600 border border-gray-200 rounded hover:bg-gray-50">
+            Annuler
+          </button>
+          <button onClick={() => onConfirm(reason)} disabled={!reason.trim()}
+            data-testid="confirm-reject-btn"
+            className="px-4 py-2 text-sm text-white bg-rose-600 rounded hover:bg-rose-700 disabled:opacity-40">
+            Confirmer le rejet
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+// ─── Sub-vue générique de validation ─────────────────────────────────────────
+function ValidationSubView({ view, actionLabel, actionIcon: ActionIcon, actionClass, actionToastFn, showTimeout, showStatus, refresh }) {
+  const [groups, setGroups]       = useState([]);
+  const [loading, setLoading]     = useState(false);
+  const [selected, setSelected]   = useState({});
+  const [open, setOpen]           = useState({});
+  const [rejectIds, setRejectIds] = useState(null);
+
+  const load = useCallback(async () => {
+    setLoading(true);
+    try {
+      const r = await timesheetsAPI.getValidation(view);
+      setGroups(r.data);
+      setOpen(Object.fromEntries(r.data.map((_, i) => [i, true])));
+    } catch { toast.error("Erreur chargement"); }
+    finally { setLoading(false); }
+  }, [view]);
+
+  useEffect(() => { load(); }, [load, refresh]);
+
+  const handleAction = async (ids) => {
+    try {
+      const r = await timesheetsAPI.validateTimesheets({ timesheet_ids: ids });
+      toast.success(actionToastFn(r.data));
+      load();
+    } catch (err) { toast.error(err.response?.data?.detail || "Erreur"); }
+  };
+
+  const handleRejectConfirm = async (reason) => {
+    try {
+      const r = await timesheetsAPI.rejectTimesheets({ timesheet_ids: rejectIds, rejection_reason: reason });
+      toast.success(`${r.data.rejected} timesheet(s) rejeté(s) et remis en brouillon`);
+      setRejectIds(null); load();
+    } catch (err) { toast.error(err.response?.data?.detail || "Erreur rejet"); }
+  };
+
+  const selectedAll = groups.flatMap((g, i) => selected[i] ? g.ts_ids : []);
+
+  if (loading) return <div className="py-12 text-center text-slate-400 text-sm">Chargement...</div>;
+  if (!groups.length) return (
+    <div className="py-12 text-center border-2 border-dashed border-gray-200 rounded-lg" data-testid={`validation-empty-${view}`}>
+      <CheckCircle size={32} className="text-emerald-300 mx-auto mb-2" />
+      <p className="text-sm text-slate-400">Aucune soumission en attente</p>
+    </div>
+  );
+
+  return (
+    <div data-testid={`validation-view-${view}`}>
+      {/* Bulk actions */}
+      <div className="flex items-center justify-between mb-4">
+        <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+          <input type="checkbox"
+            checked={groups.length > 0 && groups.every((_, i) => selected[i])}
+            onChange={(e) => setSelected(Object.fromEntries(groups.map((_, i) => [i, e.target.checked])))}
+            data-testid="bulk-select-all" className="accent-[#0052CC]" />
+          Tout sélectionner
+          {selectedAll.length > 0 && (
+            <span className="text-[#0052CC] font-semibold ml-1">({selectedAll.length})</span>
+          )}
+        </label>
+        {selectedAll.length > 0 && (
+          <div className="flex gap-2">
+            <button onClick={() => handleAction(selectedAll)} data-testid="bulk-validate-btn"
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-semibold rounded ${actionClass}`}>
+              <ActionIcon size={12} /> Valider la sélection
+            </button>
+            <button onClick={() => setRejectIds(selectedAll)}
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 text-white text-xs font-semibold rounded hover:bg-rose-700">
+              <X size={12} /> Rejeter
+            </button>
+          </div>
+        )}
+      </div>
+
+      {groups.map((g, i) => (
+        <GroupCard key={i} g={g} idx={i}
+          open={!!open[i]} onToggle={() => setOpen((p) => ({ ...p, [i]: !p[i] }))}
+          selected={!!selected[i]} onSelect={(v) => setSelected((p) => ({ ...p, [i]: v }))}
+          actionLabel={actionLabel} actionIcon={ActionIcon} actionClass={actionClass}
+          onAction={handleAction} onReject={(ids) => setRejectIds(ids)}
+          showTimeout={showTimeout} showStatus={showStatus}
+        />
+      ))}
+
+      {rejectIds && (
+        <RejectModal
+          onConfirm={handleRejectConfirm}
+          onClose={() => setRejectIds(null)}
+        />
+      )}
+    </div>
+  );
+}
+
+// ─── ONGLET 2 : Validation (3 sous-vues) ─────────────────────────────────────
+function ValidationView({ user, refresh }) {
+  const isPmo = user?.role === "TENANT_ADMIN" || user?.role === "PMO_USER";
+  const [subView, setSubView] = useState("valideur");
+
+  const SUB_TABS = [
+    { id: "valideur", label: "Valideur N+1",    icon: Users,
+      desc: "Timesheets soumis à valider en tant que N+1 de la ressource" },
+    { id: "cp",       label: "Chef de Projet",  icon: Briefcase,
+      desc: "Timesheets déjà validés N+1, à approuver définitivement" },
+    ...(isPmo ? [{ id: "pmo", label: "PMO / Admin", icon: Shield,
+      desc: "Vue complète — bypass possible sur tous les statuts" }] : []),
+  ];
+
+  const viewConfig = {
+    valideur: {
+      actionLabel: "Valider (→ CP)",
+      actionIcon: CheckCircle,
+      actionClass: "bg-[#0052CC] hover:bg-[#0047B3]",
+      actionToastFn: (d) => `${d.advanced_to_cp_reviewed ?? 0} timesheet(s) transmis au Chef de Projet`,
+      showTimeout: false, showStatus: false,
+    },
+    cp: {
+      actionLabel: "Valider définitivement",
+      actionIcon: CheckCircle,
+      actionClass: "bg-emerald-600 hover:bg-emerald-700",
+      actionToastFn: (d) => `${d.validated ?? 0} timesheet(s) validé(s) définitivement`,
+      showTimeout: true, showStatus: false,
+    },
+    pmo: {
+      actionLabel: "Bypass → Valider",
+      actionIcon: Shield,
+      actionClass: "bg-violet-600 hover:bg-violet-700",
+      actionToastFn: (d) => `${d.validated ?? 0} timesheet(s) validé(s) en bypass PMO`,
+      showTimeout: true, showStatus: true,
+    },
+  };
+
+  const cfg = viewConfig[subView];
+
+  return (
+    <div data-testid="validation-view">
+      {/* Sub-tabs */}
+      <div className="flex gap-1 mb-5 border-b border-gray-200">
+        {SUB_TABS.map(({ id, label, icon: Icon, desc }) => (
+          <button key={id} onClick={() => setSubView(id)}
+            data-testid={`sub-tab-${id}`}
+            title={desc}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold border-b-2 -mb-px transition-colors ${
+              subView === id
+                ? "border-[#0052CC] text-[#0052CC]"
+                : "border-transparent text-slate-500 hover:text-slate-700"
+            }`}>
+            <Icon size={13} /> {label}
+          </button>
+        ))}
+      </div>
+
+      {/* Description de la vue active */}
+      <div className="flex items-start gap-2 mb-4 px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg">
+        <Info size={13} className="text-slate-400 mt-0.5 shrink-0" />
+        <p className="text-[11px] text-slate-500">
+          {SUB_TABS.find((t) => t.id === subView)?.desc}
+        </p>
+      </div>
+
+      <ValidationSubView
+        key={subView}
+        view={subView}
+        actionLabel={cfg.actionLabel}
+        actionIcon={cfg.actionIcon}
+        actionClass={cfg.actionClass}
+        actionToastFn={cfg.actionToastFn}
+        showTimeout={cfg.showTimeout}
+        showStatus={cfg.showStatus}
+        refresh={refresh}
+      />
+    </div>
+  );
+}
+
+// ─── ONGLET 3 : Rapports ──────────────────────────────────────────────────────
 function ReportsView() {
-  const today   = new Date().toISOString().split("T")[0];
-  const past90  = new Date(Date.now() - 90 * 86400000).toISOString().split("T")[0];
+  const today  = new Date().toISOString().split("T")[0];
+  const past90 = new Date(Date.now() - 90 * 86400000).toISOString().split("T")[0];
   const [dim, setDim]   = useState("resource");
   const [start, setStart] = useState(past90);
   const [end, setEnd]     = useState(today);
@@ -456,10 +610,8 @@ function ReportsView() {
 
   const load = async () => {
     setLoading(true);
-    try {
-      const r = await timesheetsAPI.getReport(dim, start, end);
-      setRows(r.data);
-    } catch { toast.error("Erreur chargement rapport"); }
+    try { const r = await timesheetsAPI.getReport(dim, start, end); setRows(r.data); }
+    catch { toast.error("Erreur chargement rapport"); }
     finally { setLoading(false); }
   };
 
@@ -470,34 +622,29 @@ function ReportsView() {
       const r = await timesheetsAPI.getReportCsv(dim, start, end);
       const blob = new Blob([r.data], { type: "text/csv;charset=utf-8" });
       const url  = URL.createObjectURL(blob);
-      const a    = document.createElement("a"); a.href = url; a.download = "timesheets_report.csv";
+      const a = document.createElement("a"); a.href = url; a.download = "timesheets_report.csv";
       a.click(); URL.revokeObjectURL(url);
     } catch { toast.error("Erreur export CSV"); }
   };
 
   return (
     <div data-testid="reports-view">
-      {/* Filters */}
       <div className="bg-white border border-gray-200 rounded shadow-sm p-4 mb-6">
         <div className="flex items-center gap-3 flex-wrap">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-widest">
             <Filter size={11} /> Filtres
           </div>
-          <select value={dim} onChange={(e) => setDim(e.target.value)}
-            data-testid="report-dimension"
+          <select value={dim} onChange={(e) => setDim(e.target.value)} data-testid="report-dimension"
             className="text-xs border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:border-[#0052CC] bg-white text-slate-600">
             <option value="resource">Par ressource</option>
             <option value="team">Par équipe</option>
             <option value="project">Par projet</option>
           </select>
-          <input type="date" value={start} onChange={(e) => setStart(e.target.value)}
-            data-testid="report-start"
+          <input type="date" value={start} onChange={(e) => setStart(e.target.value)} data-testid="report-start"
             className="text-xs border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:border-[#0052CC]" />
-          <input type="date" value={end} onChange={(e) => setEnd(e.target.value)}
-            data-testid="report-end"
+          <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} data-testid="report-end"
             className="text-xs border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:border-[#0052CC]" />
-          <button onClick={load} disabled={loading}
-            data-testid="report-load-btn"
+          <button onClick={load} disabled={loading} data-testid="report-load-btn"
             className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0052CC] text-white text-xs font-semibold rounded hover:bg-[#0047B3] disabled:opacity-50">
             {loading ? <RefreshCw size={11} className="animate-spin" /> : <Filter size={11} />}
             Actualiser
@@ -513,7 +660,7 @@ function ReportsView() {
 
       {rows.length === 0 ? (
         <div className="py-16 text-center border-2 border-dashed border-gray-200 rounded-lg text-slate-400 text-sm">
-          {loading ? "Chargement…" : "Aucune donnée validée sur la période sélectionnée. Cliquez sur Actualiser."}
+          {loading ? "Chargement…" : "Aucune donnée validée sur la période. Cliquez sur Actualiser."}
         </div>
       ) : (
         <div className="bg-white border border-gray-200 rounded shadow-sm overflow-x-auto" data-testid="report-table">
@@ -551,10 +698,10 @@ function ReportsView() {
   );
 }
 
-// ─── Page principale ─────────────────────────────────────────────────────────
+// ─── Page principale ──────────────────────────────────────────────────────────
 export default function Timesheets() {
   const { user } = useAuth();
-  const [tab, setTab]         = useState("saisie");
+  const [tab, setTab]               = useState("saisie");
   const [resourceId, setResourceId] = useState(user?.resource_id || null);
   const [allResources, setAllResources] = useState([]);
   const [validRefresh, setValidRefresh] = useState(0);
@@ -563,33 +710,32 @@ export default function Timesheets() {
     resourcesAPI.list().then((r) => setAllResources(r.data)).catch(() => {});
   }, []);
 
-  // Auto-sélect la ressource de l'utilisateur connecté si elle est présente dans la liste
   useEffect(() => {
     if (!resourceId && user?.resource_id) setResourceId(user.resource_id);
   }, [user, resourceId]);
 
   const canValidate = user?.role !== "READ_ONLY";
   const TABS = [
-    { id: "saisie", label: "Ma saisie", icon: Clock },
+    { id: "saisie",     label: "Ma saisie",  icon: Clock },
     ...(canValidate ? [{ id: "validation", label: "Validation", icon: CheckCircle }] : []),
-    { id: "rapports", label: "Rapports", icon: Download },
+    { id: "rapports",   label: "Rapports",   icon: Download },
   ];
 
   return (
     <div className="p-8" data-testid="timesheets-page">
-      {/* Header */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-1">
           <Clock size={18} className="text-[#0052CC]" />
           <h1 className="font-heading text-3xl font-bold text-[#0F172A] uppercase tracking-tight">Timesheets</h1>
         </div>
-        <p className="text-sm text-slate-500">Saisie des temps · Validation hiérarchique · Rapports</p>
+        <p className="text-sm text-slate-500">
+          Saisie des temps · Validation multi-acteurs (N+1 → Chef de Projet → PMO)
+        </p>
       </div>
 
-      {/* Tabs */}
       <div className="flex items-center gap-1 mb-6 border-b border-gray-200">
         {TABS.map(({ id, label, icon: Icon }) => (
-          <button key={id} onClick={() => setTab(id)}
+          <button key={id} onClick={() => { setTab(id); if (id === "validation") setValidRefresh((n) => n + 1); }}
             data-testid={`tab-${id}`}
             className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
               tab === id ? "border-[#0052CC] text-[#0052CC]" : "border-transparent text-slate-500 hover:text-slate-700"
@@ -599,7 +745,6 @@ export default function Timesheets() {
         ))}
       </div>
 
-      {/* Tab content */}
       {tab === "saisie" && (
         <TimesheetGrid
           resourceId={resourceId}
@@ -609,7 +754,7 @@ export default function Timesheets() {
         />
       )}
       {tab === "validation" && canValidate && (
-        <ValidationView refresh={validRefresh} />
+        <ValidationView user={user} refresh={validRefresh} />
       )}
       {tab === "rapports" && <ReportsView />}
     </div>

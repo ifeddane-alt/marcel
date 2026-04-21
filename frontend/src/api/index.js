@@ -138,7 +138,7 @@ export const timesheetsAPI = {
   upsertEntry:       (data)  => api.put("/timesheets/entry", data),
   submitWeek:        (data)  => api.post("/timesheets/submit-week", data),
   getPendingCount:   ()      => api.get("/timesheets/pending-count"),
-  getValidation:     (week)  => api.get(`/timesheets/validation${week ? `?week_start=${week}` : ""}`),
+  getValidation:     (view, week) => api.get(`/timesheets/validation?view=${view}${week ? `&week_start=${week}` : ""}`),
   validateTimesheets:(data)  => api.post("/timesheets/validate", data),
   rejectTimesheets:  (data)  => api.post("/timesheets/reject", data),
   getReport:         (dim, start, end) => api.get(`/timesheets/report?dimension=${dim}&start=${start}&end=${end}`),

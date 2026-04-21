@@ -27,7 +27,13 @@ async def create_resource(data: ResourceCreate, current_user: TokenPayload) -> d
 
 async def update_resource(resource_id: str, data: ResourceUpdate, current_user: TokenPayload) -> dict:
     require_write(current_user)
+    # Inclure les champs None explicitement pour permettre la mise à null
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
+    # Permettre la mise à null de validator_resource_id
+    raw = data.model_dump()
+    if "validator_resource_id" in raw:
+        update_data["validator_resource_id"] = raw["validator_resource_id"]
+
     result = await db.resources.update_one(
         {"resource_id": resource_id, "tenant_id": current_user.tenant_id},
         {"$set": update_data},

@@ -37,18 +37,21 @@ async def submit_week(
     return await service.submit_week(data, current_user)
 
 
-# S3-02
+# S3-02 — Compteur badge (contextuel par rôle)
 @router.get("/timesheets/pending-count")
 async def get_pending_count(current_user: TokenPayload = Depends(get_current_user)):
     return {"count": await service.get_pending_count(current_user)}
 
 
+# S3-02 — Vue validation multi-acteurs
+# view = "valideur" | "cp" | "pmo"
 @router.get("/timesheets/validation")
 async def get_validation_view(
+    view: str = Query("valideur", regex="^(valideur|cp|pmo)$"),
     week_start: Optional[str] = None,
     current_user: TokenPayload = Depends(get_current_user),
 ):
-    return await service.get_validation_view(week_start, current_user)
+    return await service.get_validation_view(view, week_start, current_user)
 
 
 @router.post("/timesheets/validate")

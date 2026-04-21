@@ -2,6 +2,9 @@ from pydantic import BaseModel, Field
 from typing import List, Optional, Literal
 
 
+TimesheetStatus = Literal["draft", "submitted", "cp_reviewed", "validated", "rejected"]
+
+
 class TimesheetEntryUpsert(BaseModel):
     resource_id: str
     work_allocation_id: str

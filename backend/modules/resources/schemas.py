@@ -11,6 +11,7 @@ class ResourceCreate(BaseModel):
     availability_rate: Optional[float] = 100
     capacity_jh_month: float = 15
     email: Optional[str] = None
+    validator_resource_id: Optional[str] = None
 
 
 class ResourceUpdate(BaseModel):
@@ -22,3 +23,4 @@ class ResourceUpdate(BaseModel):
     availability_rate: Optional[float] = None
     capacity_jh_month: Optional[float] = None
     email: Optional[str] = None
+    validator_resource_id: Optional[str] = None
