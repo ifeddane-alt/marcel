@@ -1000,7 +1000,7 @@ export default function ProjectDetail() {
         </div>
 
         {/* Work Allocations — S1-05 */}
-        <div className="bg-white border border-gray-200 rounded shadow-sm" data-testid="work-allocations-section">
+        <div className="col-span-12 bg-white border border-gray-200 rounded shadow-sm" data-testid="work-allocations-section">
           <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
             <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-500 font-semibold">
               <Clock size={13} className="text-[#0052CC]" />
@@ -1072,7 +1072,7 @@ export default function ProjectDetail() {
 
         {/* Team Consumption — S1-06 */}
         {teamConsumption.length > 0 && (
-          <div className="bg-white border border-gray-200 rounded shadow-sm" data-testid="team-consumption-section">
+          <div className="col-span-12 bg-white border border-gray-200 rounded shadow-sm" data-testid="team-consumption-section">
             <div className="px-5 py-3 border-b border-gray-100">
               <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-500 font-semibold">
                 <Users size={13} className="text-[#0052CC]" />
