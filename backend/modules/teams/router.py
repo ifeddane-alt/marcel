@@ -24,6 +24,11 @@ async def get_capacity_alerts(current_user: TokenPayload = Depends(get_current_u
     return await service.get_capacity_alerts(current_user)
 
 
+@router.get("/teams/{team_id}")
+async def get_team_detail(team_id: str, current_user: TokenPayload = Depends(get_current_user)):
+    return await service.get_team_detail(team_id, current_user)
+
+
 @router.post("/teams", status_code=201)
 async def create_team(data: TeamCreate, current_user: TokenPayload = Depends(get_current_user)):
     return await service.create_team(data, current_user)

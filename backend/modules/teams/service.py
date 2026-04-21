@@ -211,7 +211,165 @@ async def get_capacity_alerts(current_user: TokenPayload) -> list:
     return alerts
 
 
-async def create_team(data: TeamCreate, current_user: TokenPayload) -> dict:
+async def get_team_detail(team_id: str, current_user: TokenPayload) -> dict:
+    """Retourne le détail complet d'une équipe : membres, affectations projets, charge mensuelle."""
+    team = await db.teams.find_one(
+        {"team_id": team_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
+    )
+    if not team:
+        raise HTTPException(status_code=404, detail="Équipe introuvable")
+
+    # Nom du manager
+    if team.get("manager_resource_id"):
+        mgr = await db.resources.find_one(
+            {"resource_id": team["manager_resource_id"]}, {"_id": 0, "name": 1}
+        )
+        team["manager_name"] = mgr["name"] if mgr else None
+    else:
+        team["manager_name"] = None
+
+    # Membres de l'équipe
+    members_raw = await db.resources.find(
+        {"team_id": team_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
+    ).to_list(None)
+    member_ids = [m["resource_id"] for m in members_raw]
+
+    # Mois courant pour charge effective
+    today = date.today()
+    current_month_str = today.replace(day=1).strftime("%Y-%m-%d")
+
+    current_allocs = await db.allocations.find(
+        {"resource_id": {"$in": member_ids}, "period_month": current_month_str},
+        {"_id": 0, "resource_id": 1, "jh_allocated": 1},
+    ).to_list(None) if member_ids else []
+    current_jh_by_res: dict = {}
+    for a in current_allocs:
+        rid = a["resource_id"]
+        current_jh_by_res[rid] = current_jh_by_res.get(rid, 0) + (a.get("jh_allocated") or 0)
+
+    total_capacity_jhm = 0.0
+    member_list = []
+    for m in members_raw:
+        capa_raw = m.get("capacity_jh_month") or 15
+        avail    = (m.get("availability_rate") or 100) / 100
+        capacity_jhm = round(capa_raw * avail, 1)
+        total_capacity_jhm += capacity_jhm
+        cur_jh = round(current_jh_by_res.get(m["resource_id"], 0), 1)
+        util_pct = round(cur_jh / capacity_jhm * 100, 1) if capacity_jhm > 0 else 0
+        member_list.append({
+            "resource_id": m["resource_id"],
+            "name": m.get("name", "?"),
+            "role": m.get("role", ""),
+            "tjm_eur": m.get("tjm_eur") or 0,
+            "availability_rate": m.get("availability_rate") or 100,
+            "capacity_jhm": capacity_jhm,
+            "current_month_jh": cur_jh,
+            "utilization_pct": util_pct,
+        })
+    member_list.sort(key=lambda x: x["name"])
+
+    # Affectations par projet (via work_allocations)
+    work_allocs: list = []
+    if member_ids:
+        work_allocs = await db.work_allocations.find(
+            {"resource_id": {"$in": member_ids}, "tenant_id": current_user.tenant_id},
+            {"_id": 0},
+        ).to_list(None)
+
+    project_allocations = []
+    if work_allocs:
+        task_ids = list({wa["task_id"] for wa in work_allocs if wa.get("task_id")})
+        tasks_docs = await db.tasks.find(
+            {"task_id": {"$in": task_ids}}, {"_id": 0, "task_id": 1, "project_id": 1}
+        ).to_list(None)
+        task_to_proj = {t["task_id"]: t["project_id"] for t in tasks_docs}
+
+        proj_ids = list(set(task_to_proj.values()))
+        projects_docs = await db.projects.find(
+            {"project_id": {"$in": proj_ids}, "tenant_id": current_user.tenant_id},
+            {"_id": 0, "project_id": 1, "name": 1, "status_rag": 1},
+        ).to_list(None)
+        proj_map = {p["project_id"]: p for p in projects_docs}
+
+        res_map = {m["resource_id"]: m for m in members_raw}
+        agg: dict = {}
+        for wa in work_allocs:
+            pid = task_to_proj.get(wa.get("task_id", ""))
+            if not pid:
+                continue
+            phase = wa.get("phase") or "—"
+            tjm   = (res_map.get(wa.get("resource_id", ""), {}) or {}).get("tjm_eur") or 0
+            pm    = wa.get("planned_md") or 0
+            cm    = wa.get("consumed_md") or 0
+            rm    = max(pm - cm, 0)
+            if pid not in agg:
+                agg[pid] = {}
+            if phase not in agg[pid]:
+                agg[pid][phase] = {"planned_md": 0.0, "consumed_md": 0.0, "raf_md": 0.0,
+                                   "consumed_cost_eur": 0.0, "raf_cost_eur": 0.0}
+            agg[pid][phase]["planned_md"]        += pm
+            agg[pid][phase]["consumed_md"]       += cm
+            agg[pid][phase]["raf_md"]            += rm
+            agg[pid][phase]["consumed_cost_eur"] += cm * tjm
+            agg[pid][phase]["raf_cost_eur"]      += rm * tjm
+
+        for pid, phases in agg.items():
+            proj = proj_map.get(pid, {})
+            total_row = {"planned_md": 0.0, "consumed_md": 0.0, "raf_md": 0.0,
+                         "consumed_cost_eur": 0.0, "raf_cost_eur": 0.0}
+            phases_list = []
+            for ph, vals in sorted(phases.items()):
+                phases_list.append({"phase": ph, **{k: round(v, 1) for k, v in vals.items()}})
+                for k in total_row:
+                    total_row[k] += vals[k]
+            project_allocations.append({
+                "project_id": pid,
+                "project_name": proj.get("name", "?"),
+                "status_rag": proj.get("status_rag", "green"),
+                "phases": phases_list,
+                "total": {k: round(v, 1) for k, v in total_row.items()},
+            })
+        project_allocations.sort(key=lambda x: -x["total"]["consumed_md"])
+
+    # Charge mensuelle sur 6 mois glissants
+    start_m = today.replace(day=1) - relativedelta(months=1)
+    monthly_load = []
+    for i in range(6):
+        m_date = start_m + relativedelta(months=i)
+        m_str  = m_date.strftime("%Y-%m-%d")
+        m_label = m_date.strftime("%Y-%m")
+        if member_ids:
+            month_allocs = await db.allocations.find(
+                {"resource_id": {"$in": member_ids}, "period_month": m_str},
+                {"_id": 0, "jh_allocated": 1},
+            ).to_list(None)
+            allocated = round(sum(a.get("jh_allocated") or 0 for a in month_allocs), 1)
+        else:
+            allocated = 0.0
+        util = round(allocated / total_capacity_jhm * 100, 1) if total_capacity_jhm > 0 else 0
+        monthly_load.append({
+            "month": m_label,
+            "capacity_jhm": round(total_capacity_jhm, 1),
+            "allocated_jh": allocated,
+            "utilization_pct": util,
+        })
+
+    return {
+        "team": {
+            "team_id": team["team_id"],
+            "name": team["name"],
+            "manager_name": team.get("manager_name"),
+            "train_id": team.get("train_id"),
+            "member_count": len(member_list),
+            "total_capacity_jhm": round(total_capacity_jhm, 1),
+        },
+        "members": member_list,
+        "project_allocations": project_allocations,
+        "monthly_load": monthly_load,
+    }
+
+
+
     require_write(current_user)
     doc = {
         "team_id": str(uuid.uuid4()),

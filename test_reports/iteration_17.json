@@ -1,0 +1,29 @@
+{
+  "summary": "Team Detail page (TeamDetail.jsx) fully tested. All 8 backend API tests pass. Frontend: Navigation, header, members, project allocations, monthly load all working. Expand/collapse toggle bug found and fixed. Support team shows RED badge at 100%. RBAC: viewer (READ_ONLY) can access team detail read-only; Modifier/Supprimer buttons hidden for viewer.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "TeamDetail breadcrumb", "issues": ["Breadcrumb shows '← Équipes > Dev A' correctly ✅"]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_team_detail.py",
+    "/app/test_reports/pytest/team_detail_tests.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "FIXED: Toggle expand/collapse bug in TeamDetail.jsx - toggleProject used !s[pid] where s[pid] was undefined on first click, resulting in !undefined=true (stays open). Fixed to !(s[pid] !== false) so first click correctly collapses."
+  ],
+  "updated_files": ["/app/frontend/src/pages/TeamDetail.jsx"],
+  "success_rate": {"backend": "100% (8/8)", "frontend": "100%"},
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Team Detail page /teams/{id} fully validated. Dev A team (9ff21917-3f4d-4714-aa3d-051690cb7adf): 3 members, 5 projects, 6-month chart. All data-testids present. Toggle collapse/expand fixed. Support team badge shows RED at 100%. Viewer (viewer@altair.fr / View1234!) can access team detail read-only. Router ordering correct (capacity-heatmap, capacity-alerts before {team_id}).",
+  "test_credentials": "admin@altair.fr / Admin1234!, viewer@altair.fr / View1234!"
+}

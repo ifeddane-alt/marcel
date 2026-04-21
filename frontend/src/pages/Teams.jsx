@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, Users } from "lucide-react";
+import { Link } from "react-router-dom";
+import { Plus, Pencil, Trash2, Users, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { teamsAPI, resourcesAPI } from "@/api";
 import TeamModal from "@/components/TeamModal";
@@ -90,53 +91,59 @@ export default function Teams() {
           return (
             <div
               key={team.team_id}
-              className="bg-white border border-gray-200 rounded shadow-sm hover:shadow-md transition-shadow"
+              className="bg-white border border-gray-200 rounded shadow-sm hover:shadow-md hover:border-[#0052CC]/30 transition-all"
               data-testid={`team-card-${team.team_id}`}
             >
-              <div className="p-5">
+              {/* Clickable zone → team detail */}
+              <Link
+                to={`/teams/${team.team_id}`}
+                className="block p-5 pb-3"
+                data-testid={`team-link-${team.team_id}`}
+              >
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-3">
                     <div className="w-10 h-10 rounded bg-[#0052CC]/10 flex items-center justify-center flex-shrink-0">
                       <span className="text-sm font-bold text-[#0052CC]">{initials}</span>
                     </div>
                     <div>
-                      <div className="font-semibold text-slate-800 text-base">{team.name}</div>
+                      <div className="font-semibold text-slate-800 text-base hover:text-[#0052CC] transition-colors">{team.name}</div>
                       {team.manager_name && (
                         <div className="text-xs text-slate-500 mt-0.5">Manager : {team.manager_name}</div>
                       )}
                     </div>
                   </div>
-                  {canWrite && (
-                    <div className="flex items-center gap-1">
-                      <button
-                        onClick={() => { setSelectedTeam(team); setModalOpen(true); }}
-                        data-testid={`btn-edit-team-${team.team_id}`}
-                        className="p-1.5 text-slate-400 hover:text-[#0052CC] hover:bg-blue-50 rounded transition-colors"
-                        title="Modifier"
-                      >
-                        <Pencil size={13} />
-                      </button>
-                      {isAdmin && (
-                        <button
-                          onClick={() => setConfirmDelete(team)}
-                          data-testid={`btn-delete-team-${team.team_id}`}
-                          className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors"
-                          title="Supprimer"
-                        >
-                          <Trash2 size={13} />
-                        </button>
-                      )}
-                    </div>
-                  )}
+                  <ChevronRight size={14} className="text-slate-300 mt-1 flex-shrink-0" />
                 </div>
-
                 <div className="flex items-center gap-1.5 text-slate-500">
                   <Users size={13} />
                   <span className="text-xs">
                     {memberCount} membre{memberCount > 1 ? "s" : ""}
                   </span>
                 </div>
-              </div>
+              </Link>
+              {/* Action buttons (stop propagation) */}
+              {canWrite && (
+                <div className="flex items-center gap-1 px-5 py-2 border-t border-gray-50">
+                  <button
+                    onClick={() => { setSelectedTeam(team); setModalOpen(true); }}
+                    data-testid={`btn-edit-team-${team.team_id}`}
+                    className="flex items-center gap-1 px-2 py-1 text-[11px] text-slate-500 hover:text-[#0052CC] hover:bg-blue-50 rounded transition-colors"
+                    title="Modifier"
+                  >
+                    <Pencil size={11} /> Modifier
+                  </button>
+                  {isAdmin && (
+                    <button
+                      onClick={() => setConfirmDelete(team)}
+                      data-testid={`btn-delete-team-${team.team_id}`}
+                      className="flex items-center gap-1 px-2 py-1 text-[11px] text-slate-500 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors ml-auto"
+                      title="Supprimer"
+                    >
+                      <Trash2 size={11} /> Supprimer
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
           );
         })}

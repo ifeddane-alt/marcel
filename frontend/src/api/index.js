@@ -41,6 +41,7 @@ export const projectsAPI = {
 
 export const teamsAPI = {
   list: () => api.get("/teams"),
+  get: (id) => api.get(`/teams/${id}`),
   create: (data) => api.post("/teams", data),
   update: (id, data) => api.put(`/teams/${id}`, data),
   delete: (id) => api.delete(`/teams/${id}`),
