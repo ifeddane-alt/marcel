@@ -1,8 +1,9 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Map, Filter, ZoomIn, ZoomOut, X, ExternalLink } from "lucide-react";
-import { projectsAPI, programsAPI, milestonesAPI } from "@/api";
+import { Map, Filter, ZoomIn, ZoomOut, X, ExternalLink, Diamond } from "lucide-react";
+import { projectsAPI, programsAPI, milestonesAPI, projectDependenciesAPI } from "@/api";
 import RAGBadge from "@/components/RAGBadge";
+import { FAMILY_CONFIG } from "@/components/MilestoneModal";
 import { formatDate } from "@/utils/format";
 
 const RAG_BAR_COLORS = {
@@ -16,10 +17,15 @@ const STATUS_LABELS = {
   cancelled: "Annulé", planning: "Planification",
 };
 
-const COL_WIDTH_MONTH   = 80;  // px par mois
-const COL_WIDTH_QUARTER = 200; // px par trimestre
-const ROW_HEIGHT        = 40;  // px par projet
-const LEFT_PANEL_W      = 220; // px colonne gauche (noms projets)
+const IMPACT_COLORS = {
+  critical: "#EF4444", high: "#F97316", medium: "#F59E0B", low: "#10B981",
+};
+
+const COL_WIDTH_MONTH   = 80;
+const COL_WIDTH_QUARTER = 200;
+const ROW_HEIGHT        = 40;
+const LEFT_PANEL_W      = 220;
+const GROUP_HEADER_H    = 28;
 
 function dateToMs(d) {
   if (!d) return null;
@@ -49,32 +55,46 @@ function buildHeaders(timeMin, timeMax, isQuarter) {
       d.setMonth(d.getMonth() + 1);
     }
   }
-  // deduplicate
   const seen = new Set();
   return headers.filter((h) => { if (seen.has(h.ts)) return false; seen.add(h.ts); return true; });
 }
 
 export default function Roadmap() {
-  const [projects, setProjects]   = useState([]);
-  const [programs, setPrograms]   = useState([]);
-  const [milestones, setMilestones] = useState([]);
-  const [loading, setLoading]     = useState(true);
+  const [projects,    setProjects]    = useState([]);
+  const [programs,    setPrograms]    = useState([]);
+  const [milestones,  setMilestones]  = useState([]);
+  const [allDeps,     setAllDeps]     = useState([]);
+  const [loading,     setLoading]     = useState(true);
+
+  // Existing filters
   const [filterProgram, setFilterProgram] = useState("");
-  const [filterRag, setFilterRag]         = useState("");
-  const [filterStatus, setFilterStatus]   = useState("");
-  const [isQuarter, setIsQuarter]         = useState(false);
-  const [tooltip, setTooltip]     = useState(null); // {x, y, content}
+  const [filterRag,     setFilterRag]     = useState("");
+  const [filterStatus,  setFilterStatus]  = useState("");
+
+  // New milestone filters
+  const [filterMsFamily,    setFilterMsFamily]    = useState("");
+  const [filterMsType,      setFilterMsType]      = useState("");
+  const [filterMsAttribute, setFilterMsAttribute] = useState("");
+  const [filterMsBlocking,  setFilterMsBlocking]  = useState(false);
+
+  const [showDeps, setShowDeps] = useState(true);
+  const [isQuarter, setIsQuarter] = useState(false);
+  const [tooltip, setTooltip] = useState(null);
   const scrollRef = useRef(null);
 
   useEffect(() => {
-    Promise.all([projectsAPI.list(), programsAPI.list(), milestonesAPI.list()])
-      .then(([pRes, pgRes, mRes]) => {
-        setProjects(pRes.data);
-        setPrograms(pgRes.data);
-        setMilestones(mRes.data);
-        setLoading(false);
-      })
-      .catch(() => setLoading(false));
+    Promise.all([
+      projectsAPI.list(),
+      programsAPI.list(),
+      milestonesAPI.list(),
+      projectDependenciesAPI.listAll(),
+    ]).then(([pRes, pgRes, mRes, dRes]) => {
+      setProjects(pRes.data);
+      setPrograms(pgRes.data);
+      setMilestones(mRes.data);
+      setAllDeps(dRes.data);
+      setLoading(false);
+    }).catch(() => setLoading(false));
   }, []);
 
   const programMap = useMemo(() => {
@@ -92,24 +112,22 @@ export default function Roadmap() {
     });
   }, [projects, filterProgram, filterRag, filterStatus]);
 
+  const filteredProjectIds = useMemo(() => new Set(filtered.map((p) => p.project_id)), [filtered]);
+
   // Time range
   const { timeMin, timeMax } = useMemo(() => {
     if (!filtered.length) return { timeMin: Date.now(), timeMax: Date.now() + 365 * 24 * 3600 * 1000 };
     const starts = filtered.map((p) => dateToMs(p.start_date)).filter(Boolean);
     const ends   = filtered.map((p) => dateToMs(p.end_date_forecast || p.end_date_baseline)).filter(Boolean);
     if (!starts.length) return { timeMin: Date.now(), timeMax: Date.now() + 365 * 24 * 3600 * 1000 };
-    const pad = 30.5 * 24 * 3600 * 1000; // 1 month padding
-    return {
-      timeMin: Math.min(...starts) - pad,
-      timeMax: Math.max(...ends) + pad,
-    };
+    const pad = 30.5 * 24 * 3600 * 1000;
+    return { timeMin: Math.min(...starts) - pad, timeMax: Math.max(...ends) + pad };
   }, [filtered]);
 
   const colWidth = isQuarter ? COL_WIDTH_QUARTER : COL_WIDTH_MONTH;
   const headers  = useMemo(() => buildHeaders(timeMin, timeMax, isQuarter), [timeMin, timeMax, isQuarter]);
   const totalW   = headers.length * colWidth;
 
-  // Group projects by program
   const grouped = useMemo(() => {
     const groups = {};
     filtered.forEach((p) => {
@@ -124,25 +142,88 @@ export default function Roadmap() {
     });
   }, [filtered, programMap]);
 
-  // Milestones map by project
+  const toX = (ms) => msToX(ms, timeMin, colWidth, isQuarter);
+  const todayX = toX(Date.now());
+
+  // Compute milestone types available for selected family
+  const availableTypes = filterMsFamily ? (FAMILY_CONFIG[filterMsFamily]?.types || []) : [];
+
+  // Milestone filtering by family/type/attribute/blocking
+  const filteredMilestones = useMemo(() => {
+    return milestones.filter((ms) => {
+      if (filterMsFamily && ms.family !== filterMsFamily) return false;
+      if (filterMsType && ms.type !== filterMsType) return false;
+      if (filterMsAttribute && ms.attribute !== filterMsAttribute) return false;
+      if (filterMsBlocking && !ms.is_blocking) return false;
+      return true;
+    });
+  }, [milestones, filterMsFamily, filterMsType, filterMsAttribute, filterMsBlocking]);
+
+  // Milestones map by project (respects filters)
   const milestonesByProject = useMemo(() => {
     const m = {};
-    milestones.filter((ms) => ms.is_governance).forEach((ms) => {
+    const hasFilter = filterMsFamily || filterMsType || filterMsAttribute || filterMsBlocking;
+    // If no milestone filter active: show only governance milestones (backward compat)
+    // If filter active: show all matching milestones
+    const msToShow = hasFilter ? filteredMilestones : milestones.filter((ms) => ms.is_governance);
+    msToShow.forEach((ms) => {
       if (!m[ms.project_id]) m[ms.project_id] = [];
       m[ms.project_id].push(ms);
     });
     return m;
-  }, [milestones]);
+  }, [milestones, filteredMilestones, filterMsFamily, filterMsType, filterMsAttribute, filterMsBlocking]);
 
-  const toX = (ms) => msToX(ms, timeMin, colWidth, isQuarter);
-  const todayX = toX(Date.now());
+  // Project bar X positions (for dependency arrows)
+  const projectBarX = useMemo(() => {
+    const map = {};
+    filtered.forEach((p) => {
+      const startMs = dateToMs(p.start_date);
+      const endMs   = dateToMs(p.end_date_forecast || p.end_date_baseline);
+      if (startMs && endMs) {
+        const bl = Math.max(toX(startMs), 0);
+        const br = Math.max(toX(endMs), bl + 6);
+        map[p.project_id] = { left: bl, right: br };
+      }
+    });
+    return map;
+  }, [filtered, toX]); // eslint-disable-line
 
-  const resetFilters = () => { setFilterProgram(""); setFilterRag(""); setFilterStatus(""); };
-  const hasFilters = filterProgram || filterRag || filterStatus;
+  // Project Y positions in timeline body (for dependency arrows)
+  const projectY = useMemo(() => {
+    const map = {};
+    let cY = 0;
+    grouped.forEach(([, projList]) => {
+      cY += GROUP_HEADER_H;
+      projList.forEach((p, ri) => {
+        map[p.project_id] = cY + ri * ROW_HEIGHT + ROW_HEIGHT / 2;
+      });
+      cY += projList.length * ROW_HEIGHT;
+    });
+    return map;
+  }, [grouped]);
 
-  if (loading) {
-    return <div className="p-8 text-slate-400 text-sm">Chargement de la roadmap...</div>;
-  }
+  // Dependencies to render on roadmap (both projects visible)
+  const visibleDeps = useMemo(() => {
+    if (!showDeps) return [];
+    return allDeps.filter((dep) =>
+      filteredProjectIds.has(dep.source_project_id) &&
+      filteredProjectIds.has(dep.target_project_id)
+    );
+  }, [allDeps, filteredProjectIds, showDeps]);
+
+  const totalTimelineH = useMemo(() => {
+    let h = 0;
+    grouped.forEach(([, projList]) => { h += GROUP_HEADER_H + projList.length * ROW_HEIGHT; });
+    return h + 24; // today label row
+  }, [grouped]);
+
+  const resetFilters = () => {
+    setFilterProgram(""); setFilterRag(""); setFilterStatus("");
+    setFilterMsFamily(""); setFilterMsType(""); setFilterMsAttribute(""); setFilterMsBlocking(false);
+  };
+  const hasFilters = filterProgram || filterRag || filterStatus || filterMsFamily || filterMsType || filterMsAttribute || filterMsBlocking;
+
+  if (loading) return <div className="p-8 text-slate-400 text-sm">Chargement de la roadmap...</div>;
 
   return (
     <div className="p-8" data-testid="roadmap-page">
@@ -158,26 +239,20 @@ export default function Roadmap() {
             </div>
             <p className="text-sm text-slate-500">
               Vue consolidée multi-projets — {filtered.length} projet{filtered.length !== 1 ? "s" : ""}
+              {visibleDeps.length > 0 && (
+                <span className="ml-2 text-violet-500 font-medium">
+                  · {visibleDeps.length} dépendance{visibleDeps.length > 1 ? "s" : ""}
+                </span>
+              )}
             </p>
           </div>
-          {/* Zoom controls */}
           <div className="flex items-center gap-2" data-testid="roadmap-zoom-controls">
-            <button
-              onClick={() => setIsQuarter(false)}
-              data-testid="zoom-month-btn"
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded transition-colors ${
-                !isQuarter ? "bg-[#0052CC] text-white" : "border border-gray-200 text-slate-600 hover:bg-gray-50"
-              }`}
-            >
+            <button onClick={() => setIsQuarter(false)} data-testid="zoom-month-btn"
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded transition-colors ${!isQuarter ? "bg-[#0052CC] text-white" : "border border-gray-200 text-slate-600 hover:bg-gray-50"}`}>
               <ZoomIn size={12} /> Mois
             </button>
-            <button
-              onClick={() => setIsQuarter(true)}
-              data-testid="zoom-quarter-btn"
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded transition-colors ${
-                isQuarter ? "bg-[#0052CC] text-white" : "border border-gray-200 text-slate-600 hover:bg-gray-50"
-              }`}
-            >
+            <button onClick={() => setIsQuarter(true)} data-testid="zoom-quarter-btn"
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded transition-colors ${isQuarter ? "bg-[#0052CC] text-white" : "border border-gray-200 text-slate-600 hover:bg-gray-50"}`}>
               <ZoomOut size={12} /> Trimestre
             </button>
           </div>
@@ -186,58 +261,103 @@ export default function Roadmap() {
 
       {/* Filters */}
       <div className="bg-white border border-gray-200 rounded shadow-sm p-4 mb-6" data-testid="roadmap-filters">
-        <div className="flex items-center gap-3 flex-wrap">
+        {/* Row 1: project filters */}
+        <div className="flex items-center gap-3 flex-wrap mb-3">
           <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-widest">
-            <Filter size={11} /> Filtres
+            <Filter size={11} /> Projets
           </div>
-          <select
-            value={filterProgram}
-            onChange={(e) => setFilterProgram(e.target.value)}
-            data-testid="filter-program"
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 text-slate-600 focus:outline-none focus:border-[#0052CC] bg-white"
-          >
+          <select value={filterProgram} onChange={(e) => setFilterProgram(e.target.value)} data-testid="filter-program"
+            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 text-slate-600 focus:outline-none focus:border-[#0052CC] bg-white">
             <option value="">Tous programmes</option>
-            {programs.map((p) => (
-              <option key={p.program_id} value={p.program_id}>{p.name}</option>
-            ))}
+            {programs.map((p) => <option key={p.program_id} value={p.program_id}>{p.name}</option>)}
           </select>
-          <select
-            value={filterRag}
-            onChange={(e) => setFilterRag(e.target.value)}
-            data-testid="filter-rag"
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 text-slate-600 focus:outline-none focus:border-[#0052CC] bg-white"
-          >
+          <select value={filterRag} onChange={(e) => setFilterRag(e.target.value)} data-testid="filter-rag"
+            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 text-slate-600 focus:outline-none focus:border-[#0052CC] bg-white">
             <option value="">Tous RAG</option>
             <option value="green">Vert</option>
             <option value="orange">Orange</option>
             <option value="red">Rouge</option>
           </select>
-          <select
-            value={filterStatus}
-            onChange={(e) => setFilterStatus(e.target.value)}
-            data-testid="filter-status"
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 text-slate-600 focus:outline-none focus:border-[#0052CC] bg-white"
-          >
+          <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} data-testid="filter-status"
+            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 text-slate-600 focus:outline-none focus:border-[#0052CC] bg-white">
             <option value="">Tous statuts</option>
-            {Object.entries(STATUS_LABELS).map(([k, v]) => (
-              <option key={k} value={k}>{v}</option>
-            ))}
+            {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
+        </div>
+
+        {/* Row 2: milestone filters */}
+        <div className="flex items-center gap-3 flex-wrap">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-violet-500 uppercase tracking-widest">
+            <Diamond size={11} /> Jalons
+          </div>
+          <select value={filterMsFamily} onChange={(e) => { setFilterMsFamily(e.target.value); setFilterMsType(""); }}
+            data-testid="filter-ms-family"
+            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 text-slate-600 focus:outline-none focus:border-violet-400 bg-white">
+            <option value="">Toutes familles</option>
+            {Object.entries(FAMILY_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
+          </select>
+          <select value={filterMsType} onChange={(e) => setFilterMsType(e.target.value)}
+            disabled={!filterMsFamily} data-testid="filter-ms-type"
+            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 text-slate-600 focus:outline-none focus:border-violet-400 bg-white disabled:opacity-50">
+            <option value="">Tous types</option>
+            {availableTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
+          </select>
+          <select value={filterMsAttribute} onChange={(e) => setFilterMsAttribute(e.target.value)}
+            data-testid="filter-ms-attribute"
+            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 text-slate-600 focus:outline-none focus:border-violet-400 bg-white">
+            <option value="">Tous attributs</option>
+            <option value="critical">Critical</option>
+            <option value="strategic">Strategic</option>
+          </select>
+          <button type="button" onClick={() => setFilterMsBlocking(!filterMsBlocking)}
+            data-testid="filter-ms-blocking"
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded border transition-colors ${filterMsBlocking ? "bg-rose-50 border-rose-300 text-rose-700" : "border-gray-200 text-slate-500 hover:bg-gray-50"}`}>
+            ⚑ Bloquants uniquement
+          </button>
+          <button type="button" onClick={() => setShowDeps(!showDeps)}
+            data-testid="toggle-deps"
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded border transition-colors ${showDeps ? "bg-violet-50 border-violet-300 text-violet-700" : "border-gray-200 text-slate-500 hover:bg-gray-50"}`}>
+            ⟶ Dépendances
+          </button>
           {hasFilters && (
-            <button
-              onClick={resetFilters}
-              data-testid="filter-reset"
-              className="flex items-center gap-1 text-xs text-slate-400 hover:text-rose-500 border border-gray-200 px-2 py-1 rounded"
-            >
-              <X size={10} /> Réinitialiser
+            <button onClick={resetFilters} data-testid="filter-reset"
+              className="flex items-center gap-1 text-xs text-slate-400 hover:text-rose-500 border border-gray-200 px-2 py-1 rounded">
+              <X size={10} /> Tout réinitialiser
             </button>
           )}
-          <div className="ml-auto flex items-center gap-3 text-[10px] text-slate-400">
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block" /> Vert</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-amber-500 inline-block" /> Orange</span>
-            <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-rose-500 inline-block" /> Rouge</span>
-            <span className="flex items-center gap-1"><span className="inline-block text-[#0052CC] font-bold">◆</span> Jalon gouvernance</span>
-          </div>
+        </div>
+
+        {/* Legend */}
+        <div className="flex items-center gap-4 mt-3 text-[10px] text-slate-400 flex-wrap">
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block" /> Vert</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-amber-500 inline-block" /> Orange</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-rose-500 inline-block" /> Rouge</span>
+          <span className="flex items-center gap-1">
+            <svg width="10" height="10" viewBox="0 0 10 10"><polygon points="5,1 9,5 5,9 1,5" fill="#EAB308"/></svg>
+            Epic Lifecycle
+          </span>
+          <span className="flex items-center gap-1">
+            <svg width="10" height="10" viewBox="0 0 10 10"><polygon points="5,1 9,5 5,9 1,5" fill="#8B5CF6"/></svg>
+            Epic Milestone
+          </span>
+          <span className="flex items-center gap-1">
+            <svg width="10" height="10" viewBox="0 0 10 10"><polygon points="5,1 9,5 5,9 1,5" fill="#10B981"/></svg>
+            Transversal
+          </span>
+          <span className="flex items-center gap-1">
+            <svg width="10" height="10" viewBox="0 0 10 10"><polygon points="5,1 9,5 5,9 1,5" fill="#EAB308" stroke="#EF4444" strokeWidth="2"/></svg>
+            Critical
+          </span>
+          <span className="flex items-center gap-1">
+            <svg width="10" height="10" viewBox="0 0 10 10"><polygon points="5,1 9,5 5,9 1,5" fill="#8B5CF6" stroke="#3B82F6" strokeWidth="2"/></svg>
+            Strategic
+          </span>
+          {visibleDeps.length > 0 && (
+            <span className="flex items-center gap-1">
+              <svg width="20" height="8"><line x1="0" y1="4" x2="16" y2="4" stroke="#8B5CF6" strokeWidth="1.5" strokeDasharray="3 2"/><polygon points="14,1.5 20,4 14,6.5" fill="#8B5CF6"/></svg>
+              Dépendance
+            </span>
+          )}
         </div>
       </div>
 
@@ -256,11 +376,9 @@ export default function Roadmap() {
             <div className="overflow-hidden" ref={scrollRef}>
               <div className="flex" style={{ width: totalW }}>
                 {headers.map((h, i) => (
-                  <div
-                    key={i}
+                  <div key={i}
                     className="text-center text-[10px] font-semibold text-slate-500 py-2 border-r border-gray-100 flex-shrink-0"
-                    style={{ width: colWidth }}
-                  >
+                    style={{ width: colWidth }}>
                     {h.label}
                   </div>
                 ))}
@@ -270,12 +388,12 @@ export default function Roadmap() {
 
           {/* Timeline body */}
           <div className="overflow-x-auto" data-testid="roadmap-timeline">
-            <div style={{ minWidth: LEFT_PANEL_W + totalW }}>
-              {grouped.map(([programId, projList], gi) => (
+            <div style={{ minWidth: LEFT_PANEL_W + totalW, position: "relative" }}>
+              {grouped.map(([programId, projList]) => (
                 <div key={programId}>
                   {/* Program group header */}
-                  <div className="flex items-center bg-slate-50 border-b border-gray-100 px-4 py-1.5"
-                    style={{ minWidth: LEFT_PANEL_W + totalW }}>
+                  <div className="flex items-center bg-slate-50 border-b border-gray-100 px-4"
+                    style={{ minWidth: LEFT_PANEL_W + totalW, height: GROUP_HEADER_H }}>
                     <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500" style={{ width: LEFT_PANEL_W - 16 }}>
                       {programId === "__none__" ? "Sans programme" : (programMap[programId] || programId)}
                     </div>
@@ -285,37 +403,25 @@ export default function Roadmap() {
                   </div>
 
                   {/* Project rows */}
-                  {projList.map((p, ri) => {
+                  {projList.map((p) => {
                     const startMs = dateToMs(p.start_date);
                     const endMs   = dateToMs(p.end_date_forecast || p.end_date_baseline);
                     const ragCfg  = RAG_BAR_COLORS[p.status_rag] || RAG_BAR_COLORS.green;
                     const pMilestones = milestonesByProject[p.project_id] || [];
-
-                    let barLeft = null, barWidth = null;
-                    if (startMs && endMs) {
-                      barLeft  = Math.max(toX(startMs), 0);
-                      barWidth = Math.max(toX(endMs) - barLeft, 6);
-                    }
+                    const barX = projectBarX[p.project_id];
 
                     return (
-                      <div
-                        key={p.project_id}
+                      <div key={p.project_id}
                         className="flex items-center border-b border-gray-50 hover:bg-blue-50/30 transition-colors"
                         style={{ height: ROW_HEIGHT }}
-                        data-testid={`roadmap-row-${p.project_id}`}
-                      >
+                        data-testid={`roadmap-row-${p.project_id}`}>
                         {/* Left: project name */}
-                        <div
-                          className="flex-shrink-0 flex items-center gap-2 px-4 border-r border-gray-100"
-                          style={{ width: LEFT_PANEL_W, minWidth: LEFT_PANEL_W }}
-                        >
+                        <div className="flex-shrink-0 flex items-center gap-2 px-4 border-r border-gray-100"
+                          style={{ width: LEFT_PANEL_W, minWidth: LEFT_PANEL_W }}>
                           <span className={`w-1.5 h-4 rounded-sm flex-shrink-0 ${ragCfg.bg}`} />
-                          <Link
-                            to={`/projects/${p.project_id}`}
+                          <Link to={`/projects/${p.project_id}`}
                             className="text-xs text-slate-700 font-medium hover:text-[#0052CC] truncate flex-1"
-                            title={p.name}
-                            data-testid={`roadmap-project-link-${p.project_id}`}
-                          >
+                            title={p.name} data-testid={`roadmap-project-link-${p.project_id}`}>
                             {p.name.split("—")[0].trim().slice(0, 26)}
                           </Link>
                           <ExternalLink size={9} className="text-slate-300 flex-shrink-0" />
@@ -325,61 +431,56 @@ export default function Roadmap() {
                         <div className="relative flex-1" style={{ minWidth: totalW, height: ROW_HEIGHT }}>
                           {/* Today line */}
                           {todayX >= 0 && todayX <= totalW && (
-                            <div
-                              className="absolute top-0 bottom-0 w-px bg-[#0052CC]/30 z-10 pointer-events-none"
-                              style={{ left: todayX }}
-                            />
+                            <div className="absolute top-0 bottom-0 w-px bg-[#0052CC]/30 z-10 pointer-events-none"
+                              style={{ left: todayX }} />
                           )}
-
                           {/* Column separators */}
                           {headers.map((h, i) => (
                             <div key={i}
                               className="absolute top-0 bottom-0 border-r border-gray-50 pointer-events-none"
-                              style={{ left: i * colWidth, width: colWidth }}
-                            />
+                              style={{ left: i * colWidth, width: colWidth }} />
                           ))}
-
                           {/* Project bar */}
-                          {barLeft !== null && (
+                          {barX && (
                             <div
                               className={`absolute top-2.5 h-5 rounded ${ragCfg.bg} ${ragCfg.border} border cursor-pointer flex items-center px-1.5 overflow-hidden z-20 transition-opacity hover:opacity-90`}
-                              style={{ left: barLeft, width: barWidth, minWidth: 6 }}
+                              style={{ left: barX.left, width: Math.max(barX.right - barX.left, 6) }}
                               title={`${p.name}\n${formatDate(p.start_date)} → ${formatDate(p.end_date_forecast || p.end_date_baseline)}`}
                               onClick={() => setTooltip(tooltip?.id === p.project_id ? null : {
-                                id: p.project_id,
-                                name: p.name,
+                                id: p.project_id, name: p.name,
                                 start: formatDate(p.start_date),
                                 end: formatDate(p.end_date_forecast || p.end_date_baseline),
-                                rag: p.status_rag,
-                                status: STATUS_LABELS[p.status] || p.status,
-                                budget: p.budget_total,
+                                rag: p.status_rag, status: STATUS_LABELS[p.status] || p.status, budget: p.budget_total,
                               })}
-                              data-testid={`roadmap-bar-${p.project_id}`}
-                            >
-                              {barWidth > 40 && (
+                              data-testid={`roadmap-bar-${p.project_id}`}>
+                              {(barX.right - barX.left) > 40 && (
                                 <span className={`text-[10px] font-semibold ${ragCfg.text} truncate`}>
                                   {p.name.split("—")[0].trim().slice(0, 20)}
                                 </span>
                               )}
                             </div>
                           )}
-
-                          {/* Governance milestones */}
+                          {/* Milestones */}
                           {pMilestones.map((ms) => {
                             const msMs = dateToMs(ms.date_forecast || ms.date_baseline);
                             if (!msMs) return null;
                             const mx = toX(msMs);
-                            const ragMs = ms.status === "atteint" ? "#10B981" : ms.status === "en_retard" ? "#EF4444" : "#0052CC";
+                            const fCfg = FAMILY_CONFIG[ms.family];
+                            const fill = fCfg?.fill || "#0052CC";
+                            const stroke = ms.attribute === "critical" ? "#EF4444" : ms.attribute === "strategic" ? "#3B82F6" : "none";
+                            const typeLabel = fCfg?.types?.find((t) => t.value === ms.type)?.label || ms.type || "";
+                            const tooltipTxt = [ms.name, typeLabel, ms.deliverable, ms.comment, ms.is_blocking ? "⚑ Bloquant" : null].filter(Boolean).join(" | ");
                             return (
-                              <div
-                                key={ms.milestone_id}
+                              <div key={ms.milestone_id}
                                 className="absolute top-1/2 -translate-y-1/2 z-30 cursor-pointer"
-                                style={{ left: mx - 7, width: 14, height: 14 }}
-                                title={`${ms.name}\n${formatDate(ms.date_forecast || ms.date_baseline)}`}
-                                data-testid={`roadmap-milestone-${ms.milestone_id}`}
-                              >
-                                <svg viewBox="0 0 14 14" style={{ fill: ragMs, filter: "drop-shadow(0 1px 2px rgba(0,0,0,.3))" }}>
-                                  <polygon points="7,1 13,7 7,13 1,7" />
+                                style={{ left: mx - 8, width: 16, height: 16 }}
+                                title={tooltipTxt}
+                                data-testid={`roadmap-milestone-${ms.milestone_id}`}>
+                                <svg viewBox="0 0 16 16">
+                                  <polygon points="8,1 15,8 8,15 1,8"
+                                    fill={fill}
+                                    stroke={stroke} strokeWidth={ms.attribute ? "2.5" : "0"}
+                                    style={{ filter: "drop-shadow(0 1px 2px rgba(0,0,0,.25))" }} />
                                 </svg>
                               </div>
                             );
@@ -392,17 +493,54 @@ export default function Roadmap() {
               ))}
 
               {/* Today label at bottom */}
-              <div className="relative h-6 border-t border-gray-100 bg-gray-50" style={{ minWidth: LEFT_PANEL_W + totalW }}>
-                <div style={{ marginLeft: LEFT_PANEL_W }}>
-                  {todayX >= 0 && todayX <= totalW && (
-                    <div className="absolute top-1" style={{ left: LEFT_PANEL_W + todayX - 20 }}>
-                      <span className="text-[9px] font-bold text-[#0052CC] bg-blue-50 border border-blue-200 rounded px-1 py-0.5">
-                        Aujourd'hui
-                      </span>
-                    </div>
-                  )}
-                </div>
+              <div className="relative border-t border-gray-100 bg-gray-50" style={{ minWidth: LEFT_PANEL_W + totalW, height: 24 }}>
+                {todayX >= 0 && todayX <= totalW && (
+                  <div className="absolute top-1" style={{ left: LEFT_PANEL_W + todayX - 20 }}>
+                    <span className="text-[9px] font-bold text-[#0052CC] bg-blue-50 border border-blue-200 rounded px-1 py-0.5">
+                      Aujourd'hui
+                    </span>
+                  </div>
+                )}
               </div>
+
+              {/* SVG overlay for dependency arrows */}
+              {visibleDeps.length > 0 && (
+                <div className="absolute top-0 pointer-events-none overflow-visible z-25"
+                  style={{ left: LEFT_PANEL_W, top: 0, width: totalW, height: totalTimelineH }}>
+                  <svg width={totalW} height={totalTimelineH} style={{ overflow: "visible" }}>
+                    <defs>
+                      {["critical","high","medium","low"].map((imp) => (
+                        <marker key={imp} id={`arrow-${imp}`} markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
+                          <polygon points="0 0, 8 3, 0 6" fill={IMPACT_COLORS[imp]} />
+                        </marker>
+                      ))}
+                    </defs>
+                    {visibleDeps.map((dep) => {
+                      const sBarX = projectBarX[dep.source_project_id];
+                      const tBarX = projectBarX[dep.target_project_id];
+                      const sY    = projectY[dep.source_project_id];
+                      const tY    = projectY[dep.target_project_id];
+                      if (!sBarX || !tBarX || sY === undefined || tY === undefined) return null;
+                      const sX  = sBarX.right + 2;
+                      const tX  = tBarX.left - 2;
+                      const color = IMPACT_COLORS[dep.impact] || "#8B5CF6";
+                      const midX = (sX + tX) / 2;
+                      return (
+                        <path key={dep.dependency_id}
+                          d={`M ${sX} ${sY} C ${midX} ${sY}, ${midX} ${tY}, ${tX} ${tY}`}
+                          fill="none"
+                          stroke={color}
+                          strokeWidth="1.5"
+                          strokeDasharray="5 3"
+                          markerEnd={`url(#arrow-${dep.impact})`}
+                          opacity="0.75">
+                          <title>{dep.source_project_name} → {dep.target_project_name}: {dep.description}</title>
+                        </path>
+                      );
+                    })}
+                  </svg>
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -410,10 +548,8 @@ export default function Roadmap() {
 
       {/* Tooltip card */}
       {tooltip && (
-        <div
-          className="fixed bottom-6 right-6 bg-white border border-gray-200 rounded-lg shadow-xl p-4 z-50 min-w-[220px]"
-          data-testid="roadmap-tooltip"
-        >
+        <div className="fixed bottom-6 right-6 bg-white border border-gray-200 rounded-lg shadow-xl p-4 z-50 min-w-[220px]"
+          data-testid="roadmap-tooltip">
           <div className="flex items-start justify-between gap-2 mb-2">
             <div className="text-sm font-bold text-slate-800 leading-snug">{tooltip.name}</div>
             <button onClick={() => setTooltip(null)} className="text-slate-300 hover:text-slate-600">
@@ -432,10 +568,8 @@ export default function Roadmap() {
               </div>
             )}
           </div>
-          <Link
-            to={`/projects/${tooltip.id}`}
-            className="mt-3 flex items-center gap-1 text-[11px] text-[#0052CC] hover:underline"
-          >
+          <Link to={`/projects/${tooltip.id}`}
+            className="mt-3 flex items-center gap-1 text-[11px] text-[#0052CC] hover:underline">
             <ExternalLink size={10} /> Voir le projet
           </Link>
         </div>

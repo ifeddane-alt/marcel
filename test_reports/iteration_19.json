@@ -1,0 +1,40 @@
+{
+  "summary": "Stream 4: Full testing of milestone model (3 families) + project_dependencies CRUD + frontend MilestoneModal + Roadmap filters. All backend tests passed (14/14). Frontend UI and integration fully functional.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Roadmap — family filter",
+        "issues": [
+          "NOTE (not a bug): svg polygon count includes legend diamonds (always shows all family colors). Actual project-bar filtering IS correct — only epic_milestone violet diamonds remain on bars after filter. Filter reduces governance diamonds from 23 to ~2 visible on bars."
+        ]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_milestones_deps.py",
+    "/app/test_reports/pytest/s4_milestones_deps.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Roadmap milestonesByProject logic: when no filter is active, only is_governance milestones are shown (backward compat). When any filter is active, all matching milestones are shown. This is intentional but could be surprising to end users.",
+    "Backend milestone validation: attribute field is silently nullified for READ_ONLY viewers instead of returning 400 — acceptable but could be more explicit."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_milestones_deps.py"
+  ],
+  "success_rate": {
+    "backend": "100% (14/14 passed)",
+    "frontend": "100%"
+  },
+  "seed_data_creation": "Test created/deleted milestones and dependencies during test run (auto-cleanup in test)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Stream 4 fully tested and working. Backend: milestones CRUD with 3 families (epic_lifecycle/epic_milestone/transversal), family/type validation, 403 for READ_ONLY. Project dependencies CRUD with enriched names. Frontend: MilestoneModal with 3 family cards + filtered type dropdown, JALONS section in ProjectDetail with colored family labels + critical border, DÉPENDANCES INTER-PROJETS section. Roadmap: double filter bar (PROJETS + JALONS), SVG polygons colored by family (#EAB308/#8B5CF6/#10B981), 6 SVG dependency arrows (strokeDasharray), deps toggle hides arrows, family/attribute/blocking filters working.",
+  "test_credentials": "admin@altair.fr / Admin1234!, pmo@altair.fr / Pmo1234!, viewer@altair.fr / View1234!"
+}

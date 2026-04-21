@@ -161,12 +161,19 @@ def decision_status_label(s):
 
 # ---- S2-04 — Slide Roadmap matplotlib ----
 
-def add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_date):
-    """Génère un slide Roadmap avec un diagramme Gantt matplotlib multi-projets."""
+def add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_date, dependencies=None):
+    """Génère un slide Roadmap avec un diagramme Gantt matplotlib multi-projets.
+    Losanges colorés par famille (or/violet/vert), bordures critical/strategic, flèches dépendances."""
     from datetime import datetime as dt, timedelta
     import matplotlib.dates as mdates
 
     RAG_HEX = {"green": "#10B981", "orange": "#F59E0B", "red": "#EF4444"}
+    FAMILY_FILL = {
+        "epic_lifecycle": "#EAB308",  # or
+        "epic_milestone": "#8B5CF6",  # violet
+        "transversal":    "#10B981",  # vert
+    }
+    IMPACT_COLORS = {"critical": "#EF4444", "high": "#F97316", "medium": "#F59E0B", "low": "#10B981"}
 
     def _parse(d):
         if not d:
@@ -177,6 +184,7 @@ def add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_dat
             return None
 
     rows = []
+    project_ids_in_slide = set()
     for p in projects:
         start = _parse(p.get("start_date"))
         end   = _parse(p.get("end_date_forecast") or p.get("end_date_baseline"))
@@ -190,6 +198,7 @@ def add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_dat
             "rag": p.get("status_rag", "green"),
             "pid": p.get("project_id"),
         })
+        project_ids_in_slide.add(p.get("project_id"))
 
     slide = _blank_slide(prs)
     _rect(slide, Emu(0), Emu(0), SW, SH, fill=WHITE)
@@ -239,9 +248,11 @@ def add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_dat
     # Milestones by project
     ms_by_proj = {}
     for ms in all_milestones:
-        if ms.get("is_governance"):
-            pid = ms.get("project_id", "")
-            ms_by_proj.setdefault(pid, []).append(ms)
+        pid = ms.get("project_id", "")
+        ms_by_proj.setdefault(pid, []).append(ms)
+
+    # Build index: project_id → row index (for dependency arrows)
+    pid_to_row = {r["pid"]: i for i, r in enumerate(rows)}
 
     # Bars & milestones
     for i, r in enumerate(rows):
@@ -261,17 +272,69 @@ def add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_dat
             ax.text(cx, i, r["name"], ha="center", va="center",
                     fontsize=6.5, color="white", fontweight="bold", zorder=5,
                     clip_on=True)
-        # Milestone diamonds
+
+        # Milestone diamonds — colored by family
         for ms in ms_by_proj.get(r["pid"], []):
             d = _parse(ms.get("date_forecast") or ms.get("date_baseline"))
             if not d or not (t_min <= d <= t_max):
                 continue
-            ms_col = "#EF4444" if ms.get("status") == "en_retard" else "#0B2545"
-            ax.plot(mdates.date2num(d), i, "D", color=ms_col, markersize=7,
-                    markeredgewidth=0.5, markeredgecolor="white", zorder=6)
+            family = ms.get("family")
+            ms_fill = FAMILY_FILL.get(family, "#0B2545")
+            attribute = ms.get("attribute")
+            edge_color = "#EF4444" if attribute == "critical" else "#3B82F6" if attribute == "strategic" else "white"
+            edge_w = 1.5 if attribute else 0.5
+            ax.plot(mdates.date2num(d), i, "D",
+                    color=ms_fill,
+                    markersize=7,
+                    markeredgewidth=edge_w,
+                    markeredgecolor=edge_color,
+                    zorder=7)
+            # Bloquant indicator
+            if ms.get("is_blocking"):
+                ax.text(mdates.date2num(d), i - 0.35, "⚑",
+                        fontsize=5, color="#EF4444", ha="center", zorder=8)
+
+    # Dependency arrows between projects in this slide
+    if dependencies:
+        for dep in dependencies:
+            sp = dep.get("source_project_id")
+            tp = dep.get("target_project_id")
+            if sp not in project_ids_in_slide or tp not in project_ids_in_slide:
+                continue
+            si = pid_to_row.get(sp)
+            ti = pid_to_row.get(tp)
+            if si is None or ti is None:
+                continue
+            src_row = rows[si]
+            tgt_row = rows[ti]
+            sx = mdates.date2num(src_row["end"])
+            tx = mdates.date2num(tgt_row["start"])
+            color = IMPACT_COLORS.get(dep.get("impact", "medium"), "#8B5CF6")
+            ax.annotate("",
+                xy=(tx, ti), xytext=(sx, si),
+                arrowprops=dict(
+                    arrowstyle="-|>",
+                    color=color,
+                    lw=1.0,
+                    linestyle="dashed",
+                    connectionstyle="arc3,rad=0.2",
+                ),
+                zorder=3)
 
     ax.set_yticks(range(n))
     ax.set_yticklabels([r["name"] for r in rows], fontsize=7)
+
+    # Legend
+    legend_patches = [
+        mpatches.Patch(facecolor="#EAB308", label="Epic Lifecycle"),
+        mpatches.Patch(facecolor="#8B5CF6", label="Epic Milestone"),
+        mpatches.Patch(facecolor="#10B981", label="Transversal / Réglementaire"),
+        mpatches.Patch(facecolor="#EAB308", edgecolor="#EF4444", linewidth=2, label="Critical"),
+        mpatches.Patch(facecolor="#8B5CF6", edgecolor="#3B82F6", linewidth=2, label="Strategic"),
+    ]
+    ax.legend(handles=legend_patches, loc="lower right", fontsize=5.5, framealpha=0.8,
+              ncol=len(legend_patches), borderpad=0.5)
+
     ax.set_title("Roadmap Portefeuille", fontsize=10, fontweight="bold",
                  color="#0F172A", pad=6, loc="left")
 
@@ -1095,7 +1158,7 @@ def add_slide_team_consumption(prs, project, team_rows, instance_name, instance_
 def generate_copil_pptx(instance_name, instance_date, projects,
                         all_milestones, all_risks, all_decisions,
                         governance_id=None, team_consumption_by_project=None,
-                        include_roadmap=False):
+                        include_roadmap=False, dependencies=None):
     prs = Presentation()
     prs.slide_width = SW
     prs.slide_height = SH
@@ -1141,7 +1204,8 @@ def generate_copil_pptx(instance_name, instance_date, projects,
 
     # S2-04 — Slide Roadmap consolidée (optionnel)
     if include_roadmap:
-        add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_date)
+        add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_date,
+                          dependencies=dependencies)
 
     buf = io.BytesIO()
     prs.save(buf)

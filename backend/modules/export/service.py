@@ -117,6 +117,11 @@ async def export_copil(data: ExportCopilRequest, current_user: TokenPayload):
         data.project_ids, current_user.tenant_id
     )
 
+    # Dependencies for roadmap arrows
+    dependencies = await db.project_dependencies.find(
+        {"tenant_id": current_user.tenant_id}, {"_id": 0}
+    ).to_list(None)
+
     buf = generate_copil_pptx(
         instance_name=data.instance_name,
         instance_date=data.instance_date,
@@ -127,5 +132,6 @@ async def export_copil(data: ExportCopilRequest, current_user: TokenPayload):
         governance_id=data.governance_id,
         team_consumption_by_project=team_consumption_by_project,
         include_roadmap=data.include_roadmap,
+        dependencies=dependencies,
     )
     return buf, data.instance_name, data.instance_date

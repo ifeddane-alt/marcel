@@ -3,9 +3,9 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Calendar, ChevronRight, Flag, AlertTriangle, Clock, TrendingUp,
   Pencil, Trash2, Plus, History, ShieldAlert, ClipboardList, Presentation, Users,
-  GitBranch, BarChart2,
+  GitBranch, BarChart2, Diamond, GitFork,
 } from "lucide-react";
-import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI, decisionsAPI, workAllocationsAPI } from "@/api";
+import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI, decisionsAPI, workAllocationsAPI, projectDependenciesAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import RAGBadge, { MethodologyBadge, MilestoneBadge, TaskTypeBadge, TaskStatusBadge, ProjectStatusBadge } from "@/components/RAGBadge";
 import ProjectModal from "@/components/ProjectModal";
@@ -13,6 +13,8 @@ import TaskModal from "@/components/TaskModal";
 import BudgetRevisionModal from "@/components/BudgetRevisionModal";
 import RiskModal from "@/components/RiskModal";
 import DecisionModal from "@/components/DecisionModal";
+import MilestoneModal, { FAMILY_CONFIG } from "@/components/MilestoneModal";
+import DependencyModal from "@/components/DependencyModal";
 import RiskHeatmap from "@/components/RiskHeatmap";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import ExportCopilModal from "@/components/ExportCopilModal";
@@ -73,6 +75,16 @@ export default function ProjectDetail() {
   const [confirmDelete, setConfirmDelete] = useState(null); // {type: 'project'|'task'|'risk'|'decision', item}
   const [deleting, setDeleting] = useState(false);
 
+  // Milestone CRUD state
+  const [milestoneModalOpen, setMilestoneModalOpen] = useState(false);
+  const [selectedMilestone, setSelectedMilestone] = useState(null);
+
+  // Dependency state
+  const [dependencies, setDependencies] = useState([]);
+  const [depModalOpen, setDepModalOpen] = useState(false);
+  const [selectedDep, setSelectedDep] = useState(null);
+  const [allProjects, setAllProjects] = useState([]);
+
   const fetchAll = useCallback(() => {
     Promise.all([
       projectsAPI.get(id),
@@ -85,7 +97,9 @@ export default function ProjectDetail() {
       workAllocationsAPI.list(id),
       workAllocationsAPI.teamConsumption(id),
       workAllocationsAPI.raf(id),
-    ]).then(([pRes, mRes, aRes, tRes, rRes, rkRes, dRes, waRes, tcRes, rafRes]) => {
+      projectDependenciesAPI.list(id),
+      projectsAPI.list(),
+    ]).then(([pRes, mRes, aRes, tRes, rRes, rkRes, dRes, waRes, tcRes, rafRes, depRes, allPRes]) => {
       setProject(pRes.data);
       setMilestones(mRes.data);
       setAllocations(aRes.data);
@@ -96,6 +110,8 @@ export default function ProjectDetail() {
       setWorkAllocations(waRes.data);
       setTeamConsumption(tcRes.data);
       setRaf(rafRes.data);
+      setDependencies(depRes.data);
+      setAllProjects(allPRes.data || []);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [id]);
@@ -123,6 +139,14 @@ export default function ProjectDetail() {
         fetchAll();
       } else if (confirmDelete.type === "work_allocation") {
         await workAllocationsAPI.delete(confirmDelete.item.work_allocation_id);
+        setConfirmDelete(null);
+        fetchAll();
+      } else if (confirmDelete.type === "milestone") {
+        await milestonesAPI.delete(confirmDelete.item.milestone_id);
+        setConfirmDelete(null);
+        fetchAll();
+      } else if (confirmDelete.type === "dependency") {
+        await projectDependenciesAPI.delete(confirmDelete.item.dependency_id);
         setConfirmDelete(null);
         fetchAll();
       }
@@ -756,49 +780,199 @@ export default function ProjectDetail() {
             )}
           </div>
 
-          {/* Milestones */}
+          {/* Milestones — enrichis 3 familles */}
           <div className="bg-white border border-gray-200 rounded shadow-sm" data-testid="milestones-section">
             <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
-              <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-500 font-semibold">
+                <Diamond size={13} className="text-yellow-500" />
                 Jalons ({milestones.length})
               </div>
+              {canWrite && (
+                <button
+                  onClick={() => { setSelectedMilestone(null); setMilestoneModalOpen(true); }}
+                  data-testid="btn-new-milestone"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0052CC] text-white text-xs font-semibold rounded hover:bg-[#0047B3] transition-colors"
+                >
+                  <Plus size={12} /> Nouveau jalon
+                </button>
+              )}
             </div>
             {milestones.length === 0 ? (
               <div className="px-5 py-8 text-sm text-slate-400 text-center">Aucun jalon défini</div>
             ) : (
-              <table className="w-full text-sm">
-                <thead>
-                  <tr className="bg-gray-50 border-b border-gray-100 text-left">
-                    {["Jalon", "Date baseline", "Date forecast", "Date réelle", "Statut", "Gouvernance"].map((h) => (
-                      <th key={h} className="px-4 py-2.5 text-xs font-semibold text-slate-600">{h}</th>
-                    ))}
-                  </tr>
-                </thead>
-                <tbody>
-                  {milestones.map((m) => (
-                    <tr key={m.milestone_id} className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors" data-testid={`milestone-row-${m.milestone_id}`}>
-                      <td className="px-4 py-2.5 font-medium text-slate-800">{m.name}</td>
-                      <td className="px-4 py-2.5 text-xs font-mono-data text-slate-600">{formatDate(m.date_baseline)}</td>
-                      <td className="px-4 py-2.5 text-xs font-mono-data">
-                        <span className={m.date_forecast > m.date_baseline ? "text-rose-600 font-semibold" : "text-slate-600"}>
-                          {formatDate(m.date_forecast)}
-                        </span>
-                      </td>
-                      <td className="px-4 py-2.5 text-xs font-mono-data text-slate-500">
-                        {m.date_actual ? formatDate(m.date_actual) : "—"}
-                      </td>
-                      <td className="px-4 py-2.5"><MilestoneBadge status={m.status} /></td>
-                      <td className="px-4 py-2.5">
-                        {m.is_governance && (
-                          <span className="inline-flex items-center gap-1 text-[10px] text-[#0052CC] font-semibold">
-                            <Flag size={10} />GOV
-                          </span>
-                        )}
-                      </td>
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-100 text-left">
+                      {["Famille / Type", "Jalon", "Baseline", "Forecast", "Réelle", "Statut", "Attribut", ""].map((h) => (
+                        <th key={h} className="px-3 py-2.5 text-xs font-semibold text-slate-600 whitespace-nowrap">{h}</th>
+                      ))}
                     </tr>
-                  ))}
-                </tbody>
-              </table>
+                  </thead>
+                  <tbody>
+                    {milestones.map((m) => {
+                      const fCfg = FAMILY_CONFIG[m.family];
+                      const tooltipText = [
+                        m.family ? `Famille: ${fCfg?.label || m.family}` : null,
+                        m.type ? `Type: ${fCfg?.types?.find(t=>t.value===m.type)?.label || m.type}` : null,
+                        m.comment ? `Commentaire: ${m.comment}` : null,
+                        m.deliverable ? `Livrable: ${m.deliverable}` : null,
+                        m.owner_resource_id ? `Owner: ${resources.find(r=>r.resource_id===m.owner_resource_id)?.name || m.owner_resource_id}` : null,
+                        m.is_blocking ? "⚠ Bloquant" : null,
+                      ].filter(Boolean).join(" | ");
+                      return (
+                        <tr key={m.milestone_id} title={tooltipText}
+                          className={`border-b border-gray-100 hover:bg-gray-50/50 transition-colors ${m.attribute === "critical" ? "border-l-2 border-l-rose-500" : m.attribute === "strategic" ? "border-l-2 border-l-blue-500" : ""}`}
+                          data-testid={`milestone-row-${m.milestone_id}`}>
+                          <td className="px-3 py-2.5">
+                            {fCfg ? (
+                              <div className="flex flex-col gap-0.5">
+                                <span className={`text-[9px] font-bold uppercase tracking-widest ${fCfg.color}`}>{fCfg.label}</span>
+                                <span className="text-[10px] text-slate-500">{fCfg.types.find(t=>t.value===m.type)?.label || m.type || "—"}</span>
+                              </div>
+                            ) : (
+                              <span className="text-slate-400 text-xs">—</span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2.5">
+                            <div className="flex items-center gap-1.5">
+                              {fCfg && (
+                                <svg width="12" height="12" viewBox="0 0 12 12" className="shrink-0">
+                                  <polygon points="6,1 11,6 6,11 1,6"
+                                    fill={fCfg.fill}
+                                    stroke={m.attribute === "critical" ? "#EF4444" : m.attribute === "strategic" ? "#3B82F6" : "none"}
+                                    strokeWidth={m.attribute ? "2" : "0"} />
+                                </svg>
+                              )}
+                              <span className="font-medium text-slate-800 text-xs leading-snug">{m.name}</span>
+                              {m.is_blocking && <span title="Bloquant" className="text-rose-500 text-[10px] font-bold ml-1">⚑</span>}
+                              {m.is_governance && <Flag size={10} className="text-[#0052CC] ml-0.5 shrink-0" />}
+                            </div>
+                          </td>
+                          <td className="px-3 py-2.5 text-xs font-mono-data text-slate-600 whitespace-nowrap">{formatDate(m.date_baseline)}</td>
+                          <td className="px-3 py-2.5 text-xs font-mono-data whitespace-nowrap">
+                            <span className={m.date_forecast > m.date_baseline ? "text-rose-600 font-semibold" : "text-slate-600"}>
+                              {formatDate(m.date_forecast)}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2.5 text-xs font-mono-data text-slate-500 whitespace-nowrap">
+                            {m.date_actual ? formatDate(m.date_actual) : "—"}
+                          </td>
+                          <td className="px-3 py-2.5"><MilestoneBadge status={m.status} /></td>
+                          <td className="px-3 py-2.5">
+                            {m.attribute === "critical" && (
+                              <span className="inline-block px-1.5 py-0.5 text-[9px] font-bold uppercase bg-rose-100 text-rose-700 rounded border border-rose-200">Critical</span>
+                            )}
+                            {m.attribute === "strategic" && (
+                              <span className="inline-block px-1.5 py-0.5 text-[9px] font-bold uppercase bg-blue-100 text-blue-700 rounded border border-blue-200">Strategic</span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2.5">
+                            {canWrite && (
+                              <div className="flex items-center gap-1">
+                                <button onClick={() => { setSelectedMilestone(m); setMilestoneModalOpen(true); }}
+                                  data-testid={`btn-edit-milestone-${m.milestone_id}`}
+                                  className="p-1 text-slate-400 hover:text-[#0052CC] rounded transition-colors">
+                                  <Pencil size={12} />
+                                </button>
+                                <button onClick={() => setConfirmDelete({ type: "milestone", item: m })}
+                                  data-testid={`btn-delete-milestone-${m.milestone_id}`}
+                                  className="p-1 text-slate-400 hover:text-rose-500 rounded transition-colors">
+                                  <Trash2 size={12} />
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
+            )}
+          </div>
+
+          {/* Dépendances inter-projets */}
+          <div className="bg-white border border-gray-200 rounded shadow-sm" data-testid="dependencies-section">
+            <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-500 font-semibold">
+                <GitFork size={13} className="text-violet-500" />
+                Dépendances inter-projets ({dependencies.length})
+              </div>
+              {canWrite && (
+                <button
+                  onClick={() => { setSelectedDep(null); setDepModalOpen(true); }}
+                  data-testid="btn-new-dependency"
+                  className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0052CC] text-white text-xs font-semibold rounded hover:bg-[#0047B3] transition-colors"
+                >
+                  <Plus size={12} /> Nouvelle dépendance
+                </button>
+              )}
+            </div>
+            {dependencies.length === 0 ? (
+              <div className="px-5 py-8 text-sm text-slate-400 text-center">Aucune dépendance définie</div>
+            ) : (
+              <div className="overflow-x-auto">
+                <table className="w-full text-sm">
+                  <thead>
+                    <tr className="bg-gray-50 border-b border-gray-100 text-left">
+                      {["Direction", "Projet lié", "Nature", "Impact", "Échéance", "Statut", ""].map((h) => (
+                        <th key={h} className="px-3 py-2.5 text-xs font-semibold text-slate-600 whitespace-nowrap">{h}</th>
+                      ))}
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {dependencies.map((dep) => {
+                      const IMPACT_COLORS = { low: "bg-emerald-100 text-emerald-700 border-emerald-200", medium: "bg-amber-100 text-amber-700 border-amber-200", high: "bg-orange-100 text-orange-700 border-orange-200", critical: "bg-rose-100 text-rose-700 border-rose-200" };
+                      const STATUS_LABELS = { identified: "Identifiée", in_progress: "En cours", resolved: "Résolue", blocked: "Bloquée" };
+                      const NATURE_LABELS = { deliverable: "Livrable", resource: "Ressource", technical: "Technique", regulatory: "Réglementaire", budget: "Budget", data: "Données" };
+                      const isOutbound = dep.source_project_id === id;
+                      const linkedProject = isOutbound ? dep.target_project_name : dep.source_project_name;
+                      return (
+                        <tr key={dep.dependency_id}
+                          className="border-b border-gray-100 hover:bg-gray-50/50 transition-colors"
+                          data-testid={`dep-row-${dep.dependency_id}`}
+                          title={dep.description}>
+                          <td className="px-3 py-2.5">
+                            {isOutbound ? (
+                              <span className="text-[10px] font-bold text-[#0052CC]">→ Je dépends de</span>
+                            ) : (
+                              <span className="text-[10px] font-bold text-violet-600">← Dépend de moi</span>
+                            )}
+                          </td>
+                          <td className="px-3 py-2.5 font-medium text-slate-800 text-xs">{linkedProject}</td>
+                          <td className="px-3 py-2.5 text-xs text-slate-600">{NATURE_LABELS[dep.nature] || dep.nature}</td>
+                          <td className="px-3 py-2.5">
+                            <span className={`inline-block px-1.5 py-0.5 text-[9px] font-bold uppercase rounded border ${IMPACT_COLORS[dep.impact] || ""}`}>
+                              {dep.impact}
+                            </span>
+                          </td>
+                          <td className="px-3 py-2.5 text-xs font-mono-data text-slate-600 whitespace-nowrap">
+                            {dep.target_date ? formatDate(dep.target_date) : "—"}
+                          </td>
+                          <td className="px-3 py-2.5 text-xs text-slate-500">{STATUS_LABELS[dep.status] || dep.status}</td>
+                          <td className="px-3 py-2.5">
+                            {canWrite && (
+                              <div className="flex items-center gap-1">
+                                <button onClick={() => { setSelectedDep(dep); setDepModalOpen(true); }}
+                                  data-testid={`btn-edit-dep-${dep.dependency_id}`}
+                                  className="p-1 text-slate-400 hover:text-[#0052CC] rounded transition-colors">
+                                  <Pencil size={12} />
+                                </button>
+                                <button onClick={() => setConfirmDelete({ type: "dependency", item: dep })}
+                                  data-testid={`btn-delete-dep-${dep.dependency_id}`}
+                                  className="p-1 text-slate-400 hover:text-rose-500 rounded transition-colors">
+                                  <Trash2 size={12} />
+                                </button>
+                              </div>
+                            )}
+                          </td>
+                        </tr>
+                      );
+                    })}
+                  </tbody>
+                </table>
+              </div>
             )}
           </div>
 
@@ -1298,6 +1472,8 @@ export default function ProjectDetail() {
           : confirmDelete?.type === "task" ? "Supprimer la tâche"
           : confirmDelete?.type === "risk" ? "Supprimer le risque"
           : confirmDelete?.type === "work_allocation" ? "Supprimer l'allocation"
+          : confirmDelete?.type === "milestone" ? "Supprimer le jalon"
+          : confirmDelete?.type === "dependency" ? "Supprimer la dépendance"
           : "Supprimer la décision"
         }
         message={
@@ -1309,9 +1485,49 @@ export default function ProjectDetail() {
             ? `Supprimer le risque "${confirmDelete?.item?.title}" ?`
             : confirmDelete?.type === "work_allocation"
             ? `Supprimer cette allocation de travail ?`
+            : confirmDelete?.type === "milestone"
+            ? `Supprimer le jalon "${confirmDelete?.item?.name}" ?`
+            : confirmDelete?.type === "dependency"
+            ? `Supprimer cette dépendance inter-projets ?`
             : `Supprimer la décision "${confirmDelete?.item?.title}" ?`
         }
       />
+      {milestoneModalOpen && (
+        <MilestoneModal
+          milestone={selectedMilestone}
+          projectId={id}
+          resources={resources}
+          isAdmin={canWrite}
+          onSave={async (data) => {
+            if (selectedMilestone) {
+              await milestonesAPI.update(selectedMilestone.milestone_id, data);
+            } else {
+              await milestonesAPI.create(data);
+            }
+            setMilestoneModalOpen(false);
+            fetchAll();
+          }}
+          onClose={() => setMilestoneModalOpen(false)}
+        />
+      )}
+      {depModalOpen && (
+        <DependencyModal
+          dependency={selectedDep}
+          projectId={id}
+          projects={allProjects}
+          sourceMilestones={milestones}
+          onSave={async (data) => {
+            if (selectedDep) {
+              await projectDependenciesAPI.update(selectedDep.dependency_id, data);
+            } else {
+              await projectDependenciesAPI.create(data);
+            }
+            setDepModalOpen(false);
+            fetchAll();
+          }}
+          onClose={() => setDepModalOpen(false)}
+        />
+      )}
     </div>
   );
 }

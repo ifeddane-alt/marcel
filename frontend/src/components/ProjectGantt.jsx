@@ -42,18 +42,27 @@ function toGanttTasks(tasks, milestones) {
     .filter(Boolean);
 
   // Jalons (losanges) — frappe-gantt les affiche comme des barres 1-jour
+  // Couleur par famille : epic_lifecycle=gold, epic_milestone=violet, transversal=emerald
+  const FAMILY_CLASS = {
+    epic_lifecycle: "ms-gold",
+    epic_milestone: "ms-violet",
+    transversal:    "ms-green",
+  };
   milestones
     .filter((m) => m.date_forecast || m.date_baseline)
     .forEach((m) => {
       const d = fmt(m.date_forecast || m.date_baseline);
       if (!d) return;
+      const statusSuffix = m.attribute === "critical" ? "-critical" : m.attribute === "strategic" ? "-strategic" : "";
+      const familyClass = FAMILY_CLASS[m.family] || "ms-orange";
+      const prefix = m.is_blocking ? "⚑ " : "⬥ ";
       ganttTasks.push({
         id: `ms_${m.milestone_id}`,
-        name: `⬥ ${m.name}`,
+        name: `${prefix}${m.name}`,
         start: d,
         end: d,
-        progress: m.status === "atteint" ? 100 : 0,
-        custom_class: `milestone-${(m.status === "atteint" ? "green" : m.status === "en_retard" ? "red" : "orange")}`,
+        progress: m.status === "achieved" ? 100 : 0,
+        custom_class: `${familyClass}${statusSuffix}`,
       });
     });
 
@@ -124,6 +133,18 @@ export default function ProjectGantt({ tasks = [], milestones = [], onTaskClick 
         .gantt .milestone-green rect { fill: #10B981; }
         .gantt .milestone-orange rect { fill: #F59E0B; }
         .gantt .milestone-red rect { fill: #EF4444; }
+        /* Jalons colorés par famille */
+        .gantt .ms-gold rect { fill: #EAB308; }
+        .gantt .ms-violet rect { fill: #8B5CF6; }
+        .gantt .ms-green rect { fill: #10B981; }
+        .gantt .ms-orange rect { fill: #F59E0B; }
+        /* Attributs — bordure rouge/bleue */
+        .gantt .ms-gold-critical rect,
+        .gantt .ms-violet-critical rect,
+        .gantt .ms-green-critical rect { fill: inherit; stroke: #EF4444; stroke-width: 2; }
+        .gantt .ms-gold-strategic rect,
+        .gantt .ms-violet-strategic rect,
+        .gantt .ms-green-strategic rect { fill: inherit; stroke: #3B82F6; stroke-width: 2; }
         .gantt .bar-label { font-size: 11px; fill: #0F172A; font-weight: 500; }
         .gantt .today-highlight { fill: rgba(0,82,204,0.07); }
       `}</style>

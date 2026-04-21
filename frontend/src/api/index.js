@@ -71,6 +71,17 @@ export const allocationsAPI = {
 
 export const milestonesAPI = {
   list: (projectId) => api.get(`/milestones${projectId ? `?project_id=${projectId}` : ""}`),
+  create: (data) => api.post("/milestones", data),
+  update: (id, data) => api.put(`/milestones/${id}`, data),
+  delete: (id) => api.delete(`/milestones/${id}`),
+};
+
+export const projectDependenciesAPI = {
+  list: (projectId) => api.get(`/project-dependencies?project_id=${projectId}`),
+  listAll: () => api.get("/project-dependencies/all"),
+  create: (data) => api.post("/project-dependencies", data),
+  update: (id, data) => api.put(`/project-dependencies/${id}`, data),
+  delete: (id) => api.delete(`/project-dependencies/${id}`),
 };
 
 export const tasksAPI = {
