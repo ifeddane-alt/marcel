@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Outlet, NavLink, useNavigate } from "react-router-dom";
 import {
   LayoutDashboard,
@@ -11,7 +11,9 @@ import {
   FolderKanban,
   Upload,
   UsersRound,
+  Map,
 } from "lucide-react";
+import { teamsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 
 const ROLE_LABELS = {
@@ -24,6 +26,7 @@ const navItems = [
   { to: "/dashboard", icon: LayoutDashboard, label: "Tableau de bord" },
   { to: "/programmes", icon: FolderKanban, label: "Programmes" },
   { to: "/portfolio", icon: Briefcase, label: "Portefeuille" },
+  { to: "/roadmap", icon: Map, label: "Roadmap" },
   { to: "/resources", icon: Users, label: "Ressources" },
   { to: "/teams", icon: UsersRound, label: "Équipes" },
   { to: "/governance", icon: ShieldCheck, label: "Gouvernance" },
@@ -32,6 +35,13 @@ const navItems = [
 export default function Layout() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
+  const [alertCount, setAlertCount] = useState(0);
+
+  useEffect(() => {
+    teamsAPI.capacityAlerts().then((r) => {
+      setAlertCount(r.data.filter((a) => a.level === "critique" || a.level === "rouge").length);
+    }).catch(() => {});
+  }, []);
 
   const handleLogout = () => {
     logout();
@@ -74,7 +84,15 @@ export default function Layout() {
               }
             >
               <Icon size={16} strokeWidth={1.75} className="flex-shrink-0" />
-              <span>{label}</span>
+              <span className="flex-1">{label}</span>
+              {label === "Équipes" && alertCount > 0 && (
+                <span
+                  className="ml-auto flex-shrink-0 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-rose-500 text-white text-[10px] font-bold px-1"
+                  data-testid="sidebar-alert-badge"
+                >
+                  {alertCount}
+                </span>
+              )}
             </NavLink>
           ))}
 

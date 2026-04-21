@@ -16,6 +16,7 @@ import RiskHeatmap from "@/components/RiskHeatmap";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import ExportCopilModal from "@/components/ExportCopilModal";
 import WorkAllocationModal from "@/components/WorkAllocationModal";
+import ProjectGantt from "@/components/ProjectGantt";
 import { formatEuro, formatDate, formatJH } from "@/utils/format";
 
 function BudgetBar({ label, value, total, color }) {

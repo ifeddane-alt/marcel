@@ -7,9 +7,10 @@ import {
 import {
   Briefcase, TrendingUp, AlertTriangle, CheckCircle, ArrowRight, ShieldAlert, MapPin,
 } from "lucide-react";
-import { dashboardAPI, programsAPI, projectsAPI } from "@/api";
+import { dashboardAPI, programsAPI, projectsAPI, teamsAPI } from "@/api";
 import RAGBadge from "@/components/RAGBadge";
 import RiskHeatmap from "@/components/RiskHeatmap";
+import CapacityAlertBanner from "@/components/CapacityAlertBanner";
 import { formatEuro, formatDate } from "@/utils/format";
 
 const RAG_COLORS = { green: "#10B981", orange: "#F59E0B", red: "#EF4444" };
@@ -56,6 +57,7 @@ export default function Dashboard() {
   const [heatmapRisks, setHeatmapRisks] = useState([]);
   const [programs, setPrograms] = useState([]);
   const [allProjects, setAllProjects] = useState([]);
+  const [capacityAlerts, setCapacityAlerts] = useState([]);
   const [heatmapFilterProgram, setHeatmapFilterProgram] = useState("");
   const [heatmapFilterProject, setHeatmapFilterProject] = useState("");
   const [loading, setLoading] = useState(true);
@@ -67,12 +69,14 @@ export default function Dashboard() {
       dashboardAPI.heatmapRisks(),
       programsAPI.list(),
       projectsAPI.list(),
-    ]).then(([sRes, rRes, hrRes, pRes, projRes]) => {
+      teamsAPI.capacityAlerts(),
+    ]).then(([sRes, rRes, hrRes, pRes, projRes, caRes]) => {
         setSummary(sRes.data);
         setTopRisks(rRes.data);
         setHeatmapRisks(hrRes.data);
         setPrograms(pRes.data);
         setAllProjects(projRes.data);
+        setCapacityAlerts(caRes.data);
         setLoading(false);
       }).catch(() => setLoading(false));
   }, []);
@@ -303,7 +307,14 @@ export default function Dashboard() {
 
       {/* Top 10 risques critiques portefeuille */}
       {topRisks.length > 0 && (
+        {capacityAlerts.length > 0 && (
+          <div className="mb-6">
+            <CapacityAlertBanner alerts={capacityAlerts} compact={true} />
+          </div>
+        )}
+
         <div className="bg-white border border-gray-200 rounded shadow-sm mb-6" data-testid="top-risks-widget">
+
           <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
             <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-500 font-semibold">
               <ShieldAlert size={13} className="text-rose-400" />

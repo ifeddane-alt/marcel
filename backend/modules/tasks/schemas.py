@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from typing import Optional
+from typing import Optional, List
 
 
 class TaskCreate(BaseModel):
@@ -18,6 +18,7 @@ class TaskCreate(BaseModel):
     jh_consumed: float = 0
     jh_restants_estimes: Optional[float] = None
     resource_id: Optional[str] = None
+    dependencies: Optional[List[str]] = None
 
 
 class TaskUpdate(BaseModel):
@@ -35,3 +36,4 @@ class TaskUpdate(BaseModel):
     jh_consumed: Optional[float] = None
     jh_restants_estimes: Optional[float] = None
     resource_id: Optional[str] = None
+    dependencies: Optional[List[str]] = None

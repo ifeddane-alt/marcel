@@ -19,6 +19,11 @@ async def get_capacity_heatmap(
     return await service.get_capacity_heatmap(months, current_user)
 
 
+@router.get("/teams/capacity-alerts")
+async def get_capacity_alerts(current_user: TokenPayload = Depends(get_current_user)):
+    return await service.get_capacity_alerts(current_user)
+
+
 @router.post("/teams", status_code=201)
 async def create_team(data: TeamCreate, current_user: TokenPayload = Depends(get_current_user)):
     return await service.create_team(data, current_user)

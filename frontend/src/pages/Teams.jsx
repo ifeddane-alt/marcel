@@ -4,6 +4,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { teamsAPI, resourcesAPI } from "@/api";
 import TeamModal from "@/components/TeamModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
+import CapacityAlertBanner from "@/components/CapacityAlertBanner";
 
 export default function Teams() {
   const { user } = useAuth();
@@ -12,6 +13,7 @@ export default function Teams() {
 
   const [teams, setTeams] = useState([]);
   const [resources, setResources] = useState([]);
+  const [alerts, setAlerts] = useState([]);
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
@@ -19,10 +21,11 @@ export default function Teams() {
   const [deleting, setDeleting] = useState(false);
 
   const fetchAll = () => {
-    Promise.all([teamsAPI.list(), resourcesAPI.list()])
-      .then(([tRes, rRes]) => {
+    Promise.all([teamsAPI.list(), resourcesAPI.list(), teamsAPI.capacityAlerts()])
+      .then(([tRes, rRes, aRes]) => {
         setTeams(tRes.data);
         setResources(rRes.data);
+        setAlerts(aRes.data);
         setLoading(false);
       })
       .catch(() => setLoading(false));
@@ -61,6 +64,8 @@ export default function Teams() {
           </button>
         )}
       </div>
+
+      <CapacityAlertBanner alerts={alerts} />
 
       {/* Stats cards */}
       <div className="grid grid-cols-2 lg:grid-cols-3 gap-4 mb-6">

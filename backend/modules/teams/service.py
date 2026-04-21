@@ -116,7 +116,99 @@ async def get_capacity_heatmap(months: int, current_user: TokenPayload) -> list:
     return result
 
 
-async def create_team(data: TeamCreate, current_user: TokenPayload) -> dict:
+async def get_capacity_alerts(current_user: TokenPayload) -> list:
+    """Alertes capacité : équipes > 70% d'utilisation sur mois courant + mois suivant."""
+    today = date.today()
+    current_m = today.replace(day=1)
+    months_to_check = [
+        current_m.strftime("%Y-%m-%d"),
+        (current_m + relativedelta(months=1)).strftime("%Y-%m-%d"),
+    ]
+
+    # Équipes et ressources
+    teams = await db.teams.find({"tenant_id": current_user.tenant_id}, {"_id": 0}).to_list(None)
+    resources = await db.resources.find(
+        {"tenant_id": current_user.tenant_id},
+        {"_id": 0, "resource_id": 1, "name": 1, "role": 1, "team_id": 1,
+         "capacity_jh_month": 1, "availability_rate": 1},
+    ).to_list(None)
+    res_by_id = {r["resource_id"]: r for r in resources}
+    team_map = {t["team_id"]: t["name"] for t in teams}
+
+    # Capacité effective par équipe (JH/mois)
+    team_capacity: dict = {}
+    for r in resources:
+        tid = r.get("team_id") or "__unassigned__"
+        capa = (r.get("capacity_jh_month") or 0) * ((r.get("availability_rate") or 100) / 100)
+        team_capacity[tid] = team_capacity.get(tid, 0) + capa
+
+    # Allocations via project_ids du tenant
+    tenant_projects = await db.projects.find(
+        {"tenant_id": current_user.tenant_id}, {"_id": 0, "project_id": 1}
+    ).to_list(None)
+    tenant_project_ids = [p["project_id"] for p in tenant_projects]
+
+    allocations = await db.allocations.find(
+        {"project_id": {"$in": tenant_project_ids},
+         "period_month": {"$in": months_to_check}},
+        {"_id": 0, "resource_id": 1, "period_month": 1, "jh_allocated": 1},
+    ).to_list(None)
+
+    # Agréger par (team_id, period)
+    agg: dict = {}  # (tid, period) → {total_jh, resources: {rid: jh}}
+    for a in allocations:
+        rid = a.get("resource_id", "")
+        period = a.get("period_month", "")[:7]
+        jh = a.get("jh_allocated") or 0
+        res = res_by_id.get(rid, {})
+        tid = res.get("team_id") or "__unassigned__"
+        key = (tid, period)
+        if key not in agg:
+            agg[key] = {"total_jh": 0, "resources": {}}
+        agg[key]["total_jh"] += jh
+        agg[key]["resources"][rid] = agg[key]["resources"].get(rid, 0) + jh
+
+    # Construire les alertes
+    alerts = []
+    for (tid, period), data in agg.items():
+        capa = team_capacity.get(tid, 0)
+        if capa == 0:
+            continue
+        utilization_pct = round(data["total_jh"] / capa * 100, 1)
+        if utilization_pct < 70:
+            continue
+        level = "critique" if utilization_pct > 100 else ("rouge" if utilization_pct > 85 else "orange")
+        # Ressources surchargées dans cette équipe
+        overloaded = []
+        for rid, jh in data["resources"].items():
+            res = res_by_id.get(rid, {})
+            res_capa = (res.get("capacity_jh_month") or 0) * ((res.get("availability_rate") or 100) / 100)
+            if res_capa > 0:
+                res_util = round(jh / res_capa * 100, 1)
+                if res_util >= 70:
+                    overloaded.append({
+                        "resource_id": rid,
+                        "name": res.get("name", rid),
+                        "role": res.get("role", ""),
+                        "jh_allocated": round(jh, 1),
+                        "capacity_jh": round(res_capa, 1),
+                        "utilization_pct": res_util,
+                    })
+
+        alerts.append({
+            "team_id": tid if tid != "__unassigned__" else None,
+            "team_name": team_map.get(tid, "Non affectées"),
+            "period": period,
+            "capacity_jh": round(capa, 1),
+            "allocated_jh": round(data["total_jh"], 1),
+            "utilization_pct": utilization_pct,
+            "level": level,
+            "overloaded_resources": sorted(overloaded, key=lambda x: -x["utilization_pct"]),
+        })
+
+    level_order = {"critique": 0, "rouge": 1, "orange": 2}
+    alerts.sort(key=lambda x: (level_order.get(x["level"], 3), -x["utilization_pct"]))
+    return alerts
     require_write(current_user)
     doc = {
         "team_id": str(uuid.uuid4()),
