@@ -177,6 +177,13 @@ export default function Dashboard() {
         ))}
       </div>
 
+      {/* Alertes capacité — widget compact (avant les graphiques) */}
+      {capacityAlerts.length > 0 && (
+        <div className="mb-6" data-testid="capacity-alerts-section">
+          <CapacityAlertBanner alerts={capacityAlerts} compact={true} />
+        </div>
+      )}
+
       {/* Charts row */}
       <div className="grid grid-cols-12 gap-4 mb-6">
         {/* Budget bar chart */}
@@ -304,13 +311,6 @@ export default function Dashboard() {
           </table>
         </div>
       </div>
-
-      {/* Alertes capacité — widget compact */}
-      {capacityAlerts.length > 0 && (
-        <div className="mb-6">
-          <CapacityAlertBanner alerts={capacityAlerts} compact={true} />
-        </div>
-      )}
 
       {/* Top 10 risques critiques portefeuille */}
       {topRisks.length > 0 && (

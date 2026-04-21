@@ -1,0 +1,54 @@
+{
+  "summary": "Stream 3 (S3-01 à S3-04) E2E testing completed. All 16 backend tests passed. All UI flows validated for admin, PMO and viewer roles. 4 fixes (realistic names, allocations, dashboard widget, teams cleanup) also verified.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_s3_timesheets.py",
+    "/app/test_reports/pytest/s3_timesheets.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Timesheets.jsx line 571: canValidate = user?.role !== 'READ_ONLY' — this means PMO and ADMIN can validate, which is intentional. However the backend /timesheets/pending-count also responds to READ_ONLY (200). This is benign since the Layout.jsx already gates the UI badge for non-READ_ONLY, but backend could add a guard if desired.",
+    "service.py daily_cap uses (capacity_jh_month/21) * availability_rate — correct per spec, yields ~0.95 JH for 20JH/100% resource."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_s3_timesheets.py"
+  ],
+  "success_rate": {
+    "backend": "100% (16/16)",
+    "frontend": "100%"
+  },
+  "test_credentials": {
+    "admin": "admin@altair.fr / Admin1234! → Sophie Martin (TENANT_ADMIN)",
+    "pmo": "pmo@altair.fr / Pmo1234! → PMO_USER",
+    "viewer": "viewer@altair.fr / View1234! → Marie Leclerc (READ_ONLY)"
+  },
+  "seed_data_creation": "No seed data created — used existing timesheets data (35 submitted entries in seed)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Stream 3 (Timesheets S3-01 to S3-04) fully tested and working. Backend token key is access_token (not token). All 4 corrections validated: realistic resource names (Sophie Martin, Thomas Dubois, etc.), no parasite teams (Dev A/B/Infra/QA/Support only), Dashboard capacity alerts widget above charts, Thomas Dubois allocations visible. Timesheets sidebar badge shows 24 (pending count). Viewer (READ_ONLY) correctly has no Validation tab.",
+  "feature_status": {
+    "S3-01_grid_load": "PASS - Grid loads with resource picker, week nav, 0.95 JH daily cap",
+    "S3-01_cell_autosave": "PASS - Cell input with 500ms debounce, PUT /api/timesheets/entry returns 200",
+    "S3-01_submit_week": "PASS - Submit button active when draft entries exist",
+    "S3-02_badge_sidebar": "PASS - Badge shows 24 pending submissions (screenshot confirmed)",
+    "S3-02_validation_tab": "PASS - 4 validation groups shown with Valider/Rejeter buttons",
+    "S3-02_validate": "PASS - POST /api/timesheets/validate returns validated count",
+    "S3-02_reject_modal": "PASS - Modal opens, requires reason, Confirmer le rejet button works",
+    "S3-03_consumed_md": "PASS - consumed_md > 0 found on at least one work-allocation",
+    "S3-04_reports_resource": "PASS - Pivot table by resource displayed",
+    "S3-04_reports_project": "PASS - Pivot table by project displayed",
+    "S3-04_export_csv": "PASS - Export CSV button visible and backend returns CSV",
+    "dashboard_capacity_alerts": "PASS - Widget above charts (y=468 vs charts y=659)",
+    "realistic_resource_names": "PASS - Sophie Martin, Thomas Dubois, Alexandre Moreau etc.",
+    "no_parasite_teams": "PASS - Only Dev A, Dev B, Infra, QA, Support",
+    "viewer_no_validation": "PASS - Validation tab absent for READ_ONLY"
+  }
+}

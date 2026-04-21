@@ -392,25 +392,25 @@ PROJECTS = [
 ]
 
 RESOURCES = [
-    {"resource_id": RESOURCE_IDS[0], "tenant_id": TENANT_ID, "name": "Ressource_01", "role": "Architecte SI",
+    {"resource_id": RESOURCE_IDS[0], "tenant_id": TENANT_ID, "name": "Sophie Martin", "role": "Architecte SI",
      "capacity_jh_month": 20, "team": "Dev A", "team_id": TEAM_IDS[0], "tjm_eur": 900, "availability_rate": 100},
-    {"resource_id": RESOURCE_IDS[1], "tenant_id": TENANT_ID, "name": "Ressource_02", "role": "Chef de Projet Senior",
+    {"resource_id": RESOURCE_IDS[1], "tenant_id": TENANT_ID, "name": "Thomas Dubois", "role": "Chef de Projet Senior",
      "capacity_jh_month": 22, "team": "Dev A", "team_id": TEAM_IDS[0], "tjm_eur": 800, "availability_rate": 100},
-    {"resource_id": RESOURCE_IDS[2], "tenant_id": TENANT_ID, "name": "Ressource_03", "role": "Développeur Senior Java",
+    {"resource_id": RESOURCE_IDS[2], "tenant_id": TENANT_ID, "name": "Alexandre Moreau", "role": "Développeur Senior Java",
      "capacity_jh_month": 20, "team": "Dev A", "team_id": TEAM_IDS[0], "tjm_eur": 600, "availability_rate": 100},
-    {"resource_id": RESOURCE_IDS[3], "tenant_id": TENANT_ID, "name": "Ressource_04", "role": "Business Analyst",
+    {"resource_id": RESOURCE_IDS[3], "tenant_id": TENANT_ID, "name": "Marie Fontaine", "role": "Business Analyst",
      "capacity_jh_month": 20, "team": "Dev B", "team_id": TEAM_IDS[1], "tjm_eur": 700, "availability_rate": 100},
-    {"resource_id": RESOURCE_IDS[4], "tenant_id": TENANT_ID, "name": "Ressource_05", "role": "DevOps Engineer",
+    {"resource_id": RESOURCE_IDS[4], "tenant_id": TENANT_ID, "name": "Nicolas Petit", "role": "DevOps Engineer",
      "capacity_jh_month": 20, "team": "Infra", "team_id": TEAM_IDS[2], "tjm_eur": 600, "availability_rate": 100},
-    {"resource_id": RESOURCE_IDS[5], "tenant_id": TENANT_ID, "name": "Ressource_06", "role": "Product Owner",
+    {"resource_id": RESOURCE_IDS[5], "tenant_id": TENANT_ID, "name": "Isabelle Bernard", "role": "Product Owner",
      "capacity_jh_month": 18, "team": "Dev B", "team_id": TEAM_IDS[1], "tjm_eur": 700, "availability_rate": 100},
-    {"resource_id": RESOURCE_IDS[6], "tenant_id": TENANT_ID, "name": "Ressource_07", "role": "Scrum Master",
+    {"resource_id": RESOURCE_IDS[6], "tenant_id": TENANT_ID, "name": "Julien Girard", "role": "Scrum Master",
      "capacity_jh_month": 15, "team": "QA", "team_id": TEAM_IDS[3], "tjm_eur": 550, "availability_rate": 80},
-    {"resource_id": RESOURCE_IDS[7], "tenant_id": TENANT_ID, "name": "Ressource_08", "role": "Data Engineer",
+    {"resource_id": RESOURCE_IDS[7], "tenant_id": TENANT_ID, "name": "Camille Rousseau", "role": "Data Engineer",
      "capacity_jh_month": 20, "team": "Dev B", "team_id": TEAM_IDS[1], "tjm_eur": 600, "availability_rate": 100},
-    {"resource_id": RESOURCE_IDS[8], "tenant_id": TENANT_ID, "name": "Ressource_09", "role": "UX/UI Designer",
+    {"resource_id": RESOURCE_IDS[8], "tenant_id": TENANT_ID, "name": "Lucie Dumont", "role": "UX/UI Designer",
      "capacity_jh_month": 18, "team": "QA", "team_id": TEAM_IDS[3], "tjm_eur": 550, "availability_rate": 90},
-    {"resource_id": RESOURCE_IDS[9], "tenant_id": TENANT_ID, "name": "Ressource_10", "role": "Expert Sécurité SI",
+    {"resource_id": RESOURCE_IDS[9], "tenant_id": TENANT_ID, "name": "Marc Lefebvre", "role": "Expert Sécurité SI",
      "capacity_jh_month": 15, "team": "Support", "team_id": TEAM_IDS[4], "tjm_eur": 500, "availability_rate": 100},
 ]
 
@@ -441,6 +441,12 @@ ALLOCATIONS = [
     # DORA NIS2
     {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[7], "resource_id": RESOURCE_IDS[9], "period_month": _month(0),  "jh_allocated": 15, "jh_consumed":  0, "allocation_rate": 100},
     {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[7], "resource_id": RESOURCE_IDS[7], "period_month": _month(1),  "jh_allocated": 10, "jh_consumed":  0, "allocation_rate": 50},
+    # Dev A — Thomas Dubois (Chef de Projet) charge mois courant
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[0], "resource_id": RESOURCE_IDS[1], "period_month": _month(0),  "jh_allocated": 16, "jh_consumed":  4, "allocation_rate": 73},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[1], "resource_id": RESOURCE_IDS[1], "period_month": _month(0),  "jh_allocated":  6, "jh_consumed":  2, "allocation_rate": 27},
+    # Dev A — Alexandre Moreau (Dev Java) charge mois courant
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[1], "resource_id": RESOURCE_IDS[2], "period_month": _month(0),  "jh_allocated": 12, "jh_consumed":  5, "allocation_rate": 60},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[2], "resource_id": RESOURCE_IDS[2], "period_month": _month(0),  "jh_allocated":  8, "jh_consumed":  3, "allocation_rate": 40},
 ]
 
 MILESTONES = [
@@ -1479,6 +1485,8 @@ WORK_ALLOCATIONS_TEMPLATE = [
     # P7 — DORA NIS2 (tasks 40-45)
     _wa(0, 7, 9, "analyse",        12.0, 9.0),    # Sécurité → GAP Analysis
     _wa(1, 7, 0, "analyse",        10.0, 4.5),    # Architecte → Cartographie
+    # CdP Senior (Thomas Dubois) — tâche Recette SI Finance + pilotage Phoenix
+    _wa(4, 1, 1, "recette",        12.0, 2.0),    # CdP → Recette & Tests SI Finance
 ]
 
 
@@ -1663,8 +1671,8 @@ async def seed():
     print(f"Timesheets créés : {len(ts_to_insert)}")
 
     print("\n=== Comptes disponibles ===")
-    print("  admin@altair.fr    / Admin1234!  (TENANT_ADMIN)  → ressource Ressource_01")
-    print("  pmo@altair.fr      / Pmo1234!    (PMO_USER)")
+    print("  admin@altair.fr    / Admin1234!  (TENANT_ADMIN)  → Sophie Martin (Architecte SI)")
+    print("  pmo@altair.fr      / Pmo1234!    (PMO_USER)      → Thomas Dubois (Chef de Projet Senior)")
     print("  viewer@altair.fr   / View1234!   (READ_ONLY)")
     print("\nSeed terminé avec succès.")
     client.close()
