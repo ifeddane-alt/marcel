@@ -305,14 +305,15 @@ export default function Dashboard() {
         </div>
       </div>
 
+      {/* Alertes capacité — widget compact */}
+      {capacityAlerts.length > 0 && (
+        <div className="mb-6">
+          <CapacityAlertBanner alerts={capacityAlerts} compact={true} />
+        </div>
+      )}
+
       {/* Top 10 risques critiques portefeuille */}
       {topRisks.length > 0 && (
-        {capacityAlerts.length > 0 && (
-          <div className="mb-6">
-            <CapacityAlertBanner alerts={capacityAlerts} compact={true} />
-          </div>
-        )}
-
         <div className="bg-white border border-gray-200 rounded shadow-sm mb-6" data-testid="top-risks-widget">
 
           <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">

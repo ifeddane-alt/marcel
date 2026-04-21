@@ -9,7 +9,6 @@
  */
 import React, { useEffect, useRef, useState } from "react";
 import Gantt from "frappe-gantt";
-import "frappe-gantt/dist/frappe-gantt.css";
 
 const VIEW_MODES = ["Day", "Week", "Month", "Quarter Year"];
 const VIEW_LABELS = { Day: "Jour", Week: "Semaine", Month: "Mois", "Quarter Year": "Trimestre" };
@@ -54,7 +53,7 @@ function toGanttTasks(tasks, milestones) {
         start: d,
         end: d,
         progress: m.status === "atteint" ? 100 : 0,
-        custom_class: `milestone-bar rag-${(m.status === "atteint" ? "green" : m.status === "en_retard" ? "red" : "orange")}`,
+        custom_class: `milestone-${(m.status === "atteint" ? "green" : m.status === "en_retard" ? "red" : "orange")}`,
       });
     });
 
@@ -70,15 +69,16 @@ export default function ProjectGantt({ tasks = [], milestones = [], onTaskClick 
 
   useEffect(() => {
     if (!containerRef.current || ganttTasks.length === 0) return;
+    const container = containerRef.current;
     // Nettoyer l'instance précédente
-    containerRef.current.innerHTML = "";
-    ganttRef.current = new Gantt(containerRef.current, ganttTasks, {
+    container.innerHTML = "";
+    ganttRef.current = new Gantt(container, ganttTasks, {
       view_mode: viewMode,
       date_format: "YYYY-MM-DD",
       on_click: (task) => onTaskClick?.(task.id),
       language: "fr",
     });
-    return () => { containerRef.current && (containerRef.current.innerHTML = ""); };
+    return () => { container.innerHTML = ""; };
   }, [ganttTasks.length, viewMode]); // eslint-disable-line
 
   if (ganttTasks.length === 0) {
@@ -121,9 +121,9 @@ export default function ProjectGantt({ tasks = [], milestones = [], onTaskClick 
         .gantt .bar-completed rect { fill: #10B981; }
         .gantt .bar-in-progress rect { fill: #0052CC; }
         .gantt .bar-not-started rect { fill: #94A3B8; }
-        .gantt .milestone-bar.rag-green rect { fill: #10B981; }
-        .gantt .milestone-bar.rag-orange rect { fill: #F59E0B; }
-        .gantt .milestone-bar.rag-red rect { fill: #EF4444; }
+        .gantt .milestone-green rect { fill: #10B981; }
+        .gantt .milestone-orange rect { fill: #F59E0B; }
+        .gantt .milestone-red rect { fill: #EF4444; }
         .gantt .bar-label { font-size: 11px; fill: #0F172A; font-weight: 500; }
         .gantt .today-highlight { fill: rgba(0,82,204,0.07); }
       `}</style>

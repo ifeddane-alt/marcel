@@ -3,6 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Calendar, ChevronRight, Flag, AlertTriangle, Clock, TrendingUp,
   Pencil, Trash2, Plus, History, ShieldAlert, ClipboardList, Presentation, Users,
+  GitBranch, BarChart2,
 } from "lucide-react";
 import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI, decisionsAPI, workAllocationsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -55,6 +56,7 @@ export default function ProjectDetail() {
   const [teamConsumption, setTeamConsumption] = useState([]);
   const [raf, setRaf] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [taskView, setTaskView] = useState("table"); // "table" | "gantt"
 
   // Modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -401,8 +403,35 @@ export default function ProjectDetail() {
           <div className="bg-white border border-gray-200 rounded shadow-sm" data-testid="tasks-section">
             <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
               <div className="flex-1">
-                <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold">
-                  Décomposition du Projet ({tasks.length} tâches / features)
+                <div className="flex items-center gap-3">
+                  <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold">
+                    Décomposition du Projet ({tasks.length} tâches / features)
+                  </div>
+                  {/* View toggle */}
+                  <div className="flex items-center gap-1 ml-2" data-testid="task-view-toggle">
+                    <button
+                      onClick={() => setTaskView("table")}
+                      data-testid="task-view-table-btn"
+                      className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded transition-colors ${
+                        taskView === "table"
+                          ? "bg-[#0052CC] text-white"
+                          : "text-slate-500 border border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      <ClipboardList size={11} /> Liste
+                    </button>
+                    <button
+                      onClick={() => setTaskView("gantt")}
+                      data-testid="task-view-gantt-btn"
+                      className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded transition-colors ${
+                        taskView === "gantt"
+                          ? "bg-[#0052CC] text-white"
+                          : "text-slate-500 border border-gray-200 hover:bg-gray-50"
+                      }`}
+                    >
+                      <BarChart2 size={11} /> Gantt
+                    </button>
+                  </div>
                 </div>
                 {/* Mini-RAG summary + coverage */}
                 {tasks.length > 0 && (() => {
@@ -459,6 +488,17 @@ export default function ProjectDetail() {
             {tasks.length === 0 ? (
               <div className="px-5 py-8 text-sm text-slate-400 text-center">
                 Aucune tâche/feature définie pour ce projet
+              </div>
+            ) : taskView === "gantt" ? (
+              <div className="p-5" data-testid="gantt-tab-content">
+                <ProjectGantt
+                  tasks={tasks}
+                  milestones={milestones}
+                  onTaskClick={(taskId) => {
+                    const t = tasks.find((x) => x.task_id === taskId);
+                    if (t && canWrite) { setSelectedTask(t); setTaskModalOpen(true); }
+                  }}
+                />
               </div>
             ) : (
               <div className="overflow-x-auto">
@@ -525,6 +565,14 @@ export default function ProjectDetail() {
                           {/* Nom */}
                           <td className="px-3 py-2.5 font-medium text-slate-800 max-w-[200px]">
                             <span className="line-clamp-2 leading-snug">{t.name}</span>
+                            {t.dependencies && t.dependencies.length > 0 && (
+                              <div className="flex items-center gap-1 mt-0.5" title={`Prérequis : ${t.dependencies.map(depId => tasks.find(x => x.task_id === depId)?.name || depId).join(", ")}`}>
+                                <GitBranch size={9} className="text-slate-400 flex-shrink-0" />
+                                <span className="text-[9px] text-slate-400 font-mono">
+                                  {t.dependencies.length} prérequis
+                                </span>
+                              </div>
+                            )}
                           </td>
                           <td className="px-3 py-2.5">
                             <TaskTypeBadge type={t.type} />
@@ -1203,6 +1251,7 @@ export default function ProjectDetail() {
         task={selectedTask}
         projectId={id}
         resources={resources}
+        allTasks={tasks}
         onSaved={fetchAll}
       />
       <RiskModal

@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, GitBranch } from "lucide-react";
 import Modal from "@/components/Modal";
 import { tasksAPI } from "@/api";
 
@@ -9,6 +9,7 @@ const EMPTY = {
   date_start_actual: "", date_end_actual: "",
   budget_planned_k: "", budget_consumed_k: "",
   jh_planned: "", jh_consumed: "", resource_id: "",
+  dependencies: [],
 };
 
 const INPUT_CLS = "w-full text-sm border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-white";
@@ -25,7 +26,7 @@ function Field({ label, required, error, children }) {
   );
 }
 
-export default function TaskModal({ isOpen, onClose, task, projectId, resources = [], onSaved }) {
+export default function TaskModal({ isOpen, onClose, task, projectId, resources = [], allTasks = [], onSaved }) {
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
@@ -47,6 +48,7 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
         jh_planned: task.jh_planned != null ? String(task.jh_planned) : "",
         jh_consumed: task.jh_consumed != null ? String(task.jh_consumed) : "",
         resource_id: task.resource_id || "",
+        dependencies: task.dependencies || [],
       });
     } else {
       setForm(EMPTY);
@@ -56,6 +58,15 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
   }, [isOpen, task]);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
+
+  const toggleDep = (depId) => {
+    setForm((f) => {
+      const deps = f.dependencies.includes(depId)
+        ? f.dependencies.filter((d) => d !== depId)
+        : [...f.dependencies, depId];
+      return { ...f, dependencies: deps };
+    });
+  };
 
   const validate = () => {
     const errs = {};
@@ -84,6 +95,7 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
         jh_consumed: form.jh_consumed ? Number(form.jh_consumed) : 0,
         resource_id: form.resource_id || null,
         project_id: projectId,
+        dependencies: form.dependencies,
       };
       if (task) {
         await tasksAPI.update(task.task_id, payload);
@@ -169,6 +181,51 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
             {resources.map((r) => <option key={r.resource_id} value={r.resource_id}>{r.name}</option>)}
           </select>
         </Field>
+
+        {/* S2-01 — Dépendances inter-tâches */}
+        {(() => {
+          const availableDeps = allTasks.filter((t) => t.task_id !== task?.task_id);
+          if (availableDeps.length === 0) return null;
+          return (
+            <div className="border-t border-gray-100 pt-4">
+              <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-2">
+                <GitBranch size={11} />
+                Dépendances (tâches prérequises)
+              </div>
+              <div
+                className="max-h-36 overflow-y-auto border border-gray-200 rounded divide-y divide-gray-50"
+                data-testid="dependencies-picker"
+              >
+                {availableDeps.map((t) => {
+                  const checked = form.dependencies.includes(t.task_id);
+                  return (
+                    <label
+                      key={t.task_id}
+                      className={`flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors ${checked ? "bg-blue-50/50" : ""}`}
+                    >
+                      <input
+                        type="checkbox"
+                        className="accent-[#0052CC] flex-shrink-0"
+                        checked={checked}
+                        onChange={() => toggleDep(t.task_id)}
+                        data-testid={`dep-checkbox-${t.task_id}`}
+                      />
+                      <span className="text-xs text-slate-700 leading-snug line-clamp-1 flex-1">{t.name}</span>
+                      {t.status && (
+                        <span className="text-[9px] font-semibold text-slate-400 uppercase flex-shrink-0">{t.status}</span>
+                      )}
+                    </label>
+                  );
+                })}
+              </div>
+              {form.dependencies.length > 0 && (
+                <p className="text-[10px] text-[#0052CC] mt-1">
+                  {form.dependencies.length} dépendance{form.dependencies.length > 1 ? "s" : ""} sélectionnée{form.dependencies.length > 1 ? "s" : ""}
+                </p>
+              )}
+            </div>
+          );
+        })()}
 
         <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
           <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-600 border border-gray-200 rounded hover:bg-gray-50 transition-colors">

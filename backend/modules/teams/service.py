@@ -209,6 +209,9 @@ async def get_capacity_alerts(current_user: TokenPayload) -> list:
     level_order = {"critique": 0, "rouge": 1, "orange": 2}
     alerts.sort(key=lambda x: (level_order.get(x["level"], 3), -x["utilization_pct"]))
     return alerts
+
+
+async def create_team(data: TeamCreate, current_user: TokenPayload) -> dict:
     require_write(current_user)
     doc = {
         "team_id": str(uuid.uuid4()),
