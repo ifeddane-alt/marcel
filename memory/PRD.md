@@ -79,6 +79,7 @@ Construire et étendre en continu une application web SaaS multi-tenant appelée
 | S2-02  | Vue Gantt / Timeline projet (frappe-gantt)           | 2026-04    |
 | S2-03  | Roadmap consolidée multi-projets (page /roadmap)     | 2026-04    |
 | S2-04  | Slide Roadmap dans PPT COPIL (matplotlib)            | 2026-04    |
+| UX-01  | Page Détail Équipe /teams/{id} (membres, allocs, heatmap) | 2026-04 |
 
 ---
 
