@@ -17,14 +17,14 @@ function Field({ label, children, hint }) {
 
 export default function ExportCopilModal({ isOpen, onClose, selectedProjectIds = [], selectedProjectNames = [], preGovernanceId = null }) {
   const today = new Date().toISOString().split("T")[0];
-  const [form, setForm] = useState({ instanceName: "", instanceDate: today, governanceId: preGovernanceId || "" });
+  const [form, setForm] = useState({ instanceName: "", instanceDate: today, governanceId: preGovernanceId || "", includeRoadmap: false });
   const [instances, setInstances] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
 
   useEffect(() => {
     if (!isOpen) return;
-    setForm({ instanceName: "", instanceDate: today, governanceId: preGovernanceId || "" });
+    setForm({ instanceName: "", instanceDate: today, governanceId: preGovernanceId || "", includeRoadmap: false });
     setError("");
     governanceAPI.list().then((r) => setInstances(r.data)).catch(() => {});
   }, [isOpen, preGovernanceId]);
@@ -42,6 +42,7 @@ export default function ExportCopilModal({ isOpen, onClose, selectedProjectIds =
         instance_name: form.instanceName.trim(),
         instance_date: form.instanceDate,
         governance_id: form.governanceId || null,
+        include_roadmap: form.includeRoadmap,
       });
       const blob = new Blob([res.data], {
         type: "application/vnd.openxmlformats-officedocument.presentationml.presentation",
@@ -128,9 +129,21 @@ export default function ExportCopilModal({ isOpen, onClose, selectedProjectIds =
         </Field>
 
         <div className="border-t border-gray-100 pt-3 flex items-center justify-between">
-          <p className="text-[11px] text-slate-400">
-            Format : PowerPoint PPTX · {2 + (selectedProjectIds.length > 0 ? 3 : 0) + selectedProjectIds.length} slides environ
-          </p>
+          <div className="flex items-center gap-4">
+            <label className="flex items-center gap-2 cursor-pointer select-none" data-testid="include-roadmap-toggle">
+              <input
+                type="checkbox"
+                className="accent-[#0052CC] w-4 h-4"
+                checked={form.includeRoadmap}
+                onChange={(e) => setForm((f) => ({ ...f, includeRoadmap: e.target.checked }))}
+                data-testid="include-roadmap-checkbox"
+              />
+              <span className="text-xs font-medium text-slate-600">Inclure slide Roadmap</span>
+            </label>
+            <p className="text-[11px] text-slate-400">
+              ~{2 + (selectedProjectIds.length > 0 ? 3 : 0) + selectedProjectIds.length + (form.includeRoadmap ? 1 : 0)} slides
+            </p>
+          </div>
           <div className="flex items-center gap-3">
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-600 border border-gray-200 rounded hover:bg-gray-50 transition-colors">
               Annuler

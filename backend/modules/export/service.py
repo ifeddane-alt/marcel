@@ -126,5 +126,6 @@ async def export_copil(data: ExportCopilRequest, current_user: TokenPayload):
         all_decisions=decisions,
         governance_id=data.governance_id,
         team_consumption_by_project=team_consumption_by_project,
+        include_roadmap=data.include_roadmap,
     )
     return buf, data.instance_name, data.instance_date

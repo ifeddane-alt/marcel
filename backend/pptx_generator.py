@@ -159,6 +159,136 @@ def decision_status_label(s):
     }.get(str(s), str(s) if s else "—")
 
 
+# ---- S2-04 — Slide Roadmap matplotlib ----
+
+def add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_date):
+    """Génère un slide Roadmap avec un diagramme Gantt matplotlib multi-projets."""
+    from datetime import datetime as dt, timedelta
+    import matplotlib.dates as mdates
+
+    RAG_HEX = {"green": "#10B981", "orange": "#F59E0B", "red": "#EF4444"}
+
+    def _parse(d):
+        if not d:
+            return None
+        try:
+            return dt.strptime(str(d)[:10], "%Y-%m-%d")
+        except Exception:
+            return None
+
+    rows = []
+    for p in projects:
+        start = _parse(p.get("start_date"))
+        end   = _parse(p.get("end_date_forecast") or p.get("end_date_baseline"))
+        if not start:
+            continue
+        if not end or end <= start:
+            end = start + timedelta(days=90)
+        rows.append({
+            "name": (p.get("name") or "?")[:35],
+            "start": start, "end": end,
+            "rag": p.get("status_rag", "green"),
+            "pid": p.get("project_id"),
+        })
+
+    slide = _blank_slide(prs)
+    _rect(slide, Emu(0), Emu(0), SW, SH, fill=WHITE)
+    _header(slide, "Roadmap Portefeuille",
+            subtitle=f"{instance_name} · {instance_date}")
+    _footer(slide, "Projetenne · Confidentiel")
+
+    if not rows:
+        tb = _tb(slide, Inches(0.5), Inches(2.5), Inches(12), Inches(1))
+        r = tb.text_frame.paragraphs[0].add_run()
+        r.text = "Aucun projet avec des dates planifiées définies."
+        r.font.size = Pt(12)
+        r.font.name = FONT
+        r.font.color.rgb = MID
+        return
+
+    t_min = min(r["start"] for r in rows) - timedelta(days=20)
+    t_max = max(r["end"]   for r in rows) + timedelta(days=20)
+    n     = len(rows)
+
+    fig_h = max(3.0, min(6.5, 1.0 + n * 0.5))
+    fig, ax = plt.subplots(figsize=(12.5, fig_h))
+    ax.set_facecolor("#FAFAFA")
+    fig.patch.set_facecolor("#FAFAFA")
+
+    ax.set_xlim(mdates.date2num(t_min), mdates.date2num(t_max))
+    ax.set_ylim(-0.6, n - 0.4)
+    ax.invert_yaxis()
+
+    # Grid
+    ax.xaxis.set_major_locator(mdates.MonthLocator())
+    ax.xaxis.set_major_formatter(mdates.DateFormatter("%b %y"))
+    ax.xaxis.set_tick_params(labelsize=7, rotation=25)
+    ax.grid(axis="x", linestyle="--", linewidth=0.4, alpha=0.5, color="#CBD5E1")
+    ax.tick_params(axis="y", length=0, labelsize=7.5)
+    for spine in ["top", "right", "left"]:
+        ax.spines[spine].set_visible(False)
+
+    # Today line
+    today = dt.now()
+    if t_min <= today <= t_max:
+        ax.axvline(mdates.date2num(today), color="#0052CC",
+                   linewidth=1.5, linestyle="--", alpha=0.6, zorder=5)
+        ax.text(mdates.date2num(today), -0.4, "Auj.",
+                fontsize=6, color="#0052CC", ha="center", va="bottom", zorder=6)
+
+    # Milestones by project
+    ms_by_proj = {}
+    for ms in all_milestones:
+        if ms.get("is_governance"):
+            pid = ms.get("project_id", "")
+            ms_by_proj.setdefault(pid, []).append(ms)
+
+    # Bars & milestones
+    for i, r in enumerate(rows):
+        color   = RAG_HEX.get(r["rag"], "#10B981")
+        x_start = mdates.date2num(r["start"])
+        x_end   = mdates.date2num(r["end"])
+        bar = mpatches.FancyBboxPatch(
+            (x_start, i - 0.28), x_end - x_start, 0.56,
+            boxstyle="round,pad=0.3",
+            facecolor=color, edgecolor="white", linewidth=0.6, zorder=4,
+        )
+        ax.add_patch(bar)
+        # Label inside bar
+        bar_days = (r["end"] - r["start"]).days
+        if bar_days > 25:
+            cx = (x_start + x_end) / 2
+            ax.text(cx, i, r["name"], ha="center", va="center",
+                    fontsize=6.5, color="white", fontweight="bold", zorder=5,
+                    clip_on=True)
+        # Milestone diamonds
+        for ms in ms_by_proj.get(r["pid"], []):
+            d = _parse(ms.get("date_forecast") or ms.get("date_baseline"))
+            if not d or not (t_min <= d <= t_max):
+                continue
+            ms_col = "#EF4444" if ms.get("status") == "en_retard" else "#0B2545"
+            ax.plot(mdates.date2num(d), i, "D", color=ms_col, markersize=7,
+                    markeredgewidth=0.5, markeredgecolor="white", zorder=6)
+
+    ax.set_yticks(range(n))
+    ax.set_yticklabels([r["name"] for r in rows], fontsize=7)
+    ax.set_title("Roadmap Portefeuille", fontsize=10, fontweight="bold",
+                 color="#0F172A", pad=6, loc="left")
+
+    plt.tight_layout(pad=0.6)
+
+    buf = io.BytesIO()
+    fig.savefig(buf, format="png", dpi=150, bbox_inches="tight")
+    plt.close(fig)
+    buf.seek(0)
+
+    img_w  = Inches(12.2)
+    img_h  = Inches(5.6)
+    img_l  = (SW - img_w) / 2
+    img_t  = Inches(1.3)
+    slide.shapes.add_picture(buf, img_l, img_t, img_w, img_h)
+
+
 # ---- Header bar (full-width, Navy) ----
 
 def _header(slide, title, subtitle=None, height_in=1.15):
@@ -964,7 +1094,8 @@ def add_slide_team_consumption(prs, project, team_rows, instance_name, instance_
 
 def generate_copil_pptx(instance_name, instance_date, projects,
                         all_milestones, all_risks, all_decisions,
-                        governance_id=None, team_consumption_by_project=None):
+                        governance_id=None, team_consumption_by_project=None,
+                        include_roadmap=False):
     prs = Presentation()
     prs.slide_width = SW
     prs.slide_height = SH
@@ -1007,6 +1138,10 @@ def generate_copil_pptx(instance_name, instance_date, projects,
         # S1-08 — Slide consommation par équipe
         team_rows = tc_by_proj.get(pid, [])
         add_slide_team_consumption(prs, p, team_rows, instance_name, instance_date)
+
+    # S2-04 — Slide Roadmap consolidée (optionnel)
+    if include_roadmap:
+        add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_date)
 
     buf = io.BytesIO()
     prs.save(buf)
