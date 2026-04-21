@@ -1,4 +1,4 @@
-"""Générateur PowerPoint COPIL — Projetenne"""
+"""Générateur PowerPoint COPIL — Projetenne (v2)"""
 import io
 from datetime import datetime
 from typing import List, Optional
@@ -17,8 +17,8 @@ from pptx.enum.text import PP_ALIGN
 SW = Inches(13.33)
 SH = Inches(7.5)
 
-# ---- Palette (fond blanc, accents Navy Blue) ----
-NAVY        = RGBColor(0x0F, 0x17, 0x2A)
+# ---- Palette — fond blanc, accents Navy #0B2545, RAG couleurs corrigées ----
+NAVY        = RGBColor(0x0B, 0x25, 0x45)
 BLUE        = RGBColor(0x00, 0x52, 0xCC)
 LIGHT_BLUE  = RGBColor(0xEB, 0xF2, 0xFF)
 WHITE       = RGBColor(0xFF, 0xFF, 0xFF)
@@ -27,9 +27,9 @@ DARK        = RGBColor(0x1E, 0x29, 0x3B)
 MID         = RGBColor(0x64, 0x74, 0x8B)
 LIGHT       = RGBColor(0x94, 0xA3, 0xB8)
 BORDER      = RGBColor(0xE2, 0xE8, 0xF0)
-RED         = RGBColor(0xDC, 0x26, 0x26)
-ORANGE_C    = RGBColor(0xD9, 0x77, 0x06)
-GREEN_C     = RGBColor(0x16, 0xA3, 0x4A)
+RED         = RGBColor(0xEF, 0x44, 0x44)
+ORANGE_C    = RGBColor(0xF5, 0x9E, 0x0B)
+GREEN_C     = RGBColor(0x10, 0xB9, 0x81)
 LIGHT_RED   = RGBColor(0xFE, 0xF2, 0xF2)
 LIGHT_AMBER = RGBColor(0xFF, 0xF7, 0xED)
 LIGHT_GREEN = RGBColor(0xF0, 0xFD, 0xF4)
@@ -42,6 +42,8 @@ DECISION_STATUS_COLORS = {
     "reportée":  RGBColor(0xF1, 0xF5, 0xF9),
     "annulée":   RGBColor(0xFE, 0xE2, 0xE2),
 }
+
+FONT = "Arial"
 
 
 # ---- Helper utilities ----
@@ -77,7 +79,7 @@ def _clear(tf):
 
 
 def _run(tf, text, size=9, bold=False, color=None, align=PP_ALIGN.LEFT, space_before=0, italic=False):
-    """Add a paragraph with a single run to a text frame."""
+    """Add a paragraph with a single run to a text frame (Arial font)."""
     p = tf.add_paragraph()
     p.alignment = align
     p.space_before = Pt(space_before)
@@ -86,6 +88,7 @@ def _run(tf, text, size=9, bold=False, color=None, align=PP_ALIGN.LEFT, space_be
     r.font.size = Pt(size)
     r.font.bold = bold
     r.font.italic = italic
+    r.font.name = FONT
     r.font.color.rgb = color or DARK
     return p
 
@@ -141,20 +144,20 @@ def decision_status_label(s):
     }.get(str(s), str(s) if s else "—")
 
 
-# ---- Header bar (top of every slide) ----
+# ---- Header bar (full-width, Navy) ----
 
 def _header(slide, title, subtitle=None, height_in=1.15):
     h = Inches(height_in)
-    _rect(slide, 0, 0, SW, h, fill=NAVY)
-    # Title
-    tb = _tb(slide, Inches(0.4), Inches(0.1), SW - Inches(0.8), h - Inches(0.2))
+    # Pleine largeur exacte
+    _rect(slide, Emu(0), Emu(0), SW, h, fill=NAVY)
+    tb = _tb(slide, Inches(0.4), Inches(0.12), SW - Inches(0.8), h - Inches(0.25))
     _clear(tb.text_frame)
     p = tb.text_frame.paragraphs[0]
-    p.alignment = PP_ALIGN.LEFT
     r = p.add_run()
     r.text = title
     r.font.size = Pt(20)
     r.font.bold = True
+    r.font.name = FONT
     r.font.color.rgb = WHITE
     if subtitle:
         _run(tb.text_frame, subtitle, size=9, color=RGBColor(0xAA, 0xCC, 0xFF))
@@ -172,6 +175,7 @@ def _section_label(slide, left, top, width, height_in, label):
     r.text = label.upper()
     r.font.size = Pt(7)
     r.font.bold = True
+    r.font.name = FONT
     r.font.color.rgb = BLUE
 
 
@@ -185,12 +189,13 @@ def _footer(slide, text="Projetenne · Confidentiel"):
     r = p.add_run()
     r.text = text
     r.font.size = Pt(6.5)
+    r.font.name = FONT
     r.font.color.rgb = LIGHT
 
 
-# ---- Table helper ----
+# ---- Table helper (with word wrap) ----
 
-def _styled_table(slide, headers, rows, left, top, width, col_widths_in, row_height_in=0.38,
+def _styled_table(slide, headers, rows, left, top, width, col_widths_in, row_height_in=0.42,
                   header_bg=NAVY, header_fg=WHITE):
     n_cols = len(headers)
     n_rows = len(rows) + 1
@@ -212,11 +217,13 @@ def _styled_table(slide, headers, rows, left, top, width, col_widths_in, row_hei
         cell.margin_left = Inches(0.06)
         cell.margin_right = Inches(0.04)
         cell.margin_top = Inches(0.02)
+        cell.text_frame.word_wrap = True
         cell.text_frame.paragraphs[0].clear()
         r = cell.text_frame.paragraphs[0].add_run()
         r.text = h
         r.font.size = Pt(8)
         r.font.bold = True
+        r.font.name = FONT
         r.font.color.rgb = header_fg
         cell.text_frame.paragraphs[0].alignment = PP_ALIGN.CENTER
 
@@ -232,85 +239,128 @@ def _styled_table(slide, headers, rows, left, top, width, col_widths_in, row_hei
             cell.margin_left = Inches(0.06)
             cell.margin_right = Inches(0.04)
             cell.margin_top = Inches(0.02)
+            cell.text_frame.word_wrap = True
             cell.text_frame.paragraphs[0].clear()
             run = cell.text_frame.paragraphs[0].add_run()
             run.text = str(val)
             run.font.size = Pt(opts.get("size", 8))
             run.font.bold = opts.get("bold", False)
+            run.font.name = FONT
             run.font.color.rgb = opts.get("color", DARK)
             cell.text_frame.paragraphs[0].alignment = opts.get("align", PP_ALIGN.LEFT)
 
     return tf
 
 
+# ---- 2-column key/value table helper ----
+
+def _kv_table(slide, items, left, top, width, label_ratio=0.45, row_h=0.36):
+    """items = list of (label, value, value_color, bold, row_bg)"""
+    n = len(items)
+    height = Inches(row_h * n)
+    ts = slide.shapes.add_table(n, 2, left, top, width, height)
+    tbl = ts.table
+    lw = int(width * label_ratio)
+    tbl.columns[0].width = lw
+    tbl.columns[1].width = width - lw
+    for i, (lbl, val, fg, bold, bg) in enumerate(items):
+        tbl.rows[i].height = Inches(row_h)
+        for col_idx, (text, clr, is_bold) in enumerate([(lbl, MID, False), (val, fg, bold)]):
+            cell = tbl.cell(i, col_idx)
+            cell.fill.solid()
+            cell.fill.fore_color.rgb = bg
+            cell.margin_left = Inches(0.08)
+            cell.margin_top = Inches(0.04)
+            cell.text_frame.word_wrap = True
+            p = cell.text_frame.paragraphs[0]
+            p.clear()
+            r = p.add_run()
+            r.text = text
+            r.font.size = Pt(8.5)
+            r.font.bold = is_bold
+            r.font.name = FONT
+            r.font.color.rgb = clr
+    return ts, Inches(row_h * n)
+
+
 # ====================================================================
-# SLIDE 1 — GARDE
+# SLIDE 1 — GARDE (fond blanc, titre Navy, bloc projets encadré)
 # ====================================================================
 
 def add_slide_garde(prs, instance_name, instance_date, projects):
     slide = _blank_slide(prs)
 
-    # Dark blue top half
-    _rect(slide, 0, 0, SW, SH * 0.58, fill=NAVY)
+    # Thin top accent bar (Navy)
+    _rect(slide, Emu(0), Emu(0), SW, Inches(0.1), fill=NAVY)
 
     # App label
-    app_tb = _tb(slide, Inches(0.5), Inches(0.35), Inches(5), Inches(0.35))
+    app_tb = _tb(slide, Inches(0.5), Inches(0.22), Inches(6), Inches(0.32))
     _clear(app_tb.text_frame)
     r = app_tb.text_frame.paragraphs[0].add_run()
     r.text = "PROJETENNE  ·  EXPORT COPIL"
     r.font.size = Pt(8)
     r.font.bold = True
-    r.font.color.rgb = RGBColor(0x5E, 0x8F, 0xFF)
+    r.font.name = FONT
+    r.font.color.rgb = NAVY
 
-    # Instance name
-    ttb = _tb(slide, Inches(0.5), Inches(0.82), SW - Inches(1.0), Inches(1.6))
+    # Instance name — large, Navy
+    ttb = _tb(slide, Inches(0.5), Inches(0.65), SW - Inches(1.0), Inches(1.5))
     ttb.text_frame.word_wrap = True
     _clear(ttb.text_frame)
-    p = ttb.text_frame.paragraphs[0]
-    r2 = p.add_run()
+    p2 = ttb.text_frame.paragraphs[0]
+    r2 = p2.add_run()
     r2.text = instance_name
-    r2.font.size = Pt(32)
+    r2.font.size = Pt(36)
     r2.font.bold = True
-    r2.font.color.rgb = WHITE
+    r2.font.name = FONT
+    r2.font.color.rgb = NAVY
 
-    # Date
-    dtb = _tb(slide, Inches(0.5), Inches(2.5), Inches(8), Inches(0.4))
+    # Date — dark text
+    dtb = _tb(slide, Inches(0.5), Inches(2.3), Inches(8), Inches(0.4))
     _clear(dtb.text_frame)
-    p = dtb.text_frame.paragraphs[0]
-    r3 = p.add_run()
+    r3 = dtb.text_frame.paragraphs[0].add_run()
     r3.text = fmt_date(instance_date)
-    r3.font.size = Pt(13)
-    r3.font.color.rgb = RGBColor(0xAA, 0xCC, 0xFF)
+    r3.font.size = Pt(14)
+    r3.font.name = FONT
+    r3.font.color.rgb = DARK
 
-    # Scope count
-    scope_tb = _tb(slide, Inches(0.5), Inches(3.1), SW - Inches(1.0), Inches(0.35))
+    # Scope count — dark text
+    scope_tb = _tb(slide, Inches(0.5), Inches(2.78), SW - Inches(1.0), Inches(0.35))
     _clear(scope_tb.text_frame)
-    p = scope_tb.text_frame.paragraphs[0]
-    r4 = p.add_run()
+    r4 = scope_tb.text_frame.paragraphs[0].add_run()
     r4.text = f"{len(projects)} projet{'s' if len(projects) > 1 else ''} en périmètre"
-    r4.font.size = Pt(10)
-    r4.font.color.rgb = LIGHT
+    r4.font.size = Pt(11)
+    r4.font.name = FONT
+    r4.font.color.rgb = MID
 
-    # Project list rows
-    list_top = SH * 0.60
-    row_h = Inches(0.43)
+    # Navy header bar for project list container
+    list_start = Inches(3.25)
+    _rect(slide, Inches(0.4), list_start, SW - Inches(0.8), Inches(0.3), fill=NAVY)
+    hdr_tb = _tb(slide, Inches(0.55), list_start + Inches(0.05), SW - Inches(1.1), Inches(0.25))
+    _clear(hdr_tb.text_frame)
+    rh = hdr_tb.text_frame.paragraphs[0].add_run()
+    rh.text = "PROJETS EN PÉRIMÈTRE"
+    rh.font.size = Pt(7.5)
+    rh.font.bold = True
+    rh.font.name = FONT
+    rh.font.color.rgb = WHITE
+
+    # Project rows — encadrés Navy
+    row_h = Inches(0.42)
     for idx, p_data in enumerate(projects[:8]):
-        row_y = list_top + idx * row_h
+        row_y = list_start + Inches(0.3) + idx * row_h
         rag = p_data.get("status_rag", "green")
         _rect(slide, Inches(0.4), row_y, SW - Inches(0.8), row_h - Inches(0.03),
               fill=BG, no_line=False, line_color=BORDER, line_pt=0.3)
-        # RAG strip
-        _rect(slide, Inches(0.4), row_y, Inches(0.06), row_h - Inches(0.03), fill=rag_color(rag))
-        # Name
+        _rect(slide, Inches(0.4), row_y, Inches(0.07), row_h - Inches(0.03), fill=rag_color(rag))
         ntb = _tb(slide, Inches(0.58), row_y + Inches(0.07), Inches(10.0), row_h)
         _clear(ntb.text_frame)
-        pp = ntb.text_frame.paragraphs[0]
-        rn = pp.add_run()
+        rn = ntb.text_frame.paragraphs[0].add_run()
         rn.text = trunc(p_data.get("name", "?"), 65)
         rn.font.size = Pt(9)
         rn.font.bold = True
+        rn.font.name = FONT
         rn.font.color.rgb = DARK
-        # Budget
         btb = _tb(slide, SW - Inches(2.4), row_y + Inches(0.07), Inches(2.0), row_h)
         _clear(btb.text_frame)
         pp2 = btb.text_frame.paragraphs[0]
@@ -318,30 +368,35 @@ def add_slide_garde(prs, instance_name, instance_date, projects):
         rb = pp2.add_run()
         rb.text = keur(p_data.get("budget_total"))
         rb.font.size = Pt(8)
+        rb.font.name = FONT
         rb.font.color.rgb = MID
 
     if len(projects) > 8:
-        etb = _tb(slide, Inches(0.5), list_top + 8 * row_h + Inches(0.08), Inches(8), Inches(0.28))
+        etb = _tb(slide, Inches(0.5),
+                  list_start + Inches(0.3) + 8 * row_h + Inches(0.06),
+                  Inches(8), Inches(0.28))
         _clear(etb.text_frame)
         re = etb.text_frame.paragraphs[0].add_run()
-        re.text = f"+ {len(projects) - 8} autre{'s' if len(projects) - 8 > 1 else ''} projet{'s' if len(projects) - 8 > 1 else ''}…"
+        re.text = f"+ {len(projects) - 8} autre(s) projet(s)…"
         re.font.size = Pt(8)
+        re.font.name = FONT
         re.font.color.rgb = LIGHT
 
     _footer(slide)
 
 
 # ====================================================================
-# SLIDE 2 — SOMMAIRE
+# SLIDE 2 — SOMMAIRE (tableau pleine largeur)
 # ====================================================================
 
-def add_slide_sommaire(prs, projects):
+def add_slide_sommaire(prs, projects, instance_name="", instance_date=""):
     slide = _blank_slide(prs)
     _header(slide, "Synthèse du Portefeuille",
             f"{len(projects)} projet{'s' if len(projects) > 1 else ''} sélectionné{'s' if len(projects) > 1 else ''}")
 
     headers = ["RAG", "Projet", "Responsable", "Budget (K€)", "EAC (K€)", "Écart", "Statut", "Fin forecast"]
-    col_w = [0.55, 3.8, 1.7, 1.2, 1.2, 1.0, 1.3, 1.25]
+    # Colonnes élargies pour couvrir toute la largeur (~12.93")
+    col_w = [0.6, 4.1, 1.8, 1.3, 1.3, 1.1, 1.4, 1.33]
     rows = []
 
     for p in projects:
@@ -356,7 +411,7 @@ def add_slide_sommaire(prs, projects):
         rows.append([
             (rag_label(rag), {"bg": {"green": LIGHT_GREEN, "orange": LIGHT_AMBER, "red": LIGHT_RED}.get(rag, BG),
                               "color": rag_color(rag), "bold": True, "align": PP_ALIGN.CENTER, "size": 8}),
-            (trunc(p.get("name", "?"), 50), {}),
+            (trunc(p.get("name", "?"), 55), {}),
             (trunc(p.get("owner_name", p.get("metadata", {}).get("sponsor", "—")), 22), {"color": MID}),
             (f"{int(total/1000):,}".replace(",", "\u202f"), {"align": PP_ALIGN.RIGHT}),
             (f"{int(eac/1000):,}".replace(",", "\u202f"), {"align": PP_ALIGN.RIGHT, "bold": True}),
@@ -366,14 +421,16 @@ def add_slide_sommaire(prs, projects):
             (fmt_date(p.get("end_date_forecast")), {"align": PP_ALIGN.CENTER, "color": MID}),
         ])
 
-    table_left = Inches(0.25)
+    table_left = Inches(0.2)
     table_width = sum(Inches(w) for w in col_w)
-    _styled_table(slide, headers, rows, table_left, Inches(1.25), table_width, col_w, row_height_in=0.4)
-    _footer(slide)
+    _styled_table(slide, headers, rows, table_left, Inches(1.25), table_width, col_w, row_height_in=0.42)
+
+    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  Projetenne Confidentiel" if instance_name else "Projetenne · Confidentiel"
+    _footer(slide, footer_text)
 
 
 # ====================================================================
-# SLIDE 3 — HEATMAP P×I (matplotlib)
+# SLIDE 3 — HEATMAP P×I (axe X corrigé)
 # ====================================================================
 
 def generate_heatmap_img(risks):
@@ -401,7 +458,7 @@ def generate_heatmap_img(risks):
 
     for (imp, prob), count in risk_pos.items():
         crit = prob * imp
-        color = "#DC2626" if crit >= 16 else "#D97706" if crit >= 7 else "#16A34A"
+        color = "#EF4444" if crit >= 16 else "#F59E0B" if crit >= 7 else "#10B981"
         ax.scatter(imp, prob, s=min(180 + count * 40, 450), c=color,
                    zorder=5, edgecolors="white", linewidths=1.5, alpha=0.9)
         if count > 1:
@@ -414,24 +471,24 @@ def generate_heatmap_img(risks):
     ax.set_yticks(range(1, 6))
     ax.set_xticklabels([str(i) for i in range(1, 6)], fontsize=9, color="#475569")
     ax.set_yticklabels([str(i) for i in range(1, 6)], fontsize=9, color="#475569")
-    ax.set_xlabel("Impact  →", fontsize=10, color="#334155", labelpad=5)
-    ax.set_ylabel("Probabilité  →", fontsize=10, color="#334155", labelpad=5)
+    ax.set_xlabel("Impact  →", fontsize=10, color="#334155", labelpad=8)
+    ax.set_ylabel("Probabilité  →", fontsize=10, color="#334155", labelpad=8)
     ax.tick_params(length=0)
     for spine in ax.spines.values():
         spine.set_edgecolor("#E2E8F0")
         spine.set_linewidth(0.5)
     ax.set_aspect("equal")
-    plt.tight_layout(pad=0.8)
+    # FIX: réserver espace en bas pour l'axe X (évite la coupure)
+    plt.subplots_adjust(left=0.14, right=0.96, bottom=0.18, top=0.96)
 
     buf = io.BytesIO()
-    plt.savefig(buf, format="png", dpi=150, bbox_inches="tight",
-                facecolor="white", edgecolor="none")
+    plt.savefig(buf, format="png", dpi=150, facecolor="white", edgecolor="none")
     plt.close(fig)
     buf.seek(0)
     return buf
 
 
-def add_slide_heatmap(prs, risks, proj_names):
+def add_slide_heatmap(prs, risks, proj_names, instance_name="", instance_date=""):
     slide = _blank_slide(prs)
     crit_n = sum(1 for r in risks if r.get("criticality", 0) >= 16)
     mod_n = sum(1 for r in risks if 7 <= r.get("criticality", 0) < 16)
@@ -442,7 +499,6 @@ def add_slide_heatmap(prs, risks, proj_names):
     img_buf = generate_heatmap_img(risks)
     slide.shapes.add_picture(img_buf, Inches(0.3), Inches(1.25), width=Inches(6.7))
 
-    # Right side: zone bars + top risks
     rx = Inches(7.3)
     ry = Inches(1.4)
     for label, count, bg, fg in [
@@ -462,10 +518,10 @@ def add_slide_heatmap(prs, risks, proj_names):
         r.text = str(count)
         r.font.size = Pt(22)
         r.font.bold = True
+        r.font.name = FONT
         r.font.color.rgb = fg
         ry += Inches(0.85)
 
-    # Top critical risks list
     top_risks = sorted(risks, key=lambda x: -x.get("criticality", 0))[:5]
     if top_risks:
         ry += Inches(0.15)
@@ -484,87 +540,96 @@ def add_slide_heatmap(prs, risks, proj_names):
             r_run = p.add_run()
             r_run.text = f"[{crit}] {trunc(r_item.get('title', '?'), 45)}"
             r_run.font.size = Pt(7.5)
+            r_run.font.name = FONT
             r_run.font.color.rgb = DARK
             p2 = tb_r.text_frame.add_paragraph()
             r2 = p2.add_run()
             r2.text = pname
             r2.font.size = Pt(6.5)
+            r2.font.name = FONT
             r2.font.color.rgb = MID
             ry += Inches(0.47)
 
-    _footer(slide)
+    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  Projetenne Confidentiel" if instance_name else "Projetenne · Confidentiel"
+    _footer(slide, footer_text)
 
 
 # ====================================================================
-# SLIDE 4 — TOP RISQUES CRITIQUES
+# SLIDE 4 — TOP RISQUES CRITIQUES (colonnes élargies, word wrap)
 # ====================================================================
 
-def add_slide_top_risks(prs, risks, proj_names):
+def add_slide_top_risks(prs, risks, proj_names, instance_name="", instance_date=""):
     slide = _blank_slide(prs)
     top = sorted(risks, key=lambda x: -x.get("criticality", 0))[:10]
     _header(slide, "Top Risques Critiques",
             f"Projets sélectionnés — {len(top)} risques présentés par criticité décroissante")
 
     headers = ["#", "Crit.", "Risque", "Catégorie", "Projet", "Statut", "Échéance", "Propriétaire"]
-    col_w = [0.35, 0.55, 3.5, 1.1, 2.3, 0.9, 1.1, 1.7]
+    # Colonnes élargies : Risque 3.5→4.3, Projet 2.3→3.0
+    col_w = [0.35, 0.5, 4.3, 1.1, 3.0, 0.85, 1.0, 1.83]
     rows = []
     for idx, r in enumerate(top):
         crit = r.get("criticality", 0)
         rows.append([
             (str(idx + 1), {"align": PP_ALIGN.CENTER, "color": MID}),
             (str(crit), {"align": PP_ALIGN.CENTER, "bold": True, "color": crit_color(crit), "bg": crit_bg(crit)}),
-            (trunc(r.get("title", "?"), 55), {}),
+            (trunc(r.get("title", "?"), 70), {}),
             (r.get("category", "—"), {"color": MID}),
-            (trunc(proj_names.get(r.get("project_id", ""), "?"), 32), {"color": BLUE}),
+            (trunc(proj_names.get(r.get("project_id", ""), "?"), 42), {"color": BLUE}),
             (r.get("status", "—"), {"color": MID, "size": 7}),
             (fmt_date(r.get("due_date")), {"align": PP_ALIGN.CENTER, "color": MID}),
-            (trunc(r.get("owner", "—") or "—", 22), {"color": MID}),
+            (trunc(r.get("owner", "—") or "—", 25), {"color": MID}),
         ])
 
-    left = Inches(0.25)
+    left = Inches(0.2)
     width = sum(Inches(w) for w in col_w)
-    _styled_table(slide, headers, rows, left, Inches(1.25), width, col_w, row_height_in=0.42)
-    _footer(slide)
+    _styled_table(slide, headers, rows, left, Inches(1.25), width, col_w, row_height_in=0.46)
+
+    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  Projetenne Confidentiel" if instance_name else "Projetenne · Confidentiel"
+    _footer(slide, footer_text)
 
 
 # ====================================================================
-# SLIDE 5 — DÉCISIONS CLÉS
+# SLIDE 5 — DÉCISIONS CLÉS (colonnes élargies, footer)
 # ====================================================================
 
-def add_slide_decisions(prs, decisions, governance_id=None):
+def add_slide_decisions(prs, decisions, governance_id=None, instance_name="", instance_date=""):
     slide = _blank_slide(prs)
     subtitle = "Instance de gouvernance sélectionnée" if governance_id else "10 dernières décisions du périmètre"
     _header(slide, "Décisions Clés",
             f"{len(decisions)} décision{'s' if len(decisions) != 1 else ''}  ·  {subtitle}")
 
     headers = ["Date", "Décision", "Catégorie", "Statut", "Projet", "Responsable"]
-    col_w = [1.1, 4.0, 1.3, 1.1, 3.0, 1.7]
+    # Décision 4.0→5.0, Projet 3.0→3.0 (keep), Responsable ajusté
+    col_w = [0.95, 5.0, 1.2, 1.0, 3.0, 1.78]
     rows = []
     for d in decisions[:12]:
         status = d.get("status", "—")
         rows.append([
             (fmt_date(d.get("decision_date")), {"align": PP_ALIGN.CENTER, "color": MID}),
-            (trunc(d.get("title", "?"), 65), {}),
+            (trunc(d.get("title", "?"), 80), {}),
             (d.get("category", "—"), {"color": MID}),
             (decision_status_label(status), {
                 "align": PP_ALIGN.CENTER, "size": 7,
                 "bg": DECISION_STATUS_COLORS.get(status, BG), "bold": True,
             }),
-            (trunc(d.get("project_name", "?"), 38), {"color": BLUE}),
-            (trunc(d.get("owner", "—") or "—", 22), {"color": MID}),
+            (trunc(d.get("project_name", "?"), 42), {"color": BLUE}),
+            (trunc(d.get("owner", "—") or "—", 25), {"color": MID}),
         ])
 
-    left = Inches(0.25)
+    left = Inches(0.2)
     width = sum(Inches(w) for w in col_w)
-    _styled_table(slide, headers, rows, left, Inches(1.25), width, col_w, row_height_in=0.42)
-    _footer(slide)
+    _styled_table(slide, headers, rows, left, Inches(1.25), width, col_w, row_height_in=0.46)
+
+    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  Projetenne Confidentiel" if instance_name else "Projetenne · Confidentiel"
+    _footer(slide, footer_text)
 
 
 # ====================================================================
-# SLIDE 6+N — FICHE PROJET
+# SLIDE 6+N — FICHE PROJET (tables KV pour budget/planning, sous-blocs risques/décisions)
 # ====================================================================
 
-def add_slide_fiche(prs, project, milestones, risks, decisions):
+def add_slide_fiche(prs, project, milestones, risks, decisions, instance_name="", instance_date=""):
     slide = _blank_slide(prs)
 
     name = project.get("name", "?")
@@ -576,26 +641,24 @@ def add_slide_fiche(prs, project, milestones, risks, decisions):
 
     # ---- Header ----
     HEADER_H = Inches(1.2)
-    _rect(slide, 0, 0, SW, HEADER_H, fill=NAVY)
-
-    # RAG strip
-    _rect(slide, 0, 0, Inches(0.18), HEADER_H, fill=rag_color(rag))
+    _rect(slide, Emu(0), Emu(0), SW, HEADER_H, fill=NAVY)
+    _rect(slide, Emu(0), Emu(0), Inches(0.18), HEADER_H, fill=rag_color(rag))
 
     ttb = _tb(slide, Inches(0.32), Inches(0.1), SW - Inches(4.0), Inches(0.65))
     _clear(ttb.text_frame)
-    p = ttb.text_frame.paragraphs[0]
-    r = p.add_run()
+    r = ttb.text_frame.paragraphs[0].add_run()
     r.text = trunc(name, 72)
     r.font.size = Pt(17)
     r.font.bold = True
+    r.font.name = FONT
     r.font.color.rgb = WHITE
 
     ctb = _tb(slide, Inches(0.32), Inches(0.78), Inches(4), Inches(0.32))
     _clear(ctb.text_frame)
-    p2 = ctb.text_frame.paragraphs[0]
-    r2 = p2.add_run()
+    r2 = ctb.text_frame.paragraphs[0].add_run()
     r2.text = code if code else ""
     r2.font.size = Pt(8)
+    r2.font.name = FONT
     r2.font.color.rgb = LIGHT
 
     meta_tb = _tb(slide, Inches(4.0), Inches(0.78), SW - Inches(4.4), Inches(0.32))
@@ -605,6 +668,7 @@ def add_slide_fiche(prs, project, milestones, risks, decisions):
     r3 = p3.add_run()
     r3.text = f"{owner}  ·  {methodology.upper()}  ·  {status_label(status)}  ·  RAG {rag_label(rag).upper()}"
     r3.font.size = Pt(8)
+    r3.font.name = FONT
     r3.font.color.rgb = rag_color(rag)
 
     # ---- Layout grid ----
@@ -612,15 +676,11 @@ def add_slide_fiche(prs, project, milestones, risks, decisions):
     COL_W = Inches(6.35)
     L_X = Inches(0.2)
     R_X = SW - COL_W - Inches(0.2)
-    TOP_H = Inches(2.7)
-    BTM_H = SH - BODY_Y - TOP_H - Inches(0.25) - Inches(0.08)
-    TOP_Y = BODY_Y
+    TOP_H = Inches(2.75)
     BTM_Y = BODY_Y + TOP_H + Inches(0.1)
+    BTM_H = SH - BTM_Y - Inches(0.35)
 
-    # ---- BUDGET (top-left) ----
-    _section_label(slide, L_X, TOP_Y, COL_W, 0.26, "Budget")
-    bud_y = TOP_Y + Inches(0.26)
-
+    # ---- BUDGET — table KV 2 colonnes (top-left) ----
     capex_p = project.get("capex_planned", 0) or 0
     capex_c = project.get("capex_consumed", 0) or 0
     opex_p = project.get("opex_planned", 0) or 0
@@ -631,62 +691,41 @@ def add_slide_fiche(prs, project, milestones, risks, decisions):
     ecart = eac - total
     ecart_pct = (ecart / total * 100) if total else 0
     cons_pct = min(int(consumed / total * 100), 100) if total else 0
-
-    # 2-column CAPEX / OPEX rows
-    for (lbl1, v1, lbl2, v2) in [
-        ("CAPEX prévu", keur(capex_p), "CAPEX consommé", keur(capex_c)),
-        ("OPEX prévu", keur(opex_p), "OPEX consommé", keur(opex_c)),
-    ]:
-        half = COL_W // 2 - Inches(0.04)
-        for lbl, val, bx in [(lbl1, v1, L_X), (lbl2, v2, L_X + half + Inches(0.06))]:
-            _rect(slide, bx, bud_y, half, Inches(0.5), fill=BG, no_line=False, line_color=BORDER, line_pt=0.3)
-            tb_b = _tb(slide, bx + Inches(0.1), bud_y + Inches(0.04), half - Inches(0.15), Inches(0.46))
-            _clear(tb_b.text_frame)
-            _run(tb_b.text_frame, lbl, size=7, color=LIGHT)
-            _run(tb_b.text_frame, val, size=10, bold=True, color=DARK)
-        bud_y += Inches(0.54)
-
-    # EAC row
     eac_col = RED if ecart > 0 else GREEN_C if ecart < 0 else DARK
     ecart_str = (f"{'+'if ecart>0 else ''}{int(ecart/1000):,}".replace(",", "\u202f") +
                  f" K€  ({'+' if ecart_pct > 0 else ''}{ecart_pct:.1f}%)" if total else "—")
-    _rect(slide, L_X, bud_y, COL_W, Inches(0.54), fill=LIGHT_BLUE, no_line=False, line_color=BORDER, line_pt=0.4)
-    eac_tb = _tb(slide, L_X + Inches(0.12), bud_y + Inches(0.06), COL_W - Inches(0.2), Inches(0.46))
-    _clear(eac_tb.text_frame)
-    p_eac = eac_tb.text_frame.paragraphs[0]
-    r_l = p_eac.add_run()
-    r_l.text = "EAC : "
-    r_l.font.size = Pt(9)
-    r_l.font.color.rgb = MID
-    r_v = p_eac.add_run()
-    r_v.text = keur(eac)
-    r_v.font.size = Pt(12)
-    r_v.font.bold = True
-    r_v.font.color.rgb = DARK
-    r_e = p_eac.add_run()
-    r_e.text = f"     Écart : {ecart_str}"
-    r_e.font.size = Pt(8.5)
-    r_e.font.color.rgb = eac_col
-    bud_y += Inches(0.58)
+
+    _section_label(slide, L_X, BODY_Y, COL_W, 0.26, "Budget")
+    bud_y = BODY_Y + Inches(0.26)
+
+    budget_items = [
+        ("CAPEX prévu",    keur(capex_p),  DARK,   False, BG),
+        ("CAPEX consommé", keur(capex_c),  DARK,   True,  WHITE),
+        ("OPEX prévu",     keur(opex_p),   DARK,   False, BG),
+        ("OPEX consommé",  keur(opex_c),   DARK,   True,  WHITE),
+        ("Budget total",   keur(total),    DARK,   True,  BG),
+        ("EAC (Estimate At Completion)", keur(eac), eac_col, True, LIGHT_BLUE),
+        ("Écart EAC / Budget", ecart_str,  eac_col, True, LIGHT_RED if ecart > 0 else LIGHT_GREEN if ecart < 0 else BG),
+    ]
+    _, kv_h = _kv_table(slide, budget_items, L_X, bud_y, COL_W, label_ratio=0.45, row_h=0.33)
+    bud_y += kv_h + Inches(0.06)
 
     # Progress bar
     _rect(slide, L_X, bud_y, COL_W, Inches(0.13), fill=BORDER)
     if cons_pct > 0:
         bar_w = int(COL_W * cons_pct / 100)
-        _rect(slide, L_X, bud_y, bar_w, Inches(0.13), fill=RED if cons_pct >= 90 else BLUE)
+        _rect(slide, L_X, bud_y, bar_w, Inches(0.13),
+              fill=RED if cons_pct >= 90 else BLUE)
     bud_y += Inches(0.15)
     pct_tb = _tb(slide, L_X, bud_y, COL_W, Inches(0.2))
     _clear(pct_tb.text_frame)
-    pp_pct = pct_tb.text_frame.paragraphs[0]
-    r_pct = pp_pct.add_run()
+    r_pct = pct_tb.text_frame.paragraphs[0].add_run()
     r_pct.text = f"Avancement budgétaire : {cons_pct}%  ({keur(consumed)} / {keur(total)})"
     r_pct.font.size = Pt(7)
+    r_pct.font.name = FONT
     r_pct.font.color.rgb = MID
 
-    # ---- PLANNING (top-right) ----
-    _section_label(slide, R_X, TOP_Y, COL_W, 0.26, "Planning")
-    plan_y = TOP_Y + Inches(0.26)
-
+    # ---- PLANNING — table KV 2 colonnes (top-right) ----
     start = project.get("start_date", "") or ""
     end_base = project.get("end_date_baseline", "") or ""
     end_fore = project.get("end_date_forecast", "") or ""
@@ -705,21 +744,19 @@ def add_slide_fiche(prs, project, milestones, risks, decisions):
         except Exception:
             pass
 
-    for i, (lbl, val, vc) in enumerate([
-        ("Début", fmt_date(start), MID),
-        ("Fin baseline (initiale)", fmt_date(end_base), MID),
-        ("Fin forecast (actuelle)", fmt_date(end_fore), RED if delay_color == RED else MID),
-        ("Délai vs baseline", delay_str, delay_color),
-    ]):
-        ry_plan = plan_y + i * Inches(0.42)
-        _rect(slide, R_X, ry_plan, COL_W, Inches(0.4), fill=BG if i % 2 == 0 else WHITE,
-              no_line=False, line_color=BORDER, line_pt=0.3)
-        lbl_tb = _tb(slide, R_X + Inches(0.1), ry_plan + Inches(0.07), COL_W * 0.42, Inches(0.3))
-        _clear(lbl_tb.text_frame)
-        _run(lbl_tb.text_frame, lbl, size=8, color=MID)
-        val_tb = _tb(slide, R_X + COL_W * 0.44, ry_plan + Inches(0.07), COL_W * 0.54, Inches(0.3))
-        _clear(val_tb.text_frame)
-        _run(val_tb.text_frame, val, size=9, bold=True, color=vc)
+    _section_label(slide, R_X, BODY_Y, COL_W, 0.26, "Planning")
+    plan_y = BODY_Y + Inches(0.26)
+
+    planning_items = [
+        ("Début",                        fmt_date(start),    MID,         False, BG),
+        ("Fin baseline (initiale)",       fmt_date(end_base), MID,         False, WHITE),
+        ("Fin forecast (actuelle)",       fmt_date(end_fore), RED if delay_color == RED else MID, True, BG),
+        ("Délai vs baseline",             delay_str,          delay_color, True,  WHITE),
+        ("Avancement JH",
+         f"{int(project.get('jh_consumed',0)):,} / {int(project.get('jh_planned',0)):,} JH".replace(",", "\u202f"),
+         DARK, False, BG),
+    ]
+    _kv_table(slide, planning_items, R_X, plan_y, COL_W, label_ratio=0.48, row_h=0.38)
 
     # ---- JALONS (bottom-left) ----
     _section_label(slide, L_X, BTM_Y, COL_W, 0.26, "Jalons Clés")
@@ -731,70 +768,80 @@ def add_slide_fiche(prs, project, milestones, risks, decisions):
 
     for i, (upcoming, ms) in enumerate(combined[:6]):
         my = mil_y + i * Inches(0.4)
-        _rect(slide, L_X, my, COL_W, Inches(0.38), fill=LIGHT_BLUE if upcoming else BG,
+        _rect(slide, L_X, my, COL_W, Inches(0.38),
+              fill=LIGHT_BLUE if upcoming else BG,
               no_line=False, line_color=BORDER, line_pt=0.3)
-        dtb = _tb(slide, L_X + Inches(0.1), my + Inches(0.07), Inches(1.1), Inches(0.28))
+        dtb = _tb(slide, L_X + Inches(0.1), my + Inches(0.07), Inches(1.15), Inches(0.28))
         _clear(dtb.text_frame)
         _run(dtb.text_frame, fmt_date(ms.get("date_forecast")), size=7.5,
              color=BLUE if upcoming else MID, bold=upcoming)
-        ntb = _tb(slide, L_X + Inches(1.25), my + Inches(0.07), COL_W - Inches(1.4), Inches(0.28))
+        ntb = _tb(slide, L_X + Inches(1.3), my + Inches(0.07), COL_W - Inches(1.45), Inches(0.28))
         _clear(ntb.text_frame)
-        _run(ntb.text_frame, trunc(ms.get("name", "?"), 42), size=7.5, color=DARK)
+        _run(ntb.text_frame, trunc(ms.get("name", "?"), 44), size=7.5, color=DARK)
 
     if not combined:
         ntb = _tb(slide, L_X + Inches(0.1), mil_y + Inches(0.1), COL_W - Inches(0.2), Inches(0.3))
         _clear(ntb.text_frame)
         _run(ntb.text_frame, "Aucun jalon défini.", size=8, color=LIGHT, italic=True)
 
-    # ---- RISQUES & DÉCISIONS (bottom-right) ----
-    _section_label(slide, R_X, BTM_Y, COL_W, 0.26, "Risques & Décisions")
-    rd_y = BTM_Y + Inches(0.26)
+    # ---- RISQUES & DÉCISIONS (bottom-right) — 2 sous-blocs séparés ----
+    rd_y = BTM_Y
 
+    # Sous-bloc RISQUES
+    _section_label(slide, R_X, rd_y, COL_W, 0.26, f"Risques (Top {min(3, len(risks))})")
+    rd_y += Inches(0.26)
     top3 = sorted(risks, key=lambda x: -x.get("criticality", 0))[:3]
     for r_item in top3:
         crit = r_item.get("criticality", 0)
-        _rect(slide, R_X, rd_y, COL_W, Inches(0.4), fill=crit_bg(crit),
+        _rect(slide, R_X, rd_y, COL_W, Inches(0.42), fill=crit_bg(crit),
               no_line=False, line_color=BORDER, line_pt=0.3)
-        _rect(slide, R_X + Inches(0.1), rd_y + Inches(0.12), Inches(0.2), Inches(0.18), fill=crit_color(crit))
-        rtb = _tb(slide, R_X + Inches(0.4), rd_y + Inches(0.07), COL_W - Inches(0.55), Inches(0.3))
+        _rect(slide, R_X + Inches(0.1), rd_y + Inches(0.13),
+              Inches(0.18), Inches(0.18), fill=crit_color(crit))
+        rtb = _tb(slide, R_X + Inches(0.38), rd_y + Inches(0.06),
+                  COL_W - Inches(0.55), Inches(0.34))
         _clear(rtb.text_frame)
-        _run(rtb.text_frame, f"[{crit}] {trunc(r_item.get('title', '?'), 46)}", size=7.5, color=DARK)
-        rd_y += Inches(0.43)
-
+        _run(rtb.text_frame, f"[{crit}] {trunc(r_item.get('title', '?'), 52)}", size=7.5, color=DARK)
+        rd_y += Inches(0.44)
     if not top3:
-        ntb = _tb(slide, R_X + Inches(0.1), rd_y + Inches(0.05), COL_W, Inches(0.3))
-        _clear(ntb.text_frame)
-        _run(ntb.text_frame, "Aucun risque enregistré.", size=8, color=LIGHT, italic=True)
+        etb = _tb(slide, R_X + Inches(0.1), rd_y + Inches(0.05), COL_W, Inches(0.3))
+        _clear(etb.text_frame)
+        _run(etb.text_frame, "Aucun risque enregistré.", size=8, color=LIGHT, italic=True)
         rd_y += Inches(0.35)
 
-    # Separator
-    _rect(slide, R_X, rd_y + Inches(0.04), COL_W, Inches(0.01), fill=BORDER)
-    rd_y += Inches(0.15)
+    rd_y += Inches(0.1)
 
+    # Sous-bloc DÉCISIONS
+    _section_label(slide, R_X, rd_y, COL_W, 0.26, f"Décisions ({min(3, len(decisions))} récentes)")
+    rd_y += Inches(0.26)
     last3 = decisions[:3]
     for d in last3:
         dstatus = d.get("status", "—")
-        _rect(slide, R_X, rd_y, COL_W, Inches(0.4), fill=DECISION_STATUS_COLORS.get(dstatus, BG),
+        _rect(slide, R_X, rd_y, COL_W, Inches(0.42),
+              fill=DECISION_STATUS_COLORS.get(dstatus, BG),
               no_line=False, line_color=BORDER, line_pt=0.3)
-        dtb = _tb(slide, R_X + Inches(0.1), rd_y + Inches(0.07), COL_W - Inches(1.7), Inches(0.3))
-        _clear(dtb.text_frame)
-        _run(dtb.text_frame, trunc(d.get("title", "?"), 42), size=7.5, color=DARK)
-        date_tb = _tb(slide, R_X + COL_W - Inches(1.6), rd_y + Inches(0.07), Inches(1.5), Inches(0.3))
+        dtb2 = _tb(slide, R_X + Inches(0.1), rd_y + Inches(0.06),
+                   COL_W - Inches(1.7), Inches(0.34))
+        _clear(dtb2.text_frame)
+        _run(dtb2.text_frame, trunc(d.get("title", "?"), 46), size=7.5, color=DARK)
+        date_tb = _tb(slide, R_X + COL_W - Inches(1.6), rd_y + Inches(0.06),
+                      Inches(1.5), Inches(0.34))
         _clear(date_tb.text_frame)
         pp_d = date_tb.text_frame.paragraphs[0]
         pp_d.alignment = PP_ALIGN.RIGHT
         rr = pp_d.add_run()
-        rr.text = f"{fmt_date(d.get('decision_date'))}  ·  {decision_status_label(dstatus)[:4]}"
+        rr.text = f"{fmt_date(d.get('decision_date'))}  ·  {decision_status_label(dstatus)[:6]}"
         rr.font.size = Pt(6.5)
+        rr.font.name = FONT
         rr.font.color.rgb = MID
-        rd_y += Inches(0.43)
-
+        rd_y += Inches(0.44)
     if not last3:
-        ntb = _tb(slide, R_X + Inches(0.1), rd_y + Inches(0.05), COL_W, Inches(0.3))
-        _clear(ntb.text_frame)
-        _run(ntb.text_frame, "Aucune décision enregistrée.", size=8, color=LIGHT, italic=True)
+        etb2 = _tb(slide, R_X + Inches(0.1), rd_y + Inches(0.05), COL_W, Inches(0.3))
+        _clear(etb2.text_frame)
+        _run(etb2.text_frame, "Aucune décision enregistrée.", size=8, color=LIGHT, italic=True)
 
-    _footer(slide, f"{rag_label(rag)}  ·  {trunc(name, 40)}")
+    # Footer neutre (suppression du footer orphelin)
+    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  Projetenne Confidentiel" if instance_name else "Projetenne · Confidentiel"
+    _footer(slide, footer_text)
 
 
 # ====================================================================
@@ -818,19 +865,19 @@ def generate_copil_pptx(instance_name, instance_date, projects,
     add_slide_garde(prs, instance_name, instance_date, projects)
 
     # Slide 2 — Sommaire
-    add_slide_sommaire(prs, projects)
+    add_slide_sommaire(prs, projects, instance_name, instance_date)
 
     # Slide 3 — Heatmap
     if all_risks:
-        add_slide_heatmap(prs, all_risks, proj_names)
+        add_slide_heatmap(prs, all_risks, proj_names, instance_name, instance_date)
 
     # Slide 4 — Top risques
     if all_risks:
-        add_slide_top_risks(prs, all_risks, proj_names)
+        add_slide_top_risks(prs, all_risks, proj_names, instance_name, instance_date)
 
     # Slide 5 — Décisions
     if all_decisions:
-        add_slide_decisions(prs, all_decisions[:10], governance_id)
+        add_slide_decisions(prs, all_decisions[:10], governance_id, instance_name, instance_date)
 
     # Slide 6+N — Fiche par projet
     for p in projects:
@@ -840,7 +887,7 @@ def generate_copil_pptx(instance_name, instance_date, projects,
         r_proj = sorted([r for r in all_risks if r.get("project_id") == pid],
                         key=lambda x: -x.get("criticality", 0))
         d_proj = [d for d in all_decisions if d.get("project_id") == pid]
-        add_slide_fiche(prs, p, ms_sorted, r_proj, d_proj)
+        add_slide_fiche(prs, p, ms_sorted, r_proj, d_proj, instance_name, instance_date)
 
     buf = io.BytesIO()
     prs.save(buf)
