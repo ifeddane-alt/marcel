@@ -17,6 +17,41 @@ Tenant démo : **Groupe Altair Industries**
 - **Design** : Swiss Corporate Navy Blue (#0F172A sidebar, #0052CC accent, #F8F9FA bg)
 - **Polices** : Barlow Condensed (titres), Inter (corps), JetBrains Mono (données)
 
+## Architecture Backend (v2.0 — Sprint 0 — 21/04/2026)
+
+```
+/app/backend/
+├── server.py                  # 50 lignes (app factory + include_router)
+├── core/
+│   ├── auth.py                # TokenPayload, create_token, get_current_user, require_write
+│   └── database.py            # Motor client + db instance
+├── shared/
+│   ├── rag.py                 # calculate_task_rag, STATUS_PROGRESS, _get_task_rag_settings
+│   └── utils.py               # placeholder helpers futurs (keur, etc.)
+├── modules/
+│   ├── auth/                  # schemas.py, router.py
+│   ├── projects/              # schemas.py, service.py, router.py
+│   ├── programs/              # schemas.py, service.py, router.py
+│   ├── resources/             # schemas.py, service.py, router.py
+│   ├── tasks/                 # schemas.py, service.py, router.py
+│   ├── allocations/           # service.py, router.py
+│   ├── milestones/            # service.py, router.py
+│   ├── risks/                 # schemas.py, service.py, router.py
+│   ├── decisions/             # schemas.py, service.py, router.py
+│   ├── governance/            # service.py, router.py
+│   ├── dashboard/             # service.py, router.py
+│   ├── export/                # schemas.py, service.py, router.py
+│   ├── csv_import/            # schemas.py, service.py, router.py
+│   └── tenant/                # router.py
+└── pptx_generator.py          # Générateur PowerPoint COPIL (intact)
+```
+
+### Principes d'architecture
+- **2 couches** : router.py (HTTP, auth deps, request/response) + service.py (logique métier + requêtes Motor)
+- **Pas de Repository pattern** : requêtes Motor directes dans service.py
+- **Dépendances unidirectionnelles** : Level 3 (dashboard, export) → Level 2 (projects, risks, etc.) → Level 1 (core, shared)
+- **Isolation multi-tenant** : filtrage `tenant_id` sur chaque requête
+
 ## Collections MongoDB
 | Collection | Champs clés |
 |-----------|-------------|
@@ -32,193 +67,107 @@ Tenant démo : **Groupe Altair Industries**
 
 ---
 
-## Ce qui est implémenté (v1.5 — 13/04/2026)
+## Ce qui est implémenté
+
+### Sprint 0 — Refactoring Backend Modulaire (COMPLET ✅ — 21/04/2026)
+- [x] Migration `server.py` (1519 lignes) → architecture modulaire 2-couches
+- [x] `core/auth.py` : TokenPayload, create_token, get_current_user, require_write
+- [x] `core/database.py` : Motor client + instance db
+- [x] `shared/rag.py` : calculate_task_rag, _get_task_rag_settings
+- [x] 13 modules avec router.py + service.py + schemas.py
+- [x] `server.py` = 50 lignes (app factory)
+- [x] Zéro changement fonctionnel — 52/52 tests backend passés
+- [x] RBAC intact : READ_ONLY=403, PMO=CRUD sans delete, ADMIN=CRUD complet
 
 ### Heatmap Dashboard — Cartographie des risques P × I (COMPLET ✅ — 13/04/2026)
-- [x] GET /api/dashboard/heatmap-risks — tous les risques tenant enrichis (project_name + program_id/program_name)
-- [x] `Dashboard.jsx` : section "Cartographie des risques P × I" sous le widget Top Risques
-- [x] Filtres dropdowns : Programme + Projet (cascadé, bouton Réinitialiser si filtre actif)
-- [x] Layout : heatmap 5×5 côté gauche + barres distribution criticité (Élevés/Modérés/Faibles %) + top 3 risques critiques côté droit
-- [x] Composant `RiskHeatmap.jsx` partagé (utilisé dans ProjectDetail + Dashboard)
-
-## Ce qui est implémenté (v1.6 — 14/02/2026)
-
-### Seed données (COMPLET ✅ — 13/04/2026)
-- [x] 4 programmes Altair créés avec owners, dates, budgets
-- [x] 8 projets rattachés — 2 par programme (mapping cohérent métier)
-  - Transformation Digitale & Métiers : Phoenix + CRM Salesforce
-  - Modernisation SI & Infrastructure : ERP SAP + Cloud Azure
-  - Pilotage Finance & Expérience Collaborateur : SI Finance + Digital Workplace
-  - Conformité, RH & Résilience : Portail RH + DORA NIS2
-- [x] `db.programs.delete_many` + `db.programs.insert_many` dans `seed()` — reproductible
+- [x] GET /api/dashboard/heatmap-risks
+- [x] `Dashboard.jsx` : section "Cartographie des risques P × I"
+- [x] Filtres dropdowns + composant `RiskHeatmap.jsx` partagé
 
 ### Chantier 5 — Export PowerPoint COPIL (COMPLET ✅ — 13/04/2026)
-- [x] Backend `pptx_generator.py` : 6 slides (Garde, Synthèse, Heatmap P×I matplotlib, Top Risques, Décisions Clés, Fiches Projet par projet)
-- [x] Palette "Option B" : fond blanc, accents Navy Blue (#0F172A) uniquement dans titres/badges/séparateurs — compatible impression
-- [x] `POST /api/export/copil` : reçoit `{project_ids[], instance_name, instance_date, governance_id?}`, retourne fichier PPTX binaire, accessible aux 3 rôles (READ_ONLY inclus)
-- [x] `ExportCopilModal.jsx` : formulaire complet (nom instance, date, rattachement gouvernance optionnel), preview des projets sélectionnés, téléchargement automatique
-- [x] `Portfolio.jsx` : colonne checkbox (select-all + cases par ligne), barre d'action bleue "X projets sélectionnés + Export COPIL" contextuelle
-- [x] `ProjectDetail.jsx` : bouton "Export COPIL" dans l'en-tête, visible pour tous les rôles, ouvre modal avec le projet courant
-- [x] `ProgramDetail.jsx` : bouton "Export COPIL" dans l'en-tête, visible pour tous les rôles, ouvre modal avec tous les projets du programme
-- [x] `Governance.jsx` : bouton "Export COPIL" dans la vue expandée de chaque instance, pré-sélectionne les projets en périmètre + rattache le governance_id automatiquement
-- [x] Tests 100% — 6/6 backend + frontend tous rôles (iteration_12.json)
+- [x] Backend `pptx_generator.py` : 6 slides
+- [x] `POST /api/export/copil`
+- [x] `ExportCopilModal.jsx`, boutons dans Portfolio/ProjectDetail/ProgramDetail/Governance
+- [x] Tests 100% — 6/6 (iteration_12.json)
 
 ### Chantier 8 — Registre des décisions (COMPLET ✅ — 13/04/2026)
-- [x] Collection `decisions` : 8 catégories (stratégique | périmètre | planning | budgétaire | technique | ressources | conformité | gouvernance)
-- [x] 6 statuts cycle de vie : proposée | prise | en_cours | appliquée | reportée | annulée
-- [x] CRUD complet : GET/POST/PUT/DELETE /api/decisions — tenant isolation, RBAC (READ_ONLY=403, PMO=créer/modifier, ADMIN=supprimer)
-- [x] Optionnel : `governance_id` pour lier une décision à une instance de gouvernance
-- [x] `DecisionModal.jsx` : formulaire complet (titre, description, catégorie, statut, dates, responsable, impact), sélecteur projet si contexte governance
-- [x] `ProjectDetail.jsx` : section "Registre des décisions" — tableau (Date, Décision, Catégorie, Statut, Responsable, Échéance), clic=édition, poubelle ADMIN
-- [x] `Governance.jsx` entièrement réécrit : tableau global cross-projets avec 3 filtres (statut/catégorie/projet) + bouton Nouvelle décision + colonne projet linkée + vue par instance (décisions liées + bouton Ajouter dans l'instance expandée)
-- [x] Seed : 32 décisions réalistes (4 par projet × 8 projets), catégories variées, certaines liées à des instances governance
-- [x] Governance IDs fixés en constantes (GOVERNANCE_IDS[0..4]) pour cohérence des liens decisions↔instances
+- [x] Collection `decisions` : 8 catégories, 6 statuts
+- [x] CRUD complet GET/POST/PUT/DELETE /api/decisions
+- [x] `DecisionModal.jsx`, sections dans ProjectDetail.jsx et Governance.jsx
+- [x] Seed : 32 décisions
 - [x] Tests 100% — 15/15 (iteration_11.json)
 
 ### Chantier 7 — Registre des risques (COMPLET ✅ — 13/04/2026)
-- [x] Collection `risks` : risk_id, project_id, tenant_id, title, description, category, probability(1-5), impact(1-5), criticality(auto = P×I), status, mitigation_plan, owner, due_date
-- [x] GET/POST/PUT/DELETE /api/risks — isolation tenant, recalcul criticité auto, RBAC
-- [x] GET /api/dashboard/top-risks — top 10 cross-projets enrichis
-- [x] `ProjectDetail.jsx` : section "Registre des risques" — table, heatmap 5×5, RiskModal
-- [x] `Dashboard.jsx` : widget "TOP RISQUES CRITIQUES — PORTEFEUILLE"
-- [x] Seed : 38 risques (4-6 par projet)
+- [x] Collection `risks` : criticité auto P×I
+- [x] CRUD GET/POST/PUT/DELETE /api/risks
+- [x] `RiskModal.jsx`, heatmap 5×5, widget Dashboard top-risques
+- [x] Seed : 38 risques
 - [x] Tests 100% — 24/24 (iteration_9.json)
 
 ### Chantier 6 — Budget CAPEX/OPEX + EAC + Révisions (COMPLET ✅)
-- [x] Schema `projects` enrichi : capex_*, opex_*, eac, budget_revision_history[]
+- [x] Schema projets enrichi, `_sync_budget_aggregates()`
+- [x] `POST /api/projects/:id/budget-revision`
 - [x] Tests 100% — 11/11 (iteration_10.json)
+
+### Chantier 4 — Programmes (COMPLET ✅)
+- [x] CRUD /api/programs avec agrégation métriques
+- [x] Page Programmes + Détail Programme
+
+### Chantier 3 — CRUD depuis UI (COMPLET ✅)
+- [x] Modals Projet/Tâche/Ressource/Programme
+- [x] Tests 100% — 22/22 (iteration_6.json)
+
+### Chantier 2 — Import CSV (COMPLET ✅)
+- [x] Wizard 4 étapes, POST /api/import/preview + commit
+- [x] Support projets, tâches, ressources
+
+### Chantier 1 — Tâches (COMPLET ✅)
+- [x] CRUD /api/tasks avec mini-RAG calculé
+- [x] 46 tâches seedées
+
+### Infrastructure (COMPLET ✅)
+- [x] Auth JWT multi-tenant, RBAC 3 rôles
+- [x] Dashboard, Portfolio, ProjectDetail, Resources, Governance
+- [x] Multi-tenant isolation complète
 
 ---
 
 ## Roadmap / Backlog priorisé
 
-### P0 — En attente validation user
-| Chantier | Description | Statut |
-|---------|-------------|--------|
-| **Chantier 5** | Export PowerPoint COPIL | LIVRÉ 14/02/2026 — validation user |
-
-### P1 — Prochains chantiers
+### P1 — Prochains chantiers (après Sprint 0 validé)
 | Chantier | Description |
 |---------|-------------|
-| Notif email | Alertes sur risques critiques ou budget dépassé |
-| BI / Export | Export CSV cross-projets depuis Dashboard |
-| Audit trail | Journal des modifications (qui a changé quoi quand) |
+| **P3 étendu** | Gestion des Ressources : teams, team_id, tjm_eur, work_allocations |
+| **P1 Demande** | Collection `demands` et workflow de qualification |
+| **P5 Temps** | Collection `timesheets` et validation hiérarchique |
+| **Chantier 9a SAFe** | Collections trains, pis, sprints, capabilities |
+| **Chantier 9b Tasks** | parent_id, phase sur tasks, vue arbre |
+
+### P2 — Backlog
+| Chantier | Description |
+|---------|-------------|
+| **P2 Arbitrage** | Scoring et enveloppe portefeuille |
+| **Module Scope** | Snapshot, capacity vs charge, Gantt recalcul |
+| **Notif email** | Alertes risques critiques / budget dépassé |
+| **BI / Export** | Export CSV cross-projets depuis Dashboard |
+| **Audit trail** | Journal des modifications |
 
 ---
 
-## Fichiers de référence principaux
-- `/app/backend/server.py` : ~1500 lignes — à découper en routers/ si Chantier 5 grossit
-- `/app/backend/seed.py` : Données de démo complètes
-- `/app/frontend/src/api/index.js` : Client API Axios complet
-- `/app/frontend/src/pages/` : Dashboard, Portfolio, ProjectDetail, Governance, Programs, Resources
-- `/app/frontend/src/components/` : RiskModal, DecisionModal, RiskHeatmap, BudgetRevisionModal, TaskModal, etc.
-
----
-
-## Ce qui est implémenté (v1.4 — 13/04/2026)
-
-### Chantier 7 — Registre des risques (COMPLET ✅ — 13/04/2026)
-- [x] Collection `risks` : risk_id, project_id, tenant_id, title, description, category, probability(1-5), impact(1-5), criticality(auto = P×I), status, mitigation_plan, owner, due_date
-- [x] GET/POST/PUT/DELETE /api/risks — isolation tenant, recalcul criticité auto, RBAC (READ_ONLY=403, PMO=create/update, ADMIN=CRUD)
-- [x] GET /api/dashboard/top-risks — top 10 cross-projets, enrichis avec project_name
-- [x] `ProjectDetail.jsx` : section "Registre des risques" — table triée criticité décroissante, badges couleur (rouge≥16, orange7-15, vert≤6), catégories colorées, suppression ADMIN
-- [x] Heatmap 5×5 P×I : cellules colorées, pastilles représentant les risques, tooltip on hover
-- [x] `RiskModal.jsx` : formulaire CRUD, criticité auto-calculée live (P×I), tout créer/éditer via clic ou bouton
-- [x] `Dashboard.jsx` : widget "TOP RISQUES CRITIQUES — PORTEFEUILLE" (10 risques, tri desc, liens projets)
-- [x] Seed : 38 risques (4-6 par projet), variété catégories et criticités
-- [x] Tests 100% — 24/24 (iteration_9.json)
-
-### Chantier 6 — Budget CAPEX/OPEX + EAC + Révisions (COMPLET ✅ — bug fix 13/04/2026)
-- [x] Bug fix critique : `current_user.sub` → `current_user.email` dans fallback author du budget-revision
-- [x] Tooltip "?" sur Total budget dans ProjectModal (Option A validée par user)
-- [x] Tests 100% — 11/11 (iteration_10.json)
-- [x] Schema `projects` enrichi : `capex_planned`, `capex_consumed`, `opex_planned`, `opex_consumed`, `eac`, `budget_revision_history[]`, `end_date_actual`, `status`
-- [x] `_sync_budget_aggregates()` : calcul auto `budget_total/consumed/forecast` depuis CAPEX+OPEX
-- [x] `POST /api/projects/:id/budget-revision` : création entrée historique + mise à jour EAC
-- [x] `ProjectDetail.jsx` : section "BUDGET CAPEX / OPEX & EAC" avec 2 cartes (CAPEX bleu / OPEX orange), bloc EAC + écart %, historique révisions timeline
-- [x] `BudgetRevisionModal.jsx` : formulaire EAC + motif + auteur, bouton visible ADMIN+PMO, absent READ_ONLY
-- [x] `ProjectModal.jsx` : champs CAPEX/OPEX en K€ (total auto-calculé live), dates renommées ("Fin prévue initiale (baseline)", "Fin prévue actuelle (forecast)", "Fin réelle"), dropdown Statut projet
-- [x] `Portfolio.jsx` : filtre "Tous statuts" + badge ProjectStatusBadge sous le nom du projet
-- [x] `RAGBadge.jsx` : export `ProjectStatusBadge` (en_preparation/actif/en_pause/cloture/archive)
-- [x] Seed : 8 projets avec CAPEX/OPEX, statuts variés, historiques révisions réels
-- [x] Tests 100% — 25/25 (iteration_8.json)
-
-### Chantier 3 — CRUD complet depuis UI (COMPLET — v1.3)
-- [x] Bouton "+ Nouveau projet" Portfolio (ADMIN + PMO) · modal création avec tous champs
-- [x] Clic ligne Portfolio → modal édition pré-rempli · bouton Supprimer avec confirmation (ADMIN)
-- [x] Bouton "Modifier" + "Supprimer" sur Détail Projet (rôles respectés)
-- [x] Bouton "+ Nouvelle tâche" sur Détail Projet · clic ligne tâche → édition · suppression (ADMIN)
-- [x] Bouton "+ Nouvelle ressource" sur page Ressources · édition · suppression (ADMIN)
-- [x] Bouton "+ Nouveau programme" sur page Programmes · édition · suppression (ADMIN)
-- [x] Backend : DELETE /api/projects (cascade tasks+milestones), POST/PUT/DELETE /api/resources
-- [x] Composants : Modal, ProjectModal, TaskModal, ResourceModal, ProgramModal, ConfirmDialog
-- [x] READ_ONLY : 0 bouton d'action · PMO : create/edit sans delete · ADMIN : CRUD complet
-- [x] Tests 100% — 22/22 (iteration_6.json)
-
-### Chantier 2 — Import CSV (COMPLET — v1.3)
-- [x] Page Import (/import) — wizard 4 étapes drag-and-drop
-- [x] POST /api/import/preview + POST /api/import/commit
-- [x] Support projets, tâches, ressources
-- [x] Mapping intelligent des colonnes
-- [x] Tests 14/14 UI + 11 Chrome (validé user)
-
-### Chantier 4 — Programmes (COMPLET — v1.2)
-- [x] Collection `programs` : program_id, tenant_id, name, description, owner, dates, budget_keur, status
-- [x] Champ `program_id` optionnel sur projets
-- [x] GET/POST/PUT/DELETE /api/programs — avec agrégation auto (budget consolidé, RAG worst-case, project_count)
-- [x] GET /api/programs/:id — détail avec projects[], milestones[], metrics{}
-- [x] Page Programmes (/programmes) — cartes avec RAG, budget, barres de consommation
-- [x] Page Détail Programme (/programmes/:id) — table projets, totaux, jalons agrégés, distribution RAG
-- [x] Filtre "Programme" sur page Portfolio + sous-titre programme sur chaque ligne projet
-- [x] Seed : 3 programmes couvrant les 8 projets Altair Industries
-- [x] Tests 100% backend + frontend (iteration_5.json)
-
-### Chantier 1 — Tâches (COMPLET)
-- [x] GET/POST/PUT/DELETE /api/tasks — isolation tenant, READ_ONLY bloqué
-- [x] 46 tâches seedées (5-7 par projet), mini-RAG calculé automatiquement
-- [x] Section "Décomposition du projet" complète : tableau 11 colonnes, badges RAG, indicateurs dérive, totaux landing
-- [x] Tests 100% — frontend validé (iteration_3.json)
-
-### Infrastructure (COMPLET)
-- [x] POST /api/auth/login — JWT avec rôles
-- [x] Full CRUD projects, tasks, resources, programs, milestones, allocations
-- [x] Dashboard — 4 metric cards, bar chart budgets, pie chart RAG
-- [x] Portfolio — table sortable + filtres (RAG, méthodo, programme, statut)
-- [x] ProjectDetail — alertes dépassement, budget CAPEX/OPEX/EAC, jalons, allocations, tâches
-- [x] Resources — table avec taux de charge calculé
-- [x] Gouvernance — cards expandables avec rapport sanity check
-- [x] Multi-tenant isolation (tenant_id filtering)
-- [x] Role-based access (READ_ONLY bloqué sur POST/PUT)
-
----
-
-## Roadmap (Chantiers restants)
-
-### P0 — En attente validation user
-- [ ] **Chantier 6** ← LIVRÉ le 13/04/2026, en attente validation user
-- [ ] **Chantier 7** ← LIVRÉ le 13/04/2026, en attente validation user
-
-### P1 — Prochains chantiers
-- [ ] **Chantier 7** — Registre des risques
-  - Collection `risks` : probabilité × impact = criticité, catégories
-  - CRUD dans ProjectDetail.jsx
-  - Widget top 10 risques sur Dashboard
-- [ ] **Chantier 8** — Registre des décisions
-  - Collection `decisions` : date, statut, responsable
-  - CRUD dans ProjectDetail.jsx et Governance.jsx
-- [ ] **Chantier 5** — Export PowerPoint COPIL (python-pptx)
-  - POST /api/export/copil
-  - Slides : portfolio summary, RAG chart, budget, top risques
-
-## Notes architecture importantes
-- Stack définitive : FastAPI + MongoDB + React/JSX (pas de migration)
-- L'isolation multi-tenant est assurée par filtrage `tenant_id` sur chaque requête
-- JWT local sans AWS Cognito réel — signature HS256 avec secret en .env
-- server.py > 1100 lignes — envisager split en routers/ si Chantier 7 ou 8 grossit significativement
-
-## Données de seed (v1.4)
+## Données de seed (v1.5)
 - 1 tenant : Groupe Altair Industries
 - 3 utilisateurs (Admin, PMO, Viewer)
-- 8 projets avec CAPEX/OPEX, statuts variés (actif/en_pause/en_preparation), révisions EAC
-- 10 ressources (Ressource_01 à Ressource_10)
-- 18 allocations, 21 jalons, 5 instances de gouvernance, 46 tâches
+- 4 programmes : Transformation Digitale, Modernisation SI, Pilotage Finance, Conformité RH
+- 8 projets (2 par programme) avec CAPEX/OPEX, statuts variés
+- 10 ressources, 18 allocations, 21 jalons, 5 instances gouvernance
+- 46 tâches, 38 risques, 32 décisions
+
+## Fichiers de référence principaux
+- `/app/backend/server.py` : 50 lignes — app factory
+- `/app/backend/core/` : auth.py, database.py
+- `/app/backend/shared/` : rag.py, utils.py
+- `/app/backend/modules/` : 13 modules (router + service + schemas)
+- `/app/backend/pptx_generator.py` : Générateur PPTX COPIL
+- `/app/backend/seed.py` : Données de démo complètes
+- `/app/frontend/src/api/index.js` : Client API Axios
+- `/app/frontend/src/pages/` : Dashboard, Portfolio, ProjectDetail, Governance, Programs, Resources
