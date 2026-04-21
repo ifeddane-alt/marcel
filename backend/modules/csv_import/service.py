@@ -212,6 +212,16 @@ async def commit_import(
                 }
                 await db.tasks.insert_one(doc)
             elif entity == "resources":
+                # Résoudre team_id si team_name est fourni
+                team_id = None
+                if mapped.get("team_id"):
+                    team_id = mapped["team_id"]
+                elif mapped.get("team"):
+                    team_doc = await db.teams.find_one(
+                        {"tenant_id": current_user.tenant_id, "name": mapped["team"]}
+                    )
+                    if team_doc:
+                        team_id = team_doc["team_id"]
                 doc = {
                     "resource_id": str(uuid.uuid4()),
                     "tenant_id": current_user.tenant_id,
@@ -220,7 +230,10 @@ async def commit_import(
                     "capacity_jh_month": float(
                         mapped.get("capacity_jh_month", "15").replace(",", ".") or "15"
                     ),
+                    "tjm_eur": float(mapped.get("tjm_eur", "0").replace(",", ".") or "0") or None,
+                    "availability_rate": float(mapped.get("availability_rate", "100").replace(",", ".") or "100"),
                     "team": mapped.get("team", ""),
+                    "team_id": team_id,
                     "email": mapped.get("email", ""),
                     "created_at": datetime.now(timezone.utc).isoformat(),
                 }

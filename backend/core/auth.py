@@ -37,3 +37,8 @@ async def get_current_user(
 def require_write(user: TokenPayload):
     if user.role == "READ_ONLY":
         raise HTTPException(status_code=403, detail="Droits insuffisants")
+
+
+def require_admin(user: TokenPayload):
+    if user.role != "TENANT_ADMIN":
+        raise HTTPException(status_code=403, detail="Droits administrateur requis")

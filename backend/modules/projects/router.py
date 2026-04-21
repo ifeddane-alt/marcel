@@ -42,3 +42,19 @@ async def add_budget_revision(
 @router.delete("/projects/{project_id}", status_code=204)
 async def delete_project(project_id: str, current_user: TokenPayload = Depends(get_current_user)):
     await service.delete_project(project_id, current_user)
+
+
+@router.get("/projects/{project_id}/team-consumption")
+async def get_team_consumption(
+    project_id: str,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    return await service.get_team_consumption(project_id, current_user)
+
+
+@router.get("/projects/{project_id}/raf")
+async def get_raf(
+    project_id: str,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    return await service.get_raf(project_id, current_user)

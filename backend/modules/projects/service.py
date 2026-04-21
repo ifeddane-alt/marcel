@@ -120,3 +120,123 @@ async def delete_project(project_id: str, current_user: TokenPayload) -> None:
     )
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Projet introuvable")
+
+
+async def get_team_consumption(project_id: str, current_user: TokenPayload) -> list:
+    """S1-06 — Consommation par équipe : SUM(work_allocations.md × tjm_eur) GROUP BY team."""
+    proj = await db.projects.find_one(
+        {"project_id": project_id, "tenant_id": current_user.tenant_id}
+    )
+    if not proj:
+        raise HTTPException(status_code=404, detail="Projet introuvable")
+
+    tasks = await db.tasks.find(
+        {"project_id": project_id, "tenant_id": current_user.tenant_id},
+        {"_id": 0, "task_id": 1},
+    ).to_list(None)
+    task_ids = [t["task_id"] for t in tasks]
+    if not task_ids:
+        return []
+
+    work_allocs = await db.work_allocations.find(
+        {"task_id": {"$in": task_ids}}, {"_id": 0}
+    ).to_list(None)
+    if not work_allocs:
+        return []
+
+    # Charger toutes les ressources du tenant
+    resources = await db.resources.find(
+        {"tenant_id": current_user.tenant_id},
+        {"_id": 0, "resource_id": 1, "tjm_eur": 1, "team_id": 1, "team": 1},
+    ).to_list(None)
+    res_map = {r["resource_id"]: r for r in resources}
+
+    # Charger les équipes du tenant
+    teams = await db.teams.find(
+        {"tenant_id": current_user.tenant_id}, {"_id": 0, "team_id": 1, "name": 1}
+    ).to_list(None)
+    team_map = {t["team_id"]: t["name"] for t in teams}
+
+    # Agrégation par team_id
+    agg: dict = {}
+    for wa in work_allocs:
+        res = res_map.get(wa.get("resource_id", ""), {})
+        team_id = res.get("team_id") or "__none__"
+        team_name = team_map.get(team_id) or res.get("team") or "Non affectée"
+        tjm = res.get("tjm_eur") or 0
+        planned_md = wa.get("planned_md", 0)
+        consumed_md = wa.get("consumed_md", 0)
+        raf_md = max(planned_md - consumed_md, 0)
+
+        if team_id not in agg:
+            agg[team_id] = {
+                "team_id": team_id if team_id != "__none__" else None,
+                "team_name": team_name,
+                "planned_md": 0.0,
+                "consumed_md": 0.0,
+                "raf_md": 0.0,
+                "planned_cost_eur": 0.0,
+                "consumed_cost_eur": 0.0,
+                "raf_cost_eur": 0.0,
+            }
+        agg[team_id]["planned_md"] += planned_md
+        agg[team_id]["consumed_md"] += consumed_md
+        agg[team_id]["raf_md"] += raf_md
+        agg[team_id]["planned_cost_eur"] += round(planned_md * tjm, 2)
+        agg[team_id]["consumed_cost_eur"] += round(consumed_md * tjm, 2)
+        agg[team_id]["raf_cost_eur"] += round(raf_md * tjm, 2)
+
+    return sorted(agg.values(), key=lambda x: -x["consumed_cost_eur"])
+
+
+async def get_raf(project_id: str, current_user: TokenPayload) -> dict:
+    """S1-07 — RAF valorisé : SUM((planned_md - consumed_md) × tjm_eur) par projet."""
+    proj = await db.projects.find_one(
+        {"project_id": project_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
+    )
+    if not proj:
+        raise HTTPException(status_code=404, detail="Projet introuvable")
+
+    tasks = await db.tasks.find(
+        {"project_id": project_id, "tenant_id": current_user.tenant_id},
+        {"_id": 0, "task_id": 1},
+    ).to_list(None)
+    task_ids = [t["task_id"] for t in tasks]
+    if not task_ids:
+        return {"raf_md": 0.0, "raf_cost_eur": 0.0, "consumed_md": 0.0,
+                "consumed_cost_eur": 0.0, "atterrissage_eur": proj.get("budget_consumed", 0)}
+
+    work_allocs = await db.work_allocations.find(
+        {"task_id": {"$in": task_ids}}, {"_id": 0}
+    ).to_list(None)
+
+    resources = await db.resources.find(
+        {"tenant_id": current_user.tenant_id},
+        {"_id": 0, "resource_id": 1, "tjm_eur": 1},
+    ).to_list(None)
+    res_map = {r["resource_id"]: r.get("tjm_eur") or 0 for r in resources}
+
+    raf_md = 0.0
+    raf_cost = 0.0
+    consumed_md = 0.0
+    consumed_cost = 0.0
+
+    for wa in work_allocs:
+        tjm = res_map.get(wa.get("resource_id", ""), 0)
+        p = wa.get("planned_md", 0)
+        c = wa.get("consumed_md", 0)
+        raf = max(p - c, 0)
+        consumed_md += c
+        consumed_cost += c * tjm
+        raf_md += raf
+        raf_cost += raf * tjm
+
+    atterrissage = round(consumed_cost + raf_cost, 2)
+
+    return {
+        "raf_md": round(raf_md, 2),
+        "raf_cost_eur": round(raf_cost, 2),
+        "consumed_md": round(consumed_md, 2),
+        "consumed_cost_eur": round(consumed_cost, 2),
+        "atterrissage_eur": atterrissage,
+    }

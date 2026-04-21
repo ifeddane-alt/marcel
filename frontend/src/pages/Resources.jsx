@@ -83,7 +83,7 @@ export default function Resources() {
         <table className="w-full text-sm" data-testid="resources-table">
           <thead>
             <tr className="bg-gray-50 border-b border-gray-200 text-left">
-              {["Ressource","Rôle","Équipe","Capacité / mois","JH alloués","Taux de charge"].map((h) => (
+              {["Ressource","Rôle","Équipe","TJM","Dispo","Capa effective","JH alloués","Charge"].map((h) => (
                 <th key={h} className="px-4 py-3 text-xs font-semibold text-slate-600">{h}</th>
               ))}
               {canWrite && <th className="px-4 py-3 text-xs font-semibold text-slate-600 text-right">Actions</th>}
@@ -92,9 +92,12 @@ export default function Resources() {
           <tbody>
             {filtered.map((r) => {
               const totalAllocated = getChargeTotal(r.resource_id);
-              const chargeRate = r.capacity_jh_month ? Math.round((totalAllocated / r.capacity_jh_month) * 100) : 0;
+              const availRate = r.availability_rate != null ? r.availability_rate : 100;
+              const capaEffective = Math.round((r.capacity_jh_month || 0) * availRate / 100);
+              const chargeRate = capaEffective ? Math.round((totalAllocated / capaEffective) * 100) : 0;
               const overloaded = chargeRate > 90;
               const initials = r.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
+              const teamLabel = r.team || "—";
               return (
                 <tr key={r.resource_id} className="border-b border-gray-100 hover:bg-gray-50/60 transition-colors" data-testid={`resource-row-${r.resource_id}`}>
                   <td className="px-4 py-3">
@@ -107,10 +110,16 @@ export default function Resources() {
                   </td>
                   <td className="px-4 py-3 text-slate-600">{r.role}</td>
                   <td className="px-4 py-3">
-                    {r.team ? <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200">{r.team}</span> : <span className="text-slate-300">—</span>}
+                    {teamLabel !== "—" ? <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200">{teamLabel}</span> : <span className="text-slate-300">—</span>}
                   </td>
-                  <td className="px-4 py-3 font-mono-data text-sm font-bold text-slate-700">{r.capacity_jh_month} JH</td>
-                  <td className="px-4 py-3 font-mono-data text-sm text-slate-700">
+                  <td className="px-4 py-3 font-mono text-xs text-slate-700">
+                    {r.tjm_eur ? `${r.tjm_eur.toLocaleString("fr-FR")} €` : <span className="text-slate-300">—</span>}
+                  </td>
+                  <td className="px-4 py-3 text-xs text-slate-600">
+                    {availRate < 100 ? <span className="text-amber-600 font-semibold">{availRate}%</span> : <span className="text-slate-400">100%</span>}
+                  </td>
+                  <td className="px-4 py-3 font-mono text-sm font-bold text-slate-700">{capaEffective} JH</td>
+                  <td className="px-4 py-3 font-mono text-sm text-slate-700">
                     {totalAllocated > 0 ? `${totalAllocated} JH` : <span className="text-slate-300">—</span>}
                   </td>
                   <td className="px-4 py-3">
@@ -119,7 +128,7 @@ export default function Resources() {
                         <div className="h-1.5 w-20 bg-gray-100 rounded-full overflow-hidden">
                           <div className={`h-full rounded-full ${overloaded ? "bg-rose-500" : "bg-[#0052CC]"}`} style={{ width: `${Math.min(chargeRate, 100)}%` }} />
                         </div>
-                        <span className={`font-mono-data text-xs font-semibold ${overloaded ? "text-rose-600" : "text-slate-600"}`}>{chargeRate}%</span>
+                        <span className={`font-mono text-xs font-semibold ${overloaded ? "text-rose-600" : "text-slate-600"}`}>{chargeRate}%</span>
                       </div>
                     ) : <span className="text-slate-300 text-xs">Non allouée</span>}
                   </td>

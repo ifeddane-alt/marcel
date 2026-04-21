@@ -20,7 +20,7 @@ IMPORT_TEMPLATES = {
                     "2025-01-01", "2025-03-31", "2025-01-15", "", "100", "40", "200", "80", "Alice Dupont"]],
     },
     "resources": {
-        "fields": ["name", "role", "capacity_jh_month", "team", "email"],
+        "fields": ["name", "role", "capacity_jh_month", "tjm_eur", "availability_rate", "team", "team_id", "email"],
         "required": ["name", "role"],
         "sample": [["Alice Dupont", "Chef de projet", "15", "Équipe Digital", "alice@altair.fr"]],
     },
@@ -61,6 +61,9 @@ FIELD_ALIASES: dict = {
         "name": ["name", "nom", "prenom_nom"],
         "role": ["role", "poste", "fonction", "titre"],
         "capacity_jh_month": ["capacity_jh_month", "capacite", "dispo", "jh_mois"],
+        "tjm_eur": ["tjm_eur", "tjm", "taux_journalier", "daily_rate"],
+        "availability_rate": ["availability_rate", "taux_dispo", "disponibilite", "dispo_pct"],
+        "team_id": ["team_id"],
         "team": ["team", "equipe", "departement", "service"],
         "email": ["email", "mail", "adresse_email"],
     },

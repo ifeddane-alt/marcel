@@ -39,6 +39,22 @@ export const projectsAPI = {
   delete: (id) => api.delete(`/projects/${id}`),
 };
 
+export const teamsAPI = {
+  list: () => api.get("/teams"),
+  create: (data) => api.post("/teams", data),
+  update: (id, data) => api.put(`/teams/${id}`, data),
+  delete: (id) => api.delete(`/teams/${id}`),
+};
+
+export const workAllocationsAPI = {
+  list: (projectId) => api.get(`/projects/${projectId}/work-allocations`),
+  create: (data) => api.post("/work-allocations", data),
+  update: (id, data) => api.put(`/work-allocations/${id}`, data),
+  delete: (id) => api.delete(`/work-allocations/${id}`),
+  teamConsumption: (projectId) => api.get(`/projects/${projectId}/team-consumption`),
+  raf: (projectId) => api.get(`/projects/${projectId}/raf`),
+};
+
 export const resourcesAPI = {
   list: () => api.get("/resources"),
   create: (data) => api.post("/resources", data),

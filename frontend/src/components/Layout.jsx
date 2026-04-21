@@ -10,6 +10,7 @@ import {
   Building2,
   FolderKanban,
   Upload,
+  UsersRound,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 
@@ -24,6 +25,7 @@ const navItems = [
   { to: "/programmes", icon: FolderKanban, label: "Programmes" },
   { to: "/portfolio", icon: Briefcase, label: "Portefeuille" },
   { to: "/resources", icon: Users, label: "Ressources" },
+  { to: "/teams", icon: UsersRound, label: "Équipes" },
   { to: "/governance", icon: ShieldCheck, label: "Gouvernance" },
 ];
 

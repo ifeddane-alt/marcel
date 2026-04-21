@@ -30,12 +30,56 @@ PROJECT_IDS = [str(uuid.uuid4()) for _ in range(8)]
 RESOURCE_IDS = [str(uuid.uuid4()) for _ in range(10)]
 GOVERNANCE_IDS = [str(uuid.uuid4()) for _ in range(5)]
 PROGRAM_IDS = [str(uuid.uuid4()) for _ in range(4)]
+TEAM_IDS = [str(uuid.uuid4()) for _ in range(5)]
 
 # Mapping programmes :
 # PROGRAM_IDS[0] = Transformation Digitale & Métiers  → P0 Phoenix, P4 CRM Salesforce
 # PROGRAM_IDS[1] = Modernisation SI & Infrastructure  → P2 ERP SAP, P5 Cloud Azure
 # PROGRAM_IDS[2] = Pilotage Finance & Expérience Coll → P1 SI Finance, P3 Digital Workplace
 # PROGRAM_IDS[3] = Conformité, RH & Résilience        → P6 Portail RH, P7 DORA NIS2
+
+TEAMS = [
+    {
+        "team_id": TEAM_IDS[0],
+        "tenant_id": TENANT_ID,
+        "name": "Dev A",
+        "manager_resource_id": RESOURCE_IDS[2],
+        "train_id": None,
+        "created_at": "2025-01-01T00:00:00Z",
+    },
+    {
+        "team_id": TEAM_IDS[1],
+        "tenant_id": TENANT_ID,
+        "name": "Dev B",
+        "manager_resource_id": RESOURCE_IDS[5],
+        "train_id": None,
+        "created_at": "2025-01-01T00:00:00Z",
+    },
+    {
+        "team_id": TEAM_IDS[2],
+        "tenant_id": TENANT_ID,
+        "name": "Infra",
+        "manager_resource_id": RESOURCE_IDS[4],
+        "train_id": None,
+        "created_at": "2025-01-01T00:00:00Z",
+    },
+    {
+        "team_id": TEAM_IDS[3],
+        "tenant_id": TENANT_ID,
+        "name": "QA",
+        "manager_resource_id": RESOURCE_IDS[6],
+        "train_id": None,
+        "created_at": "2025-01-01T00:00:00Z",
+    },
+    {
+        "team_id": TEAM_IDS[4],
+        "tenant_id": TENANT_ID,
+        "name": "Support",
+        "manager_resource_id": RESOURCE_IDS[9],
+        "train_id": None,
+        "created_at": "2025-01-01T00:00:00Z",
+    },
+]
 
 PROGRAMS = [
     {
@@ -339,16 +383,26 @@ PROJECTS = [
 ]
 
 RESOURCES = [
-    {"resource_id": RESOURCE_IDS[0], "tenant_id": TENANT_ID, "name": "Ressource_01", "role": "Architecte SI", "capacity_jh_month": 20, "team": "Architecture"},
-    {"resource_id": RESOURCE_IDS[1], "tenant_id": TENANT_ID, "name": "Ressource_02", "role": "Chef de Projet Senior", "capacity_jh_month": 22, "team": "PMO"},
-    {"resource_id": RESOURCE_IDS[2], "tenant_id": TENANT_ID, "name": "Ressource_03", "role": "Développeur Senior Java", "capacity_jh_month": 20, "team": "Dev Core"},
-    {"resource_id": RESOURCE_IDS[3], "tenant_id": TENANT_ID, "name": "Ressource_04", "role": "Business Analyst", "capacity_jh_month": 20, "team": "Métier"},
-    {"resource_id": RESOURCE_IDS[4], "tenant_id": TENANT_ID, "name": "Ressource_05", "role": "DevOps Engineer", "capacity_jh_month": 20, "team": "Infrastructure"},
-    {"resource_id": RESOURCE_IDS[5], "tenant_id": TENANT_ID, "name": "Ressource_06", "role": "Product Owner", "capacity_jh_month": 18, "team": "Product"},
-    {"resource_id": RESOURCE_IDS[6], "tenant_id": TENANT_ID, "name": "Ressource_07", "role": "Scrum Master", "capacity_jh_month": 15, "team": "Agile"},
-    {"resource_id": RESOURCE_IDS[7], "tenant_id": TENANT_ID, "name": "Ressource_08", "role": "Data Engineer", "capacity_jh_month": 20, "team": "Data & BI"},
-    {"resource_id": RESOURCE_IDS[8], "tenant_id": TENANT_ID, "name": "Ressource_09", "role": "UX/UI Designer", "capacity_jh_month": 18, "team": "Design"},
-    {"resource_id": RESOURCE_IDS[9], "tenant_id": TENANT_ID, "name": "Ressource_10", "role": "Expert Sécurité SI", "capacity_jh_month": 15, "team": "Cybersécurité"},
+    {"resource_id": RESOURCE_IDS[0], "tenant_id": TENANT_ID, "name": "Ressource_01", "role": "Architecte SI",
+     "capacity_jh_month": 20, "team": "Dev A", "team_id": TEAM_IDS[0], "tjm_eur": 900, "availability_rate": 100},
+    {"resource_id": RESOURCE_IDS[1], "tenant_id": TENANT_ID, "name": "Ressource_02", "role": "Chef de Projet Senior",
+     "capacity_jh_month": 22, "team": "Dev A", "team_id": TEAM_IDS[0], "tjm_eur": 800, "availability_rate": 100},
+    {"resource_id": RESOURCE_IDS[2], "tenant_id": TENANT_ID, "name": "Ressource_03", "role": "Développeur Senior Java",
+     "capacity_jh_month": 20, "team": "Dev A", "team_id": TEAM_IDS[0], "tjm_eur": 600, "availability_rate": 100},
+    {"resource_id": RESOURCE_IDS[3], "tenant_id": TENANT_ID, "name": "Ressource_04", "role": "Business Analyst",
+     "capacity_jh_month": 20, "team": "Dev B", "team_id": TEAM_IDS[1], "tjm_eur": 700, "availability_rate": 100},
+    {"resource_id": RESOURCE_IDS[4], "tenant_id": TENANT_ID, "name": "Ressource_05", "role": "DevOps Engineer",
+     "capacity_jh_month": 20, "team": "Infra", "team_id": TEAM_IDS[2], "tjm_eur": 600, "availability_rate": 100},
+    {"resource_id": RESOURCE_IDS[5], "tenant_id": TENANT_ID, "name": "Ressource_06", "role": "Product Owner",
+     "capacity_jh_month": 18, "team": "Dev B", "team_id": TEAM_IDS[1], "tjm_eur": 700, "availability_rate": 100},
+    {"resource_id": RESOURCE_IDS[6], "tenant_id": TENANT_ID, "name": "Ressource_07", "role": "Scrum Master",
+     "capacity_jh_month": 15, "team": "QA", "team_id": TEAM_IDS[3], "tjm_eur": 550, "availability_rate": 80},
+    {"resource_id": RESOURCE_IDS[7], "tenant_id": TENANT_ID, "name": "Ressource_08", "role": "Data Engineer",
+     "capacity_jh_month": 20, "team": "Dev B", "team_id": TEAM_IDS[1], "tjm_eur": 600, "availability_rate": 100},
+    {"resource_id": RESOURCE_IDS[8], "tenant_id": TENANT_ID, "name": "Ressource_09", "role": "UX/UI Designer",
+     "capacity_jh_month": 18, "team": "QA", "team_id": TEAM_IDS[3], "tjm_eur": 550, "availability_rate": 90},
+    {"resource_id": RESOURCE_IDS[9], "tenant_id": TENANT_ID, "name": "Ressource_10", "role": "Expert Sécurité SI",
+     "capacity_jh_month": 15, "team": "Support", "team_id": TEAM_IDS[4], "tjm_eur": 500, "availability_rate": 100},
 ]
 
 ALLOCATIONS = [
@@ -1355,6 +1409,69 @@ DECISIONS = [
      "governance_id": None, "created_at": "2025-04-10T10:00:00Z"},
 ]
 
+# ===== WORK ALLOCATIONS (S1-05) =====
+# Seed : 3-5 allocations par projet (tâche × ressource × phase)
+# task IDs are dynamic in TASKS list above — we pick by project position
+
+
+def _wa(task_offset, project_idx, resource_idx, phase, planned, consumed):
+    """Helper: work allocation using positional task (task within project group)."""
+    return {
+        "work_allocation_id": str(uuid.uuid4()),
+        "tenant_id": TENANT_ID,
+        "task_id": None,          # Will be resolved at seed time
+        "resource_id": RESOURCE_IDS[resource_idx],
+        "phase": phase,
+        "planned_md": planned,
+        "consumed_md": consumed,
+        "created_at": "2025-04-20T10:00:00Z",
+        "_project_idx": project_idx,
+        "_task_offset": task_offset,
+    }
+
+
+# We'll populate task_ids in the seed function
+WORK_ALLOCATIONS_TEMPLATE = [
+    # P0 — Phoenix (tasks 0-5 in TASKS)
+    _wa(0, 0, 0, "analyse",        15.0, 12.0),   # Architecte → Epic Cadrage
+    _wa(0, 0, 1, "conception",     10.0, 8.0),    # CdP → Epic Cadrage
+    _wa(1, 0, 7, "implementation", 40.0, 32.0),   # Data Engineer → Feature Data
+    _wa(2, 0, 2, "implementation", 30.0, 20.0),   # Dev Java → US ERP DataLake
+    _wa(5, 0, 7, "review",         10.0, 5.0),    # Data Engineer → US Reporting
+
+    # P1 — SI Finance (tasks 6-11)
+    _wa(0, 1, 3, "analyse",        15.0, 15.0),   # BA → Analyse besoins
+    _wa(2, 1, 2, "implementation", 25.0, 18.0),   # Dev Java → Dev Comptabilité
+    _wa(3, 1, 3, "implementation", 20.0, 12.0),   # BA → Dev CdG
+
+    # P2 — SAP (tasks 12-18)
+    _wa(2, 2, 2, "implementation", 50.0, 45.0),   # Dev Java → RICEFW
+    _wa(3, 2, 7, "implementation", 30.0, 25.0),   # Data Engineer → Migration données
+    _wa(4, 2, 2, "test",           15.0, 8.0),    # Dev Java → Tests régression
+
+    # P3 — Digital Workplace (tasks 19-23)
+    _wa(0, 3, 4, "implementation", 12.0, 12.0),   # DevOps → Teams/Exchange
+    _wa(1, 3, 8, "implementation", 18.0, 10.0),   # UX → SharePoint
+    _wa(2, 3, 5, "analyse",         8.0, 5.0),    # PO → Power Automate
+
+    # P4 — CRM Salesforce (tasks 24-29)
+    _wa(0, 4, 0, "conception",     10.0, 10.0),   # Architecte → Epic Architecture
+    _wa(1, 4, 5, "implementation", 22.0, 12.0),   # PO → Sales Cloud
+    _wa(3, 4, 5, "analyse",         8.0, 5.0),    # PO → Dashboard perf
+
+    # P5 — Cloud Azure (tasks 30-34)
+    _wa(0, 5, 4, "implementation", 10.0, 9.5),    # DevOps → Landing Zone
+    _wa(2, 5, 4, "implementation", 20.0, 10.0),   # DevOps → Wave 2
+
+    # P6 — Portail RH (tasks 35-39)
+    _wa(0, 6, 8, "implementation", 20.0, 22.0),   # UX → Congés
+    _wa(1, 6, 8, "implementation", 18.0, 20.0),   # UX → Fiche Paie
+
+    # P7 — DORA NIS2 (tasks 40-45)
+    _wa(0, 7, 9, "analyse",        12.0, 9.0),    # Sécurité → GAP Analysis
+    _wa(1, 7, 0, "analyse",        10.0, 4.5),    # Architecte → Cartographie
+]
+
 
 async def seed():
     print("=== Seed Projetenne ===")
@@ -1369,6 +1486,7 @@ async def seed():
         await db.resources.delete_many({"tenant_id": TENANT_ID})
         await db.allocations.delete_many({})
         await db.milestones.delete_many({})
+        await db.teams.delete_many({"tenant_id": TENANT_ID})
         await db.governance.delete_many({"tenant_id": TENANT_ID})
         await db.programs.delete_many({"tenant_id": TENANT_ID})
 
@@ -1416,6 +1534,11 @@ async def seed():
     await db.governance.insert_many(GOVERNANCE)
     print(f"Instances de gouvernance créées : {len(GOVERNANCE)}")
 
+    # Teams seed
+    await db.teams.delete_many({"tenant_id": TENANT_ID})
+    await db.teams.insert_many(TEAMS)
+    print(f"Équipes créées : {len(TEAMS)}")
+
     # Tasks seed
     await db.tasks.delete_many({})
     await db.tasks.insert_many(TASKS)
@@ -1430,6 +1553,30 @@ async def seed():
     await db.decisions.delete_many({})
     await db.decisions.insert_many(DECISIONS)
     print(f"Décisions créées : {len(DECISIONS)}")
+
+    # Work Allocations seed (S1-05)
+    # Résoudre les task_ids depuis la DB
+    await db.work_allocations.delete_many({})
+    # Grouper les tâches par projet
+    all_tasks = await db.tasks.find({"tenant_id": TENANT_ID}, {"_id": 0, "task_id": 1, "project_id": 1}).to_list(None)
+    tasks_by_project = {}
+    for t in all_tasks:
+        pid = t["project_id"]
+        tasks_by_project.setdefault(pid, []).append(t["task_id"])
+
+    work_allocs_to_insert = []
+    for wa in WORK_ALLOCATIONS_TEMPLATE:
+        proj_idx = wa.pop("_project_idx")
+        task_offset = wa.pop("_task_offset")
+        proj_id = PROJECT_IDS[proj_idx]
+        proj_tasks = tasks_by_project.get(proj_id, [])
+        if task_offset < len(proj_tasks):
+            wa["task_id"] = proj_tasks[task_offset]
+            work_allocs_to_insert.append(wa)
+
+    if work_allocs_to_insert:
+        await db.work_allocations.insert_many(work_allocs_to_insert)
+    print(f"Work allocations créées : {len(work_allocs_to_insert)}")
 
     print("\n=== Comptes disponibles ===")
     print("  admin@altair.fr    / Admin1234!  (TENANT_ADMIN)")

@@ -11,6 +11,7 @@ import ProjectDetail from "@/pages/ProjectDetail";
 import Resources from "@/pages/Resources";
 import Governance from "@/pages/Governance";
 import Import from "@/pages/Import";
+import Teams from "@/pages/Teams";
 import "@/App.css";
 
 function ProtectedRoute({ children }) {
@@ -38,6 +39,7 @@ function AppRoutes() {
         <Route path="portfolio" element={<Portfolio />} />
         <Route path="projects/:id" element={<ProjectDetail />} />
         <Route path="resources" element={<Resources />} />
+        <Route path="teams" element={<Teams />} />
         <Route path="governance" element={<Governance />} />
         <Route path="import" element={<Import />} />
       </Route>

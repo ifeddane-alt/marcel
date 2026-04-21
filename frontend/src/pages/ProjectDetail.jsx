@@ -2,9 +2,9 @@ import React, { useEffect, useState, useCallback } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Calendar, ChevronRight, Flag, AlertTriangle, Clock, TrendingUp,
-  Pencil, Trash2, Plus, History, ShieldAlert, ClipboardList, Presentation,
+  Pencil, Trash2, Plus, History, ShieldAlert, ClipboardList, Presentation, Users,
 } from "lucide-react";
-import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI, decisionsAPI } from "@/api";
+import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI, decisionsAPI, workAllocationsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import RAGBadge, { MethodologyBadge, MilestoneBadge, TaskTypeBadge, TaskStatusBadge, ProjectStatusBadge } from "@/components/RAGBadge";
 import ProjectModal from "@/components/ProjectModal";
@@ -15,6 +15,7 @@ import DecisionModal from "@/components/DecisionModal";
 import RiskHeatmap from "@/components/RiskHeatmap";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import ExportCopilModal from "@/components/ExportCopilModal";
+import WorkAllocationModal from "@/components/WorkAllocationModal";
 import { formatEuro, formatDate, formatJH } from "@/utils/format";
 
 function BudgetBar({ label, value, total, color }) {
@@ -49,6 +50,9 @@ export default function ProjectDetail() {
   const [risks, setRisks] = useState([]);
   const [decisions, setDecisions] = useState([]);
   const [resources, setResources] = useState([]);
+  const [workAllocations, setWorkAllocations] = useState([]);
+  const [teamConsumption, setTeamConsumption] = useState([]);
+  const [raf, setRaf] = useState(null);
   const [loading, setLoading] = useState(true);
 
   // Modal state
@@ -58,6 +62,8 @@ export default function ProjectDetail() {
   const [riskModalOpen, setRiskModalOpen] = useState(false);
   const [decisionModalOpen, setDecisionModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [waModalOpen, setWaModalOpen] = useState(false);
+  const [selectedWa, setSelectedWa] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
   const [selectedRisk, setSelectedRisk] = useState(null);
   const [selectedDecision, setSelectedDecision] = useState(null);
@@ -73,7 +79,10 @@ export default function ProjectDetail() {
       resourcesAPI.list(),
       risksAPI.list(id),
       decisionsAPI.list(id),
-    ]).then(([pRes, mRes, aRes, tRes, rRes, rkRes, dRes]) => {
+      workAllocationsAPI.list(id),
+      workAllocationsAPI.teamConsumption(id),
+      workAllocationsAPI.raf(id),
+    ]).then(([pRes, mRes, aRes, tRes, rRes, rkRes, dRes, waRes, tcRes, rafRes]) => {
       setProject(pRes.data);
       setMilestones(mRes.data);
       setAllocations(aRes.data);
@@ -81,6 +90,9 @@ export default function ProjectDetail() {
       setResources(rRes.data);
       setRisks(rkRes.data);
       setDecisions(dRes.data);
+      setWorkAllocations(waRes.data);
+      setTeamConsumption(tcRes.data);
+      setRaf(rafRes.data);
       setLoading(false);
     }).catch(() => setLoading(false));
   }, [id]);
@@ -104,6 +116,10 @@ export default function ProjectDetail() {
         fetchAll();
       } else if (confirmDelete.type === "decision") {
         await decisionsAPI.delete(confirmDelete.item.decision_id);
+        setConfirmDelete(null);
+        fetchAll();
+      } else if (confirmDelete.type === "work_allocation") {
+        await workAllocationsAPI.delete(confirmDelete.item.work_allocation_id);
         setConfirmDelete(null);
         fetchAll();
       }
@@ -983,7 +999,119 @@ export default function ProjectDetail() {
           )}
         </div>
 
-        {/* Right column — project info */}
+        {/* Work Allocations — S1-05 */}
+        <div className="bg-white border border-gray-200 rounded shadow-sm" data-testid="work-allocations-section">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-500 font-semibold">
+              <Clock size={13} className="text-[#0052CC]" />
+              Allocations de travail ({workAllocations.length})
+            </div>
+            {canWrite && (
+              <button
+                onClick={() => { setSelectedWa(null); setWaModalOpen(true); }}
+                data-testid="btn-new-work-allocation"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0052CC] text-white text-xs font-semibold rounded hover:bg-[#0047B3] transition-colors"
+              >
+                <Plus size={12} /> Nouvelle allocation
+              </button>
+            )}
+          </div>
+          {workAllocations.length === 0 ? (
+            <div className="px-5 py-6 text-center text-sm text-slate-400">
+              Aucune allocation de travail. Cliquez sur "Nouvelle allocation" pour commencer.
+            </div>
+          ) : (
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm" data-testid="work-allocations-table">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-100 text-left">
+                    {["Ressource", "Phase", "JH prévus", "JH consommés", "Coût prévu", "Coût consommé", "RAF €", ""].map((h) => (
+                      <th key={h} className="px-3 py-2 text-xs font-semibold text-slate-500 whitespace-nowrap">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {workAllocations.map((wa) => {
+                    const raf_wa = Math.max((wa.planned_md || 0) - (wa.consumed_md || 0), 0);
+                    const raf_cost = Math.round((raf_wa * (wa.tjm_eur || 0)) * 100) / 100;
+                    return (
+                      <tr key={wa.work_allocation_id} className="border-b border-gray-50 hover:bg-gray-50/50" data-testid={`wa-row-${wa.work_allocation_id}`}>
+                        <td className="px-3 py-2.5 text-xs font-medium text-slate-700">{wa.resource_name || wa.resource_id}</td>
+                        <td className="px-3 py-2.5">
+                          <span className="text-[10px] font-semibold uppercase tracking-wide bg-slate-100 text-slate-600 px-1.5 py-0.5 rounded">
+                            {wa.phase}
+                          </span>
+                        </td>
+                        <td className="px-3 py-2.5 font-mono text-xs text-slate-700">{wa.planned_md} JH</td>
+                        <td className="px-3 py-2.5 font-mono text-xs text-slate-700">{wa.consumed_md} JH</td>
+                        <td className="px-3 py-2.5 font-mono text-xs text-slate-700">
+                          {wa.planned_cost_eur ? `${wa.planned_cost_eur.toLocaleString("fr-FR")} €` : "—"}
+                        </td>
+                        <td className="px-3 py-2.5 font-mono text-xs text-slate-700">
+                          {wa.consumed_cost_eur ? `${wa.consumed_cost_eur.toLocaleString("fr-FR")} €` : "—"}
+                        </td>
+                        <td className="px-3 py-2.5 font-mono text-xs font-semibold text-amber-700">
+                          {raf_cost > 0 ? `${raf_cost.toLocaleString("fr-FR")} €` : "—"}
+                        </td>
+                        <td className="px-3 py-2.5">
+                          {canWrite && (
+                            <div className="flex items-center gap-1">
+                              <button onClick={() => { setSelectedWa(wa); setWaModalOpen(true); }} className="p-1 text-slate-300 hover:text-[#0052CC] transition-colors" data-testid={`btn-edit-wa-${wa.work_allocation_id}`}><Pencil size={12} /></button>
+                              <button onClick={() => setConfirmDelete({ type: "work_allocation", item: wa })} className="p-1 text-slate-300 hover:text-rose-500 transition-colors" data-testid={`btn-delete-wa-${wa.work_allocation_id}`}><Trash2 size={12} /></button>
+                            </div>
+                          )}
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </tbody>
+              </table>
+            </div>
+          )}
+        </div>
+
+        {/* Team Consumption — S1-06 */}
+        {teamConsumption.length > 0 && (
+          <div className="bg-white border border-gray-200 rounded shadow-sm" data-testid="team-consumption-section">
+            <div className="px-5 py-3 border-b border-gray-100">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-500 font-semibold">
+                <Users size={13} className="text-[#0052CC]" />
+                Consommation par équipe
+              </div>
+            </div>
+            <div className="overflow-x-auto">
+              <table className="w-full text-sm" data-testid="team-consumption-table">
+                <thead>
+                  <tr className="bg-gray-50 border-b border-gray-100 text-left">
+                    {["Équipe", "JH prévus", "JH consommés", "Coût prévu", "Coût consommé", "RAF JH", "RAF €"].map((h) => (
+                      <th key={h} className="px-3 py-2 text-xs font-semibold text-slate-500 whitespace-nowrap">{h}</th>
+                    ))}
+                  </tr>
+                </thead>
+                <tbody>
+                  {teamConsumption.map((tc) => (
+                    <tr key={tc.team_id || tc.team_name} className="border-b border-gray-50 hover:bg-gray-50/50" data-testid={`tc-row-${tc.team_name}`}>
+                      <td className="px-3 py-2.5 font-medium text-xs text-slate-700">
+                        <div className="flex items-center gap-1.5">
+                          <div className="w-5 h-5 rounded bg-[#0052CC]/10 flex items-center justify-center flex-shrink-0">
+                            <span className="text-[9px] font-bold text-[#0052CC]">{tc.team_name.slice(0,2).toUpperCase()}</span>
+                          </div>
+                          {tc.team_name}
+                        </div>
+                      </td>
+                      <td className="px-3 py-2.5 font-mono text-xs text-slate-600">{tc.planned_md} JH</td>
+                      <td className="px-3 py-2.5 font-mono text-xs text-slate-700 font-semibold">{tc.consumed_md} JH</td>
+                      <td className="px-3 py-2.5 font-mono text-xs text-slate-600">{tc.planned_cost_eur?.toLocaleString("fr-FR")} €</td>
+                      <td className="px-3 py-2.5 font-mono text-xs text-slate-700 font-semibold">{tc.consumed_cost_eur?.toLocaleString("fr-FR")} €</td>
+                      <td className="px-3 py-2.5 font-mono text-xs text-amber-700 font-semibold">{tc.raf_md} JH</td>
+                      <td className="px-3 py-2.5 font-mono text-xs text-amber-700 font-bold">{tc.raf_cost_eur?.toLocaleString("fr-FR")} €</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        )}
         <div className="col-span-12 lg:col-span-4 space-y-4">
           <div className="bg-white border border-gray-200 rounded shadow-sm p-5">
             <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4">
@@ -1015,6 +1143,29 @@ export default function ProjectDetail() {
               )}
             </dl>
           </div>
+
+          {/* RAF valorisé — S1-07 */}
+          {raf && (
+            <div className="bg-white border border-gray-200 rounded shadow-sm p-5" data-testid="raf-section">
+              <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-3">
+                RAF &amp; Atterrissage valorisé
+              </div>
+              <div className="space-y-2.5">
+                {[
+                  { label: "Consommé (JH)", value: `${raf.consumed_md} JH`, color: "text-slate-700" },
+                  { label: "Consommé (€)", value: `${(raf.consumed_cost_eur || 0).toLocaleString("fr-FR")} €`, color: "text-slate-700" },
+                  { label: "RAF (JH)", value: `${raf.raf_md} JH`, color: "text-amber-600 font-bold" },
+                  { label: "RAF (€)", value: `${(raf.raf_cost_eur || 0).toLocaleString("fr-FR")} €`, color: "text-amber-600 font-bold" },
+                  { label: "Atterrissage (€)", value: `${(raf.atterrissage_eur || 0).toLocaleString("fr-FR")} €`, color: "text-[#0052CC] font-bold" },
+                ].map(({ label, value, color }) => (
+                  <div key={label} className="flex justify-between items-center border-b border-gray-50 pb-2 last:border-0">
+                    <span className="text-xs text-slate-400">{label}</span>
+                    <span className={`font-mono text-sm ${color}`}>{value}</span>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Milestone summary */}
           <div className="bg-white border border-gray-200 rounded shadow-sm p-5">
@@ -1079,6 +1230,14 @@ export default function ProjectDetail() {
         selectedProjectIds={project ? [project.project_id] : []}
         selectedProjectNames={project ? [project.name] : []}
       />
+      <WorkAllocationModal
+        isOpen={waModalOpen}
+        onClose={() => setWaModalOpen(false)}
+        wa={selectedWa}
+        tasks={tasks}
+        resources={resources}
+        onSaved={fetchAll}
+      />
       <ConfirmDialog
         isOpen={!!confirmDelete}
         onClose={() => setConfirmDelete(null)}
@@ -1088,6 +1247,7 @@ export default function ProjectDetail() {
           confirmDelete?.type === "project" ? "Supprimer le projet"
           : confirmDelete?.type === "task" ? "Supprimer la tâche"
           : confirmDelete?.type === "risk" ? "Supprimer le risque"
+          : confirmDelete?.type === "work_allocation" ? "Supprimer l'allocation"
           : "Supprimer la décision"
         }
         message={
@@ -1097,6 +1257,8 @@ export default function ProjectDetail() {
             ? `Supprimer la tâche "${confirmDelete?.item?.name}" ?`
             : confirmDelete?.type === "risk"
             ? `Supprimer le risque "${confirmDelete?.item?.title}" ?`
+            : confirmDelete?.type === "work_allocation"
+            ? `Supprimer cette allocation de travail ?`
             : `Supprimer la décision "${confirmDelete?.item?.title}" ?`
         }
       />

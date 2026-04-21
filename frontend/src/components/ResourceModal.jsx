@@ -1,9 +1,9 @@
 import React, { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import Modal from "@/components/Modal";
-import { resourcesAPI } from "@/api";
+import { resourcesAPI, teamsAPI } from "@/api";
 
-const EMPTY = { name: "", role: "", team: "", capacity_jh_month: "15", email: "" };
+const EMPTY = { name: "", role: "", team: "", team_id: "", capacity_jh_month: "15", tjm_eur: "", availability_rate: "100", email: "" };
 const INPUT_CLS = "w-full text-sm border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-white";
 
 function Field({ label, required, error, children }) {
@@ -20,18 +20,23 @@ function Field({ label, required, error, children }) {
 
 export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
   const [form, setForm] = useState(EMPTY);
+  const [teams, setTeams] = useState([]);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const [apiError, setApiError] = useState("");
 
   useEffect(() => {
     if (!isOpen) return;
+    teamsAPI.list().then((r) => setTeams(r.data)).catch(() => {});
     if (resource) {
       setForm({
         name: resource.name || "",
         role: resource.role || "",
         team: resource.team || "",
+        team_id: resource.team_id || "",
         capacity_jh_month: resource.capacity_jh_month != null ? String(resource.capacity_jh_month) : "15",
+        tjm_eur: resource.tjm_eur != null ? String(resource.tjm_eur) : "",
+        availability_rate: resource.availability_rate != null ? String(resource.availability_rate) : "100",
         email: resource.email || "",
       });
     } else {
@@ -42,11 +47,20 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
+  const handleTeamChange = (e) => {
+    const teamId = e.target.value;
+    const team = teams.find((t) => t.team_id === teamId);
+    setForm((f) => ({ ...f, team_id: teamId, team: team ? team.name : f.team }));
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     const errs = {};
     if (!form.name.trim()) errs.name = "Nom requis";
     if (!form.role.trim()) errs.role = "Rôle requis";
+    if (form.availability_rate !== "" && (Number(form.availability_rate) < 0 || Number(form.availability_rate) > 100)) {
+      errs.availability_rate = "Entre 0 et 100";
+    }
     if (Object.keys(errs).length) { setErrors(errs); return; }
     setSaving(true); setApiError("");
     try {
@@ -54,7 +68,10 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
         name: form.name.trim(),
         role: form.role.trim(),
         team: form.team || null,
+        team_id: form.team_id || null,
         capacity_jh_month: form.capacity_jh_month ? Number(form.capacity_jh_month) : 15,
+        tjm_eur: form.tjm_eur ? Number(form.tjm_eur) : null,
+        availability_rate: form.availability_rate !== "" ? Number(form.availability_rate) : 100,
         email: form.email || null,
       };
       if (resource) {
@@ -67,6 +84,10 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
       setApiError(err.response?.data?.detail || "Erreur lors de la sauvegarde");
     } finally { setSaving(false); }
   };
+
+  const capaciteEffective = form.capacity_jh_month && form.availability_rate
+    ? Math.round(Number(form.capacity_jh_month) * Number(form.availability_rate) / 100)
+    : null;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={resource ? "Modifier la ressource" : "Nouvelle ressource"}>
@@ -83,17 +104,36 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
         </div>
 
         <div className="grid grid-cols-2 gap-3">
-          <Field label="Équipe / Département">
-            <input data-testid="resource-form-team" className={INPUT_CLS} value={form.team} onChange={set("team")} placeholder="Ex : Équipe Digital" />
+          <Field label="Équipe">
+            <select data-testid="resource-form-team-id" className={INPUT_CLS} value={form.team_id} onChange={handleTeamChange}>
+              <option value="">— Aucune équipe —</option>
+              {teams.map((t) => (
+                <option key={t.team_id} value={t.team_id}>{t.name}</option>
+              ))}
+            </select>
           </Field>
-          <Field label="Capacité mensuelle (JH)">
-            <input data-testid="resource-form-capacity" type="number" className={INPUT_CLS} value={form.capacity_jh_month} onChange={set("capacity_jh_month")} min="0" max="30" />
+          <Field label="Email">
+            <input data-testid="resource-form-email" type="email" className={INPUT_CLS} value={form.email} onChange={set("email")} placeholder="Ex : alice@altair.fr" />
           </Field>
         </div>
 
-        <Field label="Email">
-          <input data-testid="resource-form-email" type="email" className={INPUT_CLS} value={form.email} onChange={set("email")} placeholder="Ex : alice@altair.fr" />
-        </Field>
+        <div className="grid grid-cols-3 gap-3">
+          <Field label="Capacité (JH/mois)">
+            <input data-testid="resource-form-capacity" type="number" className={INPUT_CLS} value={form.capacity_jh_month} onChange={set("capacity_jh_month")} min="0" max="30" />
+          </Field>
+          <Field label="Dispo (%)" error={errors.availability_rate}>
+            <input data-testid="resource-form-availability" type="number" className={INPUT_CLS} value={form.availability_rate} onChange={set("availability_rate")} min="0" max="100" placeholder="100" />
+          </Field>
+          <Field label="TJM (€/jour)">
+            <input data-testid="resource-form-tjm" type="number" className={INPUT_CLS} value={form.tjm_eur} onChange={set("tjm_eur")} min="0" placeholder="Ex : 650" />
+          </Field>
+        </div>
+
+        {capaciteEffective !== null && Number(form.availability_rate) < 100 && (
+          <p className="text-xs text-slate-500 -mt-2">
+            Capacité effective : <strong>{capaciteEffective} JH/mois</strong> ({form.availability_rate}% de {form.capacity_jh_month} JH)
+          </p>
+        )}
 
         <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
           <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-600 border border-gray-200 rounded hover:bg-gray-50 transition-colors">Annuler</button>
