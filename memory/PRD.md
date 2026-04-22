@@ -80,7 +80,25 @@ Any → draft (rejet avec motif obligatoire)
 - Projects 0,2,5,7 (Finance/SAP/Azure/DORA) → CP : Sophie Martin
 - Projects 1,3,4,6 (Phoenix/DW/CRM/RH) → CP : Thomas Dubois
 
-### ✅ Stream 4 — Enrichissement Roadmap
+### ✅ P1 Congés & Absences (NOUVEAU - 2026-02)
+**Fonctionnalités :**
+- Saisie directe des absences (0.5 = demi-journée, 1.0 = journée)
+- Jours fériés hardcodés FR + MA 2025-2026 (inclus dates islamiques approx.)
+- Blocage saisie timesheets si absence = 1j ce jour-là (→ 409)
+- Ligne "Absences" dans la grille timesheets hebdomadaire (clic : 0 → ½j → 1j → 0)
+- Onglet "Absences" avec calendrier mensuel interactif + stats (JH ouvrés, fériés, absences, disponibles)
+- Capacité journalière réduite de moitié si absence = 0.5j
+- `day_caps` retourné dans la grille pour adapter les limites par jour
+
+**API :**
+- `PUT /api/leaves/entry` — upsert/delete absence
+- `GET /api/leaves/month?resource_id=&month=YYYY-MM` — calendrier mensuel
+- `GET /api/holidays?year=&month=` — jours fériés FR + MA
+
+**Champs DB :**
+- Collection `leaves`: `leave_id`, `tenant_id`, `resource_id`, `date`, `value` (0.5 | 1.0), `created_by`, `created_at`
+
+
 - Milestones familles 3 types + filtres + PPT
 - Dépendances inter-projets avec nature/statut/impact
 
