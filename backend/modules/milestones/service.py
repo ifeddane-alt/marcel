@@ -1,5 +1,7 @@
 import uuid
-from datetime import datetime, timezone
+import io
+import csv as csv_mod
+from datetime import datetime, timezone, date
 from typing import Optional
 from fastapi import HTTPException
 from core.database import db
@@ -143,3 +145,113 @@ async def delete_milestone(milestone_id: str, current_user: TokenPayload) -> dic
         raise HTTPException(status_code=403, detail="Accès refusé")
     await db.milestones.delete_one({"milestone_id": milestone_id})
     return {"deleted": True, "milestone_id": milestone_id}
+
+
+
+# ─── Tableau de bord Réglementaire ──────────────────────────────────────────
+
+def _days_remaining(target_date_str: str | None) -> int | None:
+    if not target_date_str:
+        return None
+    try:
+        td = date.fromisoformat(str(target_date_str)[:10])
+        return (td - date.today()).days
+    except Exception:
+        return None
+
+
+def _urgency_color(days: int | None, status: str | None) -> str:
+    if days is None:
+        return "grey"
+    if status in ("done", "completed"):
+        return "done"
+    if days < 0:
+        return "overdue"
+    if days <= 30:
+        return "red"
+    if days <= 90:
+        return "orange"
+    return "green"
+
+
+async def get_regulatory(
+    current_user: TokenPayload,
+    project_id: str | None = None,
+    milestone_type: str | None = None,
+    attribute: str | None = None,
+) -> list:
+    # Tous les projets du tenant
+    projs = await db.projects.find(
+        {"tenant_id": current_user.tenant_id},
+        {"_id": 0, "project_id": 1, "name": 1, "program_id": 1},
+    ).to_list(None)
+    proj_map = {p["project_id"]: p for p in projs}
+    valid_pids = list(proj_map.keys())
+
+    # Filtre de base : type regulatory ou decomm
+    query: dict = {
+        "project_id": {"$in": valid_pids},
+        "type": {"$in": ["regulatory", "decomm"]},
+    }
+    if project_id:
+        query["project_id"] = project_id
+    if milestone_type:
+        query["type"] = milestone_type
+    if attribute:
+        query["attribute"] = attribute
+
+    ms_list = await db.milestones.find(query, {"_id": 0}).to_list(None)
+
+    # Enrichissement : ressources (owners)
+    owner_ids = list({m.get("owner_resource_id") for m in ms_list if m.get("owner_resource_id")})
+    resources = await db.resources.find(
+        {"resource_id": {"$in": owner_ids}}, {"_id": 0, "resource_id": 1, "name": 1}
+    ).to_list(None) if owner_ids else []
+    res_map = {r["resource_id"]: r["name"] for r in resources}
+
+    result = []
+    for m in ms_list:
+        proj     = proj_map.get(m.get("project_id", ""), {})
+        target   = m.get("date_forecast") or m.get("date_baseline")
+        days     = _days_remaining(target)
+        color    = _urgency_color(days, m.get("status"))
+        result.append({
+            **m,
+            "project_name":   proj.get("name", "?"),
+            "owner_name":     res_map.get(m.get("owner_resource_id", ""), "—"),
+            "target_date":    target,
+            "days_remaining": days,
+            "urgency_color":  color,
+        })
+
+    # Tri par date cible croissante (None en fin)
+    result.sort(key=lambda x: (x["target_date"] or "9999-12-31"))
+    return result
+
+
+async def get_regulatory_kpis(current_user: TokenPayload) -> dict:
+    all_ms = await get_regulatory(current_user)
+    total = len(all_ms)
+    within_90  = sum(1 for m in all_ms if m["days_remaining"] is not None and 0 <= m["days_remaining"] <= 90)
+    overdue    = sum(1 for m in all_ms if m["urgency_color"] == "overdue")
+    crit_open  = sum(1 for m in all_ms if m.get("attribute") == "critical" and m.get("status") not in ("done", "completed"))
+    return {
+        "total":      total,
+        "within_90":  within_90,
+        "overdue":    overdue,
+        "crit_open":  crit_open,
+    }
+
+
+async def get_regulatory_csv(current_user: TokenPayload, **filters) -> str:
+    ms_list = await get_regulatory(current_user, **filters)
+    buf = io.StringIO()
+    writer = csv_mod.writer(buf)
+    writer.writerow(["Projet", "Type", "Libellé", "Date cible", "Owner", "Statut", "Jours restants", "Attribut", "Bloquant"])
+    for m in ms_list:
+        writer.writerow([
+            m["project_name"], m["type"], m["name"], m.get("target_date", ""),
+            m["owner_name"], m.get("status", ""), m.get("days_remaining", ""),
+            m.get("attribute", ""), "Oui" if m.get("is_blocking") else "Non",
+        ])
+    return buf.getvalue()

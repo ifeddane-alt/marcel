@@ -5,6 +5,7 @@ import {
   Briefcase,
   Users,
   ShieldCheck,
+  ShieldAlert,
   LogOut,
   ChevronRight,
   Building2,
@@ -31,6 +32,7 @@ const navItems = [
   { to: "/resources", icon: Users, label: "Ressources" },
   { to: "/teams", icon: UsersRound, label: "Équipes" },
   { to: "/governance", icon: ShieldCheck, label: "Gouvernance" },
+  { to: "/conformite", icon: ShieldAlert, label: "Conformité" },
   { to: "/timesheets", icon: Clock, label: "Timesheets" },
 ];
 

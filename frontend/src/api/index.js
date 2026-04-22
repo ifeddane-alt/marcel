@@ -70,10 +70,13 @@ export const allocationsAPI = {
 };
 
 export const milestonesAPI = {
-  list: (projectId) => api.get(`/milestones${projectId ? `?project_id=${projectId}` : ""}`),
-  create: (data) => api.post("/milestones", data),
-  update: (id, data) => api.put(`/milestones/${id}`, data),
-  delete: (id) => api.delete(`/milestones/${id}`),
+  list:           (projectId) => api.get(`/milestones${projectId ? `?project_id=${projectId}` : ""}`),
+  create:         (data)      => api.post("/milestones", data),
+  update:         (id, data)  => api.put(`/milestones/${id}`, data),
+  delete:         (id)        => api.delete(`/milestones/${id}`),
+  regulatory:     (params)    => api.get("/milestones/regulatory", { params }),
+  regulatoryKpis: ()          => api.get("/milestones/regulatory/kpis"),
+  regulatoryCsv:  (params)    => api.get("/milestones/regulatory/csv", { params, responseType: "text" }),
 };
 
 export const projectDependenciesAPI = {

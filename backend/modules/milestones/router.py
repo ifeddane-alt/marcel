@@ -1,4 +1,5 @@
-from fastapi import APIRouter, Depends, HTTPException
+from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi.responses import PlainTextResponse
 from typing import Optional
 from core.auth import TokenPayload, get_current_user
 from . import service
@@ -12,6 +13,41 @@ async def list_milestones(
     current_user: TokenPayload = Depends(get_current_user),
 ):
     return await service.list_milestones(project_id, current_user)
+
+
+@router.get("/milestones/regulatory/kpis")
+async def get_regulatory_kpis(current_user: TokenPayload = Depends(get_current_user)):
+    return await service.get_regulatory_kpis(current_user)
+
+
+@router.get("/milestones/regulatory/csv", response_class=PlainTextResponse)
+async def get_regulatory_csv(
+    project_id: Optional[str] = None,
+    milestone_type: Optional[str] = None,
+    attribute: Optional[str] = None,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    csv_data = await service.get_regulatory_csv(
+        current_user,
+        project_id=project_id, milestone_type=milestone_type, attribute=attribute,
+    )
+    return PlainTextResponse(
+        content=csv_data,
+        headers={"Content-Disposition": "attachment; filename=conformite_jalons.csv"},
+    )
+
+
+@router.get("/milestones/regulatory")
+async def get_regulatory(
+    project_id: Optional[str] = None,
+    milestone_type: Optional[str] = None,
+    attribute: Optional[str] = None,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    return await service.get_regulatory(
+        current_user,
+        project_id=project_id, milestone_type=milestone_type, attribute=attribute,
+    )
 
 
 @router.post("/milestones")

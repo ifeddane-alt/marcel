@@ -10,6 +10,7 @@ import Portfolio from "@/pages/Portfolio";
 import ProjectDetail from "@/pages/ProjectDetail";
 import Resources from "@/pages/Resources";
 import Governance from "@/pages/Governance";
+import Conformite from "@/pages/Conformite";
 import Import from "@/pages/Import";
 import Teams from "@/pages/Teams";
 import TeamDetail from "@/pages/TeamDetail";
@@ -47,6 +48,7 @@ function AppRoutes() {
         <Route path="roadmap" element={<Roadmap />} />
         <Route path="timesheets" element={<Timesheets />} />
         <Route path="governance" element={<Governance />} />
+        <Route path="conformite" element={<Conformite />} />
         <Route path="import" element={<Import />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

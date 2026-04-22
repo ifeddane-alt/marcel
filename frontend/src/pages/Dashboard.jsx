@@ -7,7 +7,7 @@ import {
 import {
   Briefcase, TrendingUp, AlertTriangle, CheckCircle, ArrowRight, ShieldAlert, MapPin,
 } from "lucide-react";
-import { dashboardAPI, programsAPI, projectsAPI, teamsAPI } from "@/api";
+import { dashboardAPI, programsAPI, projectsAPI, teamsAPI, milestonesAPI } from "@/api";
 import RAGBadge from "@/components/RAGBadge";
 import RiskHeatmap from "@/components/RiskHeatmap";
 import CapacityAlertBanner from "@/components/CapacityAlertBanner";
@@ -58,6 +58,7 @@ export default function Dashboard() {
   const [programs, setPrograms] = useState([]);
   const [allProjects, setAllProjects] = useState([]);
   const [capacityAlerts, setCapacityAlerts] = useState([]);
+  const [regulatoryAlerts, setRegulatoryAlerts] = useState([]);
   const [heatmapFilterProgram, setHeatmapFilterProgram] = useState("");
   const [heatmapFilterProject, setHeatmapFilterProject] = useState("");
   const [loading, setLoading] = useState(true);
@@ -70,13 +71,19 @@ export default function Dashboard() {
       programsAPI.list(),
       projectsAPI.list(),
       teamsAPI.capacityAlerts(),
-    ]).then(([sRes, rRes, hrRes, pRes, projRes, caRes]) => {
+      milestonesAPI.regulatory({ milestone_type: undefined }),
+    ]).then(([sRes, rRes, hrRes, pRes, projRes, caRes, regRes]) => {
         setSummary(sRes.data);
         setTopRisks(rRes.data);
         setHeatmapRisks(hrRes.data);
         setPrograms(pRes.data);
         setAllProjects(projRes.data);
         setCapacityAlerts(caRes.data);
+        // Top 5 upcoming regulatory (non-done, date ascending)
+        const upcomingReg = (regRes.data || [])
+          .filter((m) => m.urgency_color !== "done" && m.target_date)
+          .slice(0, 5);
+        setRegulatoryAlerts(upcomingReg);
         setLoading(false);
       }).catch(() => setLoading(false));
   }, []);
@@ -181,6 +188,66 @@ export default function Dashboard() {
       {capacityAlerts.length > 0 && (
         <div className="mb-6" data-testid="capacity-alerts-section">
           <CapacityAlertBanner alerts={capacityAlerts} compact={true} />
+        </div>
+      )}
+
+      {/* Widget Alertes réglementaires */}
+      {regulatoryAlerts.length > 0 && (
+        <div className="bg-white border border-gray-200 rounded shadow-sm mb-6" data-testid="regulatory-alerts-widget">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+            <div className="flex items-center gap-2">
+              <ShieldAlert size={14} className="text-[#0052CC]" />
+              <span className="text-sm font-bold text-slate-800">Alertes réglementaires</span>
+              <span className="text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full">
+                {regulatoryAlerts.filter((m) => m.urgency_color === "red" || m.urgency_color === "overdue").length} urgent(s)
+              </span>
+            </div>
+            <Link to="/conformite" className="text-xs text-[#0052CC] hover:underline flex items-center gap-1">
+              Voir tout <ArrowRight size={11} />
+            </Link>
+          </div>
+          <div className="divide-y divide-gray-50">
+            {regulatoryAlerts.map((m) => {
+              const colorMap = {
+                overdue: "text-gray-400 line-through",
+                red:     "text-rose-700 font-bold",
+                orange:  "text-amber-700 font-semibold",
+                green:   "text-emerald-600",
+              };
+              const bgMap = {
+                overdue: "",
+                red:     "bg-rose-50/30",
+                orange:  "bg-amber-50/30",
+                green:   "",
+              };
+              const daysLabel = m.urgency_color === "overdue"
+                ? `${Math.abs(m.days_remaining)}j retard`
+                : `${m.days_remaining}j`;
+              return (
+                <div key={m.milestone_id} className={`flex items-center justify-between px-5 py-2.5 ${bgMap[m.urgency_color] || ""}`}
+                  data-testid={`reg-alert-${m.milestone_id}`}>
+                  <div className="flex items-center gap-3 min-w-0">
+                    <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border
+                      ${m.type === "regulatory" ? "bg-blue-50 text-blue-600 border-blue-200" : "bg-orange-50 text-orange-600 border-orange-200"}`}>
+                      {m.type === "regulatory" ? "RÉGL." : "DÉCOM."}
+                    </span>
+                    <div className="min-w-0">
+                      <span className="text-xs font-semibold text-slate-800 truncate block">{m.name}</span>
+                      <span className="text-[10px] text-slate-400 truncate">{m.project_name?.slice(0, 25)}</span>
+                    </div>
+                  </div>
+                  <div className="flex items-center gap-3 shrink-0 ml-4">
+                    <span className="text-[10px] text-slate-400 font-mono whitespace-nowrap">
+                      {m.target_date ? new Date(m.target_date + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short" }) : "—"}
+                    </span>
+                    <span className={`text-[11px] min-w-[60px] text-right tabular-nums ${colorMap[m.urgency_color] || "text-slate-600"}`}>
+                      {daysLabel}
+                    </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
         </div>
       )}
 

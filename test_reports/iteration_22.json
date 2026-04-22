@@ -1,0 +1,30 @@
+{
+  "summary": "Tableau de bord réglementaire (Conformité) — 24/24 backend tests passed, all 18 frontend features verified. No issues found.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_regulatory.py",
+    "/app/test_reports/pytest/regulatory.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": [
+    "/app/backend/tests/test_regulatory.py"
+  ],
+  "success_rate": {
+    "backend": "100% (24/24)",
+    "frontend": "100% — all 18 features verified"
+  },
+  "test_credentials": "admin@altair.fr / Admin1234!, viewer@altair.fr / View1234!",
+  "seed_data_creation": "11 milestones regulatory+decomm already seeded (not created by test agent)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Conformité feature fully working. Backend: /api/milestones/regulatory (11 milestones, filters type+attribute, sorted asc), /api/milestones/regulatory/kpis (total=11, within_90=7, overdue=2, crit_open=8), /api/milestones/regulatory/csv (correct headers). Frontend: /conformite page with KPI cards, sortable table, type/attribute/project filters, CSV export, sidebar entry. Dashboard widget shows 5 upcoming alerts with color badges and 'Voir tout' link to /conformite. Viewer can access all."
+}
