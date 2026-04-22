@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Loader2, GitBranch } from "lucide-react";
+import { Loader2, GitBranch, Layers, BookOpen, FileText, Zap } from "lucide-react";
 import Modal from "@/components/Modal";
-import { tasksAPI } from "@/api";
+import { tasksAPI, safeAPI } from "@/api";
 
 const EMPTY = {
   name: "", type: "tâche", status: "not_started",
@@ -10,9 +10,19 @@ const EMPTY = {
   budget_planned_k: "", budget_consumed_k: "",
   jh_planned: "", jh_consumed: "", resource_id: "",
   dependencies: [],
+  // SAFe
+  task_level: "task",
+  parent_id: "",
+  sprint_id: "",
 };
 
 const INPUT_CLS = "w-full text-sm border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-white";
+
+const LEVEL_OPTIONS = [
+  { value: "task",       label: "Tâche",       icon: FileText, bg: "bg-slate-50  border-slate-300  text-slate-600" },
+  { value: "feature",    label: "Feature",     icon: Layers,   bg: "bg-blue-50   border-blue-300   text-blue-700" },
+  { value: "user_story", label: "User Story",  icon: BookOpen, bg: "bg-violet-50 border-violet-300 text-violet-700" },
+];
 
 function Field({ label, required, error, children }) {
   return (
@@ -31,6 +41,13 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [sprints, setSprints] = useState([]);
+
+  // Charger les sprints disponibles (tous sprints du tenant pour ce projet)
+  useEffect(() => {
+    if (!isOpen) return;
+    safeAPI.listSprints({}).then(r => setSprints(r.data)).catch(() => {});
+  }, [isOpen]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -49,6 +66,9 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
         jh_consumed: task.jh_consumed != null ? String(task.jh_consumed) : "",
         resource_id: task.resource_id || "",
         dependencies: task.dependencies || [],
+        task_level: task.task_level || "task",
+        parent_id: task.parent_id || "",
+        sprint_id: task.sprint_id || "",
       });
     } else {
       setForm(EMPTY);
@@ -72,6 +92,9 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
     const errs = {};
     if (!form.name.trim()) errs.name = "Nom requis";
     if (!form.type) errs.type = "Type requis";
+    if (form.task_level === "user_story" && !form.parent_id) {
+      errs.parent_id = "Une User Story doit avoir une Feature parente";
+    }
     return errs;
   };
 
@@ -96,6 +119,9 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
         resource_id: form.resource_id || null,
         project_id: projectId,
         dependencies: form.dependencies,
+        task_level: form.task_level,
+        parent_id: form.parent_id || null,
+        sprint_id: form.sprint_id || null,
       };
       if (task) {
         await tasksAPI.update(task.task_id, payload);
@@ -111,6 +137,12 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
     }
   };
 
+  // Features disponibles comme parents (pour user_story uniquement)
+  const parentFeatures = allTasks.filter(t => t.task_level === "feature" && t.task_id !== task?.task_id);
+  const isUserStory = form.task_level === "user_story";
+  const isFeature = form.task_level === "feature";
+  const isSafe = isUserStory || isFeature;
+
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={task ? "Modifier la tâche" : "Nouvelle tâche"} size="lg">
       <form onSubmit={handleSubmit} className="space-y-4" data-testid="task-form">
@@ -118,8 +150,30 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
           <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded px-3 py-2">{apiError}</div>
         )}
 
+        {/* Niveau SAFe */}
+        <Field label="Niveau SAFe">
+          <div className="grid grid-cols-3 gap-2" data-testid="task-level-selector">
+            {LEVEL_OPTIONS.map(({ value, label, icon: Icon, bg }) => (
+              <button
+                key={value}
+                type="button"
+                data-testid={`task-level-${value}`}
+                onClick={() => setForm(f => ({ ...f, task_level: value, parent_id: value !== "user_story" ? "" : f.parent_id }))}
+                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded border-2 transition-all ${
+                  form.task_level === value ? bg : "bg-white border-gray-200 text-slate-500 hover:border-gray-300"
+                }`}
+              >
+                <Icon size={12} />
+                {label}
+              </button>
+            ))}
+          </div>
+        </Field>
+
         <Field label="Nom de la tâche" required error={errors.name}>
-          <input data-testid="task-form-name" className={INPUT_CLS} value={form.name} onChange={set("name")} placeholder="Ex : Cadrage stratégique" />
+          <input data-testid="task-form-name" className={INPUT_CLS} value={form.name} onChange={set("name")} placeholder={
+            isFeature ? "Ex : Parcours Onboarding Web" : isUserStory ? "Ex : Écran inscription et validation email" : "Ex : Cadrage stratégique"
+          } />
         </Field>
 
         <div className="grid grid-cols-2 gap-3">
@@ -138,9 +192,49 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
               <option value="completed">Terminé</option>
               <option value="delayed">En retard</option>
               <option value="cancelled">Annulé</option>
+              <option value="done">Fait (SAFe)</option>
             </select>
           </Field>
         </div>
+
+        {/* Feature parente (user_story uniquement) */}
+        {isUserStory && (
+          <Field label="Feature parente" required error={errors.parent_id}>
+            <select
+              data-testid="task-form-parent-id"
+              className={INPUT_CLS}
+              value={form.parent_id}
+              onChange={set("parent_id")}
+            >
+              <option value="">— Sélectionner une Feature —</option>
+              {parentFeatures.map(f => (
+                <option key={f.task_id} value={f.task_id}>{f.name}</option>
+              ))}
+            </select>
+            {parentFeatures.length === 0 && (
+              <p className="text-[10px] text-amber-600 mt-0.5">Aucune feature disponible — créez d'abord une Feature.</p>
+            )}
+          </Field>
+        )}
+
+        {/* Sprint assignment (feature ou user_story) */}
+        {(isSafe || form.sprint_id) && sprints.length > 0 && (
+          <Field label="Sprint assigné">
+            <select
+              data-testid="task-form-sprint-id"
+              className={INPUT_CLS}
+              value={form.sprint_id}
+              onChange={set("sprint_id")}
+            >
+              <option value="">— Non assigné (Backlog PI) —</option>
+              {sprints.map(s => (
+                <option key={s.sprint_id} value={s.sprint_id}>
+                  {s.name} ({s.start_date?.slice(0,10)} → {s.end_date?.slice(0,10)})
+                </option>
+              ))}
+            </select>
+          </Field>
+        )}
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Début prévu">
@@ -182,7 +276,7 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
           </select>
         </Field>
 
-        {/* S2-01 — Dépendances inter-tâches */}
+        {/* Dépendances */}
         {(() => {
           const availableDeps = allTasks.filter((t) => t.task_id !== task?.task_id);
           if (availableDeps.length === 0) return null;
@@ -192,27 +286,19 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
                 <GitBranch size={11} />
                 Dépendances (tâches prérequises)
               </div>
-              <div
-                className="max-h-36 overflow-y-auto border border-gray-200 rounded divide-y divide-gray-50"
-                data-testid="dependencies-picker"
-              >
+              <div className="max-h-32 overflow-y-auto border border-gray-200 rounded divide-y divide-gray-50" data-testid="dependencies-picker">
                 {availableDeps.map((t) => {
                   const checked = form.dependencies.includes(t.task_id);
                   return (
-                    <label
-                      key={t.task_id}
+                    <label key={t.task_id}
                       className={`flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors ${checked ? "bg-blue-50/50" : ""}`}
                     >
-                      <input
-                        type="checkbox"
-                        className="accent-[#0052CC] flex-shrink-0"
-                        checked={checked}
-                        onChange={() => toggleDep(t.task_id)}
-                        data-testid={`dep-checkbox-${t.task_id}`}
-                      />
+                      <input type="checkbox" className="accent-[#0052CC] flex-shrink-0"
+                        checked={checked} onChange={() => toggleDep(t.task_id)}
+                        data-testid={`dep-checkbox-${t.task_id}`} />
                       <span className="text-xs text-slate-700 leading-snug line-clamp-1 flex-1">{t.name}</span>
-                      {t.status && (
-                        <span className="text-[9px] font-semibold text-slate-400 uppercase flex-shrink-0">{t.status}</span>
+                      {t.task_level && t.task_level !== "task" && (
+                        <span className="text-[9px] font-bold text-blue-600 flex-shrink-0">{t.task_level.toUpperCase()}</span>
                       )}
                     </label>
                   );
@@ -231,12 +317,8 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
           <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-600 border border-gray-200 rounded hover:bg-gray-50 transition-colors">
             Annuler
           </button>
-          <button
-            type="submit"
-            disabled={saving}
-            data-testid="task-form-submit"
-            className="flex items-center gap-2 px-5 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] disabled:opacity-50 transition-colors"
-          >
+          <button type="submit" disabled={saving} data-testid="task-form-submit"
+            className="flex items-center gap-2 px-5 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] disabled:opacity-50 transition-colors">
             {saving && <Loader2 size={14} className="animate-spin" />}
             {task ? "Enregistrer" : "Créer la tâche"}
           </button>

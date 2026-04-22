@@ -256,3 +256,58 @@ async def get_project_external_costs(project_id: str, current_user: TokenPayload
         "total_external": total_regie_eur + total_forfait_envelope,
         "resources": resources_detail,
     }
+
+
+async def export_vendors_csv(current_user: TokenPayload) -> bytes:
+    """Exporte tous les contrats fournisseurs en CSV."""
+    import io, csv as csv_module
+    external = await db.resources.find(
+        {
+            "tenant_id": current_user.tenant_id,
+            "resource_type": {"$in": ["externe_regie", "externe_forfait"]},
+        },
+        {"_id": 0},
+    ).to_list(None)
+
+    buf = io.StringIO()
+    writer = csv_module.writer(buf, delimiter=";", quoting=csv_module.QUOTE_MINIMAL)
+    # En-tête
+    writer.writerow([
+        "Fournisseur", "Nom / Prestation", "Rôle", "Type",
+        "TJM Contrat (€/j)", "TJM Facturé (€/j)", "Variance TJM (%)",
+        "Enveloppe Forfait (€)", "Consommé Forfait (€)", "% Consommé",
+        "Début Contrat", "Fin Contrat",
+    ])
+    today = date.today()
+    for res in sorted(external, key=lambda r: r.get("vendor", "")):
+        rtype = res.get("resource_type", "")
+        contract_end = res.get("contract_end", "")
+        if contract_end:
+            try:
+                end_date = date.fromisoformat(str(contract_end)[:10])
+                days_left = (end_date - today).days
+            except (ValueError, TypeError):
+                days_left = None
+        else:
+            days_left = None
+        if rtype == "externe_regie":
+            ctjm = res.get("contract_tjm") or 0
+            ftjm = res.get("tjm_eur") or 0
+            variance = round((ftjm - ctjm) / ctjm * 100, 1) if ctjm > 0 else ""
+            writer.writerow([
+                res.get("vendor", ""), res.get("name", ""), res.get("role", ""), "Régie",
+                ctjm, ftjm, variance,
+                "", "", "",
+                res.get("contract_start", ""), contract_end,
+            ])
+        elif rtype == "externe_forfait":
+            env = res.get("forfait_envelope") or 0
+            cons = res.get("forfait_consumed") or 0
+            pct = round(cons / env * 100, 1) if env else ""
+            writer.writerow([
+                res.get("vendor", ""), res.get("name", ""), res.get("role", ""), "Forfait",
+                "", "", "",
+                env, cons, pct,
+                res.get("contract_start", ""), contract_end,
+            ])
+    return buf.getvalue().encode("utf-8-sig")  # BOM pour Excel FR

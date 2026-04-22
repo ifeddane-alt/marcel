@@ -3,10 +3,11 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   Train, Target, Zap, BarChart3, ChevronDown, ChevronRight,
   Plus, Pencil, Trash2, Users, Calendar, CheckCircle2,
-  AlertCircle, Clock, Circle, ArrowRight,
+  AlertCircle, Clock, Circle, ArrowRight, Layout,
 } from "lucide-react";
 import { safeAPI } from "@/api";
 import Modal from "@/components/Modal";
+import PIPlanning from "@/components/PIPlanning";
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
 const CAP_STATUS = {
@@ -330,6 +331,8 @@ export default function TrainsSafe() {
   const [loading, setLoading] = useState(true);
   const [loadingOverview, setLoadingOverview] = useState(false);
   const [error, setError] = useState("");
+  const [activeTab, setActiveTab] = useState("overview"); // "overview" | "planning"
+  const [activePIId, setActivePIId] = useState(null);
 
   // Capability modal state
   const [capModal, setCapModal] = useState({ open: false, pi: null, cap: null });
@@ -340,7 +343,10 @@ export default function TrainsSafe() {
       setTrains(r.data);
       setLoading(false);
       const firstId = trainId || (r.data[0]?.train_id);
-      if (firstId) setSelectedTrainId(firstId);
+      if (firstId) {
+        setSelectedTrainId(firstId);
+        setActivePIId(null);
+      }
     } catch {
       setError("Erreur lors du chargement des trains");
       setLoading(false);
@@ -423,7 +429,7 @@ export default function TrainsSafe() {
       {train && (
         <>
           {/* Train Info + KPIs */}
-          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5 mb-6">
+          <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5 mb-5">
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-4">
                 <div className="w-12 h-12 rounded-xl bg-[#0052CC]/10 flex items-center justify-center flex-shrink-0">
@@ -485,23 +491,84 @@ export default function TrainsSafe() {
             )}
           </div>
 
-          {/* PIs avec sprints et capabilities */}
-          {loadingOverview ? (
-            <div className="text-slate-400 text-sm py-8 text-center">Chargement…</div>
-          ) : (
-            <div className="space-y-5">
-              {(overview?.pis || []).map(pi => (
-                <PIPanel
-                  key={pi.pi_id}
-                  pi={pi}
-                  onAddCapability={(pi) => setCapModal({ open: true, pi, cap: null })}
-                  onEditCapability={(cap) => {
-                    const pi = overview.pis.find(p => p.capabilities?.some(c => c.capability_id === cap.capability_id));
-                    setCapModal({ open: true, pi, cap });
-                  }}
-                  onDeleteCapability={handleDeleteCapability}
-                />
-              ))}
+          {/* Tabs : Overview | PI Planning */}
+          <div className="flex gap-1 mb-5 border-b border-gray-200">
+            {[
+              { id: "overview", label: "Vue d'ensemble", Icon: BarChart3 },
+              { id: "planning", label: "PI Planning",   Icon: Layout },
+            ].map(({ id, label, Icon }) => (
+              <button
+                key={id}
+                data-testid={`train-tab-${id}`}
+                onClick={() => setActiveTab(id)}
+                className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
+                  activeTab === id
+                    ? "border-[#0052CC] text-[#0052CC]"
+                    : "border-transparent text-slate-500 hover:text-slate-700"
+                }`}
+              >
+                <Icon size={14} />
+                {label}
+              </button>
+            ))}
+          </div>
+
+          {/* Onglet Vue d'ensemble */}
+          {activeTab === "overview" && (
+            <>
+              {loadingOverview ? (
+                <div className="text-slate-400 text-sm py-8 text-center">Chargement…</div>
+              ) : (
+                <div className="space-y-5">
+                  {(overview?.pis || []).map(pi => (
+                    <PIPanel
+                      key={pi.pi_id}
+                      pi={pi}
+                      onAddCapability={(pi) => setCapModal({ open: true, pi, cap: null })}
+                      onEditCapability={(cap) => {
+                        const pi = overview.pis.find(p => p.capabilities?.some(c => c.capability_id === cap.capability_id));
+                        setCapModal({ open: true, pi, cap });
+                      }}
+                      onDeleteCapability={handleDeleteCapability}
+                    />
+                  ))}
+                </div>
+              )}
+            </>
+          )}
+
+          {/* Onglet PI Planning */}
+          {activeTab === "planning" && (
+            <div>
+              {/* Sélecteur PI */}
+              <div className="flex gap-2 mb-4 flex-wrap">
+                {(overview?.pis || []).map(pi => (
+                  <button
+                    key={pi.pi_id}
+                    data-testid={`pi-select-btn-${pi.pi_id}`}
+                    onClick={() => setActivePIId(pi.pi_id)}
+                    className={`px-3 py-1.5 text-sm font-semibold rounded border transition-all ${
+                      activePIId === pi.pi_id
+                        ? "bg-[#0052CC] text-white border-[#0052CC]"
+                        : "bg-white text-slate-600 border-gray-200 hover:border-[#0052CC]"
+                    }`}
+                  >
+                    {pi.name}
+                  </button>
+                ))}
+                {!activePIId && overview?.pis?.length > 0 && (
+                  <button
+                    onClick={() => setActivePIId(overview.pis[0].pi_id)}
+                    className="text-[#0052CC] text-sm underline"
+                  >
+                    Sélectionner un PI →
+                  </button>
+                )}
+              </div>
+              <PIPlanning
+                trainId={selectedTrainId}
+                piId={activePIId || overview?.pis?.[0]?.pi_id}
+              />
             </div>
           )}
         </>

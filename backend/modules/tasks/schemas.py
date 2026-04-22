@@ -33,6 +33,8 @@ class TaskCreate(BaseModel):
     lifecycle_phase: str = "backlog"
     # 3e — Estimations par phase
     phase_estimates: Optional[List[PhaseEstimate]] = None
+    # Sprint assignment
+    sprint_id: Optional[str] = None
 
 
 class TaskUpdate(BaseModel):
@@ -58,6 +60,8 @@ class TaskUpdate(BaseModel):
     lifecycle_phase: Optional[str] = None
     # 3e
     phase_estimates: Optional[List[PhaseEstimate]] = None
+    # Sprint assignment
+    sprint_id: Optional[str] = None
 
 
 class PhaseTransition(BaseModel):

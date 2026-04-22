@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from fastapi.responses import StreamingResponse
 from core.auth import TokenPayload, get_current_user, permission_required
 from .schemas import ResourceCreate, ResourceUpdate
 from . import service
@@ -49,3 +50,15 @@ async def get_project_external_costs(
     current_user: TokenPayload = Depends(get_current_user),
 ):
     return await service.get_project_external_costs(project_id, current_user)
+
+
+@router.get("/vendors/export/csv")
+async def export_vendors_csv(
+    current_user: TokenPayload = Depends(permission_required("vendors.view")),
+):
+    csv_bytes = await service.export_vendors_csv(current_user)
+    return StreamingResponse(
+        iter([csv_bytes]),
+        media_type="text/csv",
+        headers={"Content-Disposition": "attachment; filename=contrats_fournisseurs.csv"},
+    )

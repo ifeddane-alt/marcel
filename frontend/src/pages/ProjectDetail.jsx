@@ -702,6 +702,14 @@ export default function ProjectDetail() {
                                   {t.lifecycle_phase.toUpperCase()}
                                 </span>
                               )}
+                              {t.sprint_id && (() => {
+                                return (
+                                  <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-emerald-50 text-emerald-600 border border-emerald-200 flex-shrink-0 flex items-center gap-0.5">
+                                    <svg width="8" height="8" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>
+                                    Sprint
+                                  </span>
+                                );
+                              })()}
                             </div>
                             {t.dependencies && t.dependencies.length > 0 && (
                               <div className="flex items-center gap-1 mt-0.5" title={`Prérequis : ${t.dependencies.map(depId => tasks.find(x => x.task_id === depId)?.name || depId).join(", ")}`}>

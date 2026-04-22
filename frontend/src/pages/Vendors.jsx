@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import {
-  Building2, AlertTriangle, Clock, TrendingUp, TrendingDown,
+  Building2, AlertTriangle, Clock, Download,
   ChevronDown, ChevronRight, Package, Handshake
 } from "lucide-react";
 import { vendorsAPI } from "@/api";
@@ -246,6 +246,23 @@ export default function Vendors() {
       });
   }, []);
 
+  const handleExportCSV = async () => {
+    try {
+      const API_URL = process.env.REACT_APP_BACKEND_URL;
+      const token = localStorage.getItem("projetenne_token");
+      const resp = await fetch(`${API_URL}/api/vendors/export/csv`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!resp.ok) throw new Error("Export failed");
+      const blob = await resp.blob();
+      const url = URL.createObjectURL(blob);
+      const a = document.createElement("a");
+      a.href = url; a.download = "contrats_fournisseurs.csv";
+      document.body.appendChild(a); a.click(); document.body.removeChild(a);
+      URL.revokeObjectURL(url);
+    } catch (e) { console.error("Export CSV error", e); }
+  };
+
   if (loading) return <div className="p-8 text-slate-400 text-sm">Chargement des fournisseurs...</div>;
   if (error) return <div className="p-8 text-rose-600 text-sm">{error}</div>;
 
@@ -268,6 +285,14 @@ export default function Vendors() {
             {summary.total_regie_resources} régie · {summary.total_forfait_resources} forfait
           </p>
         </div>
+        <button
+          onClick={handleExportCSV}
+          data-testid="export-csv-btn"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-[#0052CC] border border-[#0052CC]/30 rounded hover:bg-[#0052CC]/5 transition-colors"
+        >
+          <Download size={14} />
+          Export CSV
+        </button>
       </div>
 
       {/* KPI Cards */}
