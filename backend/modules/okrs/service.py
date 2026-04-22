@@ -65,6 +65,8 @@ async def update_okr(okr_id: str, data: OKRUpdate, current_user: TokenPayload) -
         update["description"] = data.description
     if data.status is not None:
         update["status"] = data.status
+    if data.train_id is not None:
+        update["train_id"] = data.train_id
     if data.linked_capability_ids is not None:
         update["linked_capability_ids"] = data.linked_capability_ids
     if data.key_results is not None:

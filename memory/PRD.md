@@ -163,17 +163,31 @@ allocations:   allocation_id, project_id, resource_id, period_month, jh_allocate
 
 ## Backlog Priorisé
 
-### P0 (Prochain Sprint) — Chantier 3 (suite)
+### ✅ P0 — Chantier 3 SAFe (COMPLET — 2026-02)
+- Trains SAFe, PIs, Sprints, Capabilities (CRUD complet)
+- Hiérarchie capability → feature → user_story (parent_id + task_level)
+- TaskTreeView expandable (bascule flat/tree dans ProjectDetail)
+- Phase lifecycle (transitions anti-rollback)
+- Phase estimates (JH/budget par phase)
+- Page "Trains SAFe" dans sidebar
 
-- **Export CSV contrats fournisseurs** (backlog, simple)
-- **Ajout tâches SAFe via modal** : sélecteur task_level (feature/user_story) dans TaskModal + sélection parent_id
-- **Sprint Assignment** : assigner une tâche/user story à un sprint spécifique
-- **PI Planning Board** : vue kanban de planification d'un PI (features à placer dans les sprints)
+### ✅ P0 — Lot 4 (5 fonctionnalités — 2026-02) TESTÉ 100%
+- **TaskModal SAFe** : task_level (tâche/feature/user_story) + parent_id + sprint_id
+- **Sprint assignment** : assigner feature/US à un sprint depuis TaskModal et PI Planning
+- **Export CSV contrats fournisseurs** : GET /api/vendors/export/csv
+- **PI Planning Board** : kanban features dans sprints (composant PIPlanning)
+- **Module OKR + WSJF auto + Dashboard Programme** :
+  - CRUD complet OKRs (objectifs, key results, liaisons capabilities)
+  - Calcul WSJF auto : (BV + TC + RR) / Job Size sur chaque capability
+  - Dashboard Programme : KPIs, répartition caps, vélocité PI, leaderboard WSJF
+  - Nouvel onglet "Dashboard Programme" dans Trains SAFe
 
-### P1 — Chantier 4 Portefeuille stratégique
-- OKR (Objectives & Key Results) liés aux capabilities SAFe
-- Scoring stratégique WSJF automatique
-- Dashboard programme : vue consolidée train → projets → avancement
+### P0 (Prochain) — Back-office admin (à recevoir)
+
+### P1 — Futur
+- Notifications temps réel (WebSocket)
+- Import/Export Excel complet
+- Multi-langue (i18n)
 
 ---
 
@@ -181,13 +195,21 @@ allocations:   allocation_id, project_id, resource_id, period_month, jh_allocate
 - `/app/backend/modules/profiles/` (service.py, router.py, schemas.py)
 - `/app/backend/modules/demands/` (service.py, router.py)
 - `/app/backend/modules/resources/` (service.py, router.py, schemas.py) ← vendor functions added
+- `/app/backend/modules/safe/` (router.py, service.py, schemas.py) ← SAFe Trains/PIs/Sprints/Capabilities
+- `/app/backend/modules/okrs/` (router.py, service.py, schemas.py) ← OKR + WSJF + Dashboard Programme
+- `/app/backend/modules/tasks/` ← updated with task_level, parent_id, sprint_id, phase_history
 - `/app/backend/core/auth.py` (permission_required, TokenPayload)
+- `/app/frontend/src/pages/TrainsSafe.jsx` ← onglets: Vue d'ensemble | PI Planning | Dashboard Programme
+- `/app/frontend/src/components/OKRDashboard.jsx` ← NEW: OKR CRUD + WSJF + Programme KPIs
+- `/app/frontend/src/components/PIPlanning.jsx` ← NEW: kanban PI Planning board
+- `/app/frontend/src/components/TaskTreeView.jsx` ← NEW: arbre hiérarchique tasks
+- `/app/frontend/src/components/TaskModal.jsx` ← updated: task_level, parent_id, sprint_id
 - `/app/frontend/src/pages/AdminProfiles.jsx`
 - `/app/frontend/src/pages/AdminUsers.jsx`
 - `/app/frontend/src/pages/Demands.jsx`
-- `/app/frontend/src/pages/Vendors.jsx` ← NEW
+- `/app/frontend/src/pages/Vendors.jsx` ← CSV export
 - `/app/frontend/src/pages/Resources.jsx` ← type filters + badges
 - `/app/frontend/src/components/ResourceModal.jsx` ← 3-type mode
 - `/app/frontend/src/pages/ProjectDetail.jsx` ← external costs section
 - `/app/frontend/src/components/Layout.jsx` ← ACHATS/FINANCES sidebar section
-- `/app/frontend/src/api/index.js`
+- `/app/frontend/src/api/index.js` ← safeAPI, okrsAPI, vendorsAPI

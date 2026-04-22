@@ -25,6 +25,7 @@ class OKRUpdate(BaseModel):
     key_results: Optional[List[KeyResult]] = None
     linked_capability_ids: Optional[List[str]] = None
     status: Optional[str] = None
+    train_id: Optional[str] = None
 
 
 class WSJFUpdate(BaseModel):

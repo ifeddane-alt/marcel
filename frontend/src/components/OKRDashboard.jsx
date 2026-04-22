@@ -743,7 +743,7 @@ export default function OKRDashboard({ selectedTrainId }) {
                 <WSJFScore value={cap.wsjf} />
                 <button
                   onClick={() => setWsjfModal({ open: true, cap })}
-                  className="opacity-0 group-hover:opacity-100 flex items-center gap-1 text-[11px] text-[#0052CC] hover:text-[#0047B3] transition-all ml-1"
+                  className="flex items-center gap-1 text-[11px] text-[#0052CC] hover:text-[#0047B3] transition-all ml-1 flex-shrink-0"
                   data-testid={`wsjf-edit-${cap.capability_id}`}
                 >
                   <Pencil size={11} /> Scorer
