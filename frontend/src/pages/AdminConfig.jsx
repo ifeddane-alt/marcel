@@ -161,14 +161,14 @@ function WorkflowsSection({ config, onSave }) {
   const dm = wf.demands || {};
 
   const [steps, setSteps] = useState(ts.validation_steps || 2);
-  const [timeout, setTimeout] = useState(ts.cp_timeout_days ?? 3);
+  const [cpTimeout, setCpTimeout] = useState(ts.cp_timeout_days ?? 3);
   const [autoValidate, setAutoValidate] = useState(ts.auto_validate_on_timeout ?? true);
   const [activeStatuses, setActiveStatuses] = useState(dm.active_statuses || DEMAND_STATUSES_ALL.map(s => s.value));
   const [saving, setSaving] = useState(false);
   const [success, setSuccess] = useState(false);
 
   const dirty = steps !== (ts.validation_steps || 2)
-    || Number(timeout) !== (ts.cp_timeout_days ?? 3)
+    || Number(cpTimeout) !== (ts.cp_timeout_days ?? 3)
     || autoValidate !== (ts.auto_validate_on_timeout ?? true)
     || JSON.stringify(activeStatuses.sort()) !== JSON.stringify((dm.active_statuses || []).sort());
 
@@ -184,7 +184,7 @@ function WorkflowsSection({ config, onSave }) {
     try {
       await adminConfigAPI.updateWorkflows({
         workflows: {
-          timesheet: { validation_steps: Number(steps), cp_timeout_days: Number(timeout), auto_validate_on_timeout: autoValidate },
+          timesheet: { validation_steps: Number(steps), cp_timeout_days: Number(cpTimeout), auto_validate_on_timeout: autoValidate },
           demands:   { active_statuses: activeStatuses },
         },
       });
@@ -224,8 +224,8 @@ function WorkflowsSection({ config, onSave }) {
                 <label className="text-xs font-semibold text-slate-600 block mb-1">
                   Timeout CP (jours ouvrés)
                 </label>
-                <input type="number" min="1" max="30" value={timeout}
-                  onChange={e => { setTimeout(e.target.value); setSuccess(false); }}
+                <input type="number" min="1" max="30" value={cpTimeout}
+                  onChange={e => { setCpTimeout(e.target.value); setSuccess(false); }}
                   className={INPUT_CLS} data-testid="ts-cp-timeout" />
               </div>
               <div>

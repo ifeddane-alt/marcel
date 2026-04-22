@@ -182,7 +182,19 @@ allocations:   allocation_id, project_id, resource_id, period_month, jh_allocate
   - Dashboard Programme : KPIs, répartition caps, vélocité PI, leaderboard WSJF
   - Nouvel onglet "Dashboard Programme" dans Trains SAFe
 
-### P0 (Prochain) — Back-office admin (à recevoir)
+### ✅ P0 — Chantier 4 Back-office Admin (COMPLET — 2026-02) TESTÉ 100%
+- **Page /admin/config** : accès TENANT_ADMIN uniquement (AdminRoute + permission admin.config)
+- **Section 1 — Modules** : 7 toggles on/off (safe/demands/timesheets/leaves/vendors/compliance/roadmap). Sidebar dynamique + API 403 si module désactivé
+- **Section 2 — Workflows** : timesheets (2 ou 3 étapes, timeout CP, auto-validation), demands (statuts actifs)
+- **Section 3 — Référentiels** : enums éditables (catégories risques, natures dépendances, statuts projets, urgences demandes) avec add/edit/delete/réordonner + badge "SYS" pour valeurs non supprimables
+- **Section 4 — Jours Fériés** : table CRUD + import prédéfini France 2026 / Maroc 2026
+- **Section 5 — Alertes** : 7 seuils dynamiques (capacité équipe, forfait, TJM, réglementaire, EAC) appliqués dans les calculs d'alerte
+- **Section 6 — Export PPT** : couleurs primaire/secondaire/accent, nom entreprise, police, logo base64
+- **TenantConfigContext** : chargé au login, distribué dans toute l'app. Sidebar conditionnelle + dropdowns dynamiques (RiskModal, DependencyModal, ProjectModal, MilestoneModal)
+- **Seed Altair** : POST /api/admin/config/seed — fériés FR+MA 2026, enums système, seuils par défaut
+- **admin@altair.fr** : password réinitialisé à Admin2026!
+
+### P0 (Prochain) — Back-office admin (suite si besoin) ou prochain chantier utilisateur
 
 ### P1 — Futur
 - Notifications temps réel (WebSocket)
