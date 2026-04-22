@@ -25,11 +25,13 @@ async def get_regulatory_csv(
     project_id: Optional[str] = None,
     milestone_type: Optional[str] = None,
     attribute: Optional[str] = None,
+    program_id: Optional[str] = None,
     current_user: TokenPayload = Depends(get_current_user),
 ):
     csv_data = await service.get_regulatory_csv(
         current_user,
-        project_id=project_id, milestone_type=milestone_type, attribute=attribute,
+        project_id=project_id, milestone_type=milestone_type,
+        attribute=attribute, program_id=program_id,
     )
     return PlainTextResponse(
         content=csv_data,
@@ -42,11 +44,13 @@ async def get_regulatory(
     project_id: Optional[str] = None,
     milestone_type: Optional[str] = None,
     attribute: Optional[str] = None,
+    program_id: Optional[str] = None,
     current_user: TokenPayload = Depends(get_current_user),
 ):
     return await service.get_regulatory(
         current_user,
-        project_id=project_id, milestone_type=milestone_type, attribute=attribute,
+        project_id=project_id, milestone_type=milestone_type,
+        attribute=attribute, program_id=program_id,
     )
 
 

@@ -1,0 +1,56 @@
+{
+  "summary": "Full testing of Profiles & Habilitations (BLOC 2a/2b/2c), Conformité programme filter, RBAC middleware. All 20 backend tests passed. Frontend mostly working with one access control bug found.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {
+        "endpoint": "GET /api/profiles",
+        "issue": "No admin restriction: any authenticated user (including PMO) can list all profiles. The spec says /admin/profiles is TENANT_ADMIN only. Consider adding _require_admin() check or keeping it read-accessible by design.",
+        "priority": "LOW"
+      }
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "App.js route /admin/profiles and /admin/users",
+        "issue": "Missing frontend route guard - any authenticated user can navigate directly to /admin/profiles and /admin/users (e.g. PMO can access the page). The sidebar correctly hides links for non-TENANT_ADMIN, but direct URL navigation is not blocked. Need an AdminRoute guard that checks user.role === 'TENANT_ADMIN' or has admin.profiles permission.",
+        "selector": "Route path='admin/profiles'",
+        "priority": "MEDIUM"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "Admin Profiles page",
+        "issues": ["No delete button visible for system profiles (correct). Custom profiles show delete button (correct). Permission count badges are clear and informative. Overall design is clean and professional."]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_profiles_rbac.py",
+    "/app/test_reports/pytest/profiles_rbac_results.xml"
+  ],
+  "action_items": [
+    "Add AdminRoute guard in App.js for /admin/profiles and /admin/users that checks user.role === 'TENANT_ADMIN'. PMO can currently access these pages by direct URL.",
+    "Optionally restrict GET /api/profiles to admin users (or keep read-accessible - confirm intent with design spec)"
+  ],
+  "critical_code_review_comments": [
+    "App.js admin routes lack a role-based guard. ProtectedRoute only checks token existence, not admin role. PMO/CP/VIEWER can directly navigate to /admin/profiles and /admin/users.",
+    "Layout.jsx correctly hides admin sidebar links for non-TENANT_ADMIN (user?.role === 'TENANT_ADMIN'), but no route-level protection.",
+    "Backend: _require_admin() correctly enforces admin.profiles permission for CREATE/UPDATE/DELETE/DUPLICATE. Only GET /api/profiles is unprotected."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_profiles_rbac.py"
+  ],
+  "success_rate": {
+    "backend": "100% (20/20 tests passed)",
+    "frontend": "85% (route guard missing for admin pages)"
+  },
+  "test_credentials": "admin@altair.fr/Admin1234!, pmo@altair.fr/Pmo1234!, cp@altair.fr/Altair2026!, user@altair.fr/Altair2026!, achats@altair.fr/Altair2026!",
+  "seed_data_creation": "None. TEST_ profiles created and cleaned up in test suite.",
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Profiles RBAC (BLOC 2a/2b/2c) fully working on backend. All 20 tests pass: 12 system profiles seeded, login permissions correct (admin=*, cp=29 perms, user=2 perms), RBAC middleware blocks correctly (achats→403 on projects.create, user→403 on demands.submit, cp→200 on demands.submit). Conformité page has programme filter (4 select filters visible). Admin users page shows all 7 users with profile dropdowns. ONE BUG: /admin/profiles and /admin/users routes have no frontend access guard - PMO can navigate directly to these pages. Fix: Add AdminRoute component in App.js.",
+  "rca_of_issue": "Frontend route guard missing. App.js ProtectedRoute only checks token, not role. AdminRoute component needed: const AdminRoute = ({children}) => { const {user} = useAuth(); return user?.role === 'TENANT_ADMIN' ? children : <Navigate to='/dashboard' replace />; }. Apply to both /admin/profiles and /admin/users routes."
+}

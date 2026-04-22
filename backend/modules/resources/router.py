@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from core.auth import TokenPayload, get_current_user
+from core.auth import TokenPayload, get_current_user, permission_required
 from .schemas import ResourceCreate, ResourceUpdate
 from . import service
 
@@ -12,7 +12,10 @@ async def list_resources(current_user: TokenPayload = Depends(get_current_user))
 
 
 @router.post("/resources", status_code=201)
-async def create_resource(data: ResourceCreate, current_user: TokenPayload = Depends(get_current_user)):
+async def create_resource(
+    data: ResourceCreate,
+    current_user: TokenPayload = Depends(permission_required("resources.create")),
+):
     return await service.create_resource(data, current_user)
 
 
@@ -20,11 +23,14 @@ async def create_resource(data: ResourceCreate, current_user: TokenPayload = Dep
 async def update_resource(
     resource_id: str,
     data: ResourceUpdate,
-    current_user: TokenPayload = Depends(get_current_user),
+    current_user: TokenPayload = Depends(permission_required("resources.edit")),
 ):
     return await service.update_resource(resource_id, data, current_user)
 
 
 @router.delete("/resources/{resource_id}", status_code=204)
-async def delete_resource(resource_id: str, current_user: TokenPayload = Depends(get_current_user)):
+async def delete_resource(
+    resource_id: str,
+    current_user: TokenPayload = Depends(permission_required("resources.create")),
+):
     await service.delete_resource(resource_id, current_user)

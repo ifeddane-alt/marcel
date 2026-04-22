@@ -31,6 +31,7 @@ from modules.project_dependencies.router import router as project_dependencies_r
 from modules.teams.router import router as teams_router
 from modules.work_allocations.router import router as work_allocations_router
 from modules.demands.router import router as demands_router
+from modules.profiles.router import router as profiles_router
 
 app = FastAPI(title="Projetenne API")
 
@@ -48,7 +49,7 @@ for _router in [
     governance_router, dashboard_router, risks_router, decisions_router,
     export_router, csv_import_router, teams_router, work_allocations_router,
     timesheets_router, project_dependencies_router, leaves_router,
-    demands_router,
+    demands_router, profiles_router,
 ]:
     app.include_router(_router, prefix="/api")
 

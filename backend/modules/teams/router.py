@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends, Query
-from core.auth import TokenPayload, get_current_user
+from core.auth import TokenPayload, get_current_user, permission_required
 from .schemas import TeamCreate, TeamUpdate
 from . import service
 
@@ -30,7 +30,10 @@ async def get_team_detail(team_id: str, current_user: TokenPayload = Depends(get
 
 
 @router.post("/teams", status_code=201)
-async def create_team(data: TeamCreate, current_user: TokenPayload = Depends(get_current_user)):
+async def create_team(
+    data: TeamCreate,
+    current_user: TokenPayload = Depends(permission_required("teams.create")),
+):
     return await service.create_team(data, current_user)
 
 
@@ -38,11 +41,14 @@ async def create_team(data: TeamCreate, current_user: TokenPayload = Depends(get
 async def update_team(
     team_id: str,
     data: TeamUpdate,
-    current_user: TokenPayload = Depends(get_current_user),
+    current_user: TokenPayload = Depends(permission_required("teams.edit")),
 ):
     return await service.update_team(team_id, data, current_user)
 
 
 @router.delete("/teams/{team_id}", status_code=204)
-async def delete_team(team_id: str, current_user: TokenPayload = Depends(get_current_user)):
+async def delete_team(
+    team_id: str,
+    current_user: TokenPayload = Depends(permission_required("teams.create")),
+):
     await service.delete_team(team_id, current_user)

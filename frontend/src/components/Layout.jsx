@@ -15,6 +15,8 @@ import {
   Map,
   Clock,
   Inbox,
+  Shield,
+  Settings,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -36,6 +38,11 @@ const navItems = [
   { to: "/conformite", icon: ShieldAlert, label: "Conformité" },
   { to: "/demands",    icon: Inbox,       label: "Demandes" },
   { to: "/timesheets", icon: Clock,       label: "Timesheets" },
+];
+
+const adminItems = [
+  { to: "/admin/profiles", icon: Shield,   label: "Profils" },
+  { to: "/admin/users",    icon: Settings, label: "Utilisateurs" },
 ];
 
 export default function Layout() {
@@ -130,6 +137,28 @@ export default function Layout() {
                 <Upload size={16} strokeWidth={1.75} className="flex-shrink-0" />
                 <span>Import CSV</span>
               </NavLink>
+            </>
+          )}
+
+          {/* Administration — TENANT_ADMIN uniquement */}
+          {user?.role === "TENANT_ADMIN" && (
+            <>
+              <div className="text-[10px] uppercase tracking-widest text-slate-500 px-3 pt-3 pb-1 font-semibold">
+                Administration
+              </div>
+              {adminItems.map(({ to, icon: Icon, label }) => (
+                <NavLink
+                  key={to}
+                  to={to}
+                  data-testid={`nav-admin-${label.toLowerCase()}`}
+                  className={({ isActive }) =>
+                    `sidebar-item ${isActive ? "sidebar-item-active" : ""}`
+                  }
+                >
+                  <Icon size={16} strokeWidth={1.75} className="flex-shrink-0" />
+                  <span>{label}</span>
+                </NavLink>
+              ))}
             </>
           )}
         </nav>

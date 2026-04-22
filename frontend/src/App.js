@@ -17,6 +17,8 @@ import TeamDetail from "@/pages/TeamDetail";
 import Roadmap from "@/pages/Roadmap";
 import Timesheets from "@/pages/Timesheets";
 import Demands from "@/pages/Demands";
+import AdminProfiles from "@/pages/AdminProfiles";
+import AdminUsers from "@/pages/AdminUsers";
 import "@/App.css";
 
 function ProtectedRoute({ children }) {
@@ -51,6 +53,8 @@ function AppRoutes() {
         <Route path="governance" element={<Governance />} />
         <Route path="conformite" element={<Conformite />} />
         <Route path="demands" element={<Demands />} />
+        <Route path="admin/profiles" element={<AdminProfiles />} />
+        <Route path="admin/users" element={<AdminUsers />} />
         <Route path="import" element={<Import />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

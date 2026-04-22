@@ -179,12 +179,18 @@ async def get_regulatory(
     project_id: str | None = None,
     milestone_type: str | None = None,
     attribute: str | None = None,
+    program_id: str | None = None,
 ) -> list:
     # Tous les projets du tenant
     projs = await db.projects.find(
         {"tenant_id": current_user.tenant_id},
         {"_id": 0, "project_id": 1, "name": 1, "program_id": 1},
     ).to_list(None)
+
+    # Filtre par programme avant de construire la map
+    if program_id:
+        projs = [p for p in projs if p.get("program_id") == program_id]
+
     proj_map = {p["project_id"]: p for p in projs}
     valid_pids = list(proj_map.keys())
 

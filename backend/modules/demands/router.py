@@ -1,6 +1,6 @@
 from fastapi import APIRouter, Depends, Query
 from typing import Optional
-from core.auth import TokenPayload, get_current_user
+from core.auth import TokenPayload, get_current_user, permission_required
 from . import service
 from .schemas import DemandCreate, DemandUpdate, DemandTransitionRequest, ConvertToProjectRequest
 
@@ -19,7 +19,7 @@ async def list_demands(
 @router.post("/demands")
 async def create_demand(
     data: DemandCreate,
-    current_user: TokenPayload = Depends(get_current_user),
+    current_user: TokenPayload = Depends(permission_required("demands.submit")),
 ):
     return await service.create_demand(data, current_user)
 
@@ -36,7 +36,7 @@ async def get_demand(
 async def update_demand(
     demand_id: str,
     data: DemandUpdate,
-    current_user: TokenPayload = Depends(get_current_user),
+    current_user: TokenPayload = Depends(permission_required("demands.qualify")),
 ):
     return await service.update_demand(demand_id, data, current_user)
 
@@ -44,7 +44,7 @@ async def update_demand(
 @router.delete("/demands/{demand_id}")
 async def delete_demand(
     demand_id: str,
-    current_user: TokenPayload = Depends(get_current_user),
+    current_user: TokenPayload = Depends(permission_required("demands.qualify")),
 ):
     return await service.delete_demand(demand_id, current_user)
 
@@ -53,7 +53,7 @@ async def delete_demand(
 async def transition_demand(
     demand_id: str,
     data: DemandTransitionRequest,
-    current_user: TokenPayload = Depends(get_current_user),
+    current_user: TokenPayload = Depends(permission_required("demands.qualify")),
 ):
     return await service.transition_demand(demand_id, data, current_user)
 
@@ -62,7 +62,7 @@ async def transition_demand(
 async def convert_to_project(
     demand_id: str,
     data: ConvertToProjectRequest,
-    current_user: TokenPayload = Depends(get_current_user),
+    current_user: TokenPayload = Depends(permission_required("demands.convert")),
 ):
     return await service.convert_to_project(demand_id, data, current_user)
 

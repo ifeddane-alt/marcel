@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from core.auth import TokenPayload, get_current_user
+from core.auth import TokenPayload, get_current_user, permission_required
 from .schemas import ProjectCreate, ProjectUpdate, BudgetRevisionCreate
 from . import service
 
@@ -17,7 +17,10 @@ async def get_project(project_id: str, current_user: TokenPayload = Depends(get_
 
 
 @router.post("/projects", status_code=201)
-async def create_project(data: ProjectCreate, current_user: TokenPayload = Depends(get_current_user)):
+async def create_project(
+    data: ProjectCreate,
+    current_user: TokenPayload = Depends(permission_required("projects.create")),
+):
     return await service.create_project(data, current_user)
 
 
@@ -25,7 +28,7 @@ async def create_project(data: ProjectCreate, current_user: TokenPayload = Depen
 async def update_project(
     project_id: str,
     data: ProjectUpdate,
-    current_user: TokenPayload = Depends(get_current_user),
+    current_user: TokenPayload = Depends(permission_required("projects.edit")),
 ):
     return await service.update_project(project_id, data, current_user)
 
@@ -34,13 +37,16 @@ async def update_project(
 async def add_budget_revision(
     project_id: str,
     data: BudgetRevisionCreate,
-    current_user: TokenPayload = Depends(get_current_user),
+    current_user: TokenPayload = Depends(permission_required("budget.revise_eac")),
 ):
     return await service.add_budget_revision(project_id, data, current_user)
 
 
 @router.delete("/projects/{project_id}", status_code=204)
-async def delete_project(project_id: str, current_user: TokenPayload = Depends(get_current_user)):
+async def delete_project(
+    project_id: str,
+    current_user: TokenPayload = Depends(permission_required("projects.delete")),
+):
     await service.delete_project(project_id, current_user)
 
 
@@ -55,6 +61,6 @@ async def get_team_consumption(
 @router.get("/projects/{project_id}/raf")
 async def get_raf(
     project_id: str,
-    current_user: TokenPayload = Depends(get_current_user),
+    current_user: TokenPayload = Depends(permission_required("raf.view")),
 ):
     return await service.get_raf(project_id, current_user)

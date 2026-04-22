@@ -165,4 +165,25 @@ export const demandsAPI = {
   seed:         ()           => api.post("/demands/seed"),
 };
 
+export const profilesAPI = {
+  list:              ()           => api.get("/profiles"),
+  get:               (id)         => api.get(`/profiles/${id}`),
+  create:            (data)       => api.post("/profiles", data),
+  update:            (id, data)   => api.put(`/profiles/${id}`, data),
+  delete:            (id)         => api.delete(`/profiles/${id}`),
+  duplicate:         (id, data)   => api.post(`/profiles/${id}/duplicate`, data),
+  getPermissions:    ()           => api.get("/profiles/permissions"),
+  seedFull:          ()           => api.post("/profiles/seed-full"),
+};
+
+export const usersAPI = {
+  list:              (params)     => api.get("/admin/users", { params }),
+  updateProfile:     (id, data)   => api.patch(`/admin/users/${id}`, data),
+};
+
+export const vendorsAPI = {
+  list:     (params) => api.get("/resources", { params: { ...params, resource_type_in: "externe_regie,externe_forfait" } }),
+  update:   (id, data) => api.put(`/resources/${id}`, data),
+};
+
 export default api;

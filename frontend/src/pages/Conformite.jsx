@@ -3,7 +3,7 @@ import {
   ShieldAlert, Download, Filter, RefreshCw, AlertTriangle,
   CheckCircle, Clock, TrendingDown, ChevronUp, ChevronDown,
 } from "lucide-react";
-import { milestonesAPI, projectsAPI } from "@/api";
+import { milestonesAPI, projectsAPI, programsAPI } from "@/api";
 import { toast } from "sonner";
 
 // ─── Helpers ─────────────────────────────────────────────────────────────────
@@ -78,11 +78,13 @@ export default function Conformite() {
   const [milestones, setMilestones] = useState([]);
   const [kpis, setKpis]             = useState(null);
   const [projects, setProjects]     = useState([]);
+  const [programs, setPrograms]     = useState([]);
   const [loading, setLoading]       = useState(false);
 
   // Filtres
-  const [filterProject,  setFilterProject]  = useState("");
-  const [filterType,     setFilterType]     = useState("");
+  const [filterProgram,   setFilterProgram]   = useState("");
+  const [filterProject,   setFilterProject]   = useState("");
+  const [filterType,      setFilterType]      = useState("");
   const [filterAttribute, setFilterAttribute] = useState("");
 
   // Tri
@@ -93,21 +95,24 @@ export default function Conformite() {
     setLoading(true);
     try {
       const params = {};
+      if (filterProgram)   params.program_id     = filterProgram;
       if (filterProject)   params.project_id     = filterProject;
       if (filterType)      params.milestone_type = filterType;
       if (filterAttribute) params.attribute       = filterAttribute;
 
-      const [msRes, kpiRes, projRes] = await Promise.all([
+      const [msRes, kpiRes, projRes, progRes] = await Promise.all([
         milestonesAPI.regulatory(params),
         milestonesAPI.regulatoryKpis(),
         projectsAPI ? projectsAPI.list() : Promise.resolve({ data: [] }),
+        programsAPI.list(),
       ]);
       setMilestones(msRes.data);
       setKpis(kpiRes.data);
       setProjects(projRes.data || []);
+      setPrograms(progRes.data || []);
     } catch { toast.error("Erreur chargement conformité"); }
     finally { setLoading(false); }
-  }, [filterProject, filterType, filterAttribute]);
+  }, [filterProgram, filterProject, filterType, filterAttribute]);
 
   useEffect(() => { loadData(); }, [loadData]);
 
@@ -129,6 +134,7 @@ export default function Conformite() {
   const handleCsvExport = async () => {
     try {
       const params = {};
+      if (filterProgram)   params.program_id     = filterProgram;
       if (filterProject)   params.project_id     = filterProject;
       if (filterType)      params.milestone_type = filterType;
       if (filterAttribute) params.attribute       = filterAttribute;
@@ -172,13 +178,23 @@ export default function Conformite() {
           <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-widest">
             <Filter size={11} /> Filtres
           </div>
+          <select value={filterProgram} onChange={(e) => { setFilterProgram(e.target.value); setFilterProject(""); }}
+            data-testid="filter-programme"
+            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:border-[#0052CC] bg-white text-slate-600 min-w-[160px]">
+            <option value="">Tous les programmes</option>
+            {programs.map((p) => (
+              <option key={p.program_id} value={p.program_id}>{p.name?.slice(0, 35)}</option>
+            ))}
+          </select>
           <select value={filterProject} onChange={(e) => setFilterProject(e.target.value)}
             data-testid="filter-project"
             className="text-xs border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:border-[#0052CC] bg-white text-slate-600 min-w-[160px]">
             <option value="">Tous les projets</option>
-            {projects.map((p) => (
-              <option key={p.project_id} value={p.project_id}>{p.name?.slice(0,30)}</option>
-            ))}
+            {projects
+              .filter((p) => !filterProgram || p.program_id === filterProgram)
+              .map((p) => (
+                <option key={p.project_id} value={p.project_id}>{p.name?.slice(0,30)}</option>
+              ))}
           </select>
           <select value={filterType} onChange={(e) => setFilterType(e.target.value)}
             data-testid="filter-type"
