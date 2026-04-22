@@ -52,20 +52,40 @@ Multi-tenant avec isolation stricte des données et RBAC granulaire par profils.
 - Fallback automatique vers role legacy (TENANT_ADMIN/PMO_USER/READ_ONLY)
 - Permissions incluses dans le JWT au login
 
-#### 2c. Enrichissement Ressources
+#### 2c. Enrichissement Ressources (COMPLET — 2026-04)
 - Champs : `resource_type` (interne/externe_regie/externe_forfait)
-- `vendor`, `contract_tjm`, `forfait_envelope`, `forfait_consumed`
-- `contract_start`, `contract_end`
-- 3 ressources externes seedées (Capgemini ×2, Accenture ×1)
+- `vendor`, `contract_tjm`, `forfait_envelope`, `forfait_consumed`, `contract_start`, `contract_end`
+- 5 ressources externes seedées : Capgemini, Accenture, Sopra Steria, IBM France, Atos
+- ResourceModal 3 modes : Interne / Régie (champs vendor+TJM contrat) / Forfait (enveloppe+consommé+dates)
+- Page Ressources : filtres par type (Tous/Interne/Régie/Forfait) + badges icône+texte dans la table
 
 #### 2d. Pages Admin
 - `/admin/profiles` : matrice permissions cochable par module, CRUD custom, duplication
 - `/admin/users` : liste 7 users avec dropdown profil, filtre par profil
 - AdminRoute guard : seul TENANT_ADMIN peut accéder (redirect → /dashboard sinon)
 
+#### 2e. Suivi Fournisseurs (COMPLET — 2026-04)
+- Page `/vendors` : Suivi Fournisseurs complet
+  - KPI cards : nb fournisseurs, enveloppe TJM régie, forfait total, alertes actives
+  - Cards par fournisseur (expandable) : section Régie (TJM contrat vs facturé, variance %) + section Forfait (barre progression, consommé/reste)
+  - Alertes automatiques : variance TJM >10%, forfait >85%, contrats expirant <90j
+  - Données démo : Accenture (20% variance TJM), Sopra Steria (91% forfait), Atos (contrat expirant mars 2026)
+- Section "Coûts Externes Alloués" dans ProjectDetail (après EAC block)
+  - Régie : JH alloués × TJM contractuel
+  - Forfait : enveloppe + consommé
+  - Pourcentage du budget total
+- Sidebar nouvelle section "ACHATS / FINANCES" (visible si `vendors.view` ou `*`)
+- API : `/api/vendors/summary`, `/api/vendors/project/{id}`
+
 ---
 
 ## API Endpoints Clés
+
+### Fournisseurs (Vendors)
+| Méthode | Route | Permission |
+|---|---|---|
+| GET | `/api/vendors/summary` | vendors.view |
+| GET | `/api/vendors/project/{project_id}` | Tous authentifiés |
 
 ### Profils
 | Méthode | Route | Permissions |
@@ -99,45 +119,55 @@ resources:     resource_id, tenant_id, name, role, team_id, resource_type,
                contract_start, contract_end, tjm_eur, availability_rate
 demands:       demand_id, tenant_id, title, description, requester, urgency,
                status, priority_score, rejection_reason, converted_project_id
+allocations:   allocation_id, project_id, resource_id, period_month, jh_allocated, jh_consumed
 ```
 
 ---
 
 ## Backlog Priorisé
 
-### P0 (Prochain Sprint)
-- **Chantier 3 : SAFe Structurel** (trains, PIs, sprints, capabilities)
+### P0 (Prochain Sprint) — Chantier 3 : SAFe Structurel
 
-### Bloc 2 Restant (à faire avant ou pendant SAFe)
-- Page "Suivi Fournisseurs" (`/vendors`) — vue groupée par fournisseur (régie vs forfait, alertes 80%/100%, écart TJM)
-- ResourceModal enrichi (3 modes : Interne / Régie / Forfait)
-- Page Ressources enrichie (filtre resource_type + badge type)
-- Impact projets : coûts externes dans section Budget de ProjectDetail
-
----
-
-## Chantier 3 : SAFe Structurel
-
-### Phase 3a — Collections SAFe
+#### Phase 3a — Collections SAFe
 - Collections `trains`, `pis`, `sprints`, `capabilities` CRUD
 - Lier les équipes à `train_id`
 
-### Phase 3b — Hiérarchie tâches
+#### Phase 3b — Hiérarchie tâches
 - `parent_id` + `task_level` sur tasks
 - capability → feature → user story
+- Projets non-SAFe restent en liste plate
 
-### Phase 3c — TreeView projet
-### Phase 3d — Cycle de vie par phase (phase_history)
-### Phase 3e — Estimations par phase
-### Phase 3f — Page "Trains SAFe" dans sidebar
+#### Phase 3c — TreeView projet
+- Vue expandable (arbre) dans ProjectDetail
+- Toggle flat list / tree view
+
+#### Phase 3d — Cycle de vie par phase
+- `phase_history` collection, anti-rollback rules
+- Phases : backlog, review, analysis, implementation, test, hypercare, done, rejected
+
+#### Phase 3e — Estimations par phase
+- `phase_estimates[]` array sur tasks
+
+#### Phase 3f — Page "Trains SAFe"
+- PI timelines, sprints, capacités dans la sidebar
+
+#### Seed & Tests SAFe
+- 1 train, 2 PIs, 4 sprints, capabilities avec hiérarchie
+- Zéro régression sur projets non-SAFe plats
 
 ---
 
 ## Fichiers Clés
 - `/app/backend/modules/profiles/` (service.py, router.py, schemas.py)
 - `/app/backend/modules/demands/` (service.py, router.py)
+- `/app/backend/modules/resources/` (service.py, router.py, schemas.py) ← vendor functions added
 - `/app/backend/core/auth.py` (permission_required, TokenPayload)
 - `/app/frontend/src/pages/AdminProfiles.jsx`
 - `/app/frontend/src/pages/AdminUsers.jsx`
 - `/app/frontend/src/pages/Demands.jsx`
+- `/app/frontend/src/pages/Vendors.jsx` ← NEW
+- `/app/frontend/src/pages/Resources.jsx` ← type filters + badges
+- `/app/frontend/src/components/ResourceModal.jsx` ← 3-type mode
+- `/app/frontend/src/pages/ProjectDetail.jsx` ← external costs section
+- `/app/frontend/src/components/Layout.jsx` ← ACHATS/FINANCES sidebar section
 - `/app/frontend/src/api/index.js`
