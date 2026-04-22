@@ -14,6 +14,7 @@ import {
   UsersRound,
   Map,
   Clock,
+  Inbox,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -33,7 +34,8 @@ const navItems = [
   { to: "/teams", icon: UsersRound, label: "Équipes" },
   { to: "/governance", icon: ShieldCheck, label: "Gouvernance" },
   { to: "/conformite", icon: ShieldAlert, label: "Conformité" },
-  { to: "/timesheets", icon: Clock, label: "Timesheets" },
+  { to: "/demands",    icon: Inbox,       label: "Demandes" },
+  { to: "/timesheets", icon: Clock,       label: "Timesheets" },
 ];
 
 export default function Layout() {

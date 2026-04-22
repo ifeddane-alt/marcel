@@ -154,4 +154,15 @@ export const leavesAPI = {
   getHolidays: (year, month)              => api.get(`/holidays?year=${year}&month=${month}`),
 };
 
+export const demandsAPI = {
+  list:         (params)     => api.get("/demands", { params }),
+  get:          (id)         => api.get(`/demands/${id}`),
+  create:       (data)       => api.post("/demands", data),
+  update:       (id, data)   => api.put(`/demands/${id}`, data),
+  delete:       (id)         => api.delete(`/demands/${id}`),
+  transition:   (id, data)   => api.patch(`/demands/${id}/transition`, data),
+  convert:      (id, data)   => api.post(`/demands/${id}/convert`, data),
+  seed:         ()           => api.post("/demands/seed"),
+};
+
 export default api;
