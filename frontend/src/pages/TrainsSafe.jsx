@@ -3,11 +3,12 @@ import { useParams, useNavigate } from "react-router-dom";
 import {
   Train, Target, Zap, BarChart3, ChevronDown, ChevronRight,
   Plus, Pencil, Trash2, Users, Calendar, CheckCircle2,
-  AlertCircle, Clock, Circle, ArrowRight, Layout,
+  AlertCircle, Clock, Circle, ArrowRight, Layout, TrendingUp,
 } from "lucide-react";
 import { safeAPI } from "@/api";
 import Modal from "@/components/Modal";
 import PIPlanning from "@/components/PIPlanning";
+import OKRDashboard from "@/components/OKRDashboard";
 
 // ─── Constantes ──────────────────────────────────────────────────────────────
 const CAP_STATUS = {
@@ -491,11 +492,12 @@ export default function TrainsSafe() {
             )}
           </div>
 
-          {/* Tabs : Overview | PI Planning */}
+          {/* Tabs : Overview | PI Planning | Dashboard Programme */}
           <div className="flex gap-1 mb-5 border-b border-gray-200">
             {[
-              { id: "overview", label: "Vue d'ensemble", Icon: BarChart3 },
-              { id: "planning", label: "PI Planning",   Icon: Layout },
+              { id: "overview",   label: "Vue d'ensemble",       Icon: BarChart3 },
+              { id: "planning",   label: "PI Planning",          Icon: Layout },
+              { id: "dashboard",  label: "Dashboard Programme",  Icon: TrendingUp },
             ].map(({ id, label, Icon }) => (
               <button
                 key={id}
@@ -570,6 +572,11 @@ export default function TrainsSafe() {
                 piId={activePIId || overview?.pis?.[0]?.pi_id}
               />
             </div>
+          )}
+
+          {/* Onglet Dashboard Programme */}
+          {activeTab === "dashboard" && (
+            <OKRDashboard selectedTrainId={selectedTrainId} />
           )}
         </>
       )}

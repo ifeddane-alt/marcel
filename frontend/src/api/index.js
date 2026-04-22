@@ -216,4 +216,13 @@ export const vendorsAPI = {
   projectCosts: (projectId) => api.get(`/vendors/project/${projectId}`),
 };
 
+export const okrsAPI = {
+  list:        (params)     => api.get("/okrs", { params }),
+  create:      (data)       => api.post("/okrs", data),
+  update:      (id, data)   => api.put(`/okrs/${id}`, data),
+  delete:      (id)         => api.delete(`/okrs/${id}`),
+  dashboard:   ()           => api.get("/programme/dashboard"),
+  updateWSJF:  (capId, data) => api.put(`/capabilities/${capId}/wsjf`, data),
+};
+
 export default api;
