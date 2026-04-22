@@ -181,6 +181,34 @@ export const usersAPI = {
   updateProfile:     (id, data)   => api.patch(`/admin/users/${id}`, data),
 };
 
+export const safeAPI = {
+  // Trains
+  listTrains:      () => api.get("/safe/trains"),
+  getTrainOverview:(id) => api.get(`/safe/trains/${id}/overview`),
+  createTrain:     (data) => api.post("/safe/trains", data),
+  updateTrain:     (id, data) => api.put(`/safe/trains/${id}`, data),
+  deleteTrain:     (id) => api.delete(`/safe/trains/${id}`),
+  // PIs
+  listPIs:         (params) => api.get("/safe/pis", { params }),
+  createPI:        (data) => api.post("/safe/pis", data),
+  updatePI:        (id, data) => api.put(`/safe/pis/${id}`, data),
+  deletePI:        (id) => api.delete(`/safe/pis/${id}`),
+  // Sprints
+  listSprints:     (params) => api.get("/safe/sprints", { params }),
+  createSprint:    (data) => api.post("/safe/sprints", data),
+  updateSprint:    (id, data) => api.put(`/safe/sprints/${id}`, data),
+  deleteSprint:    (id) => api.delete(`/safe/sprints/${id}`),
+  // Capabilities
+  listCapabilities:(params) => api.get("/safe/capabilities", { params }),
+  createCapability:(data) => api.post("/safe/capabilities", data),
+  updateCapability:(id, data) => api.put(`/safe/capabilities/${id}`, data),
+  deleteCapability:(id) => api.delete(`/safe/capabilities/${id}`),
+  // Tasks phase lifecycle
+  transitionPhase: (taskId, data) => api.post(`/tasks/${taskId}/transition`, data),
+  getPhaseHistory: (taskId) => api.get(`/tasks/${taskId}/phase-history`),
+  updatePhaseEstimates: (taskId, data) => api.put(`/tasks/${taskId}/phase-estimates`, data),
+};
+
 export const vendorsAPI = {
   list:    (params) => api.get("/resources", { params: { ...params, resource_type_in: "externe_regie,externe_forfait" } }),
   update:  (id, data) => api.put(`/resources/${id}`, data),

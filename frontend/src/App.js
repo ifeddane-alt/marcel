@@ -20,6 +20,7 @@ import Demands from "@/pages/Demands";
 import AdminProfiles from "@/pages/AdminProfiles";
 import AdminUsers from "@/pages/AdminUsers";
 import Vendors from "@/pages/Vendors";
+import TrainsSafe from "@/pages/TrainsSafe";
 import "@/App.css";
 
 function ProtectedRoute({ children }) {
@@ -64,6 +65,8 @@ function AppRoutes() {
         <Route path="admin/profiles" element={<AdminRoute><AdminProfiles /></AdminRoute>} />
         <Route path="admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
         <Route path="vendors" element={<Vendors />} />
+        <Route path="safe/trains" element={<TrainsSafe />} />
+        <Route path="safe/trains/:trainId" element={<TrainsSafe />} />
         <Route path="import" element={<Import />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

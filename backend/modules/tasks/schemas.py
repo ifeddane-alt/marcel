@@ -2,6 +2,13 @@ from pydantic import BaseModel
 from typing import Optional, List
 
 
+class PhaseEstimate(BaseModel):
+    phase: str
+    jh_estimated: float = 0
+    jh_actual: Optional[float] = None
+    notes: Optional[str] = None
+
+
 class TaskCreate(BaseModel):
     project_id: str
     name: str
@@ -19,6 +26,13 @@ class TaskCreate(BaseModel):
     jh_restants_estimes: Optional[float] = None
     resource_id: Optional[str] = None
     dependencies: Optional[List[str]] = None
+    # 3b — Hiérarchie SAFe
+    parent_id: Optional[str] = None
+    task_level: str = "task"    # task | feature | user_story
+    # 3d — Cycle de vie
+    lifecycle_phase: str = "backlog"
+    # 3e — Estimations par phase
+    phase_estimates: Optional[List[PhaseEstimate]] = None
 
 
 class TaskUpdate(BaseModel):
@@ -37,3 +51,16 @@ class TaskUpdate(BaseModel):
     jh_restants_estimes: Optional[float] = None
     resource_id: Optional[str] = None
     dependencies: Optional[List[str]] = None
+    # 3b
+    parent_id: Optional[str] = None
+    task_level: Optional[str] = None
+    # 3d
+    lifecycle_phase: Optional[str] = None
+    # 3e
+    phase_estimates: Optional[List[PhaseEstimate]] = None
+
+
+class PhaseTransition(BaseModel):
+    to_phase: str
+    note: Optional[str] = None
+

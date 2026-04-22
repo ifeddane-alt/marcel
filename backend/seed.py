@@ -38,6 +38,12 @@ def pw(password: str) -> str:
 PROJECT_IDS = [str(uuid.uuid4()) for _ in range(8)]
 RESOURCE_IDS = [str(uuid.uuid4()) for _ in range(10)]
 VENDOR_RESOURCE_IDS = [str(uuid.uuid4()) for _ in range(5)]
+
+# SAFe — Chantier 3
+TRAIN_ID         = str(uuid.uuid4())
+PI_IDS           = [str(uuid.uuid4()) for _ in range(2)]
+SPRINT_IDS       = [str(uuid.uuid4()) for _ in range(4)]
+CAPABILITY_IDS   = [str(uuid.uuid4()) for _ in range(5)]
 GOVERNANCE_IDS = [str(uuid.uuid4()) for _ in range(5)]
 PROGRAM_IDS = [str(uuid.uuid4()) for _ in range(4)]
 TEAM_IDS = [str(uuid.uuid4()) for _ in range(5)]
@@ -1882,6 +1888,305 @@ async def seed():
     ]
     await db.project_dependencies.insert_many(PROJECT_DEPS)
     print(f"Dépendances inter-projets créées : {len(PROJECT_DEPS)}")
+
+    # ── SAFe — Chantier 3a ──────────────────────────────────────────────────
+    await db.trains.delete_many({"tenant_id": TENANT_ID})
+    await db.pis.delete_many({"tenant_id": TENANT_ID})
+    await db.sprints.delete_many({"tenant_id": TENANT_ID})
+    await db.capabilities.delete_many({"tenant_id": TENANT_ID})
+    await db.phase_history.delete_many({"tenant_id": TENANT_ID})
+
+    TRAIN = {
+        "train_id":    TRAIN_ID,
+        "tenant_id":   TENANT_ID,
+        "name":        "ART Digital Banking",
+        "description": "Release Train principal — Transformation Digitale Groupe",
+        "vision":      "Livrer une expérience client digitale unifiée sur tous les canaux Altair d'ici fin 2026",
+        "team_ids":    [TEAM_IDS[0], TEAM_IDS[1], TEAM_IDS[2]],
+        "created_at":  "2025-10-01T09:00:00Z",
+    }
+    await db.trains.insert_one(TRAIN)
+    TRAIN.pop("_id", None)
+
+    PIS = [
+        {
+            "pi_id":      PI_IDS[0],
+            "tenant_id":  TENANT_ID,
+            "train_id":   TRAIN_ID,
+            "name":       "PI-1 2026",
+            "start_date": "2026-01-05",
+            "end_date":   "2026-04-04",
+            "objectives": [
+                "Livrer Onboarding Client Digitalisé (MVP)",
+                "Stabiliser API Gateway Banking v1",
+                "Démarrer Score Crédit IA — pipeline données",
+            ],
+            "status":     "active",
+            "created_at": "2025-10-15T09:00:00Z",
+        },
+        {
+            "pi_id":      PI_IDS[1],
+            "tenant_id":  TENANT_ID,
+            "train_id":   TRAIN_ID,
+            "name":       "PI-2 2026",
+            "start_date": "2026-04-07",
+            "end_date":   "2026-07-03",
+            "objectives": [
+                "Score Crédit IA — mise en production",
+                "Reporting Réglementaire DORA automatisé",
+                "Migration Batch Jobs Cloud Azure finalisée",
+            ],
+            "status":     "planning",
+            "created_at": "2025-10-15T09:00:00Z",
+        },
+    ]
+    await db.pis.insert_many(PIS)
+    for p in PIS:
+        p.pop("_id", None)
+
+    SPRINTS = [
+        # PI-1
+        {
+            "sprint_id":        SPRINT_IDS[0],
+            "tenant_id":        TENANT_ID,
+            "pi_id":            PI_IDS[0],
+            "train_id":         TRAIN_ID,
+            "name":             "Sprint 1.1",
+            "start_date":       "2026-01-05",
+            "end_date":         "2026-01-23",
+            "capacity_jh":      120.0,
+            "velocity_planned": 42,
+            "velocity_actual":  40,
+            "status":           "completed",
+            "created_at":       "2025-12-15T09:00:00Z",
+        },
+        {
+            "sprint_id":        SPRINT_IDS[1],
+            "tenant_id":        TENANT_ID,
+            "pi_id":            PI_IDS[0],
+            "train_id":         TRAIN_ID,
+            "name":             "Sprint 1.2",
+            "start_date":       "2026-01-26",
+            "end_date":         "2026-02-13",
+            "capacity_jh":      115.0,
+            "velocity_planned": 40,
+            "velocity_actual":  38,
+            "status":           "completed",
+            "created_at":       "2025-12-15T09:00:00Z",
+        },
+        # PI-2
+        {
+            "sprint_id":        SPRINT_IDS[2],
+            "tenant_id":        TENANT_ID,
+            "pi_id":            PI_IDS[1],
+            "train_id":         TRAIN_ID,
+            "name":             "Sprint 2.1",
+            "start_date":       "2026-04-07",
+            "end_date":         "2026-04-24",
+            "capacity_jh":      125.0,
+            "velocity_planned": 45,
+            "velocity_actual":  None,
+            "status":           "planning",
+            "created_at":       "2026-02-01T09:00:00Z",
+        },
+        {
+            "sprint_id":        SPRINT_IDS[3],
+            "tenant_id":        TENANT_ID,
+            "pi_id":            PI_IDS[1],
+            "train_id":         TRAIN_ID,
+            "name":             "Sprint 2.2",
+            "start_date":       "2026-04-28",
+            "end_date":         "2026-05-15",
+            "capacity_jh":      120.0,
+            "velocity_planned": 43,
+            "velocity_actual":  None,
+            "status":           "planning",
+            "created_at":       "2026-02-01T09:00:00Z",
+        },
+    ]
+    await db.sprints.insert_many(SPRINTS)
+    for s in SPRINTS:
+        s.pop("_id", None)
+
+    CAPABILITIES = [
+        {
+            "capability_id":      CAPABILITY_IDS[0],
+            "tenant_id":          TENANT_ID,
+            "train_id":           TRAIN_ID,
+            "pi_id":              PI_IDS[0],
+            "name":               "Onboarding Client Digitalisé",
+            "description":        "Parcours d'inscription 100% digital avec vérification d'identité KYC automatisée",
+            "status":             "in_progress",
+            "wsjf":               13.5,
+            "linked_project_ids": [PROJECT_IDS[0]],
+            "created_at":         "2025-11-01T09:00:00Z",
+        },
+        {
+            "capability_id":      CAPABILITY_IDS[1],
+            "tenant_id":          TENANT_ID,
+            "train_id":           TRAIN_ID,
+            "pi_id":              PI_IDS[0],
+            "name":               "API Gateway Banking v1",
+            "description":        "Couche d'API REST sécurisée pour exposition des services bancaires (OAuth2 + MFA)",
+            "status":             "done",
+            "wsjf":               10.0,
+            "linked_project_ids": [PROJECT_IDS[0]],
+            "created_at":         "2025-11-01T09:00:00Z",
+        },
+        {
+            "capability_id":      CAPABILITY_IDS[2],
+            "tenant_id":          TENANT_ID,
+            "train_id":           TRAIN_ID,
+            "pi_id":              PI_IDS[0],
+            "name":               "Module Score Crédit IA",
+            "description":        "Pipeline ML pour scoring crédit temps réel — intégration bureau d'études data",
+            "status":             "committed",
+            "wsjf":               8.5,
+            "linked_project_ids": [PROJECT_IDS[0]],
+            "created_at":         "2025-11-15T09:00:00Z",
+        },
+        {
+            "capability_id":      CAPABILITY_IDS[3],
+            "tenant_id":          TENANT_ID,
+            "train_id":           TRAIN_ID,
+            "pi_id":              PI_IDS[1],
+            "name":               "Reporting Réglementaire DORA",
+            "description":        "Automatisation des rapports de conformité DORA (RTS5, RTS11) vers l'ACPR",
+            "status":             "identified",
+            "wsjf":               11.0,
+            "linked_project_ids": [PROJECT_IDS[7]],
+            "created_at":         "2026-01-10T09:00:00Z",
+        },
+        {
+            "capability_id":      CAPABILITY_IDS[4],
+            "tenant_id":          TENANT_ID,
+            "train_id":           TRAIN_ID,
+            "pi_id":              PI_IDS[1],
+            "name":               "Migration Batch Jobs Cloud Azure",
+            "description":        "Migration des 47 batch jobs on-premise vers Azure Batch + Container Apps",
+            "status":             "committed",
+            "wsjf":               7.5,
+            "linked_project_ids": [PROJECT_IDS[5]],
+            "created_at":         "2026-01-10T09:00:00Z",
+        },
+    ]
+    await db.capabilities.insert_many(CAPABILITIES)
+    for c in CAPABILITIES:
+        c.pop("_id", None)
+    print(f"Train SAFe créé : {TRAIN['name']} · 2 PIs · 4 sprints · {len(CAPABILITIES)} capabilities")
+
+    # ── Tâches SAFe pour Phoenix (P0) — hiérarchie feature / user story ──────
+    # (Ajout à la collection tasks existante)
+    SAFE_TASK_IDS = [str(uuid.uuid4()) for _ in range(5)]
+    SAFE_TASKS = [
+        # Feature 1
+        {
+            "task_id":         SAFE_TASK_IDS[0],
+            "tenant_id":       TENANT_ID,
+            "project_id":      PROJECT_IDS[0],
+            "name":            "Parcours Onboarding Web",
+            "type":            "feature",
+            "status":          "in_progress",
+            "task_level":      "feature",
+            "parent_id":       None,
+            "lifecycle_phase": "implementation",
+            "jh_planned":      45.0,
+            "jh_consumed":     28.0,
+            "budget_planned_k": 33.75,
+            "budget_consumed_k": 21.0,
+            "date_start_planned": "2026-01-05",
+            "date_end_planned":   "2026-02-28",
+            "phase_estimates": [
+                {"phase": "analyse",        "jh_estimated": 8.0,  "jh_actual": 8.0},
+                {"phase": "conception",     "jh_estimated": 10.0, "jh_actual": 9.0},
+                {"phase": "implementation", "jh_estimated": 27.0, "jh_actual": None},
+            ],
+            "created_at": "2026-01-05T09:00:00Z",
+        },
+        # User Stories de Feature 1
+        {
+            "task_id":         SAFE_TASK_IDS[1],
+            "tenant_id":       TENANT_ID,
+            "project_id":      PROJECT_IDS[0],
+            "name":            "Écran inscription et validation email",
+            "type":            "user_story",
+            "status":          "done",
+            "task_level":      "user_story",
+            "parent_id":       SAFE_TASK_IDS[0],
+            "lifecycle_phase": "done",
+            "jh_planned":      12.0,
+            "jh_consumed":     11.5,
+            "budget_planned_k": 9.0,
+            "budget_consumed_k": 8.625,
+            "date_start_planned": "2026-01-05",
+            "date_end_planned":   "2026-01-23",
+            "phase_estimates": [],
+            "created_at": "2026-01-05T09:00:00Z",
+        },
+        {
+            "task_id":         SAFE_TASK_IDS[2],
+            "tenant_id":       TENANT_ID,
+            "project_id":      PROJECT_IDS[0],
+            "name":            "Intégration OCR document d'identité (KYC)",
+            "type":            "user_story",
+            "status":          "in_progress",
+            "task_level":      "user_story",
+            "parent_id":       SAFE_TASK_IDS[0],
+            "lifecycle_phase": "implementation",
+            "jh_planned":      18.0,
+            "jh_consumed":     10.0,
+            "budget_planned_k": 13.5,
+            "budget_consumed_k": 7.5,
+            "date_start_planned": "2026-01-26",
+            "date_end_planned":   "2026-02-28",
+            "phase_estimates": [],
+            "created_at": "2026-01-26T09:00:00Z",
+        },
+        # Feature 2
+        {
+            "task_id":         SAFE_TASK_IDS[3],
+            "tenant_id":       TENANT_ID,
+            "project_id":      PROJECT_IDS[0],
+            "name":            "API Gateway Banking — Auth & Sécurité",
+            "type":            "feature",
+            "status":          "done",
+            "task_level":      "feature",
+            "parent_id":       None,
+            "lifecycle_phase": "done",
+            "jh_planned":      30.0,
+            "jh_consumed":     32.0,
+            "budget_planned_k": 22.5,
+            "budget_consumed_k": 24.0,
+            "date_start_planned": "2026-01-05",
+            "date_end_planned":   "2026-02-13",
+            "phase_estimates": [],
+            "created_at": "2026-01-05T09:00:00Z",
+        },
+        # User Story de Feature 2
+        {
+            "task_id":         SAFE_TASK_IDS[4],
+            "tenant_id":       TENANT_ID,
+            "project_id":      PROJECT_IDS[0],
+            "name":            "Authentification OAuth2 + MFA renforcé",
+            "type":            "user_story",
+            "status":          "done",
+            "task_level":      "user_story",
+            "parent_id":       SAFE_TASK_IDS[3],
+            "lifecycle_phase": "done",
+            "jh_planned":      20.0,
+            "jh_consumed":     22.0,
+            "budget_planned_k": 15.0,
+            "budget_consumed_k": 16.5,
+            "date_start_planned": "2026-01-05",
+            "date_end_planned":   "2026-02-13",
+            "phase_estimates": [],
+            "created_at": "2026-01-05T09:00:00Z",
+        },
+    ]
+    await db.tasks.insert_many(SAFE_TASKS)
+    for t in SAFE_TASKS:
+        t.pop("_id", None)
+    print(f"Tâches SAFe créées (Phoenix) : {len(SAFE_TASKS)} (2 features + 3 user stories)")
 
     print("\n=== Comptes disponibles ===")
     print("  admin@altair.fr    / Admin1234!  (TENANT_ADMIN)  → Sophie Martin (Architecte SI)")

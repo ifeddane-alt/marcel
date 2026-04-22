@@ -1,11 +1,24 @@
 from fastapi import HTTPException
-from typing import Optional
+from typing import Optional, List
 from datetime import datetime, timezone
 import uuid
 from core.database import db
 from core.auth import TokenPayload, require_write
 from shared.rag import calculate_task_rag, _get_task_rag_settings
-from .schemas import TaskCreate, TaskUpdate
+from .schemas import TaskCreate, TaskUpdate, PhaseTransition, PhaseEstimate
+
+# 3d — Matrice de transitions valides (anti-rollback : terminal = done/rejected)
+VALID_TRANSITIONS: dict = {
+    "backlog":        ["review", "rejected"],
+    "review":         ["analysis", "backlog", "rejected"],
+    "analysis":       ["implementation", "review", "rejected"],
+    "implementation": ["test", "analysis", "rejected"],
+    "test":           ["hypercare", "implementation", "rejected"],
+    "hypercare":      ["done", "test"],
+    "done":           [],   # terminal
+    "rejected":       [],   # terminal
+}
+TERMINAL_PHASES = {"done", "rejected"}
 
 
 def _can_reach(start: str, target: str, adj: dict, visited: set) -> bool:
@@ -51,6 +64,10 @@ async def list_tasks(project_id: Optional[str], current_user: TokenPayload) -> l
 
     rag_cfg = await _get_task_rag_settings(current_user.tenant_id)
     for task in tasks:
+        # Assurer la compatibilité ascendante pour les champs SAFe
+        task.setdefault("task_level", "task")
+        task.setdefault("lifecycle_phase", "backlog")
+        task.setdefault("phase_estimates", [])
         computed = calculate_task_rag(
             task,
             budget_threshold_pct=rag_cfg["budget_threshold_pct"],
@@ -115,3 +132,91 @@ async def delete_task(task_id: str, current_user: TokenPayload) -> None:
     )
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Tâche introuvable")
+
+
+# ─── 3d — Transition de phase ────────────────────────────────────────────────
+
+async def transition_task_phase(
+    task_id: str, data: PhaseTransition, current_user: TokenPayload
+) -> dict:
+    require_write(current_user)
+    task = await db.tasks.find_one(
+        {"task_id": task_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
+    )
+    if not task:
+        raise HTTPException(status_code=404, detail="Tâche introuvable")
+
+    from_phase = task.get("lifecycle_phase", "backlog")
+    to_phase = data.to_phase
+
+    if from_phase in TERMINAL_PHASES:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Phase '{from_phase}' est terminale, aucune transition possible",
+        )
+    allowed = VALID_TRANSITIONS.get(from_phase, [])
+    if to_phase not in allowed:
+        raise HTTPException(
+            status_code=422,
+            detail=f"Transition '{from_phase}' → '{to_phase}' non autorisée. Transitions valides : {allowed}",
+        )
+
+    # Mettre à jour la tâche
+    await db.tasks.update_one(
+        {"task_id": task_id, "tenant_id": current_user.tenant_id},
+        {"$set": {"lifecycle_phase": to_phase}},
+    )
+
+    # Enregistrer l'historique
+    history_doc = {
+        "history_id": str(uuid.uuid4()),
+        "tenant_id": current_user.tenant_id,
+        "task_id": task_id,
+        "from_phase": from_phase,
+        "to_phase": to_phase,
+        "changed_by": current_user.user_id,
+        "changed_at": datetime.now(timezone.utc).isoformat(),
+        "note": data.note,
+    }
+    await db.phase_history.insert_one(history_doc)
+    history_doc.pop("_id", None)
+
+    updated = await db.tasks.find_one({"task_id": task_id}, {"_id": 0})
+    updated.setdefault("task_level", "task")
+    updated.setdefault("lifecycle_phase", "backlog")
+    updated.setdefault("phase_estimates", [])
+    return {"task": updated, "history_entry": history_doc}
+
+
+async def get_phase_history(task_id: str, current_user: TokenPayload) -> list:
+    task = await db.tasks.find_one(
+        {"task_id": task_id, "tenant_id": current_user.tenant_id}, {"_id": 0, "task_id": 1}
+    )
+    if not task:
+        raise HTTPException(status_code=404, detail="Tâche introuvable")
+    return await db.phase_history.find(
+        {"task_id": task_id}, {"_id": 0}
+    ).sort("changed_at", -1).to_list(None)
+
+
+# ─── 3e — Estimations par phase ──────────────────────────────────────────────
+
+async def update_phase_estimates(
+    task_id: str, phase_estimates: List[PhaseEstimate], current_user: TokenPayload
+) -> dict:
+    require_write(current_user)
+    task = await db.tasks.find_one(
+        {"task_id": task_id, "tenant_id": current_user.tenant_id}, {"_id": 0, "task_id": 1}
+    )
+    if not task:
+        raise HTTPException(status_code=404, detail="Tâche introuvable")
+    estimates_data = [e.model_dump() for e in phase_estimates]
+    await db.tasks.update_one(
+        {"task_id": task_id, "tenant_id": current_user.tenant_id},
+        {"$set": {"phase_estimates": estimates_data}},
+    )
+    updated = await db.tasks.find_one({"task_id": task_id}, {"_id": 0})
+    updated.setdefault("task_level", "task")
+    updated.setdefault("lifecycle_phase", "backlog")
+    updated.setdefault("phase_estimates", [])
+    return updated

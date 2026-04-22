@@ -18,6 +18,7 @@ import {
   Shield,
   Settings,
   Handshake,
+  Train,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -121,6 +122,25 @@ export default function Layout() {
               )}
             </NavLink>
           ))}
+
+          {/* SAFe — Trains (profils avec trains.view ou *) */}
+          {(user?.permissions?.includes("trains.view") || user?.permissions?.includes("*")) && (
+            <>
+              <div className="text-[10px] uppercase tracking-widest text-slate-500 px-3 pt-3 pb-1 font-semibold">
+                SAFe
+              </div>
+              <NavLink
+                to="/safe/trains"
+                data-testid="nav-trains-safe"
+                className={({ isActive }) =>
+                  `sidebar-item ${isActive ? "sidebar-item-active" : ""}`
+                }
+              >
+                <Train size={16} strokeWidth={1.75} className="flex-shrink-0" />
+                <span>Trains SAFe</span>
+              </NavLink>
+            </>
+          )}
 
           {/* Achats / Finances — profils avec vendors.view */}
           {(user?.permissions?.includes("vendors.view") || user?.permissions?.includes("*")) && (

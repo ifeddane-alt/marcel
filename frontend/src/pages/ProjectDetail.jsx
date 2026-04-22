@@ -10,6 +10,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import RAGBadge, { MethodologyBadge, MilestoneBadge, TaskTypeBadge, TaskStatusBadge, ProjectStatusBadge } from "@/components/RAGBadge";
 import ProjectModal from "@/components/ProjectModal";
 import TaskModal from "@/components/TaskModal";
+import TaskTreeView from "@/components/TaskTreeView";
 import BudgetRevisionModal from "@/components/BudgetRevisionModal";
 import RiskModal from "@/components/RiskModal";
 import DecisionModal from "@/components/DecisionModal";
@@ -59,7 +60,7 @@ export default function ProjectDetail() {
   const [raf, setRaf] = useState(null);
   const [externalCosts, setExternalCosts] = useState(null);
   const [loading, setLoading] = useState(true);
-  const [taskView, setTaskView] = useState("table"); // "table" | "gantt"
+  const [taskView, setTaskView] = useState("table"); // "table" | "gantt" | "tree"
 
   // Modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -529,6 +530,22 @@ export default function ProjectDetail() {
                     >
                       <BarChart2 size={11} /> Gantt
                     </button>
+                    {tasks.some(t => t.task_level && t.task_level !== "task") && (
+                      <button
+                        onClick={() => setTaskView("tree")}
+                        data-testid="task-view-tree-btn"
+                        className={`flex items-center gap-1 px-2.5 py-1 text-[11px] font-semibold rounded transition-colors ${
+                          taskView === "tree"
+                            ? "bg-indigo-600 text-white"
+                            : "text-indigo-600 border border-indigo-200 hover:bg-indigo-50"
+                        }`}
+                      >
+                        <svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5">
+                          <path d="M3 3h18"/><path d="M3 9h12"/><path d="M3 15h6"/><path d="M15 9v6"/><path d="M9 15v6"/>
+                        </svg>
+                        Arbre SAFe
+                      </button>
+                    )}
                   </div>
                 </div>
                 {/* Mini-RAG summary + coverage */}
@@ -598,6 +615,13 @@ export default function ProjectDetail() {
                   }}
                 />
               </div>
+            ) : taskView === "tree" ? (
+              <div className="p-4" data-testid="tree-tab-content">
+                <TaskTreeView
+                  tasks={tasks}
+                  onSelectTask={(t) => { if (canWrite) { setSelectedTask(t); setTaskModalOpen(true); } }}
+                />
+              </div>
             ) : (
               <div className="overflow-x-auto">
                 <table className="w-full text-xs" data-testid="tasks-table">
@@ -662,7 +686,23 @@ export default function ProjectDetail() {
 
                           {/* Nom */}
                           <td className="px-3 py-2.5 font-medium text-slate-800 max-w-[200px]">
-                            <span className="line-clamp-2 leading-snug">{t.name}</span>
+                            <div className="flex items-center gap-1.5 flex-wrap">
+                              <span className="line-clamp-2 leading-snug">{t.name}</span>
+                              {t.task_level && t.task_level !== "task" && (
+                                <span className={`text-[9px] font-bold px-1 py-0.5 rounded border flex-shrink-0 ${
+                                  t.task_level === "feature"
+                                    ? "bg-blue-50 text-blue-600 border-blue-200"
+                                    : "bg-violet-50 text-violet-600 border-violet-200"
+                                }`}>
+                                  {t.task_level === "feature" ? "FEAT" : "US"}
+                                </span>
+                              )}
+                              {t.lifecycle_phase && t.lifecycle_phase !== "backlog" && (
+                                <span className="text-[9px] font-bold px-1 py-0.5 rounded bg-indigo-50 text-indigo-600 border border-indigo-200 flex-shrink-0">
+                                  {t.lifecycle_phase.toUpperCase()}
+                                </span>
+                              )}
+                            </div>
                             {t.dependencies && t.dependencies.length > 0 && (
                               <div className="flex items-center gap-1 mt-0.5" title={`Prérequis : ${t.dependencies.map(depId => tasks.find(x => x.task_id === depId)?.name || depId).join(", ")}`}>
                                 <GitBranch size={9} className="text-slate-400 flex-shrink-0" />
