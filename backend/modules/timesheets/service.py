@@ -11,6 +11,7 @@ from collections import defaultdict
 
 from core.database import db
 from core.auth import TokenPayload, require_write
+from shared.holidays import get_holidays_for_dates
 from .schemas import (
     TimesheetEntryUpsert, TimesheetSubmitWeek,
     TimesheetValidateRequest, TimesheetRejectRequest,
@@ -176,6 +177,26 @@ async def get_grid(resource_id: str, week_start: str, current_user: TokenPayload
     for ts in ts_docs:
         entry_map.setdefault(ts["work_allocation_id"], {})[ts["date"]] = ts
 
+    # ── Absences & jours fériés ───────────────────────────────────────────
+    leaves_docs = await db.leaves.find(
+        {"resource_id": resource_id, "date": {"$in": days}, "tenant_id": current_user.tenant_id},
+        {"_id": 0, "date": 1, "value": 1},
+    ).to_list(None)
+    leaves_map = {l["date"]: l["value"] for l in leaves_docs}
+    holidays_map = get_holidays_for_dates(days)
+
+    # Capacité effective par jour (réduite si absence = 0.5, nulle si jour férié ou absence = 1.0)
+    day_caps: dict[str, float] = {}
+    for d in days:
+        if holidays_map.get(d):
+            day_caps[d] = 0.0  # jour férié → pas de saisie
+        elif leaves_map.get(d) == 1.0:
+            day_caps[d] = 0.0  # journée d'absence → pas de saisie
+        elif leaves_map.get(d) == 0.5:
+            day_caps[d] = round(daily_cap / 2, 2)  # demi-journée
+        else:
+            day_caps[d] = daily_cap
+
     rows, day_totals = [], {d: 0.0 for d in days}
     for wa in work_allocs:
         waid = wa["work_allocation_id"]
@@ -217,11 +238,14 @@ async def get_grid(resource_id: str, week_start: str, current_user: TokenPayload
         "resource_id":      resource_id,
         "resource_name":    resource.get("name", "?"),
         "daily_cap_jh":     daily_cap,
+        "day_caps":         day_caps,
         "days":             days,
         "rows":             rows,
         "day_totals":       {d: round(v, 1) for d, v in day_totals.items()},
         "week_grand_total": round(sum(day_totals.values()), 1),
         "can_submit":       can_submit,
+        "leaves":           leaves_map,
+        "holidays":         holidays_map,
     }
 
 
@@ -246,6 +270,27 @@ async def upsert_entry(data: TimesheetEntryUpsert, current_user: TokenPayload) -
             status_code=422,
             detail=f"JH saisi ({data.jh_value}) dépasse la capacité journalière ({daily_cap:.1f} JH)",
         )
+
+    # ── Vérification absence ─────────────────────────────────────────────
+    if data.jh_value > 0:
+        leave_doc = await db.leaves.find_one(
+            {"resource_id": data.resource_id, "date": data.date,
+             "tenant_id": current_user.tenant_id},
+            {"_id": 0, "value": 1},
+        )
+        absence_val = leave_doc["value"] if leave_doc else 0.0
+        if absence_val == 1.0:
+            raise HTTPException(
+                status_code=409,
+                detail="Impossible de saisir des heures : absence journée entière ce jour",
+            )
+        if absence_val == 0.5:
+            half_cap = round(daily_cap / 2, 2)
+            if data.jh_value > half_cap:
+                raise HTTPException(
+                    status_code=422,
+                    detail=f"Demi-journée d'absence : saisie limitée à {half_cap} JH ce jour",
+                )
 
     existing = await db.timesheets.find_one(
         {"resource_id": data.resource_id, "work_allocation_id": data.work_allocation_id,

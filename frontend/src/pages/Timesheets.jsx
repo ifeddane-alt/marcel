@@ -2,10 +2,10 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Clock, CheckCircle, AlertTriangle, ChevronLeft, ChevronRight,
   Download, Filter, Send, RefreshCw, X, Users, Briefcase, Shield,
-  ArrowRight, Info,
+  ArrowRight, Info, CalendarDays, Minus,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
-import { timesheetsAPI, resourcesAPI } from "@/api";
+import { timesheetsAPI, resourcesAPI, leavesAPI } from "@/api";
 import { toast } from "sonner";
 
 // ─── Constantes ─────────────────────────────────────────────────────────────
@@ -137,6 +137,27 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
     }, 500);
   }, [resourceId]);
 
+  // Gestion des absences : cycle 0 → 0.5 → 1 → 0
+  const handleLeave = useCallback(async (day) => {
+    const current = grid?.leaves?.[day] ?? 0;
+    const next = current === 0 ? 0.5 : current === 0.5 ? 1.0 : 0.0;
+    try {
+      await leavesAPI.upsertEntry({ resource_id: resourceId, date: day, value: next });
+      setGrid((g) => ({
+        ...g,
+        leaves: { ...g.leaves, [day]: next },
+        day_caps: {
+          ...g.day_caps,
+          [day]: g.holidays?.[day] ? 0 : next === 1.0 ? 0 : next === 0.5 ? g.daily_cap_jh / 2 : g.daily_cap_jh,
+        },
+      }));
+      const label = next === 0 ? "Absence supprimée" : next === 0.5 ? "Demi-journée enregistrée" : "Journée d'absence enregistrée";
+      toast.success(label);
+    } catch (err) {
+      toast.error(err.response?.data?.detail || "Erreur saisie absence");
+    }
+  }, [resourceId, grid]);
+
   const handleSubmit = async () => {
     setSubmitting(true);
     try {
@@ -147,13 +168,23 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
     finally { setSubmitting(false); }
   };
 
-  const canEdit  = (status) => !status || status === "draft" || status === "rejected";
-  const cellBg   = (status) => {
-    if (!status || status === "draft")     return "";
-    if (status === "submitted")            return "bg-blue-50";
-    if (status === "cp_reviewed")          return "bg-amber-50";
-    if (status === "validated")            return "bg-emerald-50";
-    if (status === "rejected")             return "bg-rose-50/60";
+  const canEdit = (status, day) => {
+    if (!grid) return false;
+    // Jour férié → jamais éditable
+    if (grid.holidays?.[day]?.length) return false;
+    // Absence journée entière → pas d'édition possible
+    if ((grid.leaves?.[day] ?? 0) >= 1.0) return false;
+    return !status || status === "draft" || status === "rejected";
+  };
+
+  const cellBg = (status, day) => {
+    if (grid?.holidays?.[day]?.length) return "bg-gray-100";
+    if ((grid?.leaves?.[day] ?? 0) >= 1.0) return "bg-indigo-50";
+    if (!status || status === "draft")  return "";
+    if (status === "submitted")         return "bg-blue-50";
+    if (status === "cp_reviewed")       return "bg-amber-50";
+    if (status === "validated")         return "bg-emerald-50";
+    if (status === "rejected")          return "bg-rose-50/60";
     return "";
   };
 
@@ -219,18 +250,71 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
                 <th className="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-500 min-w-[240px]">
                   Projet / Tâche / Phase
                 </th>
-                {grid.days.map((day, i) => (
-                  <th key={day} className="px-2 py-2.5 text-center text-[10px] font-bold uppercase tracking-widest text-slate-500 min-w-[80px]">
-                    <div>{DOW[i]}</div>
-                    <div className="text-[9px] text-slate-400 font-normal mt-0.5">
-                      {new Date(day + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })}
-                    </div>
-                  </th>
-                ))}
+                {grid.days.map((day, i) => {
+                  const hols = grid.holidays?.[day] ?? [];
+                  const isHoliday = hols.length > 0;
+                  return (
+                    <th key={day} className={`px-2 py-2 text-center text-[10px] font-bold uppercase tracking-widest min-w-[80px] ${isHoliday ? "bg-gray-100 text-gray-400" : "text-slate-500"}`}>
+                      <div>{DOW[i]}</div>
+                      <div className="text-[9px] font-normal mt-0.5">
+                        {new Date(day + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })}
+                      </div>
+                      {isHoliday && (
+                        <div className="text-[8px] font-semibold text-indigo-400 mt-0.5 truncate max-w-[72px] mx-auto" title={hols.map(h=>h.name).join(", ")}>
+                          {hols[0].country === "FR" ? "🇫🇷" : "🇲🇦"} Férié
+                        </div>
+                      )}
+                    </th>
+                  );
+                })}
                 <th className="px-3 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-slate-500 min-w-[70px]">Total</th>
               </tr>
             </thead>
             <tbody>
+              {/* ── Ligne Absences ─────────────────────────────────────── */}
+              <tr className="border-b border-indigo-100 bg-indigo-50/40" data-testid="absence-row">
+                <td className="px-4 py-2">
+                  <div className="flex items-center gap-1.5">
+                    <CalendarDays size={12} className="text-indigo-500 shrink-0" />
+                    <span className="text-xs font-semibold text-indigo-700">Absences</span>
+                  </div>
+                  <div className="text-[9px] text-indigo-400 mt-0.5">Clic : 0 → ½j → 1j → 0</div>
+                </td>
+                {grid.days.map((day) => {
+                  const hols = grid.holidays?.[day] ?? [];
+                  const val  = grid.leaves?.[day] ?? 0;
+                  if (hols.length > 0) {
+                    return (
+                      <td key={day} className="px-2 py-2 text-center bg-gray-100">
+                        <span className="text-[9px] text-gray-400 font-medium block truncate" title={hols.map(h=>h.name).join(", ")}>
+                          Férié
+                        </span>
+                      </td>
+                    );
+                  }
+                  return (
+                    <td key={day} className="px-2 py-2 text-center">
+                      <button
+                        onClick={() => handleLeave(day)}
+                        data-testid={`absence-cell-${day}`}
+                        className={`w-14 mx-auto flex items-center justify-center text-xs font-bold rounded py-1 border transition-all cursor-pointer
+                          ${val === 0   ? "border-gray-200 text-gray-400 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600" : ""}
+                          ${val === 0.5 ? "border-indigo-300 bg-indigo-100 text-indigo-700" : ""}
+                          ${val === 1.0 ? "border-indigo-500 bg-indigo-200 text-indigo-800" : ""}
+                        `}
+                      >
+                        {val === 0 ? <Minus size={10} /> : val === 0.5 ? "½j" : "1j"}
+                      </button>
+                    </td>
+                  );
+                })}
+                <td className="px-3 py-2 text-right text-xs font-bold text-indigo-700 tabular-nums">
+                  {Object.values(grid.leaves ?? {}).reduce((s, v) => s + v, 0) > 0
+                    ? Object.values(grid.leaves ?? {}).reduce((s, v) => s + v, 0) + " j"
+                    : <span className="text-slate-300">—</span>}
+                </td>
+              </tr>
+              {/* ── Lignes Projets ─────────────────────────────────────── */}
               {grid.rows.map((row) => (
                 <tr key={row.work_allocation_id} className="border-b border-gray-50 hover:bg-gray-50/50"
                   data-testid={`grid-row-${row.work_allocation_id}`}>
@@ -246,11 +330,13 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
                   {grid.days.map((day) => {
                     const e   = row.entries[day];
                     const key = `${row.work_allocation_id}__${day}`;
-                    const editable = canEdit(e?.status);
+                    const editable  = canEdit(e?.status, day);
+                    const bg        = cellBg(e?.status, day);
+                    const dayCap    = grid.day_caps?.[day] ?? grid.daily_cap_jh;
                     return (
-                      <td key={day} className={`px-2 py-1.5 text-center ${cellBg(e?.status)}`}>
+                      <td key={day} className={`px-2 py-1.5 text-center ${bg}`}>
                         <div className="relative group">
-                          <input type="number" min={0} max={grid.daily_cap_jh * 2} step={0.5}
+                          <input type="number" min={0} max={dayCap * 2} step={0.5}
                             value={cells[key] ?? 0}
                             onChange={(ev) => handleCell(row.work_allocation_id, day, ev.target.value)}
                             disabled={!editable}
@@ -282,14 +368,16 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
               ))}
               <tr className="bg-[#EBF2FF] border-t-2 border-[#0052CC]/20">
                 <td className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-[#0052CC]">Total / jour</td>
-                {grid.days.map((day) => (
-                  <td key={day} className="px-2 py-2 text-center text-xs font-bold text-[#0052CC] tabular-nums">
-                    {grid.day_totals[day] > 0 ? grid.day_totals[day] : "—"}
-                    {grid.daily_cap_jh > 0 && grid.day_totals[day] > grid.daily_cap_jh && (
-                      <AlertTriangle size={10} className="inline ml-1 text-rose-500" />
-                    )}
-                  </td>
-                ))}
+                {grid.days.map((day) => {
+                  const dayCap = grid.day_caps?.[day] ?? grid.daily_cap_jh;
+                  const exceeded = dayCap > 0 && grid.day_totals[day] > dayCap;
+                  return (
+                    <td key={day} className="px-2 py-2 text-center text-xs font-bold text-[#0052CC] tabular-nums">
+                      {grid.day_totals[day] > 0 ? grid.day_totals[day] : "—"}
+                      {exceeded && <AlertTriangle size={10} className="inline ml-1 text-rose-500" />}
+                    </td>
+                  );
+                })}
                 <td className="px-3 py-2 text-right text-xs font-bold text-[#0052CC] tabular-nums">
                   {grid.week_grand_total || "—"}
                 </td>
@@ -698,6 +786,207 @@ function ReportsView() {
   );
 }
 
+// ─── ONGLET 4 : Calendrier Absences ──────────────────────────────────────────
+const FR_MONTHS = ["Janvier","Février","Mars","Avril","Mai","Juin","Juillet","Août","Septembre","Octobre","Novembre","Décembre"];
+const DOW_FULL  = ["Lun", "Mar", "Mer", "Jeu", "Ven", "Sam", "Dim"];
+
+function AbsencesCalendar({ allResources, defaultResourceId }) {
+  const today   = new Date();
+  const [year,  setYear]  = useState(today.getFullYear());
+  const [month, setMonth] = useState(today.getMonth() + 1); // 1-based
+  const [resourceId, setResourceId] = useState(defaultResourceId || "");
+  const [cal,   setCal]   = useState(null);
+  const [loading, setLoading] = useState(false);
+
+  const monthStr = `${year}-${String(month).padStart(2, "0")}`;
+
+  const load = useCallback(async () => {
+    if (!resourceId) return;
+    setLoading(true);
+    try {
+      const r = await leavesAPI.getMonth(resourceId, monthStr);
+      setCal(r.data);
+    } catch { toast.error("Erreur chargement calendrier"); }
+    finally { setLoading(false); }
+  }, [resourceId, monthStr]);
+
+  useEffect(() => { load(); }, [load]);
+
+  const handleDayClick = async (day) => {
+    if (day.is_weekend || day.is_holiday) return;
+    const current = day.absence_value ?? 0;
+    const next    = current === 0 ? 0.5 : current === 0.5 ? 1.0 : 0.0;
+    try {
+      await leavesAPI.upsertEntry({ resource_id: resourceId, date: day.date, value: next });
+      setCal((c) => ({
+        ...c,
+        days: c.days.map((d) => d.date === day.date ? { ...d, absence_value: next } : d),
+        stats: {
+          ...c.stats,
+          absence_jh:  c.stats.absence_jh  - current + next,
+          available_jh: c.stats.available_jh + current - next,
+        },
+      }));
+    } catch (err) { toast.error(err.response?.data?.detail || "Erreur"); }
+  };
+
+  const shiftMonth = (delta) => {
+    let nm = month + delta, ny = year;
+    if (nm > 12) { nm = 1; ny++; }
+    if (nm < 1)  { nm = 12; ny--; }
+    setMonth(nm); setYear(ny);
+  };
+
+  // Construire la grille calendrier (semaines en lignes)
+  const buildWeeks = (days) => {
+    if (!days?.length) return [];
+    const firstDow = days[0].weekday; // 0=Lun
+    const padded   = [...Array(firstDow).fill(null), ...days];
+    const weeks    = [];
+    for (let i = 0; i < padded.length; i += 7) weeks.push(padded.slice(i, i + 7));
+    // Compléter la dernière semaine
+    const last = weeks[weeks.length - 1];
+    while (last.length < 7) last.push(null);
+    return weeks;
+  };
+
+  const dayClass = (day) => {
+    if (!day) return "";
+    if (day.is_weekend)     return "bg-gray-50 text-gray-300 cursor-default";
+    if (day.is_holiday)     return "bg-indigo-50 cursor-default";
+    if (day.absence_value === 1.0) return "bg-indigo-500 text-white cursor-pointer hover:bg-indigo-600";
+    if (day.absence_value === 0.5) return "bg-indigo-200 text-indigo-800 cursor-pointer hover:bg-indigo-300";
+    return "bg-white hover:bg-indigo-50 cursor-pointer";
+  };
+
+  const stats = cal?.stats;
+
+  return (
+    <div data-testid="absences-calendar">
+      {/* En-tête */}
+      <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
+        <div className="flex items-center gap-2">
+          <button onClick={() => shiftMonth(-1)} data-testid="cal-prev-month"
+            className="p-1.5 border border-gray-200 rounded hover:bg-gray-50 text-slate-500"><ChevronLeft size={14} /></button>
+          <span className="text-base font-bold text-slate-800 min-w-[160px] text-center">
+            {FR_MONTHS[month - 1]} {year}
+          </span>
+          <button onClick={() => shiftMonth(1)} data-testid="cal-next-month"
+            className="p-1.5 border border-gray-200 rounded hover:bg-gray-50 text-slate-500"><ChevronRight size={14} /></button>
+        </div>
+        <select value={resourceId} onChange={(e) => setResourceId(e.target.value)}
+          data-testid="cal-resource-picker"
+          className="text-sm border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-[#0052CC] bg-white min-w-[200px]">
+          <option value="">— Sélectionner une ressource —</option>
+          {allResources.map((r) => (
+            <option key={r.resource_id} value={r.resource_id}>{r.name}</option>
+          ))}
+        </select>
+      </div>
+
+      {!resourceId ? (
+        <div className="py-16 text-center border-2 border-dashed border-gray-200 rounded-lg text-slate-400 text-sm">
+          Sélectionnez une ressource pour voir son calendrier d'absences
+        </div>
+      ) : loading ? (
+        <div className="py-12 text-center text-slate-400 text-sm">Chargement...</div>
+      ) : cal && (
+        <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          {/* Calendrier */}
+          <div className="lg:col-span-2 bg-white border border-gray-200 rounded shadow-sm overflow-hidden">
+            <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
+              {DOW_FULL.map((d, i) => (
+                <div key={d} className={`py-2 text-center text-[10px] font-bold uppercase tracking-widest ${i >= 5 ? "text-gray-300" : "text-slate-500"}`}>
+                  {d}
+                </div>
+              ))}
+            </div>
+            {buildWeeks(cal.days).map((week, wi) => (
+              <div key={wi} className="grid grid-cols-7 border-b border-gray-100">
+                {week.map((day, di) => {
+                  if (!day) return <div key={di} className="p-2 bg-gray-50/50 min-h-[52px]" />;
+                  const dayNum = parseInt(day.date.split("-")[2]);
+                  return (
+                    <div key={day.date} onClick={() => handleDayClick(day)}
+                      data-testid={`cal-day-${day.date}`}
+                      className={`p-2 min-h-[52px] border-r border-gray-100 flex flex-col transition-colors ${dayClass(day)}`}>
+                      <span className={`text-xs font-semibold mb-1 ${day.is_holiday ? "text-indigo-600" : day.is_weekend ? "text-gray-300" : "text-slate-700"}`}>
+                        {dayNum}
+                      </span>
+                      {day.is_holiday && day.holidays.length > 0 && (
+                        <span className="text-[9px] leading-tight text-indigo-500 font-medium truncate" title={day.holidays.map(h=>h.name).join(", ")}>
+                          {day.holidays[0].country === "FR" ? "🇫🇷" : "🇲🇦"} {day.holidays[0].name.slice(0, 12)}
+                        </span>
+                      )}
+                      {!day.is_weekend && !day.is_holiday && day.absence_value > 0 && (
+                        <span className="text-[10px] font-bold mt-auto">
+                          {day.absence_value === 0.5 ? "½ j" : "1 j"}
+                        </span>
+                      )}
+                      {!day.is_weekend && !day.is_holiday && day.absence_value === 0 && (
+                        <span className="text-[9px] text-gray-300 mt-auto opacity-0 group-hover:opacity-100">+</span>
+                      )}
+                    </div>
+                  );
+                })}
+              </div>
+            ))}
+          </div>
+
+          {/* Stats & légende */}
+          <div className="space-y-4">
+            {stats && (
+              <div className="bg-white border border-gray-200 rounded shadow-sm p-4" data-testid="cal-stats">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Résumé du mois</h3>
+                <div className="space-y-2">
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-slate-600">Jours ouvrés</span>
+                    <span className="text-sm font-bold text-slate-800" data-testid="stat-working">{stats.total_working} j</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-slate-600">Jours fériés</span>
+                    <span className="text-sm font-semibold text-indigo-600" data-testid="stat-holidays">{stats.holiday_days} j</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs text-slate-600">Absences saisies</span>
+                    <span className="text-sm font-semibold text-amber-600" data-testid="stat-absences">{stats.absence_jh} j</span>
+                  </div>
+                  <div className="h-px bg-gray-100 my-1" />
+                  <div className="flex justify-between items-center">
+                    <span className="text-xs font-semibold text-slate-700">JH disponibles nettes</span>
+                    <span className="text-base font-bold text-[#0052CC]" data-testid="stat-available">{stats.available_jh} j</span>
+                  </div>
+                </div>
+              </div>
+            )}
+
+            <div className="bg-white border border-gray-200 rounded shadow-sm p-4">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Légende</h3>
+              <div className="space-y-1.5">
+                {[
+                  { cls: "bg-white border border-gray-200", label: "Jour ouvré disponible (clic pour ajouter)" },
+                  { cls: "bg-indigo-200 border border-indigo-300", label: "Demi-journée d'absence" },
+                  { cls: "bg-indigo-500 border border-indigo-600", label: "Journée entière d'absence" },
+                  { cls: "bg-indigo-50 border border-indigo-200", label: "Jour férié (FR ou MA)" },
+                  { cls: "bg-gray-50 border border-gray-200", label: "Week-end" },
+                ].map(({ cls, label }) => (
+                  <div key={label} className="flex items-center gap-2">
+                    <div className={`w-5 h-5 rounded ${cls} shrink-0`} />
+                    <span className="text-[11px] text-slate-600">{label}</span>
+                  </div>
+                ))}
+              </div>
+              <div className="mt-3 pt-3 border-t border-gray-100">
+                <p className="text-[10px] text-slate-400">Cliquez sur un jour pour cycler : disponible → ½j → 1j → disponible</p>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
 // ─── Page principale ──────────────────────────────────────────────────────────
 export default function Timesheets() {
   const { user } = useAuth();
@@ -718,6 +1007,7 @@ export default function Timesheets() {
   const TABS = [
     { id: "saisie",     label: "Ma saisie",  icon: Clock },
     ...(canValidate ? [{ id: "validation", label: "Validation", icon: CheckCircle }] : []),
+    { id: "absences",   label: "Absences",   icon: CalendarDays },
     { id: "rapports",   label: "Rapports",   icon: Download },
   ];
 
@@ -729,7 +1019,7 @@ export default function Timesheets() {
           <h1 className="font-heading text-3xl font-bold text-[#0F172A] uppercase tracking-tight">Timesheets</h1>
         </div>
         <p className="text-sm text-slate-500">
-          Saisie des temps · Validation multi-acteurs (N+1 → Chef de Projet → PMO)
+          Saisie des temps · Absences · Validation multi-acteurs (N+1 → Chef de Projet → PMO)
         </p>
       </div>
 
@@ -755,6 +1045,12 @@ export default function Timesheets() {
       )}
       {tab === "validation" && canValidate && (
         <ValidationView user={user} refresh={validRefresh} />
+      )}
+      {tab === "absences" && (
+        <AbsencesCalendar
+          allResources={allResources}
+          defaultResourceId={resourceId}
+        />
       )}
       {tab === "rapports" && <ReportsView />}
     </div>

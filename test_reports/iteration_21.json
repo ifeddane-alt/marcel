@@ -1,0 +1,34 @@
+{
+  "summary": "P1 Congés/Absences — 10/10 backend tests passed, all 18 frontend features verified. Fixed 1 bug in leaves/service.py (holiday_days always 0 in month stats).",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_leaves_p1.py",
+    "/app/test_reports/pytest/leaves_p1.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "FIXED: Bug in /app/backend/modules/leaves/service.py — get_month_calendar passed working_dates (holidays already excluded) to count_working_days, causing holiday_days to always return 0. Fixed by passing all non-weekend dates instead."
+  ],
+  "updated_files": [
+    "/app/backend/modules/leaves/service.py",
+    "/app/backend/tests/test_leaves_p1.py"
+  ],
+  "success_rate": {
+    "backend": "100% (10/10)",
+    "frontend": "100% — all features working"
+  },
+  "test_credentials": "admin@altair.fr / Admin1234!",
+  "seed_data_creation": "Test leave entries created/deleted during tests (DATE_WD=2026-02-10 cleaned up)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "P1 Congés fully working. Backend: /api/holidays, /api/leaves/entry (CRUD), /api/leaves/month, /api/timesheets/grid (with leaves/holidays/day_caps). Frontend: Absences tab with monthly calendar, resource picker, holiday flags (🇫🇷/🇲🇦), stats panel, day cycling (0→½j→1j→0), absence-row in Ma saisie grid. Bug fixed: holiday_days=0 in month stats.",
+  "rca_of_the_issue": "In get_month_calendar (leaves/service.py), working_dates was computed as [dates where not weekend AND not holiday], then passed to count_working_days(). But count_working_days() counts holidays by checking _HOLIDAY_INDEX — since holidays were already excluded from the list, holiday_days was always 0. Fix: pass all non-weekend dates to count_working_days so it can detect and count holidays itself."
+}

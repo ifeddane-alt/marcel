@@ -145,4 +145,10 @@ export const timesheetsAPI = {
   getReportCsv:      (dim, start, end) => api.get(`/timesheets/report/csv?dimension=${dim}&start=${start}&end=${end}`, { responseType: "text" }),
 };
 
+export const leavesAPI = {
+  upsertEntry: (data)                     => api.put("/leaves/entry", data),
+  getMonth:    (resourceId, month)        => api.get(`/leaves/month?resource_id=${resourceId}&month=${month}`),
+  getHolidays: (year, month)              => api.get(`/holidays?year=${year}&month=${month}`),
+};
+
 export default api;
