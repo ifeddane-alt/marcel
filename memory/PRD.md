@@ -41,66 +41,58 @@ Multi-tenant avec isolation stricte des données et RBAC granulaire.
 - Validation simple (`submitted → validated`)
 - Rapports CSV par ressource / équipe / projet
 
-### ✅ Stream 3 Enhancement — Workflow Multi-Acteurs (NOUVEAU - 2026-02)
+### ✅ Stream 3 Enhancement — Workflow Multi-Acteurs (2026-02)
 **Workflow 4 étapes :**
 ```
 draft → submitted → cp_reviewed → validated
                     ↑              ↑
                 Valideur N+1    Chef de Projet
-                
+
 PMO/Admin bypass → validated (depuis n'importe quel statut)
 Any → draft (rejet avec motif obligatoire)
 ```
 
-**RBAC du workflow :**
-| Transition | Acteur | Condition |
-|---|---|---|
-| draft → submitted | Ressource | jh_value > 0 |
-| submitted → cp_reviewed | Valideur | `resource.validator_resource_id` ou manager d'équipe |
-| cp_reviewed → validated | Chef de Projet | `project.owner_resource_id` |
-| any → validated (bypass) | TENANT_ADMIN ou PMO_USER | Accès direct |
-| any → draft (reject) | Valideur, CP, ou PMO/Admin | Motif obligatoire |
-
-**Timeout CP :** Badge d'alerte si `cp_reviewed` depuis > 3 jours ouvrés
-
-**3 sous-vues dans l'onglet Validation :**
-- **Valideur N+1** : timesheets `submitted` où je suis le valideur explicite ou manager d'équipe
-- **Chef de Projet** : timesheets `cp_reviewed` pour mes projets (`owner_resource_id`)
-- **PMO/Admin** (TENANT_ADMIN/PMO_USER uniquement) : tout voir + bypass
-
-**Champs DB ajoutés :**
-- `resources.validator_resource_id` (override N+1, sinon manager d'équipe par défaut)
-- `projects.owner_resource_id` (CP du projet pour validation finale)
-- `timesheets.status` : ajout de `cp_reviewed`
-- `timesheets.cp_reviewed_at`, `modified_by`, `modified_at`, `modification_reason`
-
-**Données de démo :**
-- Sophie Martin (admin) = valideur de Thomas Dubois et Alexandre Moreau
-- Thomas Dubois (PMO) = valideur de Sophie Martin
-- Projects 0,2,5,7 (Finance/SAP/Azure/DORA) → CP : Sophie Martin
-- Projects 1,3,4,6 (Phoenix/DW/CRM/RH) → CP : Thomas Dubois
-
-### ✅ P1 Congés & Absences (NOUVEAU - 2026-02)
-**Fonctionnalités :**
+### ✅ P1 Congés & Absences (2026-02)
 - Saisie directe des absences (0.5 = demi-journée, 1.0 = journée)
-- Jours fériés hardcodés FR + MA 2025-2026 (inclus dates islamiques approx.)
-- Blocage saisie timesheets si absence = 1j ce jour-là (→ 409)
-- Ligne "Absences" dans la grille timesheets hebdomadaire (clic : 0 → ½j → 1j → 0)
-- Onglet "Absences" avec calendrier mensuel interactif + stats (JH ouvrés, fériés, absences, disponibles)
-- Capacité journalière réduite de moitié si absence = 0.5j
-- `day_caps` retourné dans la grille pour adapter les limites par jour
+- Jours fériés hardcodés FR + MA 2025-2026
+- Ligne "Absences" dans la grille timesheets hebdomadaire
+- Onglet "Absences" avec calendrier mensuel interactif + stats
 
-**API :**
-- `PUT /api/leaves/entry` — upsert/delete absence
-- `GET /api/leaves/month?resource_id=&month=YYYY-MM` — calendrier mensuel
-- `GET /api/holidays?year=&month=` — jours fériés FR + MA
+### ✅ Tableau de bord réglementaire - Conformité (2026-02)
+- Page Conformité avec milestones regulatory + decomm
+- KPIs : total actifs, critiques (J-30), orange (J-31-90), dépassés
+- Tableau triable/filtrable par projet, type, statut
+- Export CSV
+
+### ✅ Gestion de la Demande (2026-04)
+**Workflow de qualification :**
+```
+nouvelle → qualifiee (PMO/Admin : qualify)
+qualifiee → priorisee (PMO/Admin : prioritize, priority_score obligatoire)
+priorisee → acceptee (PMO/Admin : accept)
+priorisee → refusee (PMO/Admin : refuse, rejection_reason obligatoire)
+acceptee → convertie (PMO/Admin : convert → crée un projet)
+```
+
+**Fonctionnalités :**
+- Vue Kanban (6 colonnes) avec drag & drop HTML5
+- Vue Tableau (table sortable)
+- KPIs en-tête : total, nouvelles, acceptées, critiques
+- Création par tout rôle non READ_ONLY
+- CRUD complet (PMO/Admin)
+- Modal de conversion en projet pré-remplie (titre, description, budget, dates, programme)
+- Seed de 10 demandes de démo via `POST /api/demands/seed`
+- Filtres : statut, urgence, recherche texte libre
 
 **Champs DB :**
-- Collection `leaves`: `leave_id`, `tenant_id`, `resource_id`, `date`, `value` (0.5 | 1.0), `created_by`, `created_at`
-
-
-- Milestones familles 3 types + filtres + PPT
-- Dépendances inter-projets avec nature/statut/impact
+```
+demands: demand_id, tenant_id, title, description, requester, requester_department,
+         business_value, estimated_budget, urgency (low/medium/high/critical),
+         status (nouvelle/qualifiee/priorisee/acceptee/refusee/convertie),
+         priority_score, rejection_reason, qualified_by, qualified_at,
+         prioritized_by, prioritized_at, accepted_by, accepted_at,
+         refused_by, refused_at, converted_project_id, created_by, created_at, updated_at
+```
 
 ---
 
@@ -118,6 +110,18 @@ Any → draft (rejet avec motif obligatoire)
 | POST | `/api/timesheets/reject` | Rejet → draft (motif obligatoire) |
 | GET | `/api/timesheets/report` | Rapport agrégé |
 
+### Demands
+| Méthode | Route | Description |
+|---|---|---|
+| GET | `/api/demands` | Liste (filtres: status, urgency) |
+| POST | `/api/demands` | Créer (non READ_ONLY) |
+| GET | `/api/demands/{id}` | Détail |
+| PUT | `/api/demands/{id}` | Modifier (PMO/Admin) |
+| DELETE | `/api/demands/{id}` | Supprimer (PMO/Admin) |
+| PATCH | `/api/demands/{id}/transition` | Transition workflow |
+| POST | `/api/demands/{id}/convert` | Convertir en projet |
+| POST | `/api/demands/seed` | Seed données démo |
+
 ---
 
 ## Schéma DB Clé
@@ -132,30 +136,67 @@ timesheets:    timesheet_id, tenant_id, resource_id, work_allocation_id, date,
 milestones:    milestone_id, project_id, family(epic_lifecycle|epic_milestone|transversal),
                type, attribute, comment, owner_resource_id, deliverable, is_blocking
 project_dependencies: source_project_id, target_project_id, nature, status, impact
+demands:       demand_id, tenant_id, title, description, requester, requester_department,
+               business_value, estimated_budget, urgency, status, priority_score,
+               rejection_reason, qualified_by, converted_project_id, created_at
 ```
 
 ---
 
 ## Backlog Priorisé
 
-### P0 (Prêt pour implémentation)
-- Rien de bloquant actuellement
+### P0 (Prochain Sprint)
+- **SAFe Structurel (Chantier 3)** — Voir détail ci-dessous
 
-### P1 (Prochain Sprint)
-- **Congés & Planification des absences** : vue calendrier par ressource, intégration dans la capacité
+### P1 (Futur)
+Rien de défini
 
-### P2 (Futur)
-1. **Vue Tableau de bord réglementaire** : milestones regulatory/decomm + alerte J-90
-2. **Gestion de la Demande** : collection `demands`, workflow qualification
-3. **SAFe Structurel (Chantier 9a)** : collections `trains`, `pis`, `sprints`, `capabilities`
+### P2 (Backlog)
+À définir selon priorités utilisateur
+
+---
+
+## Chantier 3 : SAFe Structurel (PROCHAIN)
+
+### Phase 3a — Collections SAFe
+- Collections `trains`, `pis`, `sprints`, `capabilities`
+- CRUD pour toutes les collections
+- Lier les équipes à `train_id`
+
+### Phase 3b — Hiérarchie tâches
+- Ajouter `parent_id` (FK vers tasks) et `task_level` (enum) aux tasks
+- Hierarchy : capability → feature → user story
+- Les projets non-SAFe restent en liste plate
+
+### Phase 3c — TreeView projet
+- Remplacer la vue flat tasks par un TreeView expandable
+- Conserver toggle liste plate
+
+### Phase 3d — Cycle de vie par phase
+- Phases : backlog, review, analysis, implementation, test, hypercare, done, rejected
+- Historique dans `phase_history` collection
+- Règles anti-rollback
+
+### Phase 3e — Estimation par phase
+- Array `phase_estimates` sur les tasks
+
+### Phase 3f — Page "Trains SAFe"
+- Sidebar : lien "Trains SAFe"
+- Timelines PI, sprints, capacités
+
+### Seed & Tests SAFe
+- 1 train, 2 PIs, 4 sprints, capabilities avec hiérarchie
+- Vérifier zéro régression sur projets flat non-SAFe
 
 ---
 
 ## Fichiers Clés
 - Backend : `/app/backend/modules/timesheets/` (service.py, router.py, schemas.py)
+- Backend : `/app/backend/modules/demands/` (service.py, router.py, schemas.py) ← NOUVEAU
 - Backend : `/app/backend/modules/resources/` (service.py, schemas.py)
 - Backend : `/app/backend/seed.py` (données de démo)
-- Backend : `/app/backend/migrate_workflow.py` (migration Stream 3 Enhancement)
 - Frontend : `/app/frontend/src/pages/Timesheets.jsx` (saisie + 3 vues validation)
-- Frontend : `/app/frontend/src/components/ResourceModal.jsx` (validator_resource_id)
-- Frontend : `/app/frontend/src/api/index.js`
+- Frontend : `/app/frontend/src/pages/Demands.jsx` (Kanban + Table + workflow) ← NOUVEAU
+- Frontend : `/app/frontend/src/components/DemandModal.jsx` ← NOUVEAU
+- Frontend : `/app/frontend/src/components/ConvertProjectModal.jsx` ← NOUVEAU
+- Frontend : `/app/frontend/src/api/index.js` (toutes les APIs)
