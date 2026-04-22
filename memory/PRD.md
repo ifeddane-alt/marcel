@@ -77,9 +77,46 @@ Multi-tenant avec isolation stricte des données et RBAC granulaire par profils.
 - Sidebar nouvelle section "ACHATS / FINANCES" (visible si `vendors.view` ou `*`)
 - API : `/api/vendors/summary`, `/api/vendors/project/{id}`
 
----
+### ✅ Chantier 3 SAFe Structurel (2026-04)
 
-## API Endpoints Clés
+#### 3a — Collections SAFe + CRUD
+- Collections MongoDB : `trains`, `pis`, `sprints`, `capabilities`
+- CRUD complet via module `/app/backend/modules/safe/`
+- Train : ART Digital Banking · 2 PIs · 4 Sprints · 5 Capabilities
+- Endpoint `/safe/trains/{id}/overview` : vue agrégée complète
+- Permissions : `trains.create`, `trains.edit`, `trains.view`, `capabilities.create`
+
+#### 3b — Hiérarchie Tasks SAFe
+- `parent_id` (FK task→task) + `task_level` (task|feature|user_story) sur les tâches
+- `lifecycle_phase` (backlog|review|analysis|implementation|test|hypercare|done|rejected) 
+- `phase_estimates` (liste d'estimations par phase)
+- Compatibilité ascendante : projets non-SAFe inchangés (task_level="task" par défaut)
+- 5 tâches SAFe seedées sur Phoenix (2 features + 3 user stories avec parent_id)
+
+#### 3c — TaskTreeView expandable
+- Composant `TaskTreeView.jsx` : affichage hiérarchique feature→user_story
+- Toggle 3 vues dans ProjectDetail : Liste | Gantt | **Arbre SAFe** (uniquement si tâches SAFe)
+- Badges FEATURE (bleu) / USER STORY (violet) + badge phase lifecycle dans toutes les vues
+
+#### 3d — Cycle de vie par phase + anti-rollback
+- Endpoint `POST /tasks/{id}/transition` avec matrice de transitions valides
+- Phases terminales (done, rejected) : aucune transition possible
+- `phase_history` collection : historique complet horodaté par utilisateur
+- Endpoint `GET /tasks/{id}/phase-history`
+
+#### 3e — Estimations par phase
+- `phase_estimates[]` sur tâches : [{phase, jh_estimated, jh_actual, notes}]
+- Endpoint `PUT /tasks/{id}/phase-estimates`
+
+#### 3f — Page Trains SAFe
+- Page `/safe/trains` avec TrainsSafe.jsx
+- Header train : vision, équipes, KPI cards (PIs, Sprints, Capabilities, Équipes)
+- Répartition capabilities par statut (identifiée/committée/en cours/terminée)
+- PI Panels expandables : objectifs, sprint cards avec vélocité, capabilities board (4 colonnes kanban)
+- CRUD Capabilities inline (modal) sur chaque PI
+- Sidebar : section "SAFE" avec "Trains SAFe" (visible pour `trains.view` ou `*`)
+
+---
 
 ### Fournisseurs (Vendors)
 | Méthode | Route | Permission |
@@ -126,34 +163,17 @@ allocations:   allocation_id, project_id, resource_id, period_month, jh_allocate
 
 ## Backlog Priorisé
 
-### P0 (Prochain Sprint) — Chantier 3 : SAFe Structurel
+### P0 (Prochain Sprint) — Chantier 3 (suite)
 
-#### Phase 3a — Collections SAFe
-- Collections `trains`, `pis`, `sprints`, `capabilities` CRUD
-- Lier les équipes à `train_id`
+- **Export CSV contrats fournisseurs** (backlog, simple)
+- **Ajout tâches SAFe via modal** : sélecteur task_level (feature/user_story) dans TaskModal + sélection parent_id
+- **Sprint Assignment** : assigner une tâche/user story à un sprint spécifique
+- **PI Planning Board** : vue kanban de planification d'un PI (features à placer dans les sprints)
 
-#### Phase 3b — Hiérarchie tâches
-- `parent_id` + `task_level` sur tasks
-- capability → feature → user story
-- Projets non-SAFe restent en liste plate
-
-#### Phase 3c — TreeView projet
-- Vue expandable (arbre) dans ProjectDetail
-- Toggle flat list / tree view
-
-#### Phase 3d — Cycle de vie par phase
-- `phase_history` collection, anti-rollback rules
-- Phases : backlog, review, analysis, implementation, test, hypercare, done, rejected
-
-#### Phase 3e — Estimations par phase
-- `phase_estimates[]` array sur tasks
-
-#### Phase 3f — Page "Trains SAFe"
-- PI timelines, sprints, capacités dans la sidebar
-
-#### Seed & Tests SAFe
-- 1 train, 2 PIs, 4 sprints, capabilities avec hiérarchie
-- Zéro régression sur projets non-SAFe plats
+### P1 — Chantier 4 Portefeuille stratégique
+- OKR (Objectives & Key Results) liés aux capabilities SAFe
+- Scoring stratégique WSJF automatique
+- Dashboard programme : vue consolidée train → projets → avancement
 
 ---
 
