@@ -1,7 +1,8 @@
 import React, { useState, useEffect } from "react";
 import { X, GitFork } from "lucide-react";
+import { useTenantConfig } from "@/contexts/TenantConfigContext";
 
-const NATURES = [
+const DEFAULT_NATURES = [
   { value: "deliverable", label: "Livrable" },
   { value: "resource",    label: "Ressource" },
   { value: "technical",   label: "Technique" },
@@ -28,6 +29,10 @@ export default function DependencyModal({
   dependency, projectId, projects, sourceMilestones, onSave, onClose,
 }) {
   const isEdit = !!dependency;
+  const { config } = useTenantConfig();
+  const NATURES = (config?.enums?.dependency_natures?.length > 0)
+    ? config.enums.dependency_natures
+    : DEFAULT_NATURES;
 
   const [direction,  setDirection]  = useState(dependency?.direction  || "outbound");
   const [targetPid,  setTargetPid]  = useState(

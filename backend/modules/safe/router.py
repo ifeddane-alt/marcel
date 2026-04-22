@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends
 from typing import Optional
 from core.auth import TokenPayload, get_current_user, permission_required
+from core.tenant_config import require_module
 from .schemas import (
     TrainCreate, TrainUpdate,
     PICreate, PIUpdate,
@@ -9,7 +10,7 @@ from .schemas import (
 )
 from . import service
 
-router = APIRouter(tags=["safe"])
+router = APIRouter(tags=["safe"], dependencies=[Depends(require_module("safe"))])
 
 
 # ─── Trains ──────────────────────────────────────────────────────────────────

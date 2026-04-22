@@ -1,5 +1,6 @@
 import React, { useState, useEffect } from "react";
 import { X, Diamond } from "lucide-react";
+import { useTenantConfig } from "@/contexts/TenantConfigContext";
 
 export const FAMILY_CONFIG = {
   epic_lifecycle: {
@@ -62,6 +63,7 @@ export const MILESTONE_STATUSES = [
 
 export default function MilestoneModal({ milestone, projectId, resources, onSave, onClose, isAdmin }) {
   const isEdit = !!milestone;
+  const { config } = useTenantConfig();
 
   const [family, setFamily] = useState(milestone?.family || "");
   const [type, setType]     = useState(milestone?.type || "");
@@ -80,7 +82,9 @@ export default function MilestoneModal({ milestone, projectId, resources, onSave
   const [error, setError]   = useState("");
 
   const familyCfg = FAMILY_CONFIG[family] || null;
-  const filteredTypes = familyCfg?.types || [];
+  // Merge tenant types with hardcoded defaults for this family
+  const tenantFamilyTypes = config?.enums?.milestone_types?.[family]?.types;
+  const filteredTypes = tenantFamilyTypes?.length > 0 ? tenantFamilyTypes : (familyCfg?.types || []);
 
   // Reset type when family changes
   useEffect(() => {

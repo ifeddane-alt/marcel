@@ -2,14 +2,15 @@ import React, { useState, useEffect } from "react";
 import { Loader2, ShieldAlert } from "lucide-react";
 import Modal from "@/components/Modal";
 import { risksAPI } from "@/api";
+import { useTenantConfig } from "@/contexts/TenantConfigContext";
 
-const CATEGORIES = [
-  { value: "technique",   label: "Technique" },
-  { value: "budget",      label: "Budget" },
-  { value: "planning",    label: "Planning" },
-  { value: "ressource",   label: "Ressource" },
-  { value: "externe",     label: "Externe" },
-  { value: "conformité",  label: "Conformité" },
+const DEFAULT_CATEGORIES = [
+  { value: "technique",  label: "Technique" },
+  { value: "budget",     label: "Budget" },
+  { value: "planning",   label: "Planning" },
+  { value: "ressource",  label: "Ressource" },
+  { value: "externe",    label: "Externe" },
+  { value: "conformité", label: "Conformité" },
 ];
 
 const STATUSES = [
@@ -66,6 +67,11 @@ function CritBadge({ crit }) {
 }
 
 export default function RiskModal({ isOpen, onClose, risk, projectId, onSaved }) {
+  const { config } = useTenantConfig();
+  const CATEGORIES = (config?.enums?.risk_categories?.length > 0)
+    ? config.enums.risk_categories
+    : DEFAULT_CATEGORIES;
+
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);

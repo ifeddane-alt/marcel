@@ -216,6 +216,17 @@ export const vendorsAPI = {
   projectCosts: (projectId) => api.get(`/vendors/project/${projectId}`),
 };
 
+export const adminConfigAPI = {
+  get:             ()    => api.get("/admin/config"),
+  seed:            ()    => api.post("/admin/config/seed"),
+  updateModules:   (d)   => api.put("/admin/config/modules", d),
+  updateWorkflows: (d)   => api.put("/admin/config/workflows", d),
+  updateEnums:     (d)   => api.put("/admin/config/enums", d),
+  updateHolidays:  (d)   => api.put("/admin/config/holidays", d),
+  updateThresholds:(d)   => api.put("/admin/config/thresholds", d),
+  updateBranding:  (d)   => api.put("/admin/config/ppt-branding", d),
+};
+
 export const okrsAPI = {
   list:        (params)     => api.get("/okrs", { params }),
   create:      (data)       => api.post("/okrs", data),

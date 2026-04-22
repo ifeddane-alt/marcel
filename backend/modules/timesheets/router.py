@@ -2,13 +2,14 @@ from fastapi import APIRouter, Depends, Query
 from fastapi.responses import PlainTextResponse
 from typing import Optional
 from core.auth import TokenPayload, get_current_user
+from core.tenant_config import require_module
 from . import service
 from .schemas import (
     TimesheetEntryUpsert, TimesheetSubmitWeek,
     TimesheetValidateRequest, TimesheetRejectRequest,
 )
 
-router = APIRouter(tags=["timesheets"])
+router = APIRouter(tags=["timesheets"], dependencies=[Depends(require_module("timesheets"))])
 
 
 # S3-01

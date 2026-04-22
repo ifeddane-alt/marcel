@@ -1,10 +1,13 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import StreamingResponse
 from core.auth import TokenPayload, get_current_user, permission_required
+from core.tenant_config import require_module
 from .schemas import ResourceCreate, ResourceUpdate
 from . import service
 
 router = APIRouter(tags=["resources"])
+
+_vendors_module = require_module("vendors")
 
 
 @router.get("/resources")
@@ -40,6 +43,7 @@ async def delete_resource(
 @router.get("/vendors/summary")
 async def get_vendors_summary(
     current_user: TokenPayload = Depends(permission_required("vendors.view")),
+    _module: TokenPayload = Depends(_vendors_module),
 ):
     return await service.get_vendors_summary(current_user)
 
@@ -48,6 +52,7 @@ async def get_vendors_summary(
 async def get_project_external_costs(
     project_id: str,
     current_user: TokenPayload = Depends(get_current_user),
+    _module: TokenPayload = Depends(_vendors_module),
 ):
     return await service.get_project_external_costs(project_id, current_user)
 
@@ -55,6 +60,7 @@ async def get_project_external_costs(
 @router.get("/vendors/export/csv")
 async def export_vendors_csv(
     current_user: TokenPayload = Depends(permission_required("vendors.view")),
+    _module: TokenPayload = Depends(_vendors_module),
 ):
     csv_bytes = await service.export_vendors_csv(current_user)
     return StreamingResponse(

@@ -55,6 +55,12 @@ async def delete_resource(resource_id: str, current_user: TokenPayload) -> None:
 
 async def get_vendors_summary(current_user: TokenPayload) -> dict:
     """Agrège toutes les ressources externes par fournisseur avec alertes."""
+    from core.tenant_config import get_thresholds
+    thr = await get_thresholds(current_user.tenant_id)
+    contract_days       = thr["regulatory_days"]
+    tjm_variance_pct    = thr["tjm_variance_pct"]
+    forfait_orange_pct  = thr["forfait_orange_pct"] / 100
+    forfait_red_pct     = thr["forfait_red_pct"] / 100
     external = await db.resources.find(
         {
             "tenant_id": current_user.tenant_id,
@@ -88,7 +94,7 @@ async def get_vendors_summary(current_user: TokenPayload) -> dict:
             try:
                 end_date = date.fromisoformat(str(contract_end)[:10])
                 days_left = (end_date - today).days
-                if 0 <= days_left <= 90:
+                if 0 <= days_left <= contract_days:
                     v["expiring_soon"].append({
                         "resource_id": res["resource_id"],
                         "name": res["name"],
@@ -120,7 +126,7 @@ async def get_vendors_summary(current_user: TokenPayload) -> dict:
             # Alerte variance TJM > 10 %
             if ctjm > 0 and ftjm > 0:
                 variance_pct = abs(ftjm - ctjm) / ctjm * 100
-                if variance_pct > 10:
+                if variance_pct > tjm_variance_pct:
                     v["alerts"].append({
                         "type": "tjm_variance",
                         "message": f"{res['name']} : TJM facturé {ftjm}€ vs contrat {ctjm}€ ({variance_pct:.0f}%)",
@@ -144,11 +150,11 @@ async def get_vendors_summary(current_user: TokenPayload) -> dict:
             v["total_forfait_envelope"] += envelope
             v["total_forfait_consumed"] += consumed
             # Alerte forfait > 85 %
-            if envelope > 0 and consumed / envelope > 0.85:
+            if envelope > 0 and consumed / envelope > forfait_orange_pct:
                 v["alerts"].append({
                     "type": "forfait_consumption",
                     "message": f"{res['name']} : forfait consommé à {pct:.0f}%",
-                    "level": "critical" if consumed / envelope > 0.95 else "warning",
+                    "level": "critical" if consumed / envelope > forfait_red_pct else "warning",
                 })
 
     vendors_list = list(vendors.values())

@@ -117,7 +117,11 @@ async def get_capacity_heatmap(months: int, current_user: TokenPayload) -> list:
 
 
 async def get_capacity_alerts(current_user: TokenPayload) -> list:
-    """Alertes capacité : équipes > 70% d'utilisation sur mois courant + mois suivant."""
+    """Alertes capacité : équipes > seuil d'utilisation sur mois courant + mois suivant."""
+    from core.tenant_config import get_thresholds
+    thr = await get_thresholds(current_user.tenant_id)
+    orange_pct = thr["capacity_orange_pct"]
+    red_pct    = thr["capacity_red_pct"]
     today = date.today()
     current_m = today.replace(day=1)
     months_to_check = [
@@ -175,9 +179,9 @@ async def get_capacity_alerts(current_user: TokenPayload) -> list:
         if capa == 0:
             continue
         utilization_pct = round(data["total_jh"] / capa * 100, 1)
-        if utilization_pct < 70:
+        if utilization_pct < orange_pct:
             continue
-        level = "critique" if utilization_pct > 100 else ("rouge" if utilization_pct > 85 else "orange")
+        level = "critique" if utilization_pct > 100 else ("rouge" if utilization_pct > red_pct else "orange")
         # Ressources surchargées dans cette équipe
         overloaded = []
         for rid, jh in data["resources"].items():
@@ -185,7 +189,7 @@ async def get_capacity_alerts(current_user: TokenPayload) -> list:
             res_capa = (res.get("capacity_jh_month") or 0) * ((res.get("availability_rate") or 100) / 100)
             if res_capa > 0:
                 res_util = round(jh / res_capa * 100, 1)
-                if res_util >= 70:
+                if res_util >= orange_pct:
                     overloaded.append({
                         "resource_id": rid,
                         "name": res.get("name", rid),

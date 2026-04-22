@@ -19,9 +19,11 @@ import {
   Settings,
   Handshake,
   Train,
+  Wrench,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { useTenantConfig } from "@/contexts/TenantConfigContext";
 
 const ROLE_LABELS = {
   TENANT_ADMIN: "Administrateur",
@@ -29,29 +31,42 @@ const ROLE_LABELS = {
   READ_ONLY: "Lecture seule",
 };
 
-const navItems = [
-  { to: "/dashboard", icon: LayoutDashboard, label: "Tableau de bord" },
-  { to: "/programmes", icon: FolderKanban, label: "Programmes" },
-  { to: "/portfolio", icon: Briefcase, label: "Portefeuille" },
-  { to: "/roadmap", icon: Map, label: "Roadmap" },
-  { to: "/resources", icon: Users, label: "Ressources" },
-  { to: "/teams", icon: UsersRound, label: "Équipes" },
-  { to: "/governance", icon: ShieldCheck, label: "Gouvernance" },
-  { to: "/conformite", icon: ShieldAlert, label: "Conformité" },
-  { to: "/demands",    icon: Inbox,       label: "Demandes" },
-  { to: "/timesheets", icon: Clock,       label: "Timesheets" },
+const ALWAYS_VISIBLE = [
+  { to: "/dashboard",  icon: LayoutDashboard, label: "Tableau de bord" },
+  { to: "/programmes", icon: FolderKanban,     label: "Programmes" },
+  { to: "/portfolio",  icon: Briefcase,        label: "Portefeuille" },
+  { to: "/resources",  icon: Users,            label: "Ressources" },
+  { to: "/teams",      icon: UsersRound,       label: "Équipes" },
+  { to: "/governance", icon: ShieldCheck,      label: "Gouvernance" },
 ];
+
+const MODULE_NAV = {
+  roadmap:    { to: "/roadmap",    icon: Map,        label: "Roadmap" },
+  compliance: { to: "/conformite", icon: ShieldAlert, label: "Conformité" },
+  demands:    { to: "/demands",    icon: Inbox,       label: "Demandes" },
+  timesheets: { to: "/timesheets", icon: Clock,       label: "Timesheets" },
+};
 
 const adminItems = [
   { to: "/admin/profiles", icon: Shield,   label: "Profils" },
   { to: "/admin/users",    icon: Settings, label: "Utilisateurs" },
+  { to: "/admin/config",   icon: Wrench,   label: "Configuration" },
 ];
 
 export default function Layout() {
   const { user, logout } = useAuth();
+  const { isModuleEnabled } = useTenantConfig();
   const navigate = useNavigate();
   const [alertCount, setAlertCount]     = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
+
+  // Build dynamic navItems based on enabled modules
+  const navItems = [
+    ...ALWAYS_VISIBLE,
+    ...Object.entries(MODULE_NAV)
+      .filter(([mod]) => isModuleEnabled(mod))
+      .map(([, item]) => item),
+  ];
 
   useEffect(() => {
     teamsAPI.capacityAlerts().then((r) => {
@@ -123,8 +138,9 @@ export default function Layout() {
             </NavLink>
           ))}
 
-          {/* SAFe — Trains (profils avec trains.view ou *) */}
-          {(user?.permissions?.includes("trains.view") || user?.permissions?.includes("*")) && (
+          {/* SAFe — Trains (profils avec trains.view ou *, ET module safe activé) */}
+          {(user?.permissions?.includes("trains.view") || user?.permissions?.includes("*")) &&
+           isModuleEnabled("safe") && (
             <>
               <div className="text-[10px] uppercase tracking-widest text-slate-500 px-3 pt-3 pb-1 font-semibold">
                 SAFe
@@ -142,8 +158,9 @@ export default function Layout() {
             </>
           )}
 
-          {/* Achats / Finances — profils avec vendors.view */}
-          {(user?.permissions?.includes("vendors.view") || user?.permissions?.includes("*")) && (
+          {/* Achats / Finances — profils avec vendors.view ET module vendors activé */}
+          {(user?.permissions?.includes("vendors.view") || user?.permissions?.includes("*")) &&
+           isModuleEnabled("vendors") && (
             <>
               <div className="text-[10px] uppercase tracking-widest text-slate-500 px-3 pt-3 pb-1 font-semibold">
                 Achats / Finances

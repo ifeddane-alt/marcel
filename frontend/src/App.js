@@ -1,6 +1,7 @@
 import React from "react";
 import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { AuthProvider, useAuth } from "@/contexts/AuthContext";
+import { TenantConfigProvider } from "@/contexts/TenantConfigContext";
 import Layout from "@/components/Layout";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
@@ -19,6 +20,7 @@ import Timesheets from "@/pages/Timesheets";
 import Demands from "@/pages/Demands";
 import AdminProfiles from "@/pages/AdminProfiles";
 import AdminUsers from "@/pages/AdminUsers";
+import AdminConfig from "@/pages/AdminConfig";
 import Vendors from "@/pages/Vendors";
 import TrainsSafe from "@/pages/TrainsSafe";
 import "@/App.css";
@@ -64,6 +66,7 @@ function AppRoutes() {
         <Route path="demands" element={<Demands />} />
         <Route path="admin/profiles" element={<AdminRoute><AdminProfiles /></AdminRoute>} />
         <Route path="admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+        <Route path="admin/config" element={<AdminRoute><AdminConfig /></AdminRoute>} />
         <Route path="vendors" element={<Vendors />} />
         <Route path="safe/trains" element={<TrainsSafe />} />
         <Route path="safe/trains/:trainId" element={<TrainsSafe />} />
@@ -77,9 +80,11 @@ function AppRoutes() {
 function App() {
   return (
     <AuthProvider>
-      <BrowserRouter>
-        <AppRoutes />
-      </BrowserRouter>
+      <TenantConfigProvider>
+        <BrowserRouter>
+          <AppRoutes />
+        </BrowserRouter>
+      </TenantConfigProvider>
     </AuthProvider>
   );
 }

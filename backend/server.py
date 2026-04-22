@@ -34,6 +34,7 @@ from modules.demands.router import router as demands_router
 from modules.profiles.router import router as profiles_router
 from modules.safe.router import router as safe_router
 from modules.okrs.router import router as okrs_router
+from modules.admin_config.router import router as admin_config_router
 
 app = FastAPI(title="Projetenne API")
 
@@ -51,7 +52,7 @@ for _router in [
     governance_router, dashboard_router, risks_router, decisions_router,
     export_router, csv_import_router, teams_router, work_allocations_router,
     timesheets_router, project_dependencies_router, leaves_router,
-    demands_router, profiles_router, safe_router, okrs_router,
+    demands_router, profiles_router, safe_router, okrs_router, admin_config_router,
 ]:
     app.include_router(_router, prefix="/api")
 

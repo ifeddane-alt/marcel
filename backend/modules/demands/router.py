@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, Query
 from typing import Optional
 from core.auth import TokenPayload, get_current_user, permission_required
+from core.tenant_config import require_module
 from . import service
 from .schemas import DemandCreate, DemandUpdate, DemandTransitionRequest, ConvertToProjectRequest
 
-router = APIRouter(tags=["demands"])
+router = APIRouter(tags=["demands"], dependencies=[Depends(require_module("demands"))])
 
 
 @router.get("/demands")

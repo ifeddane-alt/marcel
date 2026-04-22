@@ -1,10 +1,11 @@
 from fastapi import APIRouter, Depends, Query
 from core.auth import TokenPayload, get_current_user
+from core.tenant_config import require_module, get_tenant_holidays
 from shared.holidays import get_holidays_for_month
 from . import service
 from .schemas import LeaveUpsert
 
-router = APIRouter(tags=["leaves"])
+router = APIRouter(tags=["leaves"], dependencies=[Depends(require_module("leaves"))])
 
 
 @router.put("/leaves/entry")

@@ -2,9 +2,12 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 from fastapi.responses import PlainTextResponse
 from typing import Optional
 from core.auth import TokenPayload, get_current_user
+from core.tenant_config import require_module
 from . import service
 
 router = APIRouter(tags=["milestones"])
+
+_compliance_dep = Depends(require_module("compliance"))
 
 
 @router.get("/milestones")
@@ -16,7 +19,10 @@ async def list_milestones(
 
 
 @router.get("/milestones/regulatory/kpis")
-async def get_regulatory_kpis(current_user: TokenPayload = Depends(get_current_user)):
+async def get_regulatory_kpis(
+    current_user: TokenPayload = Depends(get_current_user),
+    _m: TokenPayload = _compliance_dep,
+):
     return await service.get_regulatory_kpis(current_user)
 
 
@@ -27,6 +33,7 @@ async def get_regulatory_csv(
     attribute: Optional[str] = None,
     program_id: Optional[str] = None,
     current_user: TokenPayload = Depends(get_current_user),
+    _m: TokenPayload = _compliance_dep,
 ):
     csv_data = await service.get_regulatory_csv(
         current_user,

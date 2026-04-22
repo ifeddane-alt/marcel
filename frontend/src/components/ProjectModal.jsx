@@ -2,8 +2,9 @@ import React, { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import Modal from "@/components/Modal";
 import { projectsAPI } from "@/api";
+import { useTenantConfig } from "@/contexts/TenantConfigContext";
 
-const STATUS_OPTIONS = [
+const DEFAULT_STATUS_OPTIONS = [
   { value: "en_preparation", label: "En préparation" },
   { value: "actif",          label: "Actif" },
   { value: "en_pause",       label: "En pause" },
@@ -36,6 +37,10 @@ function Field({ label, required, error, hint, children }) {
 const INPUT_CLS = "w-full text-sm border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-white";
 
 export default function ProjectModal({ isOpen, onClose, project, resources = [], programs = [], onSaved }) {
+  const { config } = useTenantConfig();
+  const STATUS_OPTIONS = (config?.enums?.project_statuses?.length > 0)
+    ? config.enums.project_statuses
+    : DEFAULT_STATUS_OPTIONS;
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
