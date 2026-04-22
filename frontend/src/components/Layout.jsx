@@ -17,6 +17,7 @@ import {
   Inbox,
   Shield,
   Settings,
+  Handshake,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -120,6 +121,25 @@ export default function Layout() {
               )}
             </NavLink>
           ))}
+
+          {/* Achats / Finances — profils avec vendors.view */}
+          {(user?.permissions?.includes("vendors.view") || user?.permissions?.includes("*")) && (
+            <>
+              <div className="text-[10px] uppercase tracking-widest text-slate-500 px-3 pt-3 pb-1 font-semibold">
+                Achats / Finances
+              </div>
+              <NavLink
+                to="/vendors"
+                data-testid="nav-suivi-fournisseurs"
+                className={({ isActive }) =>
+                  `sidebar-item ${isActive ? "sidebar-item-active" : ""}`
+                }
+              >
+                <Handshake size={16} strokeWidth={1.75} className="flex-shrink-0" />
+                <span>Suivi Fournisseurs</span>
+              </NavLink>
+            </>
+          )}
 
           {/* Import — TENANT_ADMIN + PMO_USER uniquement */}
           {user?.role !== "READ_ONLY" && (

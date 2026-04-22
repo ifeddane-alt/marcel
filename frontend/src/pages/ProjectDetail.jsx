@@ -5,7 +5,7 @@ import {
   Pencil, Trash2, Plus, History, ShieldAlert, ClipboardList, Presentation, Users,
   GitBranch, BarChart2, Diamond, GitFork,
 } from "lucide-react";
-import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI, decisionsAPI, workAllocationsAPI, projectDependenciesAPI } from "@/api";
+import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI, decisionsAPI, workAllocationsAPI, projectDependenciesAPI, vendorsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import RAGBadge, { MethodologyBadge, MilestoneBadge, TaskTypeBadge, TaskStatusBadge, ProjectStatusBadge } from "@/components/RAGBadge";
 import ProjectModal from "@/components/ProjectModal";
@@ -57,6 +57,7 @@ export default function ProjectDetail() {
   const [workAllocations, setWorkAllocations] = useState([]);
   const [teamConsumption, setTeamConsumption] = useState([]);
   const [raf, setRaf] = useState(null);
+  const [externalCosts, setExternalCosts] = useState(null);
   const [loading, setLoading] = useState(true);
   const [taskView, setTaskView] = useState("table"); // "table" | "gantt"
 
@@ -114,6 +115,8 @@ export default function ProjectDetail() {
       setAllProjects(allPRes.data || []);
       setLoading(false);
     }).catch(() => setLoading(false));
+    // Coûts externes (vendeurs) — non-bloquant
+    vendorsAPI.projectCosts(id).then((r) => setExternalCosts(r.data)).catch(() => {});
   }, [id]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
@@ -422,6 +425,77 @@ export default function ProjectDetail() {
               </div>
             )}
           </div>
+
+          {/* Coûts Externes (Régie + Forfait) */}
+          {externalCosts && externalCosts.resources && externalCosts.resources.length > 0 && (
+            <div className="bg-white border border-gray-200 rounded shadow-sm p-5" data-testid="external-costs-section">
+              <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4 flex items-center gap-2">
+                <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-[#0052CC]">
+                  <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
+                  <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
+                </svg>
+                Coûts Externes Alloués
+              </div>
+              <div className="grid grid-cols-3 gap-4 mb-4">
+                <div className="border border-orange-100 rounded-lg p-3 bg-orange-50/30">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-orange-600 mb-1">Régie estimé</div>
+                  <div className="font-mono-data text-xl font-bold text-orange-700" data-testid="ext-regie-cost">
+                    {externalCosts.total_regie_eur > 0
+                      ? `${Math.round(externalCosts.total_regie_eur / 1000).toLocaleString("fr-FR")} K€`
+                      : "—"}
+                  </div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">JH alloués × TJM contrat</div>
+                </div>
+                <div className="border border-violet-100 rounded-lg p-3 bg-violet-50/30">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-violet-600 mb-1">Forfait engagé</div>
+                  <div className="font-mono-data text-xl font-bold text-violet-700" data-testid="ext-forfait-cost">
+                    {externalCosts.total_forfait_envelope > 0
+                      ? `${Math.round(externalCosts.total_forfait_envelope / 1000).toLocaleString("fr-FR")} K€`
+                      : "—"}
+                  </div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">
+                    {externalCosts.total_forfait_consumed > 0
+                      ? `dont ${Math.round(externalCosts.total_forfait_consumed / 1000).toLocaleString("fr-FR")} K€ consommés`
+                      : "Enveloppe contractuelle"}
+                  </div>
+                </div>
+                <div className="border border-slate-200 rounded-lg p-3 bg-slate-50/50">
+                  <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500 mb-1">Total externe</div>
+                  <div className="font-mono-data text-xl font-bold text-slate-800" data-testid="ext-total-cost">
+                    {Math.round(externalCosts.total_external / 1000).toLocaleString("fr-FR")} K€
+                  </div>
+                  <div className="text-[10px] text-slate-400 mt-0.5">
+                    {project.budget_total
+                      ? `${Math.round(externalCosts.total_external / project.budget_total * 100)}% du budget total`
+                      : ""}
+                  </div>
+                </div>
+              </div>
+              {/* Détail ressources */}
+              <div className="space-y-1.5">
+                {externalCosts.resources.map((r) => (
+                  <div key={r.resource_id} className="flex items-center justify-between text-xs py-1.5 px-3 bg-gray-50 rounded border border-gray-100">
+                    <div className="flex items-center gap-2">
+                      <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded border ${
+                        r.type === "regie"
+                          ? "bg-orange-50 text-orange-700 border-orange-200"
+                          : "bg-violet-50 text-violet-700 border-violet-200"
+                      }`}>
+                        {r.type === "regie" ? "RÉGIE" : "FORFAIT"}
+                      </span>
+                      <span className="font-medium text-slate-800">{r.name}</span>
+                      {r.vendor && <span className="text-slate-400">· {r.vendor}</span>}
+                    </div>
+                    <div className="font-mono-data text-sm font-bold text-slate-700">
+                      {r.type === "regie"
+                        ? `${Math.round((r.cost_estimated || 0) / 1000).toLocaleString("fr-FR")} K€`
+                        : `${Math.round((r.forfait_envelope || 0) / 1000).toLocaleString("fr-FR")} K€`}
+                    </div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
 
           {/* Tasks — Décomposition du projet */}
           <div className="bg-white border border-gray-200 rounded shadow-sm" data-testid="tasks-section">

@@ -37,6 +37,7 @@ def pw(password: str) -> str:
 # ---- IDs fixes pour la cohérence des données ----
 PROJECT_IDS = [str(uuid.uuid4()) for _ in range(8)]
 RESOURCE_IDS = [str(uuid.uuid4()) for _ in range(10)]
+VENDOR_RESOURCE_IDS = [str(uuid.uuid4()) for _ in range(5)]
 GOVERNANCE_IDS = [str(uuid.uuid4()) for _ in range(5)]
 PROGRAM_IDS = [str(uuid.uuid4()) for _ in range(4)]
 TEAM_IDS = [str(uuid.uuid4()) for _ in range(5)]
@@ -412,6 +413,42 @@ RESOURCES = [
      "capacity_jh_month": 18, "team": "QA", "team_id": TEAM_IDS[3], "tjm_eur": 550, "availability_rate": 90},
     {"resource_id": RESOURCE_IDS[9], "tenant_id": TENANT_ID, "name": "Marc Lefebvre", "role": "Expert Sécurité SI",
      "capacity_jh_month": 15, "team": "Support", "team_id": TEAM_IDS[4], "tjm_eur": 500, "availability_rate": 100},
+    # ── Ressources externes — Suivi Fournisseurs (Bloc 2c) ────────────────────
+    {"resource_id": VENDOR_RESOURCE_IDS[0], "tenant_id": TENANT_ID,
+     "name": "Jean-Baptiste Renard", "role": "Consultant Cloud & DevOps",
+     "capacity_jh_month": 20, "team": None, "team_id": None,
+     "tjm_eur": 750, "availability_rate": 100,
+     "resource_type": "externe_regie", "vendor": "Capgemini",
+     "contract_tjm": 700, "forfait_envelope": None, "forfait_consumed": None,
+     "contract_start": "2025-01-15", "contract_end": "2026-12-31"},
+    {"resource_id": VENDOR_RESOURCE_IDS[1], "tenant_id": TENANT_ID,
+     "name": "Aurore Chaumont", "role": "Data Architect",
+     "capacity_jh_month": 18, "team": None, "team_id": None,
+     "tjm_eur": 1020, "availability_rate": 100,
+     "resource_type": "externe_regie", "vendor": "Accenture",
+     "contract_tjm": 850, "forfait_envelope": None, "forfait_consumed": None,
+     "contract_start": "2025-04-01", "contract_end": "2026-03-31"},
+    {"resource_id": VENDOR_RESOURCE_IDS[2], "tenant_id": TENANT_ID,
+     "name": "TMA SAP Module FI/CO", "role": "Prestation forfait",
+     "capacity_jh_month": 0, "team": None, "team_id": None,
+     "tjm_eur": None, "availability_rate": 100,
+     "resource_type": "externe_forfait", "vendor": "Sopra Steria",
+     "contract_tjm": None, "forfait_envelope": 180000, "forfait_consumed": 164700,
+     "contract_start": "2025-01-01", "contract_end": "2026-06-30"},
+    {"resource_id": VENDOR_RESOURCE_IDS[3], "tenant_id": TENANT_ID,
+     "name": "Audit Cybersécurité DORA/NIS2", "role": "Prestation forfait",
+     "capacity_jh_month": 0, "team": None, "team_id": None,
+     "tjm_eur": None, "availability_rate": 100,
+     "resource_type": "externe_forfait", "vendor": "IBM France",
+     "contract_tjm": None, "forfait_envelope": 250000, "forfait_consumed": 62500,
+     "contract_start": "2025-09-01", "contract_end": "2026-12-31"},
+    {"resource_id": VENDOR_RESOURCE_IDS[4], "tenant_id": TENANT_ID,
+     "name": "Kévin Marchand", "role": "Cloud Engineer Azure",
+     "capacity_jh_month": 20, "team": None, "team_id": None,
+     "tjm_eur": 680, "availability_rate": 100,
+     "resource_type": "externe_regie", "vendor": "Atos",
+     "contract_tjm": 680, "forfait_envelope": None, "forfait_consumed": None,
+     "contract_start": "2025-02-01", "contract_end": "2026-03-15"},
 ]
 
 ALLOCATIONS = [
@@ -447,6 +484,22 @@ ALLOCATIONS = [
     # Dev A — Alexandre Moreau (Dev Java) charge mois courant
     {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[1], "resource_id": RESOURCE_IDS[2], "period_month": _month(0),  "jh_allocated": 12, "jh_consumed":  5, "allocation_rate": 60},
     {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[2], "resource_id": RESOURCE_IDS[2], "period_month": _month(0),  "jh_allocated":  8, "jh_consumed":  3, "allocation_rate": 40},
+    # ── Allocations ressources externes fournisseurs ───────────────────────────
+    # Capgemini (Jean-Baptiste Renard) → Cloud Azure (P5)
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[5], "resource_id": VENDOR_RESOURCE_IDS[0], "period_month": _month(-2), "jh_allocated": 18, "jh_consumed": 18, "allocation_rate": 90},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[5], "resource_id": VENDOR_RESOURCE_IDS[0], "period_month": _month(-1), "jh_allocated": 20, "jh_consumed": 20, "allocation_rate": 100},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[5], "resource_id": VENDOR_RESOURCE_IDS[0], "period_month": _month(0),  "jh_allocated": 16, "jh_consumed":  5, "allocation_rate": 80},
+    # Accenture (Aurore Chaumont) → Phoenix SAFe (P0)
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[0], "resource_id": VENDOR_RESOURCE_IDS[1], "period_month": _month(-3), "jh_allocated": 15, "jh_consumed": 15, "allocation_rate": 83},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[0], "resource_id": VENDOR_RESOURCE_IDS[1], "period_month": _month(-2), "jh_allocated": 18, "jh_consumed": 18, "allocation_rate": 100},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[0], "resource_id": VENDOR_RESOURCE_IDS[1], "period_month": _month(-1), "jh_allocated": 18, "jh_consumed": 16, "allocation_rate": 100},
+    # Atos (Kévin Marchand) → Cloud Azure (P5)
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[5], "resource_id": VENDOR_RESOURCE_IDS[4], "period_month": _month(-1), "jh_allocated": 20, "jh_consumed": 20, "allocation_rate": 100},
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[5], "resource_id": VENDOR_RESOURCE_IDS[4], "period_month": _month(0),  "jh_allocated": 15, "jh_consumed":  8, "allocation_rate": 75},
+    # Sopra Steria (TMA SAP) → SAP (P2) — forfait, suivi par envelope/consumed
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[2], "resource_id": VENDOR_RESOURCE_IDS[2], "period_month": _month(-6), "jh_allocated": 0, "jh_consumed": 0, "allocation_rate": 100},
+    # IBM France (Audit DORA) → DORA NIS2 (P7) — forfait
+    {"allocation_id": str(uuid.uuid4()), "project_id": PROJECT_IDS[7], "resource_id": VENDOR_RESOURCE_IDS[3], "period_month": _month(-3), "jh_allocated": 0, "jh_consumed": 0, "allocation_rate": 100},
 ]
 
 MILESTONES = [

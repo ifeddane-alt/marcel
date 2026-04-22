@@ -1,10 +1,16 @@
 import React, { useEffect, useState } from "react";
-import { Plus, Pencil, Trash2, BarChart3 } from "lucide-react";
+import { Plus, Pencil, Trash2, BarChart3, User, Building2, FileText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { resourcesAPI, allocationsAPI, teamsAPI } from "@/api";
 import ResourceModal from "@/components/ResourceModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import CapacityHeatmap from "@/components/CapacityHeatmap";
+
+const TYPE_CONFIG = {
+  interne:         { label: "INTERNE",  Icon: User,      bg: "bg-blue-50",   text: "text-blue-700",   border: "border-blue-200" },
+  externe_regie:   { label: "RÉGIE",    Icon: Building2, bg: "bg-orange-50", text: "text-orange-700", border: "border-orange-200" },
+  externe_forfait: { label: "FORFAIT",  Icon: FileText,  bg: "bg-violet-50", text: "text-violet-700", border: "border-violet-200" },
+};
 
 export default function Resources() {
   const { user } = useAuth();
@@ -15,6 +21,7 @@ export default function Resources() {
   const [allocations, setAllocations] = useState([]);
   const [loading, setLoading] = useState(true);
   const [search, setSearch] = useState("");
+  const [typeFilter, setTypeFilter] = useState("all");
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedResource, setSelectedResource] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
@@ -45,7 +52,9 @@ export default function Resources() {
   const getChargeTotal = (id) => allocations.filter((a) => a.resource_id === id).reduce((s, a) => s + (a.jh_allocated || 0), 0);
   const filtered = resources.filter((r) => {
     const q = search.toLowerCase();
-    return !search || r.name.toLowerCase().includes(q) || r.role.toLowerCase().includes(q) || (r.team || "").toLowerCase().includes(q);
+    const matchSearch = !search || r.name.toLowerCase().includes(q) || r.role.toLowerCase().includes(q) || (r.team || "").toLowerCase().includes(q);
+    const matchType = typeFilter === "all" || r.resource_type === typeFilter || (!r.resource_type && typeFilter === "interne");
+    return matchSearch && matchType;
   });
 
   const openCreate = () => { setSelectedResource(null); setModalOpen(true); };
@@ -118,11 +127,38 @@ export default function Resources() {
               className="w-full pl-4 pr-3 py-2 text-sm border border-gray-200 rounded bg-white focus:outline-none focus:border-[#0052CC]" />
           </div>
 
+          {/* Filtres par type */}
+          <div className="flex gap-2 mb-4 flex-wrap">
+            {[
+              { id: "all", label: "Tous" },
+              { id: "interne", label: "Interne", Icon: User, ...TYPE_CONFIG.interne },
+              { id: "externe_regie", label: "Régie", Icon: Building2, ...TYPE_CONFIG.externe_regie },
+              { id: "externe_forfait", label: "Forfait", Icon: FileText, ...TYPE_CONFIG.externe_forfait },
+            ].map(({ id, label, Icon, bg, text, border }) => (
+              <button
+                key={id}
+                onClick={() => setTypeFilter(id)}
+                data-testid={`filter-type-${id}`}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border transition-all ${
+                  typeFilter === id
+                    ? `${bg || "bg-slate-100"} ${text || "text-slate-700"} ${border || "border-slate-300"}`
+                    : "bg-white border-gray-200 text-slate-500 hover:border-gray-300"
+                }`}
+              >
+                {Icon && <Icon size={11} />}
+                {label}
+                <span className={`text-[10px] font-mono ml-0.5 ${typeFilter === id ? "" : "text-slate-400"}`}>
+                  {id === "all" ? resources.length : resources.filter(r => r.resource_type === id || (!r.resource_type && id === "interne")).length}
+                </span>
+              </button>
+            ))}
+          </div>
+
           <div className="bg-white border border-gray-200 rounded shadow-sm overflow-x-auto">
             <table className="w-full text-sm" data-testid="resources-table">
               <thead>
                 <tr className="bg-gray-50 border-b border-gray-200 text-left">
-                  {["Ressource","Rôle","Équipe","TJM","Dispo","Capa effective","JH alloués","Charge"].map((h) => (
+                  {["Ressource","Type","Rôle","Équipe","TJM","Dispo","Capa effective","JH alloués","Charge"].map((h) => (
                     <th key={h} className="px-4 py-3 text-xs font-semibold text-slate-600">{h}</th>
                   ))}
                   {canWrite && <th className="px-4 py-3 text-xs font-semibold text-slate-600 text-right">Actions</th>}
@@ -146,6 +182,19 @@ export default function Resources() {
                           </div>
                           <span className="font-medium text-slate-800">{r.name}</span>
                         </div>
+                      </td>
+                      <td className="px-4 py-3">
+                        {(() => {
+                          const cfg = TYPE_CONFIG[r.resource_type || "interne"];
+                          const { Icon } = cfg;
+                          return (
+                            <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded border ${cfg.bg} ${cfg.text} ${cfg.border}`}
+                              data-testid={`resource-type-badge-${r.resource_id}`}>
+                              <Icon size={10} />
+                              {cfg.label}
+                            </span>
+                          );
+                        })()}
                       </td>
                       <td className="px-4 py-3 text-slate-600">{r.role}</td>
                       <td className="px-4 py-3">

@@ -19,6 +19,7 @@ import Timesheets from "@/pages/Timesheets";
 import Demands from "@/pages/Demands";
 import AdminProfiles from "@/pages/AdminProfiles";
 import AdminUsers from "@/pages/AdminUsers";
+import Vendors from "@/pages/Vendors";
 import "@/App.css";
 
 function ProtectedRoute({ children }) {
@@ -62,6 +63,7 @@ function AppRoutes() {
         <Route path="demands" element={<Demands />} />
         <Route path="admin/profiles" element={<AdminRoute><AdminProfiles /></AdminRoute>} />
         <Route path="admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
+        <Route path="vendors" element={<Vendors />} />
         <Route path="import" element={<Import />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />

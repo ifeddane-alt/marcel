@@ -19,7 +19,7 @@ export default function Login() {
     setLoading(true);
     try {
       const res = await authAPI.login(email, password);
-      login(res.data.access_token, res.data.user);
+      login(res.data.access_token, { ...res.data.user, permissions: res.data.permissions || [] });
       navigate("/dashboard");
     } catch (err) {
       setError(err.response?.data?.detail || "Erreur de connexion");

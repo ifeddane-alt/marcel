@@ -182,8 +182,10 @@ export const usersAPI = {
 };
 
 export const vendorsAPI = {
-  list:     (params) => api.get("/resources", { params: { ...params, resource_type_in: "externe_regie,externe_forfait" } }),
-  update:   (id, data) => api.put(`/resources/${id}`, data),
+  list:    (params) => api.get("/resources", { params: { ...params, resource_type_in: "externe_regie,externe_forfait" } }),
+  update:  (id, data) => api.put(`/resources/${id}`, data),
+  summary: () => api.get("/vendors/summary"),
+  projectCosts: (projectId) => api.get(`/vendors/project/${projectId}`),
 };
 
 export default api;
