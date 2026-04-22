@@ -26,6 +26,13 @@ function ProtectedRoute({ children }) {
   return token ? children : <Navigate to="/login" replace />;
 }
 
+function AdminRoute({ children }) {
+  const { token, user } = useAuth();
+  if (!token) return <Navigate to="/login" replace />;
+  if (user?.role !== "TENANT_ADMIN") return <Navigate to="/dashboard" replace />;
+  return children;
+}
+
 function AppRoutes() {
   const { token } = useAuth();
   return (
@@ -53,8 +60,8 @@ function AppRoutes() {
         <Route path="governance" element={<Governance />} />
         <Route path="conformite" element={<Conformite />} />
         <Route path="demands" element={<Demands />} />
-        <Route path="admin/profiles" element={<AdminProfiles />} />
-        <Route path="admin/users" element={<AdminUsers />} />
+        <Route path="admin/profiles" element={<AdminRoute><AdminProfiles /></AdminRoute>} />
+        <Route path="admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
         <Route path="import" element={<Import />} />
       </Route>
       <Route path="*" element={<Navigate to="/dashboard" replace />} />
