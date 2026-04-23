@@ -1,0 +1,45 @@
+{
+  "summary": "All 16 ownership filtering tests passed. Every API correctly filters data by user role: CP sees 3 projects, admin/PMO/CIO see all 8, manager sees 1 team and 3 resources, and all profiles return HTTP 200 on /api/projects.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_ownership_filtering.py",
+    "/app/test_reports/pytest/pytest_ownership.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [],
+  "updated_files": ["/app/backend/tests/test_ownership_filtering.py"],
+  "success_rate": {"backend": "100% (16/16)", "frontend": "N/A - not tested"},
+  "test_credentials": {
+    "admin": "admin@altair.fr / Admin2026!",
+    "cp": "cp@altair.fr / Altair2026! (user_id=4f741c60-81c3-4899-8cbb-bc77988f1ccc)",
+    "pmo": "pmo@altair.fr / Pmo1234!",
+    "manager": "manager@altair.fr / Altair2026! (resource_id=8e263464-f564-48b4-b4e4-dd86a18a2bc3)",
+    "viewer_cio": "viewer@altair.fr / View1234!"
+  },
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Ownership filtering fully validated. Test file: /app/backend/tests/test_ownership_filtering.py. All counts match expected: CP=3 projects, Admin=8, PMO=8, CIO=8, manager=1 team / 3 resources. is_ownership_restricted() logic is correct.",
+  "results_breakdown": {
+    "projects_cp_3": "PASS",
+    "projects_admin_8": "PASS",
+    "projects_pmo_8": "PASS",
+    "dashboard_cp_total_3": "PASS",
+    "dashboard_admin_total_8": "PASS",
+    "programs_admin_4": "PASS",
+    "programs_cp_less_than_admin": "PASS",
+    "teams_admin_5": "PASS",
+    "teams_manager_1": "PASS",
+    "resources_admin_15": "PASS",
+    "resources_manager_3": "PASS",
+    "regression_viewer_all_projects": "PASS",
+    "regression_all_profiles_200": "PASS"
+  }
+}

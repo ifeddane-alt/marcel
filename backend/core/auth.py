@@ -72,6 +72,35 @@ def permission_required(permission: str):
     return dep
 
 
+def has_perm(user: TokenPayload, permission: str) -> bool:
+    """
+    Vérifie si un utilisateur possède une permission.
+    Le wildcard '*' donne accès à tout.
+    Usage : has_perm(current_user, 'projects.view_own')
+    """
+    perms = user.permissions or []
+    if "*" in perms:
+        return True
+    return permission in perms
+
+
+def is_ownership_restricted(user: TokenPayload, restriction_perm: str) -> bool:
+    """
+    Vérifie si l'utilisateur est restreint à ses propres entités.
+    Renvoie True UNIQUEMENT si la permission de restriction est explicitement présente
+    ET que l'utilisateur n'a PAS de wildcard (accès complet).
+
+    Logique :
+    - ["*"]                         → False (accès complet, aucun filtre)
+    - ["projects.view_own", ...]    → True  (filtré par owner)
+    - ["portfolio.view", ...]       → False (accès complet sans restriction)
+    """
+    perms = user.permissions or []
+    if "*" in perms:
+        return False  # Wildcard = accès complet
+    return restriction_perm in perms
+
+
 # ─── Logique de vérification ─────────────────────────────────────────────────
 
 def _enforce_permission(user: TokenPayload, permission: str) -> None:

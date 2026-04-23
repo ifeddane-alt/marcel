@@ -2,11 +2,22 @@ from fastapi import HTTPException
 from datetime import datetime, timezone, date
 import uuid
 from core.database import db
-from core.auth import TokenPayload, require_write
+from core.auth import TokenPayload, require_write, is_ownership_restricted
 from .schemas import ResourceCreate, ResourceUpdate
 
 
 async def list_resources(current_user: TokenPayload) -> list:
+    # Filtrage ownership MANAGER : uniquement les ressources de son équipe
+    if is_ownership_restricted(current_user, "teams.view_own") and current_user.resource_id:
+        # Trouver les équipes dont ce resource est manager
+        managed_teams = await db.teams.find(
+            {"manager_resource_id": current_user.resource_id, "tenant_id": current_user.tenant_id},
+            {"_id": 0, "team_id": 1},
+        ).to_list(None)
+        team_ids = [t["team_id"] for t in managed_teams]
+        return await db.resources.find(
+            {"tenant_id": current_user.tenant_id, "team_id": {"$in": team_ids}}, {"_id": 0}
+        ).to_list(None)
     return await db.resources.find(
         {"tenant_id": current_user.tenant_id}, {"_id": 0}
     ).to_list(None)

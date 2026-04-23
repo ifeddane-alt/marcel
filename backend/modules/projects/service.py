@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from datetime import datetime, timezone
 import uuid
 from core.database import db
-from core.auth import TokenPayload, require_write
+from core.auth import TokenPayload, require_write, is_ownership_restricted
 from .schemas import ProjectCreate, ProjectUpdate, BudgetRevisionCreate
 
 
@@ -23,9 +23,11 @@ def _sync_budget_aggregates(data: dict) -> dict:
 
 
 async def list_projects(current_user: TokenPayload) -> list:
-    return await db.projects.find(
-        {"tenant_id": current_user.tenant_id}, {"_id": 0}
-    ).to_list(None)
+    query: dict = {"tenant_id": current_user.tenant_id}
+    # Filtrage ownership : CHEF_DE_PROJET ne voit que ses projets
+    if is_ownership_restricted(current_user, "projects.view_own"):
+        query["owner_id"] = current_user.user_id
+    return await db.projects.find(query, {"_id": 0}).to_list(None)
 
 
 async def get_project(project_id: str, current_user: TokenPayload) -> dict:

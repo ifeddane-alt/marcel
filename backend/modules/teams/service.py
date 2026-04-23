@@ -3,14 +3,16 @@ from datetime import datetime, timezone, date
 from dateutil.relativedelta import relativedelta
 import uuid
 from core.database import db
-from core.auth import TokenPayload, require_write, require_admin
+from core.auth import TokenPayload, require_write, require_admin, is_ownership_restricted
 from .schemas import TeamCreate, TeamUpdate
 
 
 async def list_teams(current_user: TokenPayload) -> list:
-    teams = await db.teams.find(
-        {"tenant_id": current_user.tenant_id}, {"_id": 0}
-    ).to_list(None)
+    query: dict = {"tenant_id": current_user.tenant_id}
+    # Filtrage ownership : MANAGER ne voit que son équipe
+    if is_ownership_restricted(current_user, "teams.view_own") and current_user.resource_id:
+        query["manager_resource_id"] = current_user.resource_id
+    teams = await db.teams.find(query, {"_id": 0}).to_list(None)
     # Enrichir avec le nom du manager
     resource_ids = [t["manager_resource_id"] for t in teams if t.get("manager_resource_id")]
     if resource_ids:

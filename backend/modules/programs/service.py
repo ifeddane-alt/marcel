@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from datetime import datetime, timezone
 import uuid
 from core.database import db
-from core.auth import TokenPayload, require_write
+from core.auth import TokenPayload, require_write, is_ownership_restricted
 from .schemas import ProgramCreate, ProgramUpdate
 
 
@@ -37,14 +37,21 @@ async def list_programs(current_user: TokenPayload) -> list:
     programs = await db.programs.find(
         {"tenant_id": current_user.tenant_id}, {"_id": 0}
     ).to_list(None)
-    all_projects = await db.projects.find(
-        {"tenant_id": current_user.tenant_id}, {"_id": 0}
-    ).to_list(None)
+    # Filtrage ownership : CHEF_DE_PROJET ne voit que ses projets → programmes contenant ≥ 1 de ses projets
+    project_query: dict = {"tenant_id": current_user.tenant_id}
+    if is_ownership_restricted(current_user, "projects.view_own"):
+        project_query["owner_id"] = current_user.user_id
+    all_projects = await db.projects.find(project_query, {"_id": 0}).to_list(None)
+    # Programmes visibles : ceux qui ont au moins 1 projet autorisé (ou tous si accès complet)
+    visible_program_ids = {p.get("program_id") for p in all_projects if p.get("program_id")}
     projects_by_program: dict = {}
     for p in all_projects:
         pid = p.get("program_id")
         if pid:
             projects_by_program.setdefault(pid, []).append(p)
+    # Filtrer les programmes si restricted
+    if is_ownership_restricted(current_user, "projects.view_own"):
+        programs = [prog for prog in programs if prog["program_id"] in visible_program_ids]
     for prog in programs:
         prog.update(_aggregate_program_metrics(projects_by_program.get(prog["program_id"], [])))
     return programs

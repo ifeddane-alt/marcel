@@ -1,10 +1,18 @@
 from core.database import db
-from core.auth import TokenPayload
+from core.auth import TokenPayload, has_perm, is_ownership_restricted
+
+
+def _project_query(current_user: TokenPayload) -> dict:
+    """Construit le filtre MongoDB projets selon les droits de l'utilisateur."""
+    query: dict = {"tenant_id": current_user.tenant_id}
+    if is_ownership_restricted(current_user, "projects.view_own"):
+        query["owner_id"] = current_user.user_id
+    return query
 
 
 async def get_summary(current_user: TokenPayload) -> dict:
     projects = await db.projects.find(
-        {"tenant_id": current_user.tenant_id}, {"_id": 0}
+        _project_query(current_user), {"_id": 0}
     ).to_list(None)
 
     total = len(projects)
@@ -40,14 +48,16 @@ async def get_summary(current_user: TokenPayload) -> dict:
 
 
 async def get_top_risks(current_user: TokenPayload) -> list:
-    risks = await db.risks.find(
-        {"tenant_id": current_user.tenant_id}, {"_id": 0}
-    ).sort("criticality", -1).to_list(None)
-    project_ids = list({r["project_id"] for r in risks})
-    projects = await db.projects.find(
-        {"project_id": {"$in": project_ids}}, {"_id": 0, "project_id": 1, "name": 1}
+    # Filtrer d'abord les projets autorisés
+    allowed_projects = await db.projects.find(
+        _project_query(current_user), {"_id": 0, "project_id": 1, "name": 1}
     ).to_list(None)
-    project_map = {p["project_id"]: p["name"] for p in projects}
+    allowed_ids = [p["project_id"] for p in allowed_projects]
+    project_map = {p["project_id"]: p["name"] for p in allowed_projects}
+
+    risks = await db.risks.find(
+        {"tenant_id": current_user.tenant_id, "project_id": {"$in": allowed_ids}}, {"_id": 0}
+    ).sort("criticality", -1).to_list(None)
     return [
         {**r, "project_name": project_map.get(r["project_id"], "—")}
         for r in risks[:10]
@@ -55,20 +65,24 @@ async def get_top_risks(current_user: TokenPayload) -> list:
 
 
 async def get_heatmap_risks(current_user: TokenPayload) -> list:
+    allowed_projects = await db.projects.find(
+        _project_query(current_user), {"_id": 0, "project_id": 1, "name": 1, "program_id": 1}
+    ).to_list(None)
+    allowed_ids = [p["project_id"] for p in allowed_projects]
+    if not allowed_ids:
+        return []
+
     risks = await db.risks.find(
-        {"tenant_id": current_user.tenant_id}, {"_id": 0}
+        {"tenant_id": current_user.tenant_id, "project_id": {"$in": allowed_ids}}, {"_id": 0}
     ).sort("criticality", -1).to_list(None)
     if not risks:
         return []
-    project_ids = list({r["project_id"] for r in risks})
-    projects = await db.projects.find(
-        {"project_id": {"$in": project_ids}}, {"_id": 0, "project_id": 1, "name": 1, "program_id": 1}
-    ).to_list(None)
+
     project_map = {
         p["project_id"]: {"name": p["name"], "program_id": p.get("program_id")}
-        for p in projects
+        for p in allowed_projects
     }
-    program_ids = list({p.get("program_id") for p in projects if p.get("program_id")})
+    program_ids = list({p.get("program_id") for p in allowed_projects if p.get("program_id")})
     program_map: dict = {}
     if program_ids:
         progs = await db.programs.find(

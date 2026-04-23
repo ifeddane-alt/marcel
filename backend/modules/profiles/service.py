@@ -148,8 +148,8 @@ DEFAULT_PROFILES = [
         "description": "CRUD sur ses projets (owner). Valide timesheets finales.",
         "is_system": True,
         "permissions": [
-            "dashboard.view", "portfolio.view", "export.ppt", "tasks.create",
-            "tasks.edit", "milestones.create", "milestones.edit", "roadmap.view",
+            "dashboard.view", "portfolio.view", "projects.view_own", "export.ppt",
+            "tasks.create", "tasks.edit", "milestones.create", "milestones.edit", "roadmap.view",
             "dependencies.create", "teams.view", "allocations.create",
             "budget.view", "budget.edit", "budget.revise_eac", "raf.view",
             "timesheets.submit", "timesheets.validate_step3", "leaves.submit",
@@ -164,7 +164,7 @@ DEFAULT_PROFILES = [
         "description": "Responsable d'équipe. Valide timesheets N+1 et congés.",
         "is_system": True,
         "permissions": [
-            "dashboard.view", "portfolio.view", "roadmap.view", "teams.view",
+            "dashboard.view", "portfolio.view", "roadmap.view", "teams.view", "teams.view_own",
             "teams.edit", "resources.edit", "raf.view", "timesheets.submit",
             "timesheets.validate_step2", "timesheets.view_all", "leaves.submit",
             "leaves.validate", "risks.view", "decisions.view", "demands.submit",
