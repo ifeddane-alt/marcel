@@ -122,6 +122,13 @@ async def export_copil(data: ExportCopilRequest, current_user: TokenPayload):
         {"tenant_id": current_user.tenant_id}, {"_id": 0}
     ).to_list(None)
 
+    # Branding tenant pour la mise en page PPT
+    tenant_doc = await db.tenants.find_one(
+        {"tenant_id": current_user.tenant_id},
+        {"_id": 0, "settings.ppt_branding": 1},
+    )
+    branding = (tenant_doc or {}).get("settings", {}).get("ppt_branding")
+
     buf = generate_copil_pptx(
         instance_name=data.instance_name,
         instance_date=data.instance_date,
@@ -133,5 +140,6 @@ async def export_copil(data: ExportCopilRequest, current_user: TokenPayload):
         team_consumption_by_project=team_consumption_by_project,
         include_roadmap=data.include_roadmap,
         dependencies=dependencies,
+        branding=branding,
     )
     return buf, data.instance_name, data.instance_date

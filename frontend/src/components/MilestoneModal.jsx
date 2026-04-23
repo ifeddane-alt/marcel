@@ -82,9 +82,16 @@ export default function MilestoneModal({ milestone, projectId, resources, onSave
   const [error, setError]   = useState("");
 
   const familyCfg = FAMILY_CONFIG[family] || null;
-  // Merge tenant types with hardcoded defaults for this family
-  const tenantFamilyTypes = config?.enums?.milestone_types?.[family]?.types;
-  const filteredTypes = tenantFamilyTypes?.length > 0 ? tenantFamilyTypes : (familyCfg?.types || []);
+  // Merge tenant types with hardcoded defaults — union par value (tenant peut ajouter/surcharger)
+  const filteredTypes = (() => {
+    const baseTypes = familyCfg?.types || [];
+    const tenantFamilyTypes = config?.enums?.milestone_types?.[family]?.types || [];
+    if (tenantFamilyTypes.length === 0) return baseTypes;
+    const typeMap = new Map();
+    baseTypes.forEach((t) => typeMap.set(t.value, t));
+    tenantFamilyTypes.forEach((t) => typeMap.set(t.value, t));
+    return [...typeMap.values()];
+  })();
 
   // Reset type when family changes
   useEffect(() => {

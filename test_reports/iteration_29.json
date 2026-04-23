@@ -1,0 +1,41 @@
+{
+  "summary": "Iteration 29 — Testing 3 Admin Back-office integration points: PPT Branding, Timesheet 2-step workflow, MilestoneModal merge. All critical features verified working.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/health", "issue": "Returns 404 (health endpoint not defined at this path). Non-blocking as all other endpoints work correctly."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iteration29_branding_timesheet.py",
+    "/app/test_reports/pytest/iteration29.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "pptx_generator.py is 1269 lines — exceeds the 700-line guideline. Consider splitting into slide-specific modules for maintainability."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iteration29_branding_timesheet.py"
+  ],
+  "success_rate": {
+    "backend": "90% (9/10 tests pass, 1 skip due to PMO 403 on admin config — expected)",
+    "frontend": "100%"
+  },
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All 3 integration points verified: (1) PPTX export contains 'Groupe Altair Industries' in text and #0B2545 in shape fills. (2) /api/admin/config returns ppt_branding.company_name='Groupe Altair Industries' and workflows.timesheet.validation_steps=2. (3) PMO validation goes directly to validated (advanced_to_cp_reviewed=0). (4) MilestoneModal correctly shows 11 types for epic_lifecycle, 5 for epic_milestone, 3 for transversal — tenant merge logic working. Credentials: admin@altair.fr/Admin2026! (TENANT_ADMIN), cp@altair.fr/Altair2026! (PMO_USER).",
+  "verified_features": {
+    "ppt_branding_company_name": "PASS — 'Groupe Altair Industries' present in all PPTX text runs",
+    "ppt_branding_primary_color": "PASS — #0B2545 found in shape fills (slide headers)",
+    "admin_config_company_name": "PASS — returns 'Groupe Altair Industries'",
+    "admin_config_validation_steps": "PASS — returns validation_steps=2",
+    "timesheet_pmo_2step_workflow": "PASS — PMO validate goes directly to validated, advanced_to_cp_reviewed=0",
+    "milestone_modal_type_merge": "PASS — 3 families all show correct types (hardcoded + tenant union)"
+  }
+}

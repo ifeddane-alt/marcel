@@ -566,6 +566,21 @@ async def get_validation_view(
 
 # ─── S3-02+S3-03  Validation avec transitions RBAC ──────────────────────────
 
+async def _get_validation_steps(tenant_id: str) -> int:
+    """Retourne le nombre d'étapes de validation configuré (2 ou 3)."""
+    tenant_doc = await db.tenants.find_one(
+        {"tenant_id": tenant_id},
+        {"_id": 0, "settings.workflows.timesheet.validation_steps": 1},
+    )
+    return (
+        (tenant_doc or {})
+        .get("settings", {})
+        .get("workflows", {})
+        .get("timesheet", {})
+        .get("validation_steps", 3)
+    )
+
+
 async def validate_timesheets(data: TimesheetValidateRequest, current_user: TokenPayload) -> dict:
     if current_user.role == "READ_ONLY":
         raise HTTPException(status_code=403, detail="Droits insuffisants")
@@ -579,6 +594,7 @@ async def validate_timesheets(data: TimesheetValidateRequest, current_user: Toke
 
     now = datetime.now(timezone.utc).isoformat()
     is_pmo = current_user.role in ("TENANT_ADMIN", "PMO_USER")
+    validation_steps = await _get_validation_steps(current_user.tenant_id)
 
     advanced_to_cp  = []   # submitted → cp_reviewed
     validated_ids   = []   # cp_reviewed → validated (ou bypass PMO)
@@ -596,7 +612,7 @@ async def validate_timesheets(data: TimesheetValidateRequest, current_user: Toke
                     wa_increments[waid] = wa_increments.get(waid, 0) + (ts.get("jh_value") or 0)
             continue
 
-        # ── Valideur N+1 : submitted → cp_reviewed ───────────────────────────
+        # ── Valideur N+1 : submitted → cp_reviewed (3 étapes) ou → validated (2 étapes) ──
         if status == "submitted":
             if not current_user.resource_id:
                 raise HTTPException(status_code=403, detail="Compte non lié à une ressource")
@@ -606,7 +622,15 @@ async def validate_timesheets(data: TimesheetValidateRequest, current_user: Toke
                     status_code=403,
                     detail=f"Vous n'êtes pas le valideur de la ressource {ts['resource_id']}",
                 )
-            advanced_to_cp.append(ts["timesheet_id"])
+            if validation_steps == 2:
+                # Workflow 2 étapes : valideur valide directement, bypass CP
+                validated_ids.append(ts["timesheet_id"])
+                if not ts.get("accounted"):
+                    waid = ts["work_allocation_id"]
+                    wa_increments[waid] = wa_increments.get(waid, 0) + (ts.get("jh_value") or 0)
+            else:
+                # Workflow 3 étapes : valideur → cp_reviewed, puis CP → validated
+                advanced_to_cp.append(ts["timesheet_id"])
             continue
 
         # ── Chef de Projet : cp_reviewed → validated ──────────────────────────

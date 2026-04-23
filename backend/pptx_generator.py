@@ -1,5 +1,6 @@
 """Générateur PowerPoint COPIL — Projetenne (v2)"""
 import io
+import base64
 from datetime import datetime
 from typing import List, Optional
 
@@ -46,7 +47,34 @@ DECISION_STATUS_COLORS = {
 FONT = "Arial"
 
 
-# ---- Helper utilities ----
+# ---- Branding helpers ----
+
+def _parse_rgb(hex_str, default: RGBColor) -> RGBColor:
+    """Parse une couleur hex (#RRGGBB) en RGBColor avec fallback."""
+    if not hex_str:
+        return default
+    try:
+        h = str(hex_str).lstrip('#')
+        if len(h) == 6:
+            return RGBColor(int(h[0:2], 16), int(h[2:4], 16), int(h[4:6], 16))
+    except Exception:
+        pass
+    return default
+
+
+def _brand(branding: dict | None) -> dict:
+    """Construit le dictionnaire de couleurs de marque depuis la config tenant."""
+    b = branding or {}
+    return {
+        "primary":      _parse_rgb(b.get("primary_color"), NAVY),
+        "secondary":    _parse_rgb(b.get("secondary_color"), BLUE),
+        "accent":       _parse_rgb(b.get("accent_color"), GREEN_C),
+        "company_name": b.get("company_name") or "Projetenne",
+        "font":         b.get("font") or FONT,
+        "logo_base64":  b.get("logo_base64"),
+    }
+
+
 
 def _blank_slide(prs: Presentation):
     return prs.slides.add_slide(prs.slide_layouts[6])
@@ -161,7 +189,7 @@ def decision_status_label(s):
 
 # ---- S2-04 — Slide Roadmap matplotlib ----
 
-def add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_date, dependencies=None):
+def add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_date, dependencies=None, brand=None):
     """Génère un slide Roadmap avec un diagramme Gantt matplotlib multi-projets.
     Losanges colorés par famille (or/violet/vert), bordures critical/strategic, flèches dépendances."""
     from datetime import datetime as dt, timedelta
@@ -203,8 +231,8 @@ def add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_dat
     slide = _blank_slide(prs)
     _rect(slide, Emu(0), Emu(0), SW, SH, fill=WHITE)
     _header(slide, "Roadmap Portefeuille",
-            subtitle=f"{instance_name} · {instance_date}")
-    _footer(slide, "Projetenne · Confidentiel")
+            subtitle=f"{instance_name} · {instance_date}", brand=brand)
+    _footer(slide, f"{(brand or {}).get('company_name', 'Projetenne')} · Confidentiel")
 
     if not rows:
         tb = _tb(slide, Inches(0.5), Inches(2.5), Inches(12), Inches(1))
@@ -352,12 +380,13 @@ def add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_dat
     slide.shapes.add_picture(buf, img_l, img_t, img_w, img_h)
 
 
-# ---- Header bar (full-width, Navy) ----
+# ---- Header bar (full-width, couleur primaire) ----
 
-def _header(slide, title, subtitle=None, height_in=1.15):
+def _header(slide, title, subtitle=None, height_in=1.15, brand=None):
+    primary = (brand or {}).get("primary", NAVY)
     h = Inches(height_in)
     # Pleine largeur exacte
-    _rect(slide, Emu(0), Emu(0), SW, h, fill=NAVY)
+    _rect(slide, Emu(0), Emu(0), SW, h, fill=primary)
     tb = _tb(slide, Inches(0.4), Inches(0.12), SW - Inches(0.8), h - Inches(0.25))
     _clear(tb.text_frame)
     p = tb.text_frame.paragraphs[0]
@@ -495,23 +524,40 @@ def _kv_table(slide, items, left, top, width, label_ratio=0.45, row_h=0.36):
 # SLIDE 1 — GARDE (fond blanc, titre Navy, bloc projets encadré)
 # ====================================================================
 
-def add_slide_garde(prs, instance_name, instance_date, projects):
+def add_slide_garde(prs, instance_name, instance_date, projects, brand=None):
+    br = brand or {}
+    primary    = br.get("primary", NAVY)
+    co_name    = br.get("company_name", "Projetenne")
+    logo_b64   = br.get("logo_base64")
+
     slide = _blank_slide(prs)
 
-    # Thin top accent bar (Navy)
-    _rect(slide, Emu(0), Emu(0), SW, Inches(0.1), fill=NAVY)
+    # Thin top accent bar (couleur primaire)
+    _rect(slide, Emu(0), Emu(0), SW, Inches(0.1), fill=primary)
 
     # App label
-    app_tb = _tb(slide, Inches(0.5), Inches(0.22), Inches(6), Inches(0.32))
+    app_tb = _tb(slide, Inches(0.5), Inches(0.22), Inches(8), Inches(0.32))
     _clear(app_tb.text_frame)
     r = app_tb.text_frame.paragraphs[0].add_run()
-    r.text = "PROJETENNE  ·  EXPORT COPIL"
+    r.text = f"{co_name.upper()}  ·  EXPORT COPIL"
     r.font.size = Pt(8)
     r.font.bold = True
     r.font.name = FONT
-    r.font.color.rgb = NAVY
+    r.font.color.rgb = primary
 
-    # Instance name — large, Navy
+    # Logo tenant (haut à droite, si configuré)
+    if logo_b64:
+        try:
+            logo_data = base64.b64decode(logo_b64)
+            logo_buf  = io.BytesIO(logo_data)
+            logo_w    = Inches(1.5)
+            slide.shapes.add_picture(
+                logo_buf, SW - logo_w - Inches(0.3), Inches(0.1), width=logo_w
+            )
+        except Exception:
+            pass
+
+    # Instance name — large, couleur primaire
     ttb = _tb(slide, Inches(0.5), Inches(0.65), SW - Inches(1.0), Inches(1.5))
     ttb.text_frame.word_wrap = True
     _clear(ttb.text_frame)
@@ -521,7 +567,7 @@ def add_slide_garde(prs, instance_name, instance_date, projects):
     r2.font.size = Pt(36)
     r2.font.bold = True
     r2.font.name = FONT
-    r2.font.color.rgb = NAVY
+    r2.font.color.rgb = primary
 
     # Date — dark text
     dtb = _tb(slide, Inches(0.5), Inches(2.3), Inches(8), Inches(0.4))
@@ -541,9 +587,9 @@ def add_slide_garde(prs, instance_name, instance_date, projects):
     r4.font.name = FONT
     r4.font.color.rgb = MID
 
-    # Navy header bar for project list container
+    # Header bar pour liste projets (couleur primaire)
     list_start = Inches(3.25)
-    _rect(slide, Inches(0.4), list_start, SW - Inches(0.8), Inches(0.3), fill=NAVY)
+    _rect(slide, Inches(0.4), list_start, SW - Inches(0.8), Inches(0.3), fill=primary)
     hdr_tb = _tb(slide, Inches(0.55), list_start + Inches(0.05), SW - Inches(1.1), Inches(0.25))
     _clear(hdr_tb.text_frame)
     rh = hdr_tb.text_frame.paragraphs[0].add_run()
@@ -553,7 +599,7 @@ def add_slide_garde(prs, instance_name, instance_date, projects):
     rh.font.name = FONT
     rh.font.color.rgb = WHITE
 
-    # Project rows — encadrés Navy
+    # Project rows — encadrés
     row_h = Inches(0.42)
     for idx, p_data in enumerate(projects[:8]):
         row_y = list_start + Inches(0.3) + idx * row_h
@@ -590,17 +636,18 @@ def add_slide_garde(prs, instance_name, instance_date, projects):
         re.font.name = FONT
         re.font.color.rgb = LIGHT
 
-    _footer(slide)
+    _footer(slide, f"{co_name} · Confidentiel")
 
 
 # ====================================================================
 # SLIDE 2 — SOMMAIRE (tableau pleine largeur)
 # ====================================================================
 
-def add_slide_sommaire(prs, projects, instance_name="", instance_date=""):
+def add_slide_sommaire(prs, projects, instance_name="", instance_date="", brand=None):
     slide = _blank_slide(prs)
     _header(slide, "Synthèse du Portefeuille",
-            f"{len(projects)} projet{'s' if len(projects) > 1 else ''} sélectionné{'s' if len(projects) > 1 else ''}")
+            f"{len(projects)} projet{'s' if len(projects) > 1 else ''} sélectionné{'s' if len(projects) > 1 else ''}",
+            brand=brand)
 
     headers = ["RAG", "Projet", "Responsable", "Budget (K€)", "EAC (K€)", "Écart", "Statut", "Fin forecast"]
     # Colonnes élargies pour couvrir toute la largeur (~12.93")
@@ -633,7 +680,8 @@ def add_slide_sommaire(prs, projects, instance_name="", instance_date=""):
     table_width = sum(Inches(w) for w in col_w)
     _styled_table(slide, headers, rows, table_left, Inches(1.25), table_width, col_w, row_height_in=0.42)
 
-    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  Projetenne Confidentiel" if instance_name else "Projetenne · Confidentiel"
+    co = (brand or {}).get("company_name", "Projetenne")
+    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  {co} Confidentiel" if instance_name else f"{co} · Confidentiel"
     _footer(slide, footer_text)
 
 
@@ -696,13 +744,14 @@ def generate_heatmap_img(risks):
     return buf
 
 
-def add_slide_heatmap(prs, risks, proj_names, instance_name="", instance_date=""):
+def add_slide_heatmap(prs, risks, proj_names, instance_name="", instance_date="", brand=None):
     slide = _blank_slide(prs)
     crit_n = sum(1 for r in risks if r.get("criticality", 0) >= 16)
     mod_n = sum(1 for r in risks if 7 <= r.get("criticality", 0) < 16)
     low_n = sum(1 for r in risks if r.get("criticality", 0) < 7)
     _header(slide, "Cartographie des Risques P × I",
-            f"{len(risks)} risques au total  ·  Élevés : {crit_n}  ·  Modérés : {mod_n}  ·  Faibles : {low_n}")
+            f"{len(risks)} risques au total  ·  Élevés : {crit_n}  ·  Modérés : {mod_n}  ·  Faibles : {low_n}",
+            brand=brand)
 
     img_buf = generate_heatmap_img(risks)
     slide.shapes.add_picture(img_buf, Inches(0.3), Inches(1.25), width=Inches(6.7))
@@ -758,7 +807,7 @@ def add_slide_heatmap(prs, risks, proj_names, instance_name="", instance_date=""
             r2.font.color.rgb = MID
             ry += Inches(0.47)
 
-    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  Projetenne Confidentiel" if instance_name else "Projetenne · Confidentiel"
+    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  {(brand or {}).get('company_name', 'Projetenne')} Confidentiel" if instance_name else f"{(brand or {}).get('company_name', 'Projetenne')} · Confidentiel"
     _footer(slide, footer_text)
 
 
@@ -766,11 +815,12 @@ def add_slide_heatmap(prs, risks, proj_names, instance_name="", instance_date=""
 # SLIDE 4 — TOP RISQUES CRITIQUES (colonnes élargies, word wrap)
 # ====================================================================
 
-def add_slide_top_risks(prs, risks, proj_names, instance_name="", instance_date=""):
+def add_slide_top_risks(prs, risks, proj_names, instance_name="", instance_date="", brand=None):
     slide = _blank_slide(prs)
     top = sorted(risks, key=lambda x: -x.get("criticality", 0))[:10]
     _header(slide, "Top Risques Critiques",
-            f"Projets sélectionnés — {len(top)} risques présentés par criticité décroissante")
+            f"Projets sélectionnés — {len(top)} risques présentés par criticité décroissante",
+            brand=brand)
 
     headers = ["#", "Crit.", "Risque", "Catégorie", "Projet", "Statut", "Échéance", "Propriétaire"]
     # Colonnes élargies : Risque 3.5→4.3, Projet 2.3→3.0
@@ -793,7 +843,7 @@ def add_slide_top_risks(prs, risks, proj_names, instance_name="", instance_date=
     width = sum(Inches(w) for w in col_w)
     _styled_table(slide, headers, rows, left, Inches(1.25), width, col_w, row_height_in=0.46)
 
-    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  Projetenne Confidentiel" if instance_name else "Projetenne · Confidentiel"
+    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  {(brand or {}).get('company_name', 'Projetenne')} Confidentiel" if instance_name else f"{(brand or {}).get('company_name', 'Projetenne')} · Confidentiel"
     _footer(slide, footer_text)
 
 
@@ -801,11 +851,12 @@ def add_slide_top_risks(prs, risks, proj_names, instance_name="", instance_date=
 # SLIDE 5 — DÉCISIONS CLÉS (colonnes élargies, footer)
 # ====================================================================
 
-def add_slide_decisions(prs, decisions, governance_id=None, instance_name="", instance_date=""):
+def add_slide_decisions(prs, decisions, governance_id=None, instance_name="", instance_date="", brand=None):
     slide = _blank_slide(prs)
     subtitle = "Instance de gouvernance sélectionnée" if governance_id else "10 dernières décisions du périmètre"
     _header(slide, "Décisions Clés",
-            f"{len(decisions)} décision{'s' if len(decisions) != 1 else ''}  ·  {subtitle}")
+            f"{len(decisions)} décision{'s' if len(decisions) != 1 else ''}  ·  {subtitle}",
+            brand=brand)
 
     headers = ["Date", "Décision", "Catégorie", "Statut", "Projet", "Responsable"]
     # Décision 4.0→5.0, Projet 3.0→3.0 (keep), Responsable ajusté
@@ -829,7 +880,7 @@ def add_slide_decisions(prs, decisions, governance_id=None, instance_name="", in
     width = sum(Inches(w) for w in col_w)
     _styled_table(slide, headers, rows, left, Inches(1.25), width, col_w, row_height_in=0.46)
 
-    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  Projetenne Confidentiel" if instance_name else "Projetenne · Confidentiel"
+    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  {(brand or {}).get('company_name', 'Projetenne')} Confidentiel" if instance_name else f"{(brand or {}).get('company_name', 'Projetenne')} · Confidentiel"
     _footer(slide, footer_text)
 
 
@@ -837,8 +888,10 @@ def add_slide_decisions(prs, decisions, governance_id=None, instance_name="", in
 # SLIDE 6+N — FICHE PROJET (tables KV pour budget/planning, sous-blocs risques/décisions)
 # ====================================================================
 
-def add_slide_fiche(prs, project, milestones, risks, decisions, instance_name="", instance_date=""):
+def add_slide_fiche(prs, project, milestones, risks, decisions, instance_name="", instance_date="", brand=None):
     slide = _blank_slide(prs)
+    primary = (brand or {}).get("primary", NAVY)
+    co      = (brand or {}).get("company_name", "Projetenne")
 
     name = project.get("name", "?")
     code = project.get("source_id", "")
@@ -849,7 +902,7 @@ def add_slide_fiche(prs, project, milestones, risks, decisions, instance_name=""
 
     # ---- Header ----
     HEADER_H = Inches(1.2)
-    _rect(slide, Emu(0), Emu(0), SW, HEADER_H, fill=NAVY)
+    _rect(slide, Emu(0), Emu(0), SW, HEADER_H, fill=primary)
     _rect(slide, Emu(0), Emu(0), Inches(0.18), HEADER_H, fill=rag_color(rag))
 
     ttb = _tb(slide, Inches(0.32), Inches(0.1), SW - Inches(4.0), Inches(0.65))
@@ -1048,7 +1101,7 @@ def add_slide_fiche(prs, project, milestones, risks, decisions, instance_name=""
         _run(etb2.text_frame, "Aucune décision enregistrée.", size=8, color=LIGHT, italic=True)
 
     # Footer neutre (suppression du footer orphelin)
-    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  Projetenne Confidentiel" if instance_name else "Projetenne · Confidentiel"
+    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  {co} Confidentiel" if instance_name else f"{co} · Confidentiel"
     _footer(slide, footer_text)
 
 
@@ -1056,7 +1109,7 @@ def add_slide_fiche(prs, project, milestones, risks, decisions, instance_name=""
 # SLIDE — CONSOMMATION PAR ÉQUIPE (S1-08)
 # ====================================================================
 
-def add_slide_team_consumption(prs, project, team_rows, instance_name, instance_date):
+def add_slide_team_consumption(prs, project, team_rows, instance_name, instance_date, brand=None):
     """Slide additionnel par projet : tableau consommation par équipe + KPI RAF."""
     slide = _blank_slide(prs)
 
@@ -1065,7 +1118,7 @@ def add_slide_team_consumption(prs, project, team_rows, instance_name, instance_
 
     proj_name = project.get("name", "?")
     _header(slide, f"{proj_name.upper()}  ·  CONSOMMATION PAR ÉQUIPE",
-            subtitle="Répartition JH & coûts · RAF valorisé · Atterrissage", height_in=1.2)
+            subtitle="Répartition JH & coûts · RAF valorisé · Atterrissage", height_in=1.2, brand=brand)
 
     # ---- Compute totals ----
     total_planned_md   = sum(r.get("planned_md", 0) for r in team_rows)
@@ -1147,7 +1200,7 @@ def add_slide_team_consumption(prs, project, team_rows, instance_name, instance_
         _run(empty_tb.text_frame, "Aucune allocation de travail enregistrée pour ce projet.",
              size=9, color=LIGHT, italic=True)
 
-    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  Projetenne Confidentiel"
+    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  {(brand or {}).get('company_name', 'Projetenne')} Confidentiel"
     _footer(slide, footer_text)
 
 
@@ -1158,10 +1211,12 @@ def add_slide_team_consumption(prs, project, team_rows, instance_name, instance_
 def generate_copil_pptx(instance_name, instance_date, projects,
                         all_milestones, all_risks, all_decisions,
                         governance_id=None, team_consumption_by_project=None,
-                        include_roadmap=False, dependencies=None):
+                        include_roadmap=False, dependencies=None, branding=None):
     prs = Presentation()
     prs.slide_width = SW
     prs.slide_height = SH
+
+    brand = _brand(branding)
 
     proj_names = {p["project_id"]: p["name"] for p in projects}
     tc_by_proj = team_consumption_by_project or {}
@@ -1171,22 +1226,22 @@ def generate_copil_pptx(instance_name, instance_date, projects,
         d["project_name"] = proj_names.get(d.get("project_id", ""), "?")
 
     # Slide 1 — Garde
-    add_slide_garde(prs, instance_name, instance_date, projects)
+    add_slide_garde(prs, instance_name, instance_date, projects, brand=brand)
 
     # Slide 2 — Sommaire
-    add_slide_sommaire(prs, projects, instance_name, instance_date)
+    add_slide_sommaire(prs, projects, instance_name, instance_date, brand=brand)
 
     # Slide 3 — Heatmap
     if all_risks:
-        add_slide_heatmap(prs, all_risks, proj_names, instance_name, instance_date)
+        add_slide_heatmap(prs, all_risks, proj_names, instance_name, instance_date, brand=brand)
 
     # Slide 4 — Top risques
     if all_risks:
-        add_slide_top_risks(prs, all_risks, proj_names, instance_name, instance_date)
+        add_slide_top_risks(prs, all_risks, proj_names, instance_name, instance_date, brand=brand)
 
     # Slide 5 — Décisions
     if all_decisions:
-        add_slide_decisions(prs, all_decisions[:10], governance_id, instance_name, instance_date)
+        add_slide_decisions(prs, all_decisions[:10], governance_id, instance_name, instance_date, brand=brand)
 
     # Slide 6+N — Fiche par projet + slide consommation équipe
     for p in projects:
@@ -1196,16 +1251,16 @@ def generate_copil_pptx(instance_name, instance_date, projects,
         r_proj = sorted([r for r in all_risks if r.get("project_id") == pid],
                         key=lambda x: -x.get("criticality", 0))
         d_proj = [d for d in all_decisions if d.get("project_id") == pid]
-        add_slide_fiche(prs, p, ms_sorted, r_proj, d_proj, instance_name, instance_date)
+        add_slide_fiche(prs, p, ms_sorted, r_proj, d_proj, instance_name, instance_date, brand=brand)
 
         # S1-08 — Slide consommation par équipe
         team_rows = tc_by_proj.get(pid, [])
-        add_slide_team_consumption(prs, p, team_rows, instance_name, instance_date)
+        add_slide_team_consumption(prs, p, team_rows, instance_name, instance_date, brand=brand)
 
     # S2-04 — Slide Roadmap consolidée (optionnel)
     if include_roadmap:
         add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_date,
-                          dependencies=dependencies)
+                          dependencies=dependencies, brand=brand)
 
     buf = io.BytesIO()
     prs.save(buf)
