@@ -226,8 +226,8 @@ DEFAULT_PROFILES = [
         "description": "Suivi fournisseurs, forfaits, contrats.",
         "is_system": True,
         "permissions": [
-            "budget.view", "raf.view", "vendors.view", "vendors.edit_consumed",
-            "vendors.view_contracts",
+            "dashboard.view", "budget.view", "raf.view", "vendors.view",
+            "vendors.edit_consumed", "vendors.view_contracts",
         ],
     },
     {

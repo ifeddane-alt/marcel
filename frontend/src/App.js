@@ -33,8 +33,22 @@ function ProtectedRoute({ children }) {
 function AdminRoute({ children }) {
   const { token, user } = useAuth();
   if (!token) return <Navigate to="/login" replace />;
-  if (user?.role !== "TENANT_ADMIN") return <Navigate to="/dashboard" replace />;
+  const perms = user?.permissions || [];
+  const hasAdmin = perms.includes("*") || perms.some((p) => p.startsWith("admin."));
+  if (!hasAdmin) return <Navigate to="/dashboard" replace />;
   return children;
+}
+
+/**
+ * Route /dashboard : redirige automatiquement les profils sans dashboard.view
+ * (ex: USER/Contributeur) vers /timesheets.
+ */
+function DashboardGuard() {
+  const { user } = useAuth();
+  const perms = user?.permissions || [];
+  const hasDashboard = perms.includes("*") || perms.includes("dashboard.view");
+  if (!hasDashboard) return <Navigate to="/timesheets" replace />;
+  return <Dashboard />;
 }
 
 function AppRoutes() {
@@ -51,7 +65,7 @@ function AppRoutes() {
         }
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
-        <Route path="dashboard" element={<Dashboard />} />
+        <Route path="dashboard" element={<DashboardGuard />} />
         <Route path="programmes" element={<Programs />} />
         <Route path="programmes/:id" element={<ProgramDetail />} />
         <Route path="portfolio" element={<Portfolio />} />

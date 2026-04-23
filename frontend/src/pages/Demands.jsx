@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { demandsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import { toast } from "sonner";
 import DemandModal from "@/components/DemandModal";
 import ConvertProjectModal from "@/components/ConvertProjectModal";
@@ -153,7 +154,9 @@ function KanbanColumn({ col, demands, onCardClick, onDragStart, onDrop, canWrite
 // ─── Page principale ────────────────────────────────────────────────────────
 export default function Demands() {
   const { user } = useAuth();
-  const canWrite = user?.role !== "READ_ONLY";
+  const { hasPermission, hasAnyPermission } = usePermissions();
+  // canWrite: peut créer/déplacer/interagir avec les demandes
+  const canWrite = hasAnyPermission("demands.submit", "demands.qualify", "demands.convert");
 
   const [demands, setDemands] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -329,7 +332,7 @@ export default function Demands() {
                 Tableau
               </button>
             </div>
-            {canWrite && (
+            {hasPermission("demands.submit") && (
               <button
                 data-testid="new-demand-btn"
                 onClick={() => setShowCreateModal(true)}

@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import { FolderKanban, TrendingUp, AlertTriangle, CheckCircle2, ChevronRight, Plus, Pencil, Trash2 } from "lucide-react";
 import { programsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import RAGBadge from "@/components/RAGBadge";
 import ProgramModal from "@/components/ProgramModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -18,8 +19,9 @@ const STATUS_COLORS = {
 
 export default function Programs() {
   const { user } = useAuth();
-  const canWrite = user?.role === "TENANT_ADMIN" || user?.role === "PMO_USER";
-  const isAdmin = user?.role === "TENANT_ADMIN";
+  const { hasPermission } = usePermissions();
+  const canCreate = hasPermission("projects.create");
+  const canEdit   = hasPermission("projects.edit");
 
   const [programs, setPrograms] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -56,7 +58,7 @@ export default function Programs() {
           <h1 className="font-heading text-3xl font-bold text-[#0F172A] uppercase tracking-tight">Programmes</h1>
           <p className="text-sm text-slate-500 mt-0.5">{programs.length} programme{programs.length > 1 ? "s" : ""} · {totalProjects} projets</p>
         </div>
-        {canWrite && (
+        {canCreate && (
           <button onClick={openCreate} data-testid="btn-new-program"
             className="flex items-center gap-2 px-4 py-2.5 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] transition-colors shadow-sm">
             <Plus size={15} /> Nouveau programme
@@ -126,13 +128,13 @@ export default function Programs() {
                     </span>
                   ))}
                   <div className="ml-auto flex items-center gap-1">
-                    {canWrite && (
+                    {canEdit && (
                       <button onClick={(e) => openEdit(e, prog)} data-testid={`btn-edit-program-${prog.program_id}`}
                         className="p-1.5 text-slate-400 hover:text-[#0052CC] hover:bg-blue-50 rounded transition-colors" title="Modifier">
                         <Pencil size={13} />
                       </button>
                     )}
-                    {isAdmin && (
+                    {hasPermission("projects.delete") && (
                       <button onClick={(e) => { e.stopPropagation(); e.preventDefault(); setConfirmDelete(prog); }}
                         data-testid={`btn-delete-program-${prog.program_id}`}
                         className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors" title="Supprimer">

@@ -5,6 +5,7 @@ import {
   ArrowRight, Info, CalendarDays, Minus,
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import { timesheetsAPI, resourcesAPI, leavesAPI } from "@/api";
 import { toast } from "sonner";
 
@@ -607,7 +608,9 @@ function ValidationSubView({ view, actionLabel, actionIcon: ActionIcon, actionCl
 
 // ─── ONGLET 2 : Validation (3 sous-vues) ─────────────────────────────────────
 function ValidationView({ user, refresh }) {
-  const isPmo = user?.role === "TENANT_ADMIN" || user?.role === "PMO_USER";
+  const { hasPermission, hasAnyPermission } = usePermissions();
+  // isPmo : peut faire un bypass PMO (validate_step2 = bypass CP)
+  const isPmo = hasPermission("timesheets.validate_step2");
   const [subView, setSubView] = useState("valideur");
 
   const SUB_TABS = [
@@ -990,6 +993,7 @@ function AbsencesCalendar({ allResources, defaultResourceId }) {
 // ─── Page principale ──────────────────────────────────────────────────────────
 export default function Timesheets() {
   const { user } = useAuth();
+  const { hasAnyPermission } = usePermissions();
   const [tab, setTab]               = useState("saisie");
   const [resourceId, setResourceId] = useState(user?.resource_id || null);
   const [allResources, setAllResources] = useState([]);
@@ -1003,7 +1007,12 @@ export default function Timesheets() {
     if (!resourceId && user?.resource_id) setResourceId(user.resource_id);
   }, [user, resourceId]);
 
-  const canValidate = user?.role !== "READ_ONLY";
+  // Onglet Validation : visible si on peut valider (N+1, CP, ou PMO)
+  const canValidate = hasAnyPermission(
+    "timesheets.validate_step2",
+    "timesheets.validate_step3",
+    "timesheets.modify",
+  );
   const TABS = [
     { id: "saisie",     label: "Ma saisie",  icon: Clock },
     ...(canValidate ? [{ id: "validation", label: "Validation", icon: CheckCircle }] : []),

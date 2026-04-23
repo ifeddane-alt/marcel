@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import { Plus, Pencil, Trash2, Users, ChevronRight } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import { teamsAPI, resourcesAPI } from "@/api";
 import TeamModal from "@/components/TeamModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -9,8 +10,9 @@ import CapacityAlertBanner from "@/components/CapacityAlertBanner";
 
 export default function Teams() {
   const { user } = useAuth();
-  const canWrite = user?.role === "TENANT_ADMIN" || user?.role === "PMO_USER";
-  const isAdmin = user?.role === "TENANT_ADMIN";
+  const { hasPermission } = usePermissions();
+  const canCreate = hasPermission("teams.create");
+  const canEdit   = hasPermission("teams.edit");
 
   const [teams, setTeams] = useState([]);
   const [resources, setResources] = useState([]);
@@ -55,7 +57,7 @@ export default function Teams() {
           <h1 className="font-heading text-3xl font-bold text-[#0F172A] uppercase tracking-tight">Équipes</h1>
           <p className="text-sm text-slate-500 mt-0.5">{teams.length} équipe{teams.length > 1 ? "s" : ""} · Gestion des groupes ressources</p>
         </div>
-        {canWrite && (
+        {canCreate && (
           <button
             onClick={() => { setSelectedTeam(null); setModalOpen(true); }}
             data-testid="btn-new-team"
@@ -122,8 +124,9 @@ export default function Teams() {
                 </div>
               </Link>
               {/* Action buttons (stop propagation) */}
-              {canWrite && (
+              {(canEdit || hasPermission("teams.delete")) && (
                 <div className="flex items-center gap-1 px-5 py-2 border-t border-gray-50">
+                  {canEdit && (
                   <button
                     onClick={() => { setSelectedTeam(team); setModalOpen(true); }}
                     data-testid={`btn-edit-team-${team.team_id}`}
@@ -132,7 +135,8 @@ export default function Teams() {
                   >
                     <Pencil size={11} /> Modifier
                   </button>
-                  {isAdmin && (
+                  )}
+                  {hasPermission("teams.delete") && (
                     <button
                       onClick={() => setConfirmDelete(team)}
                       data-testid={`btn-delete-team-${team.team_id}`}

@@ -3,6 +3,7 @@ import { Link, useSearchParams } from "react-router-dom";
 import { Search, Plus, Pencil, Trash2, Presentation } from "lucide-react";
 import { projectsAPI, programsAPI, resourcesAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import RAGBadge, { MethodologyBadge, ProjectStatusBadge } from "@/components/RAGBadge";
 import ProjectModal from "@/components/ProjectModal";
 import ExportCopilModal from "@/components/ExportCopilModal";
@@ -13,8 +14,10 @@ const RAG_LABELS = { green: "Vert", orange: "Orange", red: "Rouge" };
 
 export default function Portfolio() {
   const { user } = useAuth();
-  const canWrite = user?.role === "TENANT_ADMIN" || user?.role === "PMO_USER";
-  const isAdmin = user?.role === "TENANT_ADMIN";
+  const { hasPermission } = usePermissions();
+  const canCreate = hasPermission("projects.create");
+  const canEdit   = hasPermission("projects.edit");
+  const canDelete = hasPermission("projects.delete");
   const [searchParams, setSearchParams] = useSearchParams();
 
   const [projects, setProjects] = useState([]);
@@ -136,7 +139,7 @@ export default function Portfolio() {
           <h1 className="font-heading text-3xl font-bold text-[#0F172A] uppercase tracking-tight">Portefeuille</h1>
           <p className="text-sm text-slate-500 mt-0.5">{projects.length} projets — {ragCounts.red} rouge · {ragCounts.orange} orange · {ragCounts.green} vert</p>
         </div>
-        {canWrite && (
+        {canCreate && (
           <button
             onClick={openCreate}
             data-testid="btn-new-project"
@@ -234,7 +237,7 @@ export default function Portfolio() {
                   {label}{sortKey === key ? (sortDir === "asc" ? " ↑" : " ↓") : ""}
                 </th>
               ))}
-              {canWrite && <th className="px-4 py-3 text-xs font-semibold text-slate-600 text-right">Actions</th>}
+              {(canEdit || canDelete) && <th className="px-4 py-3 text-xs font-semibold text-slate-600 text-right">Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -270,14 +273,16 @@ export default function Portfolio() {
                     <span className={overBudget ? "text-rose-600 font-semibold" : "text-slate-700"}>{formatEuro(p.budget_forecast)}</span>
                   </td>
                   <td className="px-4 py-3 font-mono-data text-xs text-slate-600">{formatDate(p.end_date_forecast)}</td>
-                  {canWrite && (
+                  {(canEdit || canDelete) && (
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
+                        {canEdit && (
                         <button onClick={(e) => openEdit(e, p)} data-testid={`btn-edit-project-${p.project_id}`}
                           className="p-1.5 text-slate-400 hover:text-[#0052CC] hover:bg-blue-50 rounded transition-colors" title="Modifier">
                           <Pencil size={13} />
                         </button>
-                        {isAdmin && (
+                        )}
+                        {canDelete && (
                           <button onClick={(e) => openDelete(e, p)} data-testid={`btn-delete-project-${p.project_id}`}
                             className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors" title="Supprimer">
                             <Trash2 size={13} />
@@ -290,7 +295,7 @@ export default function Portfolio() {
               );
             })}
             {filtered.length === 0 && (
-              <tr><td colSpan={canWrite ? 8 : 7} className="text-center py-12 text-slate-400 text-sm">Aucun projet correspondant aux filtres</td></tr>
+              <tr><td colSpan={(canEdit || canDelete) ? 8 : 7} className="text-center py-12 text-slate-400 text-sm">Aucun projet correspondant aux filtres</td></tr>
             )}
           </tbody>
         </table>

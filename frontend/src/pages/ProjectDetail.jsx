@@ -7,6 +7,7 @@ import {
 } from "lucide-react";
 import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI, decisionsAPI, workAllocationsAPI, projectDependenciesAPI, vendorsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import RAGBadge, { MethodologyBadge, MilestoneBadge, TaskTypeBadge, TaskStatusBadge, ProjectStatusBadge } from "@/components/RAGBadge";
 import ProjectModal from "@/components/ProjectModal";
 import TaskModal from "@/components/TaskModal";
@@ -45,8 +46,15 @@ export default function ProjectDetail() {
   const { id } = useParams();
   const navigate = useNavigate();
   const { user } = useAuth();
-  const canWrite = user?.role === "TENANT_ADMIN" || user?.role === "PMO_USER";
-  const isAdmin = user?.role === "TENANT_ADMIN";
+  const { hasPermission } = usePermissions();
+  const canEdit      = hasPermission("projects.edit");
+  const canDelete    = hasPermission("projects.delete");
+  const canCreateMS  = hasPermission("milestones.create");
+  const canCreateRisk= hasPermission("risks.create");
+  const canCreateTask= hasPermission("tasks.create");
+  const canCreateDec = hasPermission("decisions.create");
+  // Pour rétrocompat avec canWrite utilisé dans plusieurs endroits
+  const canWrite = canEdit;
 
   const [project, setProject] = useState(null);
   const [milestones, setMilestones] = useState([]);
@@ -237,7 +245,7 @@ export default function ProjectDetail() {
               >
                 <Pencil size={13} /> Modifier
               </button>
-              {isAdmin && (
+              {canDelete && (
                 <button
                   onClick={() => setConfirmDelete({ type: "project", item: project })}
                   data-testid="btn-delete-project"
@@ -815,7 +823,7 @@ export default function ProjectDetail() {
                                 >
                                   <Pencil size={12} />
                                 </button>
-                                {isAdmin && (
+                                {canDelete && (
                                   <button
                                     onClick={() => setConfirmDelete({ type: "task", item: t })}
                                     data-testid={`btn-delete-task-${t.task_id}`}
@@ -909,7 +917,7 @@ export default function ProjectDetail() {
                 <Diamond size={13} className="text-yellow-500" />
                 Jalons ({milestones.length})
               </div>
-              {canWrite && (
+              {canCreateMS && (
                 <button
                   onClick={() => { setSelectedMilestone(null); setMilestoneModalOpen(true); }}
                   data-testid="btn-new-milestone"
@@ -1105,7 +1113,7 @@ export default function ProjectDetail() {
                 <ShieldAlert size={13} className="text-rose-400" />
                 Registre des risques ({risks.length})
               </div>
-              {canWrite && (
+              {canCreateRisk && (
                 <button
                   onClick={() => { setSelectedRisk(null); setRiskModalOpen(true); }}
                   data-testid="btn-new-risk"
@@ -1225,7 +1233,7 @@ export default function ProjectDetail() {
                     <ClipboardList size={13} className="text-[#0052CC]" />
                     Registre des décisions ({decisions.length})
                   </div>
-                  {canWrite && (
+                  {canCreateDec && (
                     <button
                       onClick={() => { setSelectedDecision(null); setDecisionModalOpen(true); }}
                       data-testid="btn-new-decision"
@@ -1280,7 +1288,7 @@ export default function ProjectDetail() {
                               {d.due_date ? formatDate(d.due_date) : "—"}
                             </td>
                             <td className="px-3 py-2.5">
-                              {isAdmin && (
+                              {canDelete && (
                                 <button
                                   onClick={(e) => { e.stopPropagation(); setConfirmDelete({ type: "decision", item: d }); }}
                                   data-testid={`btn-delete-decision-${d.decision_id}`}
@@ -1619,7 +1627,7 @@ export default function ProjectDetail() {
           milestone={selectedMilestone}
           projectId={id}
           resources={resources}
-          isAdmin={canWrite}
+          isAdmin={canDelete}
           onSave={async (data) => {
             if (selectedMilestone) {
               await milestonesAPI.update(selectedMilestone.milestone_id, data);

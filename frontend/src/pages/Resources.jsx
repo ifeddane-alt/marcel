@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Plus, Pencil, Trash2, BarChart3, User, Building2, FileText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import { resourcesAPI, allocationsAPI, teamsAPI } from "@/api";
 import ResourceModal from "@/components/ResourceModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -14,8 +15,9 @@ const TYPE_CONFIG = {
 
 export default function Resources() {
   const { user } = useAuth();
-  const canWrite = user?.role === "TENANT_ADMIN" || user?.role === "PMO_USER";
-  const isAdmin = user?.role === "TENANT_ADMIN";
+  const { hasPermission } = usePermissions();
+  const canCreate = hasPermission("resources.create");
+  const canEdit   = hasPermission("resources.edit");
 
   const [resources, setResources] = useState([]);
   const [allocations, setAllocations] = useState([]);
@@ -74,7 +76,7 @@ export default function Resources() {
           <h1 className="font-heading text-3xl font-bold text-[#0F172A] uppercase tracking-tight">Ressources</h1>
           <p className="text-sm text-slate-500 mt-0.5">{resources.length} ressources · Capacités et allocations</p>
         </div>
-        {canWrite && (
+        {canCreate && (
           <button onClick={openCreate} data-testid="btn-new-resource"
             className="flex items-center gap-2 px-4 py-2.5 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] transition-colors shadow-sm">
             <Plus size={15} /> Nouvelle ressource
@@ -161,7 +163,7 @@ export default function Resources() {
                   {["Ressource","Type","Rôle","Équipe","TJM","Dispo","Capa effective","JH alloués","Charge"].map((h) => (
                     <th key={h} className="px-4 py-3 text-xs font-semibold text-slate-600">{h}</th>
                   ))}
-                  {canWrite && <th className="px-4 py-3 text-xs font-semibold text-slate-600 text-right">Actions</th>}
+                  {(canEdit || hasPermission("resources.delete")) && <th className="px-4 py-3 text-xs font-semibold text-slate-600 text-right">Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -220,14 +222,16 @@ export default function Resources() {
                           </div>
                         ) : <span className="text-slate-300 text-xs">Non allouée</span>}
                       </td>
-                      {canWrite && (
+                      {(canEdit || hasPermission("resources.delete")) && (
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1">
+                            {canEdit && (
                             <button onClick={(e) => openEdit(e, r)} data-testid={`btn-edit-resource-${r.resource_id}`}
                               className="p-1.5 text-slate-400 hover:text-[#0052CC] hover:bg-blue-50 rounded transition-colors" title="Modifier">
                               <Pencil size={13} />
                             </button>
-                            {isAdmin && (
+                            )}
+                            {hasPermission("resources.delete") && (
                               <button onClick={(e) => { e.stopPropagation(); setConfirmDelete(r); }} data-testid={`btn-delete-resource-${r.resource_id}`}
                                 className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors" title="Supprimer">
                                 <Trash2 size={13} />

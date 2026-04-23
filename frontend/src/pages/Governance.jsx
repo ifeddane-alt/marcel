@@ -6,6 +6,7 @@ import {
 } from "lucide-react";
 import { governanceAPI, projectsAPI, decisionsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
 import { GovernanceTypeBadge, SanityBadge } from "@/components/RAGBadge";
 import DecisionModal from "@/components/DecisionModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -49,8 +50,9 @@ function SanityReport({ report }) {
 
 export default function Governance() {
   const { user } = useAuth();
-  const canWrite = user?.role === "TENANT_ADMIN" || user?.role === "PMO_USER";
-  const isAdmin = user?.role === "TENANT_ADMIN";
+  const { hasPermission } = usePermissions();
+  const canWrite = hasPermission("governance.edit");
+  const canDelete = hasPermission("governance.edit");
 
   const [instances, setInstances] = useState([]);
   const [projects, setProjects] = useState([]);
@@ -285,7 +287,7 @@ export default function Governance() {
                       {d.due_date ? formatDate(d.due_date) : "—"}
                     </td>
                     <td className="px-4 py-2.5">
-                      {isAdmin && (
+                      {canDelete && (
                         <button
                           onClick={(e) => { e.stopPropagation(); setConfirmDelete(d); }}
                           data-testid={`btn-delete-decision-${d.decision_id}`}
@@ -455,7 +457,7 @@ export default function Governance() {
                                 <ClipboardList size={13} />
                               </button>
                             )}
-                            {isAdmin && (
+                            {canDelete && (
                               <button
                                 onClick={() => setConfirmDelete(d)}
                                 className="text-slate-300 hover:text-rose-500 transition-colors flex-shrink-0"
