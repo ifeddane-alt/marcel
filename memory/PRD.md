@@ -198,7 +198,26 @@ allocations:   allocation_id, project_id, resource_id, period_month, jh_allocate
 - **MilestoneModal** : merge union des types hardcodés + types tenant pour toutes les familles (epic_lifecycle, epic_milestone, transversal) — déduplication par `value`
 - **Workflow Timesheets** : `validation_steps` depuis `tenant_settings.workflows.timesheet`. Si 2 étapes : valideur N+1 → directly `validated` (bypass CP). Si 3 étapes : comportement standard `submitted → cp_reviewed → validated`
 
-### P0 (Prochain) — Permissions Frontend (chantier à venir — prompt user attendu)
+### ✅ P0 — Frontend Permissions (COMPLET — 2026-02) TESTÉ 100% (Iteration 30)
+- **Hook `usePermissions`** (`/src/hooks/usePermissions.js`) : `hasPermission(perm)` + `hasAnyPermission()` + `canAccessNav()` — source unique de vérité pour tous les contrôles UI
+- **Sidebar dynamique** : MAIN_NAV + MODULE_NAV filtrés par permissions. Admins voient tout + section Administration. USER ne voit que Timesheets. ACHATS voit Dashboard + Suivi Fournisseurs.
+- **Header profil** : `profile_name` depuis le backend remplace le rôle legacy (`"Administrateur"`, `"PMO Portefeuille"`, `"Direction SI"`, `"Achats / Procurement"`, etc.)
+- **DashboardGuard** : redirige automatiquement les profils sans `dashboard.view` vers `/timesheets` (ex: USER/Contributeur)
+- **AdminRoute** : basé sur permissions `admin.*` au lieu de `role === TENANT_ADMIN`
+- **Boutons d'action conditionnels** : 8 pages mises à jour (`Portfolio`, `ProjectDetail`, `Teams`, `Resources`, `Programs`, `Demands`, `Governance`, `Timesheets`) — `canCreate`, `canEdit`, `canDelete` via permissions granulaires
+- **Backend** : `auth/router.py` retourne `profile_name` dans la réponse login
+- **ACHATS** : `dashboard.view` ajouté au profil (DB + DEFAULT_PROFILES)
+
+**Comptes de test validés :**
+| Email | Mot de passe | Profil | Résultat test |
+|-------|-------------|--------|---------------|
+| admin@altair.fr | Admin2026! | Administrateur | Tout + Admin ✅ |
+| pmo@altair.fr | **Pmo1234!** | PMO Portefeuille | Tout sauf Admin ✅ |
+| viewer@altair.fr | View1234! | Direction SI (CIO) | Lecture seule, 0 bouton ✅ |
+| cp@altair.fr | Altair2026! | Chef de Projet | Selon permissions ✅ |
+| manager@altair.fr | Altair2026! | Manager | Selon permissions ✅ |
+| user@altair.fr | Altair2026! | Contributeur | Redirect /timesheets ✅ |
+| achats@altair.fr | Altair2026! | Achats / Procurement | Dashboard + Vendors ✅ |
 
 ### P1 — Futur
 - Notifications temps réel (WebSocket)
