@@ -14,7 +14,7 @@ Multi-tenant avec isolation stricte des données et RBAC granulaire par profils.
 ## Utilisateurs Démo
 | Email | Mot de passe | Profil | Rôle legacy |
 |-------|---|---|---|
-| admin@altair.fr | Admin1234! | ADMIN (tous droits) | TENANT_ADMIN |
+| admin@altair.fr | Admin2026! | ADMIN (tous droits) | TENANT_ADMIN |
 | pmo@altair.fr | Pmo1234! | PORTFOLIO | PMO_USER |
 | viewer@altair.fr | View1234! | CIO | READ_ONLY |
 | cp@altair.fr | Altair2026! | CHEF_DE_PROJET | — |
@@ -248,3 +248,19 @@ allocations:   allocation_id, project_id, resource_id, period_month, jh_allocate
 - `/app/frontend/src/pages/ProjectDetail.jsx` ← external costs section
 - `/app/frontend/src/components/Layout.jsx` ← ACHATS/FINANCES sidebar section
 - `/app/frontend/src/api/index.js` ← safeAPI, okrsAPI, vendorsAPI
+
+
+### ✅ Ownership Filtering API (COMPLET — 2026-02) TESTÉ 100% (Iteration 31)
+- `is_ownership_restricted(user, perm)` dans `core/auth.py` — source de vérité pour restrictions
+- `/api/projects`, `/api/dashboard/summary`, `/api/programs` filtrés par `owner_id` pour CP
+- `/api/teams`, `/api/resources` filtrés par `manager_resource_id` pour MANAGER
+- Résultats validés : CP=3/8 projets, Admin=8/8, Manager=1 équipe, 3 ressources
+
+### ✅ Frontend Permissions (COMPLET — 2026-02) TESTÉ 100% (Iteration 30)
+- Hook `usePermissions` + sidebar dynamique + header profile_name + DashboardGuard + AdminRoute
+- 8 pages mises à jour : boutons conditionnels par permission granulaire
+
+### ✅ 3 Points Admin Config (COMPLET — 2026-02) TESTÉ 100% (Iteration 29)
+- PPT Branding (couleurs + logo + company_name), MilestoneModal merge, Timesheets 2 étapes
+
+### P0 (Prochain) — Packaging Docker (chantier annoncé par l'utilisateur)
