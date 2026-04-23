@@ -184,17 +184,21 @@ allocations:   allocation_id, project_id, resource_id, period_month, jh_allocate
 
 ### ✅ P0 — Chantier 4 Back-office Admin (COMPLET — 2026-02) TESTÉ 100%
 - **Page /admin/config** : accès TENANT_ADMIN uniquement (AdminRoute + permission admin.config)
-- **Section 1 — Modules** : 7 toggles on/off (safe/demands/timesheets/leaves/vendors/compliance/roadmap). Sidebar dynamique + API 403 si module désactivé
-- **Section 2 — Workflows** : timesheets (2 ou 3 étapes, timeout CP, auto-validation), demands (statuts actifs)
-- **Section 3 — Référentiels** : enums éditables (catégories risques, natures dépendances, statuts projets, urgences demandes) avec add/edit/delete/réordonner + badge "SYS" pour valeurs non supprimables
+- **Section 1 — Modules** : 7 toggles on/off. Sidebar dynamique + API 403 si module désactivé
+- **Section 2 — Workflows** : timesheets (2 ou 3 étapes, timeout CP, auto-validation), demands
+- **Section 3 — Référentiels** : enums éditables (catégories risques, natures dépendances, statuts projets, urgences demandes)
 - **Section 4 — Jours Fériés** : table CRUD + import prédéfini France 2026 / Maroc 2026
-- **Section 5 — Alertes** : 7 seuils dynamiques (capacité équipe, forfait, TJM, réglementaire, EAC) appliqués dans les calculs d'alerte
+- **Section 5 — Alertes** : 7 seuils dynamiques appliqués dans les calculs d'alerte
 - **Section 6 — Export PPT** : couleurs primaire/secondaire/accent, nom entreprise, police, logo base64
-- **TenantConfigContext** : chargé au login, distribué dans toute l'app. Sidebar conditionnelle + dropdowns dynamiques (RiskModal, DependencyModal, ProjectModal, MilestoneModal)
-- **Seed Altair** : POST /api/admin/config/seed — fériés FR+MA 2026, enums système, seuils par défaut
-- **admin@altair.fr** : password réinitialisé à Admin2026!
+- **TenantConfigContext** : chargé au login, distribué dans toute l'app
+- **Seed Altair** : POST /api/admin/config/seed
 
-### P0 (Prochain) — Back-office admin (suite si besoin) ou prochain chantier utilisateur
+### ✅ P0 — Intégration Admin Config (COMPLET — 2026-02) TESTÉ 100% (Iteration 29)
+- **PPT Branding** : `ppt_branding` appliqué dans tous les exports PPTX (couleur primaire dans les headers, `company_name` dans tous les pieds de page, logo sur la slide de garde)
+- **MilestoneModal** : merge union des types hardcodés + types tenant pour toutes les familles (epic_lifecycle, epic_milestone, transversal) — déduplication par `value`
+- **Workflow Timesheets** : `validation_steps` depuis `tenant_settings.workflows.timesheet`. Si 2 étapes : valideur N+1 → directly `validated` (bypass CP). Si 3 étapes : comportement standard `submitted → cp_reviewed → validated`
+
+### P0 (Prochain) — Permissions Frontend (chantier à venir — prompt user attendu)
 
 ### P1 — Futur
 - Notifications temps réel (WebSocket)
