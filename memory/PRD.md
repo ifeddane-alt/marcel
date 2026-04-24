@@ -348,3 +348,8 @@ docker-compose up -d
 **Backend** : `/app/backend/modules/arbitrage/` (router.py, service.py, schemas.py). Permissions : `arbitrage.view/edit/simulate` ajoutées aux profils PORTFOLIO, CIO, CHEF_DE_PROJET, ACHATS.
 **Seed** : 8 projets avec scores variés + enveloppe 2026 (CAPEX 12M, OPEX 6M).
 **Credentials** : admin@altair.fr / Admin2026! (mot de passe corrigé dans seed.py).
+
+### ✅ Quick Wins Arbitrage (2026-04) — TESTÉ 10/10 PASS (Iteration 35)
+1. **Widget KPI Dashboard "Enveloppe Portefeuille"** : CAPEX vert (47%), OPEX rouge (190%), badge "Dépassement", lien "Détails →" vers /arbitrage. Visible profils avec `arbitrage.view`. Chargement indépendant du Dashboard.
+2. **Export PDF Scorecard** : bouton "Export PDF" en haut de la page Arbitrage. PDF A4 (60 Ko) avec rankings, scores, enveloppes, formule poids et bubble chart (matplotlib + reportlab).
+
