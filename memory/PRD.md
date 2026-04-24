@@ -299,3 +299,30 @@ cp .env.example .env
 # Éditez .env : JWT_SECRET, TENANT_NAME, ADMIN_EMAIL, ADMIN_PASSWORD
 docker-compose up -d
 ```
+
+### ✅ Module Scope — Arbitrage + Figeage (COMPLET — 2026-04) TESTÉ 23/23 PASS (Iteration 32)
+
+**Backend — `modules/scope/` :**
+- `router.py` : 7 endpoints (GET candidates, PATCH status, GET capacity, POST snapshot, GET snapshots, POST transmit, POST gantt-compute)
+- `service.py` : logique capa vs charge, snapshot versionné, transmission PDF (ReportLab), recalcul Gantt
+- `schemas.py` : ScopeStatusPatch, SnapshotCreate, TransmitRequest
+- Field `scope_status` (sec/etendu/out) + `gantt_source` (manual/scope_computed) ajoutés à TaskUpdate
+- Permission `scope.transmit` ajoutée à ALL_PERMISSIONS + profil PORTFOLIO
+- `reportlab>=4.0.0` ajouté aux requirements
+
+**Frontend — `pages/Scope.jsx` :**
+- KPI cards : SEC, ÉTENDU, OUT, JH SEC total, Équipes surcharge
+- Barre de filtres : projet, statut scope, dates, recherche libre
+- ScopeTable : tableau interactif avec dropdown inline scope_status, couleurs par statut, tri projet→priorité
+- CapacityVsLoad : tableau équipe + expand ressource, codes couleur vert/orange/rouge
+- Recalcul live capa vs charge à chaque changement de scope_status
+- Modal "Figer le scope v{N}" (bouton conditionnel scope.freeze)
+- Historique versions (dropdown select)
+- Vue snapshot figé avec boutons Transmettre + Recalculer Gantt + téléchargement PDF auto
+
+**Seed :**
+- 17 tâches avec scope_status (mix SEC/ÉTENDU/OUT)
+- Dev A en SURCHARGE : 230 JH SEC vs 186 JH capa → test rouge validé
+- 1 snapshot figé PI-1 2026 v2 (8 features)
+
+**RBAC validé :** scope.arbitrate requis pour PATCH status, scope.freeze pour snapshot/gantt, manager → 403
