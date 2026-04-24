@@ -1,0 +1,60 @@
+version: "3.9"
+
+# Projetenne — Docker Compose On-Premise
+# Usage : cp .env.example .env && docker-compose up -d
+
+services:
+
+  # ── Base de données MongoDB ────────────────────────────────────────────────
+  mongo:
+    image: mongo:7
+    restart: unless-stopped
+    volumes:
+      - mongo_data:/data/db
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 15s
+
+  # ── API Backend FastAPI ────────────────────────────────────────────────────
+  backend:
+    build:
+      context: ./backend
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    env_file: .env
+    environment:
+      # Override MONGO_URL pour utiliser le nom du service Docker
+      MONGO_URL: "mongodb://mongo:27017"
+    depends_on:
+      mongo:
+        condition: service_healthy
+    healthcheck:
+      # Utilise Python (disponible dans l'image) pour vérifier l'endpoint /health
+      test: ["CMD", "python3", "-c",
+             "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      # start_period couvre le seed initial (quelques secondes) + démarrage uvicorn
+      start_period: 40s
+    # Pas de port exposé en externe — accès uniquement via le proxy Nginx
+
+  # ── Frontend React servi par Nginx ────────────────────────────────────────
+  frontend:
+    build:
+      context: ./frontend
+      dockerfile: Dockerfile
+      args:
+        REACT_APP_BACKEND_URL: ""
+    restart: unless-stopped
+    ports:
+      - "${HTTP_PORT:-80}:80"
+    depends_on:
+      backend:
+        condition: service_healthy
+
+volumes:
+  mongo_data:

@@ -57,6 +57,11 @@ for _router in [
     app.include_router(_router, prefix="/api")
 
 
+@app.get("/health")
+async def health():
+    return {"status": "ok"}
+
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
     client.close()

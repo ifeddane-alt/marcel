@@ -263,4 +263,39 @@ allocations:   allocation_id, project_id, resource_id, period_month, jh_allocate
 ### ✅ 3 Points Admin Config (COMPLET — 2026-02) TESTÉ 100% (Iteration 29)
 - PPT Branding (couleurs + logo + company_name), MilestoneModal merge, Timesheets 2 étapes
 
-### P0 (Prochain) — Packaging Docker (chantier annoncé par l'utilisateur)
+### ✅ Packaging Docker On-Premise (COMPLET — 2026-04)
+
+**P0 — Fichiers Docker créés :**
+- `/app/backend/Dockerfile` — Python 3.11-slim, gcc, pip install + entrypoint
+- `/app/backend/entrypoint.sh` — Seed auto puis uvicorn 2 workers
+- `/app/backend/seed_docker.py` — Seed idempotent : crée tenant+admin depuis `.env` au 1er démarrage
+- `/app/frontend/Dockerfile` — Multi-stage : Node 18 build → Nginx alpine serve
+- `/app/frontend/nginx.conf` — Proxy `/api/` → `http://backend:8000`, SPA fallback, gzip
+- `/app/frontend/.dockerignore`, `/app/backend/.dockerignore`
+- `/app/docker-compose.yml` — 3 services (mongo:7, backend, frontend), health checks, volume `mongo_data`
+- `/app/.env.example` — Variables : DB_NAME, JWT_SECRET, CORS_ORIGINS, HTTP_PORT, TENANT_NAME, ADMIN_EMAIL, ADMIN_PASSWORD, SMTP_*, ANTHROPIC_API_KEY (commenté)
+
+**P1 — Seed automatique au premier démarrage :**
+- `seed_docker.py` utilise TENANT_NAME, ADMIN_EMAIL, ADMIN_PASSWORD depuis `.env`
+- Idempotent : skip si tenant existant
+- `entrypoint.sh` orchestre seed → uvicorn
+
+**Fixes associés :**
+- `requirements.txt` : ajout `python-pptx>=1.0.0`, `matplotlib>=3.8.0`, `python-dateutil>=2.9.0`
+- `server.py` : endpoint `GET /health` ajouté (utilisé par Docker healthcheck)
+
+**Architecture Docker :**
+```
+[Navigateur] → port 80 → [Nginx]
+                             ├── /api/* → http://backend:8000  (FastAPI)
+                             └── /*    → /usr/share/nginx/html/index.html (SPA)
+                                                    ↓
+                                         [MongoDB :27017] (volume persistant)
+```
+
+**Procédure de déploiement client :**
+```bash
+cp .env.example .env
+# Éditez .env : JWT_SECRET, TENANT_NAME, ADMIN_EMAIL, ADMIN_PASSWORD
+docker-compose up -d
+```
