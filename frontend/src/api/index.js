@@ -250,8 +250,7 @@ export const scopeAPI = {
   exportCandidatesExcel: (params)        => api.get("/scope/export-excel", { params, responseType: "blob" }),
 };
 
-export const arbitrageAPI = {
-  getSummary:      ()           => api.get("/arbitrage/summary"),
+export const arbitrageAPI = {  getSummary:      ()           => api.get("/arbitrage/summary"),
   getWeights:      ()           => api.get("/arbitrage/weights"),
   updateWeights:   (data)       => api.put("/arbitrage/weights", data),
   patchScoring:    (id, data)   => api.patch(`/arbitrage/projects/${id}/scoring`, data),

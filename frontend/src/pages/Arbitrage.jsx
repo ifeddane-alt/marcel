@@ -6,7 +6,7 @@ import {
 import {
   Target, TrendingUp, BarChart2, Sliders, Save, RotateCcw,
   PlayCircle, CheckCircle, AlertTriangle, Info, ChevronDown, ChevronUp,
-  Plus, Trash2, Edit3, X, Check,
+  Plus, Trash2, Edit3, X, Check, FileDown,
 } from "lucide-react";
 import { arbitrageAPI } from "@/api";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -99,6 +99,7 @@ export default function Arbitrage() {
   const [saveScenarioModal, setSaveScenarioModal] = useState(false);
   const [scenarioName, setScenarioName] = useState("");
   const [scenarioDesc, setScenarioDesc] = useState("");
+  const [exportingPdf, setExportingPdf] = useState(false);
 
   // Envelope modal
   const [envModal, setEnvModal]         = useState(false);
@@ -171,6 +172,32 @@ export default function Arbitrage() {
       toast.error("Erreur lors de la sauvegarde des poids");
     } finally {
       setSavingWeights(false);
+    }
+  };
+
+  // ── Export PDF ───────────────────────────────────────────────────────────────
+
+  const handleExportPdf = async () => {
+    setExportingPdf(true);
+    try {
+      const { REACT_APP_BACKEND_URL } = process.env;
+      const token = localStorage.getItem("projetenne_token") || sessionStorage.getItem("projetenne_token");
+      const res = await fetch(`${REACT_APP_BACKEND_URL}/api/arbitrage/export-pdf`, {
+        headers: { Authorization: `Bearer ${token}` },
+      });
+      if (!res.ok) throw new Error("Erreur export PDF");
+      const blob = await res.blob();
+      const url  = URL.createObjectURL(blob);
+      const a    = document.createElement("a");
+      a.href     = url;
+      a.download = "scorecard_arbitrage.pdf";
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("PDF téléchargé");
+    } catch {
+      toast.error("Erreur lors de l'export PDF");
+    } finally {
+      setExportingPdf(false);
     }
   };
 
@@ -319,15 +346,26 @@ export default function Arbitrage() {
             Scoring multi-critères · Enveloppes budgétaires · Simulateur What-if
           </p>
         </div>
-        {canEdit && (
+        <div className="flex items-center gap-2">
           <button
-            onClick={() => setShowWeightsModal(true)}
-            data-testid="btn-configure-weights"
-            className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white text-sm rounded-lg hover:bg-slate-700 transition-colors"
+            onClick={handleExportPdf}
+            disabled={exportingPdf}
+            data-testid="btn-export-pdf"
+            className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-600 text-sm rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-60"
           >
-            <Sliders size={14} /> Configurer les poids
+            <FileDown size={14} />
+            {exportingPdf ? "Export..." : "Export PDF"}
           </button>
-        )}
+          {canEdit && (
+            <button
+              onClick={() => setShowWeightsModal(true)}
+              data-testid="btn-configure-weights"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white text-sm rounded-lg hover:bg-slate-700 transition-colors"
+            >
+              <Sliders size={14} /> Configurer les poids
+            </button>
+          )}
+        </div>
       </div>
 
       {/* ── KPI rapides ── */}

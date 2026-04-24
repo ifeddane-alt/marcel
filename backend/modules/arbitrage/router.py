@@ -1,4 +1,5 @@
 from fastapi import APIRouter, Depends
+from fastapi.responses import Response
 from core.auth import TokenPayload, get_current_user
 from .schemas import ScoringPatch, ArbitrageWeightsUpdate, EnvelopeUpsert, ScenarioCreate
 from . import service
@@ -99,3 +100,17 @@ async def delete_scenario(
     current_user: TokenPayload = Depends(get_current_user),
 ):
     return await service.delete_scenario(scenario_id, current_user)
+
+
+# ── 6. Export PDF Scorecard ────────────────────────────────────────────────────
+
+@router.get("/arbitrage/export-pdf")
+async def export_pdf(
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    pdf_bytes = await service.export_pdf_scorecard(current_user)
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": "attachment; filename=scorecard_arbitrage.pdf"},
+    )

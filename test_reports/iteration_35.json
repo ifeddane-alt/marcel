@@ -1,0 +1,35 @@
+{
+  "summary": "Testing of 2 quick wins on Arbitrage module: (1) Dashboard 'Enveloppe Portefeuille' widget, (2) Arbitrage Export PDF button. Found and fixed 1 bug (token key mismatch causing 401 on PDF download). All features now working.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/frontend/src/pages/Arbitrage.jsx"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "BUG FIXED: Arbitrage.jsx handleExportPdf was reading localStorage.getItem('token') but auth system stores token as 'projetenne_token'. Fixed to use projetenne_token."
+  ],
+  "updated_files": ["/app/frontend/src/pages/Arbitrage.jsx"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin@altair.fr / Admin2026!, viewer@altair.fr / View1234!",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "main_agent_can_self_test": false,
+  "context_for_next_testing_agent": "Dashboard EnveloppePortefeuille widget: PASS (CAPEX green 47%, OPEX red 190%, Dépassement badge, Détails link). Export PDF: PASS (download triggered, scorecard_arbitrage.pdf 60KB). Viewer profile: PASS (widget hidden). Bug fixed: token key was 'token' instead of 'projetenne_token' in Arbitrage.jsx handleExportPdf.",
+  "verified_features": {
+    "Dashboard widget visible for admin": "PASS - Enveloppe Portefeuille widget rendered",
+    "CAPEX green 47%": "PASS",
+    "OPEX red 190%": "PASS",
+    "Dépassement badge": "PASS",
+    "Détails link to /arbitrage": "PASS",
+    "Widget hidden for viewer": "PASS",
+    "Export PDF button on Arbitrage page": "PASS - data-testid=btn-export-pdf",
+    "GET /api/arbitrage/export-pdf": "PASS - 200 OK, application/pdf, 61KB",
+    "PDF download click": "PASS - scorecard_arbitrage.pdf downloaded after fix"
+  }
+}

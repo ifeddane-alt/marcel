@@ -6,12 +6,12 @@ import {
 } from "recharts";
 import {
   Briefcase, TrendingUp, AlertTriangle, CheckCircle, ArrowRight, ShieldAlert, MapPin,
-} from "lucide-react";
-import { dashboardAPI, programsAPI, projectsAPI, teamsAPI, milestonesAPI } from "@/api";
+} from "lucide-react";import { dashboardAPI, programsAPI, projectsAPI, teamsAPI, milestonesAPI, arbitrageAPI } from "@/api";
 import RAGBadge from "@/components/RAGBadge";
 import RiskHeatmap from "@/components/RiskHeatmap";
 import CapacityAlertBanner from "@/components/CapacityAlertBanner";
 import { formatEuro, formatDate } from "@/utils/format";
+import { usePermissions } from "@/hooks/usePermissions";
 
 const RAG_COLORS = { green: "#10B981", orange: "#F59E0B", red: "#EF4444" };
 const METHOD_COLORS = { waterfall: "#3B82F6", agile: "#8B5CF6", safe: "#6366F1" };
@@ -52,6 +52,9 @@ function CustomTooltip({ active, payload, label }) {
 }
 
 export default function Dashboard() {
+  const { hasPermission } = usePermissions();
+  const canSeeEnvelope = hasPermission("arbitrage.view") || hasPermission("*");
+
   const [summary, setSummary] = useState(null);
   const [topRisks, setTopRisks] = useState([]);
   const [heatmapRisks, setHeatmapRisks] = useState([]);
@@ -62,6 +65,7 @@ export default function Dashboard() {
   const [heatmapFilterProgram, setHeatmapFilterProgram] = useState("");
   const [heatmapFilterProject, setHeatmapFilterProject] = useState("");
   const [loading, setLoading] = useState(true);
+  const [arbitrageData, setArbitrageData] = useState(null);
 
   useEffect(() => {
     Promise.all([
@@ -79,13 +83,24 @@ export default function Dashboard() {
         setPrograms(pRes.data);
         setAllProjects(projRes.data);
         setCapacityAlerts(caRes.data);
-        // Top 5 upcoming regulatory (non-done, date ascending)
         const upcomingReg = (regRes.data || [])
           .filter((m) => m.urgency_color !== "done" && m.target_date)
           .slice(0, 5);
         setRegulatoryAlerts(upcomingReg);
         setLoading(false);
       }).catch(() => setLoading(false));
+
+    // Données arbitrage (envelopes + résumé)
+    Promise.all([
+      arbitrageAPI.getEnvelopes(),
+      arbitrageAPI.getSummary(),
+    ]).then(([envRes, sumRes]) => {
+      const envelopes = envRes.data || [];
+      const totals    = sumRes.data?.totals || {};
+      if (envelopes.length > 0) {
+        setArbitrageData({ envelopes, totals });
+      }
+    }).catch(() => {}); // silencieux si pas de données
   }, []);
 
   if (loading) {
@@ -243,6 +258,91 @@ export default function Dashboard() {
                     <span className={`text-[11px] min-w-[60px] text-right tabular-nums ${colorMap[m.urgency_color] || "text-slate-600"}`}>
                       {daysLabel}
                     </span>
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Widget Enveloppe Portefeuille — visible ADMIN, PORTFOLIO, CIO, FINANCE */}
+      {canSeeEnvelope && arbitrageData && arbitrageData.envelopes.length > 0 && (
+        <div className="bg-white border border-gray-200 rounded shadow-sm mb-6" data-testid="envelope-portfolio-widget">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+            <div className="flex items-center gap-2">
+              <TrendingUp size={14} className="text-[#0052CC]" />
+              <span className="text-sm font-bold text-slate-800">Enveloppe Portefeuille</span>
+              {arbitrageData.envelopes.some(e => {
+                const cpx = (arbitrageData.totals.capex_planned || 0) / (e.capex_envelope || 1) > 1;
+                const opx = (arbitrageData.totals.opex_planned || 0)  / (e.opex_envelope  || 1) > 1;
+                return cpx || opx;
+              }) && (
+                <span className="flex items-center gap-1 text-[10px] font-bold bg-red-100 text-red-700 border border-red-200 px-2 py-0.5 rounded-full">
+                  <AlertTriangle size={9} /> Dépassement
+                </span>
+              )}
+            </div>
+            <Link to="/arbitrage" className="text-xs text-[#0052CC] hover:underline flex items-center gap-1">
+              Détails <ArrowRight size={11} />
+            </Link>
+          </div>
+          <div className="px-5 py-4 space-y-3">
+            {arbitrageData.envelopes.map(env => {
+              const capexUsed  = arbitrageData.totals.capex_planned || 0;
+              const opexUsed   = arbitrageData.totals.opex_planned  || 0;
+              const capexPct   = env.capex_envelope > 0 ? (capexUsed / env.capex_envelope) * 100 : 0;
+              const opexPct    = env.opex_envelope  > 0 ? (opexUsed  / env.opex_envelope)  * 100 : 0;
+              const capexOver  = capexPct > 100;
+              const opexOver   = opexPct  > 100;
+              return (
+                <div key={env.envelope_id}>
+                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                    {env.label} — {env.year}
+                  </div>
+                  <div className="grid grid-cols-2 gap-4">
+                    {/* CAPEX */}
+                    <div data-testid="dashboard-capex-bar">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-slate-600 font-medium">CAPEX</span>
+                        <span className={`text-xs font-semibold ${capexOver ? "text-red-600" : "text-slate-600"}`}>
+                          {formatEuro(capexUsed)} / {formatEuro(env.capex_envelope)}
+                          <span className="ml-1 text-slate-400">({Math.round(capexPct)}%)</span>
+                        </span>
+                      </div>
+                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${capexOver ? "bg-red-500" : capexPct > 80 ? "bg-amber-400" : "bg-emerald-500"}`}
+                          style={{ width: `${Math.min(capexPct, 100)}%` }}
+                        />
+                      </div>
+                      {capexOver && (
+                        <p className="text-[10px] text-red-500 mt-0.5">
+                          +{formatEuro(capexUsed - env.capex_envelope)} ({Math.round(capexPct - 100)}% dépassement)
+                        </p>
+                      )}
+                    </div>
+                    {/* OPEX */}
+                    <div data-testid="dashboard-opex-bar">
+                      <div className="flex items-center justify-between mb-1">
+                        <span className="text-xs text-slate-600 font-medium">OPEX</span>
+                        <span className={`text-xs font-semibold ${opexOver ? "text-red-600" : "text-slate-600"}`}>
+                          {formatEuro(opexUsed)} / {formatEuro(env.opex_envelope)}
+                          <span className="ml-1 text-slate-400">({Math.round(opexPct)}%)</span>
+                        </span>
+                      </div>
+                      <div className="h-2 bg-slate-100 rounded-full overflow-hidden">
+                        <div
+                          className={`h-full rounded-full transition-all ${opexOver ? "bg-red-500" : opexPct > 80 ? "bg-amber-400" : "bg-emerald-500"}`}
+                          style={{ width: `${Math.min(opexPct, 100)}%` }}
+                        />
+                      </div>
+                      {opexOver && (
+                        <p className="text-[10px] text-red-500 mt-0.5">
+                          +{formatEuro(opexUsed - env.opex_envelope)} ({Math.round(opexPct - 100)}% dépassement)
+                        </p>
+                      )}
+                    </div>
                   </div>
                 </div>
               );
