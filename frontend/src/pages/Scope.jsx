@@ -2,6 +2,7 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   LayoutList, ChevronDown, ChevronRight, Lock, Send,
   Filter, Search, RefreshCw, AlertTriangle, CheckCircle, Minus,
+  BarChart2, Download, Table2,
 } from "lucide-react";
 import { scopeAPI, projectsAPI, teamsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -16,6 +17,167 @@ const SCOPE_OPTIONS = [
 ];
 const SCOPE_MAP = Object.fromEntries(SCOPE_OPTIONS.map((o) => [o.value, o]));
 const STATUS_COLORS = { vert: "text-emerald-600 bg-emerald-50", orange: "text-amber-600 bg-amber-50", rouge: "text-red-600 bg-red-50" };
+
+/* ── Helpers Timeline ────────────────────────────────────────────────── */
+function parsePeriodRef(ref = "") {
+  const year = parseInt(ref.match(/\d{4}/)?.[0] || new Date().getFullYear());
+  const qMatch = ref.match(/Q(\d)/i);
+  const piMatch = ref.match(/PI-?(\d)/i);
+  let startMonth = 1;
+  if (qMatch) startMonth = (parseInt(qMatch[1]) - 1) * 3 + 1;
+  else if (piMatch) startMonth = (parseInt(piMatch[1]) - 1) * 3 + 1;
+  const start = new Date(year, startMonth - 1, 1);
+  const end   = new Date(year, startMonth + 2, 0);
+  const totalDays = Math.ceil((end - start) / 86400000) + 1;
+  return { start, end, totalDays, startMonth, year };
+}
+
+function computeTeamTimelines(snapshot) {
+  if (!snapshot?.features || !snapshot?.capacity_summary) return [];
+  const period = parsePeriodRef(snapshot.period_ref);
+
+  return snapshot.capacity_summary
+    .map((team) => {
+      const capaPerDay = period.totalDays > 0 ? team.capa / period.totalDays : 0;
+      const secFeatures = snapshot.features
+        .filter((f) => f.team_id === team.team_id && f.scope_status === "sec")
+        .map((f) => ({
+          ...f,
+          total_jh: (f.phase_estimates || []).reduce((s, e) => s + (e.jh_estimated || 0), 0),
+        }))
+        .filter((f) => f.total_jh > 0);
+
+      let currentDay = 0;
+      const bars = secFeatures.map((f) => {
+        const durDays = capaPerDay > 0 ? f.total_jh / capaPerDay : 0;
+        const bar = {
+          id: f.task_id,
+          name: f.name,
+          startPct: Math.min((currentDay / period.totalDays) * 100, 100),
+          widthPct: Math.min((durDays / period.totalDays) * 100, 100 - (currentDay / period.totalDays) * 100),
+          durationDays: Math.ceil(durDays),
+          totalJh: f.total_jh,
+          overflow: currentDay + durDays > period.totalDays,
+        };
+        currentDay += durDays;
+        return bar;
+      });
+
+      return {
+        ...team,
+        bars,
+        overloadDays: Math.max(0, Math.ceil(currentDay - period.totalDays)),
+      };
+    })
+    .filter((t) => t.bars.length > 0);
+}
+
+/* ── Composant Timeline ──────────────────────────────────────────────── */
+function ScopeTimeline({ snapshot }) {
+  const period = parsePeriodRef(snapshot?.period_ref);
+  const timelines = computeTeamTimelines(snapshot);
+
+  // Génération des marques de mois
+  const monthMarks = useMemo(() => {
+    const marks = [];
+    for (let m = 0; m < 3; m++) {
+      const d = new Date(period.year, period.startMonth - 1 + m, 1);
+      const pct = (Math.ceil((d - period.start) / 86400000) / period.totalDays) * 100;
+      marks.push({ pct, label: d.toLocaleDateString("fr-FR", { month: "short", year: "2-digit" }) });
+    }
+    return marks;
+  }, [period]);
+
+  if (!snapshot || timelines.length === 0) {
+    return (
+      <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-400 text-sm">
+        Aucune feature SEC dans ce snapshot. Sélectionnez une version avec des features SEC.
+      </div>
+    );
+  }
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden" data-testid="scope-timeline">
+      <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
+        <BarChart2 size={16} className="text-slate-500" />
+        <span className="font-semibold text-slate-700 text-sm">Timeline — {snapshot.period_ref}</span>
+        <span className="text-xs text-slate-400 ml-1">(features SEC par équipe)</span>
+      </div>
+
+      <div className="p-4 space-y-5">
+        {/* Axe des mois */}
+        <div className="relative h-5 ml-[140px]">
+          {monthMarks.map((m) => (
+            <div key={m.label} className="absolute top-0 flex flex-col items-center" style={{ left: `${m.pct}%` }}>
+              <div className="w-px h-3 bg-slate-300" />
+              <span className="text-[10px] text-slate-400 whitespace-nowrap">{m.label}</span>
+            </div>
+          ))}
+        </div>
+
+        {/* Lignes par équipe */}
+        {timelines.map((team) => (
+          <div key={team.team_id} data-testid={`timeline-team-${team.team_id}`}>
+            {/* En-tête équipe */}
+            <div className="flex items-center gap-3 mb-1.5">
+              <div className="w-[130px] flex-shrink-0 text-xs font-semibold text-slate-700 truncate text-right pr-2">
+                {team.team_name}
+              </div>
+              <div className={`text-xs font-medium ${team.status === "rouge" ? "text-red-600" : team.status === "orange" ? "text-amber-600" : "text-emerald-600"}`}>
+                {team.charge_sec}/{team.capa} JH
+                {team.overloadDays > 0 && <span className="ml-1 text-red-500">+{team.overloadDays}j débord.</span>}
+              </div>
+            </div>
+
+            {/* Barre de capacité totale */}
+            <div className="flex items-center gap-3">
+              <div className="w-[130px] flex-shrink-0" />
+              <div className="flex-1 relative h-7 bg-slate-100 rounded overflow-visible">
+                {/* Limite capa */}
+                <div className="absolute inset-0 rounded bg-slate-100" />
+
+                {/* Features comme barres */}
+                {team.bars.map((bar, idx) => (
+                  <div
+                    key={bar.id || idx}
+                    data-testid={`timeline-bar-${bar.id}`}
+                    className={`absolute top-0.5 h-6 rounded cursor-default transition-all group
+                      ${bar.overflow ? "bg-red-400/80 border border-red-500" : "bg-emerald-400/80 border border-emerald-500"}`}
+                    style={{ left: `${bar.startPct}%`, width: `${Math.max(bar.widthPct, 0.5)}%` }}
+                    title={`${bar.name} · ${bar.totalJh} JH · ${bar.durationDays}j`}
+                  >
+                    <div className="absolute inset-0 flex items-center px-1 overflow-hidden">
+                      <span className="text-[9px] text-white font-semibold truncate whitespace-nowrap">
+                        {bar.name}
+                      </span>
+                    </div>
+                    {/* Tooltip */}
+                    <div className="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-1 z-50 bg-[#0F172A] text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg">
+                      {bar.name}<br />{bar.totalJh} JH · {bar.durationDays} jours
+                      {bar.overflow && <span className="text-red-300 block">⚠ Dépasse la capacité</span>}
+                    </div>
+                  </div>
+                ))}
+
+                {/* Indicateur de surcharge */}
+                {team.status === "rouge" && (
+                  <div className="absolute right-0 top-0 h-7 bg-red-200/50 border-l-2 border-red-400 border-dashed"
+                    style={{ width: `${Math.min((team.overloadDays / period.totalDays) * 100, 20)}%` }} />
+                )}
+              </div>
+            </div>
+          </div>
+        ))}
+
+        {/* Légende */}
+        <div className="flex items-center gap-4 mt-2 pl-[142px] text-xs text-slate-500">
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-emerald-400 inline-block" />Feature SEC dans la capa</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-400 inline-block" />Feature SEC en débordement</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /* ── Inline scope-status dropdown ────────────────────────────────────── */
 function ScopeStatusCell({ taskId, current, onChange, canEdit }) {
@@ -348,8 +510,12 @@ export default function Scope() {
   const [transmitSnap, setTransmitSnap] = useState(null);
   const [cpUsers,      setCpUsers]      = useState([]);
 
+  // Mode d'affichage (tableau | timeline) - timeline dispo uniquement sur snapshot
+  const [viewMode, setViewMode] = useState("table");
+
   // Version sélectionnée pour historique
   const [selectedSnapId, setSelectedSnapId] = useState("");
+  const [fullSnapshot,   setFullSnapshot]   = useState(null); // snapshot complet (avec features)
 
   const loadData = useCallback(async () => {
     setLoading(true);
@@ -441,6 +607,34 @@ export default function Scope() {
     }
   };
 
+  const handleExportExcel = async () => {
+    try {
+      let res;
+      if (viewSnap) {
+        res = await scopeAPI.exportSnapshotExcel(viewSnap.snapshot_id);
+      } else {
+        const params = {};
+        if (filterProject) params.project_id = filterProject;
+        if (filterScopeStatus) params.scope_status = filterScopeStatus;
+        if (filterSearch) params.search = filterSearch;
+        res = await scopeAPI.exportCandidatesExcel(params);
+      }
+      const url = URL.createObjectURL(new Blob([res.data], {
+        type: "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+      }));
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = viewSnap
+        ? `scope_${viewSnap.period_ref.replace(/ /g, "-")}_v${viewSnap.version}.xlsx`
+        : "scope_arbitrage.xlsx";
+      link.click();
+      URL.revokeObjectURL(url);
+      toast.success("Export Excel téléchargé");
+    } catch {
+      toast.error("Erreur lors de l'export Excel");
+    }
+  };
+
   const openTransmit = async (snap) => {
     setTransmitSnap(snap);
     // Charger les utilisateurs CP
@@ -454,8 +648,8 @@ export default function Scope() {
   };
 
   const nextVersion = (snapshots[0]?.version || 0) + 1;
-  const selectedSnap = snapshots.find((s) => s.snapshot_id === selectedSnapId);
-  const viewSnap = selectedSnap || null;
+  // viewSnap utilise le snapshot complet (avec features) pour la timeline et le tableau
+  const viewSnap = fullSnapshot || (selectedSnapId ? snapshots.find((s) => s.snapshot_id === selectedSnapId) : null);
 
   // Stats summary
   const secCount    = candidates.filter((t) => t.scope_status === "sec").length;
@@ -474,11 +668,42 @@ export default function Scope() {
           <p className="text-sm text-slate-500 mt-0.5">Sélection, figeage et transmission des features candidates</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
+          {/* Toggle Tableau / Timeline */}
+          <div className="flex rounded-lg border border-slate-200 overflow-hidden bg-white">
+            <button
+              onClick={() => setViewMode("table")}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors
+                ${viewMode === "table" ? "bg-[#0F172A] text-white" : "text-slate-600 hover:bg-slate-50"}`}
+              data-testid="view-table-btn">
+              <Table2 size={13} />Tableau
+            </button>
+            <button
+              onClick={() => setViewMode("timeline")}
+              disabled={!viewSnap}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed
+                ${viewMode === "timeline" ? "bg-[#0F172A] text-white" : "text-slate-600 hover:bg-slate-50"}`}
+              data-testid="view-timeline-btn"
+              title={!viewSnap ? "Sélectionnez une version figée pour afficher la timeline" : ""}>
+              <BarChart2 size={13} />Timeline
+            </button>
+          </div>
+
           {/* Historique versions */}
           {snapshots.length > 0 && (
             <select
               value={selectedSnapId}
-              onChange={(e) => setSelectedSnapId(e.target.value)}
+              onChange={async (e) => {
+                const id = e.target.value;
+                setSelectedSnapId(id);
+                setViewMode("table");
+                setFullSnapshot(null);
+                if (id) {
+                  try {
+                    const res = await scopeAPI.getSnapshot(id);
+                    setFullSnapshot(res.data);
+                  } catch { /* silence */ }
+                }
+              }}
               className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#0052CC]"
               data-testid="snapshot-version-select"
             >
@@ -490,6 +715,16 @@ export default function Scope() {
               ))}
             </select>
           )}
+
+          {/* Export Excel */}
+          <button
+            onClick={handleExportExcel}
+            data-testid="export-excel-btn"
+            className="flex items-center gap-2 px-3 py-2 border border-slate-200 text-slate-600 rounded-lg text-sm hover:bg-slate-50 transition-colors"
+          >
+            <Download size={14} />Excel
+          </button>
+
           {canFreeze && !viewSnap && (
             <button
               onClick={() => setShowFreeze(true)}
@@ -592,14 +827,18 @@ export default function Scope() {
         </div>
       )}
 
-      {/* Tableau */}
-      <ScopeTable
-        candidates={viewSnap ? (viewSnap.features || []) : candidates}
-        onStatusChange={handleStatusChange}
-        canEdit={canArbitrate && !viewSnap}
-      />
+      {/* Tableau / Timeline */}
+      {viewMode === "timeline" && viewSnap ? (
+        <ScopeTimeline snapshot={viewSnap} />
+      ) : (
+        <ScopeTable
+          candidates={viewSnap ? (viewSnap.features || []) : candidates}
+          onStatusChange={handleStatusChange}
+          canEdit={canArbitrate && !viewSnap}
+        />
+      )}
 
-      {/* Capa vs charge */}
+      {/* Capa vs charge (toujours visible, quelle que soit la vue) */}
       <CapacityVsLoad data={viewSnap ? (viewSnap.capacity_summary || []) : capacity} />
 
       {/* Modales */}

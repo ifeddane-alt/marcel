@@ -246,6 +246,8 @@ export const scopeAPI = {
   transmitSnapshot: (id, data)           => api.post(`/scope/snapshots/${id}/transmit`, data),
   computeGantt:     (id)                 => api.post(`/scope/snapshots/${id}/gantt-compute`),
   getUsers:         ()                   => api.get("/admin/users"),
+  exportSnapshotExcel: (id)              => api.get(`/scope/snapshots/${id}/export-excel`, { responseType: "blob" }),
+  exportCandidatesExcel: (params)        => api.get("/scope/export-excel", { params, responseType: "blob" }),
 };
 
 export default api;

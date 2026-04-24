@@ -2209,11 +2209,11 @@ async def seed():
         # Dev A avec SEC → estimations élevées pour forcer la surcharge
         if rid in DEV_A_RES and s == "sec":
             estimates = [
-                {"phase": "analysis",       "jh_estimated": 12},
-                {"phase": "implementation", "jh_estimated": 45},
-                {"phase": "test",           "jh_estimated": 18},
-                {"phase": "hypercare",      "jh_estimated": 10},
-            ]
+                {"phase": "analysis",       "jh_estimated": 20},
+                {"phase": "implementation", "jh_estimated": 60},
+                {"phase": "test",           "jh_estimated": 15},
+                {"phase": "hypercare",      "jh_estimated": 5},
+            ]  # 100 JH/tâche → 2 tâches = 200 JH vs 186 JH capa → SURCHARGE garantie
         elif s == "sec":
             estimates = [
                 {"phase": "analysis",       "jh_estimated": 5},

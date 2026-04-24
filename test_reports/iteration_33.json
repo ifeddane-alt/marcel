@@ -1,0 +1,57 @@
+{
+  "summary": "Testing 4 new Scope module features: seed.py scope_status, Scope reçu in ProjectDetail, Timeline mini-Gantt, Export Excel. 10/10 backend tests PASS, frontend UI largely working with 1 bug found.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "ProjectDetail - Scope reçu section",
+        "issue": "Badges SEC/ÉTENDU/OUT always show 0 because listSnapshots excludes the 'features' field (performance optimization). snap.features is undefined in the list response, so the counts computed in ProjectDetail are always 0.",
+        "selector": "[data-testid^='scope-snap-']",
+        "priority": "MEDIUM",
+        "rca": "service.py list_snapshots uses projection {features: 0}. ProjectDetail uses listSnapshots and tries to count snap.features.filter(...) which returns 0. Fix: either add feature_counts summary (sec_count/etendu_count/out_count) to list_snapshots response, or load full snapshot via getSnapshot(id) per entry in ProjectDetail."
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_scope_new_features.py",
+    "/app/test_reports/pytest/pytest_scope_new.xml"
+  ],
+  "action_items": [
+    "Fix ProjectDetail Scope reçu badges showing 0 SEC/ÉTENDU/OUT: add sec_count/etendu_count/out_count computed fields to list_snapshots response in service.py (or include minimal summary per snapshot)"
+  ],
+  "critical_code_review_comments": [
+    "service.py list_snapshots: excludes 'features' field correctly for performance, but ProjectDetail tries to count features from this list — need to add precomputed counts (sec_count, etendu_count, out_count) in the snapshot document or compute on-the-fly in the list endpoint."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_scope_new_features.py"
+  ],
+  "success_rate": {"backend": "100% (10/10)", "frontend": "90% (1 cosmetic badge bug)"},
+  "verified_features": {
+    "seed.py scope_status": "PASS - SEC=9, ÉTENDU=6, OUT=2, Dev A overload team visible (KPI surcharge=1)",
+    "GET /api/scope/export-excel": "PASS - returns valid XLSX (PK magic bytes), correct content-type",
+    "GET /api/scope/snapshots/{id}/export-excel": "PASS - returns valid XLSX with correct filename in Content-Disposition",
+    "GET /api/scope/snapshots?project_id=X": "PASS - returns only frozen/transmitted snapshots for project",
+    "Scope page - Tableau button": "PASS - present in header",
+    "Scope page - Timeline button": "PASS - present in header, disabled when no snapshot selected",
+    "Timeline enabled after snapshot selection": "PASS - Timeline button becomes clickable",
+    "ScopeTimeline component": "PASS - renders with 3 team rows (Dev A, Dev B, Infra)",
+    "Timeline green bars": "PASS - green bars for features SEC within capacity",
+    "Export Excel button": "PASS - present in header",
+    "ProjectDetail - Scope reçu section visible": "PASS - section shows when snapshots exist",
+    "Scope reçu - version/status/capacity": "PASS - shows period_ref, version, figé/transmis status, capacity block",
+    "Scope reçu - SEC/ÉTENDU/OUT badges": "FAIL - shows 0 for all (features not loaded in list response)",
+    "Snapshot features have team_id": "PASS - verified via API"
+  },
+  "retest_needed": true,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "10/10 backend tests pass. All 4 features implemented and mostly working. One bug: ProjectDetail Scope reçu shows 0 SEC/0 ÉTENDU/0 OUT because listSnapshots excludes features. Fix: add precomputed counts to list_snapshots service. Test file: /app/backend/tests/test_scope_new_features.py",
+  "test_credentials": {
+    "admin": "admin@altair.fr / Admin2026!",
+    "cp": "cp@altair.fr / Altair2026!"
+  }
+}

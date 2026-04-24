@@ -282,6 +282,24 @@ async def create_snapshot(data, user: TokenPayload) -> dict:
     # Snapshot de la capa vs charge
     cap_summary = await get_capacity_summary(user.tenant_id, data.project_id, None, None, None)
 
+    # Enrichir les features avec team_id depuis la ressource owner
+    res_ids = list({f.get("resource_id") for f in features if f.get("resource_id")})
+    resources_meta = await db.resources.find(
+        {"resource_id": {"$in": res_ids}, "tenant_id": user.tenant_id},
+        {"_id": 0, "resource_id": 1, "team_id": 1, "name": 1, "team": 1}
+    ).to_list(None)
+    res_team_map = {r["resource_id"]: r for r in resources_meta}
+
+    for f in features:
+        rid = f.get("resource_id")
+        if rid and rid in res_team_map:
+            f["team_id"]   = res_team_map[rid].get("team_id")
+            f["team_name"] = res_team_map[rid].get("team", "")
+            f["resource_name"] = res_team_map[rid].get("name", "")
+        # Calculer total_jh pour la timeline
+        estimates = f.get("phase_estimates") or []
+        f["total_jh_estimated"] = sum(e.get("jh_estimated", 0) for e in estimates)
+
     now = _now()
     snap = {
         "snapshot_id": str(uuid.uuid4()),
@@ -463,6 +481,166 @@ def _generate_scope_pdf(snap: dict, target_user: dict, sender, comment: str = ""
 
 
 # ─── 6. Recalcul Gantt ───────────────────────────────────────────────────────
+
+# ─── 7. Export Excel ─────────────────────────────────────────────────────────
+
+async def export_snapshot_excel(snapshot_id: str, user: TokenPayload) -> bytes:
+    """Génère un fichier Excel du snapshot : features + capa vs charge."""
+    snap = await get_snapshot(snapshot_id, user)
+
+    import xlsxwriter  # already installed (dep of python-pptx)
+    buffer = io.BytesIO()
+    wb = xlsxwriter.Workbook(buffer, {"in_memory": True})
+
+    # Formats
+    hdr  = wb.add_format({"bold": True, "bg_color": "#0F172A", "font_color": "#FFFFFF", "border": 1})
+    sec_fmt   = wb.add_format({"bg_color": "#D1FAE5", "border": 1})
+    etd_fmt   = wb.add_format({"bg_color": "#DBEAFE", "border": 1})
+    out_fmt   = wb.add_format({"bg_color": "#F1F5F9", "font_color": "#94A3B8", "border": 1})
+    base_fmt  = wb.add_format({"border": 1})
+    num_fmt   = wb.add_format({"border": 1, "num_format": "0.0"})
+    cap_hdr   = wb.add_format({"bold": True, "bg_color": "#1E293B", "font_color": "#FFFFFF", "border": 1})
+    red_fmt   = wb.add_format({"bg_color": "#FEE2E2", "border": 1})
+    orange_fmt= wb.add_format({"bg_color": "#FEF3C7", "border": 1})
+    green_fmt = wb.add_format({"bg_color": "#D1FAE5", "border": 1})
+
+    # ── Feuille 1 : Features ─────────────────────────────────────────────────
+    ws1 = wb.add_worksheet("Features Scope")
+    ws1.set_column(0, 0, 40)
+    ws1.set_column(1, 1, 25)
+    ws1.set_column(2, 2, 20)
+    ws1.set_column(3, 9, 12)
+
+    cols1 = ["Feature", "Projet", "Équipe", "Review (JH)", "Analyse (JH)", "Impl (JH)", "Test (JH)", "Hypercare (JH)", "Total (JH)", "Statut Scope"]
+    for c, h in enumerate(cols1):
+        ws1.write(0, c, h, hdr)
+
+    features = snap.get("features") or []
+    row = 1
+    for f in sorted(features, key=lambda x: (x.get("project_name", ""), x.get("scope_status") or "zzz")):
+        s = f.get("scope_status")
+        if not s:
+            continue
+        fmt = sec_fmt if s == "sec" else etd_fmt if s == "etendu" else out_fmt
+        estimates = f.get("phase_estimates") or []
+        phase_map = {e["phase"]: e.get("jh_estimated", 0) for e in estimates}
+        total = sum(phase_map.values())
+        ws1.write(row, 0, f.get("name", ""), fmt)
+        ws1.write(row, 1, f.get("project_name", f.get("project_id", "")), fmt)
+        ws1.write(row, 2, f.get("team_name", ""), fmt)
+        ws1.write(row, 3, phase_map.get("review", 0), num_fmt)
+        ws1.write(row, 4, phase_map.get("analysis", 0), num_fmt)
+        ws1.write(row, 5, phase_map.get("implementation", 0), num_fmt)
+        ws1.write(row, 6, phase_map.get("test", 0), num_fmt)
+        ws1.write(row, 7, phase_map.get("hypercare", 0), num_fmt)
+        ws1.write(row, 8, total, num_fmt)
+        ws1.write(row, 9, {"sec": "SEC", "etendu": "ÉTENDU", "out": "OUT"}.get(s, ""), fmt)
+        row += 1
+
+    # ── Feuille 2 : Capa vs Charge ───────────────────────────────────────────
+    ws2 = wb.add_worksheet("Capacité vs Charge")
+    ws2.set_column(0, 0, 20)
+    ws2.set_column(1, 6, 14)
+
+    cols2 = ["Équipe", "Capa (JH)", "Charge SEC (JH)", "Charge ÉTENDU (JH)", "Marge (JH)", "Taux (%)", "Statut"]
+    for c, h in enumerate(cols2):
+        ws2.write(0, c, h, cap_hdr)
+
+    for r_idx, team in enumerate(snap.get("capacity_summary") or [], start=1):
+        st = team.get("status", "vert")
+        row_fmt = red_fmt if st == "rouge" else orange_fmt if st == "orange" else green_fmt
+        ws2.write(r_idx, 0, team.get("team_name", ""), row_fmt)
+        ws2.write(r_idx, 1, team.get("capa", 0), row_fmt)
+        ws2.write(r_idx, 2, team.get("charge_sec", 0), row_fmt)
+        ws2.write(r_idx, 3, team.get("charge_etendu", 0), row_fmt)
+        ws2.write(r_idx, 4, team.get("marge", 0), row_fmt)
+        ws2.write(r_idx, 5, team.get("taux_pct", 0), row_fmt)
+        ws2.write(r_idx, 6, {"vert": "OK", "orange": "Attention", "rouge": "SURCHARGE"}.get(st, ""), row_fmt)
+
+        # Détail ressources
+        for ri, res in enumerate(team.get("resources") or [], start=1):
+            off = r_idx * 20 + ri  # ligne offset pour ne pas écraser
+            # On les écrit sous l'équipe dans la même feuille (indentés)
+
+    wb.close()
+    buffer.seek(0)
+    return buffer.read()
+
+
+async def export_candidates_excel(user: TokenPayload, project_id=None, scope_status=None, search=None) -> bytes:
+    """Génère un fichier Excel de la vue courante (sans snapshot)."""
+    candidates = await get_candidates(
+        tenant_id=user.tenant_id,
+        project_id=project_id,
+        team_id=None,
+        resource_id=None,
+        scope_status=scope_status,
+        search=search,
+        start_date=None,
+        end_date=None,
+    )
+    capacity = await get_capacity_summary(
+        tenant_id=user.tenant_id,
+        project_id=project_id,
+        team_id=None,
+        start_date=None,
+        end_date=None,
+    )
+
+    import xlsxwriter
+    buffer = io.BytesIO()
+    wb = xlsxwriter.Workbook(buffer, {"in_memory": True})
+
+    hdr = wb.add_format({"bold": True, "bg_color": "#0F172A", "font_color": "#FFFFFF", "border": 1})
+    sec_fmt  = wb.add_format({"bg_color": "#D1FAE5", "border": 1})
+    etd_fmt  = wb.add_format({"bg_color": "#DBEAFE", "border": 1})
+    out_fmt  = wb.add_format({"bg_color": "#F1F5F9", "font_color": "#94A3B8", "border": 1})
+    base_fmt = wb.add_format({"border": 1})
+    num_fmt  = wb.add_format({"border": 1, "num_format": "0.0"})
+    cap_hdr  = wb.add_format({"bold": True, "bg_color": "#1E293B", "font_color": "#FFFFFF", "border": 1})
+    red_fmt  = wb.add_format({"bg_color": "#FEE2E2", "border": 1})
+    orange_fmt = wb.add_format({"bg_color": "#FEF3C7", "border": 1})
+    green_fmt  = wb.add_format({"bg_color": "#D1FAE5", "border": 1})
+
+    ws1 = wb.add_worksheet("Features Scope")
+    ws1.set_column(0, 0, 40); ws1.set_column(1, 1, 25); ws1.set_column(2, 2, 20); ws1.set_column(3, 9, 12)
+    for c, h in enumerate(["Feature", "Projet", "Équipe", "Review (JH)", "Analyse (JH)", "Impl (JH)", "Test (JH)", "Hypercare (JH)", "Total (JH)", "Statut Scope"]):
+        ws1.write(0, c, h, hdr)
+    for row, f in enumerate(sorted(candidates, key=lambda x: (x.get("project_name",""), x.get("scope_status") or "zzz")), 1):
+        s = f.get("scope_status")
+        fmt = sec_fmt if s == "sec" else etd_fmt if s == "etendu" else out_fmt if s == "out" else base_fmt
+        ws1.write(row, 0, f.get("name", ""), fmt)
+        ws1.write(row, 1, f.get("project_name", ""), fmt)
+        ws1.write(row, 2, f.get("team_name", ""), fmt)
+        ws1.write(row, 3, f.get("jh_review", 0), num_fmt)
+        ws1.write(row, 4, f.get("jh_analyse", 0), num_fmt)
+        ws1.write(row, 5, f.get("jh_impl", 0), num_fmt)
+        ws1.write(row, 6, f.get("jh_test", 0), num_fmt)
+        ws1.write(row, 7, f.get("jh_hypercare", 0), num_fmt)
+        ws1.write(row, 8, f.get("total_jh_estimated", 0), num_fmt)
+        ws1.write(row, 9, {"sec": "SEC", "etendu": "ÉTENDU", "out": "OUT"}.get(s or "", "—"), fmt)
+
+    ws2 = wb.add_worksheet("Capacité vs Charge")
+    ws2.set_column(0, 0, 20); ws2.set_column(1, 6, 14)
+    for c, h in enumerate(["Équipe", "Capa (JH)", "Charge SEC (JH)", "Charge ÉTENDU (JH)", "Marge (JH)", "Taux (%)", "Statut"]):
+        ws2.write(0, c, h, cap_hdr)
+    for r_idx, team in enumerate(capacity, 1):
+        st = team.get("status", "vert")
+        row_fmt = red_fmt if st == "rouge" else orange_fmt if st == "orange" else green_fmt
+        ws2.write(r_idx, 0, team.get("team_name", ""), row_fmt)
+        ws2.write(r_idx, 1, team.get("capa", 0), row_fmt)
+        ws2.write(r_idx, 2, team.get("charge_sec", 0), row_fmt)
+        ws2.write(r_idx, 3, team.get("charge_etendu", 0), row_fmt)
+        ws2.write(r_idx, 4, team.get("marge", 0), row_fmt)
+        ws2.write(r_idx, 5, team.get("taux_pct", 0), row_fmt)
+        ws2.write(r_idx, 6, {"vert": "OK", "orange": "Attention", "rouge": "SURCHARGE"}.get(st, ""), row_fmt)
+
+    wb.close()
+    buffer.seek(0)
+    return buffer.read()
+
+
+# ─── 8. Recalcul Gantt ───────────────────────────────────────────────────────
 
 async def compute_gantt_from_snapshot(snapshot_id: str, user: TokenPayload) -> dict:
     """

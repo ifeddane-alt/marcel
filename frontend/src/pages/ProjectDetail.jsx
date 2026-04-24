@@ -3,9 +3,9 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Calendar, ChevronRight, Flag, AlertTriangle, Clock, TrendingUp,
   Pencil, Trash2, Plus, History, ShieldAlert, ClipboardList, Presentation, Users,
-  GitBranch, BarChart2, Diamond, GitFork,
+  GitBranch, BarChart2, Diamond, GitFork, Lock, Send, CheckCircle,
 } from "lucide-react";
-import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI, decisionsAPI, workAllocationsAPI, projectDependenciesAPI, vendorsAPI } from "@/api";
+import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI, decisionsAPI, workAllocationsAPI, projectDependenciesAPI, vendorsAPI, scopeAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import RAGBadge, { MethodologyBadge, MilestoneBadge, TaskTypeBadge, TaskStatusBadge, ProjectStatusBadge } from "@/components/RAGBadge";
@@ -67,6 +67,7 @@ export default function ProjectDetail() {
   const [teamConsumption, setTeamConsumption] = useState([]);
   const [raf, setRaf] = useState(null);
   const [externalCosts, setExternalCosts] = useState(null);
+  const [scopeSnapshots, setScopeSnapshots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [taskView, setTaskView] = useState("table"); // "table" | "gantt" | "tree"
 
@@ -126,6 +127,10 @@ export default function ProjectDetail() {
     }).catch(() => setLoading(false));
     // Coûts externes (vendeurs) — non-bloquant
     vendorsAPI.projectCosts(id).then((r) => setExternalCosts(r.data)).catch(() => {});
+    // Scope transmis — non-bloquant
+    scopeAPI.listSnapshots({ project_id: id }).then((r) => {
+      setScopeSnapshots((r.data || []).filter((s) => s.status === "transmitted" || s.status === "frozen"));
+    }).catch(() => {});
   }, [id]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
@@ -1465,6 +1470,82 @@ export default function ProjectDetail() {
             </div>
           </div>
         )}
+
+        {/* ── Section Scope reçu ─────────────────────────────────── */}
+        {scopeSnapshots.length > 0 && (
+          <div className="col-span-12 bg-white border border-gray-200 rounded shadow-sm" data-testid="scope-received-section">
+            <div className="px-5 py-3 border-b border-gray-100 flex items-center justify-between">
+              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-500 font-semibold">
+                <Lock size={13} className="text-[#0052CC]" />
+                Scope {scopeSnapshots.some(s => s.status === "transmitted") ? "reçu" : "figé"}
+              </div>
+              <span className="text-xs text-slate-400">{scopeSnapshots.length} version(s)</span>
+            </div>
+            <div className="divide-y divide-slate-50">
+              {scopeSnapshots.map((snap) => {
+                const secCount    = (snap.features || []).filter(f => f.scope_status === "sec").length;
+                const etenduCount = (snap.features || []).filter(f => f.scope_status === "etendu").length;
+                const outCount    = (snap.features || []).filter(f => f.scope_status === "out").length;
+                const overloadTeams = (snap.capacity_summary || []).filter(t => t.status === "rouge").length;
+                return (
+                  <div key={snap.snapshot_id} className="px-5 py-4" data-testid={`scope-snap-${snap.snapshot_id}`}>
+                    <div className="flex items-start justify-between gap-4 flex-wrap">
+                      <div className="flex items-center gap-3">
+                        {snap.status === "transmitted"
+                          ? <CheckCircle size={18} className="text-emerald-500 flex-shrink-0" />
+                          : <Lock size={18} className="text-amber-500 flex-shrink-0" />
+                        }
+                        <div>
+                          <div className="font-semibold text-slate-800 text-sm">
+                            {snap.period_ref} — v{snap.version}
+                            <span className={`ml-2 text-xs px-2 py-0.5 rounded font-medium ${snap.status === "transmitted" ? "bg-emerald-50 text-emerald-700" : "bg-amber-50 text-amber-700"}`}>
+                              {snap.status === "transmitted" ? "Transmis" : "Figé"}
+                            </span>
+                          </div>
+                          <div className="text-xs text-slate-400 mt-0.5">
+                            {snap.frozen_at?.slice(0, 10)}
+                            {snap.comment && <span className="ml-2 italic">· {snap.comment}</span>}
+                          </div>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 flex-wrap">
+                        <span className="text-xs bg-emerald-50 text-emerald-700 px-2 py-0.5 rounded font-semibold">{secCount} SEC</span>
+                        <span className="text-xs bg-blue-50 text-blue-700 px-2 py-0.5 rounded font-semibold">{etenduCount} ÉTENDU</span>
+                        <span className="text-xs bg-slate-100 text-slate-500 px-2 py-0.5 rounded">{outCount} OUT</span>
+                        {overloadTeams > 0 && (
+                          <span className="text-xs bg-red-50 text-red-600 px-2 py-0.5 rounded font-semibold flex items-center gap-1">
+                            <AlertTriangle size={10} />{overloadTeams} surcharge
+                          </span>
+                        )}
+                        <a href={`/scope`} className="ml-2 text-xs text-[#0052CC] hover:underline flex items-center gap-1">
+                          <ChevronRight size={12} />Voir dans Scope
+                        </a>
+                      </div>
+                    </div>
+
+                    {/* Capa vs charge inline */}
+                    {(snap.capacity_summary || []).length > 0 && (
+                      <div className="mt-3 grid grid-cols-2 md:grid-cols-3 lg:grid-cols-5 gap-2">
+                        {snap.capacity_summary.map((team) => (
+                          <div key={team.team_id} className={`rounded-lg px-3 py-2 border text-xs
+                            ${team.status === "rouge" ? "bg-red-50 border-red-200" : team.status === "orange" ? "bg-amber-50 border-amber-200" : "bg-emerald-50 border-emerald-200"}`}
+                            data-testid={`scope-capa-${team.team_id}`}>
+                            <div className="font-semibold text-slate-700 truncate">{team.team_name}</div>
+                            <div className={`font-bold mt-0.5 ${team.status === "rouge" ? "text-red-700" : team.status === "orange" ? "text-amber-700" : "text-emerald-700"}`}>
+                              {team.charge_sec} / {team.capa} JH
+                            </div>
+                            <div className="text-slate-400">{team.taux_pct}% · {team.status === "rouge" ? "SURCHARGE" : team.status === "orange" ? "Attention" : "OK"}</div>
+                          </div>
+                        ))}
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
+            </div>
+          </div>
+        )}
+
         <div className="col-span-12 lg:col-span-4 space-y-4">
           <div className="bg-white border border-gray-200 rounded shadow-sm p-5">
             <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4">

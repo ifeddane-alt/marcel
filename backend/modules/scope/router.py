@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, Query
-from fastapi.responses import Response
+from fastapi.responses import Response, StreamingResponse
 from typing import Optional
+import io
 
 from core.auth import TokenPayload, get_current_user, permission_required
 from .schemas import ScopeStatusPatch, SnapshotCreate, TransmitRequest
@@ -109,3 +110,35 @@ async def compute_gantt(
     current_user: TokenPayload = Depends(get_current_user),
 ):
     return await service.compute_gantt_from_snapshot(snapshot_id, current_user)
+
+
+# ── 7. Export Excel ───────────────────────────────────────────────────────────
+
+@router.get("/scope/snapshots/{snapshot_id}/export-excel")
+async def export_snapshot_excel(
+    snapshot_id: str,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    content = await service.export_snapshot_excel(snapshot_id, current_user)
+    snap = await service.get_snapshot(snapshot_id, current_user)
+    filename = f"scope_{snap.get('period_ref','').replace(' ','-')}_v{snap.get('version','')}.xlsx"
+    return Response(
+        content=content,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+
+
+@router.get("/scope/export-excel")
+async def export_candidates_excel(
+    project_id: Optional[str] = Query(None),
+    scope_status: Optional[str] = Query(None),
+    search: Optional[str] = Query(None),
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    content = await service.export_candidates_excel(current_user, project_id, scope_status, search)
+    return Response(
+        content=content,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=scope_arbitrage.xlsx"},
+    )
