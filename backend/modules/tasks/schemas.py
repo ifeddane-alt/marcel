@@ -62,6 +62,9 @@ class TaskUpdate(BaseModel):
     phase_estimates: Optional[List[PhaseEstimate]] = None
     # Sprint assignment
     sprint_id: Optional[str] = None
+    # Scope
+    scope_status: Optional[str] = None   # sec | etendu | out
+    gantt_source: Optional[str] = None   # manual | scope_computed
 
 
 class PhaseTransition(BaseModel):

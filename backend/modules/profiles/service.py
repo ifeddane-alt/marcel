@@ -84,6 +84,7 @@ ALL_PERMISSIONS = [
     # Scope
     {"key": "scope.arbitrate",             "label": "Arbitrer le scope",              "module": "Scope"},
     {"key": "scope.freeze",                "label": "Geler le scope",                 "module": "Scope"},
+    {"key": "scope.transmit",              "label": "Transmettre le scope au CP",     "module": "Scope"},
     {"key": "scope.receive",               "label": "Recevoir le scope",              "module": "Scope"},
     {"key": "scope.simulate",              "label": "Simuler le scope",               "module": "Scope"},
     # Fournisseurs
@@ -138,7 +139,7 @@ DEFAULT_PROFILES = [
             "decisions.create", "decisions.view", "governance.view", "governance.edit",
             "compliance.view", "demands.submit", "demands.qualify", "demands.convert",
             "demands.view_own", "trains.view", "capabilities.create", "scope.arbitrate",
-            "scope.freeze", "scope.receive", "scope.simulate", "vendors.view",
+            "scope.freeze", "scope.transmit", "scope.receive", "scope.simulate", "vendors.view",
             "vendors.view_contracts", "import.csv",
         ],
     },

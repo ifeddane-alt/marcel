@@ -236,4 +236,16 @@ export const okrsAPI = {
   updateWSJF:  (capId, data) => api.put(`/capabilities/${capId}/wsjf`, data),
 };
 
+export const scopeAPI = {
+  getCandidates:    (params)             => api.get("/scope/candidates", { params }),
+  patchStatus:      (taskId, data)       => api.patch(`/scope/tasks/${taskId}/status`, data),
+  getCapacity:      (params)             => api.get("/scope/capacity", { params }),
+  createSnapshot:   (data)               => api.post("/scope/snapshots", data),
+  listSnapshots:    (params)             => api.get("/scope/snapshots", { params }),
+  getSnapshot:      (id)                 => api.get(`/scope/snapshots/${id}`),
+  transmitSnapshot: (id, data)           => api.post(`/scope/snapshots/${id}/transmit`, data),
+  computeGantt:     (id)                 => api.post(`/scope/snapshots/${id}/gantt-compute`),
+  getUsers:         ()                   => api.get("/admin/users"),
+};
+
 export default api;

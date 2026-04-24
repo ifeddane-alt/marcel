@@ -2188,6 +2188,136 @@ async def seed():
         t.pop("_id", None)
     print(f"Tâches SAFe créées (Phoenix) : {len(SAFE_TASKS)} (2 features + 3 user stories)")
 
+    print("\n=== Scope seed ===")
+    # Assigner scope_status sur ~50% des tâches (P0, P1, P2)
+    scope_target_projects = PROJECT_IDS[:3]
+    scope_tasks = await db.tasks.find(
+        {"project_id": {"$in": scope_target_projects}, "tenant_id": TENANT_ID},
+        {"_id": 0, "task_id": 1, "resource_id": 1, "jh_planned": 1}
+    ).to_list(None)
+
+    # Dev A resources = RESOURCE_IDS[0,1,2] → surcharge volontaire
+    DEV_A_RES = {RESOURCE_IDS[0], RESOURCE_IDS[1], RESOURCE_IDS[2]}
+    SCOPE_CYCLE = ["sec", "sec", "sec", "etendu", "etendu", "out", None, None]
+
+    updated_scope = 0
+    for idx, task in enumerate(scope_tasks):
+        s = SCOPE_CYCLE[idx % len(SCOPE_CYCLE)]
+        if s is None:
+            continue
+        rid = task.get("resource_id")
+        # Dev A avec SEC → estimations élevées pour forcer la surcharge
+        if rid in DEV_A_RES and s == "sec":
+            estimates = [
+                {"phase": "analysis",       "jh_estimated": 12},
+                {"phase": "implementation", "jh_estimated": 45},
+                {"phase": "test",           "jh_estimated": 18},
+                {"phase": "hypercare",      "jh_estimated": 10},
+            ]
+        elif s == "sec":
+            estimates = [
+                {"phase": "analysis",       "jh_estimated": 5},
+                {"phase": "implementation", "jh_estimated": 20},
+                {"phase": "test",           "jh_estimated": 8},
+            ]
+        elif s == "etendu":
+            estimates = [
+                {"phase": "analysis",       "jh_estimated": 3},
+                {"phase": "implementation", "jh_estimated": 12},
+                {"phase": "test",           "jh_estimated": 5},
+            ]
+        else:  # out
+            estimates = [
+                {"phase": "implementation", "jh_estimated": 10},
+            ]
+        await db.tasks.update_one(
+            {"task_id": task["task_id"], "tenant_id": TENANT_ID},
+            {"$set": {"scope_status": s, "phase_estimates": estimates}},
+        )
+        updated_scope += 1
+
+    print(f"  scope_status assigné à {updated_scope} tâches")
+
+    # Vérifier surcharge Dev A
+    dev_a_sec_total = 0.0
+    for task in scope_tasks:
+        if task.get("resource_id") not in DEV_A_RES:
+            continue
+        task_full = await db.tasks.find_one(
+            {"task_id": task["task_id"]}, {"_id": 0, "scope_status": 1, "phase_estimates": 1}
+        )
+        if task_full and task_full.get("scope_status") == "sec":
+            dev_a_sec_total += sum(e.get("jh_estimated", 0) for e in (task_full.get("phase_estimates") or []))
+    dev_a_capa_3m = (20 + 22 + 20) * 3  # 186 JH sur 3 mois
+    print(f"  Dev A : {dev_a_sec_total:.0f} JH SEC vs {dev_a_capa_3m} JH capa (3 mois)")
+    if dev_a_sec_total > dev_a_capa_3m:
+        print(f"  [OK] Dev A en SURCHARGE — test de capa vs charge validé")
+
+    # Créer un snapshot figé v1 pour PROJECT_IDS[0]
+    all_p0_tasks = await db.tasks.find(
+        {"project_id": PROJECT_IDS[0], "tenant_id": TENANT_ID},
+        {"_id": 0}
+    ).to_list(None)
+
+    # Résumé capa vs charge simplifié pour le snapshot
+    snap_cap_summary = []
+    for t_idx, t_name in enumerate(["Dev A", "Dev B", "Infra", "QA", "Sécurité"]):
+        t_id = TEAM_IDS[t_idx]
+        capa_month_map = {0: 62.0, 1: 58.0, 2: 20.0, 3: 26.1, 4: 16.2}
+        capa_3m = capa_month_map.get(t_idx, 20.0) * 3
+        t_resources = await db.resources.find(
+            {"team_id": t_id, "tenant_id": TENANT_ID}, {"_id": 0, "resource_id": 1}
+        ).to_list(None)
+        t_res_ids = {r["resource_id"] for r in t_resources}
+        sec_jh = sum(
+            sum(e.get("jh_estimated", 0) for e in (t.get("phase_estimates") or []))
+            for t in all_p0_tasks
+            if t.get("resource_id") in t_res_ids and t.get("scope_status") == "sec"
+        )
+        etendu_jh = sum(
+            sum(e.get("jh_estimated", 0) for e in (t.get("phase_estimates") or []))
+            for t in all_p0_tasks
+            if t.get("resource_id") in t_res_ids and t.get("scope_status") == "etendu"
+        )
+        marge = capa_3m - sec_jh
+        snap_cap_summary.append({
+            "team_id": t_id,
+            "team_name": t_name,
+            "capa": round(capa_3m, 1),
+            "charge_sec": round(sec_jh, 1),
+            "charge_etendu": round(etendu_jh, 1),
+            "marge": round(marge, 1),
+            "taux_pct": round((sec_jh / capa_3m * 100) if capa_3m > 0 else 0, 1),
+            "status": "vert" if marge > capa_3m * 0.2 else ("orange" if marge >= 0 else "rouge"),
+        })
+
+    admin_doc = await db.users.find_one(
+        {"tenant_id": TENANT_ID, "role": "TENANT_ADMIN"}, {"_id": 0, "user_id": 1}
+    )
+    frozen_by = admin_doc.get("user_id", "system") if admin_doc else "system"
+
+    snap = {
+        "snapshot_id": str(uuid.uuid4()),
+        "tenant_id": TENANT_ID,
+        "project_id": PROJECT_IDS[0],
+        "period_ref": "PI-1 2026",
+        "version": 1,
+        "status": "frozen",
+        "comment": "Scope figé PI-1 2026 — Version initiale",
+        "features": all_p0_tasks,
+        "capacity_summary": snap_cap_summary,
+        "frozen_at": "2026-01-15T14:00:00Z",
+        "frozen_by": frozen_by,
+        "transmitted_at": None,
+        "transmitted_to": None,
+    }
+    await db.scope_snapshots.insert_one(snap)
+    snap.pop("_id", None)
+    print(f"  Snapshot figé PI-1 2026 v1 créé pour projet Phoenix")
+    for team in snap_cap_summary:
+        status_label = {"vert": "OK", "orange": "Attention", "rouge": "SURCHARGE"}.get(team["status"], "")
+        print(f"    {team['team_name']:10} capa={team['capa']:6.0f} sec={team['charge_sec']:6.0f} marge={team['marge']:6.0f} [{status_label}]")
+
     print("\n=== Comptes disponibles ===")
     print("  admin@altair.fr    / Admin1234!  (TENANT_ADMIN)  → Sophie Martin (Architecte SI)")
     print("  pmo@altair.fr      / Pmo1234!    (PMO_USER)      → Thomas Dubois (Chef de Projet Senior)")

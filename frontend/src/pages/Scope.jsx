@@ -1,0 +1,624 @@
+import React, { useState, useEffect, useCallback, useMemo } from "react";
+import {
+  LayoutList, ChevronDown, ChevronRight, Lock, Send,
+  Filter, Search, RefreshCw, AlertTriangle, CheckCircle, Minus,
+} from "lucide-react";
+import { scopeAPI, projectsAPI, teamsAPI } from "@/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { usePermissions } from "@/hooks/usePermissions";
+import { toast } from "sonner";
+
+/* ── Constantes ─────────────────────────────────────────────────────── */
+const SCOPE_OPTIONS = [
+  { value: "sec",    label: "SEC",    bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", dot: "bg-emerald-500" },
+  { value: "etendu", label: "ÉTENDU", bg: "bg-blue-50",    text: "text-blue-700",    border: "border-blue-200",    dot: "bg-blue-500" },
+  { value: "out",    label: "OUT",    bg: "bg-slate-100",  text: "text-slate-400",   border: "border-slate-200",   dot: "bg-slate-400" },
+];
+const SCOPE_MAP = Object.fromEntries(SCOPE_OPTIONS.map((o) => [o.value, o]));
+const STATUS_COLORS = { vert: "text-emerald-600 bg-emerald-50", orange: "text-amber-600 bg-amber-50", rouge: "text-red-600 bg-red-50" };
+
+/* ── Inline scope-status dropdown ────────────────────────────────────── */
+function ScopeStatusCell({ taskId, current, onChange, canEdit }) {
+  const [open, setOpen] = useState(false);
+  const opt = SCOPE_MAP[current] || null;
+
+  if (!canEdit) {
+    return opt ? (
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold ${opt.bg} ${opt.text}`}>
+        <span className={`w-1.5 h-1.5 rounded-full ${opt.dot}`} />
+        {opt.label}
+      </span>
+    ) : <span className="text-slate-400 text-xs">—</span>;
+  }
+
+  return (
+    <div className="relative">
+      <button
+        data-testid={`scope-status-btn-${taskId}`}
+        onClick={() => setOpen(!open)}
+        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold border cursor-pointer hover:opacity-80 transition-opacity
+          ${opt ? `${opt.bg} ${opt.text} ${opt.border}` : "bg-slate-50 text-slate-400 border-slate-200"}`}
+      >
+        {opt ? <span className={`w-1.5 h-1.5 rounded-full ${opt.dot}`} /> : <Minus size={10} />}
+        <span>{opt ? opt.label : "—"}</span>
+        <ChevronDown size={10} />
+      </button>
+      {open && (
+        <div className="absolute left-0 top-7 z-50 bg-white border border-slate-200 rounded-lg shadow-lg min-w-[100px] py-1">
+          {SCOPE_OPTIONS.map((o) => (
+            <button
+              key={o.value}
+              data-testid={`scope-option-${o.value}`}
+              onClick={() => { onChange(taskId, o.value); setOpen(false); }}
+              className={`w-full text-left flex items-center gap-2 px-3 py-1.5 text-xs hover:bg-slate-50 ${o.text}`}
+            >
+              <span className={`w-2 h-2 rounded-full ${o.dot}`} />
+              {o.label}
+            </button>
+          ))}
+          <button
+            onClick={() => { onChange(taskId, null); setOpen(false); }}
+            className="w-full text-left flex items-center gap-2 px-3 py-1.5 text-xs text-slate-400 hover:bg-slate-50"
+          >
+            <Minus size={10} />
+            Effacer
+          </button>
+        </div>
+      )}
+    </div>
+  );
+}
+
+/* ── Tableau d'arbitrage ─────────────────────────────────────────────── */
+function ScopeTable({ candidates, onStatusChange, canEdit }) {
+  const sorted = useMemo(() => {
+    return [...candidates].sort((a, b) => {
+      const pCmp = (a.project_name || "").localeCompare(b.project_name || "");
+      if (pCmp !== 0) return pCmp;
+      const order = { sec: 0, etendu: 1, out: 2 };
+      return (order[a.scope_status] ?? 3) - (order[b.scope_status] ?? 3);
+    });
+  }, [candidates]);
+
+  return (
+    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+      <table className="w-full text-sm" data-testid="scope-table">
+        <thead>
+          <tr className="bg-[#0F172A] text-white">
+            {["Feature", "Projet", "Équipe Owner", "Review", "Analyse", "Impl.", "Test", "Hypercare", "Total JH", "Statut Scope"].map((h) => (
+              <th key={h} className="text-left px-3 py-2.5 text-xs font-semibold whitespace-nowrap first:pl-4">{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {sorted.length === 0 && (
+            <tr>
+              <td colSpan={10} className="text-center text-slate-400 py-12 text-sm">
+                Aucune feature candidate — modifiez les filtres
+              </td>
+            </tr>
+          )}
+          {sorted.map((t) => {
+            const s = t.scope_status;
+            const rowCls = s === "sec" ? "bg-emerald-50/50" : s === "etendu" ? "bg-blue-50/50" : s === "out" ? "bg-slate-50 opacity-60" : "";
+            const lineThroughCls = s === "out" ? "line-through text-slate-400" : "";
+            return (
+              <tr key={t.task_id} className={`border-t border-slate-100 hover:brightness-95 transition-all ${rowCls}`} data-testid={`scope-row-${t.task_id}`}>
+                <td className="px-4 py-2 font-medium text-slate-800 max-w-[200px]">
+                  <span className={lineThroughCls}>{t.name}</span>
+                  {t.parent_id && <div className="text-[10px] text-slate-400 mt-0.5">↳ Capability</div>}
+                </td>
+                <td className="px-3 py-2 text-slate-600 whitespace-nowrap text-xs">{t.project_name}</td>
+                <td className="px-3 py-2 text-slate-600 whitespace-nowrap text-xs">{t.team_name || t.resource_name || "—"}</td>
+                <td className="px-3 py-2 text-right text-slate-700 text-xs">{t.jh_review || "—"}</td>
+                <td className="px-3 py-2 text-right text-slate-700 text-xs">{t.jh_analyse || "—"}</td>
+                <td className="px-3 py-2 text-right text-slate-700 text-xs">{t.jh_impl || "—"}</td>
+                <td className="px-3 py-2 text-right text-slate-700 text-xs">{t.jh_test || "—"}</td>
+                <td className="px-3 py-2 text-right text-slate-700 text-xs">{t.jh_hypercare || "—"}</td>
+                <td className="px-3 py-2 text-right font-bold text-slate-800 text-xs">
+                  {t.total_jh_estimated > 0 ? t.total_jh_estimated : "—"}
+                </td>
+                <td className="px-3 py-2">
+                  <ScopeStatusCell taskId={t.task_id} current={s} onChange={onStatusChange} canEdit={canEdit} />
+                </td>
+              </tr>
+            );
+          })}
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
+/* ── Bloc Capa vs Charge ─────────────────────────────────────────────── */
+function CapacityVsLoad({ data }) {
+  const [expandedTeams, setExpandedTeams] = useState(new Set());
+
+  const toggle = (tid) => setExpandedTeams((s) => {
+    const n = new Set(s);
+    n.has(tid) ? n.delete(tid) : n.add(tid);
+    return n;
+  });
+
+  if (!data || data.length === 0) return null;
+
+  return (
+    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden" data-testid="capacity-block">
+      <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
+        <LayoutList size={16} className="text-slate-500" />
+        <span className="font-semibold text-slate-700 text-sm">Capacité vs Charge</span>
+      </div>
+      <div className="overflow-x-auto">
+        <table className="w-full text-sm">
+          <thead>
+            <tr className="bg-slate-50 text-slate-500 text-xs">
+              {["", "Équipe", "Capa dispo (JH)", "Charge SEC (JH)", "Charge ÉTENDU (JH)", "Marge (JH)", "Taux (%)", ""].map((h, i) => (
+                <th key={i} className="text-left px-3 py-2 font-semibold whitespace-nowrap">{h}</th>
+              ))}
+            </tr>
+          </thead>
+          <tbody>
+            {data.map((team) => {
+              const isExpanded = expandedTeams.has(team.team_id);
+              const colCls = STATUS_COLORS[team.status] || "text-slate-600 bg-slate-50";
+              return (
+                <React.Fragment key={team.team_id}>
+                  <tr className="border-t border-slate-100 font-medium hover:bg-slate-50 cursor-pointer" onClick={() => toggle(team.team_id)} data-testid={`capa-team-${team.team_id}`}>
+                    <td className="px-3 py-2.5 w-6">
+                      <span className="text-slate-400">{isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</span>
+                    </td>
+                    <td className="px-3 py-2.5 text-slate-800">{team.team_name}</td>
+                    <td className="px-3 py-2.5 text-right text-slate-700">{team.capa}</td>
+                    <td className="px-3 py-2.5 text-right font-bold text-emerald-700">{team.charge_sec}</td>
+                    <td className="px-3 py-2.5 text-right text-blue-700">{team.charge_etendu}</td>
+                    <td className={`px-3 py-2.5 text-right font-bold ${team.marge < 0 ? "text-red-600" : "text-slate-700"}`}>
+                      {team.marge > 0 ? "+" : ""}{team.marge}
+                    </td>
+                    <td className="px-3 py-2.5 text-right">{team.taux_pct}%</td>
+                    <td className="px-3 py-2.5">
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded ${colCls}`}>
+                        {team.status === "rouge" ? "SURCHARGE" : team.status === "orange" ? "Attention" : "OK"}
+                      </span>
+                    </td>
+                  </tr>
+                  {isExpanded && (team.resources || []).map((r) => {
+                    const rColCls = STATUS_COLORS[r.status] || "";
+                    return (
+                      <tr key={r.resource_id} className="bg-slate-50/50 border-t border-slate-50 text-xs text-slate-600" data-testid={`capa-res-${r.resource_id}`}>
+                        <td className="px-3 py-1.5" />
+                        <td className="px-3 py-1.5 pl-8 text-slate-500">↳ {r.name}</td>
+                        <td className="px-3 py-1.5 text-right">{r.capa}</td>
+                        <td className="px-3 py-1.5 text-right text-emerald-600 font-medium">{r.charge_sec}</td>
+                        <td className="px-3 py-1.5 text-right text-blue-600">{r.charge_etendu}</td>
+                        <td className={`px-3 py-1.5 text-right font-medium ${r.marge < 0 ? "text-red-500" : ""}`}>
+                          {r.marge > 0 ? "+" : ""}{r.marge}
+                        </td>
+                        <td className="px-3 py-1.5 text-right">{r.taux_pct}%</td>
+                        <td className="px-3 py-1.5">
+                          <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${rColCls}`}>
+                            {r.status === "rouge" ? "Surcharge" : r.status === "orange" ? "Att." : "OK"}
+                          </span>
+                        </td>
+                      </tr>
+                    );
+                  })}
+                </React.Fragment>
+              );
+            })}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  );
+}
+
+/* ── Modal Figer ─────────────────────────────────────────────────────── */
+function FreezeModal({ projects, nextVersion, onClose, onFreeze }) {
+  const [projectId, setProjectId] = useState("");
+  const [periodRef, setPeriodRef] = useState("PI-1 2026");
+  const [comment, setComment] = useState("");
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" data-testid="freeze-modal">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Lock size={18} className="text-[#0052CC]" />
+            <h2 className="font-semibold text-slate-800">Figer le scope v{nextVersion}</h2>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl leading-none">&times;</button>
+        </div>
+        <div className="px-6 py-4 space-y-4">
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Projet</label>
+            <select value={projectId} onChange={(e) => setProjectId(e.target.value)}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#0052CC]"
+              data-testid="freeze-project-select">
+              <option value="">— Tous les projets —</option>
+              {projects.map((p) => <option key={p.project_id} value={p.project_id}>{p.name}</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Référence période</label>
+            <input value={periodRef} onChange={(e) => setPeriodRef(e.target.value)}
+              placeholder="ex: PI-1 2026 ou 2026-Q2"
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#0052CC]"
+              data-testid="freeze-period-input" />
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Commentaire PMO</label>
+            <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={3}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#0052CC] resize-none"
+              data-testid="freeze-comment-input" />
+          </div>
+        </div>
+        <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg">Annuler</button>
+          <button
+            onClick={() => onFreeze({ project_id: projectId || null, period_ref: periodRef, comment })}
+            disabled={!periodRef}
+            className="px-4 py-2 text-sm bg-[#0F172A] text-white rounded-lg hover:bg-slate-700 disabled:opacity-50 flex items-center gap-2"
+            data-testid="freeze-confirm-btn">
+            <Lock size={14} />
+            Figer v{nextVersion}
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Modal Transmission ──────────────────────────────────────────────── */
+function TransmitModal({ snapshot, users, onClose, onTransmit }) {
+  const [targetUserId, setTargetUserId] = useState("");
+  const [comment, setComment] = useState("");
+
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" data-testid="transmit-modal">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+          <div className="flex items-center gap-2">
+            <Send size={18} className="text-[#0052CC]" />
+            <h2 className="font-semibold text-slate-800">Transmettre au CP</h2>
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl leading-none">&times;</button>
+        </div>
+        <div className="px-6 py-4 space-y-4">
+          <div className="text-sm text-slate-600 bg-slate-50 rounded-lg p-3">
+            Scope <strong>{snapshot.period_ref}</strong> v{snapshot.version} — {(snapshot.features || []).filter(f => f.scope_status === "sec").length} features SEC
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Destinataire (CP)</label>
+            <select value={targetUserId} onChange={(e) => setTargetUserId(e.target.value)}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#0052CC]"
+              data-testid="transmit-user-select">
+              <option value="">— Choisir un CP —</option>
+              {users.map((u) => <option key={u.user_id} value={u.user_id}>{u.name} ({u.email})</option>)}
+            </select>
+          </div>
+          <div>
+            <label className="block text-xs font-medium text-slate-600 mb-1">Commentaire</label>
+            <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={3}
+              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#0052CC] resize-none"
+              data-testid="transmit-comment-input" />
+          </div>
+        </div>
+        <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg">Annuler</button>
+          <button
+            onClick={() => onTransmit(snapshot.snapshot_id, { target_user_id: targetUserId, comment })}
+            disabled={!targetUserId}
+            className="px-4 py-2 text-sm bg-[#0052CC] text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+            data-testid="transmit-confirm-btn">
+            <Send size={14} />
+            Transmettre
+          </button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+/* ── Page principale ─────────────────────────────────────────────────── */
+export default function Scope() {
+  const { user } = useAuth();
+  const { hasPermission } = usePermissions();
+  const canArbitrate = hasPermission("scope.arbitrate");
+  const canFreeze    = hasPermission("scope.freeze");
+  const canTransmit  = hasPermission("scope.transmit") || hasPermission("scope.freeze");
+
+  // Données
+  const [candidates, setCandidates]   = useState([]);
+  const [capacity, setCapacity]       = useState([]);
+  const [snapshots, setSnapshots]     = useState([]);
+  const [projects, setProjects]       = useState([]);
+  const [loading, setLoading]         = useState(false);
+
+  // Filtres
+  const [filterProject,     setFilterProject]     = useState("");
+  const [filterTeam,        setFilterTeam]        = useState("");
+  const [filterScopeStatus, setFilterScopeStatus] = useState("");
+  const [filterSearch,      setFilterSearch]      = useState("");
+  const [filterStartDate,   setFilterStartDate]   = useState("");
+  const [filterEndDate,     setFilterEndDate]      = useState("");
+
+  // Modales
+  const [showFreeze,   setShowFreeze]   = useState(false);
+  const [showTransmit, setShowTransmit] = useState(false);
+  const [transmitSnap, setTransmitSnap] = useState(null);
+  const [cpUsers,      setCpUsers]      = useState([]);
+
+  // Version sélectionnée pour historique
+  const [selectedSnapId, setSelectedSnapId] = useState("");
+
+  const loadData = useCallback(async () => {
+    setLoading(true);
+    try {
+      const params = {};
+      if (filterProject) params.project_id = filterProject;
+      if (filterTeam) params.team_id = filterTeam;
+      if (filterScopeStatus) params.scope_status = filterScopeStatus;
+      if (filterSearch) params.search = filterSearch;
+      if (filterStartDate) params.start_date = filterStartDate;
+      if (filterEndDate) params.end_date = filterEndDate;
+
+      const [candRes, capRes, snapRes] = await Promise.all([
+        scopeAPI.getCandidates(params),
+        scopeAPI.getCapacity({ project_id: filterProject || undefined, start_date: filterStartDate || undefined, end_date: filterEndDate || undefined }),
+        scopeAPI.listSnapshots({ project_id: filterProject || undefined }),
+      ]);
+      setCandidates(candRes.data);
+      setCapacity(capRes.data);
+      setSnapshots(snapRes.data);
+    } catch (e) {
+      toast.error("Erreur lors du chargement du scope");
+    } finally {
+      setLoading(false);
+    }
+  }, [filterProject, filterTeam, filterScopeStatus, filterSearch, filterStartDate, filterEndDate]);
+
+  useEffect(() => {
+    projectsAPI.list().then((r) => setProjects(r.data || [])).catch(() => {});
+    loadData();
+  }, [loadData]);
+
+  const handleStatusChange = async (taskId, newStatus) => {
+    try {
+      await scopeAPI.patchStatus(taskId, { scope_status: newStatus });
+      // Recalcul live
+      setCandidates((prev) => prev.map((t) => t.task_id === taskId ? { ...t, scope_status: newStatus } : t));
+      // Recalcul capa vs charge
+      const capRes = await scopeAPI.getCapacity({
+        project_id: filterProject || undefined,
+        start_date: filterStartDate || undefined,
+        end_date: filterEndDate || undefined,
+      });
+      setCapacity(capRes.data);
+    } catch {
+      toast.error("Impossible de mettre à jour le statut scope");
+    }
+  };
+
+  const handleFreeze = async (data) => {
+    try {
+      await scopeAPI.createSnapshot(data);
+      setShowFreeze(false);
+      toast.success(`Scope figé — v${nextVersion} créé`);
+      loadData();
+    } catch (e) {
+      toast.error(e?.response?.data?.detail || "Erreur lors du figeage");
+    }
+  };
+
+  const handleTransmit = async (snapshotId, data) => {
+    if (!data.target_user_id) return;
+    try {
+      const res = await scopeAPI.transmitSnapshot(snapshotId, data);
+      setShowTransmit(false);
+      toast.success(`Scope transmis à ${res.data.transmitted_to_name}`);
+      // Téléchargement PDF
+      if (res.data.pdf_base64) {
+        const link = document.createElement("a");
+        link.href = `data:application/pdf;base64,${res.data.pdf_base64}`;
+        link.download = `scope_${snapshotId.slice(0, 8)}.pdf`;
+        link.click();
+      }
+      loadData();
+    } catch (e) {
+      toast.error(e?.response?.data?.detail || "Erreur lors de la transmission");
+    }
+  };
+
+  const handleComputeGantt = async (snapshotId) => {
+    try {
+      const res = await scopeAPI.computeGantt(snapshotId);
+      toast.success(`Gantt recalculé — ${res.data.updated_tasks} tâches mises à jour`);
+      if (res.data.alerts?.length > 0) {
+        res.data.alerts.forEach((a) => toast.warning(a.message));
+      }
+    } catch (e) {
+      toast.error(e?.response?.data?.detail || "Erreur recalcul Gantt");
+    }
+  };
+
+  const openTransmit = async (snap) => {
+    setTransmitSnap(snap);
+    // Charger les utilisateurs CP
+    try {
+      const res = await scopeAPI.getUsers();
+      setCpUsers(res.data || []);
+    } catch {
+      setCpUsers([]);
+    }
+    setShowTransmit(true);
+  };
+
+  const nextVersion = (snapshots[0]?.version || 0) + 1;
+  const selectedSnap = snapshots.find((s) => s.snapshot_id === selectedSnapId);
+  const viewSnap = selectedSnap || null;
+
+  // Stats summary
+  const secCount    = candidates.filter((t) => t.scope_status === "sec").length;
+  const etenduCount = candidates.filter((t) => t.scope_status === "etendu").length;
+  const outCount    = candidates.filter((t) => t.scope_status === "out").length;
+  const totalJh     = candidates.filter((t) => t.scope_status === "sec")
+                                .reduce((s, t) => s + (t.total_jh_estimated || 0), 0);
+  const overloadTeams = capacity.filter((t) => t.status === "rouge").length;
+
+  return (
+    <div className="p-6 space-y-6 bg-[#F8F9FA] min-h-full">
+      {/* En-tête */}
+      <div className="flex items-start justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-slate-900 font-heading">Arbitrage Scope</h1>
+          <p className="text-sm text-slate-500 mt-0.5">Sélection, figeage et transmission des features candidates</p>
+        </div>
+        <div className="flex items-center gap-2 flex-wrap">
+          {/* Historique versions */}
+          {snapshots.length > 0 && (
+            <select
+              value={selectedSnapId}
+              onChange={(e) => setSelectedSnapId(e.target.value)}
+              className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#0052CC]"
+              data-testid="snapshot-version-select"
+            >
+              <option value="">Version courante</option>
+              {snapshots.map((s) => (
+                <option key={s.snapshot_id} value={s.snapshot_id}>
+                  v{s.version} — {s.period_ref} ({s.status === "transmitted" ? "Transmis" : "Figé"})
+                </option>
+              ))}
+            </select>
+          )}
+          {canFreeze && !viewSnap && (
+            <button
+              onClick={() => setShowFreeze(true)}
+              data-testid="freeze-scope-btn"
+              className="flex items-center gap-2 px-4 py-2 bg-[#0F172A] text-white rounded-lg text-sm hover:bg-slate-700 transition-colors"
+            >
+              <Lock size={14} />
+              Figer le scope v{nextVersion}
+            </button>
+          )}
+        </div>
+      </div>
+
+      {/* KPI cards */}
+      <div className="grid grid-cols-2 md:grid-cols-5 gap-3">
+        {[
+          { label: "SEC", value: secCount, cls: "text-emerald-700 bg-emerald-50", testid: "kpi-sec" },
+          { label: "ÉTENDU", value: etenduCount, cls: "text-blue-700 bg-blue-50", testid: "kpi-etendu" },
+          { label: "OUT", value: outCount, cls: "text-slate-500 bg-slate-100", testid: "kpi-out" },
+          { label: "JH SEC total", value: `${totalJh.toFixed(0)} JH`, cls: "text-slate-700 bg-white", testid: "kpi-jh" },
+          { label: "Équipes surcharge", value: overloadTeams, cls: overloadTeams > 0 ? "text-red-700 bg-red-50" : "text-emerald-700 bg-emerald-50", testid: "kpi-overload" },
+        ].map(({ label, value, cls, testid }) => (
+          <div key={label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
+            <div className="text-xs text-slate-500 font-medium">{label}</div>
+            <div className={`text-xl font-bold mt-1 ${cls}`} data-testid={testid}>{value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Barre de filtres */}
+      <div className="bg-white rounded-xl border border-slate-200 px-4 py-3">
+        <div className="flex items-center gap-2 flex-wrap">
+          <Filter size={14} className="text-slate-400 flex-shrink-0" />
+          <select value={filterProject} onChange={(e) => setFilterProject(e.target.value)}
+            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+            data-testid="filter-project">
+            <option value="">Tous les projets</option>
+            {projects.map((p) => <option key={p.project_id} value={p.project_id}>{p.name}</option>)}
+          </select>
+          <select value={filterScopeStatus} onChange={(e) => setFilterScopeStatus(e.target.value)}
+            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+            data-testid="filter-scope-status">
+            <option value="">Tous les statuts</option>
+            {SCOPE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
+            <option value="__none__">Non arbitré</option>
+          </select>
+          <input
+            type="date" value={filterStartDate} onChange={(e) => setFilterStartDate(e.target.value)}
+            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+            data-testid="filter-start-date" placeholder="Début" />
+          <input
+            type="date" value={filterEndDate} onChange={(e) => setFilterEndDate(e.target.value)}
+            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+            data-testid="filter-end-date" placeholder="Fin" />
+          <div className="relative flex-1 min-w-[180px]">
+            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <input
+              value={filterSearch} onChange={(e) => setFilterSearch(e.target.value)}
+              placeholder="Rechercher..."
+              className="w-full border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-sm focus:outline-none"
+              data-testid="filter-search" />
+          </div>
+          <button onClick={loadData} className="p-2 rounded-lg hover:bg-slate-50 text-slate-500" data-testid="refresh-btn">
+            <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
+          </button>
+        </div>
+      </div>
+
+      {/* Vue snapshot figé */}
+      {viewSnap && (
+        <div className="bg-amber-50 border border-amber-200 rounded-xl px-4 py-3 flex items-center justify-between">
+          <div className="flex items-center gap-3">
+            <Lock size={16} className="text-amber-600" />
+            <div>
+              <span className="font-semibold text-amber-800">Snapshot figé — {viewSnap.period_ref} v{viewSnap.version}</span>
+              <span className="ml-2 text-xs text-amber-600">{viewSnap.frozen_at?.slice(0, 10)} · {viewSnap.comment}</span>
+            </div>
+          </div>
+          <div className="flex items-center gap-2">
+            {canTransmit && viewSnap.status !== "transmitted" && (
+              <button onClick={() => openTransmit(viewSnap)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-[#0052CC] text-white rounded-lg hover:bg-blue-700"
+                data-testid="transmit-snapshot-btn">
+                <Send size={13} />Transmettre au CP
+              </button>
+            )}
+            {canFreeze && (
+              <button onClick={() => handleComputeGantt(viewSnap.snapshot_id)}
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-slate-300 rounded-lg hover:bg-white text-slate-700"
+                data-testid="compute-gantt-btn">
+                <RefreshCw size={13} />Recalculer Gantt
+              </button>
+            )}
+            {viewSnap.status === "transmitted" && (
+              <span className="flex items-center gap-1.5 text-sm text-emerald-700 bg-emerald-50 px-3 py-1.5 rounded-lg border border-emerald-200">
+                <CheckCircle size={13} />Transmis
+              </span>
+            )}
+          </div>
+        </div>
+      )}
+
+      {/* Tableau */}
+      <ScopeTable
+        candidates={viewSnap ? (viewSnap.features || []) : candidates}
+        onStatusChange={handleStatusChange}
+        canEdit={canArbitrate && !viewSnap}
+      />
+
+      {/* Capa vs charge */}
+      <CapacityVsLoad data={viewSnap ? (viewSnap.capacity_summary || []) : capacity} />
+
+      {/* Modales */}
+      {showFreeze && (
+        <FreezeModal
+          projects={projects}
+          nextVersion={nextVersion}
+          onClose={() => setShowFreeze(false)}
+          onFreeze={handleFreeze}
+        />
+      )}
+      {showTransmit && transmitSnap && (
+        <TransmitModal
+          snapshot={transmitSnap}
+          users={cpUsers}
+          onClose={() => setShowTransmit(false)}
+          onTransmit={handleTransmit}
+        />
+      )}
+    </div>
+  );
+}

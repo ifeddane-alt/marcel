@@ -20,6 +20,7 @@ import {
   Handshake,
   Train,
   Wrench,
+  Target,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -45,6 +46,7 @@ const MAIN_NAV = [
 // Entrées conditionnelles par module + permission
 const MODULE_NAV = [
   { to: "/roadmap",    icon: Map,         label: "Roadmap",    perm: "roadmap.view",    mod: "roadmap" },
+  { to: "/scope",      icon: Target,      label: "Scope",      perm: ["scope.arbitrate", "scope.freeze", "scope.receive"], mod: null },
   { to: "/conformite", icon: ShieldAlert, label: "Conformité", perm: "compliance.view", mod: "compliance" },
   {
     to: "/demands",
