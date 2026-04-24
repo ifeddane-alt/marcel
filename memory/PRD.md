@@ -326,3 +326,13 @@ docker-compose up -d
 - 1 snapshot figé PI-1 2026 v2 (8 features)
 
 **RBAC validé :** scope.arbitrate requis pour PATCH status, scope.freeze pour snapshot/gantt, manager → 403
+
+### ✅ Module Scope — Compléments P1 + Timeline + Excel (COMPLET — 2026-04) TESTÉ 10/10 PASS (Iteration 33)
+
+**4 nouvelles features :**
+1. **seed.py** : Dev A SEC estimations portées à 100 JH/tâche → surcharge garantie (200 JH vs 186 JH capa)
+2. **Section "Scope reçu"** dans ProjectDetail : snapshots frozen/transmitted affichés avec compteurs SEC/ÉTENDU/OUT, bloc capa vs charge inline, lien vers /scope
+3. **Timeline Scope** : mini-Gantt par équipe depuis snapshot figé — barres vertes (dans capa) et rouges (débordement), marqueurs de mois, tooltip feature, légende. Chargement fullSnapshot au changement de dropdown.
+4. **Export Excel** : 2 feuilles (Features Scope + Capacité vs Charge), codes couleur par statut. Endpoint snapshot (`GET /scope/snapshots/{id}/export-excel`) + candidats courants (`GET /scope/export-excel`). Bouton Excel dans header de /scope.
+
+**Fix service.py** : `list_snapshots` ajoute `sec_count/etendu_count/out_count` précompilés pour éviter chargement des features dans ProjectDetail.

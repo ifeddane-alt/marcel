@@ -325,7 +325,19 @@ async def list_snapshots(user: TokenPayload, project_id: Optional[str] = None) -
     flt: dict = {"tenant_id": user.tenant_id}
     if project_id:
         flt["project_id"] = project_id
-    return await db.scope_snapshots.find(flt, {"_id": 0, "features": 0}).sort("version", -1).to_list(None)
+    snaps = await db.scope_snapshots.find(flt, {"_id": 0, "features": 0}).sort("version", -1).to_list(None)
+
+    # Ajouter les compteurs de features (depuis features de chaque snapshot)
+    for snap in snaps:
+        snap_full = await db.scope_snapshots.find_one(
+            {"snapshot_id": snap["snapshot_id"]}, {"_id": 0, "features.scope_status": 1}
+        )
+        features = snap_full.get("features") or [] if snap_full else []
+        snap["sec_count"]    = sum(1 for f in features if f.get("scope_status") == "sec")
+        snap["etendu_count"] = sum(1 for f in features if f.get("scope_status") == "etendu")
+        snap["out_count"]    = sum(1 for f in features if f.get("scope_status") == "out")
+
+    return snaps
 
 
 async def get_snapshot(snapshot_id: str, user: TokenPayload) -> dict:

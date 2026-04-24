@@ -1483,9 +1483,9 @@ export default function ProjectDetail() {
             </div>
             <div className="divide-y divide-slate-50">
               {scopeSnapshots.map((snap) => {
-                const secCount    = (snap.features || []).filter(f => f.scope_status === "sec").length;
-                const etenduCount = (snap.features || []).filter(f => f.scope_status === "etendu").length;
-                const outCount    = (snap.features || []).filter(f => f.scope_status === "out").length;
+                const secCount    = snap.sec_count ?? (snap.features || []).filter(f => f.scope_status === "sec").length;
+                const etenduCount = snap.etendu_count ?? (snap.features || []).filter(f => f.scope_status === "etendu").length;
+                const outCount    = snap.out_count ?? (snap.features || []).filter(f => f.scope_status === "out").length;
                 const overloadTeams = (snap.capacity_summary || []).filter(t => t.status === "rouge").length;
                 return (
                   <div key={snap.snapshot_id} className="px-5 py-4" data-testid={`scope-snap-${snap.snapshot_id}`}>
