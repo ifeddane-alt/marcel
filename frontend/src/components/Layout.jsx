@@ -21,6 +21,7 @@ import {
   Train,
   Wrench,
   Target,
+  TrendingUp,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -47,6 +48,7 @@ const MAIN_NAV = [
 const MODULE_NAV = [
   { to: "/roadmap",    icon: Map,         label: "Roadmap",    perm: "roadmap.view",    mod: "roadmap" },
   { to: "/scope",      icon: Target,      label: "Scope",      perm: ["scope.arbitrate", "scope.freeze", "scope.receive"], mod: null },
+  { to: "/arbitrage",  icon: TrendingUp,  label: "Arbitrage",  perm: ["arbitrage.view", "arbitrage.edit", "arbitrage.simulate"], mod: null },
   { to: "/conformite", icon: ShieldAlert, label: "Conformité", perm: "compliance.view", mod: "compliance" },
   {
     to: "/demands",

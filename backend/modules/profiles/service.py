@@ -87,6 +87,10 @@ ALL_PERMISSIONS = [
     {"key": "scope.transmit",              "label": "Transmettre le scope au CP",     "module": "Scope"},
     {"key": "scope.receive",               "label": "Recevoir le scope",              "module": "Scope"},
     {"key": "scope.simulate",              "label": "Simuler le scope",               "module": "Scope"},
+    # Arbitrage Portefeuille
+    {"key": "arbitrage.view",              "label": "Voir l'arbitrage portefeuille",  "module": "Arbitrage"},
+    {"key": "arbitrage.edit",              "label": "Modifier le scoring / enveloppes","module": "Arbitrage"},
+    {"key": "arbitrage.simulate",          "label": "Simuler des scénarios what-if",  "module": "Arbitrage"},
     # Fournisseurs
     {"key": "vendors.view",                "label": "Voir les fournisseurs",          "module": "Fournisseurs"},
     {"key": "vendors.edit_consumed",       "label": "Mettre à jour consommé forfait", "module": "Fournisseurs"},
@@ -119,6 +123,7 @@ DEFAULT_PROFILES = [
             "risks.view", "decisions.view", "governance.view", "compliance.view",
             "demands.view_own", "trains.view", "scope.receive", "scope.simulate",
             "vendors.view", "vendors.view_contracts",
+            "arbitrage.view",
         ],
     },
     {
@@ -141,6 +146,7 @@ DEFAULT_PROFILES = [
             "demands.view_own", "trains.view", "capabilities.create", "scope.arbitrate",
             "scope.freeze", "scope.transmit", "scope.receive", "scope.simulate", "vendors.view",
             "vendors.view_contracts", "import.csv",
+            "arbitrage.view", "arbitrage.edit", "arbitrage.simulate",
         ],
     },
     {
@@ -157,6 +163,7 @@ DEFAULT_PROFILES = [
             "risks.create", "risks.view", "decisions.create", "decisions.view",
             "governance.view", "compliance.view", "demands.submit", "demands.view_own",
             "capabilities.create", "scope.receive", "vendors.view",
+            "arbitrage.view",
         ],
     },
     {
@@ -219,6 +226,7 @@ DEFAULT_PROFILES = [
             "budget.view", "budget.revise_eac", "budget.set_envelope", "raf.view",
             "timesheets.view_all", "risks.view", "compliance.view", "demands.view_own",
             "trains.view", "scope.simulate", "vendors.view", "vendors.view_contracts",
+            "arbitrage.view", "arbitrage.edit",
         ],
     },
     {

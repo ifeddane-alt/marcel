@@ -203,6 +203,14 @@ async def seed_tenant_config(tenant_id: str) -> dict:
             "font": "Arial",
             "logo_base64": None,
         },
+        "arbitrage_weights": {
+            "w1": 0.20,
+            "w2": 0.25,
+            "w3": 0.15,
+            "w4": 0.15,
+            "w5": 0.15,
+            "w6": 0.10,
+        },
     }
     await db.tenants.update_one(
         {"tenant_id": tenant_id},

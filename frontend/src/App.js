@@ -24,6 +24,7 @@ import AdminConfig from "@/pages/AdminConfig";
 import Vendors from "@/pages/Vendors";
 import TrainsSafe from "@/pages/TrainsSafe";
 import Scope from "@/pages/Scope";
+import Arbitrage from "@/pages/Arbitrage";
 import "@/App.css";
 
 function ProtectedRoute({ children }) {
@@ -76,6 +77,7 @@ function AppRoutes() {
         <Route path="teams/:id" element={<TeamDetail />} />
         <Route path="roadmap" element={<Roadmap />} />
         <Route path="scope" element={<Scope />} />
+        <Route path="arbitrage" element={<Arbitrage />} />
         <Route path="timesheets" element={<Timesheets />} />
         <Route path="governance" element={<Governance />} />
         <Route path="conformite" element={<Conformite />} />

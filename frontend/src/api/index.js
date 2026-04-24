@@ -250,4 +250,18 @@ export const scopeAPI = {
   exportCandidatesExcel: (params)        => api.get("/scope/export-excel", { params, responseType: "blob" }),
 };
 
+export const arbitrageAPI = {
+  getSummary:      ()           => api.get("/arbitrage/summary"),
+  getWeights:      ()           => api.get("/arbitrage/weights"),
+  updateWeights:   (data)       => api.put("/arbitrage/weights", data),
+  patchScoring:    (id, data)   => api.patch(`/arbitrage/projects/${id}/scoring`, data),
+  getEnvelopes:    ()           => api.get("/arbitrage/envelopes"),
+  upsertEnvelope:  (data)       => api.post("/arbitrage/envelopes", data),
+  deleteEnvelope:  (id)         => api.delete(`/arbitrage/envelopes/${id}`),
+  getScenarios:    ()           => api.get("/arbitrage/scenarios"),
+  saveScenario:    (data)       => api.post("/arbitrage/scenarios", data),
+  applyScenario:   (id)         => api.post(`/arbitrage/scenarios/${id}/apply`),
+  deleteScenario:  (id)         => api.delete(`/arbitrage/scenarios/${id}`),
+};
+
 export default api;

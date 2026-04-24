@@ -1,0 +1,50 @@
+{
+  "summary": "Full testing of Arbitrage Portefeuille module (backend + frontend). All 21 backend tests passed. All frontend features verified including scoring table, envelopes with OPEX red alert, simulator with sandbox dirty state and impact panel, weights modal with W1-W6 inputs.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_arbitrage.py",
+    "/app/test_reports/pytest/arbitrage_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "service.py is clean - async, proper MongoDB exclusion of _id, good error handling",
+    "Score formula correctly implements W1×align + W2×bv + W3×roi + W4×urg − W5×risk − W6×comp with normalization 0-100",
+    "Frontend Arbitrage.jsx is 1060 lines - near the 700-line threshold but functional"
+  ],
+  "updated_files": ["/app/backend/tests/test_arbitrage.py"],
+  "success_rate": {"backend": "100% (21/21)", "frontend": "100%"},
+  "test_credentials": "admin@altair.fr / Admin2026!",
+  "seed_data_creation": "None - existing seed data used (8 projects with scoring values + 2026 envelope)",
+  "retest_needed": false,
+  "main_agent_can_self_test": false,
+  "context_for_next_testing_agent": "Arbitrage module fully tested and working. Backend: 8 projects with correct scores (CRM Salesforce top at 78.8, Portail RH bottom at 33.8), 2026 envelope (CAPEX=12M, OPEX=6M), weights W1-W6 all at defaults. Frontend: all 3 tabs working - scoring table with inline editing, envelopes with CAPEX green/OPEX red alert, simulator with sandbox dirty/impact panel. Weights modal accessible for admin.",
+  "verified_features": {
+    "GET /api/arbitrage/summary": "PASS - 8 projects, sorted by score desc, CRM top at 78.8",
+    "GET /api/arbitrage/envelopes": "PASS - 2026 envelope CAPEX=12M, OPEX=6M",
+    "GET /api/arbitrage/weights": "PASS - default W1=0.20 through W6=0.10",
+    "PATCH /api/arbitrage/projects/{id}/scoring": "PASS - updates field and returns new score",
+    "POST /api/arbitrage/envelopes": "PASS - creates envelope, status 201",
+    "POST /api/arbitrage/scenarios": "PASS - saves scenario, status 201",
+    "Frontend /arbitrage route": "PASS - accessible after login",
+    "Sidebar Arbitrage link": "PASS",
+    "KPI cards": "PASS - 8 projets, score moyen 61, CAPEX 5 675 000€, OPEX 11 375 000€",
+    "Scoring table 8 rows sorted": "PASS - CRM first at 78.8",
+    "6 editable scoring cells per row": "PASS",
+    "Inline cell edit": "PASS - input 1-5 appears on click",
+    "OPEX over-budget red alert": "PASS - red progress bar + Dépassement badge (190%)",
+    "CAPEX green bar": "PASS - emerald progress bar (47%)",
+    "Simulator 8 rows": "PASS",
+    "Sandbox dirty amber highlight": "PASS - * indicator and impact panel appear",
+    "Impact panel": "PASS - shows CAPEX/OPEX deltas",
+    "Weights modal admin": "PASS - opens with W1-W6 inputs at correct defaults",
+    "Bubble chart": "PASS - renders with colored RAG dots"
+  }
+}

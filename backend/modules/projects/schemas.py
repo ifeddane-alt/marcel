@@ -27,6 +27,13 @@ class ProjectCreate(BaseModel):
     source_id: Optional[str] = None
     source_tool: Optional[str] = None
     metadata: dict = {}
+    # Scoring Arbitrage (1–5)
+    strategic_alignment: Optional[int] = None
+    business_value:      Optional[int] = None
+    roi_estimated:       Optional[int] = None
+    urgency:             Optional[int] = None
+    risk_score:          Optional[int] = None
+    complexity:          Optional[int] = None
 
 
 class ProjectUpdate(BaseModel):
@@ -51,6 +58,13 @@ class ProjectUpdate(BaseModel):
     description: Optional[str] = None
     owner_id: Optional[str] = None
     program_id: Optional[str] = None
+    # Scoring Arbitrage (1–5)
+    strategic_alignment: Optional[int] = None
+    business_value:      Optional[int] = None
+    roi_estimated:       Optional[int] = None
+    urgency:             Optional[int] = None
+    risk_score:          Optional[int] = None
+    complexity:          Optional[int] = None
 
 
 class BudgetRevisionCreate(BaseModel):

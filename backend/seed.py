@@ -54,6 +54,22 @@ TEAM_IDS = [str(uuid.uuid4()) for _ in range(5)]
 # PROGRAM_IDS[2] = Pilotage Finance & Expérience Coll → P1 SI Finance, P3 Digital Workplace
 # PROGRAM_IDS[3] = Conformité, RH & Résilience        → P6 Portail RH, P7 DORA NIS2
 
+PORTFOLIO_ENVELOPE_ID = str(uuid.uuid4())
+
+PORTFOLIO_ENVELOPES = [
+    {
+        "envelope_id": PORTFOLIO_ENVELOPE_ID,
+        "tenant_id": TENANT_ID,
+        "year": 2026,
+        "label": "Enveloppe Portefeuille 2026",
+        "capex_envelope": 12000000.0,   # 12 M€ CAPEX — total projets ≈ 5.7 M€ (sous-enveloppe)
+        "opex_envelope":  6000000.0,    # 6 M€ OPEX  — total projets ≈ 11.4 M€ → ALERTE ROUGE
+        "total_envelope": 18000000.0,
+        "created_at": "2026-01-01T00:00:00Z",
+        "updated_at": "2026-01-01T00:00:00Z",
+    },
+]
+
 TEAMS = [
     {
         "team_id": TEAM_IDS[0],
@@ -176,6 +192,13 @@ PROJECTS = [
         "metadata": {"sponsor": "DG", "program": "PHOENIX"},
         "program_id": PROGRAM_IDS[0],
         "created_at": "2025-01-10T10:00:00Z",
+        # Scoring Arbitrage
+        "strategic_alignment": 5,
+        "business_value":      5,
+        "roi_estimated":       4,
+        "urgency":             4,
+        "risk_score":          3,
+        "complexity":          5,
     },
     {
         "project_id": PROJECT_IDS[1],
@@ -208,6 +231,13 @@ PROJECTS = [
         "metadata": {"sponsor": "CFO", "program": "FIN2025"},
         "program_id": PROGRAM_IDS[2],
         "created_at": "2024-08-15T10:00:00Z",
+        # Scoring Arbitrage
+        "strategic_alignment": 4,
+        "business_value":      4,
+        "roi_estimated":       4,
+        "urgency":             3,
+        "risk_score":          2,
+        "complexity":          3,
     },
     {
         "project_id": PROJECT_IDS[2],
@@ -242,6 +272,13 @@ PROJECTS = [
         "metadata": {"sponsor": "DSI", "program": "ERP-SAP"},
         "program_id": PROGRAM_IDS[1],
         "created_at": "2024-02-15T10:00:00Z",
+        # Scoring Arbitrage
+        "strategic_alignment": 5,
+        "business_value":      4,
+        "roi_estimated":       3,
+        "urgency":             5,
+        "risk_score":          5,
+        "complexity":          5,
     },
     {
         "project_id": PROJECT_IDS[3],
@@ -271,6 +308,13 @@ PROJECTS = [
         "metadata": {"sponsor": "DRH", "program": "DW2025"},
         "program_id": PROGRAM_IDS[2],
         "created_at": "2025-01-20T10:00:00Z",
+        # Scoring Arbitrage
+        "strategic_alignment": 3,
+        "business_value":      4,
+        "roi_estimated":       4,
+        "urgency":             2,
+        "risk_score":          2,
+        "complexity":          2,
     },
     {
         "project_id": PROJECT_IDS[4],
@@ -303,6 +347,13 @@ PROJECTS = [
         "metadata": {"sponsor": "CCO", "program": "CRM-SF"},
         "program_id": PROGRAM_IDS[0],
         "created_at": "2025-02-10T10:00:00Z",
+        # Scoring Arbitrage
+        "strategic_alignment": 4,
+        "business_value":      5,
+        "roi_estimated":       5,
+        "urgency":             4,
+        "risk_score":          3,
+        "complexity":          3,
     },
     {
         "project_id": PROJECT_IDS[5],
@@ -332,6 +383,13 @@ PROJECTS = [
         "metadata": {"sponsor": "DSI", "program": "CLOUD-AZ"},
         "program_id": PROGRAM_IDS[1],
         "created_at": "2024-12-01T10:00:00Z",
+        # Scoring Arbitrage
+        "strategic_alignment": 4,
+        "business_value":      3,
+        "roi_estimated":       4,
+        "urgency":             3,
+        "risk_score":          2,
+        "complexity":          3,
     },
     {
         "project_id": PROJECT_IDS[6],
@@ -366,6 +424,13 @@ PROJECTS = [
         "metadata": {"sponsor": "DRH", "program": "RH-PORTAIL"},
         "program_id": PROGRAM_IDS[3],
         "created_at": "2024-10-15T10:00:00Z",
+        # Scoring Arbitrage
+        "strategic_alignment": 2,
+        "business_value":      3,
+        "roi_estimated":       2,
+        "urgency":             2,
+        "risk_score":          4,
+        "complexity":          3,
     },
     {
         "project_id": PROJECT_IDS[7],
@@ -395,6 +460,13 @@ PROJECTS = [
         "metadata": {"sponsor": "CISO", "program": "DORA-NIS2"},
         "program_id": PROGRAM_IDS[3],
         "created_at": "2025-03-01T10:00:00Z",
+        # Scoring Arbitrage
+        "strategic_alignment": 3,
+        "business_value":      2,
+        "roi_estimated":       2,
+        "urgency":             5,
+        "risk_score":          3,
+        "complexity":          3,
     },
 ]
 
@@ -1670,7 +1742,8 @@ async def seed():
         await db.teams.delete_many({"tenant_id": TENANT_ID})
         await db.governance.delete_many({"tenant_id": TENANT_ID})
         await db.programs.delete_many({"tenant_id": TENANT_ID})
-
+        await db.portfolio_envelopes.delete_many({"tenant_id": TENANT_ID})
+        await db.scenarios.delete_many({"tenant_id": TENANT_ID})
     await db.tenants.insert_one({
         "tenant_id": TENANT_ID,
         "name": "Groupe Altair Industries",
@@ -1683,6 +1756,14 @@ async def seed():
                 "delay_threshold_days": 5,
                 "reference_date": "2025-04-30",
             },
+            "arbitrage_weights": {
+                "w1": 0.20,
+                "w2": 0.25,
+                "w3": 0.15,
+                "w4": 0.15,
+                "w5": 0.15,
+                "w6": 0.10,
+            },
         },
         "created_at": "2024-01-01T00:00:00Z",
     })
@@ -1690,9 +1771,13 @@ async def seed():
 
     # Users
     users = [
-        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "admin@altair.fr", "name": "Sophie Martin", "role": "TENANT_ADMIN", "password_hash": pw("Admin1234!")},
-        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "pmo@altair.fr", "name": "Thomas Dubois", "role": "PMO_USER", "password_hash": pw("Pmo1234!")},
-        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "viewer@altair.fr", "name": "Marie Leclerc", "role": "READ_ONLY", "password_hash": pw("View1234!")},
+        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "admin@altair.fr",   "name": "Sophie Martin",     "role": "TENANT_ADMIN", "password_hash": pw("Admin2026!")},
+        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "pmo@altair.fr",     "name": "Thomas Dubois",     "role": "PMO_USER",     "password_hash": pw("Pmo1234!")},
+        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "viewer@altair.fr",  "name": "Marie Leclerc",     "role": "READ_ONLY",    "password_hash": pw("View1234!")},
+        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "cp@altair.fr",      "name": "Nicolas Petit",     "role": "PMO_USER",     "password_hash": pw("Altair2026!")},
+        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "manager@altair.fr", "name": "Isabelle Bernard",  "role": "PMO_USER",     "password_hash": pw("Altair2026!")},
+        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "user@altair.fr",    "name": "Julien Girard",     "role": "READ_ONLY",    "password_hash": pw("Altair2026!")},
+        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "achats@altair.fr",  "name": "Marc Lefebvre",     "role": "READ_ONLY",    "password_hash": pw("Altair2026!")},
     ]
     await db.users.insert_many(users)
     print(f"Utilisateurs créés : {[u['email'] for u in users]}")
@@ -1702,6 +1787,11 @@ async def seed():
 
     await db.programs.insert_many(PROGRAMS)
     print(f"Programmes créés : {len(PROGRAMS)}")
+
+    # Portfolio envelopes (Arbitrage)
+    await db.portfolio_envelopes.delete_many({"tenant_id": TENANT_ID})
+    await db.portfolio_envelopes.insert_many(PORTFOLIO_ENVELOPES)
+    print(f"Enveloppes portefeuille créées : {len(PORTFOLIO_ENVELOPES)}")
 
     await db.resources.insert_many(RESOURCES)
     print(f"Ressources créées : {len(RESOURCES)}")
@@ -2319,9 +2409,13 @@ async def seed():
         print(f"    {team['team_name']:10} capa={team['capa']:6.0f} sec={team['charge_sec']:6.0f} marge={team['marge']:6.0f} [{status_label}]")
 
     print("\n=== Comptes disponibles ===")
-    print("  admin@altair.fr    / Admin1234!  (TENANT_ADMIN)  → Sophie Martin (Architecte SI)")
-    print("  pmo@altair.fr      / Pmo1234!    (PMO_USER)      → Thomas Dubois (Chef de Projet Senior)")
-    print("  viewer@altair.fr   / View1234!   (READ_ONLY)")
+    print("  admin@altair.fr    / Admin2026!   (TENANT_ADMIN)  → Sophie Martin")
+    print("  pmo@altair.fr      / Pmo1234!     (PMO_USER)      → Thomas Dubois")
+    print("  viewer@altair.fr   / View1234!    (READ_ONLY)     → Marie Leclerc")
+    print("  cp@altair.fr       / Altair2026!  (CP)            → Nicolas Petit")
+    print("  manager@altair.fr  / Altair2026!  (Manager)       → Isabelle Bernard")
+    print("  user@altair.fr     / Altair2026!  (USER)          → Julien Girard")
+    print("  achats@altair.fr   / Altair2026!  (ACHATS)        → Marc Lefebvre")
     print("\nSeed terminé avec succès.")
     client.close()
 
