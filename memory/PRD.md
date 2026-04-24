@@ -336,3 +336,15 @@ docker-compose up -d
 4. **Export Excel** : 2 feuilles (Features Scope + Capacité vs Charge), codes couleur par statut. Endpoint snapshot (`GET /scope/snapshots/{id}/export-excel`) + candidats courants (`GET /scope/export-excel`). Bouton Excel dans header de /scope.
 
 **Fix service.py** : `list_snapshots` ajoute `sec_count/etendu_count/out_count` précompilés pour éviter chargement des features dans ProjectDetail.
+
+
+### ✅ Module Arbitrage Portefeuille (COMPLET — 2026-04) TESTÉ 21/21 PASS (Iteration 34)
+
+**3 sections implémentées :**
+1. **Scoring Projets** : matrice 6 critères (1–5) avec poids W1–W6 configurables via modal. Formule : `Score = W1×align + W2×bv + W3×roi + W4×urg − W5×risk − W6×complexity` (normalisé 0–100). Inline-édition par clic, tri automatique par score desc. Bubble Chart Recharts (X=Valeur Business, Y=Risque, taille=Budget, couleur=RAG). Top: CRM Salesforce 78.8 / Bottom: Portail RH 33.8.
+2. **Enveloppes Portefeuille** : collection `portfolio_envelopes`. Barres de progression CAPEX/OPEX avec alerte rouge si dépassement. Demo 2026: CAPEX=12M€ (vert, 47%), OPEX=6M€ (ROUGE, 190%). CRUD enveloppes via modal.
+3. **Simulateur What-if** : sandbox 100% frontend (aucune persistance avant confirmation). Tableau éditable (statut, CAPEX, OPEX), score simulé temps réel + Δ Score vs original. Panneau d'impact (deltas CAPEX/OPEX). Bouton "Appliquer" → DB, "Sauvegarder scénario" → collection `scenarios`.
+
+**Backend** : `/app/backend/modules/arbitrage/` (router.py, service.py, schemas.py). Permissions : `arbitrage.view/edit/simulate` ajoutées aux profils PORTFOLIO, CIO, CHEF_DE_PROJET, ACHATS.
+**Seed** : 8 projets avec scores variés + enveloppe 2026 (CAPEX 12M, OPEX 6M).
+**Credentials** : admin@altair.fr / Admin2026! (mot de passe corrigé dans seed.py).
