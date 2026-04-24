@@ -40,8 +40,6 @@ def _is_demo(base_url: str) -> bool:
 async def test_connection(base_url: str, auth_type: str, credentials: dict) -> dict:
     if not base_url:
         return {"success": False, "message": "URL du serveur SAP OData non configurée"}
-    if not credentials:
-        return {"success": False, "message": "Credentials SAP non configurés"}
 
     if _is_demo(base_url):
         return {
@@ -49,6 +47,9 @@ async def test_connection(base_url: str, auth_type: str, credentials: dict) -> d
             "message": "Connexion simulée (instance SAP démo)",
             "server_info": {"system": "SAP S/4HANA", "client": "100", "release": "2023 FPS02"},
         }
+
+    if not credentials:
+        return {"success": False, "message": "Credentials SAP non configurés"}
 
     try:
         import httpx
@@ -82,17 +83,15 @@ async def run_sync(config: dict, direction: str) -> dict:
 def _mock_sync_result(direction: str) -> dict:
     records = MOCK_SAP_RECORDS
     if direction in ("import", "bidirectional"):
-        updated = len(records) - random.randint(0, 1)
-        failed  = len(records) - updated
-        errors  = [f"Centre de coût {records[-1]['KOSTL']} non mappé dans MARCEL"] if failed else []
+        updated = len(records)   # toujours 8, déterministe
         return {
             "items_processed": len(records),
             "items_created":   0,
             "items_updated":   updated,
-            "items_failed":    failed,
-            "errors":          errors,
-            "status":          "partial" if failed else "success",
-            "detail": {"updated_projects": [r["NAME"] for r in records[:updated]]},
+            "items_failed":    0,
+            "errors":          [],
+            "status":          "success",
+            "detail": {"updated_projects": [r["NAME"] for r in records]},
         }
     # Export MARCEL → SAP
     return {

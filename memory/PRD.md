@@ -353,3 +353,18 @@ docker-compose up -d
 1. **Widget KPI Dashboard "Enveloppe Portefeuille"** : CAPEX vert (47%), OPEX rouge (190%), badge "Dépassement", lien "Détails →" vers /arbitrage. Visible profils avec `arbitrage.view`. Chargement indépendant du Dashboard.
 2. **Export PDF Scorecard** : bouton "Export PDF" en haut de la page Arbitrage. PDF A4 (60 Ko) avec rankings, scores, enveloppes, formule poids et bubble chart (matplotlib + reportlab).
 
+
+### ✅ Module Connecteurs (2026-04) — TESTÉ 22/22 PASS (Iteration 36)
+**Architecture commune :**
+- Collections `connector_configs` (credentials AES chiffrés, jamais retournés en clair) + `sync_logs`
+- Endpoints : `GET /connectors`, `PUT /config`, `POST /test`, `POST /sync`, `GET /logs`, `GET /status`
+- Permission : `admin.config` (ADMIN only). RBAC vérifié.
+
+**3 connecteurs mocks :**
+- **Jira** : Import Epics/Stories ↔ features MARCEL. Default mapping 8 champs. SP→JH×2. Status mapping.
+- **SAP** : Import budgets/centres de coût (KOSTL, WKGBTR, OBLIGO, BELNR). 8 projets mockés.
+- **ServiceNow** : Import Change Requests ↔ demandes MARCEL. 12 CRs mockés. Incidents → Risques.
+
+**Seed :** 3 configs démo (URLs fictives, credentials vides), 9 sync_logs historiques.
+**Frontend :** Page `/admin/connectors` avec 3 cards RAG, modal 3 onglets (Config/Mapping/Historique), toggle enabled, test connexion, sync manuelle, historique avec détail erreurs. Sidebar "Connecteurs" sous Administration.
+

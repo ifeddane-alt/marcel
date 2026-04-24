@@ -604,6 +604,13 @@ export default function Connectors() {
   const [modal, setModal]           = useState(null); // connector object
   const [syncing, setSyncing]       = useState({}); // {type: bool}
 
+  // Fermer modal avec Escape
+  useEffect(() => {
+    const handler = (e) => { if (e.key === "Escape") setModal(null); };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, []);
+
   const load = useCallback(async () => {
     setLoading(true);
     try {
