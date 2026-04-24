@@ -6,7 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 
 export default function Login() {
   const [email, setEmail] = useState("admin@altair.fr");
-  const [password, setPassword] = useState("Admin1234!");
+  const [password, setPassword] = useState("Admin2026!");
   const [showPwd, setShowPwd] = useState(false);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
@@ -147,9 +147,9 @@ export default function Login() {
               Comptes de démonstration
             </div>
             {[
-              { email: "admin@altair.fr", pwd: "Admin1234!", role: "Admin" },
-              { email: "pmo@altair.fr", pwd: "Pmo1234!", role: "PMO" },
-              { email: "viewer@altair.fr", pwd: "View1234!", role: "Viewer" },
+              { email: "admin@altair.fr",   pwd: "Admin2026!",  role: "Admin" },
+              { email: "cp@altair.fr",       pwd: "Altair2026!", role: "CP" },
+              { email: "manager@altair.fr",  pwd: "Altair2026!", role: "Manager" },
             ].map((acc) => (
               <button
                 key={acc.email}
