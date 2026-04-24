@@ -263,4 +263,15 @@ export const arbitrageAPI = {  getSummary:      ()           => api.get("/arbitr
   deleteScenario:  (id)         => api.delete(`/arbitrage/scenarios/${id}`),
 };
 
+export const connectorsAPI = {
+  listAll:         ()           => api.get("/connectors"),
+  getConfig:       (type)       => api.get(`/connectors/${type}/config`),
+  updateConfig:    (type, data) => api.put(`/connectors/${type}/config`, data),
+  updateMapping:   (type, data) => api.put(`/connectors/${type}/mapping`, data),
+  testConnection:  (type)       => api.post(`/connectors/${type}/test`),
+  triggerSync:     (type)       => api.post(`/connectors/${type}/sync`),
+  getStatus:       (type)       => api.get(`/connectors/${type}/status`),
+  getLogs:         (type, limit) => api.get(`/connectors/${type}/logs`, { params: limit ? { limit } : {} }),
+};
+
 export default api;

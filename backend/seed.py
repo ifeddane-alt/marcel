@@ -1744,6 +1744,8 @@ async def seed():
         await db.programs.delete_many({"tenant_id": TENANT_ID})
         await db.portfolio_envelopes.delete_many({"tenant_id": TENANT_ID})
         await db.scenarios.delete_many({"tenant_id": TENANT_ID})
+        await db.connector_configs.delete_many({"tenant_id": TENANT_ID})
+        await db.sync_logs.delete_many({"tenant_id": TENANT_ID})
     await db.tenants.insert_one({
         "tenant_id": TENANT_ID,
         "name": "Groupe Altair Industries",
@@ -1792,6 +1794,119 @@ async def seed():
     await db.portfolio_envelopes.delete_many({"tenant_id": TENANT_ID})
     await db.portfolio_envelopes.insert_many(PORTFOLIO_ENVELOPES)
     print(f"Enveloppes portefeuille créées : {len(PORTFOLIO_ENVELOPES)}")
+
+    # Connecteurs (demo — credentials vides)
+    from modules.connectors.encryption import encrypt_credentials
+    from modules.connectors.jira import JIRA_DEFAULT_MAPPING
+    from modules.connectors.sap import SAP_DEFAULT_MAPPING
+    from modules.connectors.servicenow import SERVICENOW_DEFAULT_MAPPING
+    empty_enc = encrypt_credentials({})
+
+    connector_configs_seed = [
+        {
+            "connector_id": str(uuid.uuid4()),
+            "tenant_id": TENANT_ID,
+            "type": "jira",
+            "enabled": False,
+            "base_url": "https://acme.atlassian.net",
+            "auth_type": "api_token",
+            "auth_credentials_enc": empty_enc,
+            "field_mapping": JIRA_DEFAULT_MAPPING,
+            "sync_direction": "bidirectional",
+            "sync_frequency": "daily",
+            "last_sync_at": "2026-04-24T06:02:15Z",
+            "last_sync_status": "partial",
+            "last_sync_error": "PROJ-42 : assigné 'john.doe@acme.fr' non trouvé dans MARCEL",
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z",
+        },
+        {
+            "connector_id": str(uuid.uuid4()),
+            "tenant_id": TENANT_ID,
+            "type": "sap",
+            "enabled": False,
+            "base_url": "https://sap.acme-industries.fr/odata",
+            "auth_type": "basic",
+            "auth_credentials_enc": empty_enc,
+            "field_mapping": SAP_DEFAULT_MAPPING,
+            "sync_direction": "import",
+            "sync_frequency": "daily",
+            "last_sync_at": "2026-04-23T08:01:30Z",
+            "last_sync_status": "success",
+            "last_sync_error": None,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z",
+        },
+        {
+            "connector_id": str(uuid.uuid4()),
+            "tenant_id": TENANT_ID,
+            "type": "servicenow",
+            "enabled": False,
+            "base_url": "https://acme.service-now.com",
+            "auth_type": "basic",
+            "auth_credentials_enc": empty_enc,
+            "field_mapping": SERVICENOW_DEFAULT_MAPPING,
+            "sync_direction": "bidirectional",
+            "sync_frequency": "manual",
+            "last_sync_at": "2026-04-21T14:03:45Z",
+            "last_sync_status": "success",
+            "last_sync_error": None,
+            "created_at": "2026-01-01T00:00:00Z",
+            "updated_at": "2026-01-01T00:00:00Z",
+        },
+    ]
+    await db.connector_configs.delete_many({"tenant_id": TENANT_ID})
+    await db.connector_configs.insert_many(connector_configs_seed)
+    print(f"Connecteurs créés : {[c['type'] for c in connector_configs_seed]}")
+
+    # Sync logs demo (historique réaliste)
+    jira_cid  = connector_configs_seed[0]["connector_id"]
+    sap_cid   = connector_configs_seed[1]["connector_id"]
+    snow_cid  = connector_configs_seed[2]["connector_id"]
+    sync_logs_seed = [
+        # Jira
+        {"log_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "connector_type": "jira",
+         "started_at": "2026-04-24T06:00:00Z", "finished_at": "2026-04-24T06:02:15Z",
+         "direction": "bidirectional", "items_processed": 23, "items_created": 5, "items_updated": 17,
+         "items_failed": 1, "errors": ["PROJ-42 : assigné 'john.doe@acme.fr' non trouvé"], "status": "partial"},
+        {"log_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "connector_type": "jira",
+         "started_at": "2026-04-22T06:00:00Z", "finished_at": "2026-04-22T06:01:47Z",
+         "direction": "bidirectional", "items_processed": 18, "items_created": 3, "items_updated": 15,
+         "items_failed": 0, "errors": [], "status": "success"},
+        {"log_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "connector_type": "jira",
+         "started_at": "2026-04-17T06:00:00Z", "finished_at": "2026-04-17T06:03:02Z",
+         "direction": "import", "items_processed": 31, "items_created": 12, "items_updated": 19,
+         "items_failed": 0, "errors": [], "status": "success"},
+        # SAP
+        {"log_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "connector_type": "sap",
+         "started_at": "2026-04-23T08:00:00Z", "finished_at": "2026-04-23T08:01:30Z",
+         "direction": "import", "items_processed": 8, "items_created": 0, "items_updated": 8,
+         "items_failed": 0, "errors": [], "status": "success"},
+        {"log_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "connector_type": "sap",
+         "started_at": "2026-04-16T08:00:00Z", "finished_at": "2026-04-16T08:01:10Z",
+         "direction": "import", "items_processed": 12, "items_created": 0, "items_updated": 12,
+         "items_failed": 0, "errors": [], "status": "success"},
+        {"log_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "connector_type": "sap",
+         "started_at": "2026-03-25T08:00:00Z", "finished_at": "2026-03-25T08:00:45Z",
+         "direction": "import", "items_processed": 6, "items_created": 0, "items_updated": 5,
+         "items_failed": 1, "errors": ["Timeout OData endpoint /BudgetSet après 30s"], "status": "error"},
+        # ServiceNow
+        {"log_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "connector_type": "servicenow",
+         "started_at": "2026-04-21T14:00:00Z", "finished_at": "2026-04-21T14:03:45Z",
+         "direction": "import", "items_processed": 12, "items_created": 4, "items_updated": 8,
+         "items_failed": 0, "errors": [], "status": "success"},
+        {"log_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "connector_type": "servicenow",
+         "started_at": "2026-04-14T14:00:00Z", "finished_at": "2026-04-14T14:02:30Z",
+         "direction": "bidirectional", "items_processed": 7, "items_created": 2, "items_updated": 5,
+         "items_failed": 0, "errors": [], "status": "success"},
+        {"log_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "connector_type": "servicenow",
+         "started_at": "2026-04-04T14:00:00Z", "finished_at": "2026-04-04T14:04:20Z",
+         "direction": "import", "items_processed": 15, "items_created": 6, "items_updated": 9,
+         "items_failed": 0, "errors": [], "status": "success"},
+    ]
+    await db.sync_logs.delete_many({"tenant_id": TENANT_ID})
+    await db.sync_logs.insert_many(sync_logs_seed)
+    print(f"Sync logs créés : {len(sync_logs_seed)}")
 
     await db.resources.insert_many(RESOURCES)
     print(f"Ressources créées : {len(RESOURCES)}")

@@ -22,6 +22,7 @@ import {
   Wrench,
   Target,
   TrendingUp,
+  Plug,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -217,6 +218,11 @@ export default function Layout() {
               {hasPermission("admin.config") && (
                 <NavLink to="/admin/config" data-testid="nav-admin-configuration" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`}>
                   <Wrench size={16} strokeWidth={1.75} className="flex-shrink-0" /><span>Configuration</span>
+                </NavLink>
+              )}
+              {hasPermission("admin.config") && (
+                <NavLink to="/admin/connectors" data-testid="nav-admin-connectors" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`}>
+                  <Plug size={16} strokeWidth={1.75} className="flex-shrink-0" /><span>Connecteurs</span>
                 </NavLink>
               )}
             </>

@@ -25,6 +25,7 @@ import Vendors from "@/pages/Vendors";
 import TrainsSafe from "@/pages/TrainsSafe";
 import Scope from "@/pages/Scope";
 import Arbitrage from "@/pages/Arbitrage";
+import Connectors from "@/pages/Connectors";
 import "@/App.css";
 
 function ProtectedRoute({ children }) {
@@ -78,6 +79,7 @@ function AppRoutes() {
         <Route path="roadmap" element={<Roadmap />} />
         <Route path="scope" element={<Scope />} />
         <Route path="arbitrage" element={<Arbitrage />} />
+        <Route path="admin/connectors" element={<Connectors />} />
         <Route path="timesheets" element={<Timesheets />} />
         <Route path="governance" element={<Governance />} />
         <Route path="conformite" element={<Conformite />} />
