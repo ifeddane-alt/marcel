@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Map, Filter, ZoomIn, ZoomOut, X, ExternalLink, Diamond } from "lucide-react";
-import { projectsAPI, programsAPI, milestonesAPI, projectDependenciesAPI } from "@/api";
+import { Map, Filter, ZoomIn, ZoomOut, X, ExternalLink, Diamond, GitCompare, Layers, RefreshCw } from "lucide-react";
+import { projectsAPI, programsAPI, milestonesAPI, projectDependenciesAPI, scopeAPI } from "@/api";
 import RAGBadge from "@/components/RAGBadge";
 import { FAMILY_CONFIG } from "@/components/MilestoneModal";
 import { formatDate } from "@/utils/format";
@@ -59,12 +59,245 @@ function buildHeaders(timeMin, timeMax, isQuarter) {
   return headers.filter((h) => { if (seen.has(h.ts)) return false; seen.add(h.ts); return true; });
 }
 
+// ─────────────────────────────────────────────────────────────────────────────
+// ScopeVsReelView — Comparaison dates scope figé vs réel par projet
+// ─────────────────────────────────────────────────────────────────────────────
+
+function ScopeBar({ label, start, end, timeMin, timeMax, color, icon }) {
+  const totalMs = timeMax - timeMin;
+  if (!start || !end || totalMs <= 0) return null;
+  const left = Math.max(0, Math.min(((start - timeMin) / totalMs) * 100, 100));
+  const width = Math.max(0.5, Math.min(((end - start) / totalMs) * 100, 100 - left));
+  return (
+    <div className="relative h-5 mb-1">
+      <div
+        className={`absolute top-0 h-5 rounded flex items-center px-1.5 overflow-hidden ${color}`}
+        style={{ left: `${left}%`, width: `${width}%`, minWidth: "3px" }}
+        title={`${label}: ${new Date(start).toLocaleDateString("fr-FR")} → ${new Date(end).toLocaleDateString("fr-FR")}`}
+      >
+        <span className="text-[9px] text-white font-semibold truncate">{label}</span>
+      </div>
+    </div>
+  );
+}
+
+function ScopeVsReelView({ projects, snapshots, selectedSnapshotId, setSelectedSnapshotId, snapshotData, scopeDates, loading }) {
+  const today = Date.now();
+
+  // Compute time range across all projects + scope dates
+  const timeRange = useMemo(() => {
+    const allMs = [];
+    projects.forEach(p => {
+      allMs.push(dateToMs(p.start_date));
+      allMs.push(dateToMs(p.end_date_forecast || p.end_date_baseline));
+    });
+    Object.values(scopeDates).forEach(({ start, end }) => {
+      if (start) allMs.push(start);
+      if (end) allMs.push(end);
+    });
+    const valid = allMs.filter(Boolean);
+    if (!valid.length) return { timeMin: today - 180 * 864e5, timeMax: today + 365 * 864e5 };
+    const pad = 30 * 864e5;
+    return { timeMin: Math.min(...valid) - pad, timeMax: Math.max(...valid) + pad };
+  }, [projects, scopeDates]); // eslint-disable-line
+
+  const { timeMin, timeMax } = timeRange;
+
+  // Determine if project is delayed vs scope
+  const getDelayStatus = (p) => {
+    const scope = scopeDates[p.project_id];
+    if (!scope?.end) return "no_scope";
+    const realEnd = dateToMs(p.end_date_forecast || p.end_date_baseline);
+    if (!realEnd) return "no_data";
+    return realEnd > scope.end ? "delayed" : "on_time";
+  };
+
+  const delayedCount = projects.filter(p => getDelayStatus(p) === "delayed").length;
+  const onTimeCount  = projects.filter(p => getDelayStatus(p) === "on_time").length;
+  const noScopeCount = projects.filter(p => getDelayStatus(p) === "no_scope").length;
+
+  return (
+    <div data-testid="scope-vs-reel-view">
+      {/* Controls */}
+      <div className="flex items-center gap-4 flex-wrap mb-5">
+        <div className="flex items-center gap-2">
+          <Layers size={14} className="text-[#0052CC]" />
+          <span className="text-sm font-semibold text-slate-700">Snapshot de référence</span>
+        </div>
+        {snapshots.length > 0 ? (
+          <select
+            value={selectedSnapshotId}
+            onChange={e => setSelectedSnapshotId(e.target.value)}
+            data-testid="scope-snapshot-select"
+            className="text-xs border border-gray-200 rounded px-3 py-1.5 text-slate-600 focus:outline-none focus:border-[#0052CC] bg-white"
+          >
+            {snapshots.map(s => (
+              <option key={s.snapshot_id || s._id} value={s.snapshot_id || s._id}>
+                {s.name || s.label || s.snapshot_id?.slice(0, 8)} —{" "}
+                {s.created_at ? new Date(s.created_at).toLocaleDateString("fr-FR") : ""}
+              </option>
+            ))}
+          </select>
+        ) : (
+          <span className="text-xs text-slate-400">Aucun snapshot disponible — créez un snapshot SEC dans le module Scope</span>
+        )}
+
+        {loading && (
+          <span className="flex items-center gap-1.5 text-xs text-slate-400">
+            <RefreshCw size={11} className="animate-spin" /> Chargement…
+          </span>
+        )}
+      </div>
+
+      {/* KPI Summary */}
+      <div className="grid grid-cols-3 gap-3 mb-5">
+        <div className="bg-rose-50 border border-rose-200 border-l-4 border-l-rose-500 rounded-lg p-3">
+          <div className="text-xs text-rose-500 font-semibold uppercase tracking-wider mb-1">En retard</div>
+          <div className="text-2xl font-bold text-rose-700">{delayedCount}</div>
+          <div className="text-[10px] text-rose-400">projet{delayedCount > 1 ? "s" : ""} dépassant le scope figé</div>
+        </div>
+        <div className="bg-emerald-50 border border-emerald-200 border-l-4 border-l-emerald-500 rounded-lg p-3">
+          <div className="text-xs text-emerald-500 font-semibold uppercase tracking-wider mb-1">Dans les délais</div>
+          <div className="text-2xl font-bold text-emerald-700">{onTimeCount}</div>
+          <div className="text-[10px] text-emerald-400">projet{onTimeCount > 1 ? "s" : ""} respectant le scope</div>
+        </div>
+        <div className="bg-slate-50 border border-slate-200 border-l-4 border-l-slate-300 rounded-lg p-3">
+          <div className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">Sans scope</div>
+          <div className="text-2xl font-bold text-slate-500">{noScopeCount}</div>
+          <div className="text-[10px] text-slate-400">pas de données dans le snapshot</div>
+        </div>
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center gap-4 text-[10px] text-slate-500 mb-4">
+        <span className="flex items-center gap-1">
+          <span className="w-8 h-3 rounded bg-[#0052CC] inline-block opacity-70" /> Scope figé (snapshot)
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-8 h-3 rounded bg-emerald-500 inline-block" /> Réel (dans les délais)
+        </span>
+        <span className="flex items-center gap-1">
+          <span className="w-8 h-3 rounded bg-rose-500 inline-block" /> Réel (en retard)
+        </span>
+      </div>
+
+      {/* Gantt Comparison */}
+      {projects.length === 0 ? (
+        <div className="bg-white border border-gray-200 rounded-lg py-16 text-center text-slate-400 text-sm">
+          Aucun projet disponible.
+        </div>
+      ) : (
+        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+          {/* Header timeline */}
+          <div className="flex border-b border-gray-200 bg-slate-50 text-[10px] text-slate-400 uppercase font-semibold">
+            <div className="flex-shrink-0 border-r border-gray-200 px-4 py-2" style={{ width: 240 }}>
+              Projet
+            </div>
+            <div className="flex-1 px-4 py-2">
+              <div className="relative flex items-center gap-4">
+                <span>Chronologie comparée</span>
+                <span className="text-[9px] text-slate-300 ml-auto">
+                  {new Date(timeMin).getFullYear()} — {new Date(timeMax).getFullYear()}
+                </span>
+              </div>
+            </div>
+          </div>
+
+          {/* Rows */}
+          <div className="divide-y divide-slate-100">
+            {projects.map(p => {
+              const status = getDelayStatus(p);
+              const scope = scopeDates[p.project_id];
+              const realStart = dateToMs(p.start_date);
+              const realEnd   = dateToMs(p.end_date_forecast || p.end_date_baseline);
+              const realColor  = status === "delayed" ? "bg-rose-500" : status === "on_time" ? "bg-emerald-500" : "bg-slate-300";
+              const statusBadge = status === "delayed"
+                ? <span className="text-[9px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded-full ml-2">Retard</span>
+                : status === "on_time"
+                ? <span className="text-[9px] font-bold text-emerald-600 bg-emerald-50 border border-emerald-200 px-1.5 py-0.5 rounded-full ml-2">OK</span>
+                : null;
+
+              return (
+                <div key={p.project_id} className="flex items-center hover:bg-slate-50 transition-colors"
+                  style={{ minHeight: 68 }}
+                  data-testid={`svr-row-${p.project_id}`}>
+                  {/* Left label */}
+                  <div className="flex-shrink-0 border-r border-gray-100 px-4 py-3" style={{ width: 240 }}>
+                    <div className="flex items-center gap-1">
+                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${p.status_rag === "green" ? "bg-emerald-500" : p.status_rag === "orange" ? "bg-amber-500" : p.status_rag === "red" ? "bg-rose-500" : "bg-slate-300"}`} />
+                      <span className="text-xs font-semibold text-slate-700 truncate">{p.name}</span>
+                      {statusBadge}
+                    </div>
+                    <div className="text-[10px] text-slate-400 mt-1">{p.owner || ""}</div>
+                    {scope?.end && realEnd && (
+                      <div className={`text-[10px] mt-0.5 ${status === "delayed" ? "text-rose-500 font-semibold" : "text-emerald-500"}`}>
+                        {status === "delayed"
+                          ? `+${Math.ceil((realEnd - scope.end) / 864e5)}j de retard`
+                          : `${Math.ceil((scope.end - realEnd) / 864e5)}j d'avance`}
+                      </div>
+                    )}
+                  </div>
+
+                  {/* Right bars */}
+                  <div className="flex-1 px-4 py-3">
+                    {/* Scope bar */}
+                    {scope?.start && scope?.end && (
+                      <ScopeBar
+                        label="Scope figé"
+                        start={scope.start}
+                        end={scope.end}
+                        timeMin={timeMin}
+                        timeMax={timeMax}
+                        color="bg-[#0052CC] opacity-60"
+                      />
+                    )}
+                    {!scope?.start && (
+                      <div className="text-[9px] text-slate-300 italic h-5 mb-1 flex items-center">
+                        Pas de données scope dans ce snapshot
+                      </div>
+                    )}
+                    {/* Réel bar */}
+                    {realStart && realEnd && (
+                      <ScopeBar
+                        label="Réel"
+                        start={realStart}
+                        end={realEnd}
+                        timeMin={timeMin}
+                        timeMax={timeMax}
+                        color={realColor}
+                      />
+                    )}
+                  </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
+// Main Roadmap component
+// ─────────────────────────────────────────────────────────────────────────────
+
 export default function Roadmap() {
   const [projects,    setProjects]    = useState([]);
   const [programs,    setPrograms]    = useState([]);
   const [milestones,  setMilestones]  = useState([]);
   const [allDeps,     setAllDeps]     = useState([]);
   const [loading,     setLoading]     = useState(true);
+
+  // Tab principal
+  const [activeRoadmapTab, setActiveRoadmapTab] = useState("timeline");
+
+  // Scope vs Réel states
+  const [snapshots,          setSnapshots]          = useState([]);
+  const [selectedSnapshotId, setSelectedSnapshotId] = useState("");
+  const [snapshotData,       setSnapshotData]       = useState(null);
+  const [loadingScope,       setLoadingScope]       = useState(false);
+  const [scopeDates,         setScopeDates]         = useState({}); // projectId → {start, end}
 
   // Existing filters
   const [filterProgram, setFilterProgram] = useState("");
@@ -223,12 +456,56 @@ export default function Roadmap() {
   };
   const hasFilters = filterProgram || filterRag || filterStatus || filterMsFamily || filterMsType || filterMsAttribute || filterMsBlocking;
 
+  // ── Scope vs Réel logic ────────────────────────────────────────────────────
+  useEffect(() => {
+    if (activeRoadmapTab !== "scope_vs_reel") return;
+    setLoadingScope(true);
+    scopeAPI.listSnapshots().then(res => {
+      const snaps = res.data || [];
+      setSnapshots(snaps);
+      if (snaps.length > 0 && !selectedSnapshotId) {
+        setSelectedSnapshotId(snaps[0].snapshot_id || snaps[0]._id || "");
+      }
+      setLoadingScope(false);
+    }).catch(() => setLoadingScope(false));
+  }, [activeRoadmapTab]); // eslint-disable-line
+
+  useEffect(() => {
+    if (!selectedSnapshotId) return;
+    setLoadingScope(true);
+    scopeAPI.getSnapshot(selectedSnapshotId).then(res => {
+      const snap = res.data;
+      setSnapshotData(snap);
+      // Compute scope dates per project from SEC features
+      const datesMap = {};
+      (snap.features || snap.tasks || []).forEach(f => {
+        if (f.scope_status !== "sec") return;
+        const pid = f.project_id;
+        if (!pid) return;
+        const startMs = dateToMs(f.start_date || f.date_start_planned);
+        const endMs   = dateToMs(f.end_date || f.end_date_deadline || f.date_end_planned);
+        if (!datesMap[pid]) datesMap[pid] = { starts: [], ends: [] };
+        if (startMs) datesMap[pid].starts.push(startMs);
+        if (endMs)   datesMap[pid].ends.push(endMs);
+      });
+      const computed = {};
+      Object.entries(datesMap).forEach(([pid, { starts, ends }]) => {
+        computed[pid] = {
+          start: starts.length ? Math.min(...starts) : null,
+          end:   ends.length   ? Math.max(...ends)   : null,
+        };
+      });
+      setScopeDates(computed);
+      setLoadingScope(false);
+    }).catch(() => setLoadingScope(false));
+  }, [selectedSnapshotId]);
+
   if (loading) return <div className="p-8 text-slate-400 text-sm">Chargement de la roadmap...</div>;
 
   return (
     <div className="p-8" data-testid="roadmap-page">
       {/* Header */}
-      <div className="mb-6">
+      <div className="mb-4">
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
@@ -246,19 +523,46 @@ export default function Roadmap() {
               )}
             </p>
           </div>
-          <div className="flex items-center gap-2" data-testid="roadmap-zoom-controls">
-            <button onClick={() => setIsQuarter(false)} data-testid="zoom-month-btn"
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded transition-colors ${!isQuarter ? "bg-[#0052CC] text-white" : "border border-gray-200 text-slate-600 hover:bg-gray-50"}`}>
-              <ZoomIn size={12} /> Mois
-            </button>
-            <button onClick={() => setIsQuarter(true)} data-testid="zoom-quarter-btn"
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded transition-colors ${isQuarter ? "bg-[#0052CC] text-white" : "border border-gray-200 text-slate-600 hover:bg-gray-50"}`}>
-              <ZoomOut size={12} /> Trimestre
-            </button>
-          </div>
+          {activeRoadmapTab === "timeline" && (
+            <div className="flex items-center gap-2" data-testid="roadmap-zoom-controls">
+              <button onClick={() => setIsQuarter(false)} data-testid="zoom-month-btn"
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded transition-colors ${!isQuarter ? "bg-[#0052CC] text-white" : "border border-gray-200 text-slate-600 hover:bg-gray-50"}`}>
+                <ZoomIn size={12} /> Mois
+              </button>
+              <button onClick={() => setIsQuarter(true)} data-testid="zoom-quarter-btn"
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded transition-colors ${isQuarter ? "bg-[#0052CC] text-white" : "border border-gray-200 text-slate-600 hover:bg-gray-50"}`}>
+                <ZoomOut size={12} /> Trimestre
+              </button>
+            </div>
+          )}
         </div>
       </div>
 
+      {/* Tab switcher */}
+      <div className="flex gap-1 border-b border-slate-200 mb-5">
+        {[
+          { key: "timeline",      icon: Map,        label: "Timeline Projets" },
+          { key: "scope_vs_reel", icon: GitCompare, label: "Scope vs Réel" },
+        ].map(({ key, icon: Icon, label }) => (
+          <button
+            key={key}
+            onClick={() => setActiveRoadmapTab(key)}
+            data-testid={`roadmap-tab-${key}`}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors
+              ${activeRoadmapTab === key
+                ? "border-[#0052CC] text-[#0052CC]"
+                : "border-transparent text-slate-500 hover:text-slate-700"}`}
+          >
+            <Icon size={14} /> {label}
+          </button>
+        ))}
+      </div>
+
+      {/* ══════════════════════════════════════════════════
+          TAB 1 — TIMELINE PROJETS (existing)
+      ══════════════════════════════════════════════════ */}
+      {activeRoadmapTab === "timeline" && (
+      <>
       {/* Filters */}
       <div className="bg-white border border-gray-200 rounded shadow-sm p-4 mb-6" data-testid="roadmap-filters">
         {/* Row 1: project filters */}
@@ -573,6 +877,22 @@ export default function Roadmap() {
             <ExternalLink size={10} /> Voir le projet
           </Link>
         </div>
+      )}
+      </>)}
+
+      {/* ══════════════════════════════════════════════════
+          TAB 2 — SCOPE vs RÉEL
+      ══════════════════════════════════════════════════ */}
+      {activeRoadmapTab === "scope_vs_reel" && (
+        <ScopeVsReelView
+          projects={projects}
+          snapshots={snapshots}
+          selectedSnapshotId={selectedSnapshotId}
+          setSelectedSnapshotId={setSelectedSnapshotId}
+          snapshotData={snapshotData}
+          scopeDates={scopeDates}
+          loading={loadingScope}
+        />
       )}
     </div>
   );

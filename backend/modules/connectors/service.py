@@ -46,7 +46,7 @@ CONNECTOR_META = {
     "sap": {
         "label": "SAP",
         "description": "Synchronisation budgets & centres de coût SAP ↔ projets MARCEL",
-        "auth_types": ["basic", "oauth2"],
+        "auth_types": ["basic", "oauth2", "rfc"],
         "auth_fields": {
             "basic": [
                 {"key": "username", "label": "Utilisateur SAP", "type": "text",     "required": True},
@@ -56,6 +56,14 @@ CONNECTOR_META = {
                 {"key": "client_id",     "label": "Client ID",       "type": "text",     "required": True},
                 {"key": "client_secret", "label": "Client Secret",   "type": "password", "required": True},
                 {"key": "token_url",     "label": "Token URL",       "type": "url",      "required": True},
+            ],
+            "rfc": [
+                {"key": "ashost",           "label": "Hôte SAP (ashost)", "type": "text",     "required": True},
+                {"key": "sysnr",            "label": "Numéro système",    "type": "text",     "required": True},
+                {"key": "client",           "label": "Client SAP",        "type": "text",     "required": True},
+                {"key": "username",         "label": "Utilisateur RFC",   "type": "text",     "required": True},
+                {"key": "password",         "label": "Mot de passe RFC",  "type": "password", "required": True},
+                {"key": "controlling_area", "label": "Controlling Area",  "type": "text",     "required": False},
             ],
         },
         "help_url": "https://help.sap.com/docs/",

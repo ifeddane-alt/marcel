@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
 import {
   AlertTriangle, TrendingDown, Shield, Calendar, Target,
-  Users, RefreshCw, Filter, ChevronRight, ArrowRight,
+  Users, RefreshCw, Filter, ChevronRight, Download, FileText, FileSpreadsheet,
 } from "lucide-react";
 import { agentAPI } from "@/api";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -65,6 +65,25 @@ export default function Recommandations() {
   const [filterSeverity, setFilterSeverity] = useState("all");
   const [filterType, setFilterType] = useState("all");
   const [lastRefresh, setLastRefresh] = useState(null);
+  const [exporting, setExporting] = useState("");
+
+  const handleExport = async (format) => {
+    setExporting(format);
+    try {
+      const res = format === "pdf"
+        ? await agentAPI.exportRecoPDF()
+        : await agentAPI.exportRecoExcel();
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `recommandations_ia_${new Date().toISOString().slice(0, 10)}.${format === "pdf" ? "pdf" : "xlsx"}`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {}
+    setExporting("");
+  };
 
   const load = async () => {
     setLoading(true);
@@ -107,15 +126,37 @@ export default function Recommandations() {
             Anomalies et alertes détectées automatiquement dans le portefeuille
           </p>
         </div>
-        <button
-          onClick={load}
-          disabled={loading}
-          data-testid="rec-refresh-btn"
-          className="flex items-center gap-2 text-xs px-3 py-2 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 text-slate-600 transition-colors disabled:opacity-50"
-        >
-          <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
-          Actualiser
-        </button>
+        <div className="flex items-center gap-2">
+          {/* Export PDF */}
+          <button
+            onClick={() => handleExport("pdf")}
+            disabled={exporting === "pdf" || loading || recs.length === 0}
+            data-testid="rec-export-pdf-btn"
+            className="flex items-center gap-1.5 text-xs px-3 py-2 border border-rose-200 rounded-lg hover:border-rose-300 hover:bg-rose-50 text-rose-600 transition-colors disabled:opacity-50"
+          >
+            <FileText size={13} />
+            {exporting === "pdf" ? "Export…" : "PDF"}
+          </button>
+          {/* Export Excel */}
+          <button
+            onClick={() => handleExport("excel")}
+            disabled={exporting === "excel" || loading || recs.length === 0}
+            data-testid="rec-export-excel-btn"
+            className="flex items-center gap-1.5 text-xs px-3 py-2 border border-emerald-200 rounded-lg hover:border-emerald-300 hover:bg-emerald-50 text-emerald-600 transition-colors disabled:opacity-50"
+          >
+            <FileSpreadsheet size={13} />
+            {exporting === "excel" ? "Export…" : "Excel"}
+          </button>
+          <button
+            onClick={load}
+            disabled={loading}
+            data-testid="rec-refresh-btn"
+            className="flex items-center gap-2 text-xs px-3 py-2 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 text-slate-600 transition-colors disabled:opacity-50"
+          >
+            <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
+            Actualiser
+          </button>
+        </div>
       </div>
 
       {/* KPI row */}

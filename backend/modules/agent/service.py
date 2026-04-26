@@ -659,3 +659,197 @@ async def delete_alert_rule(rule_id: str, user: TokenPayload) -> dict:
     if result.deleted_count == 0:
         raise HTTPException(404, "Règle d'alerte introuvable")
     return {"deleted": True}
+
+
+# ── Export Recommandations ────────────────────────────────────────────────────
+
+async def export_recommendations_pdf(user: TokenPayload) -> bytes:
+    """Génère un PDF des recommandations IA (ReportLab)."""
+    import io
+    from reportlab.lib.pagesizes import A4
+    from reportlab.lib import colors
+    from reportlab.platypus import SimpleDocTemplate, Table, TableStyle, Paragraph, Spacer
+    from reportlab.lib.styles import getSampleStyleSheet
+
+    recs = await get_recommendations(user)
+    buffer = io.BytesIO()
+    from reportlab.lib.units import cm
+    doc = SimpleDocTemplate(buffer, pagesize=A4,
+                            rightMargin=1.5*cm, leftMargin=1.5*cm,
+                            topMargin=2*cm, bottomMargin=2*cm)
+    styles = getSampleStyleSheet()
+    elems = []
+
+    today_str = date.today().isoformat()
+    elems.append(Paragraph("Recommandations IA PMO — Projetenne", styles["Title"]))
+    elems.append(Paragraph(f"Généré le {today_str}", styles["Normal"]))
+    elems.append(Spacer(1, 0.4*cm))
+
+    critical = sum(1 for r in recs if r["severity"] == "critical")
+    warning  = sum(1 for r in recs if r["severity"] == "warning")
+    kpi_data = [["Critiques", "Attentions", "Total"], [str(critical), str(warning), str(len(recs))]]
+    kpi_tbl = Table(kpi_data, colWidths=[5.5*cm]*3)
+    kpi_tbl.setStyle(TableStyle([
+        ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#0F172A")),
+        ("TEXTCOLOR", (0,0), (-1,0), colors.white),
+        ("FONTSIZE", (0,0), (-1,-1), 10), ("FONTNAME", (0,0), (-1,-1), "Helvetica-Bold"),
+        ("ALIGN", (0,0), (-1,-1), "CENTER"), ("GRID", (0,0), (-1,-1), 0.5, colors.grey),
+        ("ROWBACKGROUNDS", (0,1), (-1,-1), [colors.HexColor("#FEE2E2")]),
+    ]))
+    elems.append(kpi_tbl)
+    elems.append(Spacer(1, 0.5*cm))
+
+    TYPE_LABELS = {
+        "eac_overrun": "Dépassement EAC", "unmitigated_risk": "Risque critique",
+        "delayed_milestone": "Jalon retard", "envelope_breach": "Enveloppe dépassée",
+        "red_project": "Projet rouge", "team_overload": "Surcharge équipe",
+    }
+    SEVER_LABELS = {"critical": "Critique", "warning": "Attention", "info": "Info"}
+
+    hdr = ["Sévérité", "Type", "Titre", "Description", "Date"]
+    rows = [hdr]
+    for rec in recs:
+        rows.append([
+            SEVER_LABELS.get(rec["severity"], rec["severity"]),
+            TYPE_LABELS.get(rec["type"], rec["type"]),
+            Paragraph(rec["title"][:70], styles["Normal"]),
+            Paragraph(rec["description"][:150], styles["Normal"]),
+            today_str,
+        ])
+
+    if len(rows) > 1:
+        tbl = Table(rows, colWidths=[2*cm, 3*cm, 4.5*cm, 6*cm, 2*cm])
+        style_cmds = [
+            ("BACKGROUND", (0,0), (-1,0), colors.HexColor("#0F172A")),
+            ("TEXTCOLOR", (0,0), (-1,0), colors.white),
+            ("FONTSIZE", (0,0), (-1,0), 8), ("FONTSIZE", (0,1), (-1,-1), 7),
+            ("GRID", (0,0), (-1,-1), 0.4, colors.lightgrey),
+            ("VALIGN", (0,0), (-1,-1), "TOP"),
+            ("ROWBACKGROUNDS", (0,1), (-1,-1), [colors.white, colors.HexColor("#F8FAFC")]),
+        ]
+        for i, rec in enumerate(recs, start=1):
+            if rec["severity"] == "critical":
+                style_cmds.append(("BACKGROUND", (0,i), (0,i), colors.HexColor("#FEE2E2")))
+            elif rec["severity"] == "warning":
+                style_cmds.append(("BACKGROUND", (0,i), (0,i), colors.HexColor("#FEF3C7")))
+        tbl.setStyle(TableStyle(style_cmds))
+        elems.append(tbl)
+
+    doc.build(elems)
+    return buffer.getvalue()
+
+
+async def export_recommendations_excel(user: TokenPayload) -> bytes:
+    """Génère un Excel des recommandations IA (xlsxwriter)."""
+    import io
+    import xlsxwriter
+    recs = await get_recommendations(user)
+    today_str = date.today().isoformat()
+
+    buffer = io.BytesIO()
+    wb = xlsxwriter.Workbook(buffer, {"in_memory": True})
+    ws = wb.add_worksheet("Recommandations IA")
+
+    hdr_fmt  = wb.add_format({"bold": True, "bg_color": "#0F172A", "font_color": "#FFFFFF", "border": 1, "text_wrap": True})
+    crit_fmt = wb.add_format({"bg_color": "#FEE2E2", "border": 1, "text_wrap": True})
+    warn_fmt = wb.add_format({"bg_color": "#FEF3C7", "border": 1, "text_wrap": True})
+    info_fmt = wb.add_format({"border": 1, "text_wrap": True})
+
+    ws.set_column(0, 0, 12)
+    ws.set_column(1, 1, 20)
+    ws.set_column(2, 2, 25)
+    ws.set_column(3, 3, 45)
+    ws.set_column(4, 4, 14)
+
+    headers = ["Sévérité", "Type", "Projet / Contexte", "Titre", "Description", "Date"]
+    ws.set_column(5, 5, 14)
+    for c, h in enumerate(headers):
+        ws.write(0, c, h, hdr_fmt)
+
+    TYPE_LABELS = {
+        "eac_overrun": "Dépassement EAC", "unmitigated_risk": "Risque critique",
+        "delayed_milestone": "Jalon retard", "envelope_breach": "Enveloppe dépassée",
+        "red_project": "Projet rouge", "team_overload": "Surcharge équipe",
+    }
+    SEVER_LABELS = {"critical": "Critique", "warning": "Attention", "info": "Info"}
+
+    for row_idx, rec in enumerate(recs, start=1):
+        sev = rec["severity"]
+        row_fmt = crit_fmt if sev == "critical" else warn_fmt if sev == "warning" else info_fmt
+        ws.write(row_idx, 0, SEVER_LABELS.get(sev, sev), row_fmt)
+        ws.write(row_idx, 1, TYPE_LABELS.get(rec["type"], rec["type"]), row_fmt)
+        ws.write(row_idx, 2, rec.get("project_name", "Portefeuille"), row_fmt)
+        ws.write(row_idx, 3, rec["title"], row_fmt)
+        ws.write(row_idx, 4, rec["description"], row_fmt)
+        ws.write(row_idx, 5, today_str, row_fmt)
+
+    wb.close()
+    buffer.seek(0)
+    return buffer.read()
+
+
+# ── Analytics Agent IA (admin) ────────────────────────────────────────────────
+
+async def get_agent_analytics(user: TokenPayload) -> dict:
+    """Dashboard analytique Agent IA — ADMIN uniquement."""
+    from core.auth import has_perm
+    if not has_perm(user, "admin.config") and not has_perm(user, "*"):
+        raise HTTPException(403, "Permission admin.config requise")
+
+    tenant_id = user.tenant_id
+
+    total_logs = await db.agent_logs.count_documents({"tenant_id": tenant_id})
+    distinct_sessions = await db.agent_logs.distinct("session_id", {"tenant_id": tenant_id})
+    total_sessions = len(distinct_sessions)
+
+    pipeline_agg = [
+        {"$match": {"tenant_id": tenant_id}},
+        {"$group": {"_id": None,
+            "total_chars": {"$sum": {"$add": [
+                {"$strLenCP": {"$ifNull": ["$question", ""]}},
+                {"$strLenCP": {"$ifNull": ["$response", ""]}}
+            ]}},
+            "total_duration": {"$sum": {"$ifNull": ["$duration_ms", 0]}}
+        }}
+    ]
+    agg = await db.agent_logs.aggregate(pipeline_agg).to_list(1)
+    total_tokens = int(agg[0].get("total_chars", 0) / 4) if agg else 0
+    total_dur = agg[0].get("total_duration", 0) if agg else 0
+    avg_duration = int(total_dur / max(total_logs, 1))
+    cost_estimate = round(total_tokens * 0.000009, 2)
+
+    pipeline_top = [
+        {"$match": {"tenant_id": tenant_id}},
+        {"$group": {"_id": "$question", "count": {"$sum": 1}}},
+        {"$sort": {"count": -1}}, {"$limit": 10}
+    ]
+    top_q_raw = await db.agent_logs.aggregate(pipeline_top).to_list(10)
+    top_questions = [{"question": (r["_id"] or "")[:100], "count": r["count"]} for r in top_q_raw]
+
+    thirty_days_ago = datetime.now(timezone.utc) - __import__("datetime").timedelta(days=30)
+    pipeline_30d = [
+        {"$match": {"tenant_id": tenant_id, "created_at": {"$gte": thirty_days_ago}}},
+        {"$group": {
+            "_id": {"$dateToString": {"format": "%Y-%m-%d", "date": "$created_at"}},
+            "count": {"$sum": 1},
+            "simulations": {"$sum": {"$cond": [{"$eq": ["$is_simulation", True]}, 1, 0]}}
+        }},
+        {"$sort": {"_id": 1}}
+    ]
+    daily_raw = await db.agent_logs.aggregate(pipeline_30d).to_list(31)
+    daily_usage = [{"date": r["_id"], "messages": r["count"], "simulations": r["simulations"]} for r in daily_raw]
+
+    verified_count = await db.agent_logs.count_documents({"tenant_id": tenant_id, "verified": True})
+    simulation_count = await db.agent_logs.count_documents({"tenant_id": tenant_id, "is_simulation": True})
+
+    return {
+        "total_messages": total_logs,
+        "total_sessions": total_sessions,
+        "total_tokens_estimated": total_tokens,
+        "cost_estimate_usd": cost_estimate,
+        "avg_response_ms": avg_duration,
+        "verified_rate_pct": round(verified_count / max(total_logs, 1) * 100, 1),
+        "simulation_count": simulation_count,
+        "top_questions": top_questions,
+        "daily_usage": daily_usage,
+    }

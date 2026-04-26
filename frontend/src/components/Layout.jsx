@@ -26,6 +26,7 @@ import {
   BotMessageSquare,
   Bell,
   Lightbulb,
+  BarChart2,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -264,6 +265,11 @@ export default function Layout() {
               {hasPermission("admin.config") && (
                 <NavLink to="/admin/connectors" data-testid="nav-admin-connectors" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`}>
                   <Plug size={16} strokeWidth={1.75} className="flex-shrink-0" /><span>Connecteurs</span>
+                </NavLink>
+              )}
+              {(hasPermission("admin.config") || hasPermission("*")) && (
+                <NavLink to="/admin/agent-analytics" data-testid="nav-admin-agent-analytics" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`}>
+                  <BarChart2 size={16} strokeWidth={1.75} className="flex-shrink-0" /><span>Analytics IA</span>
                 </NavLink>
               )}
             </>

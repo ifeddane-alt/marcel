@@ -73,3 +73,44 @@ async def delete_alert_rule(
     current_user: TokenPayload = Depends(get_current_user),
 ):
     return await service.delete_alert_rule(rule_id, current_user)
+
+
+# ── Export Recommandations ────────────────────────────────────────────────────
+
+@router.get("/agent/recommendations/export-pdf")
+async def export_recommendations_pdf(
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    from fastapi.responses import Response
+    pdf_bytes = await service.export_recommendations_pdf(current_user)
+    from datetime import date
+    filename = f"recommandations_ia_{date.today().isoformat()}.pdf"
+    return Response(
+        content=pdf_bytes,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+
+
+@router.get("/agent/recommendations/export-excel")
+async def export_recommendations_excel(
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    from fastapi.responses import Response
+    excel_bytes = await service.export_recommendations_excel(current_user)
+    from datetime import date
+    filename = f"recommandations_ia_{date.today().isoformat()}.xlsx"
+    return Response(
+        content=excel_bytes,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename={filename}"},
+    )
+
+
+# ── Analytics Agent IA (admin) ────────────────────────────────────────────────
+
+@router.get("/admin/agent-analytics")
+async def get_agent_analytics(
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    return await service.get_agent_analytics(current_user)

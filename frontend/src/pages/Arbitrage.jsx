@@ -6,7 +6,7 @@ import {
 import {
   Target, TrendingUp, BarChart2, Sliders, Save, RotateCcw,
   PlayCircle, CheckCircle, AlertTriangle, Info, ChevronDown, ChevronUp,
-  Plus, Trash2, Edit3, X, Check, FileDown,
+  Plus, Trash2, Edit3, X, Check, FileDown, GitCompare, Eye, ArrowRight,
 } from "lucide-react";
 import { arbitrageAPI } from "@/api";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -98,6 +98,12 @@ export default function Arbitrage() {
   const [sandboxDirty, setSandboxDirty] = useState(false);
   const [saveScenarioModal, setSaveScenarioModal] = useState(false);
   const [scenarioName, setScenarioName] = useState("");
+
+  // Scénarios tab state
+  const [detailScenario, setDetailScenario]   = useState(null);
+  const [compareA, setCompareA]               = useState(null);
+  const [compareB, setCompareB]               = useState(null);
+  const [compareMode, setCompareMode]         = useState(false);
   const [scenarioDesc, setScenarioDesc] = useState("");
   const [exportingPdf, setExportingPdf] = useState(false);
 
@@ -393,9 +399,10 @@ export default function Arbitrage() {
       {/* ── Onglets ── */}
       <div className="flex gap-1 border-b border-slate-200">
         {[
-          { key: "scoring",    icon: Target,    label: "Scoring Projets" },
-          { key: "envelopes",  icon: BarChart2, label: "Enveloppes Budget" },
-          { key: "simulator",  icon: PlayCircle,label: "Simulateur What-if" },
+          { key: "scoring",    icon: Target,      label: "Scoring Projets" },
+          { key: "envelopes",  icon: BarChart2,   label: "Enveloppes Budget" },
+          { key: "simulator",  icon: PlayCircle,  label: "Simulateur What-if" },
+          { key: "scenarios",  icon: Save,        label: `Scénarios (${scenarios.length})` },
         ].map(({ key, icon: Icon, label }) => (
           <button
             key={key}
@@ -948,6 +955,248 @@ export default function Arbitrage() {
                     </div>
                   </div>
                 ))}
+              </div>
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* ═══════════════════════════════════════════════════════════════════════
+          TAB 4 — SCÉNARIOS SAUVEGARDÉS + COMPARAISON
+      ════════════════════════════════════════════════════════════════════════ */}
+      {activeTab === "scenarios" && (
+        <div className="space-y-4">
+          {/* Header actions */}
+          <div className="flex items-center justify-between">
+            <div className="flex items-center gap-2">
+              <Save size={15} className="text-[#0052CC]" />
+              <span className="text-sm font-semibold text-slate-800">
+                {scenarios.length} scénario{scenarios.length > 1 ? "s" : ""} sauvegardé{scenarios.length > 1 ? "s" : ""}
+              </span>
+            </div>
+            {!compareMode && scenarios.length >= 2 && (
+              <button
+                onClick={() => { setCompareMode(true); setCompareA(null); setCompareB(null); }}
+                data-testid="btn-compare-mode"
+                className="flex items-center gap-1.5 text-xs px-3 py-2 bg-[#0052CC] text-white rounded-lg hover:bg-blue-700 transition-colors"
+              >
+                <GitCompare size={13} /> Comparer 2 scénarios
+              </button>
+            )}
+            {compareMode && (
+              <button
+                onClick={() => { setCompareMode(false); setCompareA(null); setCompareB(null); }}
+                className="flex items-center gap-1.5 text-xs px-3 py-2 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50"
+              >
+                <X size={13} /> Annuler comparaison
+              </button>
+            )}
+          </div>
+
+          {/* Compare mode banner */}
+          {compareMode && (
+            <div className="bg-blue-50 border border-blue-200 rounded-lg px-4 py-3 text-sm text-blue-700 flex items-center gap-2">
+              <GitCompare size={15} />
+              Sélectionnez 2 scénarios ci-dessous pour les comparer.
+              {compareA && compareB && (
+                <span className="ml-2 font-medium">
+                  ✓ {compareA.name} vs {compareB.name} — voir la comparaison en bas
+                </span>
+              )}
+            </div>
+          )}
+
+          {scenarios.length === 0 ? (
+            <div className="bg-white border border-slate-200 rounded-lg flex flex-col items-center justify-center py-16 text-center">
+              <Save size={32} className="text-slate-200 mb-3" />
+              <p className="text-slate-500 font-medium">Aucun scénario sauvegardé</p>
+              <p className="text-slate-400 text-xs mt-1">Créez un scénario depuis l&apos;onglet Simulateur</p>
+            </div>
+          ) : (
+            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+              <div className="divide-y divide-slate-100">
+                {scenarios.map(sc => {
+                  const isSelectedA = compareA?.scenario_id === sc.scenario_id;
+                  const isSelectedB = compareB?.scenario_id === sc.scenario_id;
+                  const isSelected = isSelectedA || isSelectedB;
+                  return (
+                    <div
+                      key={sc.scenario_id}
+                      data-testid={`scenario-row-${sc.scenario_id}`}
+                      className={`px-5 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors
+                        ${isSelectedA ? "bg-blue-50 border-l-4 border-l-blue-500" : ""}
+                        ${isSelectedB ? "bg-violet-50 border-l-4 border-l-violet-500" : ""}`}
+                    >
+                      <div className="flex-1 min-w-0">
+                        <div className="flex items-center gap-2">
+                          <span className="text-sm font-semibold text-slate-800">{sc.name}</span>
+                          {sc.status === "applied" && (
+                            <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200">
+                              Appliqué
+                            </span>
+                          )}
+                          {isSelectedA && <span className="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">A</span>}
+                          {isSelectedB && <span className="text-[10px] font-bold text-violet-700 bg-violet-100 px-2 py-0.5 rounded-full">B</span>}
+                        </div>
+                        {sc.description && <div className="text-xs text-slate-400 mt-0.5 truncate">{sc.description}</div>}
+                        <div className="text-xs text-slate-400 mt-1">
+                          {sc.modifications?.length || 0} modification(s) ·{" "}
+                          {new Date(sc.created_at).toLocaleDateString("fr-FR")}
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 ml-3">
+                        {compareMode ? (
+                          <>
+                            {!isSelectedA && !compareA && (
+                              <button
+                                onClick={() => setCompareA(sc)}
+                                className="text-xs px-2.5 py-1.5 bg-blue-50 border border-blue-200 text-blue-700 rounded-lg hover:bg-blue-100"
+                              >Sélect. A</button>
+                            )}
+                            {!isSelectedB && !compareB && compareA && compareA.scenario_id !== sc.scenario_id && (
+                              <button
+                                onClick={() => setCompareB(sc)}
+                                className="text-xs px-2.5 py-1.5 bg-violet-50 border border-violet-200 text-violet-700 rounded-lg hover:bg-violet-100"
+                              >Sélect. B</button>
+                            )}
+                            {isSelected && (
+                              <button
+                                onClick={() => {
+                                  if (isSelectedA) setCompareA(null);
+                                  if (isSelectedB) setCompareB(null);
+                                }}
+                                className="text-xs px-2 py-1.5 text-slate-400 hover:text-slate-600"
+                              ><X size={12} /></button>
+                            )}
+                          </>
+                        ) : (
+                          <>
+                            <button
+                              onClick={() => setDetailScenario(detailScenario?.scenario_id === sc.scenario_id ? null : sc)}
+                              data-testid={`btn-detail-${sc.scenario_id}`}
+                              className="text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+                            >
+                              <Eye size={12} /> Détail
+                            </button>
+                            <button
+                              onClick={async () => {
+                                if (!window.confirm(`Supprimer le scénario « ${sc.name} » ?`)) return;
+                                try {
+                                  await arbitrageAPI.deleteScenario(sc.scenario_id);
+                                  setScenarios(prev => prev.filter(s => s.scenario_id !== sc.scenario_id));
+                                  if (detailScenario?.scenario_id === sc.scenario_id) setDetailScenario(null);
+                                  toast.success("Scénario supprimé");
+                                } catch { toast.error("Erreur suppression"); }
+                              }}
+                              className="text-xs px-2 py-1.5 text-rose-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg"
+                            ><Trash2 size={12} /></button>
+                          </>
+                        )}
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            </div>
+          )}
+
+          {/* Détail scénario */}
+          {detailScenario && !compareMode && (
+            <div className="bg-white border border-slate-200 rounded-xl p-5">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <Eye size={15} className="text-[#0052CC]" />
+                  <h3 className="font-semibold text-slate-800">Détail — {detailScenario.name}</h3>
+                </div>
+                <button onClick={() => setDetailScenario(null)} className="text-slate-400 hover:text-slate-600"><X size={16} /></button>
+              </div>
+              {detailScenario.description && (
+                <p className="text-xs text-slate-500 mb-3">{detailScenario.description}</p>
+              )}
+              <div className="overflow-x-auto">
+                <table className="w-full text-xs" data-testid="scenario-detail-table">
+                  <thead>
+                    <tr className="border-b border-slate-200">
+                      <th className="text-left py-2 px-3 text-slate-500 font-semibold">Projet ID</th>
+                      <th className="text-left py-2 px-3 text-slate-500 font-semibold">Champ modifié</th>
+                      <th className="text-left py-2 px-3 text-slate-500 font-semibold">Nouvelle valeur</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    {(detailScenario.modifications || []).flatMap((mod, mi) =>
+                      Object.entries(mod)
+                        .filter(([k]) => k !== "project_id")
+                        .map(([field, value], fi) => (
+                          <tr key={`${mi}-${fi}`} className="border-b border-slate-50 hover:bg-slate-50">
+                            {fi === 0 && (
+                              <td className="py-2 px-3 font-mono text-slate-500" rowSpan={Object.keys(mod).length - 1}>
+                                {mod.project_id?.slice(0, 8)}…
+                              </td>
+                            )}
+                            <td className="py-2 px-3 text-slate-700">{field}</td>
+                            <td className="py-2 px-3 font-medium text-[#0052CC]">{String(value)}</td>
+                          </tr>
+                        ))
+                    )}
+                  </tbody>
+                </table>
+              </div>
+            </div>
+          )}
+
+          {/* Comparaison côte à côte */}
+          {compareMode && compareA && compareB && (
+            <div className="bg-white border border-slate-200 rounded-xl p-5">
+              <div className="flex items-center gap-2 mb-4">
+                <GitCompare size={15} className="text-[#0052CC]" />
+                <h3 className="font-semibold text-slate-800">
+                  Comparaison : {compareA.name} <ArrowRight size={13} className="inline" /> {compareB.name}
+                </h3>
+              </div>
+              <div className="grid grid-cols-2 gap-4">
+                {[{ sc: compareA, label: "A", borderColor: "border-l-blue-500", bg: "bg-blue-50" },
+                  { sc: compareB, label: "B", borderColor: "border-l-violet-500", bg: "bg-violet-50" }].map(({ sc, label, borderColor, bg }) => {
+                  // Compute mods map: project_id + field → value
+                  const modsMap = {};
+                  (sc.modifications || []).forEach(mod => {
+                    Object.entries(mod).filter(([k]) => k !== "project_id").forEach(([field, val]) => {
+                      modsMap[`${mod.project_id}__${field}`] = val;
+                    });
+                  });
+                  // All keys
+                  const allKeys = Object.keys(modsMap);
+                  return (
+                    <div key={label} className={`border border-slate-200 border-l-4 ${borderColor} rounded-lg p-4`}>
+                      <div className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full mb-3 ${bg}`}>
+                        Scénario {label} — {sc.name}
+                      </div>
+                      <div className="space-y-1.5">
+                        {allKeys.length === 0 ? (
+                          <p className="text-xs text-slate-400">Aucune modification</p>
+                        ) : allKeys.map(key => {
+                          const [pid, field] = key.split("__");
+                          const valA = compareA.modifications?.find(m => m.project_id === pid)?.[field];
+                          const valB = compareB.modifications?.find(m => m.project_id === pid)?.[field];
+                          const diff = label === "B" && valA !== undefined && valB !== undefined && valA !== valB;
+                          const isHigher = label === "B" && typeof valA === "number" && typeof valB === "number" && valB > valA;
+                          return (
+                            <div key={key} className={`flex items-center justify-between text-xs px-2 py-1 rounded ${diff ? (isHigher ? "bg-emerald-50" : "bg-rose-50") : "bg-slate-50"}`}>
+                              <span className="text-slate-500 truncate flex-1">{field} <span className="text-[10px] text-slate-400">(…{pid?.slice(-4)})</span></span>
+                              <span className={`font-mono font-semibold ml-2 ${diff ? (isHigher ? "text-emerald-700" : "text-rose-700") : "text-slate-700"}`}>
+                                {String(modsMap[key])}
+                                {diff && (
+                                  <span className="ml-1 text-[9px] opacity-75">
+                                    {isHigher ? "▲" : "▼"}
+                                  </span>
+                                )}
+                              </span>
+                            </div>
+                          );
+                        })}
+                      </div>
+                    </div>
+                  );
+                })}
               </div>
             </div>
           )}

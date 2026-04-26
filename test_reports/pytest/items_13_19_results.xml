@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?><testsuites name="pytest tests"><testsuite name="pytest" errors="0" failures="5" skipped="0" tests="12" time="2.810" timestamp="2026-04-26T16:13:09.910177+00:00" hostname="agent-env-3e3bc150-8ec2-431a-bef0-ce3509db545e"><testcase classname="backend.tests.test_items_13_19.TestItem13Roadmap" name="test_roadmap_snapshots_endpoint" time="0.610"><failure message="AssertionError: Snapshots: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404]&gt;.status_code">backend/tests/test_items_13_19.py:43: in test_roadmap_snapshots_endpoint
+    assert r.status_code == 200, f"Snapshots: {r.text}"
+E   AssertionError: Snapshots: {"detail":"Not Found"}
+E   assert 404 == 200
+E    +  where 404 = &lt;Response [404]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_items_13_19.TestItem13Roadmap" name="test_roadmap_projects_endpoint" time="0.145"><failure message="AssertionError: Projects: {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404]&gt;.status_code">backend/tests/test_items_13_19.py:50: in test_roadmap_projects_endpoint
+    assert r.status_code == 200, f"Projects: {r.text}"
+E   AssertionError: Projects: {"detail":"Not Found"}
+E   assert 404 == 200
+E    +  where 404 = &lt;Response [404]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_items_13_19.TestItem14ExportRecommandations" name="test_export_pdf" time="0.270" /><testcase classname="backend.tests.test_items_13_19.TestItem14ExportRecommandations" name="test_export_excel" time="0.132" /><testcase classname="backend.tests.test_items_13_19.TestItem14ExportRecommandations" name="test_export_unauthenticated" time="0.125"><failure message="assert 403 == 401&#10; +  where 403 = &lt;Response [403]&gt;.status_code">backend/tests/test_items_13_19.py:81: in test_export_unauthenticated
+    assert r.status_code == 401
+E   assert 403 == 401
+E    +  where 403 = &lt;Response [403]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_items_13_19.TestItem15Scenarios" name="test_scenarios_list" time="0.110" /><testcase classname="backend.tests.test_items_13_19.TestItem16AgentAnalytics" name="test_agent_analytics" time="0.112" /><testcase classname="backend.tests.test_items_13_19.TestItem17MultiTenant" name="test_beta_corp_login" time="0.332" /><testcase classname="backend.tests.test_items_13_19.TestItem17MultiTenant" name="test_beta_corp_projets" time="0.478" /><testcase classname="backend.tests.test_items_13_19.TestItem17MultiTenant" name="test_altair_isolation" time="0.110" /><testcase classname="backend.tests.test_items_13_19.TestItem19SAPConnector" name="test_connectors_endpoint" time="0.144"><failure message="AssertionError: Connectors: 404 {&quot;detail&quot;:&quot;Not Found&quot;}&#10;assert 404 == 200&#10; +  where 404 = &lt;Response [404]&gt;.status_code">backend/tests/test_items_13_19.py:158: in test_connectors_endpoint
+    assert r.status_code == 200, f"Connectors: {r.status_code} {r.text[:300]}"
+E   AssertionError: Connectors: 404 {"detail":"Not Found"}
+E   assert 404 == 200
+E    +  where 404 = &lt;Response [404]&gt;.status_code</failure></testcase><testcase classname="backend.tests.test_items_13_19.TestItem19SAPConnector" name="test_sap_connector_rfc_option" time="0.139"><failure message="assert 404 == 200&#10; +  where 404 = &lt;Response [404]&gt;.status_code">backend/tests/test_items_13_19.py:165: in test_sap_connector_rfc_option
+    assert r.status_code == 200
+E   assert 404 == 200
+E    +  where 404 = &lt;Response [404]&gt;.status_code</failure></testcase></testsuite></testsuites>

@@ -215,6 +215,15 @@ async def list_scenarios(user: TokenPayload) -> list:
     ).sort("created_at", -1).to_list(None)
 
 
+async def get_scenario(scenario_id: str, user: TokenPayload) -> dict:
+    s = await db.scenarios.find_one(
+        {"scenario_id": scenario_id, "tenant_id": user.tenant_id}, {"_id": 0}
+    )
+    if not s:
+        raise HTTPException(404, "Scénario introuvable")
+    return s
+
+
 async def save_scenario(data: ScenarioCreate, user: TokenPayload) -> dict:
     doc = {
         "scenario_id":  str(uuid.uuid4()),

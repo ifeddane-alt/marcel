@@ -78,6 +78,14 @@ async def list_scenarios(
     return await service.list_scenarios(current_user)
 
 
+@router.get("/arbitrage/scenarios/{scenario_id}")
+async def get_scenario(
+    scenario_id: str,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    return await service.get_scenario(scenario_id, current_user)
+
+
 @router.post("/arbitrage/scenarios", status_code=201)
 async def save_scenario(
     data: ScenarioCreate,

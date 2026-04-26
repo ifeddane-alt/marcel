@@ -46,6 +46,9 @@ DECISION_STATUS_COLORS = {
 
 FONT = "Arial"
 
+# ── Branding dynamique (mis à jour à chaque génération) ──────────────────────
+_CURRENT_BRAND: dict = {}
+
 
 # ---- Branding helpers ----
 
@@ -107,7 +110,7 @@ def _clear(tf):
 
 
 def _run(tf, text, size=9, bold=False, color=None, align=PP_ALIGN.LEFT, space_before=0, italic=False):
-    """Add a paragraph with a single run to a text frame (Arial font)."""
+    """Add a paragraph with a single run to a text frame (brand font)."""
     p = tf.add_paragraph()
     p.alignment = align
     p.space_before = Pt(space_before)
@@ -116,7 +119,7 @@ def _run(tf, text, size=9, bold=False, color=None, align=PP_ALIGN.LEFT, space_be
     r.font.size = Pt(size)
     r.font.bold = bold
     r.font.italic = italic
-    r.font.name = FONT
+    r.font.name = _CURRENT_BRAND.get("font", FONT) if _CURRENT_BRAND else FONT
     r.font.color.rgb = color or DARK
     return p
 
@@ -384,6 +387,7 @@ def add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_dat
 
 def _header(slide, title, subtitle=None, height_in=1.15, brand=None):
     primary = (brand or {}).get("primary", NAVY)
+    font = (brand or _CURRENT_BRAND or {}).get("font", FONT)
     h = Inches(height_in)
     # Pleine largeur exacte
     _rect(slide, Emu(0), Emu(0), SW, h, fill=primary)
@@ -394,7 +398,7 @@ def _header(slide, title, subtitle=None, height_in=1.15, brand=None):
     r.text = title
     r.font.size = Pt(20)
     r.font.bold = True
-    r.font.name = FONT
+    r.font.name = font
     r.font.color.rgb = WHITE
     if subtitle:
         _run(tb.text_frame, subtitle, size=9, color=RGBColor(0xAA, 0xCC, 0xFF))
@@ -419,15 +423,27 @@ def _section_label(slide, left, top, width, height_in, label):
 # ---- Slide footer ----
 
 def _footer(slide, text="Projetenne · Confidentiel"):
-    tb = _tb(slide, Inches(0.4), SH - Inches(0.3), SW - Inches(0.8), Inches(0.25))
+    tb = _tb(slide, Inches(0.4), SH - Inches(0.3), SW - Inches(1.8), Inches(0.25))
     _clear(tb.text_frame)
     p = tb.text_frame.paragraphs[0]
     p.alignment = PP_ALIGN.RIGHT
     r = p.add_run()
     r.text = text
     r.font.size = Pt(6.5)
-    r.font.name = FONT
+    r.font.name = _CURRENT_BRAND.get("font", FONT) if _CURRENT_BRAND else FONT
     r.font.color.rgb = LIGHT
+    # Logo tenant en bas à droite (sur toutes les slides)
+    logo_b64 = _CURRENT_BRAND.get("logo_base64") if _CURRENT_BRAND else None
+    if logo_b64:
+        try:
+            logo_data = base64.b64decode(logo_b64)
+            logo_buf = io.BytesIO(logo_data)
+            logo_w = Inches(0.7)
+            slide.shapes.add_picture(
+                logo_buf, SW - logo_w - Inches(0.15), SH - Inches(0.35), width=logo_w
+            )
+        except Exception:
+            pass
 
 
 # ---- Table helper (with word wrap) ----
@@ -1347,11 +1363,13 @@ def generate_copil_pptx(instance_name, instance_date, projects,
                         all_milestones, all_risks, all_decisions,
                         governance_id=None, team_consumption_by_project=None,
                         include_roadmap=False, dependencies=None, branding=None):
+    global _CURRENT_BRAND
     prs = Presentation()
     prs.slide_width = SW
     prs.slide_height = SH
 
     brand = _brand(branding)
+    _CURRENT_BRAND = brand  # Appliqué à toutes les slides via _run() et _footer()
 
     proj_names = {p["project_id"]: p["name"] for p in projects}
     tc_by_proj = team_consumption_by_project or {}

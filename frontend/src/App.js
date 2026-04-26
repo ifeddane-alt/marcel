@@ -28,6 +28,7 @@ import Arbitrage from "@/pages/Arbitrage";
 import Connectors from "@/pages/Connectors";
 import Recommandations from "@/pages/Recommandations";
 import MesAlertes from "@/pages/MesAlertes";
+import AgentAnalytics from "@/pages/AgentAnalytics";
 import "@/App.css";
 
 function ProtectedRoute({ children }) {
@@ -84,6 +85,7 @@ function AppRoutes() {
         <Route path="admin/connectors" element={<Connectors />} />
         <Route path="agent/recommandations" element={<Recommandations />} />
         <Route path="agent/alertes" element={<MesAlertes />} />
+        <Route path="admin/agent-analytics" element={<AdminRoute><AgentAnalytics /></AdminRoute>} />
         <Route path="timesheets" element={<Timesheets />} />
         <Route path="governance" element={<Governance />} />
         <Route path="conformite" element={<Conformite />} />

@@ -258,6 +258,7 @@ export const arbitrageAPI = {  getSummary:      ()           => api.get("/arbitr
   upsertEnvelope:  (data)       => api.post("/arbitrage/envelopes", data),
   deleteEnvelope:  (id)         => api.delete(`/arbitrage/envelopes/${id}`),
   getScenarios:    ()           => api.get("/arbitrage/scenarios"),
+  getScenario:     (id)         => api.get(`/arbitrage/scenarios/${id}`),
   saveScenario:    (data)       => api.post("/arbitrage/scenarios", data),
   applyScenario:   (id)         => api.post(`/arbitrage/scenarios/${id}/apply`),
   deleteScenario:  (id)         => api.delete(`/arbitrage/scenarios/${id}`),
@@ -279,10 +280,13 @@ export const agentAPI = {
   listSessions:      ()           => api.get("/agent/sessions"),
   getSessionHistory: (sessionId)  => api.get(`/agent/sessions/${sessionId}/history`),
   getRecommendations:()           => api.get("/agent/recommendations"),
+  exportRecoPDF:     ()           => api.get("/agent/recommendations/export-pdf", { responseType: "blob" }),
+  exportRecoExcel:   ()           => api.get("/agent/recommendations/export-excel", { responseType: "blob" }),
   listAlertRules:    ()           => api.get("/agent/alert-rules"),
   createAlertRule:   (data)       => api.post("/agent/alert-rules", data),
   updateAlertRule:   (id, data)   => api.put(`/agent/alert-rules/${id}`, data),
   deleteAlertRule:   (id)         => api.delete(`/agent/alert-rules/${id}`),
+  getAgentAnalytics: ()           => api.get("/admin/agent-analytics"),
 };
 
 export default api;
