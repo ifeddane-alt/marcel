@@ -27,6 +27,7 @@ import {
   Bell,
   Lightbulb,
   BarChart2,
+  X,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
