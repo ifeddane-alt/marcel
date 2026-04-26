@@ -6,7 +6,8 @@ import {
 } from "recharts";
 import {
   Briefcase, TrendingUp, AlertTriangle, CheckCircle, ArrowRight, ShieldAlert, MapPin,
-} from "lucide-react";import { dashboardAPI, programsAPI, projectsAPI, teamsAPI, milestonesAPI, arbitrageAPI } from "@/api";
+  BotMessageSquare, TrendingDown, Shield, Calendar, Users, Target,
+} from "lucide-react";import { dashboardAPI, programsAPI, projectsAPI, teamsAPI, milestonesAPI, arbitrageAPI, agentAPI } from "@/api";
 import RAGBadge from "@/components/RAGBadge";
 import RiskHeatmap from "@/components/RiskHeatmap";
 import CapacityAlertBanner from "@/components/CapacityAlertBanner";
@@ -66,6 +67,7 @@ export default function Dashboard() {
   const [heatmapFilterProject, setHeatmapFilterProject] = useState("");
   const [loading, setLoading] = useState(true);
   const [arbitrageData, setArbitrageData] = useState(null);
+  const [recommendations, setRecommendations] = useState([]);
 
   useEffect(() => {
     Promise.all([
@@ -90,7 +92,12 @@ export default function Dashboard() {
         setLoading(false);
       }).catch(() => setLoading(false));
 
-    // Données arbitrage (envelopes + résumé)
+    // Recommandations Agent IA (si permission)
+    if (canSeeEnvelope) {  // réutilise la condition arbitrage (profils ADMIN/PORTFOLIO/CIO)
+      agentAPI.getRecommendations().then(r => {
+        setRecommendations((r.data || []).slice(0, 5));
+      }).catch(() => {});
+    }
     Promise.all([
       arbitrageAPI.getEnvelopes(),
       arbitrageAPI.getSummary(),
@@ -344,6 +351,60 @@ export default function Dashboard() {
                       )}
                     </div>
                   </div>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+      )}
+
+      {/* Widget Recommandations IA — visible ADMIN, PORTFOLIO, CIO */}
+      {canSeeEnvelope && recommendations.length > 0 && (
+        <div className="bg-white border border-gray-200 rounded shadow-sm mb-6" data-testid="recommendations-widget">
+          <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
+            <div className="flex items-center gap-2">
+              <BotMessageSquare size={14} className="text-[#0052CC]" />
+              <span className="text-sm font-bold text-slate-800">Recommandations IA</span>
+              {recommendations.filter(r => r.severity === "critical").length > 0 && (
+                <span className="flex items-center gap-1 text-[10px] font-bold bg-red-100 text-red-700 border border-red-200 px-2 py-0.5 rounded-full">
+                  <AlertTriangle size={9} /> {recommendations.filter(r => r.severity === "critical").length} critique(s)
+                </span>
+              )}
+            </div>
+            <Link to="/agent/recommandations" className="text-xs text-[#0052CC] hover:underline flex items-center gap-1">
+              Tout voir <ArrowRight size={11} />
+            </Link>
+          </div>
+          <div className="divide-y divide-gray-50">
+            {recommendations.map(rec => {
+              const TYPE_ICONS = {
+                eac_overrun: TrendingDown, unmitigated_risk: Shield,
+                delayed_milestone: Calendar, envelope_breach: Target,
+                red_project: AlertTriangle, team_overload: Users,
+              };
+              const Icon = TYPE_ICONS[rec.type] || AlertTriangle;
+              const sevBg = rec.severity === "critical" ? "bg-rose-50/40" : "bg-amber-50/30";
+              const iconColor = rec.severity === "critical" ? "text-rose-500" : "text-amber-500";
+              const badgeClass = rec.severity === "critical"
+                ? "bg-rose-100 text-rose-700 border-rose-200"
+                : "bg-amber-100 text-amber-700 border-amber-100";
+              return (
+                <div key={rec.id} className={`flex items-start gap-3 px-5 py-3 ${sevBg}`} data-testid={`dashboard-rec-${rec.id}`}>
+                  <Icon size={14} className={`${iconColor} flex-shrink-0 mt-0.5`} />
+                  <div className="flex-1 min-w-0">
+                    <div className="flex items-center gap-2">
+                      <span className="text-xs font-semibold text-slate-800 truncate">{rec.title}</span>
+                      <span className={`flex-shrink-0 text-[9px] font-bold px-1.5 py-0.5 rounded-full border ${badgeClass}`}>
+                        {rec.severity === "critical" ? "Critique" : "Attention"}
+                      </span>
+                    </div>
+                    <p className="text-[10px] text-slate-500 mt-0.5 line-clamp-1">{rec.description}</p>
+                  </div>
+                  {rec.project_id && (
+                    <Link to={`/projects/${rec.project_id}`} className="flex-shrink-0 text-[10px] text-[#0052CC] hover:underline whitespace-nowrap">
+                      Voir →
+                    </Link>
+                  )}
                 </div>
               );
             })}

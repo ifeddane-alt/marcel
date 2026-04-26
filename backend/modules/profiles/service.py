@@ -100,6 +100,10 @@ ALL_PERMISSIONS = [
     {"key": "admin.profiles",              "label": "Gérer les profils",              "module": "Administration"},
     {"key": "admin.config",                "label": "Configuration du tenant",        "module": "Administration"},
     {"key": "import.csv",                  "label": "Importer CSV",                   "module": "Import"},
+    # Agent IA PMO
+    {"key": "agent.chat",                  "label": "Dialoguer avec l'Agent IA PMO",  "module": "Agent IA"},
+    {"key": "agent.recommend",             "label": "Voir les recommandations IA",    "module": "Agent IA"},
+    {"key": "agent.alerts",                "label": "Gérer ses alertes personnalisées","module": "Agent IA"},
 ]
 
 # ─── 12 Profils par défaut ────────────────────────────────────────────────────
@@ -124,6 +128,7 @@ DEFAULT_PROFILES = [
             "demands.view_own", "trains.view", "scope.receive", "scope.simulate",
             "vendors.view", "vendors.view_contracts",
             "arbitrage.view",
+            "agent.chat", "agent.recommend", "agent.alerts",
         ],
     },
     {
@@ -147,6 +152,7 @@ DEFAULT_PROFILES = [
             "scope.freeze", "scope.transmit", "scope.receive", "scope.simulate", "vendors.view",
             "vendors.view_contracts", "import.csv",
             "arbitrage.view", "arbitrage.edit", "arbitrage.simulate",
+            "agent.chat", "agent.recommend", "agent.alerts",
         ],
     },
     {

@@ -23,11 +23,15 @@ import {
   Target,
   TrendingUp,
   Plug,
+  BotMessageSquare,
+  Bell,
+  Lightbulb,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTenantConfig } from "@/contexts/TenantConfigContext";
 import { usePermissions } from "@/hooks/usePermissions";
+import AgentDrawer from "@/components/AgentDrawer";
 
 // ── Entrées principales ─────────────────────────────────────────────
 // perm: permission requise (string) ou [p1,p2] (OR logique)
@@ -167,6 +171,25 @@ export default function Layout() {
             </NavLink>
           ))}
 
+          {/* Agent IA PMO — agent.chat ou agent.recommend */}
+          {(hasPermission("agent.chat") || hasPermission("agent.recommend") || hasPermission("*")) && (
+            <>
+              <div className="text-[10px] uppercase tracking-widest text-slate-500 px-3 pt-3 pb-1 font-semibold">Agent IA</div>
+              {(hasPermission("agent.recommend") || hasPermission("*")) && (
+                <NavLink to="/agent/recommandations" data-testid="nav-agent-recommandations" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`}>
+                  <Lightbulb size={16} strokeWidth={1.75} className="flex-shrink-0" />
+                  <span>Recommandations</span>
+                </NavLink>
+              )}
+              {(hasPermission("agent.alerts") || hasPermission("agent.chat") || hasPermission("*")) && (
+                <NavLink to="/agent/alertes" data-testid="nav-agent-alertes" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`}>
+                  <Bell size={16} strokeWidth={1.75} className="flex-shrink-0" />
+                  <span>Mes alertes</span>
+                </NavLink>
+              )}
+            </>
+          )}
+
           {/* SAFe — trains.view + module safe */}
           {canAccessNav("trains.view", "safe") && (
             <>
@@ -279,6 +302,9 @@ export default function Layout() {
           <Outlet />
         </main>
       </div>
+
+      {/* Agent IA PMO — Drawer flottant */}
+      <AgentDrawer />
     </div>
   );
 }

@@ -38,6 +38,7 @@ from modules.admin_config.router import router as admin_config_router
 from modules.scope.router import router as scope_router
 from modules.arbitrage.router import router as arbitrage_router
 from modules.connectors.router import router as connectors_router
+from modules.agent.router import router as agent_router
 
 app = FastAPI(title="Projetenne API")
 
@@ -59,6 +60,7 @@ for _router in [
     scope_router,
     arbitrage_router,
     connectors_router,
+    agent_router,
 ]:
     app.include_router(_router, prefix="/api")
 

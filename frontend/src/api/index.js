@@ -274,4 +274,15 @@ export const connectorsAPI = {
   getLogs:         (type, limit) => api.get(`/connectors/${type}/logs`, { params: limit ? { limit } : {} }),
 };
 
+export const agentAPI = {
+  chat:              (data)       => api.post("/agent/chat", data),
+  listSessions:      ()           => api.get("/agent/sessions"),
+  getSessionHistory: (sessionId)  => api.get(`/agent/sessions/${sessionId}/history`),
+  getRecommendations:()           => api.get("/agent/recommendations"),
+  listAlertRules:    ()           => api.get("/agent/alert-rules"),
+  createAlertRule:   (data)       => api.post("/agent/alert-rules", data),
+  updateAlertRule:   (id, data)   => api.put(`/agent/alert-rules/${id}`, data),
+  deleteAlertRule:   (id)         => api.delete(`/agent/alert-rules/${id}`),
+};
+
 export default api;
