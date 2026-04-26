@@ -368,3 +368,24 @@ docker-compose up -d
 **Seed :** 3 configs démo (URLs fictives, credentials vides), 9 sync_logs historiques.
 **Frontend :** Page `/admin/connectors` avec 3 cards RAG, modal 3 onglets (Config/Mapping/Historique), toggle enabled, test connexion, sync manuelle, historique avec détail erreurs. Sidebar "Connecteurs" sous Administration.
 
+
+### ✅ Module Agent IA PMO (2026-04) — TESTÉ 14/14 BACKEND + 100% FRONTEND (Iteration 37)
+
+**Architecture :** `/app/backend/modules/agent/` (router.py, service.py, schemas.py). Collections : `agent_logs`, `user_alert_rules`.
+
+**4 fonctionnalités principales :**
+
+1. **Chatbot conversationnel** : `POST /api/agent/chat`. Claude 3.5 Sonnet via `emergentintegrations`. Historique persisté dans `agent_logs` (session_id, question, response, verified, warnings, is_simulation). Contexte PMO enrichi : projets (EAC, budget, RAG, CAPEX/OPEX), top 15 risques, équipes, enveloppes, jalons. Historique de session rechargeable (max 8 échanges injectés dans le prompt).
+2. **Recommandations proactives déterministes** : `GET /api/agent/recommendations`. 6 règles : EAC overrun >5%, risques criticité ≥15 non mitigés, jalons retard >7j, dépassement enveloppe CAPEX/OPEX, projets rouge sans décision mensuelle, surcharge équipe >10%. Retourne 12 recommandations sur les données Altair.
+3. **Règles d'alerte personnalisées** : CRUD `GET/POST/PUT/DELETE /api/agent/alert-rules`. Métriques : budget_overrun_pct, eac_overrun_pct, delay_days, team_overload_pct, risk_score. Stockées par `user_id` + `tenant_id`.
+4. **Simulations what-if** : Détection automatique de mots-clés français ("si je", "si on annule", "et si"...). Instructions Claude spéciales + marquage "⚠️ SIMULATION — non persistée en base".
+5. **Guardrails anti-hallucination** : Validation post-génération des noms de projets et montants > 100k€ vs le contexte fourni. `verified=false` + `warnings[]` si anomalie détectée.
+
+**Frontend :**
+- `AgentDrawer.jsx` : Bouton flottant IA PMO (bottom-20 right-6). Drawer latéral 420px. Sélection de session, messages formatés (markdown inline, badges vérifié/simulation), indicateur de frappe, questions rapides.
+- `Recommandations.jsx` : Page `/agent/recommandations`. KPIs critiques/attentions/total. Filtres par sévérité et type. Cards avec icône, badge sévérité, lien projet.
+- `MesAlertes.jsx` : Page `/agent/alertes`. CRUD complet avec modal. Toggle enable/disable inline. Table des règles avec icônes métriques.
+- **Widget Dashboard** : Top 5 recommandations dans le Dashboard (section entre enveloppe et charts). Badge "X critique(s)". Lien "Tout voir".
+- **Sidebar** : Section "AGENT IA" avec Recommandations + Mes alertes.
+
+**Permissions :** `agent.chat`, `agent.recommend`, `agent.alerts` ajoutées aux profils ADMIN, PORTFOLIO, CIO.
