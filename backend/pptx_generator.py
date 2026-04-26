@@ -1205,6 +1205,141 @@ def add_slide_team_consumption(prs, project, team_rows, instance_name, instance_
 
 
 # ====================================================================
+# SLIDE CLÔTURE — Points d'attention CIO
+# ====================================================================
+
+def add_slide_cloture(prs, projects, all_risks, instance_name="", instance_date="", brand=None):
+    """Slide finale : points d'attention CIO — risques critiques, projets rouges, EAC dépassés."""
+    slide = _blank_slide(prs)
+    primary = (brand or {}).get("primary", NAVY)
+    co = (brand or {}).get("company_name", "Projetenne")
+
+    # ---- Header ----
+    HEADER_H = Inches(1.1)
+    _rect(slide, Emu(0), Emu(0), SW, HEADER_H, fill=primary)
+    _rect(slide, Emu(0), Emu(0), Inches(0.18), HEADER_H, fill=RED)
+
+    ttb = _tb(slide, Inches(0.32), Inches(0.1), SW - Inches(3.2), Inches(0.55))
+    _clear(ttb.text_frame)
+    r = ttb.text_frame.paragraphs[0].add_run()
+    r.text = "Points d'attention CIO"
+    r.font.size = Pt(18); r.font.bold = True; r.font.name = FONT; r.font.color.rgb = WHITE
+
+    sub_tb = _tb(slide, Inches(0.32), Inches(0.72), SW - Inches(3.2), Inches(0.28))
+    _clear(sub_tb.text_frame)
+    r2 = sub_tb.text_frame.paragraphs[0].add_run()
+    r2.text = f"Synthèse des alertes — {instance_name}  ·  {instance_date}"
+    r2.font.size = Pt(8.5); r2.font.name = FONT; r2.font.color.rgb = LIGHT
+
+    # ---- Données ----
+    proj_map = {p["project_id"]: p for p in projects}
+    red_projects = [p for p in projects if p.get("status_rag") == "red"]
+    eac_overruns = [p for p in projects
+                    if (p.get("budget_forecast") or 0) > (p.get("budget_total") or 1) * 1.10
+                    and (p.get("budget_total") or 0) > 0]
+    critical_risks = sorted(
+        [r for r in all_risks if r.get("criticality", 0) >= 15 and r.get("status", "") in ("identifié", "en cours")],
+        key=lambda x: -x.get("criticality", 0)
+    )[:8]
+
+    BODY_Y = HEADER_H + Inches(0.12)
+    COL_W = Inches(4.1)
+    GUTTER = Inches(0.18)
+
+    def _section(x, y, w, title, icon_color, rows, empty_msg, row_fn):
+        """Renders a section box with title + rows."""
+        # Section header
+        _rect(slide, x, y, w, Inches(0.32), fill=icon_color)
+        htb = _tb(slide, x + Inches(0.12), y + Inches(0.04), w - Inches(0.2), Inches(0.24))
+        _clear(htb.text_frame)
+        rh = htb.text_frame.paragraphs[0].add_run()
+        rh.text = title
+        rh.font.size = Pt(9); rh.font.bold = True; rh.font.name = FONT; rh.font.color.rgb = WHITE
+
+        # Rows
+        ROW_H = Inches(0.37)
+        ry = y + Inches(0.32)
+        if not rows:
+            _rect(slide, x, ry, w, ROW_H, fill=BG, no_line=False, line_color=BORDER, line_pt=0.5)
+            mt = _tb(slide, x + Inches(0.12), ry + Inches(0.08), w - Inches(0.2), Inches(0.22))
+            _clear(mt.text_frame)
+            r = mt.text_frame.paragraphs[0].add_run()
+            r.text = empty_msg; r.font.size = Pt(8); r.font.name = FONT; r.font.color.rgb = LIGHT
+            ry += ROW_H
+        else:
+            for item in rows[:6]:
+                bg, text_left, text_right = row_fn(item)
+                _rect(slide, x, ry, w, ROW_H, fill=bg, no_line=False, line_color=BORDER, line_pt=0.5)
+                lt = _tb(slide, x + Inches(0.12), ry + Inches(0.06), w - Inches(1.5), Inches(0.26))
+                _clear(lt.text_frame)
+                r = lt.text_frame.paragraphs[0].add_run()
+                r.text = trunc(text_left, 55); r.font.size = Pt(8); r.font.name = FONT; r.font.color.rgb = DARK
+                rt = _tb(slide, x + w - Inches(1.4), ry + Inches(0.06), Inches(1.3), Inches(0.26))
+                _clear(rt.text_frame)
+                rr = rt.text_frame.paragraphs[0]
+                rr.alignment = PP_ALIGN.RIGHT
+                rn = rr.add_run()
+                rn.text = text_right; rn.font.size = Pt(8); rn.font.bold = True; rn.font.name = FONT; rn.font.color.rgb = DARK
+                ry += ROW_H
+        return ry
+
+    # Section 1 — Risques critiques non mitigés (left col)
+    x1 = Inches(0.18)
+    _section(
+        x1, BODY_Y, COL_W,
+        f"Risques critiques non mitigés ({len(critical_risks)})",
+        RED,
+        critical_risks,
+        "Aucun risque critique non mitigé",
+        lambda r: (
+            LIGHT_RED,
+            f"[{r.get('criticality', 0)}/25] {r.get('title', '?')}",
+            proj_map.get(r.get("project_id", ""), {}).get("name", "—")[:22]
+        )
+    )
+
+    # Section 2 — Projets rouges (middle col)
+    x2 = x1 + COL_W + GUTTER
+    _section(
+        x2, BODY_Y, COL_W,
+        f"Projets en statut ROUGE ({len(red_projects)})",
+        RED,
+        red_projects,
+        "Aucun projet rouge",
+        lambda p: (
+            LIGHT_RED,
+            p.get("name", "?"),
+            rag_label(p.get("status_rag", ""))
+        )
+    )
+
+    # Section 3 — EAC dépassés > 10% (right col)
+    x3 = x2 + COL_W + GUTTER
+    w3 = SW - x3 - Inches(0.18)
+    _section(
+        x3, BODY_Y, w3,
+        f"EAC dépassés > 10 % ({len(eac_overruns)})",
+        ORANGE_C,
+        eac_overruns,
+        "Aucun dépassement EAC > 10 %",
+        lambda p: (
+            LIGHT_AMBER,
+            p.get("name", "?"),
+            f"+{round((p.get('budget_forecast', 0) / max(p.get('budget_total', 1), 1) - 1) * 100)} %"
+        )
+    )
+
+    # Footer
+    ftb = _tb(slide, Inches(0.18), SH - Inches(0.35), SW - Inches(0.36), Inches(0.28))
+    _clear(ftb.text_frame)
+    fp = ftb.text_frame.paragraphs[0]
+    fp.alignment = PP_ALIGN.RIGHT
+    fr = fp.add_run()
+    fr.text = f"{co}  ·  {instance_name}  ·  {instance_date}"
+    fr.font.size = Pt(7); fr.font.name = FONT; fr.font.color.rgb = LIGHT
+
+
+# ====================================================================
 # MAIN ENTRY POINT
 # ====================================================================
 
@@ -1225,6 +1360,9 @@ def generate_copil_pptx(instance_name, instance_date, projects,
     for d in all_decisions:
         d["project_name"] = proj_names.get(d.get("project_id", ""), "?")
 
+    # Trier les projets alphabétiquement (spéc : "ordre alphabétique")
+    projects_sorted = sorted(projects, key=lambda p: (p.get("name") or "").lower())
+
     # Slide 1 — Garde
     add_slide_garde(prs, instance_name, instance_date, projects, brand=brand)
 
@@ -1243,8 +1381,8 @@ def generate_copil_pptx(instance_name, instance_date, projects,
     if all_decisions:
         add_slide_decisions(prs, all_decisions[:10], governance_id, instance_name, instance_date, brand=brand)
 
-    # Slide 6+N — Fiche par projet + slide consommation équipe
-    for p in projects:
+    # Slide 6+N — Fiche par projet + slide consommation équipe (ordre alphabétique)
+    for p in projects_sorted:
         pid = p["project_id"]
         ms = [m for m in all_milestones if m.get("project_id") == pid]
         ms_sorted = sorted(ms, key=lambda x: x.get("date_forecast") or "")
@@ -1261,6 +1399,9 @@ def generate_copil_pptx(instance_name, instance_date, projects,
     if include_roadmap:
         add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_date,
                           dependencies=dependencies, brand=brand)
+
+    # Slide finale — Points d'attention CIO
+    add_slide_cloture(prs, projects, all_risks, instance_name, instance_date, brand=brand)
 
     buf = io.BytesIO()
     prs.save(buf)

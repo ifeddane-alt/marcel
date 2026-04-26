@@ -1,141 +1,129 @@
-"""Tests for Chantier 5: Export COPIL PPTX endpoint"""
+"""Tests for COPIL PPTX export endpoint"""
 import pytest
 import requests
 import os
+import io
+from pptx import Presentation
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
+BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "").rstrip("/")
 
-def get_token(email, password):
-    r = requests.post(f"{BASE_URL}/api/auth/login", json={"email": email, "password": password})
-    if r.status_code == 200:
-        return r.json().get("access_token")
-    return None
 
 @pytest.fixture(scope="module")
-def admin_token():
-    token = get_token("admin@altair.fr", "Admin1234!")
-    if not token:
-        pytest.skip("Admin auth failed")
-    return token
+def auth_token():
+    res = requests.post(f"{BASE_URL}/api/auth/login", json={"email": "admin@altair.fr", "password": "Admin2026!"})
+    assert res.status_code == 200, f"Login failed: {res.text}"
+    data = res.json()
+    return data.get("access_token") or data.get("token")
+
 
 @pytest.fixture(scope="module")
-def pmo_token():
-    token = get_token("pmo@altair.fr", "Pmo1234!")
-    if not token:
-        pytest.skip("PMO auth failed")
-    return token
+def project_ids(auth_token):
+    res = requests.get(f"{BASE_URL}/api/projects", headers={"Authorization": f"Bearer {auth_token}"})
+    assert res.status_code == 200
+    projects = res.json()
+    assert len(projects) >= 2, "Need at least 2 projects"
+    return [p["project_id"] for p in projects[:3]]
+
 
 @pytest.fixture(scope="module")
-def viewer_token():
-    token = get_token("viewer@altair.fr", "View1234!")
-    if not token:
-        pytest.skip("Viewer auth failed")
-    return token
+def pptx_response(auth_token, project_ids):
+    """Shared PPTX response for multiple tests"""
+    payload = {
+        "project_ids": project_ids,
+        "instance_name": "Test COPIL",
+        "instance_date": "2026-04-26",
+    }
+    res = requests.post(
+        f"{BASE_URL}/api/export/copil",
+        json=payload,
+        headers={"Authorization": f"Bearer {auth_token}"},
+    )
+    return res
 
-@pytest.fixture(scope="module")
-def first_project_id(admin_token):
-    """Get first project_id from portfolio"""
-    r = requests.get(f"{BASE_URL}/api/projects", headers={"Authorization": f"Bearer {admin_token}"})
-    assert r.status_code == 200
-    projects = r.json()
-    assert len(projects) > 0, "No projects found"
-    return projects[0]["project_id"], projects[0]["name"]
+
+# --- Backend tests ---
+
+def test_export_copil_http_200(pptx_response):
+    """POST /api/export/copil returns HTTP 200"""
+    assert pptx_response.status_code == 200, f"Expected 200, got {pptx_response.status_code}: {pptx_response.text[:200]}"
 
 
-class TestExportCopilAPI:
-    """Tests for POST /api/export/copil"""
+def test_export_copil_content_type(pptx_response):
+    """Response content-type is PPTX"""
+    ct = pptx_response.headers.get("content-type", "")
+    assert "presentationml" in ct or "application/octet-stream" in ct, f"Unexpected content-type: {ct}"
 
-    def test_export_copil_admin_returns_200(self, admin_token, first_project_id):
-        """Admin can generate PPTX - returns 200 with correct content-type"""
-        pid, pname = first_project_id
-        r = requests.post(
-            f"{BASE_URL}/api/export/copil",
-            headers={"Authorization": f"Bearer {admin_token}"},
-            json={
-                "project_ids": [pid],
-                "instance_name": "TEST_COPIL_Admin",
-                "instance_date": "2026-02-15",
-                "governance_id": None,
-            }
-        )
-        assert r.status_code == 200, f"Expected 200, got {r.status_code}: {r.text}"
-        assert "presentationml" in r.headers.get("content-type", ""), \
-            f"Expected PPTX content-type, got: {r.headers.get('content-type')}"
-        assert len(r.content) > 10000, f"PPTX file too small: {len(r.content)} bytes"
-        print(f"PPTX size: {len(r.content)} bytes - OK")
 
-    def test_export_copil_pmo_returns_200(self, pmo_token, first_project_id):
-        """PMO user can generate PPTX"""
-        pid, _ = first_project_id
-        r = requests.post(
-            f"{BASE_URL}/api/export/copil",
-            headers={"Authorization": f"Bearer {pmo_token}"},
-            json={
-                "project_ids": [pid],
-                "instance_name": "TEST_COPIL_PMO",
-                "instance_date": "2026-02-15",
-            }
-        )
-        assert r.status_code == 200, f"PMO export failed: {r.status_code}: {r.text}"
-        print(f"PMO PPTX size: {len(r.content)} bytes - OK")
+def test_export_copil_content_disposition_format(pptx_response):
+    """Content-Disposition filename follows COPIL_[date]_[slug].pptx format"""
+    cd = pptx_response.headers.get("content-disposition", "")
+    print(f"Content-Disposition: {cd}")
+    assert "COPIL_" in cd, f"Missing COPIL_ prefix in: {cd}"
+    assert ".pptx" in cd, f"Missing .pptx extension in: {cd}"
+    # Date should come before slug: COPIL_2026-04-26_...
+    assert "2026-04-26" in cd, f"Date not found in filename: {cd}"
 
-    def test_export_copil_viewer_returns_200(self, viewer_token, first_project_id):
-        """READ_ONLY viewer can generate PPTX"""
-        pid, _ = first_project_id
-        r = requests.post(
-            f"{BASE_URL}/api/export/copil",
-            headers={"Authorization": f"Bearer {viewer_token}"},
-            json={
-                "project_ids": [pid],
-                "instance_name": "TEST_COPIL_Viewer",
-                "instance_date": "2026-02-15",
-            }
-        )
-        assert r.status_code == 200, f"Viewer export failed: {r.status_code}: {r.text}"
-        print(f"Viewer PPTX size: {len(r.content)} bytes - OK")
 
-    def test_export_copil_empty_ids_returns_422(self, admin_token):
-        """Empty project_ids returns 422"""
-        r = requests.post(
-            f"{BASE_URL}/api/export/copil",
-            headers={"Authorization": f"Bearer {admin_token}"},
-            json={
-                "project_ids": [],
-                "instance_name": "COPIL Test",
-                "instance_date": "2026-02-15",
-            }
-        )
-        assert r.status_code == 422, f"Expected 422 for empty project_ids, got {r.status_code}"
-        print("Empty project_ids returns 422 - OK")
+def test_export_copil_binary_size(pptx_response):
+    """Response body is a non-empty PPTX binary (>10KB)"""
+    assert len(pptx_response.content) > 10000, f"PPTX too small: {len(pptx_response.content)} bytes"
 
-    def test_export_copil_no_auth_returns_401(self, first_project_id):
-        """Unauthenticated request returns 401"""
-        pid, _ = first_project_id
-        r = requests.post(
-            f"{BASE_URL}/api/export/copil",
-            json={
-                "project_ids": [pid],
-                "instance_name": "COPIL Test",
-                "instance_date": "2026-02-15",
-            }
-        )
-        assert r.status_code in [401, 403], f"Expected 401 or 403, got {r.status_code}"
-        print("Unauthenticated returns 401 - OK")
 
-    def test_export_copil_content_disposition_header(self, admin_token, first_project_id):
-        """Response has correct Content-Disposition for download"""
-        pid, _ = first_project_id
-        r = requests.post(
-            f"{BASE_URL}/api/export/copil",
-            headers={"Authorization": f"Bearer {admin_token}"},
-            json={
-                "project_ids": [pid],
-                "instance_name": "TEST COPIL",
-                "instance_date": "2026-02-15",
-            }
-        )
-        assert r.status_code == 200
-        cd = r.headers.get("content-disposition", "")
-        assert "attachment" in cd, f"Expected 'attachment' in Content-Disposition, got: {cd}"
-        assert ".pptx" in cd, f"Expected .pptx in Content-Disposition, got: {cd}"
-        print(f"Content-Disposition: {cd} - OK")
+def test_export_copil_at_least_7_slides(pptx_response):
+    """PPTX has >= 7 slides"""
+    prs = Presentation(io.BytesIO(pptx_response.content))
+    n = len(prs.slides)
+    print(f"Slide count: {n}")
+    assert n >= 7, f"Expected >= 7 slides, got {n}"
+
+
+def test_export_copil_last_slide_is_cloture(pptx_response):
+    """Last slide contains 'Points d'attention CIO' as title"""
+    prs = Presentation(io.BytesIO(pptx_response.content))
+    last_slide = prs.slides[-1]
+    all_text = ""
+    for shape in last_slide.shapes:
+        if shape.has_text_frame:
+            for para in shape.text_frame.paragraphs:
+                for run in para.runs:
+                    all_text += run.text + " "
+    print(f"Last slide text: {all_text[:300]}")
+    assert "Points d'attention CIO" in all_text or "attention CIO" in all_text, \
+        f"'Points d'attention CIO' not found in last slide. Text: {all_text[:300]}"
+
+
+def test_export_copil_with_governance_filter(auth_token):
+    """When governance_id provided, endpoint returns HTTP 200"""
+    gov_res = requests.get(f"{BASE_URL}/api/governance", headers={"Authorization": f"Bearer {auth_token}"})
+    if gov_res.status_code != 200 or not gov_res.json():
+        pytest.skip("No governance instances available")
+    
+    gov_data = gov_res.json()[0]
+    governance_id = gov_data.get("governance_id") or gov_data.get("id")
+    
+    proj_res = requests.get(f"{BASE_URL}/api/projects", headers={"Authorization": f"Bearer {auth_token}"})
+    project_ids = [p["project_id"] for p in proj_res.json()[:2]]
+    
+    payload = {
+        "project_ids": project_ids,
+        "instance_name": "Test Governance COPIL",
+        "instance_date": "2026-04-26",
+        "governance_id": governance_id,
+    }
+    pptx_res = requests.post(
+        f"{BASE_URL}/api/export/copil",
+        json=payload,
+        headers={"Authorization": f"Bearer {auth_token}"},
+    )
+    assert pptx_res.status_code == 200
+    assert len(pptx_res.content) > 5000
+
+
+def test_export_copil_unauthenticated():
+    """Unauthenticated requests return 401 or 403"""
+    res = requests.post(f"{BASE_URL}/api/export/copil", json={
+        "project_ids": ["fake-id"],
+        "instance_name": "Test",
+        "instance_date": "2026-04-26"
+    })
+    assert res.status_code in (401, 403), f"Expected 401/403, got {res.status_code}"

@@ -1,5 +1,6 @@
 from fastapi import APIRouter, Depends
 from fastapi.responses import Response
+import re
 from core.auth import TokenPayload, get_current_user
 from .schemas import ExportCopilRequest
 from . import service
@@ -13,8 +14,9 @@ async def export_copil(
     current_user: TokenPayload = Depends(get_current_user),
 ):
     buf, instance_name, instance_date = await service.export_copil(data, current_user)
-    safe_name = "".join(c if c.isalnum() else "_" for c in instance_name)[:40]
-    filename = f"COPIL_{safe_name}_{instance_date}.pptx"
+    # Nommage : COPIL_[date]_[nom-slug].pptx
+    slug = re.sub(r"[^a-z0-9]+", "-", instance_name.lower()).strip("-")[:40]
+    filename = f"COPIL_{instance_date}_{slug}.pptx"
     return Response(
         content=buf.read(),
         media_type="application/vnd.openxmlformats-officedocument.presentationml.presentation",

@@ -1,0 +1,34 @@
+{
+  "summary": "Full testing of COPIL PPTX Export feature. 8/8 backend tests pass. All frontend flows verified: checkboxes, action bar, export modal, select-all, clear selection.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_export_copil.py",
+    "/app/test_reports/pytest/export_copil_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "ExportCopilModal.jsx: the filename built client-side (a.download) uses different pattern COPIL_[name]_[date].pptx vs server's COPIL_[date]_[slug].pptx — the browser download filename does NOT match the server Content-Disposition. This is cosmetic (browser ignores Content-Disposition for blob URLs) but worth aligning.",
+    "Slide count estimator in modal shows '~7 slides' for 2 projects but actual count is much higher (2 project fiches = 4 slides + guard+summary+heatmap+risks+decisions+cloture = 10+ slides). The estimator formula is approximate."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_export_copil.py"
+  ],
+  "success_rate": {
+    "backend": "100% (8/8)",
+    "frontend": "100% — checkboxes (8 projects), action bar ('2 projets sélectionnés'), Export COPIL modal opens with today's date (2026-04-26), 6 governance options, 'Générer le PPT' button, select-all toggles all 8 projects, clear selection removes bar"
+  },
+  "test_credentials": "admin@altair.fr / Admin2026!",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "COPIL export fully tested. Backend: POST /api/export/copil returns HTTP 200, binary PPTX (>10KB), Content-Disposition=COPIL_2026-04-26_test-copil.pptx, >=7 slides, last slide='Points d'attention CIO', governance filtering works, unauthenticated returns 401. Frontend: /portfolio has checkbox column (data-testid=checkbox-project-{id}), select-all (data-testid=checkbox-select-all), action bar (data-testid=export-action-bar) shows 'N projets sélectionnés', Export COPIL button opens modal with today's date default, governance dropdown with 5 instances + 'Aucun', 'Générer le PPT' button (data-testid=export-copil-submit), 'Annuler la sélection' clears bar.",
+  "mocked_apis": "None — PPT generation is REAL using python-pptx"
+}
