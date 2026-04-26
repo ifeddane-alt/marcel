@@ -3,7 +3,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "").rstrip("/")
+BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "http://localhost:8001").rstrip("/")
 TEAM_ID = "9ff21917-3f4d-4714-aa3d-051690cb7adf"  # Dev A team with 3 members and 5 projects
 
 @pytest.fixture(scope="module")

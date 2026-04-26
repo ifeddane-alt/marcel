@@ -123,12 +123,30 @@ export default function Layout() {
   // Profil affiché : profile_name si dispo, sinon fallback role
   const profileLabel = user?.profile_name || user?.role || "";
 
+  // Sidebar collapsable (tablette ≤ 1024px)
+  const [sidebarOpen, setSidebarOpen] = React.useState(true);
+
   return (
     <div className="flex h-screen overflow-hidden bg-[#F8F9FA]">
+      {/* Overlay mobile/tablette */}
+      {!sidebarOpen && (
+        <div
+          className="fixed inset-0 bg-black/40 z-10 lg:hidden"
+          onClick={() => setSidebarOpen(true)}
+        />
+      )}
+
       {/* Sidebar */}
-      <aside className="w-60 flex-shrink-0 bg-[#0F172A] flex flex-col">
+      <aside
+        data-testid="sidebar"
+        className={`
+          flex-shrink-0 bg-[#0F172A] flex flex-col transition-all duration-200
+          ${sidebarOpen ? "w-60" : "w-0 overflow-hidden"}
+          lg:w-60 lg:overflow-visible
+        `}
+      >
         {/* Logo */}
-        <div className="px-5 py-5 border-b border-white/10">
+        <div className="px-5 py-5 border-b border-white/10 flex items-center justify-between">
           <div className="flex items-center gap-2.5">
             <div className="w-7 h-7 rounded bg-[#0052CC] flex items-center justify-center flex-shrink-0">
               <Building2 size={14} className="text-white" strokeWidth={2} />
@@ -142,6 +160,15 @@ export default function Layout() {
               </div>
             </div>
           </div>
+          {/* Bouton fermeture sidebar (tablette) */}
+          <button
+            onClick={() => setSidebarOpen(false)}
+            className="lg:hidden text-slate-500 hover:text-white ml-2 flex-shrink-0"
+            data-testid="sidebar-close-btn"
+            aria-label="Fermer la sidebar"
+          >
+            <X size={16} />
+          </button>
         </div>
 
         {/* Nav */}
@@ -303,19 +330,32 @@ export default function Layout() {
       </aside>
 
       {/* Main content */}
-      <div className="flex-1 flex flex-col overflow-hidden">
+      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Topbar */}
-        <header className="h-12 bg-white border-b border-gray-200 flex items-center px-6 flex-shrink-0">
-          <div className="flex items-center gap-1 text-sm text-slate-500">
-            <span className="text-slate-800 font-medium">Groupe Altair Industries</span>
-            <ChevronRight size={14} className="text-slate-400" />
-            <span className="text-slate-500">Portefeuille Projets</span>
+        <header className="h-12 bg-white border-b border-gray-200 flex items-center px-4 lg:px-6 flex-shrink-0">
+          {/* Burger menu (tablette/mobile) */}
+          {!sidebarOpen && (
+            <button
+              onClick={() => setSidebarOpen(true)}
+              data-testid="sidebar-open-btn"
+              className="mr-3 text-slate-500 hover:text-slate-700 lg:hidden"
+              aria-label="Ouvrir la sidebar"
+            >
+              <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+                <line x1="3" y1="6" x2="21" y2="6" /><line x1="3" y1="12" x2="21" y2="12" /><line x1="3" y1="18" x2="21" y2="18" />
+              </svg>
+            </button>
+          )}
+          <div className="flex items-center gap-1 text-sm text-slate-500 min-w-0">
+            <span className="text-slate-800 font-medium truncate">Groupe Altair Industries</span>
+            <ChevronRight size={14} className="text-slate-400 flex-shrink-0" />
+            <span className="text-slate-500 truncate hidden sm:block">Portefeuille Projets</span>
           </div>
-          <div className="ml-auto flex items-center gap-3">
+          <div className="ml-auto flex items-center gap-2 lg:gap-3 flex-shrink-0">
             <LanguageToggle />
             <NotificationBell />
             <span
-              className="text-xs font-mono-data text-slate-500 bg-slate-100 px-2 py-0.5 rounded"
+              className="text-xs font-mono-data text-slate-500 bg-slate-100 px-2 py-0.5 rounded hidden sm:block"
               data-testid="header-profile-badge"
             >
               {profileLabel}
@@ -324,7 +364,7 @@ export default function Layout() {
         </header>
 
         {/* Page content */}
-        <main className="flex-1 overflow-y-auto">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden">
           <Outlet />
         </main>
       </div>

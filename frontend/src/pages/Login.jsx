@@ -141,27 +141,38 @@ export default function Login() {
             </button>
           </form>
 
-          {/* Demo accounts */}
+          {/* Demo accounts — 7 comptes */}
           <div className="mt-6 p-4 bg-white/5 rounded border border-white/10">
-            <div className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-2">
-              Comptes de démonstration
+            <div className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold mb-3">
+              Comptes de démonstration — clic pour pré-remplir
             </div>
-            {[
-              { email: "admin@altair.fr",   pwd: "Admin2026!",  role: "Admin" },
-              { email: "cp@altair.fr",       pwd: "Altair2026!", role: "CP" },
-              { email: "manager@altair.fr",  pwd: "Altair2026!", role: "Manager" },
-            ].map((acc) => (
-              <button
-                key={acc.email}
-                type="button"
-                onClick={() => { setEmail(acc.email); setPassword(acc.pwd); }}
-                data-testid={`demo-account-${acc.role.toLowerCase()}`}
-                className="w-full text-left px-2 py-1.5 rounded hover:bg-white/10 transition-colors group"
-              >
-                <span className="text-xs text-slate-300 font-mono">{acc.email}</span>
-                <span className="text-[10px] text-slate-500 ml-2 group-hover:text-slate-400">{acc.role}</span>
-              </button>
-            ))}
+            <div className="space-y-1">
+              {[
+                { email: "admin@altair.fr",   pwd: "Admin2026!",  name: "Sophie Martin",    profile: "Administrateur" },
+                { email: "pmo@altair.fr",      pwd: "Pmo1234!",    name: "Thomas Dubois",    profile: "PMO Portefeuille" },
+                { email: "cp@altair.fr",       pwd: "Altair2026!", name: "Nicolas Petit",    profile: "Chef de Projet" },
+                { email: "manager@altair.fr",  pwd: "Altair2026!", name: "Isabelle Bernard", profile: "Manager Portfolio" },
+                { email: "viewer@altair.fr",   pwd: "View1234!",   name: "Marie Leclerc",    profile: "Direction SI" },
+                { email: "user@altair.fr",     pwd: "Altair2026!", name: "Julien Girard",    profile: "Utilisateur" },
+                { email: "achats@altair.fr",   pwd: "Altair2026!", name: "Marc Lefebvre",    profile: "Achats / Vendor" },
+              ].map((acc) => (
+                <button
+                  key={acc.email}
+                  type="button"
+                  onClick={() => { setEmail(acc.email); setPassword(acc.pwd); }}
+                  data-testid={`demo-account-${acc.email.split("@")[0]}`}
+                  className="w-full text-left px-2.5 py-2 rounded hover:bg-white/10 transition-colors group flex items-center justify-between gap-2"
+                >
+                  <div className="min-w-0">
+                    <div className="text-[11px] text-slate-200 font-mono truncate">{acc.email}</div>
+                    <div className="text-[10px] text-slate-500 truncate">{acc.name}</div>
+                  </div>
+                  <span className="flex-shrink-0 text-[9px] font-semibold text-[#0052CC] bg-blue-900/30 border border-blue-800/40 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                    {acc.profile}
+                  </span>
+                </button>
+              ))}
+            </div>
           </div>
         </div>
       </div>

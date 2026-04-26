@@ -3,7 +3,7 @@ import pytest
 import requests
 import os
 
-BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', '').rstrip('/')
+BASE_URL = os.environ.get('REACT_APP_BACKEND_URL', 'http://localhost:8001').rstrip('/')
 
 ADMIN_CREDS = {"email": "admin@altair.fr", "password": "Admin1234!"}
 VIEWER_CREDS = {"email": "viewer@altair.fr", "password": "View1234!"}

@@ -43,8 +43,34 @@ from modules.arbitrage.router import router as arbitrage_router
 from modules.connectors.router import router as connectors_router
 from modules.agent.router import router as agent_router
 from modules.notifications.router import router as notifications_router
+from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI(title="Projetenne API")
+
+# ── Middleware sécurité HTTP headers ─────────────────────────────────────────
+class SecurityHeadersMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        response.headers["X-Frame-Options"]         = "DENY"
+        response.headers["X-Content-Type-Options"]  = "nosniff"
+        response.headers["X-XSS-Protection"]        = "1; mode=block"
+        response.headers["Referrer-Policy"]         = "strict-origin-when-cross-origin"
+        response.headers["Permissions-Policy"]      = "geolocation=(), microphone=(), camera=()"
+        response.headers["Content-Security-Policy"] = (
+            "default-src 'self'; "
+            "script-src 'self' 'unsafe-inline' 'unsafe-eval'; "
+            "style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data: https:; "
+            "font-src 'self' data:; "
+            "connect-src 'self' https: wss:; "
+            "frame-ancestors 'none';"
+        )
+        # HSTS activé uniquement si HTTPS
+        if request.headers.get("x-forwarded-proto") == "https":
+            response.headers["Strict-Transport-Security"] = "max-age=31536000; includeSubDomains"
+        return response
+
+app.add_middleware(SecurityHeadersMiddleware)
 
 app.add_middleware(
     CORSMiddleware,

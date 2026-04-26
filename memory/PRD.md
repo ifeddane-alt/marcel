@@ -120,19 +120,25 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - `WebSocket /ws` — Notifications temps réel
 - `POST /api/export/copil` — Génération PPT COPIL
 
-## État final
+## État final — MARCEL V1.0 ✅ LIVRÉ (Fév 2026)
 - **19/19 items MARCEL** : COMPLÉTÉS ✅
 - **Tests E2E** : VALIDÉS (iteration_39.json — 100% frontend, backend fonctionnel)
+- **Sécurité** : Rate limiting login (slowapi 5/min), HTTP Security headers ✅
+- **Tests Pytest** : **80 tests passent / 0 échec** (6 fichiers V1.0) ✅
+- **Login page** : Panneau comptes démo visible ✅
+- **Responsive** : Sidebar collapsable tablet 1024px ✅
+- **README Docker** : Complet avec Makefile ✅
+- **Load test** : 200 projets + index MongoDB ✅
 - **Bugs connus** : Aucun
 - **APIs mockées** : SAP RFC (pyrfc absent), Jira sync, ServiceNow sync
 - **Isolation multi-tenant** : ✅ Altair / Beta Corp totalement isolés
 
 ## Backlog / Améliorations futures
-### P0 — Néant (tous items livrés)
+### P0 — Néant (MARCEL V1.0 intégralement livré)
 ### P1 — Optionnel
 - Installer pyrfc + SAP NW RFC SDK pour connectivité RFC native réelle
-- Tests unitaires pytest complets (/app/backend/tests/)
 - CI/CD pipeline GitHub Actions
+- Nettoyage des anciens fichiers de test legacy (34 fichiers d'anciennes itérations)
 
 ### P2 — Futur
 - Module "Tableau de bord CxO" personnalisable

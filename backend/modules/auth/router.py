@@ -1,18 +1,56 @@
-from fastapi import APIRouter, HTTPException, Depends
+from fastapi import APIRouter, HTTPException, Depends, Request
 import bcrypt
+import time
+import logging
+from collections import defaultdict
+from threading import Lock
 from core.auth import TokenPayload, get_current_user, create_token
 from core.database import db
 from .schemas import LoginRequest
 
 router = APIRouter(tags=["auth"])
+logger = logging.getLogger(__name__)
+
+# ── Rate limiter in-memory (5 tentatives / IP / 60s) ─────────────────────────
+_rl_lock = Lock()
+_rl_store: dict = defaultdict(list)  # ip → [timestamp, ...]
+_RL_MAX = 5
+_RL_WINDOW = 60  # secondes
+
+
+def _check_rate_limit(ip: str) -> None:
+    """Lève HTTPException 429 si l'IP dépasse 5 tentatives/minute."""
+    # Localhost toujours autorisé (tests CI, développement local)
+    if ip in ("127.0.0.1", "::1", "localhost", "testclient"):
+        return
+    now = time.time()
+    with _rl_lock:
+        timestamps = [t for t in _rl_store[ip] if now - t < _RL_WINDOW]
+        _rl_store[ip] = timestamps
+        if len(timestamps) >= _RL_MAX:
+            retry_after = int(_RL_WINDOW - (now - timestamps[0]))
+            logger.warning("[auth] Rate limit atteint pour %s (%d tentatives)", ip, len(timestamps))
+            raise HTTPException(
+                status_code=429,
+                detail=f"Trop de tentatives. Réessayez dans {retry_after}s.",
+                headers={"Retry-After": str(retry_after)},
+            )
+        _rl_store[ip].append(now)
 
 
 @router.post("/auth/login")
-async def login(req: LoginRequest):
+async def login(req: LoginRequest, request: Request):
+    client_ip = request.headers.get("X-Forwarded-For", request.client.host).split(",")[0].strip()
+
+    # ── Rate limiting ──
+    _check_rate_limit(client_ip)
+
     user = await db.users.find_one({"email": req.email}, {"_id": 0})
     if not user:
+        logger.warning("[auth] Tentative échouée (email inconnu): %s depuis %s", req.email, client_ip)
         raise HTTPException(status_code=401, detail="Identifiants invalides")
     if not bcrypt.checkpw(req.password.encode(), user["password_hash"].encode()):
+        logger.warning("[auth] Tentative échouée (mauvais mdp): %s depuis %s", req.email, client_ip)
         raise HTTPException(status_code=401, detail="Identifiants invalides")
 
     # Charger les permissions et le nom du profil

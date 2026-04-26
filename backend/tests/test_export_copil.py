@@ -5,7 +5,7 @@ import os
 import io
 from pptx import Presentation
 
-BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "").rstrip("/")
+BASE_URL = os.environ.get("REACT_APP_BACKEND_URL", "http://localhost:8001").rstrip("/")
 
 
 @pytest.fixture(scope="module")
