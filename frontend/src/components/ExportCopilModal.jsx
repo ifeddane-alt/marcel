@@ -50,8 +50,9 @@ export default function ExportCopilModal({ isOpen, onClose, selectedProjectIds =
       const url = URL.createObjectURL(blob);
       const a = document.createElement("a");
       a.href = url;
-      const safe = form.instanceName.replace(/[^a-zA-Z0-9]/g, "_").slice(0, 40);
-      a.download = `COPIL_${safe}_${form.instanceDate}.pptx`;
+      // Nommage identique au serveur : COPIL_[date]_[nom-slug].pptx
+      const slug = form.instanceName.toLowerCase().replace(/[^a-z0-9]+/g, "-").replace(/^-|-$/g, "").slice(0, 40);
+      a.download = `COPIL_${form.instanceDate}_${slug}.pptx`;
       document.body.appendChild(a);
       a.click();
       document.body.removeChild(a);

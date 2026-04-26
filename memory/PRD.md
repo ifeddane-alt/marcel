@@ -389,3 +389,25 @@ docker-compose up -d
 - **Sidebar** : Section "AGENT IA" avec Recommandations + Mes alertes.
 
 **Permissions :** `agent.chat`, `agent.recommend`, `agent.alerts` ajoutées aux profils ADMIN, PORTFOLIO, CIO.
+
+
+### ✅ Export COPIL PPT — Chantier 5 Rectification (2026-04) — TESTÉ 8/8 BACKEND + 100% FRONTEND (Iteration 38)
+
+**Principe :** Sélection manuelle des projets dans le Portfolio → modal → génération PPTX à la demande.
+
+**Structure du PPTX (7 types de slides) :**
+1. Slide de garde : instance_name, date, N projets
+2. Slide sommaire : tableau projets sélectionnés (RAG, owner, budget, EAC, fin)
+3. Heatmap risques 5×5 (matplotlib, projets sélectionnés uniquement)
+4. Top 10 risques critiques
+5. Décisions clés (filtrées par governance_id si fourni, sinon 10 dernières)
+6. Fiche par projet (ordre **alphabétique**) — en-tête, budget CAPEX/OPEX, avancement, jalons J-3/+3, top3 risques, décisions
+7. **Slide de clôture CIO** (AJOUTÉE) — 3 colonnes : risques critiques non mitigés | projets rouges | EAC dépassés >10%
+
+**Corrections apportées :**
+- Ajout de `add_slide_cloture()` dans `pptx_generator.py`
+- Tri alphabétique des projets dans `generate_copil_pptx()`
+- Nommage fichier corrigé : `COPIL_[date]_[slug].pptx` (date en premier, hyphens, lowercase) — côté serveur ET client
+- `import re` ajouté dans `modules/export/router.py`
+
+**Frontend :** Page Portfolio avec colonne checkboxes, barre action bleue ("N projets sélectionnés — Export COPIL — Annuler"), modal (nom, date, gouvernance dropdown, slide roadmap optionnel). Raccourcis "Export COPIL" sur ProgramDetail, ProjectDetail, Governance detail.
