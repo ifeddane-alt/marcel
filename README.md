@@ -1,123 +1,174 @@
-# Projetenne — Plateforme SaaS de Pilotage de Portefeuille Projets
+# Projetenne — Guide de déploiement Docker
 
-Application multi-tenant pour la gestion de portefeuilles projets grands comptes (CAC 40).
+## Prérequis
 
-## Architecture
+| Logiciel | Version minimale |
+|---|---|
+| Docker | 24.x |
+| Docker Compose | v2.x |
+| RAM | 2 Go (4 Go recommandés) |
+| Disque | 10 Go libres |
 
-| Composant | Technologie |
-|-----------|------------|
-| Frontend  | React 18 + Tailwind CSS + Recharts |
-| Backend   | FastAPI (Python) + Motor (async) |
-| Base de données | MongoDB (isolation multi-tenant par `tenant_id`) |
-| Authentification | JWT local (simulation Cognito) |
+---
 
-## Configuration
+## Installation rapide
 
-### Variables d'environnement
-
-**Backend** (`backend/.env`) :
-```
-MONGO_URL=mongodb://localhost:27017
-DB_NAME=projetenne_db
-CORS_ORIGINS=*
-JWT_SECRET=<votre-secret-fort>
-```
-
-**Frontend** (`frontend/.env`) :
-```
-REACT_APP_BACKEND_URL=https://votre-domaine.com
-```
-
-## Lancement local
-
-### Backend
 ```bash
-cd backend
-pip install -r requirements.txt
-uvicorn server:app --host 0.0.0.0 --port 8001 --reload
+# 1. Cloner le dépôt
+git clone https://github.com/votre-org/projetenne.git
+cd projetenne
+
+# 2. Copier et configurer l'environnement
+cp .env.example .env
+nano .env   # Adapter au minimum : SECRET_KEY, REACT_APP_BACKEND_URL
+
+# 3. Démarrer
+make up     # ou : docker compose up -d
+
+# 4. Ouvrir dans le navigateur
+# http://localhost  (ou votre domaine)
 ```
 
-### Seed des données de démonstration
+Compte admin par défaut (seed vide) : `admin@example.com` / `Admin2026!`
+Compte admin démo Altair (si `SEED_DEMO_DATA=true`) : `admin@altair.fr` / `Admin2026!`
+
+---
+
+## Configuration `.env`
+
+| Variable | Obligatoire | Description |
+|---|---|---|
+| `MONGO_URL` | ✓ | URL MongoDB (auto-configuré en Docker) |
+| `DB_NAME` | ✓ | Nom de la base (défaut : `projetenne`) |
+| `SECRET_KEY` | ✓ | Clé JWT — changer en production |
+| `REACT_APP_BACKEND_URL` | ✓ | URL publique de l'API (`https://api.exemple.fr`) |
+| `CORS_ORIGINS` | — | Origines CORS séparées par virgule |
+| `ENCRYPTION_KEY` | ✓ | Clé AES-256 pour les credentials connecteurs |
+| `EMERGENT_LLM_KEY` | — | Clé LLM pour l'Agent IA PMO |
+| `ANTHROPIC_MODEL` | — | Modèle Claude (défaut : `claude-sonnet-4-20250514`) |
+| `SEED_DEMO_DATA` | — | `true` → charge les données démo Altair au démarrage |
+| `DOMAIN` | — | Domaine pour HTTPS Traefik (ex : `projetenne.exemple.fr`) |
+| `ACME_EMAIL` | — | Email Let's Encrypt |
+| `HTTP_PORT` | — | Port HTTP si pas de Traefik (défaut : `80`) |
+
+---
+
+## HTTPS avec Traefik + Let's Encrypt
+
 ```bash
-cd backend
-python seed.py
+# Dans .env
+DOMAIN=projetenne.exemple.fr
+ACME_EMAIL=ops@exemple.fr
+
+# Démarrer avec le profil HTTPS
+make up-https
+# ou : docker compose --profile https up -d
 ```
 
-### Frontend
+> Le certificat TLS est automatiquement émis et renouvelé par Let's Encrypt.  
+> **Prérequis** : le port 80 et 443 doivent être accessibles depuis Internet, et le DNS `DOMAIN` doit pointer vers le serveur.
+
+---
+
+## Données démo (Altair Industries)
+
+Pour charger le jeu de données démo complet (8 projets, 10 ressources, risques, jalons, etc.) :
+
 ```bash
-cd frontend
-yarn install
-yarn start
+# Option 1 : Lors du premier démarrage
+SEED_DEMO_DATA=true docker compose up -d
+
+# Option 2 : Sur une instance déjà démarrée
+make seed-demo
 ```
 
-## Comptes de démonstration
+---
 
-| Email | Mot de passe | Rôle |
-|-------|-------------|------|
-| admin@altair.fr | Admin1234! | TENANT_ADMIN |
-| pmo@altair.fr   | Pmo1234!   | PMO_USER |
-| viewer@altair.fr| View1234!  | READ_ONLY |
+## Backup & Restore
 
-## Tenant démo
+```bash
+# Sauvegarder MongoDB → /backups/YYYY-MM-DD/
+make backup
 
-**Groupe Altair Industries** — 8 projets actifs, budget portefeuille 17,3M€
+# Restaurer depuis une sauvegarde
+make restore BACKUP=/backups/2026-04-25
 
-### Projets inclus
-- Projet Phoenix — Transformation Digitale Groupe (SAFe, Orange)
-- Modernisation SI Finance & Contrôle de Gestion (Waterfall, Vert)
-- Déploiement ERP SAP S/4HANA (Waterfall, Rouge)
-- Digital Workplace 2025 — Suite Microsoft 365 (Agile, Vert)
-- Programme CRM Salesforce — Sales & Service Cloud (SAFe, Orange)
-- Migration Infrastructure Cloud Azure (Agile, Vert)
-- Refonte Portail RH & Self-Service Collaborateur (Agile, Rouge)
-- Programme Conformité DORA & NIS2 (Waterfall, Vert)
+# Réinitialiser complètement la base
+make reset-db
+```
 
-## API Endpoints
+---
 
-| Méthode | Endpoint | Description |
-|---------|----------|-------------|
-| POST | `/api/auth/login` | Authentification JWT |
-| GET  | `/api/auth/me` | Profil utilisateur courant |
-| GET  | `/api/projects` | Liste des projets du tenant |
-| GET  | `/api/projects/:id` | Détail d'un projet |
-| POST | `/api/projects` | Créer un projet |
-| PUT  | `/api/projects/:id` | Modifier un projet |
-| GET  | `/api/resources` | Liste des ressources |
-| GET  | `/api/allocations?project_id=` | Allocations |
-| GET  | `/api/milestones?project_id=` | Jalons |
-| GET  | `/api/governance` | Instances de gouvernance |
-| GET  | `/api/dashboard/summary` | Synthèse tableau de bord |
+## Mise à jour
 
-## Sécurité multi-tenant
+```bash
+git pull origin main
+make build   # Rebuilder les images
+make down && make up
+```
 
-- `tenant_id` extrait du JWT sur chaque appel API
-- Toutes les requêtes MongoDB filtrées par `tenant_id`
-- Aucun accès cross-tenant possible
-- Rôles : TENANT_ADMIN > PMO_USER > READ_ONLY
-- Les opérations d'écriture (POST/PUT) sont interdites au rôle READ_ONLY
+---
 
-## Structure du projet
+## Troubleshooting
+
+### Port 80 déjà occupé
+```bash
+# Changer le port d'exposition
+HTTP_PORT=8080 docker compose up -d
+# ou dans .env : HTTP_PORT=8080
+```
+
+### Permission denied sur /var/run/docker.sock (Traefik)
+```bash
+sudo chmod 666 /var/run/docker.sock
+# ou ajouter votre user au groupe docker :
+sudo usermod -aG docker $USER
+```
+
+### MongoDB ne démarre pas
+```bash
+# Vérifier les logs
+docker compose logs mongo
+
+# Problème de permission sur le volume
+sudo chown -R 999:999 /var/lib/docker/volumes/projetenne_mongo_data
+```
+
+### Backend en erreur au démarrage
+```bash
+docker compose logs backend
+
+# Erreur "ENCRYPTION_KEY invalid" → regénérer la clé
+python3 -c "from cryptography.fernet import Fernet; print(Fernet.generate_key().decode())"
+# Copier la valeur dans .env → ENCRYPTION_KEY=...
+
+# Erreur JWT → regénérer SECRET_KEY
+python3 -c "import secrets; print(secrets.token_hex(32))"
+```
+
+### Frontend affiche "Erreur de connexion"
+- Vérifier que `REACT_APP_BACKEND_URL` pointe vers l'API accessible (avec `/api` en suffixe non inclus)
+- Vérifier que `CORS_ORIGINS` inclut l'URL du frontend
+
+### Connecteur SAP RFC (optionnel)
+Pour utiliser PyRFC au lieu d'OData :
+1. Installer le SAP NW RFC SDK : https://support.sap.com/en/product/connectors/nwrfcsdk.html
+2. Installer pyrfc : `pip install pyrfc`
+3. Dans la config du connecteur SAP, sélectionner `auth_type = "rfc"` et renseigner `SAP_ASHOST`, `SAP_SYSNR`, `SAP_CLIENT` dans `.env`
+
+---
+
+## Architecture des services
 
 ```
-/app
-├── backend/
-│   ├── server.py      # Application FastAPI + tous les endpoints
-│   ├── seed.py        # Script de seed données de démo
-│   ├── requirements.txt
-│   └── .env
-└── frontend/
-    └── src/
-        ├── api/index.js              # Client Axios avec intercepteurs JWT
-        ├── contexts/AuthContext.jsx  # Contexte d'authentification
-        ├── components/
-        │   ├── Layout.jsx            # Sidebar + topbar
-        │   └── RAGBadge.jsx          # Badges RAG, méthodo, statuts
-        ├── pages/
-        │   ├── Login.jsx
-        │   ├── Dashboard.jsx
-        │   ├── Portfolio.jsx
-        │   ├── ProjectDetail.jsx
-        │   ├── Resources.jsx
-        │   └── Governance.jsx
-        └── utils/format.js           # Formatage euros, dates, JH
+Internet
+    │
+    ▼
+[Traefik / Nginx]  ──────── :80 / :443
+    │
+    ├── /api/*   →  [Backend FastAPI :8000]
+    │                    │
+    │                    └── [MongoDB :27017]
+    │
+    └── /*       →  [Frontend React / Nginx :80]
 ```

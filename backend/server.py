@@ -7,10 +7,13 @@ import logging
 import os
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
+from apscheduler.schedulers.asyncio import AsyncIOScheduler
+from apscheduler.triggers.cron import CronTrigger
 
 logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
-from core.database import client
+from core.database import client, db
 from modules.auth.router import router as auth_router
 from modules.programs.router import router as programs_router
 from modules.projects.router import router as projects_router
@@ -39,6 +42,7 @@ from modules.scope.router import router as scope_router
 from modules.arbitrage.router import router as arbitrage_router
 from modules.connectors.router import router as connectors_router
 from modules.agent.router import router as agent_router
+from modules.notifications.router import router as notifications_router
 
 app = FastAPI(title="Projetenne API")
 
@@ -61,6 +65,7 @@ for _router in [
     arbitrage_router,
     connectors_router,
     agent_router,
+    notifications_router,
 ]:
     app.include_router(_router, prefix="/api")
 
@@ -70,6 +75,61 @@ async def health():
     return {"status": "ok"}
 
 
+# ── APScheduler — syncs connecteurs ──────────────────────────────────────────
+scheduler = AsyncIOScheduler()
+
+async def _run_scheduled_sync(connector_type: str):
+    """Exécute la sync d'un connecteur et log le résultat."""
+    from modules.connectors import service as conn_svc
+    import uuid
+    from datetime import datetime, timezone
+    logger.info(f"[Scheduler] Démarrage sync {connector_type}")
+    log_id = str(uuid.uuid4())
+    started_at = datetime.now(timezone.utc)
+    try:
+        # Récupère toutes les configs actives pour ce type de connecteur
+        configs = await db.connector_configs.find(
+            {"type": connector_type, "enabled": True}, {"_id": 0}
+        ).to_list(None)
+        for cfg in configs:
+            tenant_id = cfg["tenant_id"]
+            from types import SimpleNamespace
+            fake_user = SimpleNamespace(tenant_id=tenant_id, user_id="scheduler")
+            await conn_svc.trigger_sync(connector_type, fake_user)
+        logger.info(f"[Scheduler] Sync {connector_type} terminée ({len(configs)} tenant(s))")
+    except Exception as e:
+        logger.error(f"[Scheduler] Erreur sync {connector_type}: {e}")
+
+
+async def _schedule_connectors():
+    """Lit les configs actives et programme les syncs APScheduler."""
+    scheduler.remove_all_jobs()
+    configs = await db.connector_configs.find(
+        {"enabled": True, "sync_frequency": {"$ne": "manual"}}, {"_id": 0}
+    ).to_list(None)
+    seen = set()
+    for cfg in configs:
+        key = cfg["type"]
+        if key in seen:
+            continue
+        seen.add(key)
+        freq = cfg.get("sync_frequency", "daily")
+        if freq == "hourly":
+            scheduler.add_job(_run_scheduled_sync, "interval", hours=1, id=f"sync_{key}", args=[key], replace_existing=True)
+            logger.info(f"[Scheduler] Planifié {key} toutes les heures")
+        elif freq == "daily":
+            scheduler.add_job(_run_scheduled_sync, CronTrigger(hour=2, minute=0), id=f"sync_{key}", args=[key], replace_existing=True)
+            logger.info(f"[Scheduler] Planifié {key} chaque nuit à 02h00")
+
+
+@app.on_event("startup")
+async def startup_event():
+    scheduler.start()
+    await _schedule_connectors()
+    logger.info("[Scheduler] APScheduler démarré")
+
+
 @app.on_event("shutdown")
 async def shutdown_db_client():
+    scheduler.shutdown(wait=False)
     client.close()

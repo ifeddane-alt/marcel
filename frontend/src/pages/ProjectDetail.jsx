@@ -3,7 +3,7 @@ import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Calendar, ChevronRight, Flag, AlertTriangle, Clock, TrendingUp,
   Pencil, Trash2, Plus, History, ShieldAlert, ClipboardList, Presentation, Users,
-  GitBranch, BarChart2, Diamond, GitFork, Lock, Send, CheckCircle,
+  GitBranch, BarChart2, Diamond, GitFork, Lock, Send, CheckCircle, BotMessageSquare,
 } from "lucide-react";
 import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI, decisionsAPI, workAllocationsAPI, projectDependenciesAPI, vendorsAPI, scopeAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -23,6 +23,11 @@ import ExportCopilModal from "@/components/ExportCopilModal";
 import WorkAllocationModal from "@/components/WorkAllocationModal";
 import ProjectGantt from "@/components/ProjectGantt";
 import { formatEuro, formatDate, formatJH } from "@/utils/format";
+
+// Expose un événement global pour ouvrir l'AgentDrawer avec une question pré-chargée
+export function openAgentWithContext(question) {
+  window.dispatchEvent(new CustomEvent("agent:open-with-question", { detail: { question } }));
+}
 
 function BudgetBar({ label, value, total, color }) {
   const pct = total ? Math.min((value / total) * 100, 100) : 0;
@@ -234,6 +239,13 @@ export default function ProjectDetail() {
           )}
         </div>
         <div className="flex items-center gap-2 flex-shrink-0">
+          <button
+            onClick={() => openAgentWithContext(`Donne-moi un résumé complet du projet "${project?.name}" : état RAG, avancement budget, risques critiques, jalons prochains et points d'attention.`)}
+            data-testid="btn-ask-agent"
+            className="flex items-center gap-1.5 px-3 py-2 border border-blue-200 bg-blue-50 text-[#0052CC] text-sm font-semibold rounded hover:bg-blue-100 transition-colors"
+          >
+            <BotMessageSquare size={13} /> Poser une question à l'IA
+          </button>
           <button
             onClick={() => setExportModalOpen(true)}
             data-testid="btn-export-copil-project"
@@ -1539,6 +1551,11 @@ export default function ProjectDetail() {
                         ))}
                       </div>
                     )}
+
+                    {/* Features list (cliquables → modale détail) */}
+                    {(snap.features || []).length > 0 && (
+                      <ScopeFeatureList features={snap.features} />
+                    )}
                   </div>
                 );
               })}
@@ -1739,6 +1756,111 @@ export default function ProjectDetail() {
           onClose={() => setDepModalOpen(false)}
         />
       )}
+    </div>
+  );
+}
+
+// ── Scope Feature List & Modal ────────────────────────────────────────────────
+const SCOPE_STATUS_CFG = {
+  sec:    { label: "SEC",    bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200" },
+  etendu: { label: "ÉTENDU", bg: "bg-blue-50",    text: "text-blue-700",    border: "border-blue-200" },
+  out:    { label: "OUT",    bg: "bg-slate-100",  text: "text-slate-500",   border: "border-slate-200" },
+};
+
+function ScopeFeatureList({ features }) {
+  const [expanded, setExpanded] = useState(false);
+  const [selected, setSelected] = useState(null);
+  const visible = expanded ? features : features.slice(0, 3);
+  return (
+    <div className="mt-3 border-t border-slate-100 pt-3">
+      <button onClick={() => setExpanded(!expanded)}
+        className="flex items-center gap-1 text-xs font-semibold text-slate-500 hover:text-slate-800 mb-2">
+        {expanded ? <ChevronDown size={12} /> : <ChevronRight size={12} />}
+        {features.length} feature(s) — cliquez pour le détail
+      </button>
+      <div className="space-y-1">
+        {visible.map(f => {
+          const cfg = SCOPE_STATUS_CFG[f.scope_status] || SCOPE_STATUS_CFG.out;
+          return (
+            <button key={f.task_id || f.id} onClick={() => setSelected(f)}
+              data-testid={`scope-feature-row-${f.task_id}`}
+              className={`w-full text-left flex items-center gap-2 px-3 py-2 rounded-lg border ${cfg.bg} ${cfg.border} hover:opacity-80 transition-opacity`}>
+              <span className={`text-[10px] font-bold ${cfg.text} flex-shrink-0`}>{cfg.label}</span>
+              <span className="text-xs text-slate-700 font-medium truncate flex-1">{f.name || f.title}</span>
+              {(f.total_jh_estimated || 0) > 0 && <span className="text-[10px] text-slate-400">{f.total_jh_estimated} JH</span>}
+              <ChevronRight size={11} className="text-slate-300 flex-shrink-0" />
+            </button>
+          );
+        })}
+        {!expanded && features.length > 3 && (
+          <button onClick={() => setExpanded(true)} className="text-xs text-[#0052CC] hover:underline px-3">
+            + {features.length - 3} autre(s)…
+          </button>
+        )}
+      </div>
+      {selected && <ScopeFeatureModal feature={selected} onClose={() => setSelected(null)} />}
+    </div>
+  );
+}
+
+function ScopeFeatureModal({ feature: f, onClose }) {
+  return (
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" data-testid="scope-feature-modal">
+      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-lg">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+          <div className="flex items-center gap-2">
+            <Lock size={15} className="text-blue-600" />
+            <span className="font-bold text-slate-800 text-sm">{f.name || f.title || "Feature"}</span>
+            {f.scope_status && (
+              <span className={`text-[10px] font-bold px-2 py-0.5 rounded-full border ${(SCOPE_STATUS_CFG[f.scope_status] || SCOPE_STATUS_CFG.out).bg} ${(SCOPE_STATUS_CFG[f.scope_status] || SCOPE_STATUS_CFG.out).text}`}>
+                {(SCOPE_STATUS_CFG[f.scope_status] || SCOPE_STATUS_CFG.out).label}
+              </span>
+            )}
+          </div>
+          <button onClick={onClose} className="text-slate-400 hover:text-slate-700"><X size={18} /></button>
+        </div>
+        <div className="px-5 py-4 space-y-3 text-sm">
+          {f.description && (
+            <div>
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Description</div>
+              <p className="text-slate-700 text-xs">{f.description}</p>
+            </div>
+          )}
+          {f.pmo_comment && (
+            <div>
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-1">Commentaire PMO</div>
+              <p className="text-slate-600 text-xs bg-amber-50 border border-amber-100 rounded-lg px-3 py-2 italic">{f.pmo_comment}</p>
+            </div>
+          )}
+          <div className="grid grid-cols-2 gap-3">
+            {(f.total_jh_estimated || 0) > 0 && (
+              <div className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+                <div className="text-[10px] text-slate-400 font-semibold uppercase">JH estimés</div>
+                <div className="text-lg font-bold text-slate-800">{f.total_jh_estimated}</div>
+              </div>
+            )}
+            {f.team_owner && (
+              <div className="bg-slate-50 border border-slate-200 rounded-lg px-3 py-2">
+                <div className="text-[10px] text-slate-400 font-semibold uppercase">Équipe owner</div>
+                <div className="text-sm font-semibold text-slate-700">{f.team_owner}</div>
+              </div>
+            )}
+          </div>
+          {f.jh_by_phase && Object.keys(f.jh_by_phase).length > 0 && (
+            <div>
+              <div className="text-xs font-semibold text-slate-500 uppercase tracking-wide mb-2">Estimations par phase</div>
+              <div className="grid grid-cols-3 gap-2">
+                {Object.entries(f.jh_by_phase).map(([phase, jh]) => (
+                  <div key={phase} className="bg-blue-50 border border-blue-100 rounded-lg px-2 py-1.5 text-center">
+                    <div className="text-[10px] text-blue-500 font-semibold uppercase">{phase}</div>
+                    <div className="text-sm font-bold text-blue-800">{jh} JH</div>
+                  </div>
+                ))}
+              </div>
+            </div>
+          )}
+        </div>
+      </div>
     </div>
   );
 }

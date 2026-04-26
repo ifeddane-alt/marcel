@@ -28,4 +28,4 @@ emergentintegrations==0.1.0
 python-pptx>=1.0.0
 matplotlib>=3.8.0
 python-dateutil>=2.9.0
-reportlab>=4.0.0
+apscheduler>=3.10.0

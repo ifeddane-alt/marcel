@@ -2,8 +2,16 @@ import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   LayoutList, ChevronDown, ChevronRight, Lock, Send,
   Filter, Search, RefreshCw, AlertTriangle, CheckCircle, Minus,
-  BarChart2, Download, Table2,
+  BarChart2, Download, Table2, Kanban as KanbanIcon, GripVertical, Save,
 } from "lucide-react";
+import {
+  DndContext, DragOverlay, PointerSensor, useSensor, useSensors,
+  closestCenter, useDroppable,
+} from "@dnd-kit/core";
+import {
+  SortableContext, useSortable, verticalListSortingStrategy,
+} from "@dnd-kit/sortable";
+import { CSS } from "@dnd-kit/utilities";
 import { scopeAPI, projectsAPI, teamsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -374,6 +382,142 @@ function CapacityVsLoad({ data }) {
   );
 }
 
+/* ── Kanban Drag & Drop ─────────────────────────────────────────────── */
+function KanbanCard({ task, canEdit }) {
+  const { attributes, listeners, setNodeRef, transform, transition, isDragging } = useSortable({ id: task.task_id || task.id });
+  const cfg = SCOPE_MAP[task.scope_status] || SCOPE_MAP.out;
+  const style = { transform: CSS.Transform.toString(transform), transition, opacity: isDragging ? 0.4 : 1 };
+
+  return (
+    <div
+      ref={setNodeRef}
+      style={style}
+      data-testid={`kanban-card-${task.task_id}`}
+      className={`bg-white rounded-xl border ${cfg.border} shadow-sm p-3 mb-2 ${canEdit ? "cursor-grab active:cursor-grabbing" : "cursor-default"} select-none hover:shadow-md transition-shadow`}
+    >
+      <div className="flex items-start gap-2">
+        {canEdit && <GripVertical size={13} className="text-slate-300 flex-shrink-0 mt-0.5" {...listeners} {...attributes} />}
+        <div className="flex-1 min-w-0">
+          <div className={`text-xs font-bold ${cfg.text} mb-0.5`}>{task.name || task.title || "—"}</div>
+          <div className="text-[10px] text-slate-400 truncate">{task.project_name || task.project_id || ""}</div>
+          {task.total_jh_estimated > 0 && (
+            <div className="text-[10px] text-slate-500 mt-1">{task.total_jh_estimated} JH</div>
+          )}
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function KanbanColumn({ id, label, tasks, color, canEdit, isDragOver }) {
+  const { setNodeRef, isOver } = useDroppable({ id });
+  return (
+    <div
+      ref={setNodeRef}
+      data-testid={`kanban-col-${id}`}
+      className={`flex-1 min-w-[220px] rounded-2xl border-2 transition-colors p-4 ${isOver || isDragOver ? "border-blue-400 bg-blue-50/50" : "border-slate-200 bg-slate-50/60"}`}
+    >
+      <div className={`flex items-center gap-2 mb-3 pb-2 border-b border-slate-200`}>
+        <span className={`text-sm font-bold ${color}`}>{label}</span>
+        <span className="text-xs bg-white border border-slate-200 text-slate-500 font-semibold px-2 py-0.5 rounded-full">{tasks.length}</span>
+        {id === "sec" && tasks.length > 0 && (
+          <span className="text-[10px] text-emerald-600 ml-auto">
+            {tasks.reduce((s, t) => s + (t.total_jh_estimated || 0), 0).toFixed(0)} JH
+          </span>
+        )}
+      </div>
+      <SortableContext items={tasks.map(t => t.task_id || t.id)} strategy={verticalListSortingStrategy}>
+        <div className="min-h-[120px]">
+          {tasks.map(task => (
+            <KanbanCard key={task.task_id || task.id} task={task} canEdit={canEdit} />
+          ))}
+          {tasks.length === 0 && (
+            <div className="flex items-center justify-center h-20 text-xs text-slate-300 border-2 border-dashed border-slate-200 rounded-xl">
+              Déposer ici
+            </div>
+          )}
+        </div>
+      </SortableContext>
+    </div>
+  );
+}
+
+function ScopeKanban({ candidates, onStatusChange, canEdit, unsavedChanges, onSave }) {
+  const [local, setLocal] = useState(candidates);
+  const [activeId, setActiveId] = useState(null);
+
+  useEffect(() => { setLocal(candidates); }, [candidates]);
+
+  const sensors = useSensors(useSensor(PointerSensor, { activationConstraint: { distance: 5 } }));
+
+  const sec    = local.filter(t => t.scope_status === "sec");
+  const etendu = local.filter(t => t.scope_status === "etendu");
+  const out    = local.filter(t => t.scope_status === "out" || !t.scope_status);
+
+  const getContainer = (id) => {
+    if (sec.find(t => (t.task_id || t.id) === id)) return "sec";
+    if (etendu.find(t => (t.task_id || t.id) === id)) return "etendu";
+    return "out";
+  };
+
+  const handleDragEnd = (e) => {
+    setActiveId(null);
+    const { active, over } = e;
+    if (!over) return;
+    const taskId = active.id;
+    const newStatus = ["sec", "etendu", "out"].includes(over.id) ? over.id : getContainer(over.id);
+    const task = local.find(t => (t.task_id || t.id) === taskId);
+    if (!task || task.scope_status === newStatus) return;
+    setLocal(prev => prev.map(t => (t.task_id || t.id) === taskId ? { ...t, scope_status: newStatus } : t));
+    onStatusChange(taskId, newStatus);
+  };
+
+  const COLUMNS = [
+    { id: "sec",    label: "SEC",    color: "text-emerald-700" },
+    { id: "etendu", label: "ÉTENDU", color: "text-blue-700" },
+    { id: "out",    label: "OUT",    color: "text-slate-500" },
+  ];
+
+  const activeTask = activeId ? local.find(t => (t.task_id || t.id) === activeId) : null;
+
+  return (
+    <div>
+      {unsavedChanges && (
+        <div className="flex items-center justify-between bg-amber-50 border border-amber-200 rounded-xl px-4 py-2.5 mb-3" data-testid="kanban-unsaved-banner">
+          <div className="flex items-center gap-2 text-amber-700 text-sm">
+            <AlertTriangle size={14} />
+            <span>Modifications non enregistrées — le recalcul capa est en temps réel.</span>
+          </div>
+          <button
+            onClick={onSave}
+            data-testid="kanban-save-btn"
+            className="flex items-center gap-1.5 text-sm font-semibold text-white bg-[#0052CC] px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors"
+          >
+            <Save size={13} /> Enregistrer les modifications
+          </button>
+        </div>
+      )}
+      <DndContext sensors={sensors} collisionDetection={closestCenter} onDragStart={e => setActiveId(e.active.id)} onDragEnd={handleDragEnd}>
+        <div className="flex gap-4 overflow-x-auto pb-4">
+          {COLUMNS.map(col => (
+            <KanbanColumn
+              key={col.id}
+              id={col.id}
+              label={col.label}
+              color={col.color}
+              canEdit={canEdit}
+              tasks={col.id === "sec" ? sec : col.id === "etendu" ? etendu : out}
+            />
+          ))}
+        </div>
+        <DragOverlay>
+          {activeTask && <KanbanCard task={activeTask} canEdit={false} />}
+        </DragOverlay>
+      </DndContext>
+    </div>
+  );
+}
+
 /* ── Modal Figer ─────────────────────────────────────────────────────── */
 function FreezeModal({ projects, nextVersion, onClose, onFreeze }) {
   const [projectId, setProjectId] = useState("");
@@ -508,6 +652,7 @@ export default function Scope() {
   const [showFreeze,   setShowFreeze]   = useState(false);
   const [showTransmit, setShowTransmit] = useState(false);
   const [transmitSnap, setTransmitSnap] = useState(null);
+  const [kanbanChanges, setKanbanChanges] = useState({});   // taskId → newStatus (pending save)
   const [cpUsers,      setCpUsers]      = useState([]);
 
   // Mode d'affichage (tableau | timeline) - timeline dispo uniquement sur snapshot
@@ -551,9 +696,7 @@ export default function Scope() {
   const handleStatusChange = async (taskId, newStatus) => {
     try {
       await scopeAPI.patchStatus(taskId, { scope_status: newStatus });
-      // Recalcul live
       setCandidates((prev) => prev.map((t) => t.task_id === taskId ? { ...t, scope_status: newStatus } : t));
-      // Recalcul capa vs charge
       const capRes = await scopeAPI.getCapacity({
         project_id: filterProject || undefined,
         start_date: filterStartDate || undefined,
@@ -562,6 +705,30 @@ export default function Scope() {
       setCapacity(capRes.data);
     } catch {
       toast.error("Impossible de mettre à jour le statut scope");
+    }
+  };
+
+  const handleKanbanStatusChange = (taskId, newStatus) => {
+    // Mise à jour optimiste locale — sera sauvegardée en batch
+    setCandidates((prev) => prev.map((t) => t.task_id === taskId ? { ...t, scope_status: newStatus } : t));
+    setKanbanChanges((prev) => ({ ...prev, [taskId]: newStatus }));
+  };
+
+  const saveKanbanChanges = async () => {
+    const pending = Object.entries(kanbanChanges);
+    if (!pending.length) return;
+    let errors = 0;
+    for (const [taskId, newStatus] of pending) {
+      try { await scopeAPI.patchStatus(taskId, { scope_status: newStatus }); }
+      catch { errors++; }
+    }
+    if (errors === 0) {
+      toast.success(`${pending.length} modification(s) enregistrée(s)`);
+      setKanbanChanges({});
+      const capRes = await scopeAPI.getCapacity({ project_id: filterProject || undefined });
+      setCapacity(capRes.data);
+    } else {
+      toast.error(`${errors} erreur(s) lors de la sauvegarde`);
     }
   };
 
@@ -676,6 +843,14 @@ export default function Scope() {
                 ${viewMode === "table" ? "bg-[#0F172A] text-white" : "text-slate-600 hover:bg-slate-50"}`}
               data-testid="view-table-btn">
               <Table2 size={13} />Tableau
+            </button>
+            <button
+              onClick={() => setViewMode("kanban")}
+              disabled={!!viewSnap}
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors disabled:opacity-40
+                ${viewMode === "kanban" ? "bg-[#0F172A] text-white" : "text-slate-600 hover:bg-slate-50"}`}
+              data-testid="view-kanban-btn">
+              <KanbanIcon size={13} />Kanban
             </button>
             <button
               onClick={() => setViewMode("timeline")}
@@ -827,9 +1002,17 @@ export default function Scope() {
         </div>
       )}
 
-      {/* Tableau / Timeline */}
+      {/* Tableau / Kanban / Timeline */}
       {viewMode === "timeline" && viewSnap ? (
         <ScopeTimeline snapshot={viewSnap} />
+      ) : viewMode === "kanban" ? (
+        <ScopeKanban
+          candidates={viewSnap ? (viewSnap.features || []) : candidates}
+          onStatusChange={handleKanbanStatusChange}
+          canEdit={canArbitrate && !viewSnap}
+          unsavedChanges={Object.keys(kanbanChanges).length > 0}
+          onSave={saveKanbanChanges}
+        />
       ) : (
         <ScopeTable
           candidates={viewSnap ? (viewSnap.features || []) : candidates}

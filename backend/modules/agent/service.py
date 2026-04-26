@@ -23,6 +23,7 @@ import os
 from emergentintegrations.llm.chat import LlmChat, UserMessage
 
 EMERGENT_LLM_KEY = os.environ.get("EMERGENT_LLM_KEY", "")
+ANTHROPIC_MODEL = os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-20250514")
 
 # ── Mots-clés pour détecter les questions what-if ─────────────────────────────
 WHAT_IF_KEYWORDS = [
@@ -297,7 +298,7 @@ async def chat(request: ChatRequest, user: TokenPayload) -> dict:
         api_key=EMERGENT_LLM_KEY,
         session_id=internal_session,
         system_message=system_msg
-    ).with_model("anthropic", "claude-sonnet-4-5-20250929")
+    ).with_model("anthropic", os.environ.get("ANTHROPIC_MODEL", "claude-sonnet-4-20250514"))
 
     try:
         response_text = await llm_chat.send_message(UserMessage(text=request.question))

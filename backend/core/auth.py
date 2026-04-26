@@ -28,6 +28,15 @@ def create_token(payload: dict) -> str:
     return jwt.encode(data, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 
+def decode_token(token: str) -> TokenPayload:
+    """Décode un JWT sans passer par le mécanisme HTTPBearer (utile pour WebSocket)."""
+    try:
+        payload = jwt.decode(token, JWT_SECRET, algorithms=[JWT_ALGORITHM])
+        return TokenPayload(**payload)
+    except (JWTError, Exception):
+        raise ValueError("Token invalide ou expiré")
+
+
 async def get_current_user(
     creds: HTTPAuthorizationCredentials = Depends(security),
 ) -> TokenPayload:

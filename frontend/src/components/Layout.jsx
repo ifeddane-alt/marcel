@@ -32,6 +32,24 @@ import { useAuth } from "@/contexts/AuthContext";
 import { useTenantConfig } from "@/contexts/TenantConfigContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import AgentDrawer from "@/components/AgentDrawer";
+import NotificationBell from "@/components/NotificationBell";
+import { useTranslation } from "react-i18next";
+
+function LanguageToggle() {
+  const { i18n } = useTranslation();
+  const isEN = i18n.language?.startsWith("en");
+  return (
+    <button
+      onClick={() => i18n.changeLanguage(isEN ? "fr" : "en")}
+      data-testid="lang-toggle"
+      className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded border border-gray-200 text-slate-600 hover:bg-gray-50 transition-colors"
+      title={isEN ? "Passer en français" : "Switch to English"}
+    >
+      <span className="text-sm leading-none">{isEN ? "🇬🇧" : "🇫🇷"}</span>
+      <span>{isEN ? "EN" : "FR"}</span>
+    </button>
+  );
+}
 
 // ── Entrées principales ─────────────────────────────────────────────
 // perm: permission requise (string) ou [p1,p2] (OR logique)
@@ -288,6 +306,8 @@ export default function Layout() {
             <span className="text-slate-500">Portefeuille Projets</span>
           </div>
           <div className="ml-auto flex items-center gap-3">
+            <LanguageToggle />
+            <NotificationBell />
             <span
               className="text-xs font-mono-data text-slate-500 bg-slate-100 px-2 py-0.5 rounded"
               data-testid="header-profile-badge"

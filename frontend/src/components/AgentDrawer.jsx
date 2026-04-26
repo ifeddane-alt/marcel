@@ -72,6 +72,19 @@ export default function AgentDrawer() {
   useEffect(() => { if (isOpen) scrollToBottom(); }, [messages, isOpen]);
 
   useEffect(() => {
+    const handler = (e) => {
+      const question = e.detail?.question || "";
+      if (!canChat) return;
+      setIsOpen(true);
+      setCurrentSessionId(null);
+      setMessages([]);
+      if (question) setInputText(question);
+    };
+    window.addEventListener("agent:open-with-question", handler);
+    return () => window.removeEventListener("agent:open-with-question", handler);
+  }, [canChat]);
+
+  useEffect(() => {
     if (isOpen && sessions.length === 0) {
       loadSessions();
     }

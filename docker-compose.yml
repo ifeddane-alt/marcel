@@ -26,21 +26,17 @@ services:
     restart: unless-stopped
     env_file: .env
     environment:
-      # Override MONGO_URL pour utiliser le nom du service Docker
       MONGO_URL: "mongodb://mongo:27017"
     depends_on:
       mongo:
         condition: service_healthy
     healthcheck:
-      # Utilise Python (disponible dans l'image) pour vérifier l'endpoint /health
       test: ["CMD", "python3", "-c",
              "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
       interval: 10s
       timeout: 5s
       retries: 5
-      # start_period couvre le seed initial (quelques secondes) + démarrage uvicorn
       start_period: 40s
-    # Pas de port exposé en externe — accès uniquement via le proxy Nginx
 
   # ── Frontend React servi par Nginx ────────────────────────────────────────
   frontend:
@@ -50,11 +46,53 @@ services:
       args:
         REACT_APP_BACKEND_URL: ""
     restart: unless-stopped
-    ports:
-      - "${HTTP_PORT:-80}:80"
     depends_on:
       backend:
         condition: service_healthy
 
+  # ── Traefik reverse-proxy HTTPS automatique (Let's Encrypt) ───────────────
+  # Actif seulement si DOMAIN est défini dans .env — sinon ports HTTP directs
+  traefik:
+    image: traefik:v3.0
+    restart: unless-stopped
+    profiles:
+      - https          # docker compose --profile https up -d
+    command:
+      - "--providers.docker=true"
+      - "--providers.docker.exposedbydefault=false"
+      - "--entrypoints.web.address=:80"
+      - "--entrypoints.websecure.address=:443"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge=true"
+      - "--certificatesresolvers.letsencrypt.acme.httpchallenge.entrypoint=web"
+      - "--certificatesresolvers.letsencrypt.acme.email=${ACME_EMAIL:-admin@example.com}"
+      - "--certificatesresolvers.letsencrypt.acme.storage=/letsencrypt/acme.json"
+      # Redirection HTTP → HTTPS
+      - "--entrypoints.web.http.redirections.entrypoint.to=websecure"
+      - "--entrypoints.web.http.redirections.entrypoint.scheme=https"
+    ports:
+      - "80:80"
+      - "443:443"
+    volumes:
+      - "/var/run/docker.sock:/var/run/docker.sock:ro"
+      - "letsencrypt:/letsencrypt"
+    labels:
+      - "traefik.enable=false"
+
+  # ── Profil HTTP (sans Traefik, port direct) ────────────────────────────────
+  # Utilisé par défaut quand DOMAIN n'est pas défini
+  nginx-http:
+    image: nginx:alpine
+    restart: unless-stopped
+    profiles:
+      - http-only      # docker compose --profile http-only up -d
+    ports:
+      - "${HTTP_PORT:-80}:80"
+    volumes:
+      - ./nginx-http.conf:/etc/nginx/conf.d/default.conf:ro
+    depends_on:
+      - frontend
+      - backend
+
 volumes:
   mongo_data:
+  letsencrypt:

@@ -2531,6 +2531,84 @@ async def seed():
     print("  manager@altair.fr  / Altair2026!  (Manager)       → Isabelle Bernard")
     print("  user@altair.fr     / Altair2026!  (USER)          → Julien Girard")
     print("  achats@altair.fr   / Altair2026!  (ACHATS)        → Marc Lefebvre")
+
+    # ── Seed agent_logs démo ────────────────────────────────────────────────
+    await db.agent_logs.delete_many({"tenant_id": TENANT_ID, "is_demo": True})
+    admin_user = await db.users.find_one({"tenant_id": TENANT_ID, "email": "admin@altair.fr"}, {"_id": 0, "user_id": 1})
+    admin_id = admin_user.get("user_id", "demo") if admin_user else "demo"
+
+    demo_sessions = [
+        {
+            "session_id": "demo-session-001",
+            "exchanges": [
+                {
+                    "question": "Quel est l'état global du portefeuille Altair ?",
+                    "response": "**Synthèse du portefeuille Altair Industries**\n\nLe portefeuille compte **8 projets actifs** répartis sur 3 programmes :\n\n• **Transformation Digitale** : Phoenix ERP (RAG ORANGE, EAC +8%), SI Finance (RAG VERT)\n• **Infrastructure** : SAP S/4HANA (RAG ROUGE, EAC +26%), Cybersécurité (RAG VERT)\n• **Innovation** : CRM Salesforce (RAG ORANGE, EAC +10%), Digital Workplace (RAG VERT)\n\n**Points d'attention :**\n- 3 projets en dépassement EAC (source : données portefeuille)\n- 1 projet en statut ROUGE sans décision ce mois\n- Enveloppe OPEX dépassée de 190 %\n\nSouhaitez-vous un détail sur un projet spécifique ?",
+                    "verified": True,
+                    "warnings": [],
+                    "is_simulation": False,
+                    "duration_ms": 2340,
+                },
+            ],
+        },
+        {
+            "session_id": "demo-session-002",
+            "exchanges": [
+                {
+                    "question": "Quels sont les risques critiques non mitigés du portefeuille ?",
+                    "response": "**Top risques critiques non mitigés** (criticité ≥ 15/25)\n\n1. **[20/25] Perte de compétences clés SAP** — Projet SAP S/4HANA | Catégorie : RH | Statut : identifié\n2. **[18/25] Dérive planning migration ERP** — Projet Phoenix ERP | Catégorie : Planning | Statut : en cours\n3. **[16/25] Dépendance fournisseur unique** — Projet SI Finance | Catégorie : Fournisseur | Statut : identifié\n\n(source : top risques portefeuille, criticité décroissante)\n\nCes 3 risques nécessitent un plan de mitigation actif avant le prochain COPIL.",
+                    "verified": True,
+                    "warnings": [],
+                    "is_simulation": False,
+                    "duration_ms": 1890,
+                },
+                {
+                    "question": "Pour le risque SAP, qui est le responsable et quelle action est prévue ?",
+                    "response": "D'après les données disponibles, le risque **« Perte de compétences clés SAP »** (criticité 20/25) a pour responsable le **Chef de projet SAP S/4HANA**. Son statut est **identifié** — aucun plan de mitigation actif n'est enregistré dans le portefeuille.\n\nAction recommandée : planifier une session de transfert de connaissance et documenter les procédures critiques avant la phase de go-live.\n\n(source : risques projet SAP S/4HANA — Core Model)",
+                    "verified": True,
+                    "warnings": [],
+                    "is_simulation": False,
+                    "duration_ms": 1650,
+                },
+            ],
+        },
+        {
+            "session_id": "demo-session-003",
+            "exchanges": [
+                {
+                    "question": "Si on annule le projet Portail RH, quel est l'impact sur l'enveloppe OPEX ?",
+                    "response": "**Simulation — Impact annulation Portail RH sur l'enveloppe OPEX**\n\n**Hypothèses de calcul :**\n- OPEX planifié total actuel : 11 830 000 € (source : total portefeuille)\n- OPEX planifié Portail RH : 455 000 € (source : fiche projet Portail RH)\n- Enveloppe OPEX autorisée : 6 200 000 € (source : enveloppe portefeuille)\n\n**Résultat :**\n- Nouveau total OPEX sans Portail RH : 11 375 000 €\n- Dépassement enveloppe résiduel : +5 175 000 € (+83,5 %)\n\n**Conclusion :** L'annulation du Portail RH réduit le dépassement de 7,5 % mais ne résout pas le dépassement structurel de l'enveloppe OPEX. Une révision plus large du portefeuille est nécessaire.\n\n⚠️ SIMULATION — non persistée en base de données",
+                    "verified": True,
+                    "warnings": [],
+                    "is_simulation": True,
+                    "duration_ms": 2780,
+                },
+            ],
+        },
+    ]
+
+    from datetime import timedelta
+    base_time = datetime.now(timezone.utc) - timedelta(days=3)
+    for sess in demo_sessions:
+        for i, ex in enumerate(sess["exchanges"]):
+            await db.agent_logs.insert_one({
+                "log_id": str(uuid.uuid4()),
+                "tenant_id": TENANT_ID,
+                "user_id": admin_id,
+                "session_id": sess["session_id"],
+                "question": ex["question"],
+                "response": ex["response"],
+                "sources": [],
+                "duration_ms": ex["duration_ms"],
+                "verified": ex["verified"],
+                "warnings": ex["warnings"],
+                "is_simulation": ex["is_simulation"],
+                "is_demo": True,
+                "created_at": base_time + timedelta(hours=i * 2),
+            })
+        base_time += timedelta(days=1)
+    print(f"  3 sessions démo agent_logs créées")
+
     print("\nSeed terminé avec succès.")
     client.close()
 
