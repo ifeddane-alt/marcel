@@ -11,39 +11,35 @@ from .schemas import LoginRequest
 router = APIRouter(tags=["auth"])
 logger = logging.getLogger(__name__)
 
-# ── Rate limiter in-memory (5 tentatives / IP / 60s) ─────────────────────────
+# ── Rate limiter in-memory (10 tentatives / email / 60s) ─────────────────────
 _rl_lock = Lock()
-_rl_store: dict = defaultdict(list)  # ip → [timestamp, ...]
-_RL_MAX = 5
+_rl_store: dict = defaultdict(list)  # email → [timestamp, ...]
+_RL_MAX = 10
 _RL_WINDOW = 60  # secondes
 
 
-def _check_rate_limit(ip: str) -> None:
-    """Lève HTTPException 429 si l'IP dépasse 5 tentatives/minute."""
-    # Localhost toujours autorisé (tests CI, développement local)
-    if ip in ("127.0.0.1", "::1", "localhost", "testclient"):
-        return
+def _check_rate_limit(email: str) -> None:
+    """Lève HTTPException 429 si l'email dépasse 10 tentatives/minute."""
     now = time.time()
+    key = email.lower().strip()
     with _rl_lock:
-        timestamps = [t for t in _rl_store[ip] if now - t < _RL_WINDOW]
-        _rl_store[ip] = timestamps
+        timestamps = [t for t in _rl_store[key] if now - t < _RL_WINDOW]
+        _rl_store[key] = timestamps
         if len(timestamps) >= _RL_MAX:
             retry_after = int(_RL_WINDOW - (now - timestamps[0]))
-            logger.warning("[auth] Rate limit atteint pour %s (%d tentatives)", ip, len(timestamps))
+            logger.warning("[auth] Rate limit atteint pour %s (%d tentatives)", key, len(timestamps))
             raise HTTPException(
                 status_code=429,
                 detail=f"Trop de tentatives. Réessayez dans {retry_after}s.",
                 headers={"Retry-After": str(retry_after)},
             )
-        _rl_store[ip].append(now)
+        _rl_store[key].append(now)
 
 
 @router.post("/auth/login")
 async def login(req: LoginRequest, request: Request):
-    client_ip = request.headers.get("X-Forwarded-For", request.client.host).split(",")[0].strip()
-
-    # ── Rate limiting ──
-    _check_rate_limit(client_ip)
+    # ── Rate limiting par email ──
+    _check_rate_limit(req.email)
 
     user = await db.users.find_one({"email": req.email}, {"_id": 0})
     if not user:
