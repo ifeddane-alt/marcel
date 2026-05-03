@@ -1,0 +1,58 @@
+{
+  "summary": "Test complet du module Budget consolidé Altair PPM. 28/28 tests backend passent (100%). Toutes les fonctionnalités frontend validées visuellement et fonctionnellement.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {
+        "screen": "OPEX progress bar",
+        "issues": ["OPEX consommé 110% de l'enveloppe (6.0M€) — la barre dépasse l'enveloppe, ce qui est attendu (alerte visuelle rouge), comportement correct"]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_budget_module.py",
+    "/app/test_reports/pytest/budget_module.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Code propre, aucune API mockée. Toutes les 6 routes budget fonctionnent correctement.",
+    "RBAC: viewer@altair.fr retourne 403 sur /api/budget/consolidated (pas de budget.view) — comportement correct",
+    "Viewer bloqué sur POST /revise — 403 retourné correctement"
+  ],
+  "updated_files": [],
+  "success_rate": {
+    "backend": "100% (28/28 tests passent)",
+    "frontend": "100% — Tous les items validés"
+  },
+  "test_credentials": {
+    "admin": "admin@altair.fr / Admin2026!",
+    "pmo": "pmo@altair.fr / Pmo1234!",
+    "viewer": "viewer@altair.fr / View1234!"
+  },
+  "seed_data_creation": "Aucune — données Altair avec 9 projets déjà présentes (2 rouges +32%/+30%, 3 oranges, 4 verts). Enveloppe 2026: CAPEX 12M€, OPEX 6M€.",
+  "items_validated": {
+    "sidebar_budget_link": "✅ Lien 'Budget' visible dans sidebar après Portefeuille",
+    "6_kpi_cards": "✅ 6 KPIs affichées avec valeurs non nulles: CAPEX Prévu 5.9M€, CAPEX Consommé 3.7M€, OPEX Prévu 11.4M€, OPEX Consommé 7.2M€, EAC Total 16.0M€, RAF Total 5.1M€",
+    "progress_bars": "✅ Barres CAPEX (31% enveloppe 12M€) et OPEX (110% enveloppe 6M€) visibles",
+    "table_9_rows": "✅ Tableau avec 9 projets + ligne TOTAL",
+    "red_projects_on_top": "✅ 2 rouges en tête du tableau (Refonte Portail RH +32.3%, Déploiement ERP SAP +30.0%)",
+    "group_by_program": "✅ Toggle 'Grouper par programme' fonctionne — 5 groupes créés",
+    "drawer_detail": "✅ Clic projet → panneau latéral avec synthèse financière + historique révisions (2 révisions affichées)",
+    "revision_modal": "✅ Bouton 'Modifier' ouvre modal avec 3 champs numériques + textarea motif",
+    "revision_save_kpi_update": "✅ Sauvegarde révision → modal fermée → KPIs mis à jour (EAC 16.0M€ → 16.1M€)",
+    "par_programme_tab": "✅ Onglet 'Par programme' — 5 blocs expandables avec barre empilée",
+    "graphiques_tab": "✅ Onglet 'Graphiques' — 3 graphiques Recharts visibles (10 SVGs rendus)",
+    "export_excel": "✅ Endpoint /api/budget/export/excel retourne 200 + xlsx non vide",
+    "export_pdf": "✅ Endpoint /api/budget/export/pdf retourne 200 + PDF non vide",
+    "filters": "✅ Filtre statut 'actif' fonctionne (9→6 projets), bouton Réinitialiser OK",
+    "rbac_viewer": "✅ viewer@altair.fr → 403 sur /api/budget/consolidated (budget.view absent) + 403 sur POST revise"
+  },
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Module Budget 100% opérationnel. 9 projets Altair avec données budget complètes. Enveloppe 2026 seedée (CAPEX 12M€, OPEX 6M€). Révisions budgétaires fonctionnelles. RBAC correct."
+}

@@ -43,6 +43,7 @@ from modules.arbitrage.router import router as arbitrage_router
 from modules.connectors.router import router as connectors_router
 from modules.agent.router import router as agent_router
 from modules.notifications.router import router as notifications_router
+from modules.budget.router import router as budget_router
 from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI(title="Projetenne API")
@@ -92,6 +93,7 @@ for _router in [
     connectors_router,
     agent_router,
     notifications_router,
+    budget_router,
 ]:
     app.include_router(_router, prefix="/api")
 

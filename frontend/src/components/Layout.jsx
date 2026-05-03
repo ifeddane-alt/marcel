@@ -28,6 +28,7 @@ import {
   Lightbulb,
   BarChart2,
   X,
+  DollarSign,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -59,6 +60,7 @@ const MAIN_NAV = [
   { to: "/dashboard",  icon: LayoutDashboard, label: "Tableau de bord", perm: "dashboard.view" },
   { to: "/programmes", icon: FolderKanban,     label: "Programmes",     perm: "portfolio.view" },
   { to: "/portfolio",  icon: Briefcase,        label: "Portefeuille",   perm: "portfolio.view" },
+  { to: "/budget",     icon: DollarSign,       label: "Budget",         perm: "budget.view" },
   { to: "/teams",      icon: UsersRound,       label: "Équipes",        perm: "teams.view" },
   {
     to: "/resources",

@@ -29,6 +29,7 @@ import Connectors from "@/pages/Connectors";
 import Recommandations from "@/pages/Recommandations";
 import MesAlertes from "@/pages/MesAlertes";
 import AgentAnalytics from "@/pages/AgentAnalytics";
+import Budget from "@/pages/Budget";
 import "@/App.css";
 
 function ProtectedRoute({ children }) {
@@ -75,6 +76,7 @@ function AppRoutes() {
         <Route path="programmes" element={<Programs />} />
         <Route path="programmes/:id" element={<ProgramDetail />} />
         <Route path="portfolio" element={<Portfolio />} />
+        <Route path="budget" element={<Budget />} />
         <Route path="projects/:id" element={<ProjectDetail />} />
         <Route path="resources" element={<Resources />} />
         <Route path="teams" element={<Teams />} />

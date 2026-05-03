@@ -289,4 +289,13 @@ export const agentAPI = {
   getAgentAnalytics: ()           => api.get("/admin/agent-analytics"),
 };
 
+export const budgetAPI = {
+  consolidated: (params = {}) => api.get("/budget/consolidated", { params }),
+  byProgram:    ()             => api.get("/budget/by-program"),
+  projectRevisions: (id)       => api.get(`/budget/project/${id}/revisions`),
+  revise:       (id, data)     => api.post(`/budget/project/${id}/revise`, data),
+  exportExcel:  ()             => api.get("/budget/export/excel", { responseType: "blob" }),
+  exportPdf:    ()             => api.get("/budget/export/pdf", { responseType: "blob" }),
+};
+
 export default api;
