@@ -120,15 +120,11 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - `WebSocket /ws` — Notifications temps réel
 - `POST /api/export/copil` — Génération PPT COPIL
 
-## État final — MARCEL V1.0 ✅ LIVRÉ (Fév 2026)
+## État final — MARCEL V1.0 ✅ + Module Budget ✅ (Mai 2026)
 - **19/19 items MARCEL** : COMPLÉTÉS ✅
-- **Tests E2E** : VALIDÉS (iteration_39.json — 100% frontend, backend fonctionnel)
-- **Sécurité** : Rate limiting login (slowapi 5/min), HTTP Security headers ✅
-- **Tests Pytest** : **80 tests passent / 0 échec** (6 fichiers V1.0) ✅
-- **Login page** : Panneau comptes démo visible ✅
-- **Responsive** : Sidebar collapsable tablet 1024px ✅
-- **README Docker** : Complet avec Makefile ✅
-- **Load test** : 200 projets + index MongoDB ✅
+- **Module Budget** : Page /budget complète (KPIs, tableau, programmes, graphiques, export, révisions) ✅
+- **Tests Pytest** : **80 tests passent / 0 échec** ✅
+- **Sécurité** : Rate limiting par email (10/min), HTTP Security headers ✅
 - **Bugs connus** : Aucun
 - **APIs mockées** : SAP RFC (pyrfc absent), Jira sync, ServiceNow sync
 - **Isolation multi-tenant** : ✅ Altair / Beta Corp totalement isolés
