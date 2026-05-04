@@ -152,14 +152,20 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 | Desktop (≥1280px) | Toujours w-60, labels visibles | 4 colonnes | rounded-xl | p-4 md:p-6 lg:p-8 |
 
 ## Backlog / Améliorations futures
-### P0 — Néant (MARCEL V1.0 + Budget + Responsive intégralement livrés)
-### P1 — Optionnel
-- Installer pyrfc + SAP NW RFC SDK pour connectivité RFC native réelle
-- CI/CD pipeline GitHub Actions
-- Nettoyage des anciens fichiers de test legacy (34 fichiers d'anciennes itérations)
+### P0 — Néant (MARCEL V1.0 + Budget + Responsive + Power BI intégralement livrés)
+### P1 — Court terme
+- Template Power BI Desktop (.pbix) pré-câblé 6 tables + relations
+- Filtre `?program_id=` sur endpoints Power BI
+- Webhook `/api/webhooks/project-updated` pour actualisation Power BI push
+- Installer pyrfc + SAP NW RFC SDK pour connectivité RFC native
 
-### P2 — Futur
+### P2 — Moyen terme
+- CI/CD pipeline GitHub Actions
 - Module "Tableau de bord CxO" personnalisable
 - Connecteur Microsoft Project
-- API REST publique + webhooks
-- Mobile app (React Native)
+- API REST publique + webhooks Resend (email alertes)
+
+### P3 — Long terme
+- Mobile app React Native
+- Module BI intégré
+- AI Planning Assistant (prévision charge)
