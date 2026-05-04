@@ -1,12 +1,116 @@
 import React, { useEffect, useState } from "react";
 import {
   Database, Key, RefreshCw, Trash2, Copy, Check,
-  ExternalLink, ChevronRight, AlertCircle, BookOpen, Zap
+  ExternalLink, AlertCircle, BookOpen, Zap, Code2
 } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import api from "@/api";
 
 const BASE_URL = process.env.REACT_APP_BACKEND_URL || "";
+
+// ─── Génération des scripts M-Query ──────────────────────────────────────────
+
+function buildMQueries(baseUrl, apiKey) {
+  const url = baseUrl || "https://VOTRE_URL.preview.emergentagent.com";
+  const key = apiKey || "pbi-VOTRE_CLE_API";
+
+  const tables = [
+    {
+      name: "Projets",
+      path: "/api/powerbi/projects",
+      cols: [
+        ["id","type text"], ["name","type text"], ["program","type text"],
+        ["methodology","type text"], ["status","type text"], ["rag","type text"],
+        ["capex_budget","Int64.Type"], ["opex_budget","Int64.Type"],
+        ["capex_consumed","Int64.Type"], ["opex_consumed","Int64.Type"],
+        ["eac","Int64.Type"], ["raf","Int64.Type"],
+        ["start_date","type date"], ["end_date","type date"], ["owner","type text"],
+      ],
+    },
+    {
+      name: "Ressources",
+      path: "/api/powerbi/resources",
+      cols: [
+        ["id","type text"], ["name","type text"], ["role","type text"],
+        ["team","type text"], ["type","type text"], ["vendor","type text"],
+        ["tjm","type number"], ["availability_rate","type number"], ["capacity_jh","type number"],
+      ],
+    },
+    {
+      name: "Timesheets",
+      path: "/api/powerbi/timesheets",
+      cols: [
+        ["resource_name","type text"], ["project_name","type text"],
+        ["date","type date"], ["jh","type number"], ["status","type text"],
+      ],
+    },
+    {
+      name: "Budget",
+      path: "/api/powerbi/budget",
+      cols: [
+        ["project_name","type text"], ["program","type text"],
+        ["capex_prev","Int64.Type"], ["capex_cons","Int64.Type"],
+        ["opex_prev","Int64.Type"], ["opex_cons","Int64.Type"],
+        ["eac","Int64.Type"], ["raf","Int64.Type"], ["ecart_pct","type number"],
+      ],
+    },
+    {
+      name: "Risques",
+      path: "/api/powerbi/risks",
+      cols: [
+        ["project_name","type text"], ["name","type text"],
+        ["probability","Int64.Type"], ["impact","Int64.Type"],
+        ["criticality","Int64.Type"], ["category","type text"], ["status","type text"],
+      ],
+    },
+    {
+      name: "Jalons",
+      path: "/api/powerbi/milestones",
+      cols: [
+        ["project_name","type text"], ["name","type text"],
+        ["family","type text"], ["type","type text"],
+        ["date","type date"], ["days_remaining","Int64.Type"],
+        ["attribute","type text"], ["status","type text"],
+      ],
+    },
+  ];
+
+  const paramScript = `// ─── Paramètre : URL de base ───────────────────────────────────────────
+// Coller dans une nouvelle requête nommée "ProjetennBaseUrl" (type: Texte)
+"${url}" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]
+
+// ─── Paramètre : Clé API ────────────────────────────────────────────────
+// Coller dans une nouvelle requête nommée "ProjetennApiKey" (type: Texte)
+"${key}" meta [IsParameterQuery=true, Type="Text", IsParameterQueryRequired=true]`;
+
+  const tableScripts = tables.map(({ name, path, cols }) => {
+    const colNames   = cols.map(([c]) => `"${c}"`).join(", ");
+    const colTypings = cols.map(([c, t]) => `        {"${c}", ${t}}`).join(",\n");
+    return {
+      name,
+      script:
+`let
+    Source = Json.Document(
+        Web.Contents(
+            ProjetennBaseUrl,
+            [
+                RelativePath = "${path}",
+                Headers = [#"X-API-Key" = ProjetennApiKey]
+            ]
+        )
+    ),
+    ToTable = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    Expanded = Table.ExpandRecordColumn(ToTable, "Column1", {${colNames}}),
+    Typed = Table.TransformColumnTypes(Expanded, {
+${colTypings}
+    })
+in
+    Typed`,
+    };
+  });
+
+  return { paramScript, tableScripts };
+}
 
 const ENDPOINTS = [
   {
@@ -47,7 +151,7 @@ const ENDPOINTS = [
   },
 ];
 
-function CopyButton({ text, "data-testid": testId }) {
+function CopyButton({ text, "data-testid": testId, small = false }) {
   const [copied, setCopied] = useState(false);
   const copy = () => {
     navigator.clipboard.writeText(text);
@@ -58,10 +162,10 @@ function CopyButton({ text, "data-testid": testId }) {
     <button
       onClick={copy}
       data-testid={testId}
-      className="flex-shrink-0 p-1.5 rounded hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-colors"
+      className={`flex-shrink-0 rounded hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-colors ${small ? "p-1" : "p-1.5"}`}
       title="Copier"
     >
-      {copied ? <Check size={14} className="text-green-600" /> : <Copy size={14} />}
+      {copied ? <Check size={small ? 12 : 14} className="text-green-600" /> : <Copy size={small ? 12 : 14} />}
     </button>
   );
 }
@@ -304,10 +408,103 @@ export default function AdminPowerBI() {
       </div>
 
       {/* Permission requise */}
-      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-500">
+      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-500 mb-6">
         <span className="font-semibold text-slate-700">Permission requise :</span> <code>export.powerbi</code> — 
         accordée aux profils <strong>Administrateur</strong>, <strong>Direction SI (CIO)</strong>, 
         <strong> PMO Portefeuille</strong> et <strong>Finance / Contrôle de gestion</strong>.
+      </div>
+
+      {/* ─── Scripts M-Query ─────────────────────────────────────────── */}
+      <MQuerySection baseUrl={BASE_URL} apiKey={newKey || ""} />
+    </div>
+  );
+}
+
+// ─── Section M-Query (séparée pour clarté) ───────────────────────────────────
+
+function MQuerySection({ baseUrl, apiKey }) {
+  const { paramScript, tableScripts } = buildMQueries(baseUrl, apiKey);
+  const [activeTab, setActiveTab] = useState(0); // 0 = params, 1..6 = tables
+
+  const allTabs = [
+    { label: "Paramètres", script: paramScript, isParam: true },
+    ...tableScripts.map(t => ({ label: t.name, script: t.script, isParam: false })),
+  ];
+
+  return (
+    <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5" data-testid="mquery-section">
+      <div className="flex items-center gap-2 mb-1">
+        <Code2 size={16} className="text-[#F2C811]" />
+        <h2 className="font-semibold text-slate-800">Scripts M-Query (Power Query)</h2>
+      </div>
+      <p className="text-xs text-slate-500 mb-4">
+        Collez chaque script dans <strong>Power BI Desktop → Éditeur Power Query → Nouvelle requête → Requête vide → Éditeur avancé</strong>.
+        Commencez par les deux paramètres, puis créez une requête par table.
+      </p>
+
+      {/* Tabs */}
+      <div className="flex gap-1 border-b border-slate-200 mb-4 overflow-x-auto">
+        {allTabs.map((tab, i) => (
+          <button
+            key={i}
+            onClick={() => setActiveTab(i)}
+            data-testid={`mquery-tab-${tab.label.toLowerCase()}`}
+            className={`flex-shrink-0 px-3 py-2 text-xs font-semibold rounded-t border-b-2 transition-colors ${
+              activeTab === i
+                ? "border-[#0052CC] text-[#0052CC] bg-blue-50"
+                : "border-transparent text-slate-500 hover:text-slate-700"
+            }`}
+          >
+            {tab.isParam ? "Paramètres" : tab.label}
+          </button>
+        ))}
+      </div>
+
+      {/* Script actif */}
+      {allTabs.map((tab, i) => (
+        activeTab === i && (
+          <div key={i}>
+            {tab.isParam && (
+              <div className="mb-3 bg-amber-50 border border-amber-200 rounded-lg p-3 text-xs text-amber-700">
+                <strong>Étape 1 :</strong> Créez deux requêtes séparées nommées exactement{" "}
+                <code>ProjetennBaseUrl</code> et <code>ProjetennApiKey</code>.
+                Dans chaque requête → clic droit → <em>Convertir en paramètre</em> (type : Texte).
+              </div>
+            )}
+            <div className="relative">
+              <pre
+                className="bg-slate-900 text-slate-100 text-xs p-4 rounded-lg overflow-x-auto leading-relaxed whitespace-pre"
+                data-testid={`mquery-script-${tab.label.toLowerCase()}`}
+                style={{ fontFamily: "'JetBrains Mono', 'Fira Code', monospace", maxHeight: 380 }}
+              >
+                {tab.script}
+              </pre>
+              <div className="absolute top-2 right-2">
+                <CopyButton
+                  text={tab.script}
+                  data-testid={`mquery-copy-${tab.label.toLowerCase()}`}
+                  small={false}
+                />
+              </div>
+            </div>
+            {!tab.isParam && (
+              <p className="text-xs text-slate-400 mt-2">
+                Nommez la requête <strong>{tab.label}</strong> dans le panneau de gauche de l'Éditeur Power Query.
+              </p>
+            )}
+          </div>
+        )
+      ))}
+
+      <div className="mt-4 bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-500">
+        <strong className="text-slate-700">Relations recommandées dans Power BI :</strong>
+        <ul className="mt-1 space-y-0.5 list-disc list-inside">
+          <li><code>Budget[project_name]</code> → <code>Projets[name]</code> (Many-to-One)</li>
+          <li><code>Risques[project_name]</code> → <code>Projets[name]</code> (Many-to-One)</li>
+          <li><code>Jalons[project_name]</code> → <code>Projets[name]</code> (Many-to-One)</li>
+          <li><code>Timesheets[project_name]</code> → <code>Projets[name]</code> (Many-to-One)</li>
+          <li><code>Timesheets[resource_name]</code> → <code>Ressources[name]</code> (Many-to-One)</li>
+        </ul>
       </div>
     </div>
   );

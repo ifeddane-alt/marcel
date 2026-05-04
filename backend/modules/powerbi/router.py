@@ -68,62 +68,64 @@ async def get_powerbi_user(
 @router.get("/powerbi/projects")
 async def powerbi_projects(
     user: TokenPayload = Depends(get_powerbi_user),
-    from_date: Optional[str] = Query(None, description="Date de début YYYY-MM-DD (filtre sur start_date projet)"),
-    to_date:   Optional[str] = Query(None, description="Date de fin   YYYY-MM-DD (filtre sur end_date projet)"),
+    from_date:  Optional[str] = Query(None, description="Date début YYYY-MM-DD"),
+    to_date:    Optional[str] = Query(None, description="Date fin   YYYY-MM-DD"),
+    program_id: Optional[str] = Query(None, description="Filtrer sur un programme (program_id)"),
 ):
-    """Projets — format plat pour Power BI."""
-    return await service.get_projects(user.tenant_id, from_date, to_date)
+    return await service.get_projects(user.tenant_id, from_date, to_date, program_id)
 
 
 @router.get("/powerbi/resources")
 async def powerbi_resources(
     user: TokenPayload = Depends(get_powerbi_user),
-    from_date: Optional[str] = Query(None, description="Ignoré (ressources = référentiel stable)"),
-    to_date:   Optional[str] = Query(None, description="Ignoré"),
+    from_date:  Optional[str] = Query(None),
+    to_date:    Optional[str] = Query(None),
+    program_id: Optional[str] = Query(None, description="Ignoré (ressources = référentiel stable)"),
 ):
-    """Ressources — format plat."""
-    return await service.get_resources(user.tenant_id, from_date, to_date)
+    return await service.get_resources(user.tenant_id, from_date, to_date, program_id)
 
 
 @router.get("/powerbi/timesheets")
 async def powerbi_timesheets(
     user: TokenPayload = Depends(get_powerbi_user),
-    from_date: Optional[str] = Query(None, description="Date de début YYYY-MM-DD (filtre sur date entrée)"),
-    to_date:   Optional[str] = Query(None, description="Date de fin   YYYY-MM-DD"),
+    from_date:  Optional[str] = Query(None, description="Date début YYYY-MM-DD"),
+    to_date:    Optional[str] = Query(None, description="Date fin   YYYY-MM-DD"),
+    program_id: Optional[str] = Query(None, description="Filtrer sur les projets du programme"),
 ):
     """Timesheets — lignes dépliées (une ligne = une entrée/jour).
-    Les documents sans entrée retournent une ligne synthétique jh=0 pour visibilité PMO."""
-    return await service.get_timesheets(user.tenant_id, from_date, to_date)
+    Ligne synthétique jh=0 si non saisi (visibilité PMO)."""
+    return await service.get_timesheets(user.tenant_id, from_date, to_date, program_id)
 
 
 @router.get("/powerbi/budget")
 async def powerbi_budget(
     user: TokenPayload = Depends(get_powerbi_user),
-    from_date: Optional[str] = Query(None, description="Date de début YYYY-MM-DD (même logique que projects)"),
-    to_date:   Optional[str] = Query(None, description="Date de fin   YYYY-MM-DD"),
+    from_date:  Optional[str] = Query(None, description="Date début YYYY-MM-DD"),
+    to_date:    Optional[str] = Query(None, description="Date fin   YYYY-MM-DD"),
+    program_id: Optional[str] = Query(None, description="Filtrer sur un programme"),
 ):
-    """Budget — prévu vs consommé vs EAC par projet."""
-    return await service.get_budget(user.tenant_id, from_date, to_date)
+    return await service.get_budget(user.tenant_id, from_date, to_date, program_id)
 
 
 @router.get("/powerbi/risks")
 async def powerbi_risks(
     user: TokenPayload = Depends(get_powerbi_user),
-    from_date: Optional[str] = Query(None, description="Date de début YYYY-MM-DD (filtre sur updated_at)"),
-    to_date:   Optional[str] = Query(None, description="Date de fin   YYYY-MM-DD"),
+    from_date:  Optional[str] = Query(None, description="Date début YYYY-MM-DD"),
+    to_date:    Optional[str] = Query(None, description="Date fin   YYYY-MM-DD"),
+    program_id: Optional[str] = Query(None, description="Filtrer sur un programme"),
 ):
-    """Risques — format plat."""
-    return await service.get_risks(user.tenant_id, from_date, to_date)
+    return await service.get_risks(user.tenant_id, from_date, to_date, program_id)
 
 
 @router.get("/powerbi/milestones")
 async def powerbi_milestones(
     user: TokenPayload = Depends(get_powerbi_user),
-    from_date: Optional[str] = Query(None, description="Date de début YYYY-MM-DD (filtre sur date jalon)"),
-    to_date:   Optional[str] = Query(None, description="Date de fin   YYYY-MM-DD"),
+    from_date:  Optional[str] = Query(None, description="Date début YYYY-MM-DD"),
+    to_date:    Optional[str] = Query(None, description="Date fin   YYYY-MM-DD"),
+    program_id: Optional[str] = Query(None, description="Filtrer sur un programme"),
 ):
-    """Jalons — format plat avec days_remaining calculé."""
-    return await service.get_milestones(user.tenant_id, from_date, to_date)
+    """Jalons avec days_remaining calculé."""
+    return await service.get_milestones(user.tenant_id, from_date, to_date, program_id)
 
 
 # ─── Gestion clé API (réservé admin.config) ──────────────────────────────────

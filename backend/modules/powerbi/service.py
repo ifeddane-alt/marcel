@@ -54,6 +54,19 @@ def _in_range(date_str: Optional[str], from_date: Optional[str], to_date: Option
     return True
 
 
+async def _project_ids_for_program(tenant_id: str, program_id: str) -> set:
+    """Retourne l'ensemble des project_id appartenant au programme donné."""
+    cursor = db["projects"].find(
+        {"tenant_id": tenant_id, "program_id": program_id},
+        {"_id": 0, "project_id": 1},
+    )
+    ids: set = set()
+    async for p in cursor:
+        if p.get("project_id"):
+            ids.add(p["project_id"])
+    return ids
+
+
 # ─── Vérification API Key ─────────────────────────────────────────────────────
 
 async def verify_api_key(api_key: str) -> Optional[str]:
@@ -101,9 +114,13 @@ async def get_projects(
     tenant_id: str,
     from_date: Optional[str] = None,
     to_date: Optional[str] = None,
+    program_id: Optional[str] = None,
 ) -> list[dict]:
-    """Projets — filtre sur start_date si from_date/to_date fournis."""
-    cursor = db["projects"].find({"tenant_id": tenant_id}, {"_id": 0})
+    """Projets — filtre sur start_date si from_date/to_date fournis, ou sur programme."""
+    query: dict = {"tenant_id": tenant_id}
+    if program_id:
+        query["program_id"] = program_id
+    cursor = db["projects"].find(query, {"_id": 0})
     rows = []
     async for p in cursor:
         start = _date(p.get("start_date"))
@@ -141,8 +158,9 @@ async def get_resources(
     tenant_id: str,
     from_date: Optional[str] = None,
     to_date: Optional[str] = None,
+    program_id: Optional[str] = None,
 ) -> list[dict]:
-    """Ressources — pas de filtre temporel (données de référentiel)."""
+    """Ressources — pas de filtre temporel ni par programme (données de référentiel)."""
     cursor = db["resources"].find({"tenant_id": tenant_id}, {"_id": 0})
     rows = []
     async for r in cursor:
@@ -164,6 +182,7 @@ async def get_timesheets(
     tenant_id: str,
     from_date: Optional[str] = None,
     to_date: Optional[str] = None,
+    program_id: Optional[str] = None,
 ) -> list[dict]:
     """Timesheets — lignes dépliées avec filtre sur la date de saisie.
 
@@ -171,6 +190,10 @@ async def get_timesheets(
     filtrées hors-plage), on génère quand même UNE ligne synthétique jh=0
     pour visualiser les ressources qui n'ont pas saisi.
     """
+    # Si program_id fourni, ne garder que les projets du programme
+    allowed_projects: Optional[set] = None
+    if program_id:
+        allowed_projects = await _project_ids_for_program(tenant_id, program_id)
     cursor = db["timesheets"].find({"tenant_id": tenant_id}, {"_id": 0})
     rows = []
     async for ts in cursor:
@@ -193,6 +216,10 @@ async def get_timesheets(
         status = _safe(ts.get("status"), "")
         entries = ts.get("entries") or []
         period_start = _date(ts.get("week_start") or ts.get("period_start") or ts.get("date"))
+
+        # Filtre par programme : exclure si projet hors programme
+        if allowed_projects is not None and ts.get("project_id") not in allowed_projects:
+            continue
 
         # Filtrer les entrées dans la période demandée
         in_range_entries = [
@@ -227,9 +254,13 @@ async def get_budget(
     tenant_id: str,
     from_date: Optional[str] = None,
     to_date: Optional[str] = None,
+    program_id: Optional[str] = None,
 ) -> list[dict]:
     """Budget — même filtre que projects (chevauchement de période)."""
-    cursor = db["projects"].find({"tenant_id": tenant_id}, {"_id": 0})
+    query: dict = {"tenant_id": tenant_id}
+    if program_id:
+        query["program_id"] = program_id
+    cursor = db["projects"].find(query, {"_id": 0})
     rows = []
     async for p in cursor:
         start = _date(p.get("start_date"))
@@ -267,11 +298,17 @@ async def get_risks(
     tenant_id: str,
     from_date: Optional[str] = None,
     to_date: Optional[str] = None,
+    program_id: Optional[str] = None,
 ) -> list[dict]:
     """Risques — filtre sur created_at/updated_at si disponible."""
+    allowed_projects: Optional[set] = None
+    if program_id:
+        allowed_projects = await _project_ids_for_program(tenant_id, program_id)
     cursor = db["risks"].find({"tenant_id": tenant_id}, {"_id": 0})
     rows = []
     async for r in cursor:
+        if allowed_projects is not None and r.get("project_id") not in allowed_projects:
+            continue
         # Utilise created_at ou updated_at comme date de référence
         ref_date = _date(r.get("updated_at") or r.get("created_at"))
         if not _in_range(ref_date, from_date, to_date):
@@ -296,11 +333,17 @@ async def get_milestones(
     tenant_id: str,
     from_date: Optional[str] = None,
     to_date: Optional[str] = None,
+    program_id: Optional[str] = None,
 ) -> list[dict]:
     """Jalons — filtre sur la date du jalon."""
+    allowed_projects: Optional[set] = None
+    if program_id:
+        allowed_projects = await _project_ids_for_program(tenant_id, program_id)
     cursor = db["milestones"].find({"tenant_id": tenant_id}, {"_id": 0})
     rows = []
     async for m in cursor:
+        if allowed_projects is not None and m.get("project_id") not in allowed_projects:
+            continue
         date_str = _date(m.get("date"))
         if not _in_range(date_str, from_date, to_date):
             continue
