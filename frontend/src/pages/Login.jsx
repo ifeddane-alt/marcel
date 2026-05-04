@@ -36,11 +36,11 @@ export default function Login() {
           <div className="w-8 h-8 rounded bg-[#0052CC] flex items-center justify-center">
             <Building2 size={16} className="text-white" strokeWidth={2} />
           </div>
-          <span className="font-heading text-white text-xl font-bold tracking-wide">PROJETENNE</span>
+          <span className="font-heading text-white text-xl font-bold tracking-wide">MARCEL</span>
         </div>
         <div>
           <h1 className="font-heading text-white text-5xl font-bold leading-tight mb-4">
-            Pilotage de Portefeuille Projets
+            Pilotage de Portefeuille Projets + Agent IA PMO
           </h1>
           <p className="text-slate-400 text-sm leading-relaxed">
             Plateforme SaaS multi-tenant pour la gestion de portefeuilles projets grands comptes.
@@ -61,7 +61,7 @@ export default function Login() {
           </div>
         </div>
         <div className="text-slate-600 text-xs">
-          © 2025 Projetenne — Groupe Altair Industries
+          © 2025 MARCEL — Groupe Altair Industries
         </div>
       </div>
 
@@ -73,7 +73,7 @@ export default function Login() {
             <div className="w-7 h-7 rounded bg-[#0052CC] flex items-center justify-center">
               <Building2 size={14} className="text-white" strokeWidth={2} />
             </div>
-            <span className="font-heading text-white text-xl font-bold tracking-wide">PROJETENNE</span>
+            <span className="font-heading text-white text-xl font-bold tracking-wide">MARCEL</span>
           </div>
 
           <div className="mb-8">

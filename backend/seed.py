@@ -1,5 +1,5 @@
 """
-Script de seed pour Projetenne — Groupe Altair Industries (démo CAC 40)
+Script de seed pour MARCEL — Groupe Altair Industries (démo CAC 40)
 Usage: python seed.py
 """
 import asyncio
@@ -1727,7 +1727,7 @@ WORK_ALLOCATIONS_TEMPLATE = [
 
 
 async def seed():
-    print("=== Seed Projetenne ===")
+    print("=== Seed MARCEL ===")
 
     # Tenant
     existing = await db.tenants.find_one({"tenant_id": TENANT_ID})

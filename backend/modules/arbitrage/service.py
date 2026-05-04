@@ -581,7 +581,7 @@ async def export_pdf_scorecard(user: TokenPayload) -> bytes:
     elements.append(Spacer(1, 8))
     elements.append(HRFlowable(width="100%", thickness=0.5, color=C_BORDER))
     elements.append(Paragraph(
-        f"Document généré par Projetenne PPM · {now_str} · Confidentiel",
+        f"Document généré par MARCEL PPM · {now_str} · Confidentiel",
         ParagraphStyle("footer", fontSize=7, fontName="Helvetica", textColor=C_SLATE, alignment=TA_CENTER, spaceBefore=4),
     ))
 

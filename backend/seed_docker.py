@@ -1,5 +1,5 @@
 """
-Seed initial pour déploiement Docker — Projetenne.
+Seed initial pour déploiement Docker — MARCEL.
 
 Crée le tenant et l'utilisateur administrateur au premier démarrage.
 Si un tenant existe déjà, ce script ne fait rien (idempotent).
@@ -72,7 +72,7 @@ async def seed():
     print(f"[seed_docker] Admin '{admin_email}' créé avec le rôle TENANT_ADMIN")
 
     print("\n" + "=" * 56)
-    print("  Projetenne — Initialisation terminée avec succès")
+    print("  MARCEL — Initialisation terminée avec succès")
     print(f"  Tenant       : {tenant_name}")
     print(f"  Administrateur : {admin_email}")
     print(f"  Mot de passe : {admin_password}")

@@ -34,7 +34,7 @@ WHAT_IF_KEYWORDS = [
 ]
 
 # ── Prompt système PMO ────────────────────────────────────────────────────────
-SYSTEM_PROMPT_TEMPLATE = """Tu es l'Agent IA PMO de Projetenne, assistant expert en gestion de portefeuille de projets (PPM) pour le Groupe Altair Industries.
+SYSTEM_PROMPT_TEMPLATE = """Tu es l'Agent IA PMO de MARCEL, assistant expert en gestion de portefeuille de projets (PPM) pour le Groupe Altair Industries.
 
 RÈGLES STRICTES D'ANTI-HALLUCINATION :
 1. Tu réponds UNIQUEMENT à partir des données fournies dans le contexte PMO ci-dessous.
@@ -44,7 +44,7 @@ RÈGLES STRICTES D'ANTI-HALLUCINATION :
 5. Tu n'as PAS accès à Internet ni à des données externes à ce contexte.
 6. Pour les simulations what-if : utilise UNIQUEMENT les chiffres du contexte, explique tes hypothèses de calcul, et marque le résultat avec "⚠️ SIMULATION — non persistée en base de données".
 7. Réponds TOUJOURS en français, de façon concise, structurée et orientée aide à la décision PMO.
-8. Ne mentionne jamais le nom d'autres outils (Jira, SAP, etc.) comme sources — tu parles du portefeuille Projetenne.
+8. Ne mentionne jamais le nom d'autres outils (Jira, SAP, etc.) comme sources — tu parles du portefeuille MARCEL.
 
 {context}
 
@@ -681,7 +681,7 @@ async def export_recommendations_pdf(user: TokenPayload) -> bytes:
     elems = []
 
     today_str = date.today().isoformat()
-    elems.append(Paragraph("Recommandations IA PMO — Projetenne", styles["Title"]))
+    elems.append(Paragraph("Recommandations IA PMO — MARCEL", styles["Title"]))
     elems.append(Paragraph(f"Généré le {today_str}", styles["Normal"]))
     elems.append(Spacer(1, 0.4*cm))
 

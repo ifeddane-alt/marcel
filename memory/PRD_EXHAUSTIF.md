@@ -1,11 +1,11 @@
-# Projetenne — PRD Exhaustif
+# MARCEL — PRD Exhaustif
 > État complet au 04 Mai 2026 — Version livrée en production
 
 ---
 
 ## 1. Vue d'ensemble
 
-**Projetenne** est une application SaaS multi-tenant de gestion de portefeuille de projets (PPM).
+**MARCEL** est une application SaaS multi-tenant de gestion de portefeuille de projets (PPM).
 - **Architecture** : React 18 (Tailwind CSS + Shadcn/UI) + FastAPI (Python 3.11) + MongoDB Atlas
 - **Auth** : JWT HS256, rate-limiting par email (10/min), RBAC par profil
 - **Multi-tenant** : Isolation stricte par `tenant_id` sur toutes les collections MongoDB
@@ -416,7 +416,7 @@
 | `test_projects_crud.py` | CRUD projets, filtres, pagination |
 | `test_auth_rbac.py` | Login, JWT, RBAC, permissions |
 | `test_profiles_rbac.py` | Profils, seed, permissions, isolation tenant |
-| `test_projetenne.py` | Tests d'intégration généraux (suite principale) |
+| `test_MARCEL.py` | Tests d'intégration généraux (suite principale) |
 | `test_sprint0_modular.py` | Modularisation, routing |
 | `test_s1_01_teams.py` | Équipes, membres, capacité |
 | `test_s1_05_07_work_allocations.py` | Allocations temps |

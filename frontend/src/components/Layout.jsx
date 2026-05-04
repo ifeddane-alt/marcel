@@ -156,7 +156,7 @@ export default function Layout() {
           </div>
           <div className={isDrawer ? "block" : "hidden md:block xl:block"}>
             <div className="font-heading text-white text-base font-bold tracking-wide leading-none whitespace-nowrap">
-              PROJETENNE
+              MARCEL
             </div>
             <div className="text-[10px] text-slate-400 font-mono mt-0.5 tracking-wider uppercase">
               {user?.name?.split(" ")[0] || "Groupe"}

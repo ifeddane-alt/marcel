@@ -222,7 +222,7 @@ export default function AgentDrawer() {
                 </div>
                 <div>
                   <div className="text-white font-bold text-sm leading-none">Agent IA PMO</div>
-                  <div className="text-slate-400 text-[10px] mt-0.5">Projetenne — Groupe Altair</div>
+                  <div className="text-slate-400 text-[10px] mt-0.5">MARCEL — Groupe Altair</div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -406,7 +406,7 @@ export default function AgentDrawer() {
                 </button>
               </div>
               <p className="text-[9px] text-slate-300 mt-1.5 text-center">
-                Les réponses sont générées à partir de vos données Projetenne uniquement.
+                Les réponses sont générées à partir de vos données MARCEL uniquement.
               </p>
             </div>
           </div>

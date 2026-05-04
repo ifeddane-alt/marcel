@@ -1,4 +1,4 @@
-# Projetenne — PPM SaaS Multi-Tenant
+# MARCEL — PPM SaaS Multi-Tenant
 
 > Solution complète de gestion de portefeuille projets (PPM) pour DSI et PMO.  
 > Stack : React 18 · FastAPI · MongoDB · Claude Sonnet 4 · Traefik
@@ -38,8 +38,8 @@
 
 ```bash
 # Cloner le dépôt
-git clone https://github.com/votre-org/projetenne.git
-cd projetenne
+git clone https://github.com/votre-org/marcel.git
+cd marcel
 
 # Copier et éditer les variables d'environnement
 cp backend/.env.example backend/.env
@@ -63,7 +63,7 @@ L'application est accessible sur : **http://localhost**
 ```dotenv
 # ── Base de données ───────────────────────────────────────────────────────────
 MONGO_URL=mongodb://mongodb:27017          # URL MongoDB (modifiez si externe)
-DB_NAME=projetenne                         # Nom de la base
+DB_NAME=marcel                         # Nom de la base
 
 # ── Sécurité JWT ──────────────────────────────────────────────────────────────
 SECRET_KEY=changez-moi-en-production-32chars-min
@@ -153,8 +153,8 @@ Traefik est préconfiguré pour le reverse proxy HTTPS avec Let's Encrypt.
    ```yaml
    labels:
      - "traefik.enable=true"
-     - "traefik.http.routers.projetenne.rule=Host(`votre-domaine.com`)"
-     - "traefik.http.routers.projetenne.tls.certresolver=letsencrypt"
+     - "traefik.http.routers.marcel.rule=Host(`votre-domaine.com`)"
+     - "traefik.http.routers.marcel.tls.certresolver=letsencrypt"
    ```
 
 3. **Configurer le domaine** dans `backend/.env` :
@@ -199,8 +199,8 @@ make db-backup
 # Crée : backups/mongodb_YYYYMMDD_HHMMSS.gz
 
 # Manuellement
-docker exec projetenne-mongodb-1 mongodump \
-  --db=projetenne --gzip --archive \
+docker exec marcel-mongodb-1 mongodump \
+  --db=marcel --gzip --archive \
   > backups/backup_$(date +%Y%m%d).gz
 ```
 
@@ -211,8 +211,8 @@ docker exec projetenne-mongodb-1 mongodump \
 make db-restore BACKUP=backups/mongodb_20260115_120000.gz
 
 # Manuellement
-docker exec -i projetenne-mongodb-1 mongorestore \
-  --db=projetenne --gzip --archive \
+docker exec -i marcel-mongodb-1 mongorestore \
+  --db=marcel --gzip --archive \
   < backups/backup_20260115.gz
 ```
 
@@ -220,7 +220,7 @@ docker exec -i projetenne-mongodb-1 mongorestore \
 
 ```bash
 # Ajouter dans crontab (crontab -e)
-0 2 * * * cd /opt/projetenne && make db-backup >> /var/log/projetenne-backup.log 2>&1
+0 2 * * * cd /opt/marcel && make db-backup >> /var/log/marcel-backup.log 2>&1
 ```
 
 ---
@@ -235,7 +235,7 @@ git pull origin main
 make rebuild
 
 # 3. Vérifier les migrations (si applicable)
-docker exec projetenne-backend-1 python migrate.py
+docker exec marcel-backend-1 python migrate.py
 
 # 4. Valider
 make logs
@@ -325,7 +325,7 @@ make rebuild
 docker compose ps mongodb
 
 # Tester la connexion
-docker exec projetenne-backend-1 python -c "
+docker exec marcel-backend-1 python -c "
 from motor.motor_asyncio import AsyncIOMotorClient
 import asyncio, os
 async def test():
@@ -367,7 +367,7 @@ make dev
 ## Architecture technique
 
 ```
-projetenne/
+marcel/
 ├── backend/              # FastAPI + Motor + APScheduler
 │   ├── modules/          # Modules métier (agent, arbitrage, scope, ...)
 │   ├── core/             # Auth JWT, database, permissions
@@ -401,6 +401,6 @@ projetenne/
 
 ## Support
 
-- Email : support@projetenne.fr
+- Email : support@marcel.fr
 - Documentation API : `http://localhost:8001/docs`
 - Changelog : voir `CHANGELOG.md`

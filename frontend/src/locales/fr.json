@@ -78,7 +78,7 @@
     "email": "Adresse e-mail",
     "password": "Mot de passe",
     "sign_in": "Se connecter",
-    "welcome": "Bienvenue sur Projetenne",
+    "welcome": "Bienvenue sur MARCEL",
     "subtitle": "Gestion de Portefeuille de Projets",
     "invalid_credentials": "Identifiants invalides"
   },
@@ -158,7 +158,7 @@
     "simulation": "Simulation",
     "analyzing": "L'agent analyse...",
     "greeting": "Bonjour, je suis votre Agent IA PMO",
-    "disclaimer": "Les réponses sont générées à partir de vos données Projetenne uniquement.",
+    "disclaimer": "Les réponses sont générées à partir de vos données MARCEL uniquement.",
     "recommendations": "Recommandations IA",
     "critical": "critique(s)",
     "my_alerts": "Mes alertes",

@@ -1,7 +1,7 @@
-# PRD — Projetenne (PPM SaaS Multi-Tenant)
+# PRD — MARCEL (PPM SaaS Multi-Tenant)
 
 ## Énoncé du problème original
-Construire et développer en continu une application SaaS multi-tenant appelée `Projetenne` — un PPM (Project Portfolio Management) complet.
+Construire et développer en continu une application SaaS multi-tenant appelée `MARCEL` — un PPM (Project Portfolio Management) complet.
 
 ## Architecture technique
 - **Frontend** : React + Shadcn UI + react-i18next (FR/EN)

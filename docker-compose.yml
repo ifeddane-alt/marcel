@@ -1,6 +1,6 @@
 version: "3.9"
 
-# Projetenne — Docker Compose On-Premise
+# MARCEL — Docker Compose On-Premise
 # Usage : cp .env.example .env && docker-compose up -d
 
 services:

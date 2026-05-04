@@ -1,7 +1,7 @@
 {
   "design_system": {
     "identity": {
-      "name": "Projetenne",
+      "name": "MARCEL",
       "personality": "The Swiss Architect",
       "core_values": [
         "Precision",
@@ -181,7 +181,7 @@
   },
   "universal_guidelines": [
     "Do not use gradients for backgrounds. Stick to flat, solid colors.",
-    "Use 'Barlow Condensed' for all headings to give a distinct 'Projetenne' look.",
+    "Use 'Barlow Condensed' for all headings to give a distinct 'MARCEL' look.",
     "Data density is key. Avoid excessive padding in tables. Use 'p-3' or 'p-2' for table cells.",
     "All financial figures must be right-aligned and monospaced (JetBrains Mono).",
     "Dates should be formatted as 'DD MMM YYYY' (e.g., 12 Oct 2025).",

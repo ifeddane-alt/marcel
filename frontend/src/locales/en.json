@@ -78,7 +78,7 @@
     "email": "Email address",
     "password": "Password",
     "sign_in": "Sign in",
-    "welcome": "Welcome to Projetenne",
+    "welcome": "Welcome to MARCEL",
     "subtitle": "Project Portfolio Management",
     "invalid_credentials": "Invalid credentials"
   },
@@ -158,7 +158,7 @@
     "simulation": "Simulation",
     "analyzing": "Agent is analyzing...",
     "greeting": "Hello, I am your PMO AI Agent",
-    "disclaimer": "Responses are generated from your Projetenne data only.",
+    "disclaimer": "Responses are generated from your MARCEL data only.",
     "recommendations": "AI Recommendations",
     "critical": "critical",
     "my_alerts": "My Alerts",

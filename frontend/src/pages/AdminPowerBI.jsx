@@ -234,7 +234,7 @@ export default function AdminPowerBI() {
           </h1>
         </div>
         <p className="text-sm text-slate-500">
-          Connectez Power BI Desktop à vos données Projetenne via le <strong>Web Connector</strong>.
+          Connectez Power BI Desktop à vos données MARCEL via le <strong>Web Connector</strong>.
           Authentification par JWT ou clé API dédiée.
         </p>
       </div>

@@ -47,7 +47,7 @@ from modules.budget.router import router as budget_router
 from modules.powerbi.router import router as powerbi_router
 from starlette.middleware.base import BaseHTTPMiddleware
 
-app = FastAPI(title="Projetenne API")
+app = FastAPI(title="MARCEL API")
 
 # ── Middleware sécurité HTTP headers ─────────────────────────────────────────
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):

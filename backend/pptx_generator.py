@@ -1,4 +1,4 @@
-"""Générateur PowerPoint COPIL — Projetenne (v2)"""
+"""Générateur PowerPoint COPIL — MARCEL (v2)"""
 import io
 import base64
 from datetime import datetime
@@ -72,7 +72,7 @@ def _brand(branding: dict | None) -> dict:
         "primary":      _parse_rgb(b.get("primary_color"), NAVY),
         "secondary":    _parse_rgb(b.get("secondary_color"), BLUE),
         "accent":       _parse_rgb(b.get("accent_color"), GREEN_C),
-        "company_name": b.get("company_name") or "Projetenne",
+        "company_name": b.get("company_name") or "MARCEL",
         "font":         b.get("font") or FONT,
         "logo_base64":  b.get("logo_base64"),
     }
@@ -235,7 +235,7 @@ def add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_dat
     _rect(slide, Emu(0), Emu(0), SW, SH, fill=WHITE)
     _header(slide, "Roadmap Portefeuille",
             subtitle=f"{instance_name} · {instance_date}", brand=brand)
-    _footer(slide, f"{(brand or {}).get('company_name', 'Projetenne')} · Confidentiel")
+    _footer(slide, f"{(brand or {}).get('company_name', 'MARCEL')} · Confidentiel")
 
     if not rows:
         tb = _tb(slide, Inches(0.5), Inches(2.5), Inches(12), Inches(1))
@@ -422,7 +422,7 @@ def _section_label(slide, left, top, width, height_in, label):
 
 # ---- Slide footer ----
 
-def _footer(slide, text="Projetenne · Confidentiel"):
+def _footer(slide, text="MARCEL · Confidentiel"):
     tb = _tb(slide, Inches(0.4), SH - Inches(0.3), SW - Inches(1.8), Inches(0.25))
     _clear(tb.text_frame)
     p = tb.text_frame.paragraphs[0]
@@ -543,7 +543,7 @@ def _kv_table(slide, items, left, top, width, label_ratio=0.45, row_h=0.36):
 def add_slide_garde(prs, instance_name, instance_date, projects, brand=None):
     br = brand or {}
     primary    = br.get("primary", NAVY)
-    co_name    = br.get("company_name", "Projetenne")
+    co_name    = br.get("company_name", "MARCEL")
     logo_b64   = br.get("logo_base64")
 
     slide = _blank_slide(prs)
@@ -696,7 +696,7 @@ def add_slide_sommaire(prs, projects, instance_name="", instance_date="", brand=
     table_width = sum(Inches(w) for w in col_w)
     _styled_table(slide, headers, rows, table_left, Inches(1.25), table_width, col_w, row_height_in=0.42)
 
-    co = (brand or {}).get("company_name", "Projetenne")
+    co = (brand or {}).get("company_name", "MARCEL")
     footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  {co} Confidentiel" if instance_name else f"{co} · Confidentiel"
     _footer(slide, footer_text)
 
@@ -823,7 +823,7 @@ def add_slide_heatmap(prs, risks, proj_names, instance_name="", instance_date=""
             r2.font.color.rgb = MID
             ry += Inches(0.47)
 
-    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  {(brand or {}).get('company_name', 'Projetenne')} Confidentiel" if instance_name else f"{(brand or {}).get('company_name', 'Projetenne')} · Confidentiel"
+    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  {(brand or {}).get('company_name', 'MARCEL')} Confidentiel" if instance_name else f"{(brand or {}).get('company_name', 'MARCEL')} · Confidentiel"
     _footer(slide, footer_text)
 
 
@@ -859,7 +859,7 @@ def add_slide_top_risks(prs, risks, proj_names, instance_name="", instance_date=
     width = sum(Inches(w) for w in col_w)
     _styled_table(slide, headers, rows, left, Inches(1.25), width, col_w, row_height_in=0.46)
 
-    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  {(brand or {}).get('company_name', 'Projetenne')} Confidentiel" if instance_name else f"{(brand or {}).get('company_name', 'Projetenne')} · Confidentiel"
+    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  {(brand or {}).get('company_name', 'MARCEL')} Confidentiel" if instance_name else f"{(brand or {}).get('company_name', 'MARCEL')} · Confidentiel"
     _footer(slide, footer_text)
 
 
@@ -896,7 +896,7 @@ def add_slide_decisions(prs, decisions, governance_id=None, instance_name="", in
     width = sum(Inches(w) for w in col_w)
     _styled_table(slide, headers, rows, left, Inches(1.25), width, col_w, row_height_in=0.46)
 
-    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  {(brand or {}).get('company_name', 'Projetenne')} Confidentiel" if instance_name else f"{(brand or {}).get('company_name', 'Projetenne')} · Confidentiel"
+    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  {(brand or {}).get('company_name', 'MARCEL')} Confidentiel" if instance_name else f"{(brand or {}).get('company_name', 'MARCEL')} · Confidentiel"
     _footer(slide, footer_text)
 
 
@@ -907,7 +907,7 @@ def add_slide_decisions(prs, decisions, governance_id=None, instance_name="", in
 def add_slide_fiche(prs, project, milestones, risks, decisions, instance_name="", instance_date="", brand=None):
     slide = _blank_slide(prs)
     primary = (brand or {}).get("primary", NAVY)
-    co      = (brand or {}).get("company_name", "Projetenne")
+    co      = (brand or {}).get("company_name", "MARCEL")
 
     name = project.get("name", "?")
     code = project.get("source_id", "")
@@ -1216,7 +1216,7 @@ def add_slide_team_consumption(prs, project, team_rows, instance_name, instance_
         _run(empty_tb.text_frame, "Aucune allocation de travail enregistrée pour ce projet.",
              size=9, color=LIGHT, italic=True)
 
-    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  {(brand or {}).get('company_name', 'Projetenne')} Confidentiel"
+    footer_text = f"{instance_name}  ·  {fmt_date(instance_date)}  ·  {(brand or {}).get('company_name', 'MARCEL')} Confidentiel"
     _footer(slide, footer_text)
 
 
@@ -1228,7 +1228,7 @@ def add_slide_cloture(prs, projects, all_risks, instance_name="", instance_date=
     """Slide finale : points d'attention CIO — risques critiques, projets rouges, EAC dépassés."""
     slide = _blank_slide(prs)
     primary = (brand or {}).get("primary", NAVY)
-    co = (brand or {}).get("company_name", "Projetenne")
+    co = (brand or {}).get("company_name", "MARCEL")
 
     # ---- Header ----
     HEADER_H = Inches(1.1)
