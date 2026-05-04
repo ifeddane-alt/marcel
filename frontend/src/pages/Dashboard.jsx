@@ -138,19 +138,19 @@ export default function Dashboard() {
   }));
 
   return (
-    <div className="p-8" data-testid="dashboard-page">
+    <div className="p-4 md:p-6 lg:p-8" data-testid="dashboard-page">
       {/* Header */}
-      <div className="mb-6">
-        <h1 className="font-heading text-3xl font-bold text-[#0F172A] uppercase tracking-tight">
+      <div className="mb-5">
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">
           Tableau de Bord
         </h1>
-        <p className="text-sm text-slate-500 mt-0.5">
+        <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
           Groupe Altair Industries — Vue synthétique du portefeuille projets
         </p>
       </div>
 
       {/* Metric cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6" data-testid="metric-cards">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-5" data-testid="metric-cards">
         <MetricCard
           testId="metric-total-projects"
           label="Projets totaux"
@@ -186,7 +186,7 @@ export default function Dashboard() {
       </div>
 
       {/* Budget detail row */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-5">
         {[
           { label: "Budget consommé", value: formatEuro(summary.budget.consumed), pct: summary.budget.consumption_rate, color: "bg-[#0052CC]" },
           { label: "Budget forecast", value: formatEuro(summary.budget.forecast), pct: Math.round((summary.budget.forecast / summary.budget.total) * 100), color: "bg-amber-500" },
@@ -208,7 +208,7 @@ export default function Dashboard() {
 
       {/* Alertes capacité — widget compact (avant les graphiques) */}
       {capacityAlerts.length > 0 && (
-        <div className="mb-6" data-testid="capacity-alerts-section">
+        <div className="mb-5" data-testid="capacity-alerts-section">
           <CapacityAlertBanner alerts={capacityAlerts} compact={true} />
         </div>
       )}
@@ -413,9 +413,9 @@ export default function Dashboard() {
       )}
 
       {/* Charts row */}
-      <div className="grid grid-cols-12 gap-4 mb-6">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-3 md:gap-4 mb-5">
         {/* Budget bar chart */}
-        <div className="col-span-12 lg:col-span-8 bg-white border border-gray-200 rounded shadow-sm p-5">
+        <div className="col-span-1 lg:col-span-8 bg-white border border-gray-200 rounded shadow-sm p-4 md:p-5">
           <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4">
             Budget par projet (€)
           </div>
@@ -434,7 +434,7 @@ export default function Dashboard() {
         </div>
 
         {/* RAG Pie */}
-        <div className="col-span-12 lg:col-span-4 bg-white border border-gray-200 rounded shadow-sm p-5">
+        <div className="col-span-1 lg:col-span-4 bg-white border border-gray-200 rounded shadow-sm p-4 md:p-5">
           <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4">
             Distribution RAG
           </div>
@@ -675,11 +675,11 @@ export default function Dashboard() {
             const moderate = filtered.filter((r) => r.criticality >= 7 && r.criticality < 16);
             const low = filtered.filter((r) => r.criticality < 7);
             return (
-              <div className="p-5 grid grid-cols-12 gap-6">
-                <div className="col-span-12 lg:col-span-5" data-testid="dashboard-heatmap">
+              <div className="p-4 md:p-5 grid grid-cols-1 lg:grid-cols-12 gap-4 md:gap-6">
+                <div className="col-span-1 lg:col-span-5" data-testid="dashboard-heatmap">
                   <RiskHeatmap risks={filtered} showProjectName={!heatmapFilterProject} />
                 </div>
-                <div className="col-span-12 lg:col-span-7">
+                <div className="col-span-1 lg:col-span-7">
                   <div className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-3">
                     Distribution criticité — {filtered.length} risque{filtered.length !== 1 ? "s" : ""}
                     {(heatmapFilterProgram || heatmapFilterProject) && (

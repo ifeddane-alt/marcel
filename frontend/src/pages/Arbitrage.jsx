@@ -343,7 +343,7 @@ export default function Arbitrage() {
   const totals   = summary?.totals   || {};
 
   return (
-    <div className="p-6 space-y-5">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-5">
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div>
@@ -397,7 +397,7 @@ export default function Arbitrage() {
       </div>
 
       {/* ── Onglets ── */}
-      <div className="flex gap-1 border-b border-slate-200">
+      <div className="flex gap-1 border-b border-slate-200 overflow-x-auto">
         {[
           { key: "scoring",    icon: Target,      label: "Scoring Projets" },
           { key: "envelopes",  icon: BarChart2,   label: "Enveloppes Budget" },

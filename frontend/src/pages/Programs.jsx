@@ -52,10 +52,10 @@ export default function Programs() {
   const criticalCount = programs.filter((p) => p.rag_consolidated === "red").length;
 
   return (
-    <div className="p-8" data-testid="programs-page">
-      <div className="mb-6 flex items-start justify-between">
+    <div className="p-4 md:p-6 lg:p-8" data-testid="programs-page">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-heading text-3xl font-bold text-[#0F172A] uppercase tracking-tight">Programmes</h1>
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">Programmes</h1>
           <p className="text-sm text-slate-500 mt-0.5">{programs.length} programme{programs.length > 1 ? "s" : ""} · {totalProjects} projets</p>
         </div>
         {canCreate && (
@@ -67,7 +67,7 @@ export default function Programs() {
       </div>
 
       {/* Summary strip */}
-      <div className="grid grid-cols-3 gap-4 mb-6">
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
         {[
           { label: "Budget total consolidé", value: formatEuro(programs.reduce((s, p) => s + (p.budget_total || 0), 0)), icon: TrendingUp, color: "text-[#0052CC]" },
           { label: "Projets actifs", value: totalProjects, icon: FolderKanban, color: "text-slate-700" },

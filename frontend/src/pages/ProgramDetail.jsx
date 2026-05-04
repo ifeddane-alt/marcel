@@ -43,7 +43,7 @@ export default function ProgramDetail() {
     .slice(0, 10);
 
   return (
-    <div className="p-8" data-testid="program-detail-page">
+    <div className="p-4 md:p-6 lg:p-8" data-testid="program-detail-page">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1 text-xs text-slate-500 mb-6">
         <Link to="/programmes" className="hover:text-[#0052CC] flex items-center gap-1">
@@ -65,7 +65,7 @@ export default function ProgramDetail() {
               {metrics.project_count || 0} projet{(metrics.project_count || 0) > 1 ? "s" : ""}
             </span>
           </div>
-          <h1 className="font-heading text-3xl font-bold text-[#0F172A] leading-tight" data-testid="program-name">
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] leading-tight" data-testid="program-name">
             {program.name}
           </h1>
           {program.description && (

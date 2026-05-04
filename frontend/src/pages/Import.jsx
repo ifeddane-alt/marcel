@@ -120,7 +120,7 @@ export default function Import() {
     <div className="p-8 max-w-4xl mx-auto" data-testid="import-page">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="font-heading text-3xl font-bold text-[#0F172A] uppercase tracking-tight">
+        <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">
           Import CSV
         </h1>
         <p className="text-sm text-slate-500 mt-0.5">
@@ -165,7 +165,7 @@ export default function Import() {
             <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-3">
               Type de données à importer
             </div>
-            <div className="grid grid-cols-3 gap-3">
+            <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
               {ENTITIES.map((ent) => (
                 <button
                   key={ent.key}

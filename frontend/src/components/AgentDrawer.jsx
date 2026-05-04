@@ -195,11 +195,11 @@ export default function AgentDrawer() {
       {canChat && <button
         data-testid="agent-drawer-toggle"
         onClick={() => isOpen ? setIsOpen(false) : openDrawer()}
-        className="fixed bottom-20 right-6 z-50 flex items-center gap-2 px-4 py-3 rounded-full shadow-xl text-white font-semibold text-sm transition-all hover:scale-105"
+        className="fixed bottom-20 right-4 sm:right-6 z-50 flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-xl text-white font-semibold text-sm transition-all hover:scale-105"
         style={{ background: "linear-gradient(135deg, #0052CC 0%, #0747A6 100%)" }}
       >
         <BotMessageSquare size={18} strokeWidth={2} />
-        <span>Agent IA PMO</span>
+        <span className="hidden sm:inline">Agent IA PMO</span>
       </button>}
 
       {/* Drawer */}
@@ -210,7 +210,7 @@ export default function AgentDrawer() {
         >
           <div
             data-testid="agent-drawer-panel"
-            className="absolute right-0 top-0 h-full w-[420px] bg-white border-l border-gray-200 shadow-2xl flex flex-col"
+            className="absolute right-0 top-0 h-full w-full sm:w-[380px] xl:w-[420px] bg-white border-l border-gray-200 shadow-2xl flex flex-col"
             style={{ pointerEvents: "all" }}
           >
             {/* Header */}

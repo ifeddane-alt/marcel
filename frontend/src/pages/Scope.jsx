@@ -827,7 +827,7 @@ export default function Scope() {
   const overloadTeams = capacity.filter((t) => t.status === "rouge").length;
 
   return (
-    <div className="p-6 space-y-6 bg-[#F8F9FA] min-h-full">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6 bg-[#F8F9FA] min-h-full">
       {/* En-tête */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>

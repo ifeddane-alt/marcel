@@ -177,10 +177,10 @@ export default function ProjectDetail() {
   };
 
   if (loading) {
-    return <div className="p-8 text-slate-400 text-sm">Chargement du projet...</div>;
+    return <div className="p-4 md:p-8 text-slate-400 text-sm">Chargement du projet...</div>;
   }
   if (!project) {
-    return <div className="p-8 text-rose-500 text-sm">Projet introuvable.</div>;
+    return <div className="p-4 md:p-8 text-rose-500 text-sm">Projet introuvable.</div>;
   }
 
   const budgetDeviation = project.budget_forecast - project.budget_total;
@@ -205,7 +205,7 @@ export default function ProjectDetail() {
   };
 
   return (
-    <div className="p-8" data-testid="project-detail-page">
+    <div className="p-4 md:p-6 lg:p-8" data-testid="project-detail-page">
       {/* Breadcrumb */}
       <nav className="flex items-center gap-1 text-xs text-slate-500 mb-6">
         <Link to="/portfolio" className="hover:text-[#0052CC] flex items-center gap-1">
@@ -217,20 +217,20 @@ export default function ProjectDetail() {
       </nav>
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
-        <div className="flex-1 min-w-0 mr-4">
-          <div className="flex items-center gap-3 mb-2">
+      <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
+        <div className="flex-1 min-w-0">
+          <div className="flex flex-wrap items-center gap-2 mb-2">
             <span className="font-mono-data text-xs text-slate-500 bg-slate-100 px-2 py-0.5 rounded">
               {project.source_id || "—"}
             </span>
             <RAGBadge status={project.status_rag} />
             <MethodologyBadge methodology={project.methodology} />
           </div>
-          <h1 className="font-heading text-3xl font-bold text-[#0F172A] leading-tight" data-testid="project-name">
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] leading-tight" data-testid="project-name">
             {project.name}
           </h1>
           {project.description && (
-            <p className="text-sm text-slate-500 mt-1 max-w-2xl">{project.description}</p>
+            <p className="text-xs sm:text-sm text-slate-500 mt-1 max-w-2xl">{project.description}</p>
           )}
           {project.source_tool && (
             <p className="text-xs text-slate-400 mt-1">
@@ -238,37 +238,37 @@ export default function ProjectDetail() {
             </p>
           )}
         </div>
-        <div className="flex items-center gap-2 flex-shrink-0">
+        <div className="flex flex-wrap items-center gap-2 flex-shrink-0">
           <button
             onClick={() => openAgentWithContext(`Donne-moi un résumé complet du projet "${project?.name}" : état RAG, avancement budget, risques critiques, jalons prochains et points d'attention.`)}
             data-testid="btn-ask-agent"
-            className="flex items-center gap-1.5 px-3 py-2 border border-blue-200 bg-blue-50 text-[#0052CC] text-sm font-semibold rounded hover:bg-blue-100 transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 border border-blue-200 bg-blue-50 text-[#0052CC] text-xs sm:text-sm font-semibold rounded hover:bg-blue-100 transition-colors"
           >
-            <BotMessageSquare size={13} /> Poser une question à l'IA
+            <BotMessageSquare size={13} /> <span className="hidden sm:inline">Poser une question à l'IA</span><span className="sm:hidden">IA</span>
           </button>
           <button
             onClick={() => setExportModalOpen(true)}
             data-testid="btn-export-copil-project"
-            className="flex items-center gap-1.5 px-3 py-2 border border-[#0052CC] text-[#0052CC] text-sm font-semibold rounded hover:bg-[#EBF2FF] transition-colors"
+            className="flex items-center gap-1.5 px-3 py-2 border border-[#0052CC] text-[#0052CC] text-xs sm:text-sm font-semibold rounded hover:bg-[#EBF2FF] transition-colors"
           >
-            <Presentation size={13} /> Export COPIL
+            <Presentation size={13} /> <span className="hidden sm:inline">Export COPIL</span><span className="sm:hidden">COPIL</span>
           </button>
           {canWrite && (
             <>
               <button
                 onClick={() => setEditModalOpen(true)}
                 data-testid="btn-edit-project"
-                className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded text-sm text-slate-600 hover:bg-gray-50 hover:text-[#0052CC] transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded text-xs sm:text-sm text-slate-600 hover:bg-gray-50 hover:text-[#0052CC] transition-colors"
               >
-                <Pencil size={13} /> Modifier
+                <Pencil size={13} /> <span className="hidden sm:inline">Modifier</span>
               </button>
               {canDelete && (
                 <button
                   onClick={() => setConfirmDelete({ type: "project", item: project })}
                   data-testid="btn-delete-project"
-                  className="flex items-center gap-1.5 px-3 py-2 border border-rose-200 rounded text-sm text-rose-600 hover:bg-rose-50 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-2 border border-rose-200 rounded text-xs sm:text-sm text-rose-600 hover:bg-rose-50 transition-colors"
                 >
-                  <Trash2 size={13} /> Supprimer
+                  <Trash2 size={13} /> <span className="hidden sm:inline">Supprimer</span>
                 </button>
               )}
             </>
@@ -294,11 +294,11 @@ export default function ProjectDetail() {
         </div>
       )}
 
-      <div className="grid grid-cols-12 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left column */}
-        <div className="col-span-12 lg:col-span-8 space-y-4">
+        <div className="col-span-1 lg:col-span-8 space-y-4">
           {/* Budget CAPEX / OPEX + EAC */}
-          <div className="bg-white border border-gray-200 rounded shadow-sm p-5" data-testid="budget-section">
+          <div className="bg-white border border-gray-200 rounded shadow-sm p-4 md:p-5" data-testid="budget-section">
             <div className="flex items-center justify-between mb-4">
               <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold">
                 Budget CAPEX / OPEX & EAC
@@ -315,7 +315,7 @@ export default function ProjectDetail() {
             </div>
 
             {/* 4 cards CAPEX + OPEX */}
-            <div className="grid grid-cols-2 gap-4 mb-4">
+            <div className="grid grid-cols-1 sm:grid-cols-2 gap-3 md:gap-4 mb-4">
               {/* CAPEX */}
               <div className="border border-blue-100 rounded-lg p-4 bg-blue-50/30">
                 <div className="text-[10px] font-bold uppercase tracking-widest text-[#0052CC] mb-3">CAPEX</div>
@@ -462,7 +462,7 @@ export default function ProjectDetail() {
                 </svg>
                 Coûts Externes Alloués
               </div>
-              <div className="grid grid-cols-3 gap-4 mb-4">
+              <div className="grid grid-cols-1 sm:grid-cols-3 gap-3 md:gap-4 mb-4">
                 <div className="border border-orange-100 rounded-lg p-3 bg-orange-50/30">
                   <div className="text-[10px] font-bold uppercase tracking-widest text-orange-600 mb-1">Régie estimé</div>
                   <div className="font-mono-data text-xl font-bold text-orange-700" data-testid="ext-regie-cost">
@@ -1146,9 +1146,9 @@ export default function ProjectDetail() {
                 Aucun risque enregistré pour ce projet.
               </div>
             ) : (
-              <div className="grid grid-cols-12 gap-0">
+              <div className="grid grid-cols-1 lg:grid-cols-12 gap-0">
                 {/* Table des risques */}
-                <div className="col-span-12 lg:col-span-8 overflow-x-auto border-r border-gray-100">
+                <div className="col-span-1 lg:col-span-8 overflow-x-auto border-r border-gray-100">
                   <table className="w-full text-sm" data-testid="risks-table">
                     <thead>
                       <tr className="bg-gray-50 text-left">
@@ -1220,7 +1220,7 @@ export default function ProjectDetail() {
                 </div>
 
                 {/* Heatmap 5×5 */}
-                <div className="col-span-12 lg:col-span-4 p-4" data-testid="risk-heatmap-container">
+                <div className="col-span-1 lg:col-span-4 p-4" data-testid="risk-heatmap-container">
                   <RiskHeatmap risks={risks} />
                 </div>
               </div>
@@ -1563,7 +1563,7 @@ export default function ProjectDetail() {
           </div>
         )}
 
-        <div className="col-span-12 lg:col-span-4 space-y-4">
+        <div className="col-span-1 lg:col-span-4 space-y-4">
           <div className="bg-white border border-gray-200 rounded shadow-sm p-5">
             <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4">
               Informations projet

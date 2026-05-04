@@ -61,11 +61,11 @@ export default function AgentAnalytics() {
   }
 
   return (
-    <div className="p-8" data-testid="agent-analytics-page">
+    <div className="p-4 md:p-6 lg:p-8" data-testid="agent-analytics-page">
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="font-heading text-3xl font-bold text-[#0F172A] uppercase tracking-tight">
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">
             Analytics Agent IA
           </h1>
           <p className="text-sm text-slate-500 mt-0.5">

@@ -808,7 +808,7 @@ export default function AdminConfig() {
 
   if (error) {
     return (
-      <div className="p-8">
+      <div className="p-4 md:p-8">
         <div className="bg-rose-50 border border-rose-200 rounded-lg p-4 flex items-center gap-2 text-rose-700">
           <AlertCircle size={16} />
           <span className="text-sm">{error}</span>
@@ -818,7 +818,7 @@ export default function AdminConfig() {
   }
 
   return (
-    <div className="p-8 max-w-4xl mx-auto" data-testid="admin-config-page">
+    <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto" data-testid="admin-config-page">
       <div className="flex items-center gap-3 mb-6">
         <div className="w-9 h-9 bg-[#0052CC] rounded flex items-center justify-center flex-shrink-0">
           <Wrench size={18} className="text-white" />

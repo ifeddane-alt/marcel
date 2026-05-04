@@ -272,11 +272,11 @@ export default function Vendors() {
     : 0;
 
   return (
-    <div className="p-8" data-testid="vendors-page">
+    <div className="p-4 md:p-6 lg:p-8" data-testid="vendors-page">
       {/* En-tête */}
-      <div className="mb-6 flex items-start justify-between">
+      <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-heading text-3xl font-bold text-[#0F172A] uppercase tracking-tight flex items-center gap-2">
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight flex items-center gap-2">
             <Handshake size={26} className="text-[#0052CC]" />
             Suivi Fournisseurs
           </h1>
