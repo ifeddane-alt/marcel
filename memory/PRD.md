@@ -120,17 +120,25 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - `WebSocket /ws` — Notifications temps réel
 - `POST /api/export/copil` — Génération PPT COPIL
 
-## État final — MARCEL V1.0 ✅ + Module Budget ✅ (Mai 2026)
+## État final — MARCEL V1.0 ✅ + Module Budget ✅ + Responsive UI ✅ (Mai 2026)
 - **19/19 items MARCEL** : COMPLÉTÉS ✅
 - **Module Budget** : Page /budget complète (KPIs, tableau, programmes, graphiques, export, révisions) ✅
+- **Responsive Design** : Layout responsive 3 viewports (Mobile/Tablet/Desktop) ✅
 - **Tests Pytest** : **80 tests passent / 0 échec** ✅
 - **Sécurité** : Rate limiting par email (10/min), HTTP Security headers ✅
 - **Bugs connus** : Aucun
 - **APIs mockées** : SAP RFC (pyrfc absent), Jira sync, ServiceNow sync
 - **Isolation multi-tenant** : ✅ Altair / Beta Corp totalement isolés
 
+## Responsive Design — Détails (Mai 2026)
+| Viewport | Comportement Sidebar | KPI Cards | Pages |
+|---|---|---|---|
+| Mobile (<768px) | Drawer overlay, hamburger, `w-72` | 1 colonne | `p-4` |
+| Tablet (768-1279px) | `w-[60px]` in-flow, `hover:w-60` (group) | 2×2 | `p-4 md:p-6` |
+| Desktop (≥1280px) | Toujours `w-60`, labels visibles | 4 colonnes | `p-4 md:p-6 lg:p-8` |
+
 ## Backlog / Améliorations futures
-### P0 — Néant (MARCEL V1.0 intégralement livré)
+### P0 — Néant (MARCEL V1.0 + Budget + Responsive intégralement livrés)
 ### P1 — Optionnel
 - Installer pyrfc + SAP NW RFC SDK pour connectivité RFC native réelle
 - CI/CD pipeline GitHub Actions
