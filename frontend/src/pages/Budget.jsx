@@ -113,7 +113,7 @@ function RevisionModal({ project, onClose, onSave }) {
 
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6">
+      <div className="bg-white rounded-none sm:rounded-xl shadow-2xl w-full max-h-screen sm:max-h-[90vh] overflow-y-auto sm:max-w-lg p-6">
         <div className="flex items-center justify-between mb-4">
           <h3 className="font-bold text-slate-800 text-lg">Modifier le budget</h3>
           <button onClick={onClose} className="text-slate-400 hover:text-slate-600"><X size={20} /></button>
@@ -683,7 +683,8 @@ export default function BudgetPage() {
               {/* Graphique 1 — CAPEX/OPEX par programme */}
               <div className="bg-white rounded-xl border border-gray-200 p-5">
                 <h3 className="text-sm font-semibold text-slate-700 mb-4">Répartition CAPEX / OPEX par programme (K€)</h3>
-                <ResponsiveContainer width="100%" height={260}>
+                <div className="h-48 sm:h-[260px]">
+                <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartPrograms} margin={{ left: 20, right: 20, bottom: 40 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" />
                     <XAxis dataKey="name" tick={{ fontSize: 10 }} angle={-20} textAnchor="end" />
@@ -694,12 +695,14 @@ export default function BudgetPage() {
                     <Bar dataKey="OPEX (K€)" fill="#66AAF9" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
+                </div>
               </div>
 
               {/* Graphique 2 — Prévu vs Consommé vs EAC par projet */}
               <div className="bg-white rounded-xl border border-gray-200 p-5">
                 <h3 className="text-sm font-semibold text-slate-700 mb-4">Prévu vs Consommé vs EAC par projet (K€)</h3>
-                <ResponsiveContainer width="100%" height={280}>
+                <div className="h-48 sm:h-[280px]">
+                <ResponsiveContainer width="100%" height="100%">
                   <BarChart data={chartProjets} margin={{ left: 20, right: 20, bottom: 60 }}>
                     <CartesianGrid strokeDasharray="3 3" stroke="#F0F0F0" />
                     <XAxis dataKey="name" tick={{ fontSize: 9 }} angle={-30} textAnchor="end" />
@@ -711,13 +714,15 @@ export default function BudgetPage() {
                     <Bar dataKey="EAC" fill="#EF4444" radius={[3, 3, 0, 0]} />
                   </BarChart>
                 </ResponsiveContainer>
+                </div>
               </div>
 
               {/* Graphique 3 — EAC vs Budget initial (courbe) */}
               <div className="bg-white rounded-xl border border-gray-200 p-5">
                 <h3 className="text-sm font-semibold text-slate-700 mb-2">Dérive EAC par rapport au budget initial</h3>
                 <p className="text-xs text-slate-400 mb-4">Projets triés par écart croissant</p>
-                <ResponsiveContainer width="100%" height={240}>
+                <div className="h-44 sm:h-[240px]">
+                <ResponsiveContainer width="100%" height="100%">
                   <LineChart
                     data={[...chartProjets].sort((a, b) => (a.EAC - a["Prévu"]) - (b.EAC - b["Prévu"]))}
                     margin={{ left: 20, right: 20, bottom: 60 }}>
@@ -730,6 +735,7 @@ export default function BudgetPage() {
                     <Line type="monotone" dataKey="EAC" stroke="#EF4444" strokeWidth={2} strokeDasharray="4 2" dot={false} />
                   </LineChart>
                 </ResponsiveContainer>
+                </div>
               </div>
             </div>
           )}

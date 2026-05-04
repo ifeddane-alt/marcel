@@ -419,18 +419,20 @@ export default function Dashboard() {
           <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4">
             Budget par projet (€)
           </div>
-          <ResponsiveContainer width="100%" height={220}>
+          <div className="h-36 sm:h-[220px]">
+          <ResponsiveContainer width="100%" height="100%">
             <BarChart data={budgetData} margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
               <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
-              <XAxis dataKey="name" tick={{ fontSize: 10, fill: "#94A3B8" }} />
-              <YAxis tick={{ fontSize: 10, fill: "#94A3B8" }} tickFormatter={(v) => `${(v / 1e6).toFixed(1)}M`} />
+              <XAxis dataKey="name" tick={{ fontSize: 9, fill: "#94A3B8" }} interval="preserveStartEnd" />
+              <YAxis tick={{ fontSize: 9, fill: "#94A3B8" }} tickFormatter={(v) => `${(v / 1e6).toFixed(1)}M`} />
               <Tooltip content={<CustomTooltip />} />
-              <Legend wrapperStyle={{ fontSize: 11 }} />
+              <Legend wrapperStyle={{ fontSize: 10 }} />
               <Bar dataKey="Total" fill="#CBD5E1" radius={[2, 2, 0, 0]} />
               <Bar dataKey="Consommé" fill="#0052CC" radius={[2, 2, 0, 0]} />
               <Bar dataKey="Forecast" fill="#F59E0B" radius={[2, 2, 0, 0]} />
             </BarChart>
           </ResponsiveContainer>
+          </div>
         </div>
 
         {/* RAG Pie */}
@@ -438,7 +440,8 @@ export default function Dashboard() {
           <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4">
             Distribution RAG
           </div>
-          <ResponsiveContainer width="100%" height={140}>
+          <div className="h-28 sm:h-36">
+          <ResponsiveContainer width="100%" height="100%">
             <PieChart>
               <Pie data={ragData} cx="50%" cy="50%" innerRadius={45} outerRadius={65} paddingAngle={2} dataKey="value">
                 {ragData.map((entry, i) => (
@@ -448,6 +451,7 @@ export default function Dashboard() {
               <Tooltip formatter={(v) => [`${v} projets`]} />
             </PieChart>
           </ResponsiveContainer>
+          </div>
           <div className="mt-2 space-y-1.5">
             {ragData.map((item) => (
               <div key={item.name} className="flex items-center justify-between text-xs">

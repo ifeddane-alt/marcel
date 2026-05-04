@@ -525,8 +525,8 @@ function FreezeModal({ projects, nextVersion, onClose, onFreeze }) {
   const [comment, setComment] = useState("");
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" data-testid="freeze-modal">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-0 sm:p-4" data-testid="freeze-modal">
+      <div className="bg-white rounded-none sm:rounded-2xl shadow-2xl w-full max-h-screen sm:max-h-[90vh] overflow-y-auto sm:max-w-md">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Lock size={18} className="text-[#0052CC]" />
@@ -580,8 +580,8 @@ function TransmitModal({ snapshot, users, onClose, onTransmit }) {
   const [comment, setComment] = useState("");
 
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4" data-testid="transmit-modal">
-      <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-0 sm:p-4" data-testid="transmit-modal">
+      <div className="bg-white rounded-none sm:rounded-2xl shadow-2xl w-full max-h-screen sm:max-h-[90vh] overflow-y-auto sm:max-w-md">
         <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
             <Send size={18} className="text-[#0052CC]" />

@@ -518,7 +518,7 @@ export default function Demands() {
       {/* ─── DnD Quick Dialog ─────────────────────────────────────────────── */}
       {dndDialog && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 p-4">
-          <div className="bg-white rounded-2xl shadow-2xl w-full max-w-sm p-6 space-y-4">
+          <div className="bg-white rounded-none sm:rounded-2xl shadow-2xl w-full max-h-screen sm:max-h-[90vh] overflow-y-auto sm:max-w-sm p-6 space-y-4">
             <h3 className="font-bold text-slate-800">
               {dndDialog.action === "prioritize" ? "Score de priorité requis" : "Motif de refus requis"}
             </h3>

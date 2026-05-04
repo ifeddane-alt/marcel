@@ -110,7 +110,8 @@ export default function AgentAnalytics() {
               <h2 className="font-semibold text-slate-800 text-sm">Activité 30 derniers jours</h2>
             </div>
             {data.daily_usage?.length > 0 ? (
-              <ResponsiveContainer width="100%" height={220}>
+              <div className="h-36 sm:h-[220px]">
+              <ResponsiveContainer width="100%" height="100%">
                 <BarChart data={data.daily_usage} margin={{ top: 0, right: 10, left: 0, bottom: 0 }}>
                   <CartesianGrid strokeDasharray="3 3" vertical={false} stroke="#F1F5F9" />
                   <XAxis
@@ -129,6 +130,7 @@ export default function AgentAnalytics() {
                   <Bar dataKey="simulations" name="Simulations" fill="#8B5CF6" radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
+              </div>
             ) : (
               <div className="flex items-center justify-center h-40 text-slate-400 text-sm">
                 Aucune activité sur les 30 derniers jours.

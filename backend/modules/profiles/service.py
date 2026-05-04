@@ -24,6 +24,7 @@ ALL_PERMISSIONS = [
     {"key": "projects.delete",             "label": "Supprimer des projets",          "module": "Projets"},
     # Export
     {"key": "export.ppt",                  "label": "Exporter COPIL (PPT)",           "module": "Export"},
+    {"key": "export.powerbi",              "label": "Connecteur Power BI (export données)", "module": "Export"},
     # Tâches
     {"key": "tasks.create",                "label": "Créer des tâches",               "module": "Tâches"},
     {"key": "tasks.edit",                  "label": "Modifier des tâches",            "module": "Tâches"},
@@ -129,6 +130,7 @@ DEFAULT_PROFILES = [
             "vendors.view", "vendors.view_contracts",
             "arbitrage.view",
             "agent.chat", "agent.recommend", "agent.alerts",
+            "export.powerbi",
         ],
     },
     {
@@ -153,6 +155,7 @@ DEFAULT_PROFILES = [
             "vendors.view_contracts", "import.csv",
             "arbitrage.view", "arbitrage.edit", "arbitrage.simulate",
             "agent.chat", "agent.recommend", "agent.alerts",
+            "export.powerbi",
         ],
     },
     {
@@ -233,6 +236,7 @@ DEFAULT_PROFILES = [
             "timesheets.view_all", "risks.view", "compliance.view", "demands.view_own",
             "trains.view", "scope.simulate", "vendors.view", "vendors.view_contracts",
             "arbitrage.view", "arbitrage.edit",
+            "export.powerbi",
         ],
     },
     {

@@ -516,7 +516,8 @@ export default function Arbitrage() {
               <span className="text-sm font-semibold text-slate-700">Carte Valeur vs Risque</span>
               <span className="text-xs text-slate-400">(X = Valeur Business · Y = Risque · Taille = Budget total · Couleur = RAG)</span>
             </div>
-            <ResponsiveContainer width="100%" height={320}>
+            <div className="h-56 sm:h-[320px]">
+            <ResponsiveContainer width="100%" height="100%">
               <ScatterChart margin={{ top: 10, right: 20, bottom: 20, left: 10 }}>
                 <CartesianGrid strokeDasharray="3 3" stroke="#f1f5f9" />
                 <XAxis
@@ -569,6 +570,7 @@ export default function Arbitrage() {
                 </Scatter>
               </ScatterChart>
             </ResponsiveContainer>
+            </div>
             <div className="flex items-center gap-4 mt-2 justify-center flex-wrap">
               {Object.entries(RAG_COLORS).map(([k, c]) => (
                 <div key={k} className="flex items-center gap-1.5 text-xs text-slate-500">
@@ -1210,7 +1212,7 @@ export default function Arbitrage() {
       {/* Modal Poids */}
       {showWeightsModal && pendingWeights && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6" data-testid="weights-modal">
+          <div className="bg-white rounded-none sm:rounded-xl shadow-2xl w-full max-h-screen sm:max-h-[90vh] overflow-y-auto sm:max-w-md p-6" data-testid="weights-modal">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-slate-800">Configurer les poids de scoring</h3>
               <button onClick={() => setShowWeightsModal(false)} className="text-slate-400 hover:text-slate-600">
@@ -1256,7 +1258,7 @@ export default function Arbitrage() {
       {/* Modal Enveloppe */}
       {envModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6" data-testid="envelope-modal">
+          <div className="bg-white rounded-none sm:rounded-xl shadow-2xl w-full max-h-screen sm:max-h-[90vh] overflow-y-auto sm:max-w-sm p-6" data-testid="envelope-modal">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-slate-800">Enveloppe budgétaire</h3>
               <button onClick={() => setEnvModal(false)} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>
@@ -1300,7 +1302,7 @@ export default function Arbitrage() {
       {/* Modal Sauvegarder Scénario */}
       {saveScenarioModal && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
-          <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6" data-testid="save-scenario-modal">
+          <div className="bg-white rounded-none sm:rounded-xl shadow-2xl w-full max-h-screen sm:max-h-[90vh] overflow-y-auto sm:max-w-sm p-6" data-testid="save-scenario-modal">
             <div className="flex items-center justify-between mb-4">
               <h3 className="text-lg font-semibold text-slate-800">Sauvegarder le scénario</h3>
               <button onClick={() => setSaveScenarioModal(false)} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>

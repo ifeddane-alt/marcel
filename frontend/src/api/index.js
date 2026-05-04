@@ -298,4 +298,16 @@ export const budgetAPI = {
   exportPdf:    ()             => api.get("/budget/export/pdf", { responseType: "blob" }),
 };
 
+export const powerBIAPI = {
+  getKey:      ()     => api.get("/admin/powerbi/key"),
+  generateKey: ()     => api.post("/admin/powerbi/generate-key"),
+  revokeKey:   ()     => api.delete("/admin/powerbi/revoke-key"),
+  projects:    ()     => api.get("/powerbi/projects"),
+  resources:   ()     => api.get("/powerbi/resources"),
+  timesheets:  ()     => api.get("/powerbi/timesheets"),
+  budget:      ()     => api.get("/powerbi/budget"),
+  risks:       ()     => api.get("/powerbi/risks"),
+  milestones:  ()     => api.get("/powerbi/milestones"),
+};
+
 export default api;

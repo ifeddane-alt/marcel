@@ -484,7 +484,7 @@ function GroupCard({
 function RejectModal({ onConfirm, onClose }) {
   const [reason, setReason] = useState("");
   return (
-    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-4">
+    <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-0 sm:p-4">
       <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md" data-testid="reject-modal">
         <h3 className="font-bold text-slate-800 text-base mb-3 flex items-center gap-2">
           <AlertTriangle size={16} className="text-rose-500" /> Motif du rejet

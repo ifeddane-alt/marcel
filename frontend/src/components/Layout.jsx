@@ -29,6 +29,7 @@ import {
   BarChart2,
   X,
   DollarSign,
+  Database,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -301,6 +302,12 @@ export default function Layout() {
               <NavLink to="/admin/agent-analytics" data-testid="nav-admin-agent-analytics" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Analytics IA">
                 <BarChart2 size={16} strokeWidth={1.75} className="flex-shrink-0" />
                 <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Analytics IA</span>
+              </NavLink>
+            )}
+            {(hasPermission("admin.config") || hasPermission("*")) && (
+              <NavLink to="/admin/powerbi" data-testid="nav-admin-powerbi" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Connecteur Power BI">
+                <Database size={16} strokeWidth={1.75} className="flex-shrink-0" />
+                <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Power BI</span>
               </NavLink>
             )}
           </>
