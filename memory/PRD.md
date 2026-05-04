@@ -120,22 +120,36 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - `WebSocket /ws` — Notifications temps réel
 - `POST /api/export/copil` — Génération PPT COPIL
 
-## État final — MARCEL V1.0 ✅ + Module Budget ✅ + Responsive UI ✅ (Mai 2026)
+## État final — MARCEL V1.0 ✅ + Module Budget ✅ + Responsive UI ✅ + Power BI Connector ✅ (Mai 2026)
 - **19/19 items MARCEL** : COMPLÉTÉS ✅
 - **Module Budget** : Page /budget complète (KPIs, tableau, programmes, graphiques, export, révisions) ✅
 - **Responsive Design** : Layout responsive 3 viewports (Mobile/Tablet/Desktop) ✅
-- **Tests Pytest** : **80 tests passent / 0 échec** ✅
+- **Connecteur Power BI** : 6 endpoints GET /api/powerbi/*, auth JWT+API Key, page /admin/powerbi ✅
+- **Tests Pytest** : **80 tests passent / 0 échec** ✅ (+ 15 tests powerbi ajoutés)
 - **Sécurité** : Rate limiting par email (10/min), HTTP Security headers ✅
 - **Bugs connus** : Aucun
 - **APIs mockées** : SAP RFC (pyrfc absent), Jira sync, ServiceNow sync
 - **Isolation multi-tenant** : ✅ Altair / Beta Corp totalement isolés
 
+## Connecteur Power BI — Détails (Mai 2026)
+| Endpoint | Champs retournés |
+|---|---|
+| GET /api/powerbi/projects | id, name, program, methodology, status, rag, capex_budget, opex_budget, capex_consumed, opex_consumed, eac, raf, start_date, end_date, owner |
+| GET /api/powerbi/resources | id, name, role, team, type, vendor, tjm, availability_rate, capacity_jh |
+| GET /api/powerbi/timesheets | resource_name, project_name, date, jh, status |
+| GET /api/powerbi/budget | project_name, program, capex_prev, capex_cons, opex_prev, opex_cons, eac, raf, ecart_pct |
+| GET /api/powerbi/risks | project_name, name, probability, impact, criticality, category, status |
+| GET /api/powerbi/milestones | project_name, name, family, type, date, days_remaining, attribute, status |
+
+- Auth : Bearer JWT ou header X-API-Key (clé pbi-xxx générée dans /admin/powerbi)
+- Permission : export.powerbi (accordée ADMIN, CIO, PORTFOLIO, FINANCE)
+
 ## Responsive Design — Détails (Mai 2026)
-| Viewport | Comportement Sidebar | KPI Cards | Pages |
-|---|---|---|---|
-| Mobile (<768px) | Drawer overlay, hamburger, `w-72` | 1 colonne | `p-4` |
-| Tablet (768-1279px) | `w-[60px]` in-flow, `hover:w-60` (group) | 2×2 | `p-4 md:p-6` |
-| Desktop (≥1280px) | Toujours `w-60`, labels visibles | 4 colonnes | `p-4 md:p-6 lg:p-8` |
+| Viewport | Comportement Sidebar | KPI Cards | Modals | Pages |
+|---|---|---|---|---|
+| Mobile (<768px) | Drawer overlay, hamburger | 1 colonne | rounded-none, fullscreen, p-0 | p-4 |
+| Tablet (768-1279px) | 60px in-flow, hover:w-60 (group) | 2×2 | rounded-none sm:rounded-xl | p-4 md:p-6 |
+| Desktop (≥1280px) | Toujours w-60, labels visibles | 4 colonnes | rounded-xl | p-4 md:p-6 lg:p-8 |
 
 ## Backlog / Améliorations futures
 ### P0 — Néant (MARCEL V1.0 + Budget + Responsive intégralement livrés)
