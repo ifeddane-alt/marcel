@@ -161,6 +161,15 @@ async def startup_event():
     scheduler.start()
     await _schedule_connectors()
     logger.info("[Scheduler] APScheduler démarré")
+    # Synchroniser les permissions de profils pour tous les tenants existants
+    try:
+        from modules.profiles.service import seed_default_profiles
+        tenant_ids = await db.tenants.distinct("tenant_id")
+        for tid in tenant_ids:
+            await seed_default_profiles(tid)
+        logger.info(f"[Startup] Permissions profils synchronisées pour {len(tenant_ids)} tenant(s)")
+    except Exception as e:
+        logger.warning(f"[Startup] Synchro profils non critique : {e}")
 
 
 @app.on_event("shutdown")

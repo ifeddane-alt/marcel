@@ -425,31 +425,34 @@ def _role_to_permissions(role: str, tenant_id: str = "") -> list[str]:
 # ─── Seed des 12 profils par défaut ──────────────────────────────────────────
 
 async def seed_default_profiles(tenant_id: str) -> dict:
-    """Seed les 12 profils par défaut. Idempotent."""
-    existing = await db.profiles.count_documents({"tenant_id": tenant_id})
-    if existing >= 12:
-        return {"seeded": 0, "message": "Profils déjà présents"}
-
+    """Seed/synchro les profils par défaut. Upsert par code — propage les nouvelles permissions."""
     now = _now()
-    docs = []
+    upserted = 0
     for p in DEFAULT_PROFILES:
-        docs.append({
-            "profile_id": str(uuid.uuid4()),
-            "tenant_id":  tenant_id,
-            "is_system":  p["is_system"],
-            "name":       p["name"],
-            "code":       p["code"],
-            "description": p["description"],
-            "permissions": p["permissions"],
-            "created_at": now,
-            "updated_at": now,
-        })
+        existing = await db.profiles.find_one(
+            {"tenant_id": tenant_id, "code": p["code"]}, {"_id": 0, "profile_id": 1}
+        )
+        if existing:
+            # Toujours synchroniser les permissions (pour propager les ajouts)
+            await db.profiles.update_one(
+                {"tenant_id": tenant_id, "code": p["code"]},
+                {"$set": {"permissions": p["permissions"], "updated_at": now}},
+            )
+        else:
+            await db.profiles.insert_one({
+                "profile_id": str(uuid.uuid4()),
+                "tenant_id":  tenant_id,
+                "is_system":  p["is_system"],
+                "name":       p["name"],
+                "code":       p["code"],
+                "description": p["description"],
+                "permissions": p["permissions"],
+                "created_at": now,
+                "updated_at": now,
+            })
+            upserted += 1
 
-    # Vider les profils existants du tenant et ré-insérer
-    await db.profiles.delete_many({"tenant_id": tenant_id})
-    await db.profiles.insert_many(docs)
-
-    return {"seeded": len(docs), "profiles": [d["code"] for d in docs]}
+    return {"synced": len(DEFAULT_PROFILES), "created": upserted}
 
 
 async def seed_full_profiles_and_users(tenant_id: str) -> dict:
