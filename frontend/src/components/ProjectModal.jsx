@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Loader2 } from "lucide-react";
+import { Loader2, ChevronDown, ChevronUp, CheckSquare, Square, Layers } from "lucide-react";
 import Modal from "@/components/Modal";
-import { projectsAPI } from "@/api";
+import { projectsAPI, projectTemplatesAPI } from "@/api";
 import { useTenantConfig } from "@/contexts/TenantConfigContext";
 
 const DEFAULT_STATUS_OPTIONS = [
@@ -45,6 +45,11 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const [apiError, setApiError] = useState("");
+  // Template state
+  const [templates, setTemplates] = useState([]);
+  const [selectedTemplate, setSelectedTemplate] = useState(null);
+  const [selectedPhases, setSelectedPhases] = useState([]);
+  const [showTemplate, setShowTemplate] = useState(false);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -74,7 +79,23 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
     }
     setErrors({});
     setApiError("");
+    setSelectedTemplate(null);
+    setSelectedPhases([]);
+    setShowTemplate(false);
   }, [isOpen, project]);
+
+  // Load templates when methodology changes (creation only)
+  useEffect(() => {
+    if (!isOpen || project) return;
+    projectTemplatesAPI.list().then(({ data }) => {
+      const match = data.find(t => t.methodology === form.methodology);
+      setTemplates(data);
+      if (match) {
+        setSelectedTemplate(match);
+        setSelectedPhases(match.phases.map(p => p.name));
+      }
+    }).catch(() => {});
+  }, [form.methodology, isOpen, project]);
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -130,7 +151,14 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
       if (project) {
         await projectsAPI.update(project.project_id, payload);
       } else {
-        await projectsAPI.create(payload);
+        const { data: created } = await projectsAPI.create(payload);
+        // Apply template if selected
+        if (showTemplate && selectedTemplate && selectedPhases.length > 0) {
+          await projectTemplatesAPI.applyTemplate(created.project_id, {
+            template_id: selectedTemplate.template_id,
+            selected_phases: selectedPhases,
+          });
+        }
       }
       onSaved();
       onClose();
@@ -279,6 +307,54 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
           </div>
         </div>
 
+        {/* Template (création uniquement) */}
+        {!project && selectedTemplate && (
+          <div className="border-t border-gray-100 pt-3">
+            <button
+              type="button"
+              data-testid="template-toggle"
+              onClick={() => setShowTemplate(v => !v)}
+              className="flex items-center gap-2 w-full text-left text-sm font-semibold text-slate-700 hover:text-[#0052CC] transition-colors"
+            >
+              <Layers size={15} />
+              <span>Pré-charger depuis le template {selectedTemplate.name}</span>
+              {showTemplate ? <ChevronUp size={14} className="ml-auto" /> : <ChevronDown size={14} className="ml-auto" />}
+            </button>
+
+            {showTemplate && (
+              <div className="mt-3 space-y-2 bg-slate-50 rounded-lg p-3 border border-slate-200">
+                <p className="text-xs text-slate-500 mb-2">Sélectionnez les phases à pré-charger :</p>
+                {selectedTemplate.phases.map(phase => (
+                  <label
+                    key={phase.name}
+                    data-testid={`template-phase-${phase.name}`}
+                    className="flex items-start gap-2 cursor-pointer hover:bg-white rounded p-2 transition-colors"
+                  >
+                    <input
+                      type="checkbox"
+                      checked={selectedPhases.includes(phase.name)}
+                      onChange={e => {
+                        if (e.target.checked) {
+                          setSelectedPhases(prev => [...prev, phase.name]);
+                        } else {
+                          setSelectedPhases(prev => prev.filter(n => n !== phase.name));
+                        }
+                      }}
+                      className="mt-0.5 accent-[#0052CC]"
+                    />
+                    <div>
+                      <span className="text-sm font-medium text-slate-700">{phase.name}</span>
+                      <span className="text-xs text-slate-400 ml-2">
+                        {phase.milestones?.length || 0} jalons · {phase.tasks?.length || 0} tâches
+                      </span>
+                    </div>
+                  </label>
+                ))}
+              </div>
+            )}
+          </div>
+        )}
+
         <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
           <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 border border-gray-200 rounded hover:bg-gray-50 transition-colors">
             Annuler
@@ -290,7 +366,7 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
             className="flex items-center gap-2 px-5 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] disabled:opacity-50 transition-colors"
           >
             {saving && <Loader2 size={14} className="animate-spin" />}
-            {project ? "Enregistrer" : "Créer le projet"}
+            {project ? "Enregistrer" : (showTemplate && selectedTemplate ? "Créer + Appliquer le template" : "Créer le projet")}
           </button>
         </div>
       </form>

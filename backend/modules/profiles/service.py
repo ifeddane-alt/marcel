@@ -24,7 +24,9 @@ ALL_PERMISSIONS = [
     {"key": "projects.delete",             "label": "Supprimer des projets",          "module": "Projets"},
     # Export
     {"key": "export.ppt",                  "label": "Exporter COPIL (PPT)",           "module": "Export"},
+    {"key": "export.status_report",        "label": "Générer un Status Report (PPT)", "module": "Export"},
     {"key": "export.powerbi",              "label": "Connecteur Power BI (export données)", "module": "Export"},
+    {"key": "admin.templates",             "label": "Gérer les templates projets",    "module": "Admin"},
     # Tâches
     {"key": "tasks.create",                "label": "Créer des tâches",               "module": "Tâches"},
     {"key": "tasks.edit",                  "label": "Modifier des tâches",            "module": "Tâches"},
@@ -123,7 +125,7 @@ DEFAULT_PROFILES = [
         "description": "Lecture totale, exports, zéro écriture",
         "is_system": True,
         "permissions": [
-            "dashboard.view", "portfolio.view", "export.ppt", "roadmap.view",
+            "dashboard.view", "portfolio.view", "export.ppt", "export.status_report", "roadmap.view",
             "teams.view", "budget.view", "raf.view", "timesheets.view_all",
             "risks.view", "decisions.view", "governance.view", "compliance.view",
             "demands.view_own", "trains.view", "scope.receive", "scope.simulate",
@@ -140,7 +142,7 @@ DEFAULT_PROFILES = [
         "is_system": True,
         "permissions": [
             "dashboard.view", "portfolio.view", "projects.create", "projects.edit",
-            "export.ppt", "tasks.create", "tasks.edit", "milestones.create",
+            "export.ppt", "export.status_report", "tasks.create", "tasks.edit", "milestones.create",
             "milestones.edit", "milestones.set_attribute", "roadmap.view",
             "dependencies.create", "resources.create", "resources.edit",
             "teams.create", "teams.edit", "teams.view", "allocations.create",
@@ -165,6 +167,7 @@ DEFAULT_PROFILES = [
         "is_system": True,
         "permissions": [
             "dashboard.view", "portfolio.view", "projects.view_own", "export.ppt",
+            "export.status_report",
             "tasks.create", "tasks.edit", "milestones.create", "milestones.edit", "roadmap.view",
             "dependencies.create", "teams.view", "allocations.create",
             "budget.view", "budget.edit", "budget.revise_eac", "raf.view",

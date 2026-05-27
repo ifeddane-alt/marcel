@@ -20,6 +20,7 @@ import DependencyModal from "@/components/DependencyModal";
 import RiskHeatmap from "@/components/RiskHeatmap";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import ExportCopilModal from "@/components/ExportCopilModal";
+import StatusReportModal from "@/components/StatusReportModal";
 import WorkAllocationModal from "@/components/WorkAllocationModal";
 import ProjectGantt from "@/components/ProjectGantt";
 import { formatEuro, formatDate, formatJH } from "@/utils/format";
@@ -58,6 +59,7 @@ export default function ProjectDetail() {
   const canCreateRisk= hasPermission("risks.create");
   const canCreateTask= hasPermission("tasks.create");
   const canCreateDec = hasPermission("decisions.create");
+  const can          = (perm) => hasPermission(perm);
   // Pour rétrocompat avec canWrite utilisé dans plusieurs endroits
   const canWrite = canEdit;
 
@@ -83,6 +85,7 @@ export default function ProjectDetail() {
   const [riskModalOpen, setRiskModalOpen] = useState(false);
   const [decisionModalOpen, setDecisionModalOpen] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [statusReportOpen, setStatusReportOpen] = useState(false);
   const [waModalOpen, setWaModalOpen] = useState(false);
   const [selectedWa, setSelectedWa] = useState(null);
   const [selectedTask, setSelectedTask] = useState(null);
@@ -253,6 +256,15 @@ export default function ProjectDetail() {
           >
             <Presentation size={13} /> <span className="hidden sm:inline">Export COPIL</span><span className="sm:hidden">COPIL</span>
           </button>
+          {can("export.status_report") && (
+            <button
+              onClick={() => setStatusReportOpen(true)}
+              data-testid="btn-status-report"
+              className="flex items-center gap-1.5 px-3 py-2 border border-emerald-500 text-emerald-700 text-xs sm:text-sm font-semibold rounded hover:bg-emerald-50 transition-colors"
+            >
+              <ClipboardList size={13} /> <span className="hidden sm:inline">Status Report</span><span className="sm:hidden">Report</span>
+            </button>
+          )}
           {canWrite && (
             <>
               <button
@@ -1681,6 +1693,11 @@ export default function ProjectDetail() {
         onClose={() => setExportModalOpen(false)}
         selectedProjectIds={project ? [project.project_id] : []}
         selectedProjectNames={project ? [project.name] : []}
+      />
+      <StatusReportModal
+        isOpen={statusReportOpen}
+        onClose={() => setStatusReportOpen(false)}
+        project={project}
       />
       <WorkAllocationModal
         isOpen={waModalOpen}

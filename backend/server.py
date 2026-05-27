@@ -45,6 +45,8 @@ from modules.agent.router import router as agent_router
 from modules.notifications.router import router as notifications_router
 from modules.budget.router import router as budget_router
 from modules.powerbi.router import router as powerbi_router
+from modules.status_report.router import router as status_report_router
+from modules.project_templates.router import router as project_templates_router
 from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI(title="MARCEL API")
@@ -96,6 +98,8 @@ for _router in [
     notifications_router,
     budget_router,
     powerbi_router,
+    status_report_router,
+    project_templates_router,
 ]:
     app.include_router(_router, prefix="/api")
 

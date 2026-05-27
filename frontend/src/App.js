@@ -31,6 +31,7 @@ import MesAlertes from "@/pages/MesAlertes";
 import AgentAnalytics from "@/pages/AgentAnalytics";
 import Budget from "@/pages/Budget";
 import AdminPowerBI from "@/pages/AdminPowerBI";
+import AdminTemplates from "@/pages/AdminTemplates";
 import "@/App.css";
 
 function ProtectedRoute({ children }) {
@@ -97,6 +98,7 @@ function AppRoutes() {
         <Route path="admin/users" element={<AdminRoute><AdminUsers /></AdminRoute>} />
         <Route path="admin/config" element={<AdminRoute><AdminConfig /></AdminRoute>} />
         <Route path="admin/powerbi" element={<AdminRoute><AdminPowerBI /></AdminRoute>} />
+        <Route path="admin/templates" element={<AdminRoute><AdminTemplates /></AdminRoute>} />
         <Route path="vendors" element={<Vendors />} />
         <Route path="safe/trains" element={<TrainsSafe />} />
         <Route path="safe/trains/:trainId" element={<TrainsSafe />} />

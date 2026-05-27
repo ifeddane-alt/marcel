@@ -1,0 +1,41 @@
+{
+  "summary": "Tested Feature 1 (Status Report PPT) and Feature 2 (Project Templates). All 16 backend tests pass. All frontend flows verified. Found and fixed a critical permission bug: cp@altair.fr was assigned to PORTFOLIO profile which lacked 'export.status_report' permission in DB (profile was seeded before this permission was added). Fixed by adding the permission to the DB profile directly.",
+  "backend_issues": {
+    "critical": [
+      {
+        "endpoint": "seed_default_profiles / profiles DB",
+        "issue": "Existing profiles in DB were seeded before 'export.status_report' was added to DEFAULT_PROFILES. The seed function is idempotent (skips if >= 12 profiles exist) so new permissions are never applied to existing tenants. PORTFOLIO and CHEF_DE_PROJET profiles were missing 'export.status_report'. Fixed manually in DB but E1 needs to add a migration/re-seed mechanism.",
+        "priority": "HIGH"
+      }
+    ],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_status_report_templates.py",
+    "/app/test_reports/pytest/status_report_templates.xml"
+  ],
+  "action_items": [
+    "E1: Fix seed_default_profiles() to update permissions of EXISTING profiles when DEFAULT_PROFILES changes (use upsert with permissions sync, not just count-based skip). Currently a new permission added to service.py DEFAULT_PROFILES won't propagate to existing DB profiles.",
+    "E1: Consider adding a migration endpoint or startup hook that syncs existing profiles' permissions against DEFAULT_PROFILES"
+  ],
+  "critical_code_review_comments": [
+    "seed_default_profiles() at /app/backend/modules/profiles/service.py:427 uses `if existing >= 12: return` guard — this means any new permission added to DEFAULT_PROFILES will never be applied to existing tenants. Should use upsert-by-code instead.",
+    "cp@altair.fr was assigned profile_id pointing to PORTFOLIO profile, not CHEF_DE_PROJET. Both profiles needed 'export.status_report' added."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_status_report_templates.py",
+    "MongoDB: profiles collection (added export.status_report to PORTFOLIO and CHEF_DE_PROJET profiles)"
+  ],
+  "success_rate": {"backend": "16/16 (100%)", "frontend": "100%"},
+  "test_credentials": "admin@altair.fr / Admin2026!, cp@altair.fr / Altair2026!",
+  "seed_data_creation": "None - only DB profile permissions updated to fix bug",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Status Report and Project Templates both working. Weather endpoint returns 4 indicators (perimeter, budget, calendar, scope_change) each with valid level (soleil/nuage/pluie/orage/gel). PPT generation returns pptx > 10KB. Templates: 3 defaults (Waterfall 6 phases, Agile 5 phases, SAFe 4 phases). Template section appears in project creation modal. CP user now has export.status_report permission (fixed in DB). Admin templates page at /admin/templates shows 3 templates with phases.",
+  "rca_of_issue": "Root Cause: seed_default_profiles() is idempotent based on count (>= 12 profiles = skip). When 'export.status_report' permission was added to DEFAULT_PROFILES in service.py, existing tenants' profiles in DB were never updated. Fix: added permission via $addToSet to both PORTFOLIO and CHEF_DE_PROJET profiles. Long-term fix needed in seed function to sync permissions per profile code."
+}

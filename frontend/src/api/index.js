@@ -310,4 +310,20 @@ export const powerBIAPI = {
   milestones:  ()     => api.get("/powerbi/milestones"),
 };
 
+export const statusReportAPI = {
+  getWeather:    (projectId)         => api.get(`/projects/${projectId}/weather`),
+  generate:      (projectId, data)   => api.post(`/projects/${projectId}/status-report`, data, { responseType: "arraybuffer" }),
+  listReports:   (projectId)         => api.get(`/projects/${projectId}/status-reports`),
+};
+
+export const projectTemplatesAPI = {
+  list:         ()                          => api.get("/project-templates"),
+  get:          (id)                        => api.get(`/project-templates/${id}`),
+  create:       (data)                      => api.post("/project-templates", data),
+  update:       (id, data)                  => api.put(`/project-templates/${id}`, data),
+  delete:       (id)                        => api.delete(`/project-templates/${id}`),
+  duplicate:    (id)                        => api.post(`/project-templates/${id}/duplicate`),
+  applyTemplate:(projectId, data)           => api.post(`/projects/${projectId}/apply-template`, data),
+};
+
 export default api;

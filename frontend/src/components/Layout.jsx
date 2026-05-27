@@ -30,6 +30,7 @@ import {
   X,
   DollarSign,
   Database,
+  Layers,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -308,6 +309,12 @@ export default function Layout() {
               <NavLink to="/admin/powerbi" data-testid="nav-admin-powerbi" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Connecteur Power BI">
                 <Database size={16} strokeWidth={1.75} className="flex-shrink-0" />
                 <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Power BI</span>
+              </NavLink>
+            )}
+            {(hasPermission("admin.templates") || hasPermission("*")) && (
+              <NavLink to="/admin/templates" data-testid="nav-admin-templates" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Templates Projets">
+                <Layers size={16} strokeWidth={1.75} className="flex-shrink-0" />
+                <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Templates</span>
               </NavLink>
             )}
           </>
