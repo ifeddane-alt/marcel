@@ -1,6 +1,7 @@
 import React, { createContext, useContext, useState, useEffect } from "react";
 
 const AuthContext = createContext(null);
+const API_BASE = process.env.REACT_APP_BACKEND_URL + "/api";
 
 export function AuthProvider({ children }) {
   const [token, setToken] = useState(() => localStorage.getItem("projetenne_token"));
@@ -23,17 +24,36 @@ export function AuthProvider({ children }) {
     setUser(null);
   };
 
-  // Check token expiry on mount
+  // Vérification expiry + refresh permissions si absentes (migration V1.0 → V1.1+)
   useEffect(() => {
-    if (token) {
-      try {
-        const payload = JSON.parse(atob(token.split(".")[1]));
-        if (payload.exp && payload.exp * 1000 < Date.now()) {
-          logout();
-        }
-      } catch {
+    if (!token) return;
+    try {
+      const payload = JSON.parse(atob(token.split(".")[1]));
+      if (payload.exp && payload.exp * 1000 < Date.now()) {
         logout();
+        return;
       }
+    } catch {
+      logout();
+      return;
+    }
+
+    // Si l'user en localStorage n'a pas de permissions, les rafraîchir depuis /api/auth/me
+    const stored = localStorage.getItem("projetenne_user");
+    const storedUser = stored ? JSON.parse(stored) : null;
+    if (!storedUser?.permissions?.length) {
+      fetch(`${API_BASE}/auth/me`, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
+        .then(r => r.json())
+        .then(data => {
+          if (data?.permissions) {
+            const updated = { ...storedUser, ...data, permissions: data.permissions };
+            localStorage.setItem("projetenne_user", JSON.stringify(updated));
+            setUser(updated);
+          }
+        })
+        .catch(() => {});
     }
   }, []);
 
