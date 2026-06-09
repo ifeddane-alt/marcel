@@ -158,6 +158,17 @@ async def _schedule_connectors():
 
 @app.on_event("startup")
 async def startup_event():
+    # Vérification de la licence on-premise
+    try:
+        from core.license import check_license_on_startup
+        license_info = check_license_on_startup()
+        logger.info(f"[Licence] Valide — Client: {license_info.get('customer')} — Expire: {license_info.get('expiry')}")
+    except (EnvironmentError, ValueError) as e:
+        logger.critical(f"[Licence] INVALIDE : {e}")
+        # Ne pas bloquer en preview/dev, mais logger clairement
+        if os.environ.get("SKIP_LICENSE_CHECK") != "true":
+            import sys; sys.exit(1)
+
     scheduler.start()
     await _schedule_connectors()
     logger.info("[Scheduler] APScheduler démarré")
