@@ -155,15 +155,21 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - **Template Power BI ZIP** : `GET /api/admin/powerbi/template` → ZIP (6 fichiers `.m` M-Query + README) pré-configurés avec URL tenant et clé API. Bouton "Télécharger .zip" dans `/admin/powerbi`.
 - **Webhook projet** : `PUT /api/admin/config/webhooks` → config (URL, enabled, events, HMAC secret). Fire-and-forget dans `projects/service.py` sur `project.created` / `project.updated`. Onglet "Webhooks" dans `/admin/config`.
 
+## État — MARCEL V1.4 P2 ✅ (Juin 2026) — testé 100% (iteration_46)
+- **Fix gate Waterfall** : template par défaut = 6 phases / 18 tâches / 12 jalons (ajout "Transfert vers le run" en Hypercare). Resync auto des templates par défaut non modifiés au seed (`project_templates/service.py`).
+- **Sentry APM backend (optionnel)** : init conditionnel dans `server.py` si `SENTRY_DSN` défini (env). `SENTRY_TRACES_SAMPLE_RATE` (défaut 0), `SENTRY_ENVIRONMENT`. Capture 5xx via FastApiIntegration/StarletteIntegration. NON CONFIGURÉ en preview — l'utilisateur ajoute le DSN dans le .env du VPS.
+- **Alertes email (Resend, optionnel)** : `core/email_alerts.py`, config tenant `PUT /api/admin/config/email-alerts` (enabled, recipients, events). Envoi fire-and-forget sur project.created/updated si `RESEND_API_KEY` défini (env). UI dans `/admin/config` onglet Webhooks (section-email-alerts). CLÉ NON CONFIGURÉE en preview.
+- **Dashboard CxO personnalisable** : `GET /api/dashboard/cxo` (kpis, rag, budget, jalons on-time, top 5 projets), préférences widgets par utilisateur (`GET/PUT /api/dashboard/cxo/preferences`, collection `user_preferences`). Page `/cxo` (`DashboardCxO.jsx`), entrée nav "Dashboard CxO", panneau Personnaliser avec toggles persistés.
+- **Connecteur MS Project (XML MSPDI)** : `GET /api/msproject/export/{id}` (phases=summary tasks, tâches, jalons Milestone=1) + `POST /api/msproject/import/{id}` (multipart). Boutons dans l'en-tête `ProjectDetail.jsx`. Round-trip validé.
+- **Webhook** : filtre désormais par événements configurés (`get_tenant_webhook_url(tenant_id, event)`).
+
 ## Backlog / Améliorations futures
 ### P1 — Court terme
 - SAP RFC natif : installer `pyrfc` + SAP NW RFC SDK (sous licence SAP) pour remplacer le mock actuel
 
-### P2 — Moyen terme
-- APM externe (Sentry / Datadog) pour persistance des erreurs 5xx et alertes
-- Module "Tableau de bord CxO" personnalisable
-- Connecteur Microsoft Project
-- API REST publique + webhooks Resend (email alertes)
+### P2 — Moyen terme (restant)
+- Envoi réel Sentry/Resend à activer sur le VPS (ajouter SENTRY_DSN / RESEND_API_KEY dans le .env)
+- Alertes email sur dépassements de seuil (budget, retard jalon) — actuellement seulement événements projet
 
 ### P3 — Long terme
 - Mobile app React Native
