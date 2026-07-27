@@ -61,17 +61,21 @@ async def create_project(data: ProjectCreate, current_user: TokenPayload) -> dic
 
 async def update_project(project_id: str, data: ProjectUpdate, current_user: TokenPayload) -> dict:
     require_write(current_user)
+    old = await db.projects.find_one(
+        {"project_id": project_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
+    )
+    if not old:
+        raise HTTPException(status_code=404, detail="Projet introuvable")
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     update_data = _sync_budget_aggregates(update_data)
-    result = await db.projects.update_one(
+    await db.projects.update_one(
         {"project_id": project_id, "tenant_id": current_user.tenant_id},
         {"$set": update_data},
     )
-    if result.matched_count == 0:
-        raise HTTPException(status_code=404, detail="Projet introuvable")
     updated = await db.projects.find_one({"project_id": project_id}, {"_id": 0})
-    # Fire webhook (non-bloquant)
+    # Fire webhook + alertes seuils (non-bloquant)
     asyncio.create_task(_fire_project_webhook(current_user.tenant_id, "project.updated", updated))
+    asyncio.create_task(_check_budget_threshold(current_user.tenant_id, old, updated))
     return updated
 
 
@@ -93,6 +97,33 @@ async def _fire_project_webhook(tenant_id: str, event: str, project: dict) -> No
     try:
         from core.email_alerts import send_project_event_email
         await send_project_event_email(tenant_id, event, project)
+    except Exception:
+        pass
+
+
+async def _check_budget_threshold(tenant_id: str, old: dict, new: dict) -> None:
+    """Alerte email si l'atterrissage franchit le seuil eac_ratio × budget total."""
+    try:
+        total = new.get("budget_total") or 0
+        forecast = new.get("budget_forecast") or new.get("eac") or 0
+        if not total or not forecast:
+            return
+        tenant = await db.tenants.find_one({"tenant_id": tenant_id}, {"_id": 0, "settings": 1})
+        thresholds = ((tenant or {}).get("settings") or {}).get("thresholds") or {}
+        ratio = thresholds.get("eac_ratio", 1.10)
+        limit = total * ratio
+        old_forecast = old.get("budget_forecast") or old.get("eac") or 0
+        old_total = old.get("budget_total") or total
+        was_over = old_forecast > old_total * ratio if old_total else False
+        if forecast > limit and not was_over:
+            from core.email_alerts import send_alert_email
+            await send_alert_email(tenant_id, "threshold.budget_overrun", new.get("name", ""), [
+                ("Projet", new.get("name", "—")),
+                ("Budget total", f"{total:,.0f} €"),
+                ("Atterrissage (EAC)", f"{forecast:,.0f} €"),
+                ("Seuil", f"{limit:,.0f} € (ratio {ratio})"),
+                ("Dépassement", f"+{forecast - total:,.0f} €"),
+            ])
     except Exception:
         pass
 
@@ -135,6 +166,7 @@ async def add_budget_revision(
         },
     )
     updated = await db.projects.find_one({"project_id": project_id}, {"_id": 0})
+    asyncio.create_task(_check_budget_threshold(current_user.tenant_id, project, updated))
     return updated
 
 

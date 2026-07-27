@@ -1,6 +1,7 @@
 import uuid
 import io
 import csv as csv_mod
+import asyncio
 from datetime import datetime, timezone, date
 from typing import Optional
 from fastapi import HTTPException
@@ -131,7 +132,29 @@ async def update_milestone(milestone_id: str, data: dict, current_user: TokenPay
         "updated_at": datetime.now(timezone.utc).isoformat(),
     }
     await db.milestones.update_one({"milestone_id": milestone_id}, {"$set": updates})
-    return {**existing, **updates}
+    result = {**existing, **updates}
+    asyncio.create_task(_check_milestone_late(current_user.tenant_id, existing, result, proj))
+    return result
+
+
+async def _check_milestone_late(tenant_id: str, old: dict, new: dict, proj: dict) -> None:
+    """Alerte email si un jalon glisse au-delà de sa baseline (nouvellement en retard)."""
+    try:
+        base = new.get("date_baseline")
+        fc = new.get("date_forecast")
+        if not base or not fc or new.get("status") in ("done", "completed"):
+            return
+        was_late = (old.get("date_forecast") or "") > (old.get("date_baseline") or "9999")
+        if str(fc)[:10] > str(base)[:10] and not was_late:
+            from core.email_alerts import send_alert_email
+            await send_alert_email(tenant_id, "threshold.milestone_late", new.get("name", ""), [
+                ("Jalon", new.get("name", "—")),
+                ("Projet", proj.get("name", "—")),
+                ("Date baseline", str(base)[:10]),
+                ("Date forecast", str(fc)[:10]),
+            ])
+    except Exception:
+        pass
 
 
 async def delete_milestone(milestone_id: str, current_user: TokenPayload) -> dict:

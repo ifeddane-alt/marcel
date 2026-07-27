@@ -926,6 +926,8 @@ function EmailAlertsSubSection({ config, onSave }) {
   const ALL_EVENTS = [
     { value: "project.created", label: "Projet créé" },
     { value: "project.updated", label: "Projet modifié" },
+    { value: "threshold.budget_overrun", label: "Dépassement budget (EAC > seuil)" },
+    { value: "threshold.milestone_late", label: "Jalon en retard (forecast > baseline)" },
   ];
 
   const toggleEvent = (ev) => {
