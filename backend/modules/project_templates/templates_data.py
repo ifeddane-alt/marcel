@@ -85,6 +85,7 @@ WATERFALL_TEMPLATE = {
             ],
             "tasks": [
                 {"name": "Support post-go-live", "scope_status": "SEC"},
+                {"name": "Transfert vers le run", "scope_status": "SEC"},
                 {"name": "Bilan projet", "scope_status": "SEC"},
             ],
         },

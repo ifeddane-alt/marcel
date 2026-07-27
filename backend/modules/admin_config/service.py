@@ -74,6 +74,12 @@ async def update_webhooks(data: "WebhooksUpdate", current_user: TokenPayload) ->
     )
 
 
+async def update_email_alerts(data: "EmailAlertsUpdate", current_user: TokenPayload) -> dict:
+    return await _update_section(
+        current_user.tenant_id, "email_alerts", data.email_alerts.model_dump()
+    )
+
+
 # ─── Seed Altair ──────────────────────────────────────────────────────────────
 
 SEED_ENUMS = {

@@ -1,11 +1,12 @@
-import React, { useEffect, useState, useCallback } from "react";
+import React, { useEffect, useState, useCallback, useRef } from "react";
 import { useParams, Link, useNavigate } from "react-router-dom";
 import {
   ArrowLeft, Calendar, ChevronRight, Flag, AlertTriangle, Clock, TrendingUp,
   Pencil, Trash2, Plus, History, ShieldAlert, ClipboardList, Presentation, Users,
   GitBranch, BarChart2, Diamond, GitFork, Lock, Send, CheckCircle, BotMessageSquare,
+  FileDown, FileUp,
 } from "lucide-react";
-import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI, decisionsAPI, workAllocationsAPI, projectDependenciesAPI, vendorsAPI, scopeAPI } from "@/api";
+import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI, decisionsAPI, workAllocationsAPI, projectDependenciesAPI, vendorsAPI, scopeAPI, msprojectAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import RAGBadge, { MethodologyBadge, MilestoneBadge, TaskTypeBadge, TaskStatusBadge, ProjectStatusBadge } from "@/components/RAGBadge";
@@ -143,6 +144,37 @@ export default function ProjectDetail() {
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
 
+  // ── MS Project export/import ──
+  const msImportRef = useRef(null);
+  const handleMsProjectExport = async () => {
+    try {
+      const res = await msprojectAPI.exportXml(id);
+      const url = URL.createObjectURL(new Blob([res.data], { type: "application/xml" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${project?.name || "projet"}_msproject.xml`;
+      a.click();
+      URL.revokeObjectURL(url);
+    } catch (e) {
+      alert("Erreur lors de l'export MS Project.");
+    }
+  };
+  const handleMsProjectImport = async (e) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const fd = new FormData();
+    fd.append("file", file);
+    try {
+      const res = await msprojectAPI.importXml(id, fd);
+      alert(`Import réussi : ${res.data.tasks_created} tâche(s), ${res.data.milestones_created} jalon(s).`);
+      fetchAll();
+    } catch (err) {
+      alert(err.response?.data?.detail || "Erreur lors de l'import MS Project.");
+    } finally {
+      e.target.value = "";
+    }
+  };
+
   const handleDelete = async () => {
     if (!confirmDelete) return;
     setDeleting(true);
@@ -264,6 +296,34 @@ export default function ProjectDetail() {
             >
               <ClipboardList size={13} /> <span className="hidden sm:inline">Status Report</span><span className="sm:hidden">Report</span>
             </button>
+          )}
+          <button
+            onClick={handleMsProjectExport}
+            data-testid="btn-msproject-export"
+            className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded text-xs sm:text-sm text-slate-600 hover:bg-gray-50 hover:text-[#0052CC] transition-colors"
+            title="Exporter au format MS Project (XML)"
+          >
+            <FileDown size={13} /> <span className="hidden sm:inline">MS Project</span><span className="sm:hidden">MSP</span>
+          </button>
+          {canWrite && (
+            <>
+              <button
+                onClick={() => msImportRef.current?.click()}
+                data-testid="btn-msproject-import"
+                className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 rounded text-xs sm:text-sm text-slate-600 hover:bg-gray-50 hover:text-[#0052CC] transition-colors"
+                title="Importer un fichier MS Project XML"
+              >
+                <FileUp size={13} /> <span className="hidden sm:inline">Import MSP</span><span className="sm:hidden">↑</span>
+              </button>
+              <input
+                ref={msImportRef}
+                type="file"
+                accept=".xml"
+                className="hidden"
+                data-testid="msproject-import-input"
+                onChange={handleMsProjectImport}
+              />
+            </>
           )}
           {canWrite && (
             <>

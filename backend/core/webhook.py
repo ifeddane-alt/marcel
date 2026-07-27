@@ -25,7 +25,7 @@ async def fire_webhook(webhook_url: str, event: str, payload: dict) -> None:
         logger.warning("[Webhook] Échec %s → %s : %s", event, webhook_url[:60], exc)
 
 
-async def get_tenant_webhook_url(tenant_id: str) -> str | None:
+async def get_tenant_webhook_url(tenant_id: str, event: str | None = None) -> str | None:
     """Récupère l'URL webhook configurée pour un tenant (stockée dans tenants.settings.webhook)."""
     from core.database import db
     tenant = await db.tenants.find_one({"tenant_id": tenant_id}, {"_id": 0, "settings": 1})
@@ -34,4 +34,6 @@ async def get_tenant_webhook_url(tenant_id: str) -> str | None:
     wh = (tenant.get("settings") or {}).get("webhook") or {}
     url = wh.get("url", "").strip()
     enabled = wh.get("enabled", False)
+    if event and wh.get("events") and event not in wh["events"]:
+        return None
     return url if (enabled and url) else None

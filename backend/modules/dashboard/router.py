@@ -1,8 +1,28 @@
 from fastapi import APIRouter, Depends
+from pydantic import BaseModel
 from core.auth import TokenPayload, get_current_user
 from . import service
 
 router = APIRouter(tags=["dashboard"])
+
+
+class CxoPreferences(BaseModel):
+    widgets: list[str]
+
+
+@router.get("/dashboard/cxo")
+async def dashboard_cxo(current_user: TokenPayload = Depends(get_current_user)):
+    return await service.get_cxo(current_user)
+
+
+@router.get("/dashboard/cxo/preferences")
+async def get_cxo_preferences(current_user: TokenPayload = Depends(get_current_user)):
+    return await service.get_cxo_preferences(current_user)
+
+
+@router.put("/dashboard/cxo/preferences")
+async def update_cxo_preferences(data: CxoPreferences, current_user: TokenPayload = Depends(get_current_user)):
+    return await service.update_cxo_preferences(data.widgets, current_user)
 
 
 @router.get("/dashboard/summary")

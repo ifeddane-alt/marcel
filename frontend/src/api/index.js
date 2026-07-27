@@ -134,6 +134,14 @@ export const dashboardAPI = {
   summary: () => api.get("/dashboard/summary"),
   topRisks: () => api.get("/dashboard/top-risks"),
   heatmapRisks: () => api.get("/dashboard/heatmap-risks"),
+  cxo: () => api.get("/dashboard/cxo"),
+  getCxoPreferences: () => api.get("/dashboard/cxo/preferences"),
+  updateCxoPreferences: (d) => api.put("/dashboard/cxo/preferences", d),
+};
+
+export const msprojectAPI = {
+  exportXml: (projectId) => api.get(`/msproject/export/${projectId}`, { responseType: "blob" }),
+  importXml: (projectId, formData) => api.post(`/msproject/import/${projectId}`, formData, { headers: { "Content-Type": "multipart/form-data" } }),
 };
 
 export const timesheetsAPI = {
@@ -226,6 +234,7 @@ export const adminConfigAPI = {
   updateThresholds:(d)   => api.put("/admin/config/thresholds", d),
   updateBranding:  (d)   => api.put("/admin/config/ppt-branding", d),
   updateWebhooks:  (d)   => api.put("/admin/config/webhooks", d),
+  updateEmailAlerts: (d) => api.put("/admin/config/email-alerts", d),
 };
 
 export const okrsAPI = {

@@ -76,10 +76,10 @@ async def update_project(project_id: str, data: ProjectUpdate, current_user: Tok
 
 
 async def _fire_project_webhook(tenant_id: str, event: str, project: dict) -> None:
-    """Fire-and-forget webhook pour les événements projet."""
+    """Fire-and-forget webhook + alerte email pour les événements projet."""
     try:
         from core.webhook import fire_webhook, get_tenant_webhook_url
-        url = await get_tenant_webhook_url(tenant_id)
+        url = await get_tenant_webhook_url(tenant_id, event)
         if url:
             await fire_webhook(url, event, {
                 "project_id": project.get("project_id"),
@@ -88,6 +88,11 @@ async def _fire_project_webhook(tenant_id: str, event: str, project: dict) -> No
                 "status_rag": project.get("status_rag"),
                 "tenant_id": tenant_id,
             })
+    except Exception:
+        pass
+    try:
+        from core.email_alerts import send_project_event_email
+        await send_project_event_email(tenant_id, event, project)
     except Exception:
         pass
 

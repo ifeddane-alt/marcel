@@ -47,6 +47,94 @@ async def get_summary(current_user: TokenPayload) -> dict:
     }
 
 
+CXO_DEFAULT_WIDGETS = ["kpis", "rag", "budget", "milestones", "risks", "top_projects"]
+
+
+async def get_cxo(current_user: TokenPayload) -> dict:
+    """Dashboard CxO — KPIs consolidés portefeuille."""
+    projects = await db.projects.find(_project_query(current_user), {"_id": 0}).to_list(None)
+    project_ids = [p["project_id"] for p in projects]
+
+    programs_count = await db.programs.count_documents({"tenant_id": current_user.tenant_id})
+
+    milestones = await db.milestones.find(
+        {"project_id": {"$in": project_ids}}, {"_id": 0, "date_baseline": 1, "date_forecast": 1, "status": 1}
+    ).to_list(None)
+    ms_total = len(milestones)
+    ms_on_time = sum(
+        1 for m in milestones
+        if m.get("status") == "done" or (m.get("date_forecast") or "") <= (m.get("date_baseline") or "9999")
+    )
+
+    risks = await db.risks.find(
+        {"tenant_id": current_user.tenant_id, "project_id": {"$in": project_ids}},
+        {"_id": 0, "criticality": 1},
+    ).to_list(None)
+    critical_risks = sum(1 for r in risks if (r.get("criticality") or 0) >= 9)
+
+    total_budget = sum(p.get("budget_total", 0) for p in projects)
+    total_consumed = sum(p.get("budget_consumed", 0) for p in projects)
+    total_forecast = sum(p.get("budget_forecast", 0) for p in projects)
+
+    top_projects = sorted(projects, key=lambda p: -(p.get("budget_total") or 0))[:5]
+
+    return {
+        "kpis": {
+            "total_projects": len(projects),
+            "total_programs": programs_count,
+            "active_projects": sum(1 for p in projects if p.get("status") == "actif"),
+            "critical_risks": critical_risks,
+            "total_risks": len(risks),
+        },
+        "rag": {
+            "green": sum(1 for p in projects if p.get("status_rag") == "green"),
+            "orange": sum(1 for p in projects if p.get("status_rag") in ("orange", "amber")),
+            "red": sum(1 for p in projects if p.get("status_rag") == "red"),
+        },
+        "budget": {
+            "total": total_budget,
+            "consumed": total_consumed,
+            "forecast": total_forecast,
+            "consumption_rate": round(total_consumed / total_budget * 100, 1) if total_budget else 0,
+            "overrun": max(total_forecast - total_budget, 0),
+        },
+        "milestones": {
+            "total": ms_total,
+            "on_time": ms_on_time,
+            "on_time_rate": round(ms_on_time / ms_total * 100, 1) if ms_total else 100,
+        },
+        "top_projects": [
+            {
+                "project_id": p["project_id"],
+                "name": p.get("name"),
+                "budget_total": p.get("budget_total", 0),
+                "budget_consumed": p.get("budget_consumed", 0),
+                "status_rag": p.get("status_rag"),
+                "status": p.get("status"),
+            }
+            for p in top_projects
+        ],
+    }
+
+
+async def get_cxo_preferences(current_user: TokenPayload) -> dict:
+    doc = await db.user_preferences.find_one(
+        {"user_id": current_user.user_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
+    )
+    widgets = (doc or {}).get("cxo_widgets") or CXO_DEFAULT_WIDGETS
+    return {"widgets": widgets, "available": CXO_DEFAULT_WIDGETS}
+
+
+async def update_cxo_preferences(widgets: list, current_user: TokenPayload) -> dict:
+    valid = [w for w in widgets if w in CXO_DEFAULT_WIDGETS]
+    await db.user_preferences.update_one(
+        {"user_id": current_user.user_id, "tenant_id": current_user.tenant_id},
+        {"$set": {"cxo_widgets": valid}},
+        upsert=True,
+    )
+    return {"widgets": valid, "available": CXO_DEFAULT_WIDGETS}
+
+
 async def get_top_risks(current_user: TokenPayload) -> list:
     # Filtrer d'abord les projets autorisés
     allowed_projects = await db.projects.find(

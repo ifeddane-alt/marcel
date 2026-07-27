@@ -128,3 +128,15 @@ class WebhookConfig(BaseModel):
 
 class WebhooksUpdate(BaseModel):
     webhook: WebhookConfig
+
+
+# ─── Alertes Email ────────────────────────────────────────────────────────────
+
+class EmailAlertsConfig(BaseModel):
+    enabled: bool = False
+    recipients: List[str] = []
+    events: List[str] = ["project.created", "project.updated"]
+
+
+class EmailAlertsUpdate(BaseModel):
+    email_alerts: EmailAlertsConfig

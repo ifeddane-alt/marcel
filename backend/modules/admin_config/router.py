@@ -3,6 +3,7 @@ from core.auth import TokenPayload, permission_required
 from .schemas import (
     ModulesUpdate, WorkflowsUpdate, EnumsUpdate,
     HolidaysUpdate, ThresholdsUpdate, PPTBrandingUpdate, WebhooksUpdate,
+    EmailAlertsUpdate,
 )
 from . import service
 
@@ -55,6 +56,11 @@ async def update_ppt_branding(data: PPTBrandingUpdate, current_user: TokenPayloa
 @router.put("/admin/config/webhooks")
 async def update_webhooks(data: WebhooksUpdate, current_user: TokenPayload = Depends(_perm)):
     return await service.update_webhooks(data, current_user)
+
+
+@router.put("/admin/config/email-alerts")
+async def update_email_alerts(data: EmailAlertsUpdate, current_user: TokenPayload = Depends(_perm)):
+    return await service.update_email_alerts(data, current_user)
 
 
 # ─── Seed ─────────────────────────────────────────────────────────────────────

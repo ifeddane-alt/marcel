@@ -904,6 +904,127 @@ function WebhooksSection({ config, onSave }) {
           tenant_id: "uuid-tenant",
         }, null, 2)}</pre>
       </div>
+
+      <EmailAlertsSubSection config={config} onSave={onSave} />
+    </div>
+  );
+}
+
+
+// ─── Alertes Email (Resend) ───────────────────────────────────────────────────
+
+function EmailAlertsSubSection({ config, onSave }) {
+  const ea = config?.email_alerts || {};
+  const [form, setForm] = useState({
+    enabled: ea.enabled || false,
+    recipients: (ea.recipients || []).join(", "),
+    events: ea.events || ["project.created", "project.updated"],
+  });
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState(null);
+
+  const ALL_EVENTS = [
+    { value: "project.created", label: "Projet créé" },
+    { value: "project.updated", label: "Projet modifié" },
+  ];
+
+  const toggleEvent = (ev) => {
+    setForm(f => ({
+      ...f,
+      events: f.events.includes(ev) ? f.events.filter(e => e !== ev) : [...f.events, ev],
+    }));
+  };
+
+  const save = async () => {
+    setSaving(true); setMsg(null);
+    try {
+      const recipients = form.recipients.split(",").map(r => r.trim()).filter(Boolean);
+      await adminConfigAPI.updateEmailAlerts({
+        email_alerts: { enabled: form.enabled, recipients, events: form.events },
+      });
+      setMsg({ type: "ok", text: "Alertes email sauvegardées." });
+      onSave();
+    } catch (e) {
+      setMsg({ type: "err", text: e.response?.data?.detail || "Erreur lors de la sauvegarde." });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="border-t border-gray-200 pt-6 space-y-4" data-testid="section-email-alerts">
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="font-semibold text-slate-800">Alertes Email</h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Envoi automatique d'un email (via Resend) aux destinataires configurés lors des événements projet.
+            Nécessite la variable <code className="bg-slate-100 px-1 rounded">RESEND_API_KEY</code> côté serveur.
+          </p>
+        </div>
+        <button
+          data-testid="email-alerts-save-btn"
+          onClick={save}
+          disabled={saving}
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-[#0052CC] text-white rounded-lg hover:bg-[#0040a6] transition-colors disabled:opacity-50"
+        >
+          {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />}
+          Sauvegarder
+        </button>
+      </div>
+
+      {msg && (
+        <div className={`flex items-center gap-2 p-3 rounded-lg text-sm ${msg.type === "ok" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-rose-50 text-rose-700 border border-rose-200"}`}>
+          {msg.type === "ok" ? <CheckCircle2 size={14} /> : <AlertCircle size={14} />}
+          {msg.text}
+        </div>
+      )}
+
+      <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl">
+        <div>
+          <p className="text-sm font-medium text-slate-700">Activer les alertes email</p>
+          <p className="text-xs text-slate-500">Aucun email ne sera envoyé si cette option est désactivée.</p>
+        </div>
+        <button
+          data-testid="email-alerts-toggle"
+          onClick={() => setForm(f => ({ ...f, enabled: !f.enabled }))}
+          className="focus:outline-none"
+        >
+          {form.enabled
+            ? <ToggleRight size={32} className="text-[#0052CC]" />
+            : <ToggleLeft size={32} className="text-slate-400" />
+          }
+        </button>
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-slate-600 mb-1">Destinataires (séparés par des virgules)</label>
+        <input
+          data-testid="email-alerts-recipients-input"
+          type="text"
+          value={form.recipients}
+          onChange={e => setForm(f => ({ ...f, recipients: e.target.value }))}
+          placeholder="pmo@entreprise.fr, direction@entreprise.fr"
+          className={INPUT_CLS}
+        />
+      </div>
+
+      <div>
+        <label className="block text-xs font-semibold text-slate-600 mb-2">Événements déclencheurs</label>
+        <div className="space-y-2">
+          {ALL_EVENTS.map(ev => (
+            <label key={ev.value} className="flex items-center gap-3 cursor-pointer" data-testid={`email-alert-event-${ev.value}`}>
+              <input
+                type="checkbox"
+                checked={form.events.includes(ev.value)}
+                onChange={() => toggleEvent(ev.value)}
+                className="w-4 h-4 accent-[#0052CC]"
+              />
+              <span className="text-sm text-slate-700">{ev.label}</span>
+              <code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{ev.value}</code>
+            </label>
+          ))}
+        </div>
+      </div>
     </div>
   );
 }

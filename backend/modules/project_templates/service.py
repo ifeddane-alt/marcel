@@ -28,6 +28,13 @@ async def seed_default_templates(tenant_id: str):
                 "updated_at": _now(),
             }
             await db.project_templates.insert_one(doc)
+        elif str(existing.get("updated_at", ""))[:19] == str(existing.get("created_at", "x"))[:19]:
+            # Template par défaut jamais modifié : resynchroniser depuis le code
+            if existing.get("phases") != tpl["phases"]:
+                await db.project_templates.update_one(
+                    {"template_id": existing["template_id"]},
+                    {"$set": {"phases": tpl["phases"]}},
+                )
 
 
 async def list_templates(user: TokenPayload) -> list:

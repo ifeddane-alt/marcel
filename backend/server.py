@@ -22,6 +22,24 @@ _error_counts: Counter = Counter()
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+# ── Sentry APM (optionnel — activé uniquement si SENTRY_DSN est défini) ──────
+_sentry_dsn = os.environ.get("SENTRY_DSN", "").strip()
+if _sentry_dsn:
+    import sentry_sdk
+    from sentry_sdk.integrations.fastapi import FastApiIntegration
+    from sentry_sdk.integrations.starlette import StarletteIntegration
+
+    sentry_sdk.init(
+        dsn=_sentry_dsn,
+        environment=os.environ.get("SENTRY_ENVIRONMENT", "production"),
+        traces_sample_rate=float(os.environ.get("SENTRY_TRACES_SAMPLE_RATE", "0")),
+        integrations=[
+            StarletteIntegration(transaction_style="endpoint", failed_request_status_codes={*range(500, 599)}),
+            FastApiIntegration(transaction_style="endpoint", failed_request_status_codes={*range(500, 599)}),
+        ],
+    )
+    logger.info("[Sentry] APM initialisé (env=%s)", os.environ.get("SENTRY_ENVIRONMENT", "production"))
+
 from core.database import client, db
 from modules.auth.router import router as auth_router
 from modules.programs.router import router as programs_router
@@ -57,6 +75,7 @@ from modules.powerbi.router import router as powerbi_router
 from modules.status_report.router import router as status_report_router
 from modules.project_templates.router import router as project_templates_router
 from modules.monitoring.router import router as monitoring_router
+from modules.msproject.router import router as msproject_router
 from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI(title="MARCEL API")
@@ -127,6 +146,7 @@ for _router in [
     status_report_router,
     project_templates_router,
     monitoring_router,
+    msproject_router,
 ]:
     app.include_router(_router, prefix="/api")
 
