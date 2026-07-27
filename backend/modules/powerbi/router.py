@@ -3,11 +3,12 @@
 Auth : Bearer JWT avec permission export.powerbi
       OU header X-API-Key avec clé générée dans /admin/config.
 """
-from fastapi import APIRouter, Depends, HTTPException, Header, Query
+from fastapi import APIRouter, Depends, HTTPException, Header, Query, Request
 from typing import Optional
 
 from core.auth import TokenPayload, get_current_user, permission_required
 from core.database import db
+from core.limiter import limiter
 from . import service
 
 router = APIRouter(tags=["powerbi"])
@@ -66,7 +67,9 @@ async def get_powerbi_user(
 # ─── Endpoints données (flat JSON arrays) ────────────────────────────────────
 
 @router.get("/powerbi/projects")
+@limiter.limit("10/minute")
 async def powerbi_projects(
+    request: Request,
     user: TokenPayload = Depends(get_powerbi_user),
     from_date:  Optional[str] = Query(None, description="Date début YYYY-MM-DD"),
     to_date:    Optional[str] = Query(None, description="Date fin   YYYY-MM-DD"),
@@ -76,7 +79,9 @@ async def powerbi_projects(
 
 
 @router.get("/powerbi/resources")
+@limiter.limit("10/minute")
 async def powerbi_resources(
+    request: Request,
     user: TokenPayload = Depends(get_powerbi_user),
     from_date:  Optional[str] = Query(None),
     to_date:    Optional[str] = Query(None),
@@ -86,7 +91,9 @@ async def powerbi_resources(
 
 
 @router.get("/powerbi/timesheets")
+@limiter.limit("10/minute")
 async def powerbi_timesheets(
+    request: Request,
     user: TokenPayload = Depends(get_powerbi_user),
     from_date:  Optional[str] = Query(None, description="Date début YYYY-MM-DD"),
     to_date:    Optional[str] = Query(None, description="Date fin   YYYY-MM-DD"),
@@ -98,7 +105,9 @@ async def powerbi_timesheets(
 
 
 @router.get("/powerbi/budget")
+@limiter.limit("10/minute")
 async def powerbi_budget(
+    request: Request,
     user: TokenPayload = Depends(get_powerbi_user),
     from_date:  Optional[str] = Query(None, description="Date début YYYY-MM-DD"),
     to_date:    Optional[str] = Query(None, description="Date fin   YYYY-MM-DD"),
@@ -108,7 +117,9 @@ async def powerbi_budget(
 
 
 @router.get("/powerbi/risks")
+@limiter.limit("10/minute")
 async def powerbi_risks(
+    request: Request,
     user: TokenPayload = Depends(get_powerbi_user),
     from_date:  Optional[str] = Query(None, description="Date début YYYY-MM-DD"),
     to_date:    Optional[str] = Query(None, description="Date fin   YYYY-MM-DD"),
@@ -118,7 +129,9 @@ async def powerbi_risks(
 
 
 @router.get("/powerbi/milestones")
+@limiter.limit("10/minute")
 async def powerbi_milestones(
+    request: Request,
     user: TokenPayload = Depends(get_powerbi_user),
     from_date:  Optional[str] = Query(None, description="Date début YYYY-MM-DD"),
     to_date:    Optional[str] = Query(None, description="Date fin   YYYY-MM-DD"),

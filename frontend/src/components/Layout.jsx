@@ -31,6 +31,7 @@ import {
   DollarSign,
   Database,
   Layers,
+  Activity,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -315,6 +316,12 @@ export default function Layout() {
               <NavLink to="/admin/templates" data-testid="nav-admin-templates" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Templates Projets">
                 <Layers size={16} strokeWidth={1.75} className="flex-shrink-0" />
                 <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Templates</span>
+              </NavLink>
+            )}
+            {(hasPermission("admin.config") || hasPermission("*")) && (
+              <NavLink to="/admin/monitoring" data-testid="nav-admin-monitoring" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Monitoring">
+                <Activity size={16} strokeWidth={1.75} className="flex-shrink-0" />
+                <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Monitoring</span>
               </NavLink>
             )}
           </>

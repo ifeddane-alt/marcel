@@ -5,10 +5,19 @@ load_dotenv(Path(__file__).parent / ".env")
 
 import logging
 import os
+import time
+from collections import Counter
 from fastapi import FastAPI
 from starlette.middleware.cors import CORSMiddleware
 from apscheduler.schedulers.asyncio import AsyncIOScheduler
 from apscheduler.triggers.cron import CronTrigger
+from slowapi import _rate_limit_exceeded_handler
+from slowapi.errors import RateLimitExceeded
+from core.limiter import limiter
+
+# ── Compteurs de monitoring ───────────────────────────────────────────────────
+_start_time: float = time.time()
+_error_counts: Counter = Counter()
 
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -47,9 +56,14 @@ from modules.budget.router import router as budget_router
 from modules.powerbi.router import router as powerbi_router
 from modules.status_report.router import router as status_report_router
 from modules.project_templates.router import router as project_templates_router
+from modules.monitoring.router import router as monitoring_router
 from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI(title="MARCEL API")
+
+# ── SlowAPI rate limiting ─────────────────────────────────────────────────────
+app.state.limiter = limiter
+app.add_exception_handler(RateLimitExceeded, _rate_limit_exceeded_handler)
 
 # ── Middleware sécurité HTTP headers ─────────────────────────────────────────
 class SecurityHeadersMiddleware(BaseHTTPMiddleware):
@@ -76,6 +90,18 @@ class SecurityHeadersMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(SecurityHeadersMiddleware)
 
+# ── Error tracking middleware ─────────────────────────────────────────────────
+class ErrorTrackingMiddleware(BaseHTTPMiddleware):
+    async def dispatch(self, request, call_next):
+        response = await call_next(request)
+        if response.status_code >= 500:
+            _error_counts["5xx"] += 1
+        elif response.status_code == 429:
+            _error_counts["429"] += 1
+        return response
+
+app.add_middleware(ErrorTrackingMiddleware)
+
 app.add_middleware(
     CORSMiddleware,
     allow_credentials=True,
@@ -100,13 +126,29 @@ for _router in [
     powerbi_router,
     status_report_router,
     project_templates_router,
+    monitoring_router,
 ]:
     app.include_router(_router, prefix="/api")
 
 
-@app.get("/health")
+@app.get("/api/health")
+@app.get("/health")  # aussi accessible en direct (Docker health check, etc.)
 async def health():
-    return {"status": "ok"}
+    from core.database import client as _client
+    try:
+        await _client.admin.command("ping")
+        db_status = "ok"
+    except Exception as e:
+        db_status = f"error: {e}"
+
+    uptime = int(time.time() - _start_time)
+    return {
+        "status": "ok" if db_status == "ok" else "degraded",
+        "version": "1.1.0",
+        "uptime_seconds": uptime,
+        "database": db_status,
+        "error_counts": dict(_error_counts),
+    }
 
 
 # ── APScheduler — syncs connecteurs ──────────────────────────────────────────

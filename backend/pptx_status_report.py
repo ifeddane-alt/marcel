@@ -1,6 +1,6 @@
 """Générateur Status Report PPT — MARCEL."""
 from pptx_base import *
-from pptx_base import _brand, _blank_slide, _rect, _tb, _clear, _run, _footer, _CURRENT_BRAND
+from pptx_base import _brand, _set_brand, _blank_slide, _rect, _tb, _clear, _run, _footer, _CURRENT_BRAND
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # STATUS REPORT PPT — 6 slides
@@ -405,9 +405,8 @@ def generate_status_report_pptx(
     branding: dict | None,
 ) -> bytes:
     """Génère le PPT Status Report (6 slides) et retourne les bytes."""
-    global _CURRENT_BRAND
     brand = _brand(branding)
-    _CURRENT_BRAND = brand
+    _set_brand(brand)  # Met à jour pptx_base._CURRENT_BRAND
 
     prs = Presentation()
     prs.slide_width = SW
