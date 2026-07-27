@@ -26,12 +26,12 @@ async def fire_webhook(webhook_url: str, event: str, payload: dict) -> None:
 
 
 async def get_tenant_webhook_url(tenant_id: str) -> str | None:
-    """Récupère l'URL webhook configurée pour un tenant."""
+    """Récupère l'URL webhook configurée pour un tenant (stockée dans tenants.settings.webhook)."""
     from core.database import db
-    cfg = await db.admin_config.find_one({"tenant_id": tenant_id}, {"_id": 0, "webhook": 1})
-    if not cfg:
+    tenant = await db.tenants.find_one({"tenant_id": tenant_id}, {"_id": 0, "settings": 1})
+    if not tenant:
         return None
-    wh = cfg.get("webhook") or {}
+    wh = (tenant.get("settings") or {}).get("webhook") or {}
     url = wh.get("url", "").strip()
     enabled = wh.get("enabled", False)
     return url if (enabled and url) else None
