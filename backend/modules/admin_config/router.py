@@ -2,7 +2,7 @@ from fastapi import APIRouter, Depends
 from core.auth import TokenPayload, permission_required
 from .schemas import (
     ModulesUpdate, WorkflowsUpdate, EnumsUpdate,
-    HolidaysUpdate, ThresholdsUpdate, PPTBrandingUpdate,
+    HolidaysUpdate, ThresholdsUpdate, PPTBrandingUpdate, WebhooksUpdate,
 )
 from . import service
 
@@ -50,6 +50,11 @@ async def update_thresholds(data: ThresholdsUpdate, current_user: TokenPayload =
 @router.put("/admin/config/ppt-branding")
 async def update_ppt_branding(data: PPTBrandingUpdate, current_user: TokenPayload = Depends(_perm)):
     return await service.update_ppt_branding(data, current_user)
+
+
+@router.put("/admin/config/webhooks")
+async def update_webhooks(data: WebhooksUpdate, current_user: TokenPayload = Depends(_perm)):
+    return await service.update_webhooks(data, current_user)
 
 
 # ─── Seed ─────────────────────────────────────────────────────────────────────

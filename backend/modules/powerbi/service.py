@@ -362,3 +362,198 @@ async def get_milestones(
             "status":          _safe(m.get("status"), ""),
         })
     return rows
+
+
+# ─── Template ZIP ─────────────────────────────────────────────────────────────
+
+def generate_template_zip(base_url: str, api_key: str) -> bytes:
+    """Génère un ZIP contenant les scripts M-Query Power BI pour les 6 tables."""
+    import io, zipfile
+
+    tables = {
+        "Projets": ("projects", _M_PROJECTS),
+        "Ressources": ("resources", _M_RESOURCES),
+        "Timesheets": ("timesheets", _M_TIMESHEETS),
+        "Budget": ("budget", _M_BUDGET),
+        "Risques": ("risks", _M_RISKS),
+        "Jalons": ("milestones", _M_MILESTONES),
+    }
+
+    buf = io.BytesIO()
+    with zipfile.ZipFile(buf, "w", zipfile.ZIP_DEFLATED) as zf:
+        for table_name, (endpoint, template) in tables.items():
+            script = template.replace("{{BASE_URL}}", base_url).replace("{{API_KEY}}", api_key)
+            zf.writestr(f"MARCEL_{table_name}.m", script)
+
+        zf.writestr("README.txt", _M_README.replace("{{BASE_URL}}", base_url))
+
+    buf.seek(0)
+    return buf.read()
+
+
+# ─── M-Query templates ────────────────────────────────────────────────────────
+
+_M_PROJECTS = '''let
+    BaseUrl = "{{BASE_URL}}",
+    ApiKey  = "{{API_KEY}}",
+    Source  = Json.Document(Web.Contents(
+        BaseUrl & "/api/powerbi/projects",
+        [Headers = [Authorization = "Bearer " & ApiKey]]
+    )),
+    #"Converti en tableau" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    #"Colonnes développées" = Table.ExpandRecordColumn(
+        #"Converti en tableau", "Column1",
+        {"project_id","name","status","status_rag","program","owner","start_date",
+         "end_date_baseline","end_date_forecast","budget_total","budget_consumed",
+         "budget_forecast","capex_planned","capex_consumed","opex_planned","opex_consumed","eac"}
+    ),
+    #"Types" = Table.TransformColumnTypes(#"Colonnes développées", {
+        {"project_id", type text}, {"name", type text}, {"status", type text},
+        {"status_rag", type text}, {"program", type text}, {"owner", type text},
+        {"start_date", type date}, {"end_date_baseline", type date}, {"end_date_forecast", type date},
+        {"budget_total", Int64.Type}, {"budget_consumed", Int64.Type}, {"budget_forecast", Int64.Type},
+        {"capex_planned", Int64.Type}, {"capex_consumed", Int64.Type},
+        {"opex_planned", Int64.Type}, {"opex_consumed", Int64.Type}, {"eac", Int64.Type}
+    })
+in
+    #"Types"'''
+
+_M_RESOURCES = '''let
+    BaseUrl = "{{BASE_URL}}",
+    ApiKey  = "{{API_KEY}}",
+    Source  = Json.Document(Web.Contents(
+        BaseUrl & "/api/powerbi/resources",
+        [Headers = [Authorization = "Bearer " & ApiKey]]
+    )),
+    #"Converti en tableau" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    #"Colonnes développées" = Table.ExpandRecordColumn(
+        #"Converti en tableau", "Column1",
+        {"resource_id","name","email","role","seniority","tjm","type","department"}
+    ),
+    #"Types" = Table.TransformColumnTypes(#"Colonnes développées", {
+        {"resource_id", type text}, {"name", type text}, {"email", type text},
+        {"role", type text}, {"seniority", type text}, {"tjm", type number},
+        {"type", type text}, {"department", type text}
+    })
+in
+    #"Types"'''
+
+_M_TIMESHEETS = '''let
+    BaseUrl = "{{BASE_URL}}",
+    ApiKey  = "{{API_KEY}}",
+    Source  = Json.Document(Web.Contents(
+        BaseUrl & "/api/powerbi/timesheets",
+        [Headers = [Authorization = "Bearer " & ApiKey]]
+    )),
+    #"Converti en tableau" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    #"Colonnes développées" = Table.ExpandRecordColumn(
+        #"Converti en tableau", "Column1",
+        {"resource_id","resource_name","project_id","project_name","date","jh","week","month","year","status"}
+    ),
+    #"Types" = Table.TransformColumnTypes(#"Colonnes développées", {
+        {"resource_id", type text}, {"resource_name", type text},
+        {"project_id", type text}, {"project_name", type text},
+        {"date", type date}, {"jh", type number},
+        {"week", Int64.Type}, {"month", Int64.Type}, {"year", Int64.Type},
+        {"status", type text}
+    })
+in
+    #"Types"'''
+
+_M_BUDGET = '''let
+    BaseUrl = "{{BASE_URL}}",
+    ApiKey  = "{{API_KEY}}",
+    Source  = Json.Document(Web.Contents(
+        BaseUrl & "/api/powerbi/budget",
+        [Headers = [Authorization = "Bearer " & ApiKey]]
+    )),
+    #"Converti en tableau" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    #"Colonnes développées" = Table.ExpandRecordColumn(
+        #"Converti en tableau", "Column1",
+        {"project_id","project_name","budget_total","budget_consumed","budget_forecast",
+         "capex_planned","capex_consumed","opex_planned","opex_consumed","eac","variance_pct"}
+    ),
+    #"Types" = Table.TransformColumnTypes(#"Colonnes développées", {
+        {"project_id", type text}, {"project_name", type text},
+        {"budget_total", Int64.Type}, {"budget_consumed", Int64.Type}, {"budget_forecast", Int64.Type},
+        {"capex_planned", Int64.Type}, {"capex_consumed", Int64.Type},
+        {"opex_planned", Int64.Type}, {"opex_consumed", Int64.Type},
+        {"eac", Int64.Type}, {"variance_pct", type number}
+    })
+in
+    #"Types"'''
+
+_M_RISKS = '''let
+    BaseUrl = "{{BASE_URL}}",
+    ApiKey  = "{{API_KEY}}",
+    Source  = Json.Document(Web.Contents(
+        BaseUrl & "/api/powerbi/risks",
+        [Headers = [Authorization = "Bearer " & ApiKey]]
+    )),
+    #"Converti en tableau" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    #"Colonnes développées" = Table.ExpandRecordColumn(
+        #"Converti en tableau", "Column1",
+        {"risk_id","project_id","project_name","title","category","probability",
+         "impact","criticality","owner","status","created_at"}
+    ),
+    #"Types" = Table.TransformColumnTypes(#"Colonnes développées", {
+        {"risk_id", type text}, {"project_id", type text}, {"project_name", type text},
+        {"title", type text}, {"category", type text},
+        {"probability", Int64.Type}, {"impact", Int64.Type}, {"criticality", Int64.Type},
+        {"owner", type text}, {"status", type text}, {"created_at", type date}
+    })
+in
+    #"Types"'''
+
+_M_MILESTONES = '''let
+    BaseUrl = "{{BASE_URL}}",
+    ApiKey  = "{{API_KEY}}",
+    Source  = Json.Document(Web.Contents(
+        BaseUrl & "/api/powerbi/milestones",
+        [Headers = [Authorization = "Bearer " & ApiKey]]
+    )),
+    #"Converti en tableau" = Table.FromList(Source, Splitter.SplitByNothing(), null, null, ExtraValues.Error),
+    #"Colonnes développées" = Table.ExpandRecordColumn(
+        #"Converti en tableau", "Column1",
+        {"milestone_id","project_id","project_name","name","family","type","date","days_remaining","status"}
+    ),
+    #"Types" = Table.TransformColumnTypes(#"Colonnes développées", {
+        {"milestone_id", type text}, {"project_id", type text}, {"project_name", type text},
+        {"name", type text}, {"family", type text}, {"type", type text},
+        {"date", type date}, {"days_remaining", Int64.Type}, {"status", type text}
+    })
+in
+    #"Types"'''
+
+_M_README = """MARCEL Power BI Template — Scripts M-Query
+===========================================
+
+URL API : {{BASE_URL}}
+
+INSTRUCTIONS D'IMPORT
+---------------------
+1. Ouvrez Power BI Desktop
+2. Cliquez sur "Obtenir des données" > "Requête vide"
+3. Dans l'Éditeur Power Query, cliquez sur "Éditeur avancé"
+4. Copiez-collez le contenu du fichier .m correspondant
+5. Remplacez la valeur ApiKey par votre clé (depuis MARCEL > Admin > Power BI)
+6. Répétez pour chaque table (Projets, Ressources, Timesheets, Budget, Risques, Jalons)
+
+TABLES DISPONIBLES
+------------------
+- MARCEL_Projets.m      → /api/powerbi/projects
+- MARCEL_Ressources.m   → /api/powerbi/resources
+- MARCEL_Timesheets.m   → /api/powerbi/timesheets
+- MARCEL_Budget.m       → /api/powerbi/budget
+- MARCEL_Risques.m      → /api/powerbi/risks
+- MARCEL_Jalons.m       → /api/powerbi/milestones
+
+RELATIONS RECOMMANDÉES
+----------------------
+Projets[project_id] → Timesheets[project_id]  (1:N)
+Projets[project_id] → Budget[project_id]      (1:1)
+Projets[project_id] → Risques[project_id]     (1:N)
+Projets[project_id] → Jalons[project_id]      (1:N)
+Ressources[resource_id] → Timesheets[resource_id]  (1:N)
+"""
+

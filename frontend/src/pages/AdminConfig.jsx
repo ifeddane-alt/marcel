@@ -3,7 +3,7 @@ import {
   Wrench, ToggleLeft, ToggleRight, Workflow, BookOpen, Calendar,
   Bell, Palette, Plus, Trash2, GripVertical, Save, RefreshCw,
   ChevronUp, ChevronDown, CheckCircle2, AlertCircle, Info,
-  Upload,
+  Upload, Webhook,
 } from "lucide-react";
 import { adminConfigAPI } from "@/api";
 import { useTenantConfig } from "@/contexts/TenantConfigContext";
@@ -758,6 +758,157 @@ function BrandingSection({ config, onSave }) {
   );
 }
 
+// ─── Webhooks Section ─────────────────────────────────────────────────────────
+
+function WebhooksSection({ config, onSave }) {
+  const wh = config?.webhook || {};
+  const [form, setForm] = useState({
+    url: wh.url || "",
+    enabled: wh.enabled || false,
+    events: wh.events || ["project.created", "project.updated"],
+    secret: wh.secret || "",
+  });
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState(null);
+
+  const ALL_EVENTS = [
+    { value: "project.created", label: "Projet créé" },
+    { value: "project.updated", label: "Projet modifié" },
+  ];
+
+  const toggleEvent = (ev) => {
+    setForm(f => ({
+      ...f,
+      events: f.events.includes(ev) ? f.events.filter(e => e !== ev) : [...f.events, ev],
+    }));
+  };
+
+  const save = async () => {
+    setSaving(true); setMsg(null);
+    try {
+      await adminConfigAPI.updateWebhooks({ webhook: form });
+      setMsg({ type: "ok", text: "Webhook sauvegardé." });
+      onSave();
+    } catch (e) {
+      setMsg({ type: "err", text: e.response?.data?.detail || "Erreur lors de la sauvegarde." });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6" data-testid="section-webhooks">
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="font-semibold text-slate-800">Webhook Projet</h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            MARCEL envoie un POST JSON à l'URL configurée lors des événements sélectionnés.
+            Utile pour déclencher un refresh Power BI, notifier Slack/Teams, etc.
+          </p>
+        </div>
+        <button
+          data-testid="webhooks-save-btn"
+          onClick={save}
+          disabled={saving}
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-[#0052CC] text-white rounded-lg hover:bg-[#0040a6] transition-colors disabled:opacity-50"
+        >
+          {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />}
+          Sauvegarder
+        </button>
+      </div>
+
+      {msg && (
+        <div className={`flex items-center gap-2 p-3 rounded-lg text-sm ${msg.type === "ok" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-rose-50 text-rose-700 border border-rose-200"}`}>
+          {msg.type === "ok" ? <CheckCircle2 size={14} /> : <AlertCircle size={14} />}
+          {msg.text}
+        </div>
+      )}
+
+      {/* Activation */}
+      <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl">
+        <div>
+          <p className="text-sm font-medium text-slate-700">Activer le webhook</p>
+          <p className="text-xs text-slate-500">Les requêtes ne seront envoyées que si cette option est activée.</p>
+        </div>
+        <button
+          data-testid="webhook-toggle"
+          onClick={() => setForm(f => ({ ...f, enabled: !f.enabled }))}
+          className="focus:outline-none"
+        >
+          {form.enabled
+            ? <ToggleRight size={32} className="text-[#0052CC]" />
+            : <ToggleLeft size={32} className="text-slate-400" />
+          }
+        </button>
+      </div>
+
+      {/* URL */}
+      <div>
+        <label className="block text-xs font-semibold text-slate-600 mb-1">URL de destination</label>
+        <input
+          data-testid="webhook-url-input"
+          type="url"
+          value={form.url}
+          onChange={e => setForm(f => ({ ...f, url: e.target.value }))}
+          placeholder="https://hooks.powerbi.com/... ou https://hooks.slack.com/..."
+          className={INPUT_CLS}
+        />
+        <p className="text-xs text-slate-400 mt-1">Doit être une URL HTTPS accessible publiquement.</p>
+      </div>
+
+      {/* Événements */}
+      <div>
+        <label className="block text-xs font-semibold text-slate-600 mb-2">Événements déclencheurs</label>
+        <div className="space-y-2">
+          {ALL_EVENTS.map(ev => (
+            <label key={ev.value} className="flex items-center gap-3 cursor-pointer" data-testid={`webhook-event-${ev.value}`}>
+              <input
+                type="checkbox"
+                checked={form.events.includes(ev.value)}
+                onChange={() => toggleEvent(ev.value)}
+                className="w-4 h-4 accent-[#0052CC]"
+              />
+              <span className="text-sm text-slate-700">{ev.label}</span>
+              <code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{ev.value}</code>
+            </label>
+          ))}
+        </div>
+      </div>
+
+      {/* Secret HMAC */}
+      <div>
+        <label className="block text-xs font-semibold text-slate-600 mb-1">Secret HMAC <span className="text-slate-400 font-normal">(optionnel)</span></label>
+        <input
+          data-testid="webhook-secret-input"
+          type="password"
+          value={form.secret}
+          onChange={e => setForm(f => ({ ...f, secret: e.target.value }))}
+          placeholder="Clé secrète pour valider les requêtes reçues"
+          className={INPUT_CLS}
+        />
+        <p className="text-xs text-slate-400 mt-1">
+          Si renseigné, le header <code>X-MARCEL-Signature</code> sera ajouté à chaque requête pour validation HMAC.
+        </p>
+      </div>
+
+      {/* Payload example */}
+      <div className="bg-slate-800 rounded-xl p-4">
+        <p className="text-xs text-slate-400 mb-2 font-mono">Exemple de payload :</p>
+        <pre className="text-xs text-emerald-400 font-mono overflow-x-auto">{JSON.stringify({
+          event: "project.updated",
+          timestamp: "2026-02-01T10:00:00Z",
+          project_id: "uuid-...",
+          name: "Migration SAP S/4HANA",
+          status: "actif",
+          status_rag: "amber",
+          tenant_id: "uuid-tenant",
+        }, null, 2)}</pre>
+      </div>
+    </div>
+  );
+}
+
+
 // ─── Composant principal ──────────────────────────────────────────────────────
 
 const TABS = [
@@ -767,6 +918,7 @@ const TABS = [
   { id: "holidays",   label: "Jours Fériés",     icon: Calendar },
   { id: "alerts",     label: "Alertes",          icon: Bell },
   { id: "branding",   label: "Export PPT",       icon: Palette },
+  { id: "webhooks",   label: "Webhooks",         icon: Webhook },
 ];
 
 export default function AdminConfig() {
@@ -855,6 +1007,7 @@ export default function AdminConfig() {
       {activeTab === "holidays"  && <HolidaysSection  config={config} onSave={handleSave} />}
       {activeTab === "alerts"    && <AlertsSection    config={config} onSave={handleSave} />}
       {activeTab === "branding"  && <BrandingSection  config={config} onSave={handleSave} />}
+      {activeTab === "webhooks"  && <WebhooksSection  config={config} onSave={handleSave} />}
     </div>
   );
 }

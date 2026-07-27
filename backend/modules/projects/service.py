@@ -1,5 +1,6 @@
 from fastapi import HTTPException
 from datetime import datetime, timezone
+import asyncio
 import uuid
 from core.database import db
 from core.auth import TokenPayload, require_write, is_ownership_restricted
@@ -53,6 +54,8 @@ async def create_project(data: ProjectCreate, current_user: TokenPayload) -> dic
     }
     await db.projects.insert_one(project)
     project.pop("_id", None)
+    # Fire webhook (non-bloquant)
+    asyncio.create_task(_fire_project_webhook(current_user.tenant_id, "project.created", project))
     return project
 
 
@@ -67,7 +70,26 @@ async def update_project(project_id: str, data: ProjectUpdate, current_user: Tok
     if result.matched_count == 0:
         raise HTTPException(status_code=404, detail="Projet introuvable")
     updated = await db.projects.find_one({"project_id": project_id}, {"_id": 0})
+    # Fire webhook (non-bloquant)
+    asyncio.create_task(_fire_project_webhook(current_user.tenant_id, "project.updated", updated))
     return updated
+
+
+async def _fire_project_webhook(tenant_id: str, event: str, project: dict) -> None:
+    """Fire-and-forget webhook pour les événements projet."""
+    try:
+        from core.webhook import fire_webhook, get_tenant_webhook_url
+        url = await get_tenant_webhook_url(tenant_id)
+        if url:
+            await fire_webhook(url, event, {
+                "project_id": project.get("project_id"),
+                "name": project.get("name"),
+                "status": project.get("status"),
+                "status_rag": project.get("status_rag"),
+                "tenant_id": tenant_id,
+            })
+    except Exception:
+        pass
 
 
 async def add_budget_revision(

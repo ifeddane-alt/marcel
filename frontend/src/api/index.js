@@ -225,6 +225,7 @@ export const adminConfigAPI = {
   updateHolidays:  (d)   => api.put("/admin/config/holidays", d),
   updateThresholds:(d)   => api.put("/admin/config/thresholds", d),
   updateBranding:  (d)   => api.put("/admin/config/ppt-branding", d),
+  updateWebhooks:  (d)   => api.put("/admin/config/webhooks", d),
 };
 
 export const okrsAPI = {

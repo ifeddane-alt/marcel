@@ -88,6 +88,7 @@ class TenantConfig(BaseModel):
     holidays: List[HolidayItem] = []
     thresholds: AlertThresholds = AlertThresholds()
     ppt_branding: PPTBranding = PPTBranding()
+    webhook: "WebhookConfig" = None  # type: ignore
 
 
 # ─── Update schemas ────────────────────────────────────────────────────────────
@@ -114,3 +115,16 @@ class ThresholdsUpdate(BaseModel):
 
 class PPTBrandingUpdate(BaseModel):
     ppt_branding: PPTBranding
+
+
+# ─── Webhooks ─────────────────────────────────────────────────────────────────
+
+class WebhookConfig(BaseModel):
+    url: str = ""
+    enabled: bool = False
+    events: List[str] = ["project.created", "project.updated"]
+    secret: Optional[str] = None   # HMAC secret pour validation côté destinataire
+
+
+class WebhooksUpdate(BaseModel):
+    webhook: WebhookConfig

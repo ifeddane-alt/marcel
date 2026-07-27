@@ -68,6 +68,12 @@ async def update_ppt_branding(data: PPTBrandingUpdate, current_user: TokenPayloa
     )
 
 
+async def update_webhooks(data: "WebhooksUpdate", current_user: TokenPayload) -> dict:
+    return await _update_section(
+        current_user.tenant_id, "webhook", data.webhook.model_dump()
+    )
+
+
 # ─── Seed Altair ──────────────────────────────────────────────────────────────
 
 SEED_ENUMS = {

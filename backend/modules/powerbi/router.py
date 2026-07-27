@@ -156,3 +156,27 @@ async def generate_key(user: TokenPayload = Depends(permission_required("admin.c
 @router.delete("/admin/powerbi/revoke-key")
 async def revoke_key(user: TokenPayload = Depends(permission_required("admin.config"))):
     return await service.revoke_api_key(user)
+
+
+# ─── Template ZIP ─────────────────────────────────────────────────────────────
+
+@router.get("/admin/powerbi/template")
+async def download_template(
+    request: Request,
+    user: TokenPayload = Depends(permission_required("admin.config")),
+):
+    """Télécharge un ZIP contenant les 6 scripts M-Query Power BI pré-configurés."""
+    from fastapi.responses import Response
+    import os
+
+    key_doc = await db.api_keys.find_one({"tenant_id": user.tenant_id}, {"_id": 0, "key": 1})
+    api_key = key_doc["key"] if key_doc else "VOTRE_CLE_API_ICI"
+
+    base_url = os.environ.get("REACT_APP_BACKEND_URL", str(request.base_url).rstrip("/"))
+    zip_bytes = service.generate_template_zip(base_url, api_key)
+
+    return Response(
+        content=zip_bytes,
+        media_type="application/zip",
+        headers={"Content-Disposition": "attachment; filename=MARCEL_PowerBI_Template.zip"},
+    )

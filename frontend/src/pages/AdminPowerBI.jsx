@@ -425,6 +425,26 @@ export default function AdminPowerBI() {
 function MQuerySection({ baseUrl, apiKey }) {
   const { paramScript, tableScripts } = buildMQueries(baseUrl, apiKey);
   const [activeTab, setActiveTab] = useState(0); // 0 = params, 1..6 = tables
+  const [downloading, setDownloading] = useState(false);
+
+  const downloadTemplate = async () => {
+    setDownloading(true);
+    try {
+      const res = await api.get("/admin/powerbi/template", { responseType: "blob" });
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = "MARCEL_PowerBI_Template.zip";
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch (e) {
+      alert("Erreur lors du téléchargement du template.");
+    } finally {
+      setDownloading(false);
+    }
+  };
 
   const allTabs = [
     { label: "Paramètres", script: paramScript, isParam: true },
@@ -437,10 +457,21 @@ function MQuerySection({ baseUrl, apiKey }) {
         <Code2 size={16} className="text-[#F2C811]" />
         <h2 className="font-semibold text-slate-800">Scripts M-Query (Power Query)</h2>
       </div>
-      <p className="text-xs text-slate-500 mb-4">
-        Collez chaque script dans <strong>Power BI Desktop → Éditeur Power Query → Nouvelle requête → Requête vide → Éditeur avancé</strong>.
-        Commencez par les deux paramètres, puis créez une requête par table.
-      </p>
+      <div className="flex items-center justify-between mb-4">
+        <p className="text-xs text-slate-500">
+          Collez chaque script dans <strong>Power BI Desktop → Éditeur Power Query → Nouvelle requête → Requête vide → Éditeur avancé</strong>.
+          Commencez par les deux paramètres, puis créez une requête par table.
+        </p>
+        <button
+          data-testid="download-template-btn"
+          onClick={downloadTemplate}
+          disabled={downloading}
+          className="flex-shrink-0 ml-4 flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-[#F2C811] text-slate-900 rounded-lg hover:bg-[#e6bc00] transition-colors disabled:opacity-50"
+        >
+          {downloading ? <RefreshCw size={14} className="animate-spin" /> : <BookOpen size={14} />}
+          Télécharger .zip
+        </button>
+      </div>
 
       {/* Tabs */}
       <div className="flex gap-1 border-b border-slate-200 mb-4 overflow-x-auto">
