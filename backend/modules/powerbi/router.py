@@ -165,7 +165,7 @@ async def download_template(
     request: Request,
     user: TokenPayload = Depends(permission_required("admin.config")),
 ):
-    """Télécharge un ZIP contenant les 6 scripts M-Query Power BI pré-configurés."""
+    """Télécharge un ZIP contenant les 6 scripts M-Query Power BI pré-configurés + README."""
     from fastapi.responses import Response
     import os
 

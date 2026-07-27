@@ -151,18 +151,13 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 | Tablet (768-1279px) | 60px in-flow, hover:w-60 (group) | 2×2 | rounded-none sm:rounded-xl | p-4 md:p-6 |
 | Desktop (≥1280px) | Toujours w-60, labels visibles | 4 colonnes | rounded-xl | p-4 md:p-6 lg:p-8 |
 
-## État — MARCEL V1.2 Technique ✅ (Fév 2026)
-- **PPT Refactoring** : `pptx_generator.py` 1851 → 13 lignes (façade). Code découpé en `pptx_base.py` (344L), `pptx_copil.py` (1086L), `pptx_status_report.py` (425L). Rétrocompatible.
-- **Rate Limiting** : SlowAPI intégré sur 6 endpoints Power BI (10 req/min/IP). Handler 429 global. Auth login garde son rate limiter in-memory (10/min/email).
-- **Monitoring** : `/api/health` enrichi (DB ping, uptime, version, error_counts). `/api/admin/monitoring` (collections, stats). Page UI `/admin/monitoring` avec auto-refresh 30s.
-- **CI/CD** : `.github/workflows/ci.yml` — pytest backend (avec MongoDB service) + yarn build frontend, déclenchés sur toutes les PRs.
+## État — MARCEL V1.3 P1 ✅ (Fév 2026)
+- **Template Power BI ZIP** : `GET /api/admin/powerbi/template` → ZIP (6 fichiers `.m` M-Query + README) pré-configurés avec URL tenant et clé API. Bouton "Télécharger .zip" dans `/admin/powerbi`.
+- **Webhook projet** : `PUT /api/admin/config/webhooks` → config (URL, enabled, events, HMAC secret). Fire-and-forget dans `projects/service.py` sur `project.created` / `project.updated`. Onglet "Webhooks" dans `/admin/config`.
 
 ## Backlog / Améliorations futures
 ### P1 — Court terme
-- Template Power BI Desktop (.pbix) pré-câblé 6 tables + relations
-- Filtre `?program_id=` sur endpoints Power BI
-- Webhook `/api/webhooks/project-updated` pour actualisation Power BI push
-- Installer pyrfc + SAP NW RFC SDK pour connectivité RFC native
+- SAP RFC natif : installer `pyrfc` + SAP NW RFC SDK (sous licence SAP) pour remplacer le mock actuel
 
 ### P2 — Moyen terme
 - APM externe (Sentry / Datadog) pour persistance des erreurs 5xx et alertes
