@@ -161,6 +161,7 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - **Alertes email (Resend, optionnel)** : `core/email_alerts.py`, config tenant `PUT /api/admin/config/email-alerts` (enabled, recipients, events). Envoi fire-and-forget sur project.created/updated si `RESEND_API_KEY` défini (env). UI dans `/admin/config` onglet Webhooks (section-email-alerts). CLÉ NON CONFIGURÉE en preview.
 - **Dashboard CxO personnalisable** : `GET /api/dashboard/cxo` (kpis, rag, budget, jalons on-time, top 5 projets), préférences widgets par utilisateur (`GET/PUT /api/dashboard/cxo/preferences`, collection `user_preferences`). Page `/cxo` (`DashboardCxO.jsx`), entrée nav "Dashboard CxO", panneau Personnaliser avec toggles persistés.
 - **Connecteur MS Project (XML MSPDI)** : `GET /api/msproject/export/{id}` (phases=summary tasks, tâches, jalons Milestone=1) + `POST /api/msproject/import/{id}` (multipart). Boutons dans l'en-tête `ProjectDetail.jsx`. Round-trip validé.
+- **Alertes email seuils** : `threshold.budget_overrun` (EAC > budget_total × eac_ratio, déclenché sur update projet et révision budget, anti-spam au franchissement) et `threshold.milestone_late` (forecast > baseline nouvellement en retard, sur update jalon). Événements cochables dans la config email. Poussé sur GitHub (commit a961750), CI vert (backend + frontend).
 - **Webhook** : filtre désormais par événements configurés (`get_tenant_webhook_url(tenant_id, event)`).
 
 ## Backlog / Améliorations futures
@@ -169,7 +170,6 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 
 ### P2 — Moyen terme (restant)
 - Envoi réel Sentry/Resend à activer sur le VPS (ajouter SENTRY_DSN / RESEND_API_KEY dans le .env)
-- Alertes email sur dépassements de seuil (budget, retard jalon) — actuellement seulement événements projet
 
 ### P3 — Long terme
 - Mobile app React Native
