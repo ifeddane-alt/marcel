@@ -88,14 +88,20 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
   useEffect(() => {
     if (!isOpen || project) return;
     projectTemplatesAPI.list().then(({ data }) => {
-      const match = data.find(t => t.methodology === form.methodology);
       setTemplates(data);
-      if (match) {
-        setSelectedTemplate(match);
-        setSelectedPhases(match.phases.map(p => p.name));
-      }
+      const match = data.find(t => t.methodology === form.methodology);
+      setSelectedTemplate(match || null);
+      setSelectedPhases(match ? match.phases.map(p => p.name) : []);
     }).catch(() => {});
   }, [form.methodology, isOpen, project]);
+
+  const methodTemplates = templates.filter(t => t.methodology === form.methodology);
+
+  const handleTemplateChange = (e) => {
+    const tpl = methodTemplates.find(t => t.template_id === e.target.value) || null;
+    setSelectedTemplate(tpl);
+    setSelectedPhases(tpl ? tpl.phases.map(p => p.name) : []);
+  };
 
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));
 
@@ -323,6 +329,22 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
 
             {showTemplate && (
               <div className="mt-3 space-y-2 bg-slate-50 rounded-lg p-3 border border-slate-200">
+                {methodTemplates.length > 1 && (
+                  <Field label="Template à appliquer">
+                    <select
+                      data-testid="template-select"
+                      className={INPUT_CLS}
+                      value={selectedTemplate.template_id}
+                      onChange={handleTemplateChange}
+                    >
+                      {methodTemplates.map(t => (
+                        <option key={t.template_id} value={t.template_id}>
+                          {t.name}{t.is_default ? " (par défaut)" : ""}
+                        </option>
+                      ))}
+                    </select>
+                  </Field>
+                )}
                 <p className="text-xs text-slate-500 mb-2">Sélectionnez les phases à pré-charger :</p>
                 {selectedTemplate.phases.map(phase => (
                   <label
