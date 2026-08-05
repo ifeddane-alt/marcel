@@ -140,3 +140,32 @@ class EmailAlertsConfig(BaseModel):
 
 class EmailAlertsUpdate(BaseModel):
     email_alerts: EmailAlertsConfig
+
+
+# ─── SSO ──────────────────────────────────────────────────────────────────────
+
+class SSOProviderOIDC(BaseModel):
+    enabled: bool = False
+    client_id: str = ""
+    client_secret: str = ""
+    ms_tenant: str = "organizations"
+
+
+class SSOSamlConfig(BaseModel):
+    enabled: bool = False
+    idp_entity_id: str = ""
+    sso_url: str = ""
+    x509_cert: str = ""
+
+
+class SSOConfig(BaseModel):
+    google: SSOProviderOIDC = SSOProviderOIDC()
+    entra: SSOProviderOIDC = SSOProviderOIDC()
+    saml: SSOSamlConfig = SSOSamlConfig()
+    auto_provision: bool = False
+    allowed_domains: List[str] = []
+    default_profile_id: Optional[str] = None
+
+
+class SSOUpdate(BaseModel):
+    sso: SSOConfig

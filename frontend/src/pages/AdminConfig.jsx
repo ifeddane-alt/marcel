@@ -3,9 +3,9 @@ import {
   Wrench, ToggleLeft, ToggleRight, Workflow, BookOpen, Calendar,
   Bell, Palette, Plus, Trash2, GripVertical, Save, RefreshCw,
   ChevronUp, ChevronDown, CheckCircle2, AlertCircle, Info,
-  Upload, Webhook,
+  Upload, Webhook, KeyRound,
 } from "lucide-react";
-import { adminConfigAPI } from "@/api";
+import { adminConfigAPI, profilesAPI } from "@/api";
 import { useTenantConfig } from "@/contexts/TenantConfigContext";
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
@@ -1042,6 +1042,7 @@ const TABS = [
   { id: "alerts",     label: "Alertes",          icon: Bell },
   { id: "branding",   label: "Export PPT",       icon: Palette },
   { id: "webhooks",   label: "Webhooks",         icon: Webhook },
+  { id: "sso",        label: "SSO",              icon: KeyRound },
 ];
 
 export default function AdminConfig() {
@@ -1131,6 +1132,7 @@ export default function AdminConfig() {
       {activeTab === "alerts"    && <AlertsSection    config={config} onSave={handleSave} />}
       {activeTab === "branding"  && <BrandingSection  config={config} onSave={handleSave} />}
       {activeTab === "webhooks"  && <WebhooksSection  config={config} onSave={handleSave} />}
+      {activeTab === "sso"       && <SSOSection       config={config} onSave={handleSave} />}
     </div>
   );
 }

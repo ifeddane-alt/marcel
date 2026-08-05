@@ -4,7 +4,7 @@ WORKDIR /app
 
 # Dépendances système pour la compilation de paquets Python natifs
 RUN apt-get update \
-    && apt-get install -y --no-install-recommends gcc \
+    && apt-get install -y --no-install-recommends gcc pkg-config libxml2-dev libxmlsec1-dev libxmlsec1-openssl \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

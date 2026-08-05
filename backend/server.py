@@ -76,6 +76,7 @@ from modules.status_report.router import router as status_report_router
 from modules.project_templates.router import router as project_templates_router
 from modules.monitoring.router import router as monitoring_router
 from modules.msproject.router import router as msproject_router
+from modules.sso.router import router as sso_router
 from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI(title="MARCEL API")
@@ -147,6 +148,7 @@ for _router in [
     project_templates_router,
     monitoring_router,
     msproject_router,
+    sso_router,
 ]:
     app.include_router(_router, prefix="/api")
 

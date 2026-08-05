@@ -80,6 +80,12 @@ async def update_email_alerts(data: "EmailAlertsUpdate", current_user: TokenPayl
     )
 
 
+async def update_sso(data: "SSOUpdate", current_user: TokenPayload) -> dict:
+    return await _update_section(
+        current_user.tenant_id, "sso", data.sso.model_dump()
+    )
+
+
 # ─── Seed Altair ──────────────────────────────────────────────────────────────
 
 SEED_ENUMS = {

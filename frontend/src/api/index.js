@@ -29,6 +29,8 @@ api.interceptors.response.use(
 export const authAPI = {
   login: (email, password) => api.post("/auth/login", { email, password }),
   me: () => api.get("/auth/me"),
+  ssoProviders: (email) => api.get(`/auth/sso/providers?email=${encodeURIComponent(email)}`),
+  ssoExchange: (code) => api.post("/auth/sso/exchange", { code }),
 };
 
 export const projectsAPI = {
@@ -235,6 +237,7 @@ export const adminConfigAPI = {
   updateBranding:  (d)   => api.put("/admin/config/ppt-branding", d),
   updateWebhooks:  (d)   => api.put("/admin/config/webhooks", d),
   updateEmailAlerts: (d) => api.put("/admin/config/email-alerts", d),
+  updateSSO:       (d)   => api.put("/admin/config/sso", d),
 };
 
 export const okrsAPI = {

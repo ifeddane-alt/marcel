@@ -1,0 +1,30 @@
+{
+  "summary": "SSO backend flows fully validated (17/17 pytest tests pass), Login-page SSO frontend mostly OK. CRITICAL frontend bug: Admin Config → onglet SSO crashes with 'SSOSection is not defined' — the SSOSection component and all data-testid cards (section-sso, sso-google-card, sso-entra-card, sso-saml-card, sso-provisioning-card, sso-autoprovision-toggle, sso-allowed-domains, sso-default-profile, sso-save-btn) are referenced in AdminConfig.jsx line 1135 but never defined/imported anywhere in /app/frontend/src. The admin SSO UI is entirely missing from the frontend code. Minor issue: /login?sso=fakecode does NOT display the 'Code SSO invalide' error although the /api/auth/sso/exchange call returns 401 (twice). Login-regression classic passes.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "AdminConfig.jsx (SSO tab)", "issue": "ReferenceError: SSOSection is not defined — component referenced at line 1135 <SSOSection config={config} onSave={handleSave} /> but never declared or imported. Clicking data-testid='config-tab-sso' crashes the whole admin config page with an uncaught runtime error. All expected data-testid attributes for the SSO admin section are MISSING from the codebase: section-sso, sso-google-card, sso-entra-card, sso-saml-card, sso-provisioning-card, sso-autoprovision-toggle, sso-allowed-domains, sso-default-profile, sso-save-btn.", "selector": "[data-testid='config-tab-sso']", "priority": "CRITICAL"},
+      {"component": "Login.jsx (sso exchange path)", "issue": "Navigating to /login?sso=fakecode calls authAPI.ssoExchange which returns 401 twice (visible in console), but the .catch handler's setError does not surface any message via [data-testid='login-error']. Expected: 'Échec de la connexion SSO' / 'Code SSO invalide'. Possibly StrictMode double-mount clearing state or err.response being undefined.", "selector": "[data-testid='login-error']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/test_sso_flows.py", "/app/test_reports/pytest/sso_flows.xml"],
+  "action_items": [
+    "URGENT — Implement/import SSOSection component in AdminConfig.jsx with all required data-testid: section-sso, sso-google-card (with google toggle+client_id+client_secret+ms_tenant), sso-entra-card (idem+ms_tenant), sso-saml-card (idp_entity_id+sso_url+x509_cert), sso-provisioning-card (sso-autoprovision-toggle, sso-allowed-domains input, sso-default-profile select populated with profiles), sso-save-btn. The endpoint PUT /api/admin/config/sso expects body wrapped as {\"sso\": {...}} (SSOUpdate schema).",
+    "Fix /login?sso=fakecode error display — ensure error state persists after ssoExchange rejection and renders in [data-testid='login-error']. Consider guarding useEffect against React StrictMode double-invoke (useRef guard) and defensively displaying err.message when err.response is undefined."
+  ],
+  "critical_code_review_comments": [
+    "AdminConfig.jsx line 1135: references undefined SSOSection — dead reference, likely a partial implementation was merged. Whole SSO tab non-functional.",
+    "PUT /api/admin/config/sso expects wrapped body {sso: SSOConfig}; make sure frontend adminConfigAPI.updateSSO wraps payload accordingly (main agent should verify /app/frontend/src/api/index.js when implementing SSOSection).",
+    "Login.jsx useEffect for SSO exchange has empty deps and uses setSearchParams inside .catch — safe, but the async setError does not display. Add a mounted ref or log to identify why."
+  ],
+  "updated_files": ["/app/backend/tests/test_sso_flows.py"],
+  "success_rate": {"backend": "100% (17/17)", "frontend": "60% (Login SSO buttons OK, admin SSO UI missing/crashes, sso=code error path silent)"},
+  "test_credentials": "admin@altair.fr / Admin2026!",
+  "seed_data_creation": "None. SSO config was toggled ON then cleaned up at end of pytest suite (TestZZZCleanup). Confirmed providers=[] post-cleanup.",
+  "retest_needed": true,
+  "main_agent_can_self_test": false,
+  "context_for_next_testing_agent": "Backend test file /app/backend/tests/test_sso_flows.py covers regression auth (health, login OK/bad/unknown), providers empty→3 after config, redirects Google/Entra/SAML, error paths (unknown email, bad provider, invalid state, invalid exchange code), SAML metadata public-host check, and final cleanup. It self-configures then wipes the SSO config using {sso:{...}} wrapper. Frontend blocker: SSOSection component not implemented — main agent must add it and its data-testid attributes before retest of admin flow.",
+  "rca of the issue": "AdminConfig.jsx line 1135 renders <SSOSection ...> but no matching component or import exists in /app/frontend/src. Result: uncaught ReferenceError, blank admin page when SSO tab clicked. Reproduction: login admin → /admin/config → click SSO tab → uncaught runtime error overlay 'SSOSection is not defined'. Mitigation: create SSOSection component with the described data-testid API and wire it into the file (either inline or via import from ./components)."
+}

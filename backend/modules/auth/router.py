@@ -40,11 +40,16 @@ def _check_rate_limit(email: str) -> None:
 async def login(req: LoginRequest, request: Request):
     # ── Rate limiting par email ──
     _check_rate_limit(req.email)
+    client_ip = request.client.host if request.client else "?"
 
     user = await db.users.find_one({"email": req.email}, {"_id": 0})
     if not user:
         logger.warning("[auth] Tentative échouée (email inconnu): %s depuis %s", req.email, client_ip)
         raise HTTPException(status_code=401, detail="Identifiants invalides")
+    if not user.get("password_hash"):
+        # Compte SSO sans mot de passe local
+        logger.warning("[auth] Tentative mdp sur compte SSO: %s depuis %s", req.email, client_ip)
+        raise HTTPException(status_code=401, detail="Ce compte utilise le SSO — utilisez la connexion SSO")
     if not bcrypt.checkpw(req.password.encode(), user["password_hash"].encode()):
         logger.warning("[auth] Tentative échouée (mauvais mdp): %s depuis %s", req.email, client_ip)
         raise HTTPException(status_code=401, detail="Identifiants invalides")
