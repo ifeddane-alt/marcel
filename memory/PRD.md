@@ -173,6 +173,10 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - Dockerfile backend : ajout libxmlsec1-dev pour python3-saml. Commit `12cfd20`, CI vert.
 - ⚠️ Testé jusqu'à la redirection IdP (pas d'identifiants Google/Microsoft réels). L'utilisateur doit créer ses app registrations et configurer l'onglet SSO.
 
+## Fix — Sélecteur de template projet (Juin 2026)
+- Bug : le modal "Nouveau projet" (`ProjectModal.jsx`) prenait automatiquement le premier template de la méthodologie (le défaut) — les templates custom (ex: "WATERFALL BYGGA" de l'utilisateur) n'étaient jamais proposés.
+- Fix : select `template-select` dans la section template listant tous les templates de la méthodologie (défaut + custom), phases resynchronisées au changement. Commit `6bf588a`, CI vert.
+
 ## Backlog / Améliorations futures
 ### P1 — Court terme
 - SAP RFC natif : installer `pyrfc` + SAP NW RFC SDK (sous licence SAP) pour remplacer le mock actuel
