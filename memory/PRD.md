@@ -164,6 +164,15 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - **Alertes email seuils** : `threshold.budget_overrun` (EAC > budget_total × eac_ratio, déclenché sur update projet et révision budget, anti-spam au franchissement) et `threshold.milestone_late` (forecast > baseline nouvellement en retard, sur update jalon). Événements cochables dans la config email. Poussé sur GitHub (commit a961750), CI vert (backend + frontend).
 - **Webhook** : filtre désormais par événements configurés (`get_tenant_webhook_url(tenant_id, event)`).
 
+## État — MARCEL V1.5 SSO ✅ (Juin 2026) — backend 17/17, frontend validé (iteration_47 + retest correctifs)
+- **SSO multi-tenant** (`backend/modules/sso/`) : Google OIDC, Microsoft Entra ID OIDC, SAML 2.0 (python3-saml). Config par tenant dans `tenants.settings.sso` via `PUT /api/admin/config/sso`.
+- Routes : `GET /api/auth/sso/providers?email=`, `GET /api/auth/sso/login/{provider}?email=`, `GET /api/auth/sso/callback/{provider}`, `POST /api/auth/sso/saml/acs/{tenant_id}`, `GET /api/auth/sso/saml/metadata/{tenant_id}`, `POST /api/auth/sso/exchange` (ticket one-shot 60s, collections TTL sso_states/sso_tickets/sso_replays).
+- Auto-provisioning optionnel (allowed_domains + profil par défaut). Comptes SSO sans mot de passe local (guard 401 dans login).
+- UI : boutons Google/Microsoft/SAML sur `/login` (échange ticket via `?sso=`), onglet SSO dans `/admin/config` (3 cartes + provisioning, URLs de callback affichées).
+- Fixes : bug `client_ip` (NameError → 500 sur login échoué), intercepteur axios 401 n'écrase plus les erreurs des routes `/auth/`, `base_url_of` préfère `x-forwarded-host` + override env `PUBLIC_BASE_URL`.
+- Dockerfile backend : ajout libxmlsec1-dev pour python3-saml. Commit `12cfd20`, CI vert.
+- ⚠️ Testé jusqu'à la redirection IdP (pas d'identifiants Google/Microsoft réels). L'utilisateur doit créer ses app registrations et configurer l'onglet SSO.
+
 ## Backlog / Améliorations futures
 ### P1 — Court terme
 - SAP RFC natif : installer `pyrfc` + SAP NW RFC SDK (sous licence SAP) pour remplacer le mock actuel
