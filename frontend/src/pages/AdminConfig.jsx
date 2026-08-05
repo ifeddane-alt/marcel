@@ -1032,6 +1032,161 @@ function EmailAlertsSubSection({ config, onSave }) {
 }
 
 
+// ─── SSO Section ──────────────────────────────────────────────────────────────
+
+function SSOSection({ config, onSave }) {
+  const sso = config?.sso || {};
+  const [form, setForm] = useState({
+    google: { enabled: false, client_id: "", client_secret: "", ms_tenant: "organizations", ...(sso.google || {}) },
+    entra: { enabled: false, client_id: "", client_secret: "", ms_tenant: "organizations", ...(sso.entra || {}) },
+    saml: { enabled: false, idp_entity_id: "", sso_url: "", x509_cert: "", ...(sso.saml || {}) },
+    auto_provision: sso.auto_provision || false,
+    allowed_domains: (sso.allowed_domains || []).join(", "),
+    default_profile_id: sso.default_profile_id || "",
+  });
+  const [profiles, setProfiles] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [msg, setMsg] = useState(null);
+  const origin = window.location.origin;
+
+  useEffect(() => {
+    profilesAPI.list().then(r => setProfiles(r.data || [])).catch(() => {});
+  }, []);
+
+  const setProvider = (p, field, value) =>
+    setForm(f => ({ ...f, [p]: { ...f[p], [field]: value } }));
+
+  const save = async () => {
+    setSaving(true); setMsg(null);
+    try {
+      await adminConfigAPI.updateSSO({
+        sso: {
+          google: form.google,
+          entra: form.entra,
+          saml: form.saml,
+          auto_provision: form.auto_provision,
+          allowed_domains: form.allowed_domains.split(",").map(d => d.trim().toLowerCase()).filter(Boolean),
+          default_profile_id: form.default_profile_id || null,
+        },
+      });
+      setMsg({ type: "ok", text: "Configuration SSO sauvegardée." });
+      onSave();
+    } catch (e) {
+      setMsg({ type: "err", text: e.response?.data?.detail || "Erreur lors de la sauvegarde." });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const Toggle = ({ on, onClick, testid }) => (
+    <button data-testid={testid} onClick={onClick} className="focus:outline-none flex-shrink-0">
+      {on ? <ToggleRight size={30} className="text-[#0052CC]" /> : <ToggleLeft size={30} className="text-slate-400" />}
+    </button>
+  );
+
+  return (
+    <div className="space-y-6" data-testid="section-sso">
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="font-semibold text-slate-800">Single Sign-On (SSO)</h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Connexion via Google, Microsoft Entra ID (OIDC) ou tout IdP SAML 2.0 (Okta, Keycloak, ADFS…).
+          </p>
+        </div>
+        <button
+          data-testid="sso-save-btn"
+          onClick={save}
+          disabled={saving}
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-[#0052CC] text-white rounded-lg hover:bg-[#0040a6] transition-colors disabled:opacity-50"
+        >
+          {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />}
+          Sauvegarder
+        </button>
+      </div>
+
+      {msg && (
+        <div className={`flex items-center gap-2 p-3 rounded-lg text-sm ${msg.type === "ok" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-rose-50 text-rose-700 border border-rose-200"}`}>
+          {msg.type === "ok" ? <CheckCircle2 size={14} /> : <AlertCircle size={14} />}
+          {msg.text}
+        </div>
+      )}
+
+      {/* Google */}
+      <div className="border border-gray-200 rounded-xl p-4 space-y-3" data-testid="sso-google-card">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-slate-700">Google (OIDC)</p>
+            <p className="text-xs text-slate-400">Google Cloud Console → Credentials → OAuth client ID (Web)</p>
+          </div>
+          <Toggle on={form.google.enabled} onClick={() => setProvider("google", "enabled", !form.google.enabled)} testid="sso-google-toggle" />
+        </div>
+        <input data-testid="sso-google-client-id" placeholder="Client ID" value={form.google.client_id} onChange={e => setProvider("google", "client_id", e.target.value)} className={INPUT_CLS} />
+        <input data-testid="sso-google-client-secret" type="password" placeholder="Client Secret" value={form.google.client_secret} onChange={e => setProvider("google", "client_secret", e.target.value)} className={INPUT_CLS} />
+        <p className="text-[11px] text-slate-400">URI de redirection à déclarer : <code className="bg-slate-100 px-1 rounded">{origin}/api/auth/sso/callback/google</code></p>
+      </div>
+
+      {/* Entra ID */}
+      <div className="border border-gray-200 rounded-xl p-4 space-y-3" data-testid="sso-entra-card">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-slate-700">Microsoft Entra ID (OIDC)</p>
+            <p className="text-xs text-slate-400">Entra admin center → App registrations → New registration (Web)</p>
+          </div>
+          <Toggle on={form.entra.enabled} onClick={() => setProvider("entra", "enabled", !form.entra.enabled)} testid="sso-entra-toggle" />
+        </div>
+        <input data-testid="sso-entra-client-id" placeholder="Application (client) ID" value={form.entra.client_id} onChange={e => setProvider("entra", "client_id", e.target.value)} className={INPUT_CLS} />
+        <input data-testid="sso-entra-client-secret" type="password" placeholder="Client Secret" value={form.entra.client_secret} onChange={e => setProvider("entra", "client_secret", e.target.value)} className={INPUT_CLS} />
+        <input data-testid="sso-entra-ms-tenant" placeholder="Tenant ID Microsoft (ou 'organizations')" value={form.entra.ms_tenant} onChange={e => setProvider("entra", "ms_tenant", e.target.value)} className={INPUT_CLS} />
+        <p className="text-[11px] text-slate-400">URI de redirection à déclarer : <code className="bg-slate-100 px-1 rounded">{origin}/api/auth/sso/callback/entra</code></p>
+      </div>
+
+      {/* SAML */}
+      <div className="border border-gray-200 rounded-xl p-4 space-y-3" data-testid="sso-saml-card">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-slate-700">SAML 2.0 (Okta, Keycloak, ADFS…)</p>
+            <p className="text-xs text-slate-400">Valeurs disponibles dans les métadonnées de votre IdP</p>
+          </div>
+          <Toggle on={form.saml.enabled} onClick={() => setProvider("saml", "enabled", !form.saml.enabled)} testid="sso-saml-toggle" />
+        </div>
+        <input data-testid="sso-saml-entity-id" placeholder="IdP Entity ID (issuer)" value={form.saml.idp_entity_id} onChange={e => setProvider("saml", "idp_entity_id", e.target.value)} className={INPUT_CLS} />
+        <input data-testid="sso-saml-sso-url" placeholder="URL SSO de l'IdP (HTTP-Redirect)" value={form.saml.sso_url} onChange={e => setProvider("saml", "sso_url", e.target.value)} className={INPUT_CLS} />
+        <textarea data-testid="sso-saml-cert" rows={4} placeholder="Certificat X.509 de signature (PEM ou base64)" value={form.saml.x509_cert} onChange={e => setProvider("saml", "x509_cert", e.target.value)} className={`${INPUT_CLS} font-mono text-xs`} />
+        <p className="text-[11px] text-slate-400">
+          À déclarer côté IdP — ACS : <code className="bg-slate-100 px-1 rounded">{origin}/api/auth/sso/saml/acs/&lt;tenant_id&gt;</code>{" "}
+          · Entity ID / métadonnées SP : <code className="bg-slate-100 px-1 rounded">{origin}/api/auth/sso/saml/metadata/&lt;tenant_id&gt;</code>
+        </p>
+      </div>
+
+      {/* Provisioning */}
+      <div className="border border-gray-200 rounded-xl p-4 space-y-3" data-testid="sso-provisioning-card">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm font-semibold text-slate-700">Auto-provisioning</p>
+            <p className="text-xs text-slate-400">Créer automatiquement les utilisateurs inconnus à la première connexion SSO</p>
+          </div>
+          <Toggle on={form.auto_provision} onClick={() => setForm(f => ({ ...f, auto_provision: !f.auto_provision }))} testid="sso-autoprovision-toggle" />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 mb-1">Domaines email autorisés (séparés par des virgules)</label>
+          <input data-testid="sso-allowed-domains" placeholder="entreprise.fr, filiale.com" value={form.allowed_domains} onChange={e => setForm(f => ({ ...f, allowed_domains: e.target.value }))} className={INPUT_CLS} />
+        </div>
+        <div>
+          <label className="block text-xs font-semibold text-slate-600 mb-1">Profil par défaut des nouveaux utilisateurs</label>
+          <select data-testid="sso-default-profile" value={form.default_profile_id} onChange={e => setForm(f => ({ ...f, default_profile_id: e.target.value }))} className={INPUT_CLS}>
+            <option value="">— Lecture seule (fallback) —</option>
+            {profiles.map(p => (
+              <option key={p.profile_id} value={p.profile_id}>{p.name}</option>
+            ))}
+          </select>
+        </div>
+      </div>
+    </div>
+  );
+}
+
+
+
 // ─── Composant principal ──────────────────────────────────────────────────────
 
 const TABS = [
