@@ -177,6 +177,13 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - Bug : le modal "Nouveau projet" (`ProjectModal.jsx`) prenait automatiquement le premier template de la méthodologie (le défaut) — les templates custom (ex: "WATERFALL BYGGA" de l'utilisateur) n'étaient jamais proposés.
 - Fix : select `template-select` dans la section template listant tous les templates de la méthodologie (défaut + custom), phases resynchronisées au changement. Commit `6bf588a`, CI vert.
 
+## État — Dashboard personnalisable fusionné ✅ (Juin 2026) — testé 100% (iteration_48)
+- Fusion du Dashboard CxO dans `/dashboard` (route `/cxo` → redirect, nav CxO supprimée, `DashboardCxO.jsx` supprimé).
+- 15 widgets avec registre (`Dashboard.jsx` orchestrateur + `components/dashboard/DashboardWidgets.jsx`) : metrics, budget_detail, capacity, regulatory, envelope, ai_recommendations, upcoming_milestones (NOUVEAU, 30j avec retards), charts, milestones_gauge (ex-CxO), top_projects (ex-CxO), pending_timesheets (NOUVEAU), recent_decisions (NOUVEAU), recent_projects, top_risks, heatmap.
+- Personnalisation : panneau afficher/masquer + réordonner (flèches), préférences par utilisateur (`user_preferences.dashboard_widgets`, GET/PUT `/api/dashboard/preferences`).
+- Backend : `GET /api/dashboard/extras` (jalons à venir, timesheets submitted, décisions récentes). Endpoints CxO conservés pour compat.
+- Commit `38c8ff9`, CI vert.
+
 ## Backlog / Améliorations futures
 ### P1 — Court terme
 - SAP RFC natif : installer `pyrfc` + SAP NW RFC SDK (sous licence SAP) pour remplacer le mock actuel
