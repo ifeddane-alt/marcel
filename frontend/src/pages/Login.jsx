@@ -50,17 +50,39 @@ export default function Login() {
     window.location.assign(`${BACKEND}/api/auth/sso/login/${provider}?email=${encodeURIComponent(email)}`);
   };
 
+  const [waking, setWaking] = useState(null);
+
+  const isWakingError = (err) =>
+    !err.response || [502, 503, 504].includes(err.response.status);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     setError("");
     setLoading(true);
+    const MAX_TRIES = 8;
     try {
-      const res = await authAPI.login(email, password);
-      login(res.data.access_token, { ...res.data.user, permissions: res.data.permissions || [] });
-      navigate("/dashboard");
-    } catch (err) {
-      setError(err.response?.data?.detail || "Erreur de connexion");
+      for (let attempt = 1; attempt <= MAX_TRIES; attempt++) {
+        try {
+          const res = await authAPI.login(email, password);
+          login(res.data.access_token, { ...res.data.user, permissions: res.data.permissions || [] });
+          navigate("/dashboard");
+          return;
+        } catch (err) {
+          if (isWakingError(err) && attempt < MAX_TRIES) {
+            setWaking(attempt);
+            await new Promise((r) => setTimeout(r, 6000));
+            continue;
+          }
+          if (isWakingError(err)) {
+            setError("Le serveur ne répond pas. Réessayez dans quelques instants.");
+          } else {
+            setError(err.response?.data?.detail || "Erreur de connexion");
+          }
+          return;
+        }
+      }
     } finally {
+      setWaking(null);
       setLoading(false);
     }
   };
@@ -168,13 +190,23 @@ export default function Login() {
               </div>
             )}
 
+            {waking && (
+              <div
+                data-testid="login-waking"
+                className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded px-3 py-2 text-amber-400 text-sm"
+              >
+                <AlertCircle size={15} className="animate-pulse" />
+                L'environnement démarre… nouvelle tentative automatique ({waking}/8)
+              </div>
+            )}
+
             <button
               type="submit"
               disabled={loading}
               data-testid="login-submit-btn"
               className="w-full bg-[#0052CC] hover:bg-[#0047B3] text-white font-semibold text-sm py-2.5 rounded transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
             >
-              {loading ? "Connexion en cours..." : "Se connecter"}
+              {waking ? "Démarrage de l'environnement..." : loading ? "Connexion en cours..." : "Se connecter"}
             </button>
           </form>
 
