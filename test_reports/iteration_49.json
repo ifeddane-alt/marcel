@@ -1,0 +1,25 @@
+{
+  "summary": "Full backend + frontend testing of Dashboard matrix grid (react-grid-layout v2 legacy). Backend preferences API supports widgets+layouts persistence with correct null-preservation semantics. Frontend renders 16 widgets (capacity hidden outside edit mode when no alert), edit mode reveals customize panel + reset + capacity placeholder, widget toggle persists across reload, drag moves widget (y: 1784→2054) and save persists, reset works, no console errors. Health + login + portfolio OK.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Dashboard charts", "issues": ["Recharts warnings: 'The width(-1) and height(-1) of chart should be greater than 0' — non-blocking, likely due to ResponsiveContainer inside grid item during initial resize. Purely a console warning, chart still renders correctly after grid layout stabilizes."]}
+    ]
+  },
+  "test_report_links": ["/app/backend/tests/test_dashboard_grid.py", "/app/test_reports/pytest/dashboard_grid.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "service.get_dashboard_preferences returns layouts via `(doc or {}).get('dashboard_layouts') or None` — this coerces an empty dict {} to None on read. Not a bug for current UX but worth noting: PUT layouts={} results in GET layouts=null (silent transformation).",
+    "PUT semantics: layouts=null (Python None) intentionally skips updating dashboard_layouts (preserve). This is confirmed working, but consider documenting in schema description for clarity.",
+    "Recharts inside react-grid-layout: consider adding ResizeObserver / debounced width detection to avoid width(-1) warnings on initial mount."
+  ],
+  "updated_files": ["/app/backend/tests/test_dashboard_grid.py", "/app/test_reports/iteration_49.json"],
+  "success_rate": {"backend": "100% (7/7)", "frontend": "100% (grid render, capacity hide/show, edit panel, toggle persist, drag persist, reset)"},
+  "test_credentials": "admin@altair.fr / Admin2026!",
+  "seed_data_creation": "None; cleanup PUT with default 16 widgets and layouts={} completed. dashboard_layouts effectively cleared.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Dashboard grid (react-grid-layout@2.2.4 legacy import) working end-to-end. Login response field is 'access_token'. Cleanup already performed for admin@altair.fr — preferences restored to defaults, layouts cleared. Backend tests in /app/backend/tests/test_dashboard_grid.py reusable for regression."
+}

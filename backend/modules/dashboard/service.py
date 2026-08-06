@@ -142,17 +142,21 @@ async def get_dashboard_preferences(current_user: TokenPayload) -> dict:
         {"user_id": current_user.user_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
     )
     widgets = (doc or {}).get("dashboard_widgets") or DASHBOARD_DEFAULT_WIDGETS
-    return {"widgets": widgets, "available": DASHBOARD_DEFAULT_WIDGETS}
+    layouts = (doc or {}).get("dashboard_layouts") or None
+    return {"widgets": widgets, "layouts": layouts, "available": DASHBOARD_DEFAULT_WIDGETS}
 
 
-async def update_dashboard_preferences(widgets: list, current_user: TokenPayload) -> dict:
+async def update_dashboard_preferences(widgets: list, layouts: dict | None, current_user: TokenPayload) -> dict:
     valid = [w for w in widgets if w in DASHBOARD_DEFAULT_WIDGETS]
+    update = {"dashboard_widgets": valid}
+    if layouts is not None:
+        update["dashboard_layouts"] = layouts
     await db.user_preferences.update_one(
         {"user_id": current_user.user_id, "tenant_id": current_user.tenant_id},
-        {"$set": {"dashboard_widgets": valid}},
+        {"$set": update},
         upsert=True,
     )
-    return {"widgets": valid, "available": DASHBOARD_DEFAULT_WIDGETS}
+    return {"widgets": valid, "layouts": layouts, "available": DASHBOARD_DEFAULT_WIDGETS}
 
 
 CXO_DEFAULT_WIDGETS = ["kpis", "rag", "budget", "milestones", "risks", "top_projects"]
