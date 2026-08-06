@@ -210,7 +210,6 @@ export default function Dashboard() {
   };
 
   const visible = widgets.filter((w) => RENDERERS[w]);
-  const hidden = ALL_WIDGETS.filter((w) => !widgets.includes(w));
 
   const HAS_CONTENT = {
     capacity: capacityAlerts.length > 0,
@@ -271,20 +270,25 @@ export default function Dashboard() {
         </div>
       </div>
 
-      {/* Blocs masqués — réaffichage */}
-      {customizing && hidden.length > 0 && (
-        <div className="mb-4 flex flex-wrap items-center gap-1.5 bg-white border border-dashed border-gray-300 rounded-xl px-3 py-2.5" data-testid="dashboard-hidden-blocks">
-          <span className="text-[11px] font-semibold text-slate-500 mr-1">Blocs masqués :</span>
-          {hidden.map((w) => (
-            <button
-              key={w}
-              data-testid={`dashboard-widget-restore-${w}`}
-              onClick={() => showWidget(w)}
-              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border border-gray-200 bg-gray-50 text-slate-500 hover:border-[#0052CC] hover:text-[#0052CC] transition-colors"
-            >
-              <Plus size={10} /> {WIDGET_LABELS[w] || w}
-            </button>
-          ))}
+      {/* Barre de choix des blocs */}
+      {customizing && (
+        <div className="mb-4 bg-white border border-[#0052CC]/30 rounded-xl px-3 py-2.5" data-testid="dashboard-blocks-bar">
+          <p className="text-[11px] font-semibold text-slate-500 mb-2">Blocs du tableau de bord — cliquez pour afficher / masquer :</p>
+          <div className="flex flex-wrap items-center gap-1.5">
+            {ALL_WIDGETS.map((w) => {
+              const on = widgets.includes(w);
+              return (
+                <button
+                  key={w}
+                  data-testid={`dashboard-widget-toggle-${w}`}
+                  onClick={() => (on ? hideWidget(w) : showWidget(w))}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${on ? "bg-[#EBF2FF] border-[#0052CC] text-[#0052CC]" : "bg-gray-50 border-gray-200 text-slate-400 hover:border-slate-400"}`}
+                >
+                  {on ? <Check size={10} /> : <Plus size={10} />} {WIDGET_LABELS[w] || w}
+                </button>
+              );
+            })}
+          </div>
         </div>
       )}
       {customizing && (
