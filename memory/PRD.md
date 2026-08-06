@@ -185,6 +185,7 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - Commit `38c8ff9`, CI vert.
 - **Widget Charge équipes** (Juin 2026) : `team_load` ajouté aux widgets par défaut (16 au total) — capacité vs allocations par équipe (via `/api/teams/capacity-heatmap?months=3`), barre d'utilisation mois courant, mini-cellules 3 mois, surcharges >100% en rouge, badge nombre de surcharges. Commit `1d2dfa0`, CI vert. Auto-testé (curl + screenshot).
 - **Grille matricielle** (Juin 2026, testé 100% iteration_49) : dashboard converti en grille drag & drop (`react-grid-layout@2.2.4`, import legacy `Responsive+WidthProvider`). Mode édition : déplacer (bandeau bleu), redimensionner (poignée), activer/désactiver (pills), réinitialiser. Layouts persistés par utilisateur (`user_preferences.dashboard_layouts`, PUT `/api/dashboard/preferences` {widgets, layouts}). Widgets sans données masqués hors édition (placeholder en édition). Commit `ddea1b9`, CI vert.
+- **Blocs indépendants** (Juin 2026, testé 100% iteration_50) : 22 blocs déplaçables individuellement (cartes KPI, budget, graphiques séparés), masquage par croix sur le bandeau de chaque bloc en mode édition, zone "Blocs masqués" pour réafficher, migration auto des anciens ids composites (LEGACY_MAP). Commit `51f2a10`, CI vert.
 - ⏳ EN ATTENTE réponse utilisateur : reporting PMO "PTF Sync" + "SPR" (questions posées : définitions exactes, sections, format écran/PPT/PDF, périmètre).
 
 ## Backlog / Améliorations futures
