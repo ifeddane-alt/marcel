@@ -70,6 +70,36 @@ function WidgetShell({ title, icon: Icon, badge, link, linkLabel = "Voir tout", 
 
 // ─── Widgets ──────────────────────────────────────────────────────────────────
 
+export function MetricSingleWidget({ summary, kind }) {
+  const M = {
+    metric_projects: { label: "Projets totaux", value: summary.total_projects, sub: "dans le portefeuille", icon: Briefcase, accent: "#0052CC" },
+    metric_green: { label: "Projets verts", value: summary.rag_counts.green, sub: "dans les délais et budget", icon: CheckCircle, accent: "#10B981" },
+    metric_at_risk: { label: "Projets à risque", value: summary.rag_counts.orange + summary.rag_counts.red, sub: `${summary.rag_counts.orange} orange, ${summary.rag_counts.red} rouge`, icon: AlertTriangle, accent: "#EF4444" },
+    metric_budget: { label: "Budget total", value: formatEuro(summary.budget.total), sub: `${summary.budget.consumption_rate}% consommé`, icon: TrendingUp, accent: "#F59E0B" },
+  }[kind];
+  if (!M) return null;
+  return <div className="h-full [&>div]:h-full"><MetricCard testId={kind} {...M} /></div>;
+}
+
+export function BudgetSingleWidget({ summary, kind }) {
+  const M = {
+    budget_consumed: { label: "Budget consommé", value: formatEuro(summary.budget.consumed), pct: summary.budget.consumption_rate, color: "bg-[#0052CC]" },
+    budget_forecast: { label: "Budget forecast", value: formatEuro(summary.budget.forecast), pct: Math.round((summary.budget.forecast / summary.budget.total) * 100), color: "bg-amber-500" },
+    jh_progress: { label: "JH consommés / planifiés", value: `${summary.jh.consumed.toLocaleString("fr-FR")} / ${summary.jh.planned.toLocaleString("fr-FR")}`, pct: Math.round((summary.jh.consumed / summary.jh.planned) * 100), color: "bg-indigo-500" },
+  }[kind];
+  if (!M) return null;
+  return (
+    <div className="bg-white border border-gray-200 rounded shadow-sm p-5 h-full" data-testid={`${kind}-widget`}>
+      <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-2">{M.label}</div>
+      <div className="font-mono-data text-xl font-bold text-[#0F172A]">{M.value}</div>
+      <div className="mt-3 h-1.5 bg-gray-100 rounded-full overflow-hidden">
+        <div className={`h-full ${M.color} rounded-full transition-all duration-700`} style={{ width: `${Math.min(M.pct, 100)}%` }} />
+      </div>
+      <div className="text-xs text-slate-400 mt-1">{M.pct}% du budget total</div>
+    </div>
+  );
+}
+
 export function MetricsWidget({ summary }) {
   return (
     <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-5" data-testid="metric-cards">
@@ -238,6 +268,78 @@ export function RecommendationsWidget({ recommendations }) {
         })}
       </div>
     </WidgetShell>
+  );
+}
+
+export function ChartBudgetWidget({ summary }) {
+  const budgetData = (summary.recent_projects || []).slice(0, 6).map((p) => ({
+    name: p.name.split("—")[0].trim().slice(0, 20),
+    Total: p.budget_total, Consommé: p.budget_consumed, Forecast: p.budget_forecast,
+  }));
+  return (
+    <div className="bg-white border border-gray-200 rounded shadow-sm p-4 md:p-5 h-full flex flex-col" data-testid="chart-budget-widget">
+      <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4">Budget par projet (€)</div>
+      <div className="flex-1 min-h-[140px]">
+        <ResponsiveContainer width="100%" height="100%">
+          <BarChart data={budgetData} margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
+            <CartesianGrid strokeDasharray="3 3" stroke="#F1F5F9" />
+            <XAxis dataKey="name" tick={{ fontSize: 9, fill: "#94A3B8" }} interval="preserveStartEnd" />
+            <YAxis tick={{ fontSize: 9, fill: "#94A3B8" }} tickFormatter={(v) => `${(v / 1e6).toFixed(1)}M`} />
+            <Tooltip content={<CustomTooltip />} />
+            <Legend wrapperStyle={{ fontSize: 10 }} />
+            <Bar dataKey="Total" fill="#CBD5E1" radius={[2, 2, 0, 0]} />
+            <Bar dataKey="Consommé" fill="#0052CC" radius={[2, 2, 0, 0]} />
+            <Bar dataKey="Forecast" fill="#F59E0B" radius={[2, 2, 0, 0]} />
+          </BarChart>
+        </ResponsiveContainer>
+      </div>
+    </div>
+  );
+}
+
+export function ChartRagWidget({ summary }) {
+  const ragData = [
+    { name: "Vert", value: summary.rag_counts.green, color: "#10B981" },
+    { name: "Orange", value: summary.rag_counts.orange, color: "#F59E0B" },
+    { name: "Rouge", value: summary.rag_counts.red, color: "#EF4444" },
+  ];
+  const methodData = Object.entries(summary.methodology_counts).map(([k, v]) => ({ name: k.charAt(0).toUpperCase() + k.slice(1), value: v }));
+  return (
+    <div className="bg-white border border-gray-200 rounded shadow-sm p-4 md:p-5 h-full" data-testid="chart-rag-widget">
+      <div className="text-xs uppercase tracking-widest text-slate-500 font-semibold mb-4">Distribution RAG</div>
+      <div className="h-28 sm:h-36">
+        <ResponsiveContainer width="100%" height="100%">
+          <PieChart>
+            <Pie data={ragData} cx="50%" cy="50%" innerRadius={45} outerRadius={65} paddingAngle={2} dataKey="value">
+              {ragData.map((entry, i) => <Cell key={i} fill={entry.color} />)}
+            </Pie>
+            <Tooltip formatter={(v) => [`${v} projets`]} />
+          </PieChart>
+        </ResponsiveContainer>
+      </div>
+      <div className="mt-2 space-y-1.5">
+        {ragData.map((item) => (
+          <div key={item.name} className="flex items-center justify-between text-xs">
+            <div className="flex items-center gap-1.5">
+              <span className="w-2 h-2 rounded-full" style={{ backgroundColor: item.color }} />
+              <span className="text-slate-600">{item.name}</span>
+            </div>
+            <span className="font-mono-data font-bold text-slate-800">{item.value}</span>
+          </div>
+        ))}
+      </div>
+      <div className="mt-4 pt-4 border-t border-gray-100">
+        <div className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-2">Méthodologies</div>
+        <div className="space-y-1.5">
+          {methodData.map((m) => (
+            <div key={m.name} className="flex items-center justify-between text-xs">
+              <span className="text-slate-600">{m.name}</span>
+              <span className="font-mono-data font-bold text-slate-800">{m.value} proj.</span>
+            </div>
+          ))}
+        </div>
+      </div>
+    </div>
   );
 }
 

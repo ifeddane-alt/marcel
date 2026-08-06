@@ -1,0 +1,22 @@
+{
+  "summary": "Full retest of MARCEL dashboard 22 individual-block refactor + croix-hide UX. Backend: 8/8 pytest pass (health, login access_token, available=22 ids, PUT 22 widgets, PUT with layouts, legacy widget filtering, hide single block persist, cleanup restore 22). Legacy migration: injected legacy widgets (['metrics','budget_detail','charts','heatmap']) directly into MongoDB (bypassing API filter), reloaded /dashboard → frontend correctly migrated to 10 individual blocks (4 metric_* + budget_consumed + budget_forecast + jh_progress + chart_budget + chart_rag + heatmap), 0 console errors. Edit mode: 22 hide buttons after reset, croix on metric_green hides it and moves it to dashboard-hidden-blocks zone with restore button; clicking restore brings it back. Save persists 22 widgets + non-null layouts. Cleanup performed (22 defaults + empty layouts).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/test_dashboard_grid.py", "/app/test_reports/pytest/dashboard_grid_iter50.xml"],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Backend service.update_dashboard_preferences filters unknown widget ids at write time (valid = [w for w in widgets if w in DEFAULT_WIDGETS]). This means legacy composite ids ('metrics','budget_detail','charts') can never be *persisted* via the API — only pre-existing MongoDB docs contain them. The frontend LEGACY_MAP migration therefore only triggers on stored docs written before the refactor (fine — expected one-shot migration path). Not a bug, just a note: the spec's 'PUT legacy → reload' scenario is not directly testable via the public API (backend strips them); we validated it by injecting the legacy state directly in MongoDB.",
+    "get_dashboard_preferences coerces empty layouts dict {} to None on read (`(doc or {}).get('dashboard_layouts') or None`). Confirmed harmless for current UX (frontend rebuilds default layouts) but worth documenting."
+  ],
+  "updated_files": ["/app/backend/tests/test_dashboard_grid.py", "/app/test_reports/iteration_50.json"],
+  "success_rate": {"backend": "100% (8/8)", "frontend": "100% (legacy migration, 22 hide crosses, restore zone, save persist)"},
+  "test_credentials": "admin@altair.fr / Admin2026! (login field: access_token)",
+  "seed_data_creation": "Temporarily injected legacy widgets in user_preferences for admin@altair.fr to test frontend migration; cleaned up via PUT with 22 defaults + layouts={}.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Dashboard 22-block refactor fully validated. Legacy migration path (LEGACY_MAP in Dashboard.jsx) works end-to-end when legacy docs pre-exist in MongoDB. Test file /app/backend/tests/test_dashboard_grid.py updated to 22-widget schema and reusable for regression. Backend correctly filters unknown widget ids at PUT time so legacy ids cannot be re-persisted via public API — that's by design."
+}

@@ -2,29 +2,35 @@ import React, { useEffect, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout/legacy";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import { Settings2, RefreshCw, Check, X, Eye, EyeOff, Move, RotateCcw } from "lucide-react";
+import { Settings2, RefreshCw, Check, X, Move, RotateCcw, Plus } from "lucide-react";
 import { dashboardAPI, programsAPI, projectsAPI, teamsAPI, milestonesAPI, arbitrageAPI, agentAPI } from "@/api";
 import { usePermissions } from "@/hooks/usePermissions";
 import {
-  MetricsWidget, BudgetDetailWidget, CapacityWidget, RegulatoryWidget,
-  EnvelopeWidget, RecommendationsWidget, ChartsWidget, MilestonesGaugeWidget,
-  UpcomingMilestonesWidget, TopProjectsWidget, PendingTimesheetsWidget,
-  RecentDecisionsWidget, RecentProjectsWidget, TopRisksWidget, HeatmapWidget,
-  TeamLoadWidget,
+  MetricSingleWidget, BudgetSingleWidget, CapacityWidget, RegulatoryWidget,
+  EnvelopeWidget, RecommendationsWidget, ChartBudgetWidget, ChartRagWidget,
+  MilestonesGaugeWidget, UpcomingMilestonesWidget, TopProjectsWidget,
+  PendingTimesheetsWidget, RecentDecisionsWidget, RecentProjectsWidget,
+  TopRisksWidget, HeatmapWidget, TeamLoadWidget,
 } from "@/components/dashboard/DashboardWidgets";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
 
 const WIDGET_LABELS = {
-  metrics: "Indicateurs clés",
-  budget_detail: "Détail budget & JH",
+  metric_projects: "Projets totaux",
+  metric_green: "Projets verts",
+  metric_at_risk: "Projets à risque",
+  metric_budget: "Budget total",
+  budget_consumed: "Budget consommé",
+  budget_forecast: "Budget forecast",
+  jh_progress: "JH consommés",
   capacity: "Alertes capacité",
   regulatory: "Alertes réglementaires",
   envelope: "Enveloppe portefeuille",
   ai_recommendations: "Recommandations IA",
   upcoming_milestones: "Jalons à venir (30j)",
   team_load: "Charge équipes",
-  charts: "Graphiques budget & RAG",
+  chart_budget: "Graphique budget",
+  chart_rag: "Distribution RAG",
   milestones_gauge: "Taux jalons à l'heure",
   top_projects: "Top 5 projets budget",
   pending_timesheets: "Timesheets à valider",
@@ -36,26 +42,57 @@ const WIDGET_LABELS = {
 
 // Grille par défaut (12 colonnes, rowHeight 40)
 const DEFAULT_GRID = {
-  metrics:             { x: 0, y: 0,  w: 12, h: 4, minW: 4, minH: 3 },
-  budget_detail:       { x: 0, y: 4,  w: 12, h: 4, minW: 4, minH: 3 },
-  capacity:            { x: 0, y: 8,  w: 12, h: 3, minW: 4, minH: 2 },
-  regulatory:          { x: 0, y: 11, w: 6,  h: 8, minW: 4, minH: 4 },
-  envelope:            { x: 6, y: 11, w: 6,  h: 8, minW: 4, minH: 4 },
-  ai_recommendations:  { x: 0, y: 19, w: 6,  h: 8, minW: 4, minH: 4 },
-  upcoming_milestones: { x: 6, y: 19, w: 6,  h: 8, minW: 4, minH: 4 },
-  team_load:           { x: 0, y: 27, w: 6,  h: 9, minW: 4, minH: 4 },
-  milestones_gauge:    { x: 6, y: 27, w: 6,  h: 4, minW: 3, minH: 3 },
-  top_projects:        { x: 6, y: 31, w: 6,  h: 5, minW: 4, minH: 4 },
-  charts:              { x: 0, y: 36, w: 12, h: 9, minW: 6, minH: 6 },
-  pending_timesheets:  { x: 0, y: 45, w: 6,  h: 6, minW: 3, minH: 4 },
-  recent_decisions:    { x: 6, y: 45, w: 6,  h: 6, minW: 4, minH: 4 },
-  recent_projects:     { x: 0, y: 51, w: 12, h: 8, minW: 6, minH: 4 },
-  top_risks:           { x: 0, y: 59, w: 12, h: 9, minW: 6, minH: 4 },
-  heatmap:             { x: 0, y: 68, w: 12, h: 12, minW: 6, minH: 6 },
+  metric_projects:     { x: 0, y: 0,  w: 3,  h: 3, minW: 2, minH: 2 },
+  metric_green:        { x: 3, y: 0,  w: 3,  h: 3, minW: 2, minH: 2 },
+  metric_at_risk:      { x: 6, y: 0,  w: 3,  h: 3, minW: 2, minH: 2 },
+  metric_budget:       { x: 9, y: 0,  w: 3,  h: 3, minW: 2, minH: 2 },
+  budget_consumed:     { x: 0, y: 3,  w: 4,  h: 4, minW: 2, minH: 3 },
+  budget_forecast:     { x: 4, y: 3,  w: 4,  h: 4, minW: 2, minH: 3 },
+  jh_progress:         { x: 8, y: 3,  w: 4,  h: 4, minW: 2, minH: 3 },
+  capacity:            { x: 0, y: 7,  w: 12, h: 3, minW: 4, minH: 2 },
+  regulatory:          { x: 0, y: 10, w: 6,  h: 8, minW: 4, minH: 4 },
+  envelope:            { x: 6, y: 10, w: 6,  h: 8, minW: 4, minH: 4 },
+  ai_recommendations:  { x: 0, y: 18, w: 6,  h: 8, minW: 4, minH: 4 },
+  upcoming_milestones: { x: 6, y: 18, w: 6,  h: 8, minW: 4, minH: 4 },
+  team_load:           { x: 0, y: 26, w: 6,  h: 9, minW: 4, minH: 4 },
+  milestones_gauge:    { x: 6, y: 26, w: 6,  h: 4, minW: 3, minH: 3 },
+  top_projects:        { x: 6, y: 30, w: 6,  h: 5, minW: 4, minH: 4 },
+  chart_budget:        { x: 0, y: 35, w: 8,  h: 8, minW: 4, minH: 5 },
+  chart_rag:           { x: 8, y: 35, w: 4,  h: 8, minW: 3, minH: 5 },
+  pending_timesheets:  { x: 0, y: 43, w: 6,  h: 6, minW: 3, minH: 4 },
+  recent_decisions:    { x: 6, y: 43, w: 6,  h: 6, minW: 4, minH: 4 },
+  recent_projects:     { x: 0, y: 49, w: 12, h: 8, minW: 6, minH: 4 },
+  top_risks:           { x: 0, y: 57, w: 12, h: 9, minW: 6, minH: 4 },
+  heatmap:             { x: 0, y: 66, w: 12, h: 12, minW: 6, minH: 6 },
 };
+
+const ALL_WIDGETS = Object.keys(DEFAULT_GRID);
+
+// Migration des anciens ids composites vers les éléments individuels
+const LEGACY_MAP = {
+  metrics: ["metric_projects", "metric_green", "metric_at_risk", "metric_budget"],
+  budget_detail: ["budget_consumed", "budget_forecast", "jh_progress"],
+  charts: ["chart_budget", "chart_rag"],
+};
+
+function migrateWidgets(list) {
+  const out = [];
+  for (const w of list) {
+    if (LEGACY_MAP[w]) out.push(...LEGACY_MAP[w]);
+    else if (DEFAULT_GRID[w]) out.push(w);
+  }
+  return [...new Set(out)];
+}
 
 function buildDefaultLayout(widgets) {
   return widgets.map((w) => ({ i: w, ...DEFAULT_GRID[w] }));
+}
+
+function migrateLayouts(layouts, widgets) {
+  if (!layouts) return { lg: buildDefaultLayout(widgets) };
+  const hasLegacy = Object.values(layouts).some((arr) => (arr || []).some((it) => LEGACY_MAP[it.i]));
+  if (hasLegacy) return { lg: buildDefaultLayout(widgets) };
+  return layouts;
 }
 
 export default function Dashboard() {
@@ -76,9 +113,7 @@ export default function Dashboard() {
   const [teamLoad, setTeamLoad] = useState([]);
   const [loading, setLoading] = useState(true);
 
-  // Personnalisation
   const [widgets, setWidgets] = useState(null);
-  const [available, setAvailable] = useState([]);
   const [layouts, setLayouts] = useState(null);
   const [customizing, setCustomizing] = useState(false);
   const [saving, setSaving] = useState(false);
@@ -107,9 +142,9 @@ export default function Dashboard() {
       setCxo(cxoRes.data);
       setExtras(exRes.data);
       setTeamLoad(tlRes.data || []);
-      setWidgets(prefRes.data.widgets);
-      setAvailable(prefRes.data.available);
-      setLayouts(prefRes.data.layouts || { lg: buildDefaultLayout(prefRes.data.widgets) });
+      const migrated = migrateWidgets(prefRes.data.widgets?.length ? prefRes.data.widgets : ALL_WIDGETS);
+      setWidgets(migrated);
+      setLayouts(migrateLayouts(prefRes.data.layouts, migrated));
       setLoading(false);
     }).catch(() => setLoading(false));
 
@@ -123,10 +158,12 @@ export default function Dashboard() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  const toggleWidget = (w) =>
-    setWidgets((cur) => (cur.includes(w) ? cur.filter((x) => x !== w) : [...cur, w]));
-
-  const resetLayout = () => setLayouts({ lg: buildDefaultLayout(widgets) });
+  const hideWidget = (w) => setWidgets((cur) => cur.filter((x) => x !== w));
+  const showWidget = (w) => setWidgets((cur) => [...cur, w]);
+  const resetLayout = () => {
+    setWidgets(ALL_WIDGETS);
+    setLayouts({ lg: buildDefaultLayout(ALL_WIDGETS) });
+  };
 
   const savePrefs = async () => {
     setSaving(true);
@@ -148,15 +185,21 @@ export default function Dashboard() {
   if (!summary || !widgets || !layouts) return null;
 
   const RENDERERS = {
-    metrics: () => <MetricsWidget summary={summary} />,
-    budget_detail: () => <BudgetDetailWidget summary={summary} />,
+    metric_projects: () => <MetricSingleWidget summary={summary} kind="metric_projects" />,
+    metric_green: () => <MetricSingleWidget summary={summary} kind="metric_green" />,
+    metric_at_risk: () => <MetricSingleWidget summary={summary} kind="metric_at_risk" />,
+    metric_budget: () => <MetricSingleWidget summary={summary} kind="metric_budget" />,
+    budget_consumed: () => <BudgetSingleWidget summary={summary} kind="budget_consumed" />,
+    budget_forecast: () => <BudgetSingleWidget summary={summary} kind="budget_forecast" />,
+    jh_progress: () => <BudgetSingleWidget summary={summary} kind="jh_progress" />,
     capacity: () => <CapacityWidget capacityAlerts={capacityAlerts} />,
     regulatory: () => <RegulatoryWidget regulatoryAlerts={regulatoryAlerts} />,
     envelope: () => (canSeeEnvelope ? <EnvelopeWidget arbitrageData={arbitrageData} /> : null),
     ai_recommendations: () => (canSeeEnvelope ? <RecommendationsWidget recommendations={recommendations} /> : null),
     upcoming_milestones: () => <UpcomingMilestonesWidget extras={extras} />,
     team_load: () => <TeamLoadWidget teamLoad={teamLoad} />,
-    charts: () => <ChartsWidget summary={summary} />,
+    chart_budget: () => <ChartBudgetWidget summary={summary} />,
+    chart_rag: () => <ChartRagWidget summary={summary} />,
     milestones_gauge: () => <MilestonesGaugeWidget cxo={cxo} />,
     top_projects: () => <TopProjectsWidget cxo={cxo} />,
     pending_timesheets: () => <PendingTimesheetsWidget extras={extras} />,
@@ -167,6 +210,7 @@ export default function Dashboard() {
   };
 
   const visible = widgets.filter((w) => RENDERERS[w]);
+  const hidden = ALL_WIDGETS.filter((w) => !widgets.includes(w));
 
   const HAS_CONTENT = {
     capacity: capacityAlerts.length > 0,
@@ -181,7 +225,6 @@ export default function Dashboard() {
     heatmap: heatmapRisks.length > 0,
   };
   const hasContent = (w) => HAS_CONTENT[w] !== false;
-  // Hors édition : ne pas laisser de cases vides pour les widgets sans données
   const gridWidgets = customizing ? visible : visible.filter(hasContent);
 
   return (
@@ -198,69 +241,57 @@ export default function Dashboard() {
         </div>
         <div className="flex items-center gap-2 shrink-0">
           {customizing && (
-            <button
-              data-testid="dashboard-reset-layout-btn"
-              onClick={resetLayout}
-              className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 bg-white rounded-lg text-sm text-slate-500 hover:bg-gray-50 transition-colors"
-              title="Réinitialiser la disposition"
-            >
-              <RotateCcw size={13} /> <span className="hidden sm:inline">Réinitialiser</span>
-            </button>
+            <>
+              <button
+                data-testid="dashboard-reset-layout-btn"
+                onClick={resetLayout}
+                className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 bg-white rounded-lg text-sm text-slate-500 hover:bg-gray-50 transition-colors"
+                title="Réinitialiser la disposition"
+              >
+                <RotateCcw size={13} /> <span className="hidden sm:inline">Réinitialiser</span>
+              </button>
+              <button
+                data-testid="dashboard-prefs-save-btn"
+                onClick={savePrefs}
+                disabled={saving}
+                className="flex items-center gap-1.5 px-3 py-2 text-sm font-semibold bg-emerald-600 text-white rounded-lg disabled:opacity-50 hover:bg-emerald-700 transition-colors"
+              >
+                {saving ? <RefreshCw size={13} className="animate-spin" /> : <Check size={13} />} Enregistrer
+              </button>
+            </>
           )}
           <button
             data-testid="dashboard-customize-btn"
             onClick={() => setCustomizing((v) => !v)}
             className={`flex items-center gap-1.5 px-3 py-2 border rounded-lg text-sm transition-colors ${customizing ? "bg-[#0052CC] border-[#0052CC] text-white" : "bg-white border-gray-200 text-slate-600 hover:bg-gray-50"}`}
           >
-            <Settings2 size={14} /> <span className="hidden sm:inline">{customizing ? "Mode édition" : "Personnaliser"}</span>
+            {customizing ? <X size={14} /> : <Settings2 size={14} />}
+            <span className="hidden sm:inline">{customizing ? "Quitter l'édition" : "Personnaliser"}</span>
           </button>
         </div>
       </div>
 
-      {/* Panneau de personnalisation */}
-      {customizing && (
-        <div className="mb-5 bg-white border border-[#0052CC]/30 rounded-xl p-4" data-testid="dashboard-customize-panel">
-          <div className="flex items-center justify-between mb-3">
-            <div>
-              <p className="text-sm font-semibold text-slate-700 flex items-center gap-2">
-                <Move size={14} className="text-[#0052CC]" /> Mode édition actif
-              </p>
-              <p className="text-[11px] text-slate-400">
-                Glissez-déposez les widgets pour les repositionner, tirez le coin bas-droit pour les redimensionner.
-                Activez/désactivez les blocs ci-dessous, puis Enregistrer.
-              </p>
-            </div>
-            <div className="flex gap-2">
-              <button
-                data-testid="dashboard-prefs-save-btn"
-                onClick={savePrefs}
-                disabled={saving}
-                className="flex items-center gap-1 px-3 py-1.5 text-xs font-semibold bg-[#0052CC] text-white rounded-lg disabled:opacity-50"
-              >
-                {saving ? <RefreshCw size={12} className="animate-spin" /> : <Check size={12} />} Enregistrer
-              </button>
-              <button onClick={() => setCustomizing(false)} className="p-1.5 text-slate-400 hover:text-slate-600">
-                <X size={14} />
-              </button>
-            </div>
-          </div>
-          <div className="flex flex-wrap gap-1.5">
-            {available.map((w) => {
-              const on = widgets.includes(w);
-              return (
-                <button
-                  key={w}
-                  data-testid={`dashboard-widget-toggle-${w}`}
-                  onClick={() => toggleWidget(w)}
-                  className={`flex items-center gap-1.5 px-3 py-1.5 rounded-full text-xs font-medium border transition-colors ${on ? "bg-[#EBF2FF] border-[#0052CC] text-[#0052CC]" : "bg-white border-gray-200 text-slate-400"}`}
-                >
-                  {on ? <Eye size={11} /> : <EyeOff size={11} />}
-                  {WIDGET_LABELS[w] || w}
-                </button>
-              );
-            })}
-          </div>
+      {/* Blocs masqués — réaffichage */}
+      {customizing && hidden.length > 0 && (
+        <div className="mb-4 flex flex-wrap items-center gap-1.5 bg-white border border-dashed border-gray-300 rounded-xl px-3 py-2.5" data-testid="dashboard-hidden-blocks">
+          <span className="text-[11px] font-semibold text-slate-500 mr-1">Blocs masqués :</span>
+          {hidden.map((w) => (
+            <button
+              key={w}
+              data-testid={`dashboard-widget-restore-${w}`}
+              onClick={() => showWidget(w)}
+              className="flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border border-gray-200 bg-gray-50 text-slate-500 hover:border-[#0052CC] hover:text-[#0052CC] transition-colors"
+            >
+              <Plus size={10} /> {WIDGET_LABELS[w] || w}
+            </button>
+          ))}
         </div>
+      )}
+      {customizing && (
+        <p className="mb-4 text-[11px] text-slate-400 flex items-center gap-1.5" data-testid="dashboard-edit-hint">
+          <Move size={11} className="text-[#0052CC]" />
+          Glissez-déposez chaque bloc pour le repositionner, tirez le coin bas-droit pour le redimensionner, croix pour masquer un bloc.
+        </p>
       )}
 
       {/* Grille matricielle */}
@@ -282,19 +313,30 @@ export default function Dashboard() {
           <div
             key={w}
             data-grid={{ i: w, ...DEFAULT_GRID[w] }}
-            className={`h-full overflow-y-auto overflow-x-hidden rounded ${customizing ? "ring-2 ring-[#0052CC]/30 ring-offset-2 cursor-move bg-white/50" : ""}`}
+            className={`h-full rounded flex flex-col ${customizing ? "ring-2 ring-[#0052CC]/30 ring-offset-2 cursor-move bg-white/50" : ""}`}
             data-testid={`grid-item-${w}`}
           >
             {customizing && (
-              <div className="sticky top-0 z-10 flex items-center gap-1.5 px-2 py-1 bg-[#0052CC] text-white text-[10px] font-semibold rounded-t">
-                <Move size={10} /> {WIDGET_LABELS[w]}
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-[#0052CC] text-white text-[10px] font-semibold rounded-t shrink-0">
+                <Move size={10} />
+                <span className="flex-1 truncate">{WIDGET_LABELS[w]}</span>
+                <button
+                  data-testid={`dashboard-widget-hide-${w}`}
+                  onClick={() => hideWidget(w)}
+                  className="p-0.5 rounded hover:bg-white/20 transition-colors"
+                  title="Masquer ce bloc"
+                >
+                  <X size={11} />
+                </button>
               </div>
             )}
-            {hasContent(w) ? RENDERERS[w]() : (
-              <div className="h-full flex items-center justify-center bg-slate-50 border border-dashed border-slate-200 rounded text-xs text-slate-400 p-4 text-center">
-                {WIDGET_LABELS[w]} — aucune donnée actuellement (masqué hors édition)
-              </div>
-            )}
+            <div className="flex-1 overflow-y-auto overflow-x-hidden">
+              {hasContent(w) ? RENDERERS[w]() : (
+                <div className="h-full flex items-center justify-center bg-slate-50 border border-dashed border-slate-200 rounded text-xs text-slate-400 p-4 text-center">
+                  {WIDGET_LABELS[w]} — aucune donnée actuellement (masqué hors édition)
+                </div>
+              )}
+            </div>
           </div>
         ))}
       </ResponsiveGridLayout>
