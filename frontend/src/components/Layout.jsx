@@ -2,7 +2,6 @@ import React, { useEffect, useState } from "react";
 import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
-  Gauge,
   Briefcase,
   Users,
   ShieldCheck,
@@ -62,7 +61,6 @@ function LanguageToggle() {
 // perm: permission requise (string) ou [p1,p2] (OR logique)
 const MAIN_NAV = [
   { to: "/dashboard",  icon: LayoutDashboard, label: "Tableau de bord", perm: "dashboard.view" },
-  { to: "/cxo",        icon: Gauge,           label: "Dashboard CxO",   perm: "dashboard.view" },
   { to: "/programmes", icon: FolderKanban,     label: "Programmes",     perm: "portfolio.view" },
   { to: "/portfolio",  icon: Briefcase,        label: "Portefeuille",   perm: "portfolio.view" },
   { to: "/budget",     icon: DollarSign,       label: "Budget",         perm: "budget.view" },

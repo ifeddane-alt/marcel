@@ -10,6 +10,21 @@ class CxoPreferences(BaseModel):
     widgets: list[str]
 
 
+@router.get("/dashboard/extras")
+async def dashboard_extras(current_user: TokenPayload = Depends(get_current_user)):
+    return await service.get_extras(current_user)
+
+
+@router.get("/dashboard/preferences")
+async def get_dashboard_preferences(current_user: TokenPayload = Depends(get_current_user)):
+    return await service.get_dashboard_preferences(current_user)
+
+
+@router.put("/dashboard/preferences")
+async def update_dashboard_preferences(data: CxoPreferences, current_user: TokenPayload = Depends(get_current_user)):
+    return await service.update_dashboard_preferences(data.widgets, current_user)
+
+
 @router.get("/dashboard/cxo")
 async def dashboard_cxo(current_user: TokenPayload = Depends(get_current_user)):
     return await service.get_cxo(current_user)

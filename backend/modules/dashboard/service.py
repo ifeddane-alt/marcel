@@ -1,3 +1,5 @@
+from datetime import datetime, timezone, timedelta
+
 from core.database import db
 from core.auth import TokenPayload, has_perm, is_ownership_restricted
 
@@ -45,6 +47,112 @@ async def get_summary(current_user: TokenPayload) -> dict:
         "methodology_counts": methodology_counts,
         "recent_projects": projects[:5],
     }
+
+
+DASHBOARD_DEFAULT_WIDGETS = [
+    "metrics", "budget_detail", "capacity", "regulatory", "envelope",
+    "ai_recommendations", "upcoming_milestones", "charts", "milestones_gauge",
+    "top_projects", "pending_timesheets", "recent_decisions",
+    "recent_projects", "top_risks", "heatmap",
+]
+
+
+async def get_extras(current_user: TokenPayload) -> dict:
+    """Données des widgets additionnels du dashboard principal."""
+    projects = await db.projects.find(
+        _project_query(current_user), {"_id": 0, "project_id": 1, "name": 1}
+    ).to_list(None)
+    pnames = {p["project_id"]: p["name"] for p in projects}
+    pids = list(pnames.keys())
+    today = datetime.now(timezone.utc).date()
+    horizon = (today + timedelta(days=30)).isoformat()
+
+    ms = await db.milestones.find(
+        {"project_id": {"$in": pids}, "status": {"$ne": "done"},
+         "date_forecast": {"$lte": horizon, "$ne": None}},
+        {"_id": 0},
+    ).sort("date_forecast", 1).to_list(15)
+    upcoming = []
+    for m in ms:
+        fc = (m.get("date_forecast") or "")[:10]
+        try:
+            days = (datetime.fromisoformat(fc).date() - today).days
+        except ValueError:
+            days = None
+        upcoming.append({
+            "milestone_id": m["milestone_id"],
+            "name": m.get("name"),
+            "project_id": m.get("project_id"),
+            "project_name": pnames.get(m.get("project_id"), "—"),
+            "date_forecast": fc,
+            "days_remaining": days,
+            "late": (m.get("date_forecast") or "") > (m.get("date_baseline") or "9999")
+                    or (days is not None and days < 0),
+        })
+
+    pending = await db.timesheets.find(
+        {"tenant_id": current_user.tenant_id, "status": "submitted"}, {"_id": 0}
+    ).sort("submitted_at", -1).to_list(None)
+    resource_ids = list({t.get("resource_id") for t in pending if t.get("resource_id")})
+    rnames = {
+        r["resource_id"]: r.get("name", "—")
+        for r in await db.resources.find(
+            {"resource_id": {"$in": resource_ids}}, {"_id": 0, "resource_id": 1, "name": 1}
+        ).to_list(None)
+    }
+    pending_items = [
+        {
+            "timesheet_id": t["timesheet_id"],
+            "resource_name": rnames.get(t.get("resource_id"), "—"),
+            "date": t.get("date"),
+            "jh_value": t.get("jh_value", 0),
+        }
+        for t in pending[:5]
+    ]
+
+    decisions = await db.decisions.find(
+        {"tenant_id": current_user.tenant_id}, {"_id": 0}
+    ).sort("created_at", -1).to_list(5)
+    recent_decisions = [
+        {
+            "decision_id": d["decision_id"],
+            "title": d.get("title"),
+            "status": d.get("status"),
+            "category": d.get("category"),
+            "project_id": d.get("project_id"),
+            "project_name": pnames.get(d.get("project_id"), "—"),
+            "decision_date": d.get("decision_date") or (d.get("created_at") or "")[:10],
+        }
+        for d in decisions
+    ]
+
+    return {
+        "upcoming_milestones": upcoming,
+        "pending_timesheets": {
+            "count": len(pending),
+            "total_jh": round(sum(t.get("jh_value", 0) for t in pending), 1),
+            "items": pending_items,
+        },
+        "recent_decisions": recent_decisions,
+    }
+
+
+async def get_dashboard_preferences(current_user: TokenPayload) -> dict:
+    doc = await db.user_preferences.find_one(
+        {"user_id": current_user.user_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
+    )
+    widgets = (doc or {}).get("dashboard_widgets") or DASHBOARD_DEFAULT_WIDGETS
+    return {"widgets": widgets, "available": DASHBOARD_DEFAULT_WIDGETS}
+
+
+async def update_dashboard_preferences(widgets: list, current_user: TokenPayload) -> dict:
+    valid = [w for w in widgets if w in DASHBOARD_DEFAULT_WIDGETS]
+    await db.user_preferences.update_one(
+        {"user_id": current_user.user_id, "tenant_id": current_user.tenant_id},
+        {"$set": {"dashboard_widgets": valid}},
+        upsert=True,
+    )
+    return {"widgets": valid, "available": DASHBOARD_DEFAULT_WIDGETS}
 
 
 CXO_DEFAULT_WIDGETS = ["kpis", "rag", "budget", "milestones", "risks", "top_projects"]

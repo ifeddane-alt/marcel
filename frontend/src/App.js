@@ -33,7 +33,6 @@ import Budget from "@/pages/Budget";
 import AdminPowerBI from "@/pages/AdminPowerBI";
 import AdminTemplates from "@/pages/AdminTemplates";
 import AdminMonitoring from "@/pages/AdminMonitoring";
-import DashboardCxO from "@/pages/DashboardCxO";
 import "@/App.css";
 
 function ProtectedRoute({ children }) {
@@ -77,7 +76,7 @@ function AppRoutes() {
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
         <Route path="dashboard" element={<DashboardGuard />} />
-        <Route path="cxo" element={<DashboardCxO />} />
+        <Route path="cxo" element={<Navigate to="/dashboard" replace />} />
         <Route path="programmes" element={<Programs />} />
         <Route path="programmes/:id" element={<ProgramDetail />} />
         <Route path="portfolio" element={<Portfolio />} />

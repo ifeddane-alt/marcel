@@ -1,0 +1,30 @@
+{
+  "summary": "Tested iteration 48: dashboard customization panel + 3 new widgets (upcoming_milestones, pending_timesheets, recent_decisions) + CxO fusion into /dashboard. Backend 8/8 pytest passed. Frontend: all 13 required widget testids present, /cxo redirects to /dashboard, CxO nav removed, customize panel shows 15 rows with toggles/arrows, hide+persist+restore of top_risks works end-to-end, heatmap filters functional, /portfolio regression OK. Preferences restored to 15 defaults at end.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Dashboard charts", "issues": ["Recharts warnings 'width(-1) height(-1) of chart should be greater than 0' printed on initial mount — cosmetic/perf noise, not blocking. Consider setting explicit min-height on ResponsiveContainer parents."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_dashboard_extras_prefs.py",
+    "/app/test_reports/pytest/iter48_backend.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "dashboard/router.py: PUT /dashboard/preferences uses Pydantic model 'CxoPreferences' (shared with CxO endpoint) — misleading name; consider renaming to DashboardPreferences.",
+    "service.py get_extras: 'late' computation uses lexicographic string compare with fallback '9999' — works for ISO YYYY-MM-DD strings but fragile if date format varies. Consider parsing dates for correctness.",
+    "DashboardWidgets.jsx: Recharts ResponsiveContainer parents produce width(-1)/height(-1) warnings on first render — cosmetic but adds noise to console."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_dashboard_extras_prefs.py"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin@altair.fr / Admin2026! (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "None — preferences reset to 15 defaults at end of test.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend endpoints /api/dashboard/extras + /api/dashboard/preferences + /api/dashboard/cxo verified. Frontend widget testids stable. heatmap-filter-reset is conditionally rendered (only when programme or project filter is set) — not a bug. Auth login response uses 'access_token' (not 'token')."
+}
