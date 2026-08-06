@@ -51,8 +51,8 @@ async def get_summary(current_user: TokenPayload) -> dict:
 
 DASHBOARD_DEFAULT_WIDGETS = [
     "metrics", "budget_detail", "capacity", "regulatory", "envelope",
-    "ai_recommendations", "upcoming_milestones", "charts", "milestones_gauge",
-    "top_projects", "pending_timesheets", "recent_decisions",
+    "ai_recommendations", "upcoming_milestones", "team_load", "charts",
+    "milestones_gauge", "top_projects", "pending_timesheets", "recent_decisions",
     "recent_projects", "top_risks", "heatmap",
 ]
 

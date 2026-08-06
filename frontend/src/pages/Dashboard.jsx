@@ -7,6 +7,7 @@ import {
   EnvelopeWidget, RecommendationsWidget, ChartsWidget, MilestonesGaugeWidget,
   UpcomingMilestonesWidget, TopProjectsWidget, PendingTimesheetsWidget,
   RecentDecisionsWidget, RecentProjectsWidget, TopRisksWidget, HeatmapWidget,
+  TeamLoadWidget,
 } from "@/components/dashboard/DashboardWidgets";
 
 const WIDGET_LABELS = {
@@ -22,6 +23,7 @@ const WIDGET_LABELS = {
   top_projects: "Top 5 projets budget",
   pending_timesheets: "Timesheets à valider",
   recent_decisions: "Dernières décisions",
+  team_load: "Charge équipes",
   recent_projects: "Projets récents",
   top_risks: "Top risques",
   heatmap: "Cartographie risques",
@@ -42,6 +44,7 @@ export default function Dashboard() {
   const [recommendations, setRecommendations] = useState([]);
   const [cxo, setCxo] = useState(null);
   const [extras, setExtras] = useState(null);
+  const [teamLoad, setTeamLoad] = useState([]);
   const [loading, setLoading] = useState(true);
 
   // Personnalisation
@@ -62,7 +65,8 @@ export default function Dashboard() {
       dashboardAPI.cxo(),
       dashboardAPI.extras(),
       dashboardAPI.getDashboardPreferences(),
-    ]).then(([sRes, rRes, hrRes, pRes, projRes, caRes, regRes, cxoRes, exRes, prefRes]) => {
+      teamsAPI.capacityHeatmap(3),
+    ]).then(([sRes, rRes, hrRes, pRes, projRes, caRes, regRes, cxoRes, exRes, prefRes, tlRes]) => {
       setSummary(sRes.data);
       setTopRisks(rRes.data);
       setHeatmapRisks(hrRes.data);
@@ -74,6 +78,7 @@ export default function Dashboard() {
       setExtras(exRes.data);
       setWidgets(prefRes.data.widgets);
       setAvailable(prefRes.data.available);
+      setTeamLoad(tlRes.data || []);
       setLoading(false);
     }).catch(() => setLoading(false));
 
@@ -132,6 +137,7 @@ export default function Dashboard() {
     top_projects: () => <TopProjectsWidget cxo={cxo} />,
     pending_timesheets: () => <PendingTimesheetsWidget extras={extras} />,
     recent_decisions: () => <RecentDecisionsWidget extras={extras} />,
+    team_load: () => <TeamLoadWidget teamLoad={teamLoad} />,
     recent_projects: () => <RecentProjectsWidget summary={summary} />,
     top_risks: () => <TopRisksWidget topRisks={topRisks} />,
     heatmap: () => <HeatmapWidget heatmapRisks={heatmapRisks} programs={programs} allProjects={allProjects} />,

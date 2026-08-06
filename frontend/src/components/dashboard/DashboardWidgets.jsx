@@ -442,6 +442,68 @@ export function RecentDecisionsWidget({ extras }) {
   );
 }
 
+export function TeamLoadWidget({ teamLoad }) {
+  if (!teamLoad?.length) return null;
+  const currentPeriod = new Date().toISOString().slice(0, 7);
+  const rows = teamLoad
+    .map((t) => {
+      const idx = t.periods.findIndex((p) => p.period === currentPeriod);
+      const cur = idx >= 0 ? t.periods[idx] : t.periods[0];
+      const next = t.periods.slice(idx >= 0 ? idx : 0, (idx >= 0 ? idx : 0) + 3);
+      return { ...t, cur, next };
+    })
+    .sort((a, b) => (b.cur?.utilization_pct || 0) - (a.cur?.utilization_pct || 0));
+  const overloaded = rows.filter((t) => (t.cur?.utilization_pct || 0) > 100).length;
+  const pctColor = (pct) => (pct > 100 ? "text-rose-700" : pct >= 85 ? "text-amber-700" : "text-emerald-700");
+  const barColor = (pct) => (pct > 100 ? "bg-rose-500" : pct >= 85 ? "bg-amber-400" : "bg-emerald-500");
+  const cellBg = (pct) => (pct > 100 ? "bg-rose-100 text-rose-700 border-rose-200" : pct >= 85 ? "bg-amber-100 text-amber-700 border-amber-200" : "bg-emerald-50 text-emerald-700 border-emerald-200");
+  return (
+    <WidgetShell
+      title="Charge équipes — capacité vs allocations" icon={Users} link="/teams" linkLabel="Équipes"
+      badge={overloaded > 0 && <span className="flex items-center gap-1 text-[10px] font-bold bg-rose-100 text-rose-700 border border-rose-200 px-2 py-0.5 rounded-full normal-case tracking-normal"><AlertTriangle size={9} /> {overloaded} surcharge(s)</span>}
+      testId="team-load-widget"
+    >
+      <div className="divide-y divide-gray-50">
+        {rows.map((t) => {
+          const pct = t.cur?.utilization_pct || 0;
+          return (
+            <div key={t.team_id || "unassigned"} className={`px-5 py-3 ${pct > 100 ? "bg-rose-50/30" : ""}`} data-testid={`team-load-row-${t.team_id || "unassigned"}`}>
+              <div className="flex items-center justify-between mb-1.5">
+                <div className="flex items-center gap-2 min-w-0">
+                  {t.team_id ? (
+                    <Link to={`/teams/${t.team_id}`} className="text-xs font-semibold text-[#0052CC] hover:underline truncate">{t.team_name}</Link>
+                  ) : (
+                    <span className="text-xs font-semibold text-slate-500 truncate">{t.team_name}</span>
+                  )}
+                  <span className="text-[10px] text-slate-400 font-mono whitespace-nowrap">
+                    {t.cur?.allocated_jh ?? 0} / {t.cur?.capacity_jh ?? 0} JH
+                  </span>
+                </div>
+                <div className="flex items-center gap-2 shrink-0 ml-3">
+                  {t.next.map((p) => (
+                    <span key={p.period} className={`hidden sm:inline-block text-[9px] font-bold px-1.5 py-0.5 rounded border tabular-nums ${cellBg(p.utilization_pct)}`} title={`${p.period} : ${p.allocated_jh}/${p.capacity_jh} JH`}>
+                      {p.period.slice(5)} · {Math.round(p.utilization_pct)}%
+                    </span>
+                  ))}
+                  <span className={`text-xs font-bold tabular-nums ${pctColor(pct)}`}>{Math.round(pct)}%</span>
+                </div>
+              </div>
+              <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+                <div className={`h-full rounded-full transition-all duration-700 ${barColor(pct)}`} style={{ width: `${Math.min(pct, 100)}%` }} />
+              </div>
+              {pct > 100 && (
+                <p className="text-[10px] text-rose-600 mt-1">
+                  Surcharge : +{Math.round((t.cur.allocated_jh - t.cur.capacity_jh) * 10) / 10} JH au-dessus de la capacité ce mois-ci
+                </p>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </WidgetShell>
+  );
+}
+
 export function RecentProjectsWidget({ summary }) {
   return (
     <WidgetShell title="Projets récents" link="/portfolio" linkLabel="Voir tous" testId="recent-projects-widget">
