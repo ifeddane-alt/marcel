@@ -183,6 +183,7 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - Personnalisation : panneau afficher/masquer + réordonner (flèches), préférences par utilisateur (`user_preferences.dashboard_widgets`, GET/PUT `/api/dashboard/preferences`).
 - Backend : `GET /api/dashboard/extras` (jalons à venir, timesheets submitted, décisions récentes). Endpoints CxO conservés pour compat.
 - Commit `38c8ff9`, CI vert.
+- **Widget Charge équipes** (Juin 2026) : `team_load` ajouté aux widgets par défaut (16 au total) — capacité vs allocations par équipe (via `/api/teams/capacity-heatmap?months=3`), barre d'utilisation mois courant, mini-cellules 3 mois, surcharges >100% en rouge, badge nombre de surcharges. Commit `1d2dfa0`, CI vert. Auto-testé (curl + screenshot).
 
 ## Backlog / Améliorations futures
 ### P1 — Court terme
