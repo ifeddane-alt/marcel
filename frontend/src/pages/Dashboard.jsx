@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout/legacy";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import { Settings2, RefreshCw, Check, X, Move, RotateCcw, Plus } from "lucide-react";
+import { Settings2, RefreshCw, Check, X, Move, RotateCcw, Plus, GripVertical } from "lucide-react";
 import { dashboardAPI, programsAPI, projectsAPI, teamsAPI, milestonesAPI, arbitrageAPI, agentAPI } from "@/api";
 import { usePermissions } from "@/hooks/usePermissions";
 import {
@@ -117,6 +117,7 @@ export default function Dashboard() {
   const [layouts, setLayouts] = useState(null);
   const [customizing, setCustomizing] = useState(false);
   const [saving, setSaving] = useState(false);
+  const [dragWidget, setDragWidget] = useState(null);
 
   useEffect(() => {
     Promise.all([
@@ -173,6 +174,34 @@ export default function Dashboard() {
     } finally {
       setSaving(false);
     }
+  };
+
+  // Drop d'un bloc depuis la barre de choix vers la grille (gestion HTML5 manuelle)
+  const gridWrapRef = React.useRef(null);
+  const COLS = 12, ROW_H = 40, MARGIN = 14;
+
+  const handleGridDragOver = (e) => {
+    if (dragWidget) e.preventDefault();
+  };
+
+  const handleGridDrop = (e) => {
+    const id = dragWidget || e.dataTransfer?.getData("text/plain");
+    if (!id || !DEFAULT_GRID[id] || widgets.includes(id)) return;
+    e.preventDefault();
+    setDragWidget(null);
+    const rect = gridWrapRef.current?.getBoundingClientRect();
+    const def = DEFAULT_GRID[id];
+    let x = 0, y = 0;
+    if (rect) {
+      const colW = rect.width / COLS;
+      x = Math.max(0, Math.min(COLS - def.w, Math.round((e.clientX - rect.left) / colW)));
+      y = Math.max(0, Math.floor((e.clientY - rect.top) / (ROW_H + MARGIN)));
+    }
+    setLayouts((cur) => {
+      const lg = (cur?.lg || buildDefaultLayout(widgets)).filter((l) => l.i !== id);
+      return { ...cur, lg: [...lg, { i: id, x, y, w: def.w, h: def.h }] };
+    });
+    setWidgets((cur) => [...cur, id]);
   };
 
   if (loading) {
@@ -273,7 +302,9 @@ export default function Dashboard() {
       {/* Barre de choix des blocs */}
       {customizing && (
         <div className="mb-4 bg-white border border-[#0052CC]/30 rounded-xl px-3 py-2.5" data-testid="dashboard-blocks-bar">
-          <p className="text-[11px] font-semibold text-slate-500 mb-2">Blocs du tableau de bord — cliquez pour afficher / masquer :</p>
+          <p className="text-[11px] font-semibold text-slate-500 mb-2">
+            Blocs du tableau de bord — cliquez pour afficher / masquer, ou <strong>glissez un bloc grisé directement dans la grille</strong> :
+          </p>
           <div className="flex flex-wrap items-center gap-1.5">
             {ALL_WIDGETS.map((w) => {
               const on = widgets.includes(w);
@@ -282,9 +313,17 @@ export default function Dashboard() {
                   key={w}
                   data-testid={`dashboard-widget-toggle-${w}`}
                   onClick={() => (on ? hideWidget(w) : showWidget(w))}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${on ? "bg-[#EBF2FF] border-[#0052CC] text-[#0052CC]" : "bg-gray-50 border-gray-200 text-slate-400 hover:border-slate-400"}`}
+                  draggable={!on}
+                  onDragStart={(e) => {
+                    e.dataTransfer.setData("text/plain", w);
+                    e.dataTransfer.effectAllowed = "move";
+                    setDragWidget(w);
+                  }}
+                  onDragEnd={() => setDragWidget(null)}
+                  title={on ? "Cliquer pour masquer" : "Cliquer pour ajouter, ou glisser dans la grille"}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${on ? "bg-[#EBF2FF] border-[#0052CC] text-[#0052CC]" : "bg-gray-50 border-gray-200 text-slate-400 hover:border-slate-400 cursor-grab active:cursor-grabbing"}`}
                 >
-                  {on ? <Check size={10} /> : <Plus size={10} />} {WIDGET_LABELS[w] || w}
+                  {on ? <Check size={10} /> : <GripVertical size={10} />} {WIDGET_LABELS[w] || w}
                 </button>
               );
             })}
@@ -299,6 +338,13 @@ export default function Dashboard() {
       )}
 
       {/* Grille matricielle */}
+      <div
+        ref={gridWrapRef}
+        onDragOver={handleGridDragOver}
+        onDrop={handleGridDrop}
+        className={dragWidget ? "ring-2 ring-dashed ring-[#0052CC]/50 rounded-xl" : ""}
+        data-testid="dashboard-grid-dropzone"
+      >
       <ResponsiveGridLayout
         className={customizing ? "dashboard-grid-editing" : ""}
         layouts={layouts}
@@ -310,7 +356,12 @@ export default function Dashboard() {
         isDraggable={customizing}
         isResizable={customizing}
         draggableCancel="a, button, select, input, textarea"
-        onLayoutChange={(_cur, allLayouts) => { if (customizing) setLayouts(allLayouts); }}
+        onLayoutChange={(cur, allLayouts) => {
+          if (!customizing) return;
+          setLayouts((prev) =>
+            JSON.stringify(prev) === JSON.stringify(allLayouts) ? prev : allLayouts
+          );
+        }}
         compactType="vertical"
       >
         {gridWidgets.map((w) => (
@@ -344,6 +395,7 @@ export default function Dashboard() {
           </div>
         ))}
       </ResponsiveGridLayout>
+      </div>
     </div>
   );
 }
