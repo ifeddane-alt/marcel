@@ -186,7 +186,7 @@ export default function Dashboard() {
 
   const handleGridDrop = (e) => {
     const id = dragWidget || e.dataTransfer?.getData("text/plain");
-    if (!id || !DEFAULT_GRID[id] || widgets.includes(id)) return;
+    if (!id || !DEFAULT_GRID[id]) return;
     e.preventDefault();
     setDragWidget(null);
     const rect = gridWrapRef.current?.getBoundingClientRect();
@@ -198,10 +198,12 @@ export default function Dashboard() {
       y = Math.max(0, Math.floor((e.clientY - rect.top) / (ROW_H + MARGIN)));
     }
     setLayouts((cur) => {
-      const lg = (cur?.lg || buildDefaultLayout(widgets)).filter((l) => l.i !== id);
-      return { ...cur, lg: [...lg, { i: id, x, y, w: def.w, h: def.h }] };
+      const base = cur?.lg || buildDefaultLayout(widgets);
+      const existing = base.find((l) => l.i === id);
+      const lg = base.filter((l) => l.i !== id);
+      return { ...cur, lg: [...lg, { i: id, x, y, w: existing?.w ?? def.w, h: existing?.h ?? def.h }] };
     });
-    setWidgets((cur) => [...cur, id]);
+    setWidgets((cur) => (cur.includes(id) ? cur : [...cur, id]));
   };
 
   if (loading) {
@@ -303,7 +305,7 @@ export default function Dashboard() {
       {customizing && (
         <div className="mb-4 bg-white border border-[#0052CC]/30 rounded-xl px-3 py-2.5" data-testid="dashboard-blocks-bar">
           <p className="text-[11px] font-semibold text-slate-500 mb-2">
-            Blocs du tableau de bord — cliquez pour afficher / masquer, ou <strong>glissez un bloc grisé directement dans la grille</strong> :
+            Blocs du tableau de bord — cliquez pour afficher / masquer, ou <strong>glissez n'importe quel bloc vers l'emplacement voulu dans la grille</strong> :
           </p>
           <div className="flex flex-wrap items-center gap-1.5">
             {ALL_WIDGETS.map((w) => {
@@ -313,17 +315,18 @@ export default function Dashboard() {
                   key={w}
                   data-testid={`dashboard-widget-toggle-${w}`}
                   onClick={() => (on ? hideWidget(w) : showWidget(w))}
-                  draggable={!on}
+                  draggable
                   onDragStart={(e) => {
                     e.dataTransfer.setData("text/plain", w);
                     e.dataTransfer.effectAllowed = "move";
                     setDragWidget(w);
                   }}
                   onDragEnd={() => setDragWidget(null)}
-                  title={on ? "Cliquer pour masquer" : "Cliquer pour ajouter, ou glisser dans la grille"}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors ${on ? "bg-[#EBF2FF] border-[#0052CC] text-[#0052CC]" : "bg-gray-50 border-gray-200 text-slate-400 hover:border-slate-400 cursor-grab active:cursor-grabbing"}`}
+                  title={on ? "Cliquer pour masquer, ou glisser pour repositionner dans la grille" : "Cliquer pour ajouter, ou glisser dans la grille"}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors cursor-grab active:cursor-grabbing ${on ? "bg-[#EBF2FF] border-[#0052CC] text-[#0052CC]" : "bg-gray-50 border-gray-200 text-slate-400 hover:border-slate-400"}`}
                 >
-                  {on ? <Check size={10} /> : <GripVertical size={10} />} {WIDGET_LABELS[w] || w}
+                  {on ? <Check size={10} /> : <GripVertical size={10} />}
+                  <GripVertical size={10} className={on ? "opacity-40" : "hidden"} /> {WIDGET_LABELS[w] || w}
                 </button>
               );
             })}

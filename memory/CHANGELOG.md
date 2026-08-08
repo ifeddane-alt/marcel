@@ -60,3 +60,8 @@
 - Déploiement Docker VPS Scaleway (51.158.110.88)
 - Domaine : marcel-ppm.com
 - Repo GitHub : github.com/ifeddane-alt/marcel
+
+## 2026-06 — Drag & drop barre → grille étendu à TOUS les blocs
+- Dashboard.jsx : tous les blocs de la barre de choix sont désormais glissables (pas seulement les grisés).
+- Glisser un bloc déjà affiché le REPOSITIONNE à l'emplacement du dépôt (taille conservée), sans doublon.
+- Auto-testé via simulation drag/drop : metric_green déplacé, 22 items avant/après.
