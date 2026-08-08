@@ -222,3 +222,6 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 
 ## 2026-06 — Recherche globale étendue (livré, auto-testé)
 - /api/search/global : projets + jalons + risques + décisions groupés par type dans la barre de recherche
+
+## 2026-06 — Historique de recherche (livré, auto-testé)
+- Projets récemment consultés proposés à l'ouverture de la recherche globale (localStorage par utilisateur)

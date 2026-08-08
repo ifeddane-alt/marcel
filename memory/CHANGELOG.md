@@ -109,3 +109,9 @@
 - GlobalSearch.jsx : appel debounced 250ms, résultats groupés par type avec en-têtes (Projets/Jalons/Risques/Décisions), métadonnées (date jalon, criticité, code projet), navigation clavier sur liste aplatie
 - Clic ou Entrée sur n'importe quel résultat → fiche du projet concerné
 - Auto-testé : API (q=migration → 2 projets, 3 jalons, 4 risques) + UI (groupes affichés, clic risque → fiche projet)
+
+## 2026-06 — Historique recherche (récemment consultés)
+- utils/recentProjects.js : localStorage par utilisateur (max 6, dédupliqué, plus récent en premier)
+- ProjectDetail.jsx : chaque fiche visitée est enregistrée
+- GlobalSearch.jsx : au focus champ vide → panneau « Récemment consultés » cliquable avec badge code + RAG, navigation clavier incluse
+- Auto-testé : 2 fiches visitées → panneau affiche les 2 dans le bon ordre, clic → navigation
