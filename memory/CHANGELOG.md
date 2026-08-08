@@ -65,3 +65,13 @@
 - Dashboard.jsx : tous les blocs de la barre de choix sont désormais glissables (pas seulement les grisés).
 - Glisser un bloc déjà affiché le REPOSITIONNE à l'emplacement du dépôt (taille conservée), sans doublon.
 - Auto-testé via simulation drag/drop : metric_green déplacé, 22 items avant/après.
+
+## 2026-06 — Export/Import Excel généralisé + import MS Project .mpp
+- Nouveau module backend excel_io : /api/excel/{entity}/export, /import/preview, /import/commit
+- 10 entités : projects, programs, teams, resources, milestones, risks, decisions, demands, budget (update-only), timesheets
+- Export .xlsx stylé (en-têtes FR, formats €/dates, onglet 'Aide import') — ré-importable tel quel
+- Import avec aperçu (badges Nouveau/Mise à jour/Erreur) et upsert par nom/clé métier
+- Import Microsoft Project .mpp binaire via MPXJ (JRE 17 + JPype subprocess) + XML MSPDI conservé — bouton MS Project sur la Roadmap
+- Composants frontend : ExcelToolbar.jsx, MsProjectImport.jsx — boutons sur 9 pages
+- Dockerfile : ajout default-jre-headless (nécessaire pour le déploiement VPS)
+- Testé : agent iteration_51 = 16/16 backend, frontend 100% (fix import manquant Timesheets.jsx)

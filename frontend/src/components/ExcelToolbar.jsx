@@ -6,9 +6,9 @@ import { toast } from "sonner";
 const BTN = "flex items-center gap-1.5 px-3 py-2 text-sm border border-gray-200 bg-white rounded hover:bg-gray-50 text-slate-600 transition-colors";
 
 const ACTION_BADGE = {
-  new: { label: "Nouveau", cls: "bg-emerald-50 text-emerald-700 border-emerald-200", Icon: PlusCircle },
-  update: { label: "Mise à jour", cls: "bg-blue-50 text-blue-700 border-blue-200", Icon: PenLine },
-  error: { label: "Erreur", cls: "bg-rose-50 text-rose-700 border-rose-200", Icon: AlertTriangle },
+  new: { label: "Nouveau", plural: "Nouveaux", cls: "bg-emerald-50 text-emerald-700 border-emerald-200", Icon: PlusCircle },
+  update: { label: "Mise à jour", plural: "Mises à jour", cls: "bg-blue-50 text-blue-700 border-blue-200", Icon: PenLine },
+  error: { label: "Erreur", plural: "Erreurs", cls: "bg-rose-50 text-rose-700 border-rose-200", Icon: AlertTriangle },
 };
 
 export default function ExcelToolbar({ entity, label = "", onImported, canImport = true }) {
@@ -111,11 +111,11 @@ export default function ExcelToolbar({ entity, label = "", onImported, canImport
 
             <div className="flex items-center gap-2 px-5 py-3 border-b border-gray-50">
               {["new", "update", "error"].map((k) => {
-                const { label: bl, cls, Icon } = ACTION_BADGE[k];
+                const { label: bl, plural, cls, Icon } = ACTION_BADGE[k];
                 return (
                   <span key={k} data-testid={`excel-preview-count-${k}`}
                     className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-semibold border ${cls}`}>
-                    <Icon size={11} /> {preview.counts[k]} {bl}{preview.counts[k] > 1 ? "s" : ""}
+                    <Icon size={11} /> {preview.counts[k]} {preview.counts[k] > 1 ? plural : bl}
                   </span>
                 );
               })}
