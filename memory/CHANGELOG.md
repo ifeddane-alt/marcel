@@ -115,3 +115,14 @@
 - ProjectDetail.jsx : chaque fiche visitée est enregistrée
 - GlobalSearch.jsx : au focus champ vide → panneau « Récemment consultés » cliquable avec badge code + RAG, navigation clavier incluse
 - Auto-testé : 2 fiches visitées → panneau affiche les 2 dans le bon ordre, clic → navigation
+
+## 2026-06 — DÉPLOIEMENT VPS RÉUSSI (production marcel-ppm.com)
+- Accès SSH rétabli : clés ajoutées via Scaleway (reboot) + clé pod 'emergent-marcel-deploy' ajoutée au authorized_keys — le pod peut désormais déployer via ssh root@51.158.110.88
+- Topologie prod : nginx HÔTE (ports 80/443, SSL Certbot, server_name marcel-ppm.com) → proxy vers conteneur marcel-nginx-http :8080 → frontend/backend Docker (/opt/marcel, env compose = /opt/marcel/.env, PAS backend/.env)
+- Déployé : main @ 8b3deb6 (Excel import/export, .mpp, PDF COMEX, codes projets, recherche globale, SSO, dashboard drag&drop, etc.)
+- Incidents résolus pendant le déploiement :
+  1. Disque plein pendant build → docker builder/image prune (+ apt-get clean) ; après déploiement disque à 77%
+  2. Backend exigeait MARCEL_LICENSE_KEY (core/license.py, check au startup) → licence générée (PPM CONSEILS, expire 2030-12-31, 999 users) et ajoutée à /opt/marcel/.env
+  3. nginx-http conteneur 502 après recréation des conteneurs → docker compose restart nginx-http
+- Vérifié : https://marcel-ppm.com HTTP 200, /api/health ok, nouvelles routes présentes (403 sans auth), page login avec boutons SSO
+- RAPPEL : RESEND_API_KEY et SENTRY_DSN toujours absents de la prod ; codes projets à générer via Admin → Codes Projets en prod

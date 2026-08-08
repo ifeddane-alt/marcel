@@ -225,3 +225,7 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 
 ## 2026-06 — Historique de recherche (livré, auto-testé)
 - Projets récemment consultés proposés à l'ouverture de la recherche globale (localStorage par utilisateur)
+
+## 2026-06 — Production déployée (marcel-ppm.com, VPS Scaleway)
+- SSH pod opérationnel ; deploy = ssh /opt/marcel : git pull, docker compose build+up, restart nginx-http, prune du cache après build
+- Licence MARCEL_LICENSE_KEY requise dans /opt/marcel/.env (générée jusqu'à 2030)
