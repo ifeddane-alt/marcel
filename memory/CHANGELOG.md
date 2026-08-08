@@ -81,3 +81,12 @@
 - Bouton « PDF COMEX » sur le dashboard (data-testid dashboard-export-pdf-btn)
 - Fichiers : backend/modules/dashboard/pdf_export.py, router.py, frontend Dashboard.jsx, api/index.js
 - Auto-testé : HTTP 200, PDF 2 pages valide (contrôle visuel OK), téléchargement UI vérifié
+
+## 2026-06 — Codification projets (préfixe par programme)
+- Admin → Configuration → onglet « Codes Projets » : préfixe par défaut + préfixe par programme (P01, DATA...) + bouton backfill des projets existants
+- Génération auto côté serveur au format PREFIX-001, séquentiel par préfixe, verrouillé (non modifiable), anti-doublon garanti
+- Modal projet : champ Code en lecture seule, mis à jour en direct quand on change de programme
+- Code affiché : table Portefeuille, fiche projet, export Excel (colonne Code, lecture seule) — import Excel génère aussi le code
+- Endpoints : GET /api/projects/next-code, PUT /api/admin/config/project-codes, POST /api/admin/config/project-codes/backfill
+- Backfill exécuté en Preview : 10/10 projets codifiés (P01-xxx, DATA-xxx, PRJ-xxx)
+- Auto-testé backend (séquence, unicité, backfill, Excel) + UI (modal, admin, table)

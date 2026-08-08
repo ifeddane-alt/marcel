@@ -213,3 +213,6 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 
 ## 2026-06 — Export PDF COMEX (livré, auto-testé)
 - GET /api/dashboard/export/pdf + bouton « PDF COMEX » sur le dashboard — rapport hebdo portefeuille prêt COMEX
+
+## 2026-06 — Codification unique des projets (livré, auto-testé)
+- Préfixes par programme configurables (admin), code auto verrouillé PREFIX-001, backfill projets existants, anti-doublon serveur
