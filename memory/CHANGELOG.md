@@ -90,3 +90,10 @@
 - Endpoints : GET /api/projects/next-code, PUT /api/admin/config/project-codes, POST /api/admin/config/project-codes/backfill
 - Backfill exécuté en Preview : 10/10 projets codifiés (P01-xxx, DATA-xxx, PRJ-xxx)
 - Auto-testé backend (séquence, unicité, backfill, Excel) + UI (modal, admin, table)
+
+## 2026-06 — Codes projets partout (COPIL / PDF COMEX / Roadmap)
+- pptx_copil.py : helper _cname — code affiché sur garde, sommaire, gantt roadmap, fiches projet, conso équipes, arbitrage, décisions
+- dashboard/pdf_export.py : code préfixé aux noms (top projets, risques, jalons, décisions) ; project_code ajouté dans dashboard/service.py (get_extras, get_top_risks)
+- Roadmap.jsx : code mono gris devant le nom (timeline + Scope vs Réel + tooltips)
+- Fix : lignes résiduelles dupliquées dans pdf_export.py (SyntaxError) corrigées
+- Auto-testé : 4 codes retrouvés dans le texte PPT, 6 codes dans le PDF, screenshot Roadmap OK
