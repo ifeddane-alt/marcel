@@ -1,5 +1,7 @@
 from fastapi import APIRouter, Depends
+from fastapi.responses import Response
 from pydantic import BaseModel
+from datetime import datetime
 from core.auth import TokenPayload, get_current_user
 from . import service
 
@@ -58,3 +60,15 @@ async def dashboard_top_risks(current_user: TokenPayload = Depends(get_current_u
 @router.get("/dashboard/heatmap-risks")
 async def dashboard_heatmap_risks(current_user: TokenPayload = Depends(get_current_user)):
     return await service.get_heatmap_risks(current_user)
+
+
+@router.get("/dashboard/export/pdf")
+async def dashboard_export_pdf(current_user: TokenPayload = Depends(get_current_user)):
+    from .pdf_export import export_dashboard_pdf
+    data = await export_dashboard_pdf(current_user)
+    filename = f"MARCEL_Rapport_COMEX_{datetime.now().strftime('%Y-%m-%d')}.pdf"
+    return Response(
+        content=data,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="{filename}"'},
+    )

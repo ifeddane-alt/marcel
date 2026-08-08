@@ -143,6 +143,7 @@ export const dashboardAPI = {
   cxo: () => api.get("/dashboard/cxo"),
   getCxoPreferences: () => api.get("/dashboard/cxo/preferences"),
   updateCxoPreferences: (d) => api.put("/dashboard/cxo/preferences", d),
+  exportPdf: () => api.get("/dashboard/export/pdf", { responseType: "blob" }),
 };
 
 export const excelAPI = {

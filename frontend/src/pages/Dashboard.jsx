@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout/legacy";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import { Settings2, RefreshCw, Check, X, Move, RotateCcw, Plus, GripVertical } from "lucide-react";
+import { Settings2, RefreshCw, Check, X, Move, RotateCcw, Plus, GripVertical, FileDown } from "lucide-react";
 import { dashboardAPI, programsAPI, projectsAPI, teamsAPI, milestonesAPI, arbitrageAPI, agentAPI } from "@/api";
 import { usePermissions } from "@/hooks/usePermissions";
 import {
@@ -118,6 +118,22 @@ export default function Dashboard() {
   const [customizing, setCustomizing] = useState(false);
   const [saving, setSaving] = useState(false);
   const [dragWidget, setDragWidget] = useState(null);
+  const [exportingPdf, setExportingPdf] = useState(false);
+
+  const exportPdf = async () => {
+    setExportingPdf(true);
+    try {
+      const res = await dashboardAPI.exportPdf();
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `MARCEL_Rapport_COMEX_${new Date().toISOString().slice(0, 10)}.pdf`;
+      a.click();
+      window.URL.revokeObjectURL(url);
+    } finally {
+      setExportingPdf(false);
+    }
+  };
 
   useEffect(() => {
     Promise.all([
@@ -270,6 +286,18 @@ export default function Dashboard() {
           </p>
         </div>
         <div className="flex items-center gap-2 shrink-0">
+          {!customizing && (
+            <button
+              data-testid="dashboard-export-pdf-btn"
+              onClick={exportPdf}
+              disabled={exportingPdf}
+              className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 bg-white rounded-lg text-sm text-slate-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              title="Exporter le rapport COMEX en PDF"
+            >
+              {exportingPdf ? <RefreshCw size={13} className="animate-spin" /> : <FileDown size={13} />}
+              <span className="hidden sm:inline">PDF COMEX</span>
+            </button>
+          )}
           {customizing && (
             <>
               <button
