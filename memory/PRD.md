@@ -203,3 +203,10 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - Mobile app React Native
 - Module BI intégré
 - AI Planning Assistant (prévision charge)
+
+## 2026-06 — Export/Import Excel + MS Project .mpp (livré, testé iteration_51)
+- Export .xlsx lisible (en-têtes FR, formats €/dates, onglet Aide) sur 9 sections / 10 entités : Portefeuille, Programmes, Budget, Équipes, Ressources, Roadmap (jalons), Gouvernance (risques + décisions), Demandes, Timesheets
+- Import Excel avec aperçu de confirmation (Nouveau / Mise à jour / Erreur) et upsert par nom : /api/excel/{entity}/{export|import/preview|import/commit}
+- Import Microsoft Project .mpp binaire (MPXJ + JRE) et XML MSPDI sur la Roadmap (choix projet cible)
+- Dockerfile backend : default-jre-headless ajouté (requis au prochain déploiement VPS)
+- Commits: 6d80c09 (drag&drop barre), d6f380f (Excel/MPP)
