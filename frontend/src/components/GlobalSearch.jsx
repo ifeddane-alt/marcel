@@ -1,7 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, CornerDownLeft, FolderKanban, Flag, AlertTriangle, Gavel } from "lucide-react";
+import { Search, CornerDownLeft, FolderKanban, Flag, AlertTriangle, Gavel, History } from "lucide-react";
 import { searchAPI } from "@/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { getRecentProjects } from "@/utils/recentProjects";
 
 const RAG_DOT = { green: "bg-emerald-500", orange: "bg-amber-500", red: "bg-rose-500" };
 
@@ -14,11 +16,13 @@ const GROUPS = [
 
 export default function GlobalSearch() {
   const navigate = useNavigate();
+  const { user } = useAuth();
   const inputRef = useRef(null);
   const boxRef = useRef(null);
   const timerRef = useRef(null);
   const [q, setQ] = useState("");
   const [res, setRes] = useState(null);
+  const [recent, setRecent] = useState([]);
   const [open, setOpen] = useState(false);
   const [hi, setHi] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -55,8 +59,11 @@ export default function GlobalSearch() {
   };
 
   // Liste aplatie pour la navigation clavier
+  const showRecent = q.trim().length < 2;
   const flat = [];
-  if (res) {
+  if (showRecent) {
+    for (const item of recent) flat.push({ group: "projects", item });
+  } else if (res) {
     for (const g of GROUPS) {
       for (const item of res[g.key] || []) flat.push({ group: g.key, item });
     }
@@ -144,7 +151,7 @@ export default function GlobalSearch() {
           data-testid="global-search-input"
           value={q}
           onChange={(e) => { setQ(e.target.value); setOpen(true); setHi(0); runSearch(e.target.value); }}
-          onFocus={() => { if (q.trim().length >= 2) setOpen(true); }}
+          onFocus={() => { setRecent(getRecentProjects(user?.user_id)); setOpen(true); setHi(0); }}
           onKeyDown={onKeyDown}
           placeholder="Rechercher : projet, jalon, risque, décision…"
           className="w-full h-8 pl-8 pr-14 text-xs bg-slate-50 border border-gray-200 rounded-lg focus:outline-none focus:border-[#0052CC] focus:bg-white focus:ring-1 focus:ring-[#0052CC] transition-colors placeholder:text-slate-400"
@@ -154,10 +161,20 @@ export default function GlobalSearch() {
         </kbd>
       </div>
 
-      {open && q.trim().length >= 2 && (
+      {open && (showRecent ? recent.length > 0 : true) && (
         <div data-testid="global-search-results"
           className="absolute top-9 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-xl z-50 overflow-hidden max-h-[70vh] overflow-y-auto">
-          {loading && !res ? (
+          {showRecent ? (
+            <div data-testid="global-search-recent">
+              <div className="flex items-center gap-1.5 px-3 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400 bg-slate-50/60">
+                <History size={10} /> Récemment consultés
+              </div>
+              {recent.map((item) => {
+                flatIdx += 1;
+                return renderItem({ group: "projects", item }, flatIdx);
+              })}
+            </div>
+          ) : loading && !res ? (
             <div className="px-3 py-3 text-xs text-slate-400">Recherche…</div>
           ) : !hasResults ? (
             <div className="px-3 py-3 text-xs text-slate-400" data-testid="global-search-empty">

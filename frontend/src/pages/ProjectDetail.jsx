@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI, decisionsAPI, workAllocationsAPI, projectDependenciesAPI, vendorsAPI, scopeAPI, msprojectAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { pushRecentProject } from "@/utils/recentProjects";
 import { usePermissions } from "@/hooks/usePermissions";
 import RAGBadge, { MethodologyBadge, MilestoneBadge, TaskTypeBadge, TaskStatusBadge, ProjectStatusBadge } from "@/components/RAGBadge";
 import ProjectModal from "@/components/ProjectModal";
@@ -65,6 +66,9 @@ export default function ProjectDetail() {
   const canWrite = canEdit;
 
   const [project, setProject] = useState(null);
+  useEffect(() => {
+    if (project) pushRecentProject(user?.user_id, project);
+  }, [project, user]);
   const [milestones, setMilestones] = useState([]);
   const [allocations, setAllocations] = useState([]);
   const [tasks, setTasks] = useState([]);
