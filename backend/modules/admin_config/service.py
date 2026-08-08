@@ -86,6 +86,17 @@ async def update_sso(data: "SSOUpdate", current_user: TokenPayload) -> dict:
     )
 
 
+async def update_project_codes(data: "ProjectCodesUpdate", current_user: TokenPayload) -> dict:
+    cfg = data.project_codes.model_dump()
+    cfg["default_prefix"] = (cfg.get("default_prefix") or "PRJ").strip().upper()
+    cfg["program_prefixes"] = {
+        k: v.strip().upper()
+        for k, v in (cfg.get("program_prefixes") or {}).items()
+        if isinstance(v, str) and v.strip()
+    }
+    return await _update_section(current_user.tenant_id, "project_codes", cfg)
+
+
 # ─── Seed Altair ──────────────────────────────────────────────────────────────
 
 SEED_ENUMS = {

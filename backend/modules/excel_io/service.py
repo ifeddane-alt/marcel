@@ -453,6 +453,8 @@ async def _apply_row(entity: str, spec: dict, data: dict, info: dict, user: Toke
         doc.setdefault("end_date_baseline", doc.get("end_date_forecast"))
         if not doc.get("budget_forecast"):
             doc["budget_forecast"] = doc.get("budget_total", 0)
+        from modules.projects.service import generate_project_code
+        doc["code"] = await generate_project_code(tid, doc.get("program_id"))
         await db.projects.insert_one(doc)
         return "created"
 

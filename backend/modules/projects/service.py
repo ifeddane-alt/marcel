@@ -1,6 +1,7 @@
 from fastapi import HTTPException
 from datetime import datetime, timezone
 import asyncio
+import re
 import uuid
 from core.database import db
 from core.auth import TokenPayload, require_write, is_ownership_restricted
@@ -40,14 +41,72 @@ async def get_project(project_id: str, current_user: TokenPayload) -> dict:
     return project
 
 
+# ─── Codification projet (préfixe par programme, séquentiel, anti-doublon) ──
+
+async def _get_code_config(tenant_id: str) -> dict:
+    tenant = await db.tenants.find_one(
+        {"tenant_id": tenant_id}, {"_id": 0, "settings.project_codes": 1}
+    )
+    cfg = ((tenant or {}).get("settings") or {}).get("project_codes") or {}
+    return {
+        "default_prefix": (cfg.get("default_prefix") or "PRJ").strip().upper(),
+        "program_prefixes": cfg.get("program_prefixes") or {},
+    }
+
+
+def _prefix_for(cfg: dict, program_id) -> str:
+    return (cfg["program_prefixes"].get(program_id or "") or cfg["default_prefix"]).strip().upper()
+
+
+async def generate_project_code(tenant_id: str, program_id=None) -> str:
+    cfg = await _get_code_config(tenant_id)
+    prefix = _prefix_for(cfg, program_id)
+    pattern = re.compile(rf"^{re.escape(prefix)}-(\d+)$")
+    existing = await db.projects.find(
+        {"tenant_id": tenant_id, "code": {"$regex": f"^{re.escape(prefix)}-"}},
+        {"_id": 0, "code": 1},
+    ).to_list(None)
+    max_n = 0
+    for e in existing:
+        m = pattern.match(e.get("code") or "")
+        if m:
+            max_n = max(max_n, int(m.group(1)))
+    return f"{prefix}-{max_n + 1:03d}"
+
+
+async def backfill_codes(tenant_id: str) -> dict:
+    """Génère un code pour tous les projets du tenant qui n'en ont pas encore."""
+    cfg = await _get_code_config(tenant_id)
+    projects = await db.projects.find({"tenant_id": tenant_id}, {"_id": 0}).sort("created_at", 1).to_list(None)
+    counters: dict = {}
+    for p in projects:
+        m = re.match(r"^(.+)-(\d+)$", p.get("code") or "")
+        if m:
+            counters[m.group(1)] = max(counters.get(m.group(1), 0), int(m.group(2)))
+    updated = 0
+    for p in projects:
+        if p.get("code"):
+            continue
+        prefix = _prefix_for(cfg, p.get("program_id"))
+        counters[prefix] = counters.get(prefix, 0) + 1
+        await db.projects.update_one(
+            {"project_id": p["project_id"]},
+            {"$set": {"code": f"{prefix}-{counters[prefix]:03d}"}},
+        )
+        updated += 1
+    return {"updated": updated, "total": len(projects)}
+
+
 async def create_project(data: ProjectCreate, current_user: TokenPayload) -> dict:
     require_write(current_user)
     doc = data.model_dump()
     doc = _sync_budget_aggregates(doc)
+    code = await generate_project_code(current_user.tenant_id, doc.get("program_id"))
     project = {
         "project_id": str(uuid.uuid4()),
         "tenant_id": current_user.tenant_id,
         **doc,
+        "code": code,
         "budget_revision_history": [],
         "last_sync_at": None,
         "created_at": datetime.now(timezone.utc).isoformat(),

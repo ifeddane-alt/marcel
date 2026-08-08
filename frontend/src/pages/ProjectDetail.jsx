@@ -262,6 +262,7 @@ export default function ProjectDetail() {
             <MethodologyBadge methodology={project.methodology} />
           </div>
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] leading-tight" data-testid="project-name">
+            {project.code && <span className="font-mono text-base font-semibold text-slate-400 mr-2 align-middle" data-testid="project-detail-code">{project.code}</span>}
             {project.name}
           </h1>
           {project.description && (

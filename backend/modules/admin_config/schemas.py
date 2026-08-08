@@ -119,6 +119,15 @@ class PPTBrandingUpdate(BaseModel):
 
 # ─── Webhooks ─────────────────────────────────────────────────────────────────
 
+class ProjectCodesConfig(BaseModel):
+    default_prefix: str = "PRJ"
+    program_prefixes: dict = {}
+
+
+class ProjectCodesUpdate(BaseModel):
+    project_codes: ProjectCodesConfig
+
+
 class WebhookConfig(BaseModel):
     url: str = ""
     enabled: bool = False

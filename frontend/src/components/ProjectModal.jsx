@@ -50,6 +50,14 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
   const [selectedTemplate, setSelectedTemplate] = useState(null);
   const [selectedPhases, setSelectedPhases] = useState([]);
   const [showTemplate, setShowTemplate] = useState(false);
+  const [nextCode, setNextCode] = useState("");
+
+  useEffect(() => {
+    if (!isOpen || project) return;
+    projectsAPI.nextCode(form.program_id)
+      .then(({ data }) => setNextCode(data.code))
+      .catch(() => setNextCode(""));
+  }, [isOpen, project, form.program_id]);
 
   useEffect(() => {
     if (!isOpen) return;
@@ -192,8 +200,9 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
           <Field label="Nom du projet" required error={errors.name}>
             <input data-testid="project-form-name" className={INPUT_CLS} value={form.name} onChange={set("name")} placeholder="Ex : Projet Phoenix" />
           </Field>
-          <Field label="Code projet">
-            <input data-testid="project-form-code" className={INPUT_CLS} value={form.source_id} onChange={set("source_id")} placeholder="Ex : PRJ-001" />
+          <Field label="Code projet" hint="généré automatiquement">
+            <input data-testid="project-form-code" className={`${INPUT_CLS} bg-slate-50 text-slate-500 font-mono cursor-not-allowed`}
+              value={project ? (project.code || "—") : (nextCode || "…")} readOnly disabled />
           </Field>
         </div>
 

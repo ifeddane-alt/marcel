@@ -40,6 +40,7 @@ export const projectsAPI = {
   create: (data) => api.post("/projects", data),
   update: (id, data) => api.put(`/projects/${id}`, data),
   delete: (id) => api.delete(`/projects/${id}`),
+  nextCode: (programId) => api.get("/projects/next-code", { params: programId ? { program_id: programId } : {} }),
 };
 
 export const teamsAPI = {
@@ -247,6 +248,8 @@ export const adminConfigAPI = {
   updateThresholds:(d)   => api.put("/admin/config/thresholds", d),
   updateBranding:  (d)   => api.put("/admin/config/ppt-branding", d),
   updateWebhooks:  (d)   => api.put("/admin/config/webhooks", d),
+  updateProjectCodes: (d) => api.put("/admin/config/project-codes", d),
+  backfillProjectCodes: () => api.post("/admin/config/project-codes/backfill"),
   updateEmailAlerts: (d) => api.put("/admin/config/email-alerts", d),
   updateSSO:       (d)   => api.put("/admin/config/sso", d),
 };

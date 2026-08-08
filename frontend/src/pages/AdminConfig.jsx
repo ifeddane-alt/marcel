@@ -3,9 +3,9 @@ import {
   Wrench, ToggleLeft, ToggleRight, Workflow, BookOpen, Calendar,
   Bell, Palette, Plus, Trash2, GripVertical, Save, RefreshCw,
   ChevronUp, ChevronDown, CheckCircle2, AlertCircle, Info,
-  Upload, Webhook, KeyRound,
+  Upload, Webhook, KeyRound, Hash, Wand2,
 } from "lucide-react";
-import { adminConfigAPI, profilesAPI } from "@/api";
+import { adminConfigAPI, profilesAPI, programsAPI } from "@/api";
 import { useTenantConfig } from "@/contexts/TenantConfigContext";
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
@@ -1189,10 +1189,172 @@ function SSOSection({ config, onSave }) {
 
 // ─── Composant principal ──────────────────────────────────────────────────────
 
+// ─── Section Codes Projets ────────────────────────────────────────────────────
+
+function ProjectCodesSection({ config, onSave }) {
+  const pc = config?.project_codes || {};
+  const [form, setForm] = useState({
+    default_prefix: pc.default_prefix || "PRJ",
+    program_prefixes: pc.program_prefixes || {},
+  });
+  const [programs, setPrograms] = useState([]);
+  const [saving, setSaving] = useState(false);
+  const [backfilling, setBackfilling] = useState(false);
+  const [msg, setMsg] = useState(null);
+
+  useEffect(() => {
+    programsAPI.list().then(({ data }) => setPrograms(data)).catch(() => {});
+  }, []);
+
+  const setPrefix = (programId, value) => {
+    const v = value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8);
+    setForm(f => ({ ...f, program_prefixes: { ...f.program_prefixes, [programId]: v } }));
+  };
+
+  const save = async () => {
+    setSaving(true); setMsg(null);
+    try {
+      await adminConfigAPI.updateProjectCodes({ project_codes: form });
+      setMsg({ type: "ok", text: "Codification sauvegardée." });
+      onSave();
+    } catch (e) {
+      setMsg({ type: "err", text: e.response?.data?.detail || "Erreur lors de la sauvegarde." });
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const backfill = async () => {
+    setBackfilling(true); setMsg(null);
+    try {
+      await adminConfigAPI.updateProjectCodes({ project_codes: form });
+      const { data } = await adminConfigAPI.backfillProjectCodes();
+      setMsg({ type: "ok", text: `${data.updated} projet(s) codifié(s) sur ${data.total}.` });
+      onSave();
+    } catch (e) {
+      setMsg({ type: "err", text: e.response?.data?.detail || "Erreur lors de la génération." });
+    } finally {
+      setBackfilling(false);
+    }
+  };
+
+  return (
+    <div className="space-y-6" data-testid="section-project-codes">
+      <div className="flex items-start justify-between">
+        <div>
+          <h2 className="font-semibold text-slate-800">Codification des projets</h2>
+          <p className="text-xs text-slate-500 mt-0.5">
+            Chaque projet reçoit automatiquement un code unique au format <span className="font-mono font-semibold">PRÉFIXE-001</span>,
+            séquentiel par préfixe. Le préfixe est déterminé par le programme du projet.
+          </p>
+        </div>
+        <button
+          data-testid="project-codes-save-btn"
+          onClick={save}
+          disabled={saving}
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-[#0052CC] text-white rounded-lg hover:bg-[#0040a6] transition-colors disabled:opacity-50"
+        >
+          {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />}
+          Sauvegarder
+        </button>
+      </div>
+
+      {msg && (
+        <div className={`flex items-center gap-2 p-3 rounded-lg text-sm ${msg.type === "ok" ? "bg-emerald-50 text-emerald-700 border border-emerald-200" : "bg-rose-50 text-rose-700 border border-rose-200"}`}>
+          {msg.type === "ok" ? <CheckCircle2 size={14} /> : <AlertCircle size={14} />}
+          {msg.text}
+        </div>
+      )}
+
+      {/* Préfixe par défaut */}
+      <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
+        <label className="block text-xs font-semibold text-slate-600 mb-1">
+          Préfixe par défaut (projets hors programme)
+        </label>
+        <input
+          data-testid="project-codes-default-prefix"
+          value={form.default_prefix}
+          onChange={e => setForm(f => ({ ...f, default_prefix: e.target.value.toUpperCase().replace(/[^A-Z0-9]/g, "").slice(0, 8) }))}
+          placeholder="PRJ"
+          className={`${INPUT_CLS} max-w-[180px] font-mono`}
+        />
+        <p className="text-xs text-slate-400 mt-1">
+          Exemple : <span className="font-mono">{form.default_prefix || "PRJ"}-001</span>, <span className="font-mono">{form.default_prefix || "PRJ"}-002</span>…
+        </p>
+      </div>
+
+      {/* Table programmes → préfixes */}
+      <div>
+        <h3 className="text-sm font-semibold text-slate-700 mb-2">Préfixe par programme</h3>
+        {programs.length === 0 ? (
+          <p className="text-xs text-slate-400">Aucun programme dans le portefeuille.</p>
+        ) : (
+          <div className="border border-gray-200 rounded-xl overflow-hidden">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-gray-50 border-b border-gray-200 text-left">
+                  <th className="px-4 py-2.5 text-xs font-semibold text-slate-600">Programme</th>
+                  <th className="px-4 py-2.5 text-xs font-semibold text-slate-600 w-40">Préfixe</th>
+                  <th className="px-4 py-2.5 text-xs font-semibold text-slate-600">Aperçu</th>
+                </tr>
+              </thead>
+              <tbody>
+                {programs.map(prog => {
+                  const prefix = form.program_prefixes[prog.program_id] || "";
+                  return (
+                    <tr key={prog.program_id} className="border-b border-gray-50 last:border-0">
+                      <td className="px-4 py-2.5 text-slate-700">{prog.name}</td>
+                      <td className="px-4 py-2.5">
+                        <input
+                          data-testid={`project-codes-prefix-${prog.program_id}`}
+                          value={prefix}
+                          onChange={e => setPrefix(prog.program_id, e.target.value)}
+                          placeholder={form.default_prefix || "PRJ"}
+                          className={`${INPUT_CLS} font-mono`}
+                        />
+                      </td>
+                      <td className="px-4 py-2.5 font-mono text-xs text-slate-400">
+                        {(prefix || form.default_prefix || "PRJ")}-001
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+        <p className="text-xs text-slate-400 mt-2">
+          Si un programme n'a pas de préfixe, le préfixe par défaut est utilisé. Lettres et chiffres uniquement (max 8 caractères).
+        </p>
+      </div>
+
+      {/* Backfill */}
+      <div className="flex items-center justify-between p-4 bg-amber-50 border border-amber-200 rounded-xl">
+        <div>
+          <p className="text-sm font-medium text-slate-700">Projets existants sans code</p>
+          <p className="text-xs text-slate-500">
+            Génère un code pour tous les projets qui n'en ont pas encore, selon leur programme (sauvegarde d'abord la configuration ci-dessus).
+          </p>
+        </div>
+        <button
+          data-testid="project-codes-backfill-btn"
+          onClick={backfill}
+          disabled={backfilling}
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-amber-600 text-white rounded-lg hover:bg-amber-700 transition-colors disabled:opacity-50 shrink-0"
+        >
+          {backfilling ? <RefreshCw size={13} className="animate-spin" /> : <Wand2 size={13} />}
+          Générer les codes manquants
+        </button>
+      </div>
+    </div>
+  );
+}
+
 const TABS = [
   { id: "modules",    label: "Modules",         icon: ToggleRight },
   { id: "workflows",  label: "Workflows",        icon: Workflow },
   { id: "enums",      label: "Référentiels",     icon: BookOpen },
+  { id: "codes",      label: "Codes Projets",    icon: Hash },
   { id: "holidays",   label: "Jours Fériés",     icon: Calendar },
   { id: "alerts",     label: "Alertes",          icon: Bell },
   { id: "branding",   label: "Export PPT",       icon: Palette },
@@ -1283,6 +1445,7 @@ export default function AdminConfig() {
       {activeTab === "modules"   && <ModulesSection   config={config} onSave={handleSave} />}
       {activeTab === "workflows" && <WorkflowsSection config={config} onSave={handleSave} />}
       {activeTab === "enums"     && <EnumsSection     config={config} onSave={handleSave} />}
+      {activeTab === "codes"     && <ProjectCodesSection config={config} onSave={handleSave} />}
       {activeTab === "holidays"  && <HolidaysSection  config={config} onSave={handleSave} />}
       {activeTab === "alerts"    && <AlertsSection    config={config} onSave={handleSave} />}
       {activeTab === "branding"  && <BrandingSection  config={config} onSave={handleSave} />}

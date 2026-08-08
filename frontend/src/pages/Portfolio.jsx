@@ -86,7 +86,7 @@ export default function Portfolio() {
     .filter((p) => {
       const q = search.toLowerCase();
       return (
-        (!search || p.name.toLowerCase().includes(q) || (p.source_id || "").toLowerCase().includes(q)) &&
+        (!search || p.name.toLowerCase().includes(q) || (p.source_id || "").toLowerCase().includes(q) || (p.code || "").toLowerCase().includes(q)) &&
         (!filterRag || p.status_rag === filterRag) &&
         (!filterMethod || p.methodology === filterMethod) &&
         (!filterProgram || p.program_id === filterProgram) &&
@@ -263,6 +263,7 @@ export default function Portfolio() {
                   <td className="px-4 py-3"><RAGBadge status={p.status_rag} /></td>
                   <td className="px-4 py-3 max-w-xs">
                     <Link to={`/projects/${p.project_id}`} className="text-[#0052CC] hover:text-[#0047B3] font-medium text-sm leading-snug" data-testid={`project-link-${p.project_id}`}>
+                      {p.code && <span className="font-mono text-[10px] font-semibold text-slate-400 mr-1.5" data-testid={`project-code-${p.project_id}`}>{p.code}</span>}
                       {p.name}
                     </Link>
                     <div className="flex items-center gap-2 mt-0.5">

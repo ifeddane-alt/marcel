@@ -25,6 +25,7 @@ SPECS = {
         "match": ["name"],
         "required_new": ["name", "start_date", "end_date_forecast"],
         "columns": [
+            col("code", "Code", readonly=True),
             col("name", "Nom du projet"),
             col("methodology", "Méthodologie", "enum", options=METHO_LABELS),
             col("status_rag", "Statut RAG", "enum", options=RAG_LABELS, aliases={"amber": "orange"}),

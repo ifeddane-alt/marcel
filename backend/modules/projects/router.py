@@ -11,6 +11,11 @@ async def list_projects(current_user: TokenPayload = Depends(get_current_user)):
     return await service.list_projects(current_user)
 
 
+@router.get("/projects/next-code")
+async def next_project_code(program_id: str = None, current_user: TokenPayload = Depends(get_current_user)):
+    return {"code": await service.generate_project_code(current_user.tenant_id, program_id)}
+
+
 @router.get("/projects/{project_id}")
 async def get_project(project_id: str, current_user: TokenPayload = Depends(get_current_user)):
     return await service.get_project(project_id, current_user)

@@ -3,7 +3,7 @@ from core.auth import TokenPayload, permission_required
 from .schemas import (
     ModulesUpdate, WorkflowsUpdate, EnumsUpdate,
     HolidaysUpdate, ThresholdsUpdate, PPTBrandingUpdate, WebhooksUpdate,
-    EmailAlertsUpdate, SSOUpdate,
+    EmailAlertsUpdate, SSOUpdate, ProjectCodesUpdate,
 )
 from . import service
 
@@ -66,6 +66,17 @@ async def update_email_alerts(data: EmailAlertsUpdate, current_user: TokenPayloa
 @router.put("/admin/config/sso")
 async def update_sso(data: SSOUpdate, current_user: TokenPayload = Depends(_perm)):
     return await service.update_sso(data, current_user)
+
+
+@router.put("/admin/config/project-codes")
+async def update_project_codes(data: ProjectCodesUpdate, current_user: TokenPayload = Depends(_perm)):
+    return await service.update_project_codes(data, current_user)
+
+
+@router.post("/admin/config/project-codes/backfill")
+async def backfill_project_codes(current_user: TokenPayload = Depends(_perm)):
+    from modules.projects.service import backfill_codes
+    return await backfill_codes(current_user.tenant_id)
 
 
 # ─── Seed ─────────────────────────────────────────────────────────────────────
