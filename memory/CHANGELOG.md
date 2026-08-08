@@ -103,3 +103,9 @@
 - Recherche par code (priorité : exact > préfixe > contient) puis par nom ; badge code bleu + pastille RAG dans les résultats
 - Enter sur un code exact ouvre directement la fiche projet ; navigation clavier (flèches) ; raccourci Ctrl/Cmd+K
 - Auto-testé : DATA-001 → fiche ouverte, recherche par nom 'phoenix' OK
+
+## 2026-06 — Recherche globale étendue
+- Nouveau module backend modules/search : GET /api/search/global?q= (projets par code/nom scorés, jalons, risques triés par criticité, décisions — max 5 par type, permissions ownership respectées)
+- GlobalSearch.jsx : appel debounced 250ms, résultats groupés par type avec en-têtes (Projets/Jalons/Risques/Décisions), métadonnées (date jalon, criticité, code projet), navigation clavier sur liste aplatie
+- Clic ou Entrée sur n'importe quel résultat → fiche du projet concerné
+- Auto-testé : API (q=migration → 2 projets, 3 jalons, 4 risques) + UI (groupes affichés, clic risque → fiche projet)

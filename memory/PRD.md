@@ -219,3 +219,6 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 
 ## 2026-06 — Recherche globale par code (livré, auto-testé)
 - Barre de recherche topbar : code ou nom → ouverture directe de la fiche projet, Ctrl+K
+
+## 2026-06 — Recherche globale étendue (livré, auto-testé)
+- /api/search/global : projets + jalons + risques + décisions groupés par type dans la barre de recherche
