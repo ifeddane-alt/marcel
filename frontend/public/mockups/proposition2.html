@@ -1,0 +1,163 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Proposition 2 — Split navy</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',sans-serif;color:#09090b;background:#fafafa}
+h1,h2,h3{font-family:'Outfit',sans-serif;letter-spacing:-0.02em}
+.artboard{height:800px;position:relative;overflow:hidden}
+svg{width:18px;height:18px}
+.badge-note{position:absolute;top:24px;right:24px;background:#fff;color:#0b1c3f;font-size:12px;font-weight:600;padding:6px 14px;border-radius:999px;font-family:'Outfit';z-index:5;border:1px solid #e4e4e7}
+/* ============ LOGIN ============ */
+#login{display:flex}
+.left{width:46%;background:#0b1c3f;position:relative;display:flex;flex-direction:column;justify-content:space-between;padding:48px 52px;overflow:hidden}
+.grid-pattern{position:absolute;inset:0;background-image:linear-gradient(rgba(255,255,255,.045) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.045) 1px,transparent 1px);background-size:44px 44px}
+.glow{position:absolute;width:520px;height:520px;border-radius:50%;background:radial-gradient(circle,rgba(37,99,235,.35),transparent 65%);bottom:-180px;right:-140px}
+.left-logo{display:flex;align-items:center;gap:12px;position:relative}
+.mark{width:42px;height:42px;border-radius:11px;background:linear-gradient(135deg,#2563eb,#60a5fa);display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Outfit';font-weight:800;font-size:21px}
+.left-logo b{color:#fff;font-family:'Outfit';font-size:22px;font-weight:700;letter-spacing:.01em}
+.hero{position:relative}
+.hero h1{color:#fff;font-size:44px;font-weight:700;line-height:1.15;margin-bottom:18px}
+.hero h1 em{font-style:normal;color:#60a5fa}
+.hero p{color:#93a5c8;font-size:15px;line-height:1.6;max-width:400px;margin-bottom:30px}
+.chips{display:flex;flex-direction:column;gap:12px}
+.chip{display:flex;align-items:center;gap:12px;color:#dbe4f5;font-size:14px;font-weight:500}
+.chip .ic{width:30px;height:30px;border-radius:8px;background:rgba(96,165,250,.15);border:1px solid rgba(96,165,250,.3);display:flex;align-items:center;justify-content:center;color:#60a5fa}
+.chip .ic svg{width:15px;height:15px}
+.left-foot{color:#5b6b8f;font-size:12.5px;position:relative}
+.right{flex:1;display:flex;align-items:center;justify-content:center;background:#fff}
+.form-box{width:400px}
+.form-title{font-size:28px;font-weight:700;margin-bottom:8px}
+.form-sub{font-size:14px;color:#71717a;margin-bottom:30px}
+.field label{display:block;font-size:13px;font-weight:600;color:#3f3f46;margin-bottom:6px}
+.field input{width:100%;height:46px;border:1px solid #d4d4d8;border-radius:10px;padding:0 14px;font-size:14px;font-family:inherit}
+.field{margin-bottom:18px}
+.btn-primary{width:100%;height:48px;border:none;border-radius:10px;background:#2563eb;color:#fff;font-size:15px;font-weight:600;font-family:inherit;cursor:pointer;box-shadow:0 6px 18px -6px rgba(37,99,235,.55)}
+.divider{display:flex;align-items:center;gap:12px;color:#a1a1aa;font-size:12px;margin:24px 0}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:#e4e4e7}
+.sso-row{display:flex;gap:10px}
+.sso-btn{flex:1;height:44px;border:1px solid #e4e4e7;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:600;color:#3f3f46;font-family:inherit}
+.g-dot{width:16px;height:16px;border-radius:50%;background:conic-gradient(#ea4335 0 25%,#fbbc05 25% 50%,#34a853 50% 75%,#4285f4 75%)}
+.ms-dot{width:14px;height:14px;display:grid;grid-template-columns:1fr 1fr;gap:1px}
+.ms-dot i{display:block}
+/* ============ DASHBOARD ============ */
+#dashboard{display:flex;background:#f6f7fb}
+.sidebar{width:248px;background:#0b1c3f;display:flex;flex-direction:column;padding:18px 12px}
+.side-logo{display:flex;align-items:center;gap:10px;padding:4px 10px 20px}
+.side-logo .mark{width:34px;height:34px;font-size:17px;border-radius:9px}
+.side-logo b{color:#fff;font-family:'Outfit';font-size:18px;font-weight:700}
+.nav-label{font-size:11px;font-weight:700;color:#4d5f85;text-transform:uppercase;letter-spacing:.08em;padding:14px 10px 6px}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:10px;font-size:13.5px;font-weight:500;color:#a8b6d4;margin-bottom:2px}
+.nav-item svg{color:#7488ad}
+.nav-item.active{background:#2563eb;color:#fff;font-weight:600;box-shadow:0 4px 14px -4px rgba(37,99,235,.6)}
+.nav-item.active svg{color:#fff}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:58px;background:#fff;border-bottom:1px solid #e4e4e7;display:flex;align-items:center;justify-content:space-between;padding:0 28px}
+.search-pill{width:340px;height:38px;background:#f4f4f5;border-radius:10px;display:flex;align-items:center;gap:10px;padding:0 14px;color:#a1a1aa;font-size:13px}
+.kbd{margin-left:auto;font-family:'JetBrains Mono';font-size:11px;background:#fff;border:1px solid #e4e4e7;border-radius:6px;padding:2px 6px;color:#71717a}
+.top-right{display:flex;align-items:center;gap:14px}
+.avatar{width:34px;height:34px;border-radius:50%;background:#0b1c3f;color:#fff;display:flex;align-items:center;justify-content:center;font-size:13px;font-weight:700}
+.content{flex:1;padding:28px 32px;overflow:hidden}
+.page-title{font-size:26px;font-weight:700}
+.page-sub{font-size:13.5px;color:#71717a;margin-top:4px;margin-bottom:24px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:16px;margin-bottom:20px}
+.kpi{background:#fff;border:1px solid #e8eaf0;border-radius:14px;padding:18px 20px 18px 24px;position:relative;box-shadow:0 2px 8px -2px rgba(11,28,63,.06)}
+.kpi::before{content:"";position:absolute;left:0;top:14px;bottom:14px;width:4px;border-radius:0 4px 4px 0}
+.kpi.b::before{background:#2563eb}.kpi.g::before{background:#10b981}.kpi.a::before{background:#f59e0b}.kpi.r::before{background:#ef4444}
+.kpi-label{font-size:12.5px;font-weight:600;color:#71717a;margin-bottom:10px}
+.kpi-value{font-family:'Outfit';font-size:30px;font-weight:700;letter-spacing:-.02em}
+.kpi-delta{font-size:12px;font-weight:600;margin-top:4px}
+.panel{background:#fff;border:1px solid #e8eaf0;border-radius:14px;box-shadow:0 2px 8px -2px rgba(11,28,63,.06);overflow:hidden}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:16px 20px;border-bottom:1px solid #f0f1f5}
+.panel-title{font-family:'Outfit';font-size:15px;font-weight:600}
+table{width:100%;border-collapse:collapse;font-size:13.5px}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#71717a;font-weight:600;background:#f8f9fc;padding:10px 20px;border-bottom:1px solid #e8eaf0}
+td{padding:12px 20px;border-bottom:1px solid #f0f1f5;color:#3f3f46}
+.code{font-family:'JetBrains Mono';font-size:11.5px;background:#eef2fb;border:1px solid #d9e2f5;color:#1d4ed8;padding:2px 7px;border-radius:6px;font-weight:500}
+.rag{display:inline-flex;border-radius:7px;padding:3px 10px;font-size:11.5px;font-weight:700;border:1px solid}
+.rag-g{background:#d1fae5;color:#047857;border-color:#a7f3d0}
+.rag-a{background:#fef3c7;color:#b45309;border-color:#fde68a}
+.rag-r{background:#fee2e2;color:#b91c1c;border-color:#fecaca}
+.bar{height:7px;border-radius:99px;background:#eef0f5;width:120px;overflow:hidden;display:inline-block}
+.bar i{display:block;height:100%;border-radius:99px}
+</style>
+</head>
+<body>
+
+<section id="login" class="artboard">
+  <div class="badge-note">Proposition 2 — Split navy</div>
+  <div class="left">
+    <div class="grid-pattern"></div><div class="glow"></div>
+    <div class="left-logo"><div class="mark">M</div><b>MARCEL</b></div>
+    <div class="hero">
+      <h1>Pilotez votre<br>portefeuille avec<br><em>clarté</em>.</h1>
+      <p>Projets, budgets, jalons, risques et arbitrages — toute votre gouvernance PMO dans un seul espace.</p>
+      <div class="chips">
+        <div class="chip"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></span> Dashboard COMEX temps réel</div>
+        <div class="chip"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></span> Gouvernance, risques & décisions</div>
+        <div class="chip"><span class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></span> Agent IA PMO intégré</div>
+      </div>
+    </div>
+    <div class="left-foot">© 2026 MARCEL · marcel-ppm.com</div>
+  </div>
+  <div class="right">
+    <div class="form-box">
+      <div class="form-title">Connexion</div>
+      <div class="form-sub">Heureux de vous revoir. Accédez à votre espace.</div>
+      <div class="field"><label>Email</label><input placeholder="prenom.nom@entreprise.fr"></div>
+      <div class="field"><label>Mot de passe</label><input type="password" value="••••••••••"></div>
+      <button class="btn-primary">Se connecter</button>
+      <div class="divider">ou continuer avec</div>
+      <div class="sso-row">
+        <button class="sso-btn"><span class="g-dot"></span> Google</button>
+        <button class="sso-btn"><span class="ms-dot"><i style="background:#f25022"></i><i style="background:#7fba00"></i><i style="background:#00a4ef"></i><i style="background:#ffb900"></i></span> Microsoft</button>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section id="dashboard" class="artboard">
+  <aside class="sidebar">
+    <div class="side-logo"><div class="mark">M</div><b>MARCEL</b></div>
+    <div class="nav-label">Pilotage</div>
+    <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Dashboard</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Portefeuille</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg> Budget</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Roadmap</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> Équipes</div>
+    <div class="nav-label">Gouvernance</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Risques</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg> Administration</div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div class="search-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:15px;height:15px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Rechercher un projet, un code, un jalon… <span class="kbd">⌘K</span></div>
+      <div class="top-right"><span style="font-size:13px;color:#71717a">Altair · PMO</span><div class="avatar">AD</div></div>
+    </div>
+    <div class="content">
+      <div class="page-title">Bonjour Admin</div>
+      <div class="page-sub">Voici l'état de votre portefeuille au 15 juin 2026.</div>
+      <div class="kpis">
+        <div class="kpi b"><div class="kpi-label">Projets actifs</div><div class="kpi-value">24</div><div class="kpi-delta" style="color:#047857">+3 ce mois</div></div>
+        <div class="kpi g"><div class="kpi-label">Budget consommé</div><div class="kpi-value">4,2 M€</div><div class="kpi-delta" style="color:#71717a">sur 6,8 M€ engagés</div></div>
+        <div class="kpi a"><div class="kpi-label">Jalons à 30 jours</div><div class="kpi-value">11</div><div class="kpi-delta" style="color:#b45309">2 en retard</div></div>
+        <div class="kpi r"><div class="kpi-label">Risques critiques</div><div class="kpi-value">3</div><div class="kpi-delta" style="color:#b91c1c">action requise</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Top projets du portefeuille</span><span style="font-size:12.5px;color:#2563eb;font-weight:600">Voir tout →</span></div>
+        <table>
+          <tr><th>Code</th><th>Projet</th><th>Programme</th><th>RAG</th><th>Avancement</th><th>Budget</th></tr>
+          <tr><td><span class="code">P01-001</span></td><td style="font-weight:600;color:#09090b">Migration ERP S/4HANA</td><td>Transformation SI</td><td><span class="rag rag-g">Vert</span></td><td><span class="bar"><i style="width:72%;background:#2563eb"></i></span></td><td>1,4 M€</td></tr>
+          <tr><td><span class="code">P01-002</span></td><td style="font-weight:600;color:#09090b">Refonte portail client</td><td>Transformation SI</td><td><span class="rag rag-a">Orange</span></td><td><span class="bar"><i style="width:45%;background:#f59e0b"></i></span></td><td>620 K€</td></tr>
+          <tr><td><span class="code">DATA-001</span></td><td style="font-weight:600;color:#09090b">Data Platform v2</td><td>Data & IA</td><td><span class="rag rag-r">Rouge</span></td><td><span class="bar"><i style="width:28%;background:#ef4444"></i></span></td><td>980 K€</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
