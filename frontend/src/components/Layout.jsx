@@ -39,6 +39,7 @@ import { useTenantConfig } from "@/contexts/TenantConfigContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import AgentDrawer from "@/components/AgentDrawer";
 import NotificationBell from "@/components/NotificationBell";
+import GlobalSearch from "@/components/GlobalSearch";
 import { useTranslation } from "react-i18next";
 
 function LanguageToggle() {
@@ -417,6 +418,8 @@ export default function Layout() {
             <ChevronRight size={14} className="text-slate-400 flex-shrink-0 hidden sm:block" />
             <span className="text-slate-500 truncate hidden sm:block text-xs">Portefeuille Projets</span>
           </div>
+
+          <GlobalSearch />
 
           <div className="ml-auto flex items-center gap-2 flex-shrink-0">
             <LanguageToggle />
