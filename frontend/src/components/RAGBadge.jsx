@@ -7,10 +7,10 @@ const RAG_CONFIG = {
 };
 
 export default function RAGBadge({ status, showDot = true }) {
-  const config = RAG_CONFIG[status] || { label: status, classes: "bg-gray-100 text-gray-700 border-gray-200" };
+  const config = RAG_CONFIG[status] || { label: status, classes: "bg-zinc-100 text-zinc-700 border-zinc-200" };
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded text-xs font-medium border ${config.classes}`}
+      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-medium border ${config.classes}`}
       data-testid={`rag-badge-${status}`}
     >
       {showDot && (
@@ -32,41 +32,41 @@ const METHODOLOGY_CONFIG = {
 };
 
 export function MethodologyBadge({ methodology }) {
-  const config = METHODOLOGY_CONFIG[methodology] || { label: methodology, classes: "bg-gray-100 text-gray-700 border-gray-200" };
+  const config = METHODOLOGY_CONFIG[methodology] || { label: methodology, classes: "bg-zinc-100 text-zinc-700 border-zinc-200" };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${config.classes}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium border ${config.classes}`}>
       {config.label}
     </span>
   );
 }
 
 const MILESTONE_STATUS_CONFIG = {
-  planned: { label: "Prévu", classes: "bg-slate-100 text-slate-700 border-slate-200" },
+  planned: { label: "Prévu", classes: "bg-zinc-100 text-zinc-700 border-zinc-200" },
   at_risk: { label: "À risque", classes: "bg-amber-100 text-amber-800 border-amber-200" },
   delayed: { label: "En retard", classes: "bg-rose-100 text-rose-800 border-rose-200" },
   achieved: { label: "Atteint", classes: "bg-emerald-100 text-emerald-800 border-emerald-200" },
 };
 
 export function MilestoneBadge({ status }) {
-  const config = MILESTONE_STATUS_CONFIG[status] || { label: status, classes: "bg-gray-100 text-gray-700 border-gray-200" };
+  const config = MILESTONE_STATUS_CONFIG[status] || { label: status, classes: "bg-zinc-100 text-zinc-700 border-zinc-200" };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${config.classes}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium border ${config.classes}`}>
       {config.label}
     </span>
   );
 }
 
 const SANITY_CONFIG = {
-  pending: { label: "En attente", classes: "bg-slate-100 text-slate-700 border-slate-200" },
+  pending: { label: "En attente", classes: "bg-zinc-100 text-zinc-700 border-zinc-200" },
   passed: { label: "Validé", classes: "bg-emerald-100 text-emerald-800 border-emerald-200" },
   failed: { label: "Échec", classes: "bg-rose-100 text-rose-800 border-rose-200" },
   overridden: { label: "Overridé", classes: "bg-orange-100 text-orange-800 border-orange-200" },
 };
 
 export function SanityBadge({ status }) {
-  const config = SANITY_CONFIG[status] || { label: status, classes: "bg-gray-100 text-gray-700 border-gray-200" };
+  const config = SANITY_CONFIG[status] || { label: status, classes: "bg-zinc-100 text-zinc-700 border-zinc-200" };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${config.classes}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium border ${config.classes}`}>
       {config.label}
     </span>
   );
@@ -80,59 +80,59 @@ const GOVERNANCE_TYPE_CONFIG = {
 };
 
 export function GovernanceTypeBadge({ type }) {
-  const config = GOVERNANCE_TYPE_CONFIG[type] || { label: type, classes: "bg-gray-100 text-gray-700 border-gray-200" };
+  const config = GOVERNANCE_TYPE_CONFIG[type] || { label: type, classes: "bg-zinc-100 text-zinc-700 border-zinc-200" };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-semibold uppercase tracking-wide border ${config.classes}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-semibold uppercase tracking-wide border ${config.classes}`}>
       {config.label}
     </span>
   );
 }
 
 const TASK_TYPE_CONFIG = {
-  "tâche": { label: "Tâche", classes: "bg-slate-100 text-slate-700 border-slate-200" },
+  "tâche": { label: "Tâche", classes: "bg-zinc-100 text-zinc-700 border-zinc-200" },
   "feature": { label: "Feature", classes: "bg-cyan-50 text-cyan-700 border-cyan-200" },
   "epic": { label: "Epic", classes: "bg-purple-50 text-purple-700 border-purple-200" },
   "user_story": { label: "User Story", classes: "bg-sky-50 text-sky-700 border-sky-200" },
 };
 
 export function TaskTypeBadge({ type }) {
-  const config = TASK_TYPE_CONFIG[type] || { label: type, classes: "bg-gray-100 text-gray-700 border-gray-200" };
+  const config = TASK_TYPE_CONFIG[type] || { label: type, classes: "bg-zinc-100 text-zinc-700 border-zinc-200" };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${config.classes}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium border ${config.classes}`}>
       {config.label}
     </span>
   );
 }
 
 const TASK_STATUS_CONFIG = {
-  not_started: { label: "Non démarré", classes: "bg-slate-100 text-slate-600 border-slate-200" },
+  not_started: { label: "Non démarré", classes: "bg-zinc-100 text-zinc-600 border-zinc-200" },
   in_progress: { label: "En cours", classes: "bg-blue-100 text-blue-700 border-blue-200" },
   completed: { label: "Terminé", classes: "bg-emerald-100 text-emerald-800 border-emerald-200" },
   delayed: { label: "En retard", classes: "bg-rose-100 text-rose-800 border-rose-200" },
-  cancelled: { label: "Annulé", classes: "bg-gray-100 text-gray-500 border-gray-200 line-through" },
+  cancelled: { label: "Annulé", classes: "bg-zinc-100 text-zinc-500 border-zinc-200 line-through" },
 };
 
 export function TaskStatusBadge({ status }) {
-  const config = TASK_STATUS_CONFIG[status] || { label: status, classes: "bg-gray-100 text-gray-700 border-gray-200" };
+  const config = TASK_STATUS_CONFIG[status] || { label: status, classes: "bg-zinc-100 text-zinc-700 border-zinc-200" };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${config.classes}`} data-testid={`task-status-badge-${status}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium border ${config.classes}`} data-testid={`task-status-badge-${status}`}>
       {config.label}
     </span>
   );
 }
 
 const PROJECT_STATUS_CONFIG = {
-  en_preparation: { label: "En préparation", classes: "bg-slate-100 text-slate-600 border-slate-200" },
+  en_preparation: { label: "En préparation", classes: "bg-zinc-100 text-zinc-600 border-zinc-200" },
   actif:          { label: "Actif",           classes: "bg-blue-100 text-blue-700 border-blue-200" },
   en_pause:       { label: "En pause",        classes: "bg-amber-100 text-amber-700 border-amber-200" },
   cloture:        { label: "Clôturé",         classes: "bg-emerald-100 text-emerald-700 border-emerald-200" },
-  archive:        { label: "Archivé",         classes: "bg-gray-100 text-gray-500 border-gray-200" },
+  archive:        { label: "Archivé",         classes: "bg-zinc-100 text-zinc-500 border-zinc-200" },
 };
 
 export function ProjectStatusBadge({ status }) {
-  const config = PROJECT_STATUS_CONFIG[status] || { label: status || "—", classes: "bg-gray-100 text-gray-500 border-gray-200" };
+  const config = PROJECT_STATUS_CONFIG[status] || { label: status || "—", classes: "bg-zinc-100 text-zinc-500 border-zinc-200" };
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-xs font-medium border ${config.classes}`} data-testid={`project-status-badge-${status}`}>
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-xs font-medium border ${config.classes}`} data-testid={`project-status-badge-${status}`}>
       {config.label}
     </span>
   );

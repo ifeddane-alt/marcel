@@ -109,7 +109,7 @@ def _build_workbook(spec: dict, rows: list[dict]) -> bytes:
     ws.title = spec["label"][:31]
     cols = spec["columns"]
 
-    hdr_fill = PatternFill("solid", fgColor="0052CC")
+    hdr_fill = PatternFill("solid", fgColor="2563EB")
     hdr_font = Font(bold=True, color="FFFFFF", size=11)
     alt_fill = PatternFill("solid", fgColor="F4F7FB")
 

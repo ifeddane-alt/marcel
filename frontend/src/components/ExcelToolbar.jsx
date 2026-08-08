@@ -3,7 +3,7 @@ import { Download, Upload, X, RefreshCw, CheckCircle2, AlertTriangle, PenLine, P
 import { excelAPI } from "@/api";
 import { toast } from "sonner";
 
-const BTN = "flex items-center gap-1.5 px-3 py-2 text-sm border border-gray-200 bg-white rounded hover:bg-gray-50 text-slate-600 transition-colors";
+const BTN = "flex items-center gap-1.5 px-3 py-2 text-sm border border-zinc-200 bg-white rounded-lg hover:bg-zinc-50 text-zinc-600 transition-colors";
 
 const ACTION_BADGE = {
   new: { label: "Nouveau", plural: "Nouveaux", cls: "bg-emerald-50 text-emerald-700 border-emerald-200", Icon: PlusCircle },
@@ -94,22 +94,22 @@ export default function ExcelToolbar({ entity, label = "", onImported, canImport
         <div className="fixed inset-0 z-50 bg-black/40 flex items-center justify-center p-4"
           data-testid="excel-import-modal">
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl max-h-[85vh] flex flex-col">
-            <div className="flex items-center justify-between px-5 py-4 border-b border-gray-100">
+            <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
               <div>
-                <h3 className="font-heading font-bold text-[#0F172A]">
+                <h3 className="font-heading font-bold text-zinc-950">
                   Aperçu de l'import — {preview.label}
                 </h3>
-                <p className="text-xs text-slate-500 mt-0.5">
+                <p className="text-xs text-zinc-500 mt-0.5">
                   Vérifiez les lignes détectées avant de confirmer. Les lignes en erreur seront ignorées.
                 </p>
               </div>
               <button onClick={() => setPreview(null)} data-testid="excel-import-close-btn"
-                className="p-1.5 rounded hover:bg-gray-100 text-slate-400">
+                className="p-1.5 rounded-lg hover:bg-zinc-100 text-zinc-400">
                 <X size={16} />
               </button>
             </div>
 
-            <div className="flex items-center gap-2 px-5 py-3 border-b border-gray-50">
+            <div className="flex items-center gap-2 px-5 py-3 border-b border-zinc-50">
               {["new", "update", "error"].map((k) => {
                 const { label: bl, plural, cls, Icon } = ACTION_BADGE[k];
                 return (
@@ -119,13 +119,13 @@ export default function ExcelToolbar({ entity, label = "", onImported, canImport
                   </span>
                 );
               })}
-              <span className="ml-auto text-xs text-slate-400">{preview.total} ligne(s)</span>
+              <span className="ml-auto text-xs text-zinc-400">{preview.total} ligne(s)</span>
             </div>
 
             <div className="flex-1 overflow-auto px-5 py-3">
               <table className="w-full text-xs">
                 <thead>
-                  <tr className="text-left text-slate-500 border-b border-gray-100">
+                  <tr className="text-left text-zinc-500 border-b border-zinc-100">
                     <th className="py-2 pr-2 font-semibold">Ligne</th>
                     <th className="py-2 pr-2 font-semibold">Action</th>
                     {displayCols.map((c) => (
@@ -138,15 +138,15 @@ export default function ExcelToolbar({ entity, label = "", onImported, canImport
                     const { label: bl, cls, Icon } = ACTION_BADGE[r.action];
                     return (
                       <React.Fragment key={r.row_num}>
-                        <tr className="border-b border-gray-50" data-testid={`excel-preview-row-${r.row_num}`}>
-                          <td className="py-1.5 pr-2 text-slate-400">{r.row_num}</td>
+                        <tr className="border-b border-zinc-50" data-testid={`excel-preview-row-${r.row_num}`}>
+                          <td className="py-1.5 pr-2 text-zinc-400">{r.row_num}</td>
                           <td className="py-1.5 pr-2">
                             <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-full text-[10px] font-semibold border ${cls}`}>
                               <Icon size={10} /> {bl}
                             </span>
                           </td>
                           {displayCols.map((c) => (
-                            <td key={c.field} className="py-1.5 pr-2 text-slate-700 max-w-[180px] truncate">
+                            <td key={c.field} className="py-1.5 pr-2 text-zinc-700 max-w-[180px] truncate">
                               {String(r.data[c.field] ?? "—")}
                             </td>
                           ))}
@@ -165,15 +165,15 @@ export default function ExcelToolbar({ entity, label = "", onImported, canImport
               </table>
             </div>
 
-            <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-gray-100">
+            <div className="flex items-center justify-end gap-2 px-5 py-4 border-t border-zinc-100">
               <button onClick={() => setPreview(null)} data-testid="excel-import-cancel-btn"
-                className="px-4 py-2 text-sm border border-gray-200 rounded text-slate-600 hover:bg-gray-50">
+                className="px-4 py-2 text-sm border border-zinc-200 rounded-lg text-zinc-600 hover:bg-zinc-50">
                 Annuler
               </button>
               <button onClick={doCommit}
                 disabled={busy || preview.counts.new + preview.counts.update === 0}
                 data-testid="excel-import-confirm-btn"
-                className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-emerald-600 text-white rounded hover:bg-emerald-700 disabled:opacity-50">
+                className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-emerald-600 text-white rounded-lg hover:bg-emerald-700 disabled:opacity-50">
                 {busy ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
                 Confirmer l'import ({preview.counts.new + preview.counts.update})
               </button>

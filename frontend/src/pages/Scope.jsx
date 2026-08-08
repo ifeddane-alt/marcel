@@ -21,7 +21,7 @@ import { toast } from "sonner";
 const SCOPE_OPTIONS = [
   { value: "sec",    label: "SEC",    bg: "bg-emerald-50", text: "text-emerald-700", border: "border-emerald-200", dot: "bg-emerald-500" },
   { value: "etendu", label: "ÉTENDU", bg: "bg-blue-50",    text: "text-blue-700",    border: "border-blue-200",    dot: "bg-blue-500" },
-  { value: "out",    label: "OUT",    bg: "bg-slate-100",  text: "text-slate-400",   border: "border-slate-200",   dot: "bg-slate-400" },
+  { value: "out",    label: "OUT",    bg: "bg-zinc-100",  text: "text-zinc-400",   border: "border-zinc-200",   dot: "bg-zinc-400" },
 ];
 const SCOPE_MAP = Object.fromEntries(SCOPE_OPTIONS.map((o) => [o.value, o]));
 const STATUS_COLORS = { vert: "text-emerald-600 bg-emerald-50", orange: "text-amber-600 bg-amber-50", rouge: "text-red-600 bg-red-50" };
@@ -98,18 +98,18 @@ function ScopeTimeline({ snapshot }) {
 
   if (!snapshot || timelines.length === 0) {
     return (
-      <div className="bg-white rounded-xl border border-slate-200 p-8 text-center text-slate-400 text-sm">
+      <div className="bg-white rounded-xl border border-zinc-200 p-8 text-center text-zinc-400 text-sm">
         Aucune feature SEC dans ce snapshot. Sélectionnez une version avec des features SEC.
       </div>
     );
   }
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden" data-testid="scope-timeline">
-      <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
-        <BarChart2 size={16} className="text-slate-500" />
-        <span className="font-semibold text-slate-700 text-sm">Timeline — {snapshot.period_ref}</span>
-        <span className="text-xs text-slate-400 ml-1">(features SEC par équipe)</span>
+    <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden" data-testid="scope-timeline">
+      <div className="px-4 py-3 border-b border-zinc-100 flex items-center gap-2">
+        <BarChart2 size={16} className="text-zinc-500" />
+        <span className="font-semibold text-zinc-700 text-sm">Timeline — {snapshot.period_ref}</span>
+        <span className="text-xs text-zinc-400 ml-1">(features SEC par équipe)</span>
       </div>
 
       <div className="p-4 space-y-5">
@@ -117,8 +117,8 @@ function ScopeTimeline({ snapshot }) {
         <div className="relative h-5 ml-[140px]">
           {monthMarks.map((m) => (
             <div key={m.label} className="absolute top-0 flex flex-col items-center" style={{ left: `${m.pct}%` }}>
-              <div className="w-px h-3 bg-slate-300" />
-              <span className="text-[10px] text-slate-400 whitespace-nowrap">{m.label}</span>
+              <div className="w-px h-3 bg-zinc-300" />
+              <span className="text-[10px] text-zinc-400 whitespace-nowrap">{m.label}</span>
             </div>
           ))}
         </div>
@@ -128,7 +128,7 @@ function ScopeTimeline({ snapshot }) {
           <div key={team.team_id} data-testid={`timeline-team-${team.team_id}`}>
             {/* En-tête équipe */}
             <div className="flex items-center gap-3 mb-1.5">
-              <div className="w-[130px] flex-shrink-0 text-xs font-semibold text-slate-700 truncate text-right pr-2">
+              <div className="w-[130px] flex-shrink-0 text-xs font-semibold text-zinc-700 truncate text-right pr-2">
                 {team.team_name}
               </div>
               <div className={`text-xs font-medium ${team.status === "rouge" ? "text-red-600" : team.status === "orange" ? "text-amber-600" : "text-emerald-600"}`}>
@@ -140,16 +140,16 @@ function ScopeTimeline({ snapshot }) {
             {/* Barre de capacité totale */}
             <div className="flex items-center gap-3">
               <div className="w-[130px] flex-shrink-0" />
-              <div className="flex-1 relative h-7 bg-slate-100 rounded overflow-visible">
+              <div className="flex-1 relative h-7 bg-zinc-100 rounded-lg overflow-visible">
                 {/* Limite capa */}
-                <div className="absolute inset-0 rounded bg-slate-100" />
+                <div className="absolute inset-0 rounded-lg bg-zinc-100" />
 
                 {/* Features comme barres */}
                 {team.bars.map((bar, idx) => (
                   <div
                     key={bar.id || idx}
                     data-testid={`timeline-bar-${bar.id}`}
-                    className={`absolute top-0.5 h-6 rounded cursor-default transition-all group
+                    className={`absolute top-0.5 h-6 rounded-lg cursor-default transition-all group
                       ${bar.overflow ? "bg-red-400/80 border border-red-500" : "bg-emerald-400/80 border border-emerald-500"}`}
                     style={{ left: `${bar.startPct}%`, width: `${Math.max(bar.widthPct, 0.5)}%` }}
                     title={`${bar.name} · ${bar.totalJh} JH · ${bar.durationDays}j`}
@@ -160,7 +160,7 @@ function ScopeTimeline({ snapshot }) {
                       </span>
                     </div>
                     {/* Tooltip */}
-                    <div className="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-1 z-50 bg-[#0F172A] text-white text-xs rounded px-2 py-1 whitespace-nowrap shadow-lg">
+                    <div className="hidden group-hover:block absolute bottom-full left-1/2 -translate-x-1/2 mb-1 z-50 bg-zinc-950 text-white text-xs rounded-lg px-2 py-1 whitespace-nowrap shadow-lg">
                       {bar.name}<br />{bar.totalJh} JH · {bar.durationDays} jours
                       {bar.overflow && <span className="text-red-300 block">⚠ Dépasse la capacité</span>}
                     </div>
@@ -178,9 +178,9 @@ function ScopeTimeline({ snapshot }) {
         ))}
 
         {/* Légende */}
-        <div className="flex items-center gap-4 mt-2 pl-[142px] text-xs text-slate-500">
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-emerald-400 inline-block" />Feature SEC dans la capa</span>
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded bg-red-400 inline-block" />Feature SEC en débordement</span>
+        <div className="flex items-center gap-4 mt-2 pl-[142px] text-xs text-zinc-500">
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-lg bg-emerald-400 inline-block" />Feature SEC dans la capa</span>
+          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-lg bg-red-400 inline-block" />Feature SEC en débordement</span>
         </div>
       </div>
     </div>
@@ -194,11 +194,11 @@ function ScopeStatusCell({ taskId, current, onChange, canEdit }) {
 
   if (!canEdit) {
     return opt ? (
-      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold ${opt.bg} ${opt.text}`}>
+      <span className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold ${opt.bg} ${opt.text}`}>
         <span className={`w-1.5 h-1.5 rounded-full ${opt.dot}`} />
         {opt.label}
       </span>
-    ) : <span className="text-slate-400 text-xs">—</span>;
+    ) : <span className="text-zinc-400 text-xs">—</span>;
   }
 
   return (
@@ -206,21 +206,21 @@ function ScopeStatusCell({ taskId, current, onChange, canEdit }) {
       <button
         data-testid={`scope-status-btn-${taskId}`}
         onClick={() => setOpen(!open)}
-        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded text-xs font-semibold border cursor-pointer hover:opacity-80 transition-opacity
-          ${opt ? `${opt.bg} ${opt.text} ${opt.border}` : "bg-slate-50 text-slate-400 border-slate-200"}`}
+        className={`inline-flex items-center gap-1 px-2 py-0.5 rounded-lg text-xs font-semibold border cursor-pointer hover:opacity-80 transition-opacity
+          ${opt ? `${opt.bg} ${opt.text} ${opt.border}` : "bg-zinc-50 text-zinc-400 border-zinc-200"}`}
       >
         {opt ? <span className={`w-1.5 h-1.5 rounded-full ${opt.dot}`} /> : <Minus size={10} />}
         <span>{opt ? opt.label : "—"}</span>
         <ChevronDown size={10} />
       </button>
       {open && (
-        <div className="absolute left-0 top-7 z-50 bg-white border border-slate-200 rounded-lg shadow-lg min-w-[100px] py-1">
+        <div className="absolute left-0 top-7 z-50 bg-white border border-zinc-200 rounded-lg shadow-lg min-w-[100px] py-1">
           {SCOPE_OPTIONS.map((o) => (
             <button
               key={o.value}
               data-testid={`scope-option-${o.value}`}
               onClick={() => { onChange(taskId, o.value); setOpen(false); }}
-              className={`w-full text-left flex items-center gap-2 px-3 py-1.5 text-xs hover:bg-slate-50 ${o.text}`}
+              className={`w-full text-left flex items-center gap-2 px-3 py-1.5 text-xs hover:bg-zinc-50 ${o.text}`}
             >
               <span className={`w-2 h-2 rounded-full ${o.dot}`} />
               {o.label}
@@ -228,7 +228,7 @@ function ScopeStatusCell({ taskId, current, onChange, canEdit }) {
           ))}
           <button
             onClick={() => { onChange(taskId, null); setOpen(false); }}
-            className="w-full text-left flex items-center gap-2 px-3 py-1.5 text-xs text-slate-400 hover:bg-slate-50"
+            className="w-full text-left flex items-center gap-2 px-3 py-1.5 text-xs text-zinc-400 hover:bg-zinc-50"
           >
             <Minus size={10} />
             Effacer
@@ -251,10 +251,10 @@ function ScopeTable({ candidates, onStatusChange, canEdit }) {
   }, [candidates]);
 
   return (
-    <div className="overflow-x-auto rounded-xl border border-slate-200 bg-white">
+    <div className="overflow-x-auto rounded-xl border border-zinc-200 bg-white">
       <table className="w-full text-sm" data-testid="scope-table">
         <thead>
-          <tr className="bg-[#0F172A] text-white">
+          <tr className="bg-zinc-950 text-white">
             {["Feature", "Projet", "Équipe Owner", "Review", "Analyse", "Impl.", "Test", "Hypercare", "Total JH", "Statut Scope"].map((h) => (
               <th key={h} className="text-left px-3 py-2.5 text-xs font-semibold whitespace-nowrap first:pl-4">{h}</th>
             ))}
@@ -263,29 +263,29 @@ function ScopeTable({ candidates, onStatusChange, canEdit }) {
         <tbody>
           {sorted.length === 0 && (
             <tr>
-              <td colSpan={10} className="text-center text-slate-400 py-12 text-sm">
+              <td colSpan={10} className="text-center text-zinc-400 py-12 text-sm">
                 Aucune feature candidate — modifiez les filtres
               </td>
             </tr>
           )}
           {sorted.map((t) => {
             const s = t.scope_status;
-            const rowCls = s === "sec" ? "bg-emerald-50/50" : s === "etendu" ? "bg-blue-50/50" : s === "out" ? "bg-slate-50 opacity-60" : "";
-            const lineThroughCls = s === "out" ? "line-through text-slate-400" : "";
+            const rowCls = s === "sec" ? "bg-emerald-50/50" : s === "etendu" ? "bg-blue-50/50" : s === "out" ? "bg-zinc-50 opacity-60" : "";
+            const lineThroughCls = s === "out" ? "line-through text-zinc-400" : "";
             return (
-              <tr key={t.task_id} className={`border-t border-slate-100 hover:brightness-95 transition-all ${rowCls}`} data-testid={`scope-row-${t.task_id}`}>
-                <td className="px-4 py-2 font-medium text-slate-800 max-w-[200px]">
+              <tr key={t.task_id} className={`border-t border-zinc-100 hover:brightness-95 transition-all ${rowCls}`} data-testid={`scope-row-${t.task_id}`}>
+                <td className="px-4 py-2 font-medium text-zinc-800 max-w-[200px]">
                   <span className={lineThroughCls}>{t.name}</span>
-                  {t.parent_id && <div className="text-[10px] text-slate-400 mt-0.5">↳ Capability</div>}
+                  {t.parent_id && <div className="text-[10px] text-zinc-400 mt-0.5">↳ Capability</div>}
                 </td>
-                <td className="px-3 py-2 text-slate-600 whitespace-nowrap text-xs">{t.project_name}</td>
-                <td className="px-3 py-2 text-slate-600 whitespace-nowrap text-xs">{t.team_name || t.resource_name || "—"}</td>
-                <td className="px-3 py-2 text-right text-slate-700 text-xs">{t.jh_review || "—"}</td>
-                <td className="px-3 py-2 text-right text-slate-700 text-xs">{t.jh_analyse || "—"}</td>
-                <td className="px-3 py-2 text-right text-slate-700 text-xs">{t.jh_impl || "—"}</td>
-                <td className="px-3 py-2 text-right text-slate-700 text-xs">{t.jh_test || "—"}</td>
-                <td className="px-3 py-2 text-right text-slate-700 text-xs">{t.jh_hypercare || "—"}</td>
-                <td className="px-3 py-2 text-right font-bold text-slate-800 text-xs">
+                <td className="px-3 py-2 text-zinc-600 whitespace-nowrap text-xs">{t.project_name}</td>
+                <td className="px-3 py-2 text-zinc-600 whitespace-nowrap text-xs">{t.team_name || t.resource_name || "—"}</td>
+                <td className="px-3 py-2 text-right text-zinc-700 text-xs">{t.jh_review || "—"}</td>
+                <td className="px-3 py-2 text-right text-zinc-700 text-xs">{t.jh_analyse || "—"}</td>
+                <td className="px-3 py-2 text-right text-zinc-700 text-xs">{t.jh_impl || "—"}</td>
+                <td className="px-3 py-2 text-right text-zinc-700 text-xs">{t.jh_test || "—"}</td>
+                <td className="px-3 py-2 text-right text-zinc-700 text-xs">{t.jh_hypercare || "—"}</td>
+                <td className="px-3 py-2 text-right font-bold text-zinc-800 text-xs">
                   {t.total_jh_estimated > 0 ? t.total_jh_estimated : "—"}
                 </td>
                 <td className="px-3 py-2">
@@ -313,15 +313,15 @@ function CapacityVsLoad({ data }) {
   if (!data || data.length === 0) return null;
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden" data-testid="capacity-block">
-      <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
-        <LayoutList size={16} className="text-slate-500" />
-        <span className="font-semibold text-slate-700 text-sm">Capacité vs Charge</span>
+    <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden" data-testid="capacity-block">
+      <div className="px-4 py-3 border-b border-zinc-100 flex items-center gap-2">
+        <LayoutList size={16} className="text-zinc-500" />
+        <span className="font-semibold text-zinc-700 text-sm">Capacité vs Charge</span>
       </div>
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-slate-50 text-slate-500 text-xs">
+            <tr className="bg-zinc-50 text-zinc-500 text-xs">
               {["", "Équipe", "Capa dispo (JH)", "Charge SEC (JH)", "Charge ÉTENDU (JH)", "Marge (JH)", "Taux (%)", ""].map((h, i) => (
                 <th key={i} className="text-left px-3 py-2 font-semibold whitespace-nowrap">{h}</th>
               ))}
@@ -330,23 +330,23 @@ function CapacityVsLoad({ data }) {
           <tbody>
             {data.map((team) => {
               const isExpanded = expandedTeams.has(team.team_id);
-              const colCls = STATUS_COLORS[team.status] || "text-slate-600 bg-slate-50";
+              const colCls = STATUS_COLORS[team.status] || "text-zinc-600 bg-zinc-50";
               return (
                 <React.Fragment key={team.team_id}>
-                  <tr className="border-t border-slate-100 font-medium hover:bg-slate-50 cursor-pointer" onClick={() => toggle(team.team_id)} data-testid={`capa-team-${team.team_id}`}>
+                  <tr className="border-t border-zinc-100 font-medium hover:bg-zinc-50 cursor-pointer" onClick={() => toggle(team.team_id)} data-testid={`capa-team-${team.team_id}`}>
                     <td className="px-3 py-2.5 w-6">
-                      <span className="text-slate-400">{isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</span>
+                      <span className="text-zinc-400">{isExpanded ? <ChevronDown size={14} /> : <ChevronRight size={14} />}</span>
                     </td>
-                    <td className="px-3 py-2.5 text-slate-800">{team.team_name}</td>
-                    <td className="px-3 py-2.5 text-right text-slate-700">{team.capa}</td>
+                    <td className="px-3 py-2.5 text-zinc-800">{team.team_name}</td>
+                    <td className="px-3 py-2.5 text-right text-zinc-700">{team.capa}</td>
                     <td className="px-3 py-2.5 text-right font-bold text-emerald-700">{team.charge_sec}</td>
                     <td className="px-3 py-2.5 text-right text-blue-700">{team.charge_etendu}</td>
-                    <td className={`px-3 py-2.5 text-right font-bold ${team.marge < 0 ? "text-red-600" : "text-slate-700"}`}>
+                    <td className={`px-3 py-2.5 text-right font-bold ${team.marge < 0 ? "text-red-600" : "text-zinc-700"}`}>
                       {team.marge > 0 ? "+" : ""}{team.marge}
                     </td>
                     <td className="px-3 py-2.5 text-right">{team.taux_pct}%</td>
                     <td className="px-3 py-2.5">
-                      <span className={`text-xs font-semibold px-2 py-0.5 rounded ${colCls}`}>
+                      <span className={`text-xs font-semibold px-2 py-0.5 rounded-lg ${colCls}`}>
                         {team.status === "rouge" ? "SURCHARGE" : team.status === "orange" ? "Attention" : "OK"}
                       </span>
                     </td>
@@ -354,9 +354,9 @@ function CapacityVsLoad({ data }) {
                   {isExpanded && (team.resources || []).map((r) => {
                     const rColCls = STATUS_COLORS[r.status] || "";
                     return (
-                      <tr key={r.resource_id} className="bg-slate-50/50 border-t border-slate-50 text-xs text-slate-600" data-testid={`capa-res-${r.resource_id}`}>
+                      <tr key={r.resource_id} className="bg-zinc-50/50 border-t border-zinc-50 text-xs text-zinc-600" data-testid={`capa-res-${r.resource_id}`}>
                         <td className="px-3 py-1.5" />
-                        <td className="px-3 py-1.5 pl-8 text-slate-500">↳ {r.name}</td>
+                        <td className="px-3 py-1.5 pl-8 text-zinc-500">↳ {r.name}</td>
                         <td className="px-3 py-1.5 text-right">{r.capa}</td>
                         <td className="px-3 py-1.5 text-right text-emerald-600 font-medium">{r.charge_sec}</td>
                         <td className="px-3 py-1.5 text-right text-blue-600">{r.charge_etendu}</td>
@@ -365,7 +365,7 @@ function CapacityVsLoad({ data }) {
                         </td>
                         <td className="px-3 py-1.5 text-right">{r.taux_pct}%</td>
                         <td className="px-3 py-1.5">
-                          <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded ${rColCls}`}>
+                          <span className={`text-[10px] font-semibold px-1.5 py-0.5 rounded-lg ${rColCls}`}>
                             {r.status === "rouge" ? "Surcharge" : r.status === "orange" ? "Att." : "OK"}
                           </span>
                         </td>
@@ -396,12 +396,12 @@ function KanbanCard({ task, canEdit }) {
       className={`bg-white rounded-xl border ${cfg.border} shadow-sm p-3 mb-2 ${canEdit ? "cursor-grab active:cursor-grabbing" : "cursor-default"} select-none hover:shadow-md transition-shadow`}
     >
       <div className="flex items-start gap-2">
-        {canEdit && <GripVertical size={13} className="text-slate-300 flex-shrink-0 mt-0.5" {...listeners} {...attributes} />}
+        {canEdit && <GripVertical size={13} className="text-zinc-300 flex-shrink-0 mt-0.5" {...listeners} {...attributes} />}
         <div className="flex-1 min-w-0">
           <div className={`text-xs font-bold ${cfg.text} mb-0.5`}>{task.name || task.title || "—"}</div>
-          <div className="text-[10px] text-slate-400 truncate">{task.project_name || task.project_id || ""}</div>
+          <div className="text-[10px] text-zinc-400 truncate">{task.project_name || task.project_id || ""}</div>
           {task.total_jh_estimated > 0 && (
-            <div className="text-[10px] text-slate-500 mt-1">{task.total_jh_estimated} JH</div>
+            <div className="text-[10px] text-zinc-500 mt-1">{task.total_jh_estimated} JH</div>
           )}
         </div>
       </div>
@@ -415,11 +415,11 @@ function KanbanColumn({ id, label, tasks, color, canEdit, isDragOver }) {
     <div
       ref={setNodeRef}
       data-testid={`kanban-col-${id}`}
-      className={`flex-1 min-w-[220px] rounded-2xl border-2 transition-colors p-4 ${isOver || isDragOver ? "border-blue-400 bg-blue-50/50" : "border-slate-200 bg-slate-50/60"}`}
+      className={`flex-1 min-w-[220px] rounded-2xl border-2 transition-colors p-4 ${isOver || isDragOver ? "border-blue-400 bg-blue-50/50" : "border-zinc-200 bg-zinc-50/60"}`}
     >
-      <div className={`flex items-center gap-2 mb-3 pb-2 border-b border-slate-200`}>
+      <div className={`flex items-center gap-2 mb-3 pb-2 border-b border-zinc-200`}>
         <span className={`text-sm font-bold ${color}`}>{label}</span>
-        <span className="text-xs bg-white border border-slate-200 text-slate-500 font-semibold px-2 py-0.5 rounded-full">{tasks.length}</span>
+        <span className="text-xs bg-white border border-zinc-200 text-zinc-500 font-semibold px-2 py-0.5 rounded-full">{tasks.length}</span>
         {id === "sec" && tasks.length > 0 && (
           <span className="text-[10px] text-emerald-600 ml-auto">
             {tasks.reduce((s, t) => s + (t.total_jh_estimated || 0), 0).toFixed(0)} JH
@@ -432,7 +432,7 @@ function KanbanColumn({ id, label, tasks, color, canEdit, isDragOver }) {
             <KanbanCard key={task.task_id || task.id} task={task} canEdit={canEdit} />
           ))}
           {tasks.length === 0 && (
-            <div className="flex items-center justify-center h-20 text-xs text-slate-300 border-2 border-dashed border-slate-200 rounded-xl">
+            <div className="flex items-center justify-center h-20 text-xs text-zinc-300 border-2 border-dashed border-zinc-200 rounded-xl">
               Déposer ici
             </div>
           )}
@@ -475,7 +475,7 @@ function ScopeKanban({ candidates, onStatusChange, canEdit, unsavedChanges, onSa
   const COLUMNS = [
     { id: "sec",    label: "SEC",    color: "text-emerald-700" },
     { id: "etendu", label: "ÉTENDU", color: "text-blue-700" },
-    { id: "out",    label: "OUT",    color: "text-slate-500" },
+    { id: "out",    label: "OUT",    color: "text-zinc-500" },
   ];
 
   const activeTask = activeId ? local.find(t => (t.task_id || t.id) === activeId) : null;
@@ -491,7 +491,7 @@ function ScopeKanban({ candidates, onStatusChange, canEdit, unsavedChanges, onSa
           <button
             onClick={onSave}
             data-testid="kanban-save-btn"
-            className="flex items-center gap-1.5 text-sm font-semibold text-white bg-[#0052CC] px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-1.5 text-sm font-semibold text-white bg-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors"
           >
             <Save size={13} /> Enregistrer les modifications
           </button>
@@ -527,43 +527,43 @@ function FreezeModal({ projects, nextVersion, onClose, onFreeze }) {
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-0 sm:p-4" data-testid="freeze-modal">
       <div className="bg-white rounded-none sm:rounded-2xl shadow-2xl w-full max-h-screen sm:max-h-[90vh] overflow-y-auto sm:max-w-md">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Lock size={18} className="text-[#0052CC]" />
-            <h2 className="font-semibold text-slate-800">Figer le scope v{nextVersion}</h2>
+            <Lock size={18} className="text-blue-600" />
+            <h2 className="font-semibold text-zinc-800">Figer le scope v{nextVersion}</h2>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl leading-none">&times;</button>
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600 text-xl leading-none">&times;</button>
         </div>
         <div className="px-6 py-4 space-y-4">
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">Projet</label>
+            <label className="block text-xs font-medium text-zinc-600 mb-1">Projet</label>
             <select value={projectId} onChange={(e) => setProjectId(e.target.value)}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#0052CC]"
+              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600"
               data-testid="freeze-project-select">
               <option value="">— Tous les projets —</option>
               {projects.map((p) => <option key={p.project_id} value={p.project_id}>{p.name}</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">Référence période</label>
+            <label className="block text-xs font-medium text-zinc-600 mb-1">Référence période</label>
             <input value={periodRef} onChange={(e) => setPeriodRef(e.target.value)}
               placeholder="ex: PI-1 2026 ou 2026-Q2"
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#0052CC]"
+              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600"
               data-testid="freeze-period-input" />
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">Commentaire PMO</label>
+            <label className="block text-xs font-medium text-zinc-600 mb-1">Commentaire PMO</label>
             <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={3}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#0052CC] resize-none"
+              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600 resize-none"
               data-testid="freeze-comment-input" />
           </div>
         </div>
-        <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg">Annuler</button>
+        <div className="px-6 py-4 border-t border-zinc-100 flex justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 rounded-lg">Annuler</button>
           <button
             onClick={() => onFreeze({ project_id: projectId || null, period_ref: periodRef, comment })}
             disabled={!periodRef}
-            className="px-4 py-2 text-sm bg-[#0F172A] text-white rounded-lg hover:bg-slate-700 disabled:opacity-50 flex items-center gap-2"
+            className="px-4 py-2 text-sm bg-zinc-950 text-white rounded-lg hover:bg-zinc-700 disabled:opacity-50 flex items-center gap-2"
             data-testid="freeze-confirm-btn">
             <Lock size={14} />
             Figer v{nextVersion}
@@ -582,39 +582,39 @@ function TransmitModal({ snapshot, users, onClose, onTransmit }) {
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-0 sm:p-4" data-testid="transmit-modal">
       <div className="bg-white rounded-none sm:rounded-2xl shadow-2xl w-full max-h-screen sm:max-h-[90vh] overflow-y-auto sm:max-w-md">
-        <div className="px-6 py-4 border-b border-slate-100 flex items-center justify-between">
+        <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Send size={18} className="text-[#0052CC]" />
-            <h2 className="font-semibold text-slate-800">Transmettre au CP</h2>
+            <Send size={18} className="text-blue-600" />
+            <h2 className="font-semibold text-zinc-800">Transmettre au CP</h2>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 text-xl leading-none">&times;</button>
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600 text-xl leading-none">&times;</button>
         </div>
         <div className="px-6 py-4 space-y-4">
-          <div className="text-sm text-slate-600 bg-slate-50 rounded-lg p-3">
+          <div className="text-sm text-zinc-600 bg-zinc-50 rounded-lg p-3">
             Scope <strong>{snapshot.period_ref}</strong> v{snapshot.version} — {(snapshot.features || []).filter(f => f.scope_status === "sec").length} features SEC
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">Destinataire (CP)</label>
+            <label className="block text-xs font-medium text-zinc-600 mb-1">Destinataire (CP)</label>
             <select value={targetUserId} onChange={(e) => setTargetUserId(e.target.value)}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#0052CC]"
+              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600"
               data-testid="transmit-user-select">
               <option value="">— Choisir un CP —</option>
               {users.map((u) => <option key={u.user_id} value={u.user_id}>{u.name} ({u.email})</option>)}
             </select>
           </div>
           <div>
-            <label className="block text-xs font-medium text-slate-600 mb-1">Commentaire</label>
+            <label className="block text-xs font-medium text-zinc-600 mb-1">Commentaire</label>
             <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={3}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-[#0052CC] resize-none"
+              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600 resize-none"
               data-testid="transmit-comment-input" />
           </div>
         </div>
-        <div className="px-6 py-4 border-t border-slate-100 flex justify-end gap-2">
-          <button onClick={onClose} className="px-4 py-2 text-sm text-slate-600 hover:bg-slate-50 rounded-lg">Annuler</button>
+        <div className="px-6 py-4 border-t border-zinc-100 flex justify-end gap-2">
+          <button onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 hover:bg-zinc-50 rounded-lg">Annuler</button>
           <button
             onClick={() => onTransmit(snapshot.snapshot_id, { target_user_id: targetUserId, comment })}
             disabled={!targetUserId}
-            className="px-4 py-2 text-sm bg-[#0052CC] text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
             data-testid="transmit-confirm-btn">
             <Send size={14} />
             Transmettre
@@ -827,20 +827,20 @@ export default function Scope() {
   const overloadTeams = capacity.filter((t) => t.status === "rouge").length;
 
   return (
-    <div className="p-4 md:p-6 space-y-4 md:space-y-6 bg-[#F8F9FA] min-h-full">
+    <div className="p-4 md:p-6 space-y-4 md:space-y-6 bg-zinc-50 min-h-full">
       {/* En-tête */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-slate-900 font-heading">Arbitrage Scope</h1>
-          <p className="text-sm text-slate-500 mt-0.5">Sélection, figeage et transmission des features candidates</p>
+          <h1 className="text-2xl font-bold text-zinc-900 font-heading">Arbitrage Scope</h1>
+          <p className="text-sm text-zinc-500 mt-0.5">Sélection, figeage et transmission des features candidates</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
           {/* Toggle Tableau / Timeline */}
-          <div className="flex rounded-lg border border-slate-200 overflow-hidden bg-white">
+          <div className="flex rounded-lg border border-zinc-200 overflow-hidden bg-white">
             <button
               onClick={() => setViewMode("table")}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors
-                ${viewMode === "table" ? "bg-[#0F172A] text-white" : "text-slate-600 hover:bg-slate-50"}`}
+                ${viewMode === "table" ? "bg-zinc-950 text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
               data-testid="view-table-btn">
               <Table2 size={13} />Tableau
             </button>
@@ -848,7 +848,7 @@ export default function Scope() {
               onClick={() => setViewMode("kanban")}
               disabled={!!viewSnap}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors disabled:opacity-40
-                ${viewMode === "kanban" ? "bg-[#0F172A] text-white" : "text-slate-600 hover:bg-slate-50"}`}
+                ${viewMode === "kanban" ? "bg-zinc-950 text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
               data-testid="view-kanban-btn">
               <KanbanIcon size={13} />Kanban
             </button>
@@ -856,7 +856,7 @@ export default function Scope() {
               onClick={() => setViewMode("timeline")}
               disabled={!viewSnap}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed
-                ${viewMode === "timeline" ? "bg-[#0F172A] text-white" : "text-slate-600 hover:bg-slate-50"}`}
+                ${viewMode === "timeline" ? "bg-zinc-950 text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
               data-testid="view-timeline-btn"
               title={!viewSnap ? "Sélectionnez une version figée pour afficher la timeline" : ""}>
               <BarChart2 size={13} />Timeline
@@ -879,7 +879,7 @@ export default function Scope() {
                   } catch { /* silence */ }
                 }
               }}
-              className="border border-slate-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-[#0052CC]"
+              className="border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-600"
               data-testid="snapshot-version-select"
             >
               <option value="">Version courante</option>
@@ -895,7 +895,7 @@ export default function Scope() {
           <button
             onClick={handleExportExcel}
             data-testid="export-excel-btn"
-            className="flex items-center gap-2 px-3 py-2 border border-slate-200 text-slate-600 rounded-lg text-sm hover:bg-slate-50 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 border border-zinc-200 text-zinc-600 rounded-lg text-sm hover:bg-zinc-50 transition-colors"
           >
             <Download size={14} />Excel
           </button>
@@ -904,7 +904,7 @@ export default function Scope() {
             <button
               onClick={() => setShowFreeze(true)}
               data-testid="freeze-scope-btn"
-              className="flex items-center gap-2 px-4 py-2 bg-[#0F172A] text-white rounded-lg text-sm hover:bg-slate-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-zinc-950 text-white rounded-lg text-sm hover:bg-zinc-700 transition-colors"
             >
               <Lock size={14} />
               Figer le scope v{nextVersion}
@@ -918,29 +918,29 @@ export default function Scope() {
         {[
           { label: "SEC", value: secCount, cls: "text-emerald-700 bg-emerald-50", testid: "kpi-sec" },
           { label: "ÉTENDU", value: etenduCount, cls: "text-blue-700 bg-blue-50", testid: "kpi-etendu" },
-          { label: "OUT", value: outCount, cls: "text-slate-500 bg-slate-100", testid: "kpi-out" },
-          { label: "JH SEC total", value: `${totalJh.toFixed(0)} JH`, cls: "text-slate-700 bg-white", testid: "kpi-jh" },
+          { label: "OUT", value: outCount, cls: "text-zinc-500 bg-zinc-100", testid: "kpi-out" },
+          { label: "JH SEC total", value: `${totalJh.toFixed(0)} JH`, cls: "text-zinc-700 bg-white", testid: "kpi-jh" },
           { label: "Équipes surcharge", value: overloadTeams, cls: overloadTeams > 0 ? "text-red-700 bg-red-50" : "text-emerald-700 bg-emerald-50", testid: "kpi-overload" },
         ].map(({ label, value, cls, testid }) => (
-          <div key={label} className="bg-white rounded-xl border border-slate-200 px-4 py-3">
-            <div className="text-xs text-slate-500 font-medium">{label}</div>
+          <div key={label} className="bg-white rounded-xl border border-zinc-200 px-4 py-3">
+            <div className="text-xs text-zinc-500 font-medium">{label}</div>
             <div className={`text-xl font-bold mt-1 ${cls}`} data-testid={testid}>{value}</div>
           </div>
         ))}
       </div>
 
       {/* Barre de filtres */}
-      <div className="bg-white rounded-xl border border-slate-200 px-4 py-3">
+      <div className="bg-white rounded-xl border border-zinc-200 px-4 py-3">
         <div className="flex items-center gap-2 flex-wrap">
-          <Filter size={14} className="text-slate-400 flex-shrink-0" />
+          <Filter size={14} className="text-zinc-400 flex-shrink-0" />
           <select value={filterProject} onChange={(e) => setFilterProject(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+            className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none"
             data-testid="filter-project">
             <option value="">Tous les projets</option>
             {projects.map((p) => <option key={p.project_id} value={p.project_id}>{p.name}</option>)}
           </select>
           <select value={filterScopeStatus} onChange={(e) => setFilterScopeStatus(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+            className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none"
             data-testid="filter-scope-status">
             <option value="">Tous les statuts</option>
             {SCOPE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
@@ -948,21 +948,21 @@ export default function Scope() {
           </select>
           <input
             type="date" value={filterStartDate} onChange={(e) => setFilterStartDate(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+            className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none"
             data-testid="filter-start-date" placeholder="Début" />
           <input
             type="date" value={filterEndDate} onChange={(e) => setFilterEndDate(e.target.value)}
-            className="border border-slate-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none"
+            className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none"
             data-testid="filter-end-date" placeholder="Fin" />
           <div className="relative flex-1 min-w-[180px]">
-            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400" />
+            <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input
               value={filterSearch} onChange={(e) => setFilterSearch(e.target.value)}
               placeholder="Rechercher..."
-              className="w-full border border-slate-200 rounded-lg pl-8 pr-3 py-1.5 text-sm focus:outline-none"
+              className="w-full border border-zinc-200 rounded-lg pl-8 pr-3 py-1.5 text-sm focus:outline-none"
               data-testid="filter-search" />
           </div>
-          <button onClick={loadData} className="p-2 rounded-lg hover:bg-slate-50 text-slate-500" data-testid="refresh-btn">
+          <button onClick={loadData} className="p-2 rounded-lg hover:bg-zinc-50 text-zinc-500" data-testid="refresh-btn">
             <RefreshCw size={14} className={loading ? "animate-spin" : ""} />
           </button>
         </div>
@@ -981,14 +981,14 @@ export default function Scope() {
           <div className="flex items-center gap-2">
             {canTransmit && viewSnap.status !== "transmitted" && (
               <button onClick={() => openTransmit(viewSnap)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-[#0052CC] text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
                 data-testid="transmit-snapshot-btn">
                 <Send size={13} />Transmettre au CP
               </button>
             )}
             {canFreeze && (
               <button onClick={() => handleComputeGantt(viewSnap.snapshot_id)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-slate-300 rounded-lg hover:bg-white text-slate-700"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-zinc-300 rounded-lg hover:bg-white text-zinc-700"
                 data-testid="compute-gantt-btn">
                 <RefreshCw size={13} />Recalculer Gantt
               </button>

@@ -32,12 +32,12 @@ const PHASE_LABELS = {
 };
 
 const TH = ({ children, right }) => (
-  <th className={`px-3 py-2.5 text-[10px] font-bold uppercase tracking-widest text-slate-500 bg-gray-50 border-b border-gray-200 whitespace-nowrap ${right ? "text-right" : "text-left"}`}>
+  <th className={`px-3 py-2.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500 bg-zinc-50 border-b border-zinc-200 whitespace-nowrap ${right ? "text-right" : "text-left"}`}>
     {children}
   </th>
 );
 const TD = ({ children, right, mono, dim, bold }) => (
-  <td className={`px-3 py-2.5 text-xs border-b border-gray-50 ${right ? "text-right" : ""} ${mono ? "font-mono-data tabular-nums" : ""} ${dim ? "text-slate-400" : "text-slate-700"} ${bold ? "font-semibold" : ""}`}>
+  <td className={`px-3 py-2.5 text-xs border-b border-zinc-50 ${right ? "text-right" : ""} ${mono ? "font-mono-data tabular-nums" : ""} ${dim ? "text-zinc-400" : "text-zinc-700"} ${bold ? "font-semibold" : ""}`}>
     {children}
   </td>
 );
@@ -57,7 +57,7 @@ export default function TeamDetail() {
       .catch(() => { setError("Équipe introuvable"); setLoading(false); });
   }, [id]);
 
-  if (loading) return <div className="p-8 text-slate-400 text-sm">Chargement de l'équipe...</div>;
+  if (loading) return <div className="p-8 text-zinc-400 text-sm">Chargement de l'équipe...</div>;
   if (error)   return <div className="p-8 text-rose-600 text-sm">{error}</div>;
 
   const { team, members, project_allocations, monthly_load } = data;
@@ -80,12 +80,12 @@ export default function TeamDetail() {
   return (
     <div className="p-8" data-testid="team-detail-page">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-xs text-slate-400 mb-6">
-        <Link to="/teams" className="hover:text-[#0052CC] transition-colors flex items-center gap-1">
+      <nav className="flex items-center gap-1.5 text-xs text-zinc-400 mb-6">
+        <Link to="/teams" className="hover:text-blue-600 transition-colors flex items-center gap-1">
           <ArrowLeft size={12} /> Équipes
         </Link>
         <ChevronRight size={11} />
-        <span className="text-slate-700 font-medium">{team.name}</span>
+        <span className="text-zinc-700 font-medium">{team.name}</span>
       </nav>
 
       {/* ── 1. EN-TÊTE ─────────────────────────────────────── */}
@@ -130,18 +130,18 @@ export default function TeamDetail() {
 
       {/* ── 2. MEMBRES ─────────────────────────────────────── */}
       <section className="mb-6" data-testid="members-section">
-        <div className="bg-white border border-gray-200 rounded shadow-sm">
-          <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
-            <Users size={14} className="text-[#0052CC]" />
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-600">
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm">
+          <div className="px-5 py-3 border-b border-zinc-100 flex items-center gap-2">
+            <Users size={14} className="text-blue-600" />
+            <span className="text-xs font-bold uppercase tracking-widest text-zinc-600">
               Membres de l'équipe
             </span>
-            <span className="ml-1 bg-[#0052CC]/10 text-[#0052CC] text-[10px] font-bold rounded-full px-2 py-0.5">
+            <span className="ml-1 bg-blue-600/10 text-blue-600 text-[10px] font-bold rounded-full px-2 py-0.5">
               {members.length}
             </span>
           </div>
           {members.length === 0 ? (
-            <div className="px-5 py-8 text-sm text-slate-400 text-center">Aucun membre dans cette équipe</div>
+            <div className="px-5 py-8 text-sm text-zinc-400 text-center">Aucun membre dans cette équipe</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -162,7 +162,7 @@ export default function TeamDetail() {
                       <TD>
                         <Link
                           to={`/resources`}
-                          className="font-semibold text-slate-800 hover:text-[#0052CC] transition-colors"
+                          className="font-semibold text-zinc-800 hover:text-blue-600 transition-colors"
                           title="Voir fiche ressource"
                         >
                           {m.name}
@@ -192,19 +192,19 @@ export default function TeamDetail() {
 
       {/* ── 3. AFFECTATIONS PAR PROJET ─────────────────────── */}
       <section className="mb-6" data-testid="project-allocations-section">
-        <div className="bg-white border border-gray-200 rounded shadow-sm">
-          <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
-            <Briefcase size={14} className="text-[#0052CC]" />
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-600">
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm">
+          <div className="px-5 py-3 border-b border-zinc-100 flex items-center gap-2">
+            <Briefcase size={14} className="text-blue-600" />
+            <span className="text-xs font-bold uppercase tracking-widest text-zinc-600">
               Affectations par projet
             </span>
-            <span className="ml-1 bg-[#0052CC]/10 text-[#0052CC] text-[10px] font-bold rounded-full px-2 py-0.5">
+            <span className="ml-1 bg-blue-600/10 text-blue-600 text-[10px] font-bold rounded-full px-2 py-0.5">
               {project_allocations.length}
             </span>
           </div>
 
           {project_allocations.length === 0 ? (
-            <div className="px-5 py-8 text-sm text-slate-400 text-center">Aucune affectation enregistrée</div>
+            <div className="px-5 py-8 text-sm text-zinc-400 text-center">Aucune affectation enregistrée</div>
           ) : (
             <div className="overflow-x-auto">
               <table className="w-full">
@@ -226,7 +226,7 @@ export default function TeamDetail() {
                       <React.Fragment key={p.project_id}>
                         {/* Project row */}
                         <tr
-                          className="bg-slate-50 cursor-pointer hover:bg-slate-100 transition-colors"
+                          className="bg-zinc-50 cursor-pointer hover:bg-zinc-100 transition-colors"
                           onClick={() => toggleProject(p.project_id)}
                           data-testid={`project-alloc-row-${p.project_id}`}
                         >
@@ -234,12 +234,12 @@ export default function TeamDetail() {
                             <div className="flex items-center gap-1.5">
                               <ChevronRight
                                 size={12}
-                                className={`text-slate-400 transition-transform flex-shrink-0 ${isOpen ? "rotate-90" : ""}`}
+                                className={`text-zinc-400 transition-transform flex-shrink-0 ${isOpen ? "rotate-90" : ""}`}
                               />
                               <Link
                                 to={`/projects/${p.project_id}`}
                                 onClick={(e) => e.stopPropagation()}
-                                className="hover:text-[#0052CC] transition-colors font-semibold text-slate-800 truncate max-w-[260px]"
+                                className="hover:text-blue-600 transition-colors font-semibold text-zinc-800 truncate max-w-[260px]"
                               >
                                 {p.project_name}
                               </Link>
@@ -256,7 +256,7 @@ export default function TeamDetail() {
                         {isOpen && p.phases.map((ph) => (
                           <tr key={ph.phase} className="hover:bg-blue-50/10" data-testid={`phase-row-${p.project_id}-${ph.phase}`}>
                             <TD>
-                              <span className="ml-7 text-slate-500 text-[11px]">
+                              <span className="ml-7 text-zinc-500 text-[11px]">
                                 {PHASE_LABELS[ph.phase] || ph.phase}
                               </span>
                             </TD>
@@ -273,14 +273,14 @@ export default function TeamDetail() {
                   })}
 
                   {/* Grand total row */}
-                  <tr className="bg-[#EBF2FF] border-t-2 border-[#0052CC]/20" data-testid="grand-total-row">
-                    <TD bold><span className="text-[#0052CC] font-bold uppercase text-[10px] tracking-widest ml-2">Total équipe</span></TD>
+                  <tr className="bg-blue-50 border-t-2 border-blue-600/20" data-testid="grand-total-row">
+                    <TD bold><span className="text-blue-600 font-bold uppercase text-[10px] tracking-widest ml-2">Total équipe</span></TD>
                     <TD>—</TD>
                     <TD right mono bold>{fmtJH(grandTotal.planned_md)}</TD>
                     <TD right mono bold>{fmtJH(grandTotal.consumed_md)}</TD>
                     <TD right mono bold>{fmtJH(grandTotal.raf_md)}</TD>
-                    <TD right mono bold><span className="text-[#0052CC]">{fmtK(grandTotal.consumed_cost_eur)}</span></TD>
-                    <TD right mono bold><span className="text-[#0052CC]">{fmtK(grandTotal.raf_cost_eur)}</span></TD>
+                    <TD right mono bold><span className="text-blue-600">{fmtK(grandTotal.consumed_cost_eur)}</span></TD>
+                    <TD right mono bold><span className="text-blue-600">{fmtK(grandTotal.raf_cost_eur)}</span></TD>
                   </tr>
                 </tbody>
               </table>
@@ -291,16 +291,16 @@ export default function TeamDetail() {
 
       {/* ── 4. CHARGE MENSUELLE ─────────────────────────────── */}
       <section data-testid="monthly-load-section">
-        <div className="bg-white border border-gray-200 rounded shadow-sm">
-          <div className="px-5 py-3 border-b border-gray-100 flex items-center gap-2">
-            <TrendingUp size={14} className="text-[#0052CC]" />
-            <span className="text-xs font-bold uppercase tracking-widest text-slate-600">
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm">
+          <div className="px-5 py-3 border-b border-zinc-100 flex items-center gap-2">
+            <TrendingUp size={14} className="text-blue-600" />
+            <span className="text-xs font-bold uppercase tracking-widest text-zinc-600">
               Charge mensuelle — 6 mois glissants
             </span>
           </div>
           <div className="p-5">
             {team.total_capacity_jhm === 0 ? (
-              <p className="text-sm text-slate-400 text-center py-4">Aucune capacité définie pour cette équipe</p>
+              <p className="text-sm text-zinc-400 text-center py-4">Aucune capacité définie pour cette équipe</p>
             ) : (
               <div className="flex items-end gap-3" data-testid="monthly-chart">
                 {monthly_load.map((m, i) => {
@@ -310,11 +310,11 @@ export default function TeamDetail() {
                   return (
                     <div key={m.month} className="flex-1 flex flex-col items-center gap-1.5" data-testid={`month-bar-${m.month}`}>
                       {/* Percent label */}
-                      <span className={`text-[11px] font-bold ${isNow ? "text-slate-800" : "text-slate-400"}`}>
+                      <span className={`text-[11px] font-bold ${isNow ? "text-zinc-800" : "text-zinc-400"}`}>
                         {m.utilization_pct > 0 ? `${m.utilization_pct}%` : "—"}
                       </span>
                       {/* Bar */}
-                      <div className="w-full rounded-t overflow-hidden bg-gray-100 relative" style={{ height: 80 }}>
+                      <div className="w-full rounded-t overflow-hidden bg-zinc-100 relative" style={{ height: 80 }}>
                         <div
                           className="absolute bottom-0 left-0 right-0 rounded-t transition-all duration-500"
                           style={{
@@ -325,20 +325,20 @@ export default function TeamDetail() {
                         />
                         {/* 85% marker */}
                         <div
-                          className="absolute left-0 right-0 border-t border-dashed border-slate-400/50 pointer-events-none"
+                          className="absolute left-0 right-0 border-t border-dashed border-zinc-400/50 pointer-events-none"
                           style={{ bottom: "70.8%" }}
                           title="Seuil 85%"
                         />
                       </div>
                       {/* Labels */}
                       <div className="text-center">
-                        <div className={`text-[10px] font-semibold uppercase ${isNow ? "text-[#0052CC]" : "text-slate-500"}`}>
+                        <div className={`text-[10px] font-semibold uppercase ${isNow ? "text-blue-600" : "text-zinc-500"}`}>
                           {new Date(m.month + "-01").toLocaleDateString("fr-FR", { month: "short" })}
                         </div>
-                        <div className="text-[9px] text-slate-400">{m.allocated_jh > 0 ? `${m.allocated_jh} JH` : "0 JH"}</div>
+                        <div className="text-[9px] text-zinc-400">{m.allocated_jh > 0 ? `${m.allocated_jh} JH` : "0 JH"}</div>
                       </div>
                       {isNow && (
-                        <div className="text-[9px] text-[#0052CC] font-bold bg-blue-50 rounded px-1">
+                        <div className="text-[9px] text-blue-600 font-bold bg-blue-50 rounded-lg px-1">
                           Mois en cours
                         </div>
                       )}
@@ -346,8 +346,8 @@ export default function TeamDetail() {
                   );
                 })}
                 {/* Legend */}
-                <div className="flex flex-col gap-1.5 pl-4 border-l border-gray-100 ml-2 flex-shrink-0">
-                  <div className="text-[9px] text-slate-400 uppercase tracking-widest font-semibold mb-1">Légende</div>
+                <div className="flex flex-col gap-1.5 pl-4 border-l border-zinc-100 ml-2 flex-shrink-0">
+                  <div className="text-[9px] text-zinc-400 uppercase tracking-widest font-semibold mb-1">Légende</div>
                   {[
                     { color: "#10B981", label: "< 70%" },
                     { color: "#F59E0B", label: "70–85%" },
@@ -355,10 +355,10 @@ export default function TeamDetail() {
                   ].map(({ color, label }) => (
                     <div key={label} className="flex items-center gap-1.5">
                       <span className="w-3 h-3 rounded-sm flex-shrink-0" style={{ backgroundColor: color }} />
-                      <span className="text-[10px] text-slate-500">{label}</span>
+                      <span className="text-[10px] text-zinc-500">{label}</span>
                     </div>
                   ))}
-                  <div className="mt-2 text-[9px] text-slate-400 border-t border-dashed border-slate-300 pt-1.5">
+                  <div className="mt-2 text-[9px] text-zinc-400 border-t border-dashed border-zinc-300 pt-1.5">
                     Capa. : {team.total_capacity_jhm} JH/mois
                   </div>
                 </div>

@@ -3,14 +3,14 @@ import { Loader2, Presentation, Calendar, Building2 } from "lucide-react";
 import Modal from "@/components/Modal";
 import { exportAPI, governanceAPI } from "@/api";
 
-const INPUT_CLS = "w-full text-sm border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
 
 function Field({ label, children, hint }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-slate-600 mb-1">{label}</label>
+      <label className="block text-xs font-semibold text-zinc-600 mb-1">{label}</label>
       {children}
-      {hint && <p className="text-[11px] text-slate-400 mt-0.5">{hint}</p>}
+      {hint && <p className="text-[11px] text-zinc-400 mt-0.5">{hint}</p>}
     </div>
   );
 }
@@ -69,22 +69,22 @@ export default function ExportCopilModal({ isOpen, onClose, selectedProjectIds =
     <Modal isOpen={isOpen} onClose={onClose} title="Générer un Export COPIL" size="md">
       <div className="space-y-4" data-testid="export-copil-form">
         {error && (
-          <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded px-3 py-2">{error}</div>
+          <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{error}</div>
         )}
 
         {/* Selected projects preview */}
-        <div className="bg-[#EBF2FF] border border-[#0052CC]/20 rounded px-3 py-2.5">
-          <div className="text-[10px] uppercase tracking-widest text-[#0052CC] font-semibold mb-1.5">
+        <div className="bg-blue-50 border border-blue-600/20 rounded-lg px-3 py-2.5">
+          <div className="text-[10px] uppercase tracking-widest text-blue-600 font-semibold mb-1.5">
             {selectedProjectIds.length} projet{selectedProjectIds.length !== 1 ? "s" : ""} sélectionné{selectedProjectIds.length !== 1 ? "s" : ""}
           </div>
           <div className="flex flex-wrap gap-1">
             {selectedProjectNames.slice(0, 5).map((n, i) => (
-              <span key={i} className="inline-flex items-center px-2 py-0.5 rounded bg-white border border-[#0052CC]/20 text-[10px] text-slate-700 font-medium">
+              <span key={i} className="inline-flex items-center px-2 py-0.5 rounded-lg bg-white border border-blue-600/20 text-[10px] text-zinc-700 font-medium">
                 {n.split("—")[0].trim().slice(0, 30)}
               </span>
             ))}
             {selectedProjectNames.length > 5 && (
-              <span className="text-[10px] text-slate-400">+{selectedProjectNames.length - 5} autres</span>
+              <span className="text-[10px] text-zinc-400">+{selectedProjectNames.length - 5} autres</span>
             )}
           </div>
         </div>
@@ -101,7 +101,7 @@ export default function ExportCopilModal({ isOpen, onClose, selectedProjectIds =
 
         <Field label="Date du COPIL *">
           <div className="relative">
-            <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
             <input
               data-testid="export-copil-date"
               type="date"
@@ -114,7 +114,7 @@ export default function ExportCopilModal({ isOpen, onClose, selectedProjectIds =
 
         <Field label="Rattachement à une instance de gouvernance" hint="Optionnel — filtre les décisions affichées dans le PPT">
           <div className="relative">
-            <Building2 size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+            <Building2 size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
             <select
               data-testid="export-copil-governance"
               className={`${INPUT_CLS} pl-8`}
@@ -129,31 +129,31 @@ export default function ExportCopilModal({ isOpen, onClose, selectedProjectIds =
           </div>
         </Field>
 
-        <div className="border-t border-gray-100 pt-3 flex items-center justify-between">
+        <div className="border-t border-zinc-100 pt-3 flex items-center justify-between">
           <div className="flex items-center gap-4">
             <label className="flex items-center gap-2 cursor-pointer select-none" data-testid="include-roadmap-toggle">
               <input
                 type="checkbox"
-                className="accent-[#0052CC] w-4 h-4"
+                className="accent-[#2563eb] w-4 h-4"
                 checked={form.includeRoadmap}
                 onChange={(e) => setForm((f) => ({ ...f, includeRoadmap: e.target.checked }))}
                 data-testid="include-roadmap-checkbox"
               />
-              <span className="text-xs font-medium text-slate-600">Inclure slide Roadmap</span>
+              <span className="text-xs font-medium text-zinc-600">Inclure slide Roadmap</span>
             </label>
-            <p className="text-[11px] text-slate-400">
+            <p className="text-[11px] text-zinc-400">
               ~{2 + (selectedProjectIds.length > 0 ? 3 : 0) + selectedProjectIds.length + (form.includeRoadmap ? 1 : 0)} slides
             </p>
           </div>
           <div className="flex items-center gap-3">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-600 border border-gray-200 rounded hover:bg-gray-50 transition-colors">
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">
               Annuler
             </button>
             <button
               onClick={handleExport}
               disabled={loading}
               data-testid="export-copil-submit"
-              className="flex items-center gap-2 px-5 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] disabled:opacity-50 transition-colors"
+              className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
             >
               {loading ? <Loader2 size={14} className="animate-spin" /> : <Presentation size={14} />}
               {loading ? "Génération…" : "Générer le PPT"}

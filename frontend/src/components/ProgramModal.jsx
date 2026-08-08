@@ -4,12 +4,12 @@ import Modal from "@/components/Modal";
 import { programsAPI } from "@/api";
 
 const EMPTY = { name: "", description: "", owner: "", start_date: "", end_date: "", budget_keur: "", status: "active" };
-const INPUT_CLS = "w-full text-sm border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
 
 function Field({ label, required, error, children }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-slate-600 mb-1">
+      <label className="block text-xs font-semibold text-zinc-600 mb-1">
         {label}{required && <span className="text-rose-500 ml-0.5">*</span>}
       </label>
       {children}
@@ -74,7 +74,7 @@ export default function ProgramModal({ isOpen, onClose, program, onSaved }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={program ? "Modifier le programme" : "Nouveau programme"}>
       <form onSubmit={handleSubmit} className="space-y-4" data-testid="program-form">
-        {apiError && <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded px-3 py-2">{apiError}</div>}
+        {apiError && <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{apiError}</div>}
 
         <Field label="Nom du programme" required error={errors.name}>
           <input data-testid="program-form-name" className={INPUT_CLS} value={form.name} onChange={set("name")} placeholder="Ex : Transformation Digitale" />
@@ -111,10 +111,10 @@ export default function ProgramModal({ isOpen, onClose, program, onSaved }) {
           <input data-testid="program-form-budget" type="number" className={INPUT_CLS} value={form.budget_keur} onChange={set("budget_keur")} placeholder="Ex : 5000" min="0" />
         </Field>
 
-        <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
-          <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-600 border border-gray-200 rounded hover:bg-gray-50 transition-colors">Annuler</button>
+        <div className="flex justify-end gap-3 pt-2 border-t border-zinc-100">
+          <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">Annuler</button>
           <button type="submit" disabled={saving} data-testid="program-form-submit"
-            className="flex items-center gap-2 px-5 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] disabled:opacity-50 transition-colors">
+            className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
             {saving && <Loader2 size={14} className="animate-spin" />}
             {program ? "Enregistrer" : "Créer le programme"}
           </button>

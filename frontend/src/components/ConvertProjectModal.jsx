@@ -60,17 +60,17 @@ export default function ConvertProjectModal({ demand, onClose, onConverted }) {
         className="bg-white rounded-2xl shadow-2xl w-full max-w-lg flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
           <div className="flex items-center gap-3">
             <div className="w-8 h-8 rounded-lg bg-teal-100 flex items-center justify-center">
               <Briefcase size={16} className="text-teal-700" />
             </div>
-            <h2 className="text-base font-bold text-slate-800">Convertir en projet</h2>
+            <h2 className="text-base font-bold text-zinc-800">Convertir en projet</h2>
           </div>
           <button
             data-testid="convert-modal-close"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600"
+            className="text-zinc-400 hover:text-zinc-600"
           >
             <X size={18} />
           </button>
@@ -78,29 +78,29 @@ export default function ConvertProjectModal({ demand, onClose, onConverted }) {
 
         {/* Body */}
         <div className="px-6 py-5 space-y-4 overflow-y-auto max-h-[65vh]">
-          <p className="text-xs text-slate-500 bg-slate-50 rounded-lg p-3">
+          <p className="text-xs text-zinc-500 bg-zinc-50 rounded-lg p-3">
             Les informations ci-dessous sont pré-remplies depuis la demande. Vous pouvez les ajuster avant de créer le projet.
           </p>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">
+            <label className="block text-xs font-semibold text-zinc-600 mb-1">
               Nom du projet <span className="text-rose-500">*</span>
             </label>
             <input
               data-testid="convert-name-input"
               type="text"
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0052CC]/30"
+              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
               value={form.name}
               onChange={(e) => change("name", e.target.value)}
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">Description</label>
+            <label className="block text-xs font-semibold text-zinc-600 mb-1">Description</label>
             <textarea
               data-testid="convert-description-input"
               rows={2}
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0052CC]/30 resize-none"
+              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 resize-none"
               value={form.description}
               onChange={(e) => change("description", e.target.value)}
             />
@@ -108,25 +108,25 @@ export default function ConvertProjectModal({ demand, onClose, onConverted }) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">
                 Date de début <span className="text-rose-500">*</span>
               </label>
               <input
                 data-testid="convert-start-date-input"
                 type="date"
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0052CC]/30"
+                className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
                 value={form.start_date}
                 onChange={(e) => change("start_date", e.target.value)}
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">
                 Date de fin (baseline) <span className="text-rose-500">*</span>
               </label>
               <input
                 data-testid="convert-end-date-input"
                 type="date"
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0052CC]/30"
+                className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
                 value={form.end_date_baseline}
                 onChange={(e) => {
                   change("end_date_baseline", e.target.value);
@@ -138,11 +138,11 @@ export default function ConvertProjectModal({ demand, onClose, onConverted }) {
 
           <div className="grid grid-cols-2 gap-4">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Budget total (€)</label>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Budget total (€)</label>
               <input
                 data-testid="convert-budget-input"
                 type="number"
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0052CC]/30"
+                className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
                 placeholder="0"
                 min="0"
                 value={form.budget_total}
@@ -150,10 +150,10 @@ export default function ConvertProjectModal({ demand, onClose, onConverted }) {
               />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 mb-1">Statut RAG</label>
+              <label className="block text-xs font-semibold text-zinc-600 mb-1">Statut RAG</label>
               <select
                 data-testid="convert-rag-select"
-                className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0052CC]/30 bg-white"
+                className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 bg-white"
                 value={form.status_rag}
                 onChange={(e) => change("status_rag", e.target.value)}
               >
@@ -165,10 +165,10 @@ export default function ConvertProjectModal({ demand, onClose, onConverted }) {
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">Programme (optionnel)</label>
+            <label className="block text-xs font-semibold text-zinc-600 mb-1">Programme (optionnel)</label>
             <select
               data-testid="convert-program-select"
-              className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0052CC]/30 bg-white"
+              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 bg-white"
               value={form.program_id}
               onChange={(e) => change("program_id", e.target.value)}
             >
@@ -181,11 +181,11 @@ export default function ConvertProjectModal({ demand, onClose, onConverted }) {
         </div>
 
         {/* Footer */}
-        <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-100">
+        <div className="flex justify-end gap-3 px-6 py-4 border-t border-zinc-100">
           <button
             data-testid="convert-modal-cancel"
             onClick={onClose}
-            className="px-4 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
+            className="px-4 py-2 rounded-lg border border-zinc-200 text-sm text-zinc-600 hover:bg-zinc-50 transition-colors"
           >
             Annuler
           </button>

@@ -25,14 +25,14 @@ const CAP_STATUS_LABEL = {
 
 const WSJF_FIBONACCI = [1, 2, 3, 5, 8, 13, 21];
 
-const INPUT_CLS = "w-full text-sm border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
 function StatusBadge({ status }) {
   const cfg = OKR_STATUS[status] || OKR_STATUS.on_track;
   return (
-    <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
+    <span className={`inline-flex items-center gap-1.5 text-[10px] font-bold px-2 py-0.5 rounded-lg border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
       <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
       {cfg.label}
     </span>
@@ -68,12 +68,12 @@ function KRProgressBar({ kr }) {
   return (
     <div className="mb-2">
       <div className="flex items-center justify-between mb-0.5">
-        <span className="text-xs text-slate-600 flex-1 pr-2 leading-snug">{kr.description}</span>
-        <span className="font-mono text-[11px] text-slate-500 flex-shrink-0">
+        <span className="text-xs text-zinc-600 flex-1 pr-2 leading-snug">{kr.description}</span>
+        <span className="font-mono text-[11px] text-zinc-500 flex-shrink-0">
           {kr.current_value}/{kr.target_value} {kr.unit}
         </span>
       </div>
-      <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+      <div className="h-1.5 bg-zinc-100 rounded-full overflow-hidden">
         <div
           className={`h-full rounded-full transition-all ${pct >= 80 ? "bg-emerald-500" : pct >= 50 ? "bg-amber-500" : "bg-rose-500"}`}
           style={{ width: `${pct}%` }}
@@ -84,12 +84,12 @@ function KRProgressBar({ kr }) {
 }
 
 function WSJFScore({ value }) {
-  if (value == null) return <span className="text-[11px] text-slate-400 italic">Non calculé</span>;
+  if (value == null) return <span className="text-[11px] text-zinc-400 italic">Non calculé</span>;
   const color = value >= 8 ? "text-emerald-700 bg-emerald-50 border-emerald-300"
     : value >= 4 ? "text-amber-700 bg-amber-50 border-amber-300"
-    : "text-slate-600 bg-slate-50 border-slate-300";
+    : "text-zinc-600 bg-zinc-50 border-zinc-300";
   return (
-    <span className={`font-mono font-bold text-sm px-2.5 py-1 rounded border inline-block ${color}`}>
+    <span className={`font-mono font-bold text-sm px-2.5 py-1 rounded-lg border inline-block ${color}`}>
       WSJF {value}
     </span>
   );
@@ -169,10 +169,10 @@ function OKRModal({ isOpen, onClose, okr, trains, capabilities, onSaved }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={okr ? "Modifier l'OKR" : "Nouvel OKR"} size="lg">
       <form onSubmit={handleSubmit} className="space-y-4" data-testid="okr-form">
-        {err && <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded px-3 py-2">{err}</div>}
+        {err && <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{err}</div>}
 
         <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1">Objectif *</label>
+          <label className="block text-xs font-semibold text-zinc-600 mb-1">Objectif *</label>
           <input
             data-testid="okr-form-objective"
             className={INPUT_CLS}
@@ -183,14 +183,14 @@ function OKRModal({ isOpen, onClose, okr, trains, capabilities, onSaved }) {
         </div>
 
         <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1">Description</label>
+          <label className="block text-xs font-semibold text-zinc-600 mb-1">Description</label>
           <textarea className={INPUT_CLS} rows={2} value={form.description || ""} onChange={set("description")}
             placeholder="Contexte stratégique…" />
         </div>
 
         <div className="grid grid-cols-2 gap-3">
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">Statut</label>
+            <label className="block text-xs font-semibold text-zinc-600 mb-1">Statut</label>
             <select data-testid="okr-form-status" className={INPUT_CLS} value={form.status || "on_track"} onChange={set("status")}>
               {Object.entries(OKR_STATUS).map(([k, v]) => (
                 <option key={k} value={k}>{v.label}</option>
@@ -198,7 +198,7 @@ function OKRModal({ isOpen, onClose, okr, trains, capabilities, onSaved }) {
             </select>
           </div>
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-1">Train SAFe</label>
+            <label className="block text-xs font-semibold text-zinc-600 mb-1">Train SAFe</label>
             <select className={INPUT_CLS} value={form.train_id || ""} onChange={set("train_id")} data-testid="okr-form-train">
               <option value="">— Tous les trains —</option>
               {trains.map(t => <option key={t.train_id} value={t.train_id}>{t.name}</option>)}
@@ -209,16 +209,16 @@ function OKRModal({ isOpen, onClose, okr, trains, capabilities, onSaved }) {
         {/* Key Results */}
         <div>
           <div className="flex items-center justify-between mb-2">
-            <label className="text-xs font-semibold text-slate-600">Key Results</label>
+            <label className="text-xs font-semibold text-zinc-600">Key Results</label>
             <button type="button" onClick={addKR}
-              className="flex items-center gap-1 text-[11px] font-semibold text-[#0052CC] hover:text-[#0047B3]"
+              className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700"
               data-testid="okr-add-kr-btn">
               <Plus size={11} /> Ajouter un KR
             </button>
           </div>
           <div className="space-y-2">
             {krs.map((kr, i) => (
-              <div key={i} className="border border-gray-100 rounded p-3 bg-gray-50/50" data-testid={`kr-row-${i}`}>
+              <div key={i} className="border border-zinc-100 rounded-lg p-3 bg-zinc-50/50" data-testid={`kr-row-${i}`}>
                 <div className="flex gap-2 mb-2">
                   <input
                     className={`${INPUT_CLS} flex-1`}
@@ -228,23 +228,23 @@ function OKRModal({ isOpen, onClose, okr, trains, capabilities, onSaved }) {
                     data-testid={`kr-desc-${i}`}
                   />
                   <button type="button" onClick={() => removeKR(i)}
-                    className="p-2 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors flex-shrink-0">
+                    className="p-2 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors flex-shrink-0">
                     <Trash2 size={12} />
                   </button>
                 </div>
                 <div className="grid grid-cols-3 gap-2">
                   <div>
-                    <label className="text-[10px] text-slate-400 mb-0.5 block">Valeur cible</label>
+                    <label className="text-[10px] text-zinc-400 mb-0.5 block">Valeur cible</label>
                     <input type="number" className={INPUT_CLS} value={kr.target_value}
                       onChange={(e) => setKR(i, "target_value", e.target.value)} min="0" />
                   </div>
                   <div>
-                    <label className="text-[10px] text-slate-400 mb-0.5 block">Valeur actuelle</label>
+                    <label className="text-[10px] text-zinc-400 mb-0.5 block">Valeur actuelle</label>
                     <input type="number" className={INPUT_CLS} value={kr.current_value}
                       onChange={(e) => setKR(i, "current_value", e.target.value)} min="0" />
                   </div>
                   <div>
-                    <label className="text-[10px] text-slate-400 mb-0.5 block">Unité</label>
+                    <label className="text-[10px] text-zinc-400 mb-0.5 block">Unité</label>
                     <input className={INPUT_CLS} value={kr.unit}
                       onChange={(e) => setKR(i, "unit", e.target.value)} placeholder="%" />
                   </div>
@@ -252,7 +252,7 @@ function OKRModal({ isOpen, onClose, okr, trains, capabilities, onSaved }) {
               </div>
             ))}
             {krs.length === 0 && (
-              <div className="border border-dashed border-gray-200 rounded p-4 text-center text-[11px] text-slate-400">
+              <div className="border border-dashed border-zinc-200 rounded-lg p-4 text-center text-[11px] text-zinc-400">
                 Aucun Key Result — cliquez sur "Ajouter un KR"
               </div>
             )}
@@ -262,19 +262,19 @@ function OKRModal({ isOpen, onClose, okr, trains, capabilities, onSaved }) {
         {/* Capabilities liées */}
         {capabilities.length > 0 && (
           <div>
-            <label className="block text-xs font-semibold text-slate-600 mb-2">
+            <label className="block text-xs font-semibold text-zinc-600 mb-2">
               Capabilities liées ({selectedCaps.length} sélectionnées)
             </label>
-            <div className="max-h-36 overflow-y-auto border border-gray-200 rounded divide-y divide-gray-50">
+            <div className="max-h-36 overflow-y-auto border border-zinc-200 rounded-lg divide-y divide-zinc-50">
               {capabilities.map(cap => (
                 <label key={cap.capability_id}
-                  className={`flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors ${selectedCaps.includes(cap.capability_id) ? "bg-blue-50/50" : ""}`}
+                  className={`flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-zinc-50 transition-colors ${selectedCaps.includes(cap.capability_id) ? "bg-blue-50/50" : ""}`}
                   data-testid={`okr-cap-checkbox-${cap.capability_id}`}
                 >
-                  <input type="checkbox" className="accent-[#0052CC]"
+                  <input type="checkbox" className="accent-[#2563eb]"
                     checked={selectedCaps.includes(cap.capability_id)}
                     onChange={() => toggleCap(cap.capability_id)} />
-                  <span className="text-xs text-slate-700 flex-1 line-clamp-1">{cap.name}</span>
+                  <span className="text-xs text-zinc-700 flex-1 line-clamp-1">{cap.name}</span>
                   <WSJFScore value={cap.wsjf} />
                 </label>
               ))}
@@ -282,13 +282,13 @@ function OKRModal({ isOpen, onClose, okr, trains, capabilities, onSaved }) {
           </div>
         )}
 
-        <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
+        <div className="flex justify-end gap-3 pt-2 border-t border-zinc-100">
           <button type="button" onClick={onClose}
-            className="px-4 py-2 text-sm text-slate-600 border border-gray-200 rounded hover:bg-gray-50">
+            className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50">
             Annuler
           </button>
           <button type="submit" disabled={saving} data-testid="okr-form-submit"
-            className="px-5 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] disabled:opacity-50">
+            className="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50">
             {okr ? "Enregistrer" : "Créer l'OKR"}
           </button>
         </div>
@@ -346,28 +346,28 @@ function WSJFModal({ isOpen, onClose, cap, onSaved }) {
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Scoring WSJF" size="md">
       <form onSubmit={handleSubmit} className="space-y-4" data-testid="wsjf-form">
-        {err && <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded px-3 py-2">{err}</div>}
+        {err && <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{err}</div>}
 
         {cap && (
-          <div className="bg-slate-50 border border-slate-200 rounded p-3">
-            <div className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-1">Capability</div>
-            <div className="font-bold text-slate-800 text-sm">{cap.name}</div>
+          <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3">
+            <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mb-1">Capability</div>
+            <div className="font-bold text-zinc-800 text-sm">{cap.name}</div>
           </div>
         )}
 
-        <div className="bg-[#0052CC]/5 border border-[#0052CC]/20 rounded-lg p-4 text-center">
-          <div className="text-[10px] uppercase tracking-widest text-[#0052CC] font-bold mb-1">
+        <div className="bg-blue-600/5 border border-blue-600/20 rounded-lg p-4 text-center">
+          <div className="text-[10px] uppercase tracking-widest text-blue-600 font-bold mb-1">
             WSJF = (BV + TC + RR) ÷ Job Size
           </div>
-          <div className="text-3xl font-heading font-bold text-[#0052CC]">{previewWSJF()}</div>
+          <div className="text-3xl font-heading font-bold text-blue-600">{previewWSJF()}</div>
         </div>
 
         <div className="space-y-3">
           {FIELDS.map(({ key, label, tooltip }) => (
             <div key={key}>
               <div className="flex items-center gap-1.5 mb-1">
-                <label className="text-xs font-semibold text-slate-600">{label}</label>
-                <span className="text-[10px] text-slate-400 italic">({tooltip})</span>
+                <label className="text-xs font-semibold text-zinc-600">{label}</label>
+                <span className="text-[10px] text-zinc-400 italic">({tooltip})</span>
               </div>
               <div className="flex gap-1.5 flex-wrap">
                 {WSJF_FIBONACCI.map(v => (
@@ -376,10 +376,10 @@ function WSJFModal({ isOpen, onClose, cap, onSaved }) {
                     type="button"
                     data-testid={`wsjf-${key}-${v}`}
                     onClick={() => setForm(f => ({ ...f, [key]: v }))}
-                    className={`w-9 h-9 text-sm font-bold rounded border transition-all ${
+                    className={`w-9 h-9 text-sm font-bold rounded-lg border transition-all ${
                       form[key] === v
-                        ? "bg-[#0052CC] text-white border-[#0052CC]"
-                        : "bg-white text-slate-600 border-gray-200 hover:border-[#0052CC] hover:text-[#0052CC]"
+                        ? "bg-blue-600 text-white border-blue-600"
+                        : "bg-white text-zinc-600 border-zinc-200 hover:border-blue-600 hover:text-blue-600"
                     }`}
                   >
                     {v}
@@ -390,13 +390,13 @@ function WSJFModal({ isOpen, onClose, cap, onSaved }) {
           ))}
         </div>
 
-        <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
+        <div className="flex justify-end gap-3 pt-2 border-t border-zinc-100">
           <button type="button" onClick={onClose}
-            className="px-4 py-2 text-sm text-slate-600 border border-gray-200 rounded hover:bg-gray-50">
+            className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50">
             Annuler
           </button>
           <button type="submit" disabled={saving} data-testid="wsjf-form-submit"
-            className="px-5 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] disabled:opacity-50">
+            className="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50">
             Calculer & Enregistrer
           </button>
         </div>
@@ -413,28 +413,28 @@ function OKRCard({ okr, onEdit, onDelete }) {
   const caps = okr.linked_capabilities || [];
 
   return (
-    <div className="bg-white border border-gray-200 rounded-lg shadow-sm overflow-hidden"
+    <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-hidden"
       data-testid={`okr-card-${okr.okr_id}`}>
       <div
-        className="flex items-center gap-4 px-5 py-4 cursor-pointer hover:bg-gray-50/70 transition-colors"
+        className="flex items-center gap-4 px-5 py-4 cursor-pointer hover:bg-zinc-50/70 transition-colors"
         onClick={() => setExpanded(e => !e)}
       >
         <ProgressRing pct={okr.overall_progress || 0} size={52} />
 
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2 flex-wrap">
-            <span className="font-bold text-slate-800 text-sm leading-snug">{okr.objective}</span>
+            <span className="font-bold text-zinc-800 text-sm leading-snug">{okr.objective}</span>
             <StatusBadge status={okr.status} />
           </div>
           {okr.description && (
-            <div className="text-[11px] text-slate-400 mt-0.5 line-clamp-1">{okr.description}</div>
+            <div className="text-[11px] text-zinc-400 mt-0.5 line-clamp-1">{okr.description}</div>
           )}
           <div className="flex items-center gap-3 mt-1.5">
             {krs.length > 0 && (
-              <span className="text-[10px] text-slate-400">{krs.length} KR{krs.length > 1 ? "s" : ""}</span>
+              <span className="text-[10px] text-zinc-400">{krs.length} KR{krs.length > 1 ? "s" : ""}</span>
             )}
             {caps.length > 0 && (
-              <span className="text-[10px] text-slate-400">{caps.length} capability{caps.length > 1 ? "s" : ""} liée{caps.length > 1 ? "s" : ""}</span>
+              <span className="text-[10px] text-zinc-400">{caps.length} capability{caps.length > 1 ? "s" : ""} liée{caps.length > 1 ? "s" : ""}</span>
             )}
           </div>
         </div>
@@ -442,28 +442,28 @@ function OKRCard({ okr, onEdit, onDelete }) {
         <div className="flex items-center gap-1 flex-shrink-0">
           <button
             onClick={(e) => { e.stopPropagation(); onEdit(okr); }}
-            className="p-1.5 hover:bg-blue-50 rounded text-slate-400 hover:text-blue-600 transition-colors"
+            className="p-1.5 hover:bg-blue-50 rounded-lg text-zinc-400 hover:text-blue-600 transition-colors"
             data-testid={`okr-edit-${okr.okr_id}`}
           >
             <Pencil size={13} />
           </button>
           <button
             onClick={(e) => { e.stopPropagation(); onDelete(okr); }}
-            className="p-1.5 hover:bg-rose-50 rounded text-slate-400 hover:text-rose-600 transition-colors"
+            className="p-1.5 hover:bg-rose-50 rounded-lg text-zinc-400 hover:text-rose-600 transition-colors"
             data-testid={`okr-delete-${okr.okr_id}`}
           >
             <Trash2 size={13} />
           </button>
-          {expanded ? <ChevronDown size={14} className="text-slate-400 ml-1" /> : <ChevronRight size={14} className="text-slate-400 ml-1" />}
+          {expanded ? <ChevronDown size={14} className="text-zinc-400 ml-1" /> : <ChevronRight size={14} className="text-zinc-400 ml-1" />}
         </div>
       </div>
 
       {expanded && (
-        <div className="px-5 py-4 border-t border-gray-100 bg-gray-50/30">
+        <div className="px-5 py-4 border-t border-zinc-100 bg-zinc-50/30">
           {/* Key Results */}
           {krs.length > 0 && (
             <div className="mb-4">
-              <div className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-2">Key Results</div>
+              <div className="text-[10px] uppercase tracking-widest font-bold text-zinc-400 mb-2">Key Results</div>
               {krs.map((kr, i) => <KRProgressBar key={i} kr={kr} />)}
             </div>
           )}
@@ -471,14 +471,14 @@ function OKRCard({ okr, onEdit, onDelete }) {
           {/* Capabilities liées */}
           {caps.length > 0 && (
             <div>
-              <div className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-2">Capabilities liées</div>
+              <div className="text-[10px] uppercase tracking-widest font-bold text-zinc-400 mb-2">Capabilities liées</div>
               <div className="flex flex-wrap gap-2">
                 {caps.map(cap => (
                   <div key={cap.capability_id}
-                    className="flex items-center gap-1.5 px-2.5 py-1 bg-white border border-gray-200 rounded text-xs text-slate-700 shadow-sm">
-                    <Layers size={10} className="text-slate-400" />
+                    className="flex items-center gap-1.5 px-2.5 py-1 bg-white border border-zinc-200 rounded-lg text-xs text-zinc-700 shadow-sm">
+                    <Layers size={10} className="text-zinc-400" />
                     {cap.name}
-                    <span className="text-[10px] text-slate-400">· {CAP_STATUS_LABEL[cap.status] || cap.status}</span>
+                    <span className="text-[10px] text-zinc-400">· {CAP_STATUS_LABEL[cap.status] || cap.status}</span>
                   </div>
                 ))}
               </div>
@@ -486,7 +486,7 @@ function OKRCard({ okr, onEdit, onDelete }) {
           )}
 
           {krs.length === 0 && caps.length === 0 && (
-            <div className="text-[11px] text-slate-400 italic text-center py-2">
+            <div className="text-[11px] text-zinc-400 italic text-center py-2">
               Aucun key result ni capability liée
             </div>
           )}
@@ -552,7 +552,7 @@ export default function OKRDashboard({ selectedTrainId }) {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-16 text-slate-400 text-sm">
+      <div className="flex items-center justify-center py-16 text-zinc-400 text-sm">
         <RefreshCw size={16} className="animate-spin mr-2" />
         Chargement du Dashboard Programme…
       </div>
@@ -565,7 +565,7 @@ export default function OKRDashboard({ selectedTrainId }) {
       {/* ─── KPIs Programme ───────────────────────────────────────────────────── */}
       <div className="grid grid-cols-2 md:grid-cols-4 lg:grid-cols-6 gap-4">
         {[
-          { label: "Trains",      value: summary.total_trains,       icon: Award,       accent: "#0052CC" },
+          { label: "Trains",      value: summary.total_trains,       icon: Award,       accent: "#2563eb" },
           { label: "PIs",         value: summary.total_pis,          icon: Target,      accent: "#7c3aed" },
           { label: "Sprints",     value: summary.total_sprints,      icon: Zap,         accent: "#0891b2" },
           { label: "Capabilities",value: summary.total_capabilities, icon: Layers,      accent: "#059669" },
@@ -573,15 +573,15 @@ export default function OKRDashboard({ selectedTrainId }) {
           { label: "WSJF Moyen",  value: summary.avg_wsjf || "—",    icon: BarChart3,   accent: "#dc2626" },
         ].map(({ label, value, icon: Icon, accent }) => (
           <div key={label}
-            className="bg-white border border-gray-200 rounded-lg p-4 shadow-sm"
+            className="bg-white border border-zinc-200 rounded-lg p-4 shadow-sm"
             style={{ borderTopWidth: 3, borderTopColor: accent }}
             data-testid={`kpi-${label.toLowerCase().replace(/\s/g, "-")}`}
           >
             <div className="flex items-center justify-between mb-1">
-              <span className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">{label}</span>
+              <span className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">{label}</span>
               <Icon size={13} style={{ color: accent }} />
             </div>
-            <div className="font-heading text-2xl font-bold text-slate-800">{value ?? 0}</div>
+            <div className="font-heading text-2xl font-bold text-zinc-800">{value ?? 0}</div>
           </div>
         ))}
       </div>
@@ -590,12 +590,12 @@ export default function OKRDashboard({ selectedTrainId }) {
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
 
         {/* Caps by status */}
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5">
-          <div className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-4">
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-5">
+          <div className="text-[10px] uppercase tracking-widest font-bold text-zinc-400 mb-4">
             Capabilities par statut
           </div>
           {Object.keys(capsByStatus).length === 0 ? (
-            <div className="text-sm text-slate-400 text-center py-4">Aucune donnée</div>
+            <div className="text-sm text-zinc-400 text-center py-4">Aucune donnée</div>
           ) : (
             <div className="space-y-2.5">
               {[
@@ -609,16 +609,16 @@ export default function OKRDashboard({ selectedTrainId }) {
                 const pct = Math.round((count / total) * 100);
                 return (
                   <div key={key} className="flex items-center gap-3">
-                    <span className="text-xs text-slate-600 w-24 flex-shrink-0">{label}</span>
-                    <div className="flex-1 h-5 bg-gray-100 rounded overflow-hidden">
+                    <span className="text-xs text-zinc-600 w-24 flex-shrink-0">{label}</span>
+                    <div className="flex-1 h-5 bg-zinc-100 rounded-lg overflow-hidden">
                       <div
-                        className="h-full rounded flex items-center px-2 transition-all"
+                        className="h-full rounded-lg flex items-center px-2 transition-all"
                         style={{ width: `${Math.max(pct, 2)}%`, backgroundColor: color }}
                       >
                         {pct > 10 && <span className="text-[10px] text-white font-bold">{count}</span>}
                       </div>
                     </div>
-                    <span className="font-mono text-xs text-slate-500 w-10 text-right">{pct}%</span>
+                    <span className="font-mono text-xs text-zinc-500 w-10 text-right">{pct}%</span>
                   </div>
                 );
               })}
@@ -627,12 +627,12 @@ export default function OKRDashboard({ selectedTrainId }) {
         </div>
 
         {/* PI Velocity */}
-        <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5">
-          <div className="text-[10px] uppercase tracking-widest font-bold text-slate-400 mb-4">
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-5">
+          <div className="text-[10px] uppercase tracking-widest font-bold text-zinc-400 mb-4">
             Vélocité par PI
           </div>
           {piVelocity.length === 0 ? (
-            <div className="text-sm text-slate-400 text-center py-4">Aucun PI trouvé</div>
+            <div className="text-sm text-zinc-400 text-center py-4">Aucun PI trouvé</div>
           ) : (
             <div className="space-y-3">
               {piVelocity.map(pi => {
@@ -640,12 +640,12 @@ export default function OKRDashboard({ selectedTrainId }) {
                 return (
                   <div key={pi.pi_id}>
                     <div className="flex items-center justify-between mb-1">
-                      <span className="text-xs font-medium text-slate-700 flex-1 truncate">{pi.pi_name}</span>
-                      <span className="text-[10px] text-slate-400 ml-2">
+                      <span className="text-xs font-medium text-zinc-700 flex-1 truncate">{pi.pi_name}</span>
+                      <span className="text-[10px] text-zinc-400 ml-2">
                         {pi.velocity_actual}/{pi.velocity_planned} pts · {pi.n_sprints} sprints
                       </span>
                     </div>
-                    <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                    <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
                       <div
                         className={`h-full rounded-full transition-all ${pct >= 90 ? "bg-emerald-500" : pct >= 70 ? "bg-blue-500" : "bg-amber-500"}`}
                         style={{ width: `${Math.min(pct, 100)}%` }}
@@ -663,18 +663,18 @@ export default function OKRDashboard({ selectedTrainId }) {
       <div>
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h2 className="font-bold text-slate-800 text-base flex items-center gap-2">
-              <TrendingUp size={16} className="text-[#0052CC]" />
+            <h2 className="font-bold text-zinc-800 text-base flex items-center gap-2">
+              <TrendingUp size={16} className="text-blue-600" />
               Objectifs & Key Results (OKR)
             </h2>
-            <p className="text-xs text-slate-400 mt-0.5">
+            <p className="text-xs text-zinc-400 mt-0.5">
               {filteredOkrs.length} OKR{filteredOkrs.length !== 1 ? "s" : ""} défini{filteredOkrs.length !== 1 ? "s" : ""}
             </p>
           </div>
           <button
             onClick={() => setOkrModal({ open: true, okr: null })}
             data-testid="create-okr-btn"
-            className="flex items-center gap-1.5 px-4 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
           >
             <Plus size={14} /> Nouvel OKR
           </button>
@@ -690,13 +690,13 @@ export default function OKRDashboard({ selectedTrainId }) {
             />
           ))}
           {filteredOkrs.length === 0 && (
-            <div className="bg-white border border-dashed border-gray-300 rounded-lg py-12 text-center">
-              <TrendingUp size={28} className="mx-auto text-slate-300 mb-3" />
-              <div className="text-slate-500 text-sm font-medium">Aucun OKR défini</div>
-              <div className="text-slate-400 text-xs mt-1 mb-4">Créez votre premier objectif stratégique</div>
+            <div className="bg-white border border-dashed border-zinc-300 rounded-lg py-12 text-center">
+              <TrendingUp size={28} className="mx-auto text-zinc-300 mb-3" />
+              <div className="text-zinc-500 text-sm font-medium">Aucun OKR défini</div>
+              <div className="text-zinc-400 text-xs mt-1 mb-4">Créez votre premier objectif stratégique</div>
               <button
                 onClick={() => setOkrModal({ open: true, okr: null })}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3]"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700"
               >
                 <Plus size={13} /> Créer un OKR
               </button>
@@ -706,13 +706,13 @@ export default function OKRDashboard({ selectedTrainId }) {
       </div>
 
       {/* ─── Top Capabilities WSJF ────────────────────────────────────────────── */}
-      <div className="bg-white border border-gray-200 rounded-lg shadow-sm p-5">
+      <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-5">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <div className="text-[10px] uppercase tracking-widest font-bold text-slate-400">
+            <div className="text-[10px] uppercase tracking-widest font-bold text-zinc-400">
               Top Capabilities — Score WSJF
             </div>
-            <div className="text-[10px] text-slate-400 mt-0.5 flex items-center gap-1">
+            <div className="text-[10px] text-zinc-400 mt-0.5 flex items-center gap-1">
               <Info size={10} />
               WSJF = (Business Value + Time Criticality + Risk Reduction) ÷ Job Size
             </div>
@@ -720,30 +720,30 @@ export default function OKRDashboard({ selectedTrainId }) {
         </div>
         <div className="space-y-2" data-testid="wsjf-leaderboard">
           {topCaps.length === 0 ? (
-            <div className="text-sm text-slate-400 text-center py-6">
+            <div className="text-sm text-zinc-400 text-center py-6">
               Aucune capability avec score WSJF. Cliquez sur "Scorer" pour calculer.
             </div>
           ) : (
             topCaps.map((cap, idx) => (
               <div key={cap.capability_id}
-                className="flex items-center gap-3 p-3 rounded-lg hover:bg-gray-50/70 transition-colors group"
+                className="flex items-center gap-3 p-3 rounded-lg hover:bg-zinc-50/70 transition-colors group"
                 data-testid={`wsjf-cap-row-${cap.capability_id}`}
               >
                 <div className={`w-6 h-6 rounded-full flex items-center justify-center text-[11px] font-bold flex-shrink-0 ${
-                  idx === 0 ? "bg-amber-100 text-amber-700" : idx === 1 ? "bg-slate-100 text-slate-600" : idx === 2 ? "bg-orange-100 text-orange-700" : "bg-gray-100 text-gray-500"
+                  idx === 0 ? "bg-amber-100 text-amber-700" : idx === 1 ? "bg-zinc-100 text-zinc-600" : idx === 2 ? "bg-orange-100 text-orange-700" : "bg-zinc-100 text-zinc-500"
                 }`}>
                   {idx + 1}
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-sm font-medium text-slate-800 truncate">{cap.name}</div>
-                  <div className="text-[10px] text-slate-400">
+                  <div className="text-sm font-medium text-zinc-800 truncate">{cap.name}</div>
+                  <div className="text-[10px] text-zinc-400">
                     BV={cap.business_value} · TC={cap.time_criticality} · RR={cap.risk_reduction} · Size={cap.job_size}
                   </div>
                 </div>
                 <WSJFScore value={cap.wsjf} />
                 <button
                   onClick={() => setWsjfModal({ open: true, cap })}
-                  className="flex items-center gap-1 text-[11px] text-[#0052CC] hover:text-[#0047B3] transition-all ml-1 flex-shrink-0"
+                  className="flex items-center gap-1 text-[11px] text-blue-600 hover:text-blue-700 transition-all ml-1 flex-shrink-0"
                   data-testid={`wsjf-edit-${cap.capability_id}`}
                 >
                   <Pencil size={11} /> Scorer
@@ -755,8 +755,8 @@ export default function OKRDashboard({ selectedTrainId }) {
 
         {/* Bouton scorer une capability non encore scorée */}
         {capabilities.filter(c => c.wsjf == null).length > 0 && (
-          <div className="mt-4 pt-4 border-t border-gray-100">
-            <div className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-2">
+          <div className="mt-4 pt-4 border-t border-zinc-100">
+            <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mb-2">
               Non scorées ({capabilities.filter(c => c.wsjf == null).length})
             </div>
             <div className="flex flex-wrap gap-2">
@@ -765,7 +765,7 @@ export default function OKRDashboard({ selectedTrainId }) {
                   key={cap.capability_id}
                   onClick={() => setWsjfModal({ open: true, cap })}
                   data-testid={`wsjf-unscore-${cap.capability_id}`}
-                  className="flex items-center gap-1.5 px-3 py-1.5 border border-dashed border-gray-300 rounded text-xs text-slate-500 hover:border-[#0052CC] hover:text-[#0052CC] transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 border border-dashed border-zinc-300 rounded-lg text-xs text-zinc-500 hover:border-blue-600 hover:text-blue-600 transition-colors"
                 >
                   <Zap size={10} /> {cap.name}
                 </button>

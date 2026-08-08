@@ -3,7 +3,7 @@ import { X, Loader2 } from "lucide-react";
 import { workAllocationsAPI } from "@/api";
 
 const PHASES = ["analyse", "conception", "implementation", "review", "test", "hypercare"];
-const INPUT_CLS = "w-full text-sm border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-[#0052CC] bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 bg-white";
 
 export default function WorkAllocationModal({ isOpen, onClose, wa, tasks, resources, onSaved }) {
   const isEdit = !!wa;
@@ -65,19 +65,19 @@ export default function WorkAllocationModal({ isOpen, onClose, wa, tasks, resour
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-lg">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-          <h2 className="font-heading text-lg font-bold text-[#0F172A] uppercase tracking-tight">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-200">
+          <h2 className="font-heading text-lg font-bold text-zinc-950 tracking-tight">
             {isEdit ? "Modifier l'allocation" : "Nouvelle allocation de travail"}
           </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors"><X size={18} /></button>
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600 transition-colors"><X size={18} /></button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
-          {error && <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded px-3 py-2">{error}</div>}
+          {error && <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{error}</div>}
 
           {!isEdit && (
             <div>
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Tâche *</label>
+              <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-wide mb-1.5">Tâche *</label>
               <select data-testid="wa-modal-task" className={INPUT_CLS} value={form.task_id} onChange={set("task_id")}>
                 <option value="">— Sélectionner une tâche —</option>
                 {tasks.map((t) => <option key={t.task_id} value={t.task_id}>{t.name}</option>)}
@@ -87,7 +87,7 @@ export default function WorkAllocationModal({ isOpen, onClose, wa, tasks, resour
 
           {!isEdit && (
             <div>
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Ressource *</label>
+              <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-wide mb-1.5">Ressource *</label>
               <select data-testid="wa-modal-resource" className={INPUT_CLS} value={form.resource_id} onChange={set("resource_id")}>
                 <option value="">— Sélectionner une ressource —</option>
                 {resources.map((r) => <option key={r.resource_id} value={r.resource_id}>{r.name} ({r.role}){r.tjm_eur ? ` — ${r.tjm_eur}€/j` : ""}</option>)}
@@ -96,7 +96,7 @@ export default function WorkAllocationModal({ isOpen, onClose, wa, tasks, resour
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">Phase *</label>
+            <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-wide mb-1.5">Phase *</label>
             <select data-testid="wa-modal-phase" className={INPUT_CLS} value={form.phase} onChange={set("phase")}>
               {PHASES.map((p) => <option key={p} value={p}>{p}</option>)}
             </select>
@@ -104,25 +104,25 @@ export default function WorkAllocationModal({ isOpen, onClose, wa, tasks, resour
 
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">JH prévus *</label>
+              <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-wide mb-1.5">JH prévus *</label>
               <input data-testid="wa-modal-planned" type="number" className={INPUT_CLS} value={form.planned_md} onChange={set("planned_md")} min="0" step="0.5" placeholder="Ex: 10" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">JH consommés</label>
+              <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-wide mb-1.5">JH consommés</label>
               <input data-testid="wa-modal-consumed" type="number" className={INPUT_CLS} value={form.consumed_md} onChange={set("consumed_md")} min="0" step="0.5" placeholder="0" />
             </div>
           </div>
 
           {estimatedCost !== null && (
-            <p className="text-xs text-slate-500">
-              Coût prévu estimé : <strong className="text-[#0052CC]">{estimatedCost.toLocaleString("fr-FR")} €</strong>
+            <p className="text-xs text-zinc-500">
+              Coût prévu estimé : <strong className="text-blue-600">{estimatedCost.toLocaleString("fr-FR")} €</strong>
             </p>
           )}
 
           <div className="flex justify-end gap-3 pt-2">
-            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-600 border border-gray-200 rounded hover:bg-gray-50 transition-colors">Annuler</button>
+            <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">Annuler</button>
             <button type="submit" disabled={saving} data-testid="wa-modal-submit"
-              className="flex items-center gap-2 px-5 py-2 text-sm font-semibold bg-[#0052CC] text-white rounded hover:bg-[#0047B3] disabled:opacity-60 transition-colors">
+              className="flex items-center gap-2 px-5 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60 transition-colors">
               {saving && <Loader2 size={14} className="animate-spin" />}
               {isEdit ? "Enregistrer" : "Créer"}
             </button>

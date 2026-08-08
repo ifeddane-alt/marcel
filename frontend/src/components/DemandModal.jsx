@@ -4,14 +4,14 @@ import { demandsAPI } from "@/api";
 import { toast } from "sonner";
 
 const URGENCY_CFG = {
-  low:      { label: "Faible",   color: "bg-slate-100 text-slate-600 border-slate-200" },
+  low:      { label: "Faible",   color: "bg-zinc-100 text-zinc-600 border-zinc-200" },
   medium:   { label: "Moyen",    color: "bg-blue-50 text-blue-700 border-blue-200" },
   high:     { label: "Élevé",    color: "bg-amber-50 text-amber-700 border-amber-200" },
   critical: { label: "Critique", color: "bg-rose-50 text-rose-700 border-rose-200" },
 };
 
 const STATUS_CFG = {
-  nouvelle:  { label: "Nouvelle",  color: "bg-slate-100 text-slate-700" },
+  nouvelle:  { label: "Nouvelle",  color: "bg-zinc-100 text-zinc-700" },
   qualifiee: { label: "Qualifiée", color: "bg-blue-50 text-blue-700" },
   priorisee: { label: "Priorisée", color: "bg-violet-50 text-violet-700" },
   acceptee:  { label: "Acceptée",  color: "bg-emerald-50 text-emerald-700" },
@@ -24,23 +24,23 @@ function DemandForm({ form, onChange }) {
   return (
     <div className="grid grid-cols-2 gap-4">
       <div className="col-span-2">
-        <label className="block text-xs font-semibold text-slate-600 mb-1">
+        <label className="block text-xs font-semibold text-zinc-600 mb-1">
           Titre <span className="text-rose-500">*</span>
         </label>
         <input
           data-testid="demand-title-input"
           type="text"
-          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0052CC]/30"
+          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
           placeholder="Titre de la demande"
           value={form.title}
           onChange={(e) => onChange("title", e.target.value)}
         />
       </div>
       <div className="col-span-2">
-        <label className="block text-xs font-semibold text-slate-600 mb-1">Description</label>
+        <label className="block text-xs font-semibold text-zinc-600 mb-1">Description</label>
         <textarea
           data-testid="demand-description-input"
-          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0052CC]/30 resize-none"
+          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 resize-none"
           rows={3}
           placeholder="Contexte et objectifs du projet..."
           value={form.description}
@@ -48,34 +48,34 @@ function DemandForm({ form, onChange }) {
         />
       </div>
       <div>
-        <label className="block text-xs font-semibold text-slate-600 mb-1">
+        <label className="block text-xs font-semibold text-zinc-600 mb-1">
           Demandeur <span className="text-rose-500">*</span>
         </label>
         <input
           data-testid="demand-requester-input"
           type="text"
-          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0052CC]/30"
+          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
           placeholder="Nom du demandeur"
           value={form.requester}
           onChange={(e) => onChange("requester", e.target.value)}
         />
       </div>
       <div>
-        <label className="block text-xs font-semibold text-slate-600 mb-1">Direction / Département</label>
+        <label className="block text-xs font-semibold text-zinc-600 mb-1">Direction / Département</label>
         <input
           data-testid="demand-department-input"
           type="text"
-          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0052CC]/30"
+          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
           placeholder="Direction Financière, DSI…"
           value={form.requester_department}
           onChange={(e) => onChange("requester_department", e.target.value)}
         />
       </div>
       <div className="col-span-2">
-        <label className="block text-xs font-semibold text-slate-600 mb-1">Valeur métier</label>
+        <label className="block text-xs font-semibold text-zinc-600 mb-1">Valeur métier</label>
         <textarea
           data-testid="demand-business-value-input"
-          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0052CC]/30 resize-none"
+          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 resize-none"
           rows={2}
           placeholder="Bénéfices attendus, KPIs cibles..."
           value={form.business_value}
@@ -83,11 +83,11 @@ function DemandForm({ form, onChange }) {
         />
       </div>
       <div>
-        <label className="block text-xs font-semibold text-slate-600 mb-1">Budget estimé (€)</label>
+        <label className="block text-xs font-semibold text-zinc-600 mb-1">Budget estimé (€)</label>
         <input
           data-testid="demand-budget-input"
           type="number"
-          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0052CC]/30"
+          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
           placeholder="0"
           min="0"
           value={form.estimated_budget}
@@ -95,10 +95,10 @@ function DemandForm({ form, onChange }) {
         />
       </div>
       <div>
-        <label className="block text-xs font-semibold text-slate-600 mb-1">Urgence</label>
+        <label className="block text-xs font-semibold text-zinc-600 mb-1">Urgence</label>
         <select
           data-testid="demand-urgency-select"
-          className="w-full border border-slate-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-[#0052CC]/30 bg-white"
+          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 bg-white"
           value={form.urgency}
           onChange={(e) => onChange("urgency", e.target.value)}
         >
@@ -122,8 +122,8 @@ function WorkflowActions({ demand, canWrite, onTransition, onConvert }) {
   if (!canWrite) return null;
 
   return (
-    <div className="border-t border-slate-100 pt-4 mt-4">
-      <div className="text-xs font-semibold text-slate-500 mb-3 uppercase tracking-wider">
+    <div className="border-t border-zinc-100 pt-4 mt-4">
+      <div className="text-xs font-semibold text-zinc-500 mb-3 uppercase tracking-wider">
         Actions workflow
       </div>
 
@@ -147,7 +147,7 @@ function WorkflowActions({ demand, canWrite, onTransition, onConvert }) {
                   type="number"
                   min="0"
                   max="100"
-                  className="border border-slate-200 rounded-lg px-3 py-2 text-sm w-28 focus:outline-none focus:ring-2 focus:ring-violet-400/40"
+                  className="border border-zinc-200 rounded-lg px-3 py-2 text-sm w-28 focus:outline-none focus:ring-2 focus:ring-violet-400/40"
                   placeholder="Score 0-100"
                   value={priorityScore}
                   onChange={(e) => setPriorityScore(Number(e.target.value))}
@@ -159,7 +159,7 @@ function WorkflowActions({ demand, canWrite, onTransition, onConvert }) {
                 >
                   Confirmer
                 </button>
-                <button onClick={() => setShowPriorityScore(false)} className="px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50">
+                <button onClick={() => setShowPriorityScore(false)} className="px-3 py-2 rounded-lg border border-zinc-200 text-sm text-zinc-600 hover:bg-zinc-50">
                   Annuler
                 </button>
               </div>
@@ -203,7 +203,7 @@ function WorkflowActions({ demand, canWrite, onTransition, onConvert }) {
                   >
                     Confirmer le refus
                   </button>
-                  <button onClick={() => setShowRefuseReason(false)} className="px-3 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50">
+                  <button onClick={() => setShowRefuseReason(false)} className="px-3 py-2 rounded-lg border border-zinc-200 text-sm text-zinc-600 hover:bg-zinc-50">
                     Annuler
                   </button>
                 </div>
@@ -299,9 +299,9 @@ export default function DemandModal({ demand, onClose, onSaved, canWrite, onConv
         className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col"
       >
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
           <div className="flex items-center gap-3">
-            <h2 className="text-base font-bold text-slate-800">
+            <h2 className="text-base font-bold text-zinc-800">
               {isEdit ? "Modifier la demande" : "Nouvelle demande"}
             </h2>
             {statusCfg && (
@@ -313,7 +313,7 @@ export default function DemandModal({ demand, onClose, onSaved, canWrite, onConv
           <button
             data-testid="demand-modal-close"
             onClick={onClose}
-            className="text-slate-400 hover:text-slate-600 transition-colors"
+            className="text-zinc-400 hover:text-zinc-600 transition-colors"
           >
             <X size={18} />
           </button>
@@ -344,7 +344,7 @@ export default function DemandModal({ demand, onClose, onSaved, canWrite, onConv
 
           {/* Méta-informations */}
           {isEdit && (
-            <div className="grid grid-cols-3 gap-3 text-xs text-slate-500">
+            <div className="grid grid-cols-3 gap-3 text-xs text-zinc-500">
               {demand?.requester_department && (
                 <div className="flex items-center gap-1.5">
                   <User size={11} />
@@ -379,30 +379,30 @@ export default function DemandModal({ demand, onClose, onSaved, canWrite, onConv
             /* Vue read-only pour les demandes avancées dans le workflow */
             <div className="space-y-3 text-sm">
               <div>
-                <div className="text-xs font-semibold text-slate-500 mb-1">Titre</div>
-                <div className="text-slate-800 font-medium">{demand.title}</div>
+                <div className="text-xs font-semibold text-zinc-500 mb-1">Titre</div>
+                <div className="text-zinc-800 font-medium">{demand.title}</div>
               </div>
               {demand.description && (
                 <div>
-                  <div className="text-xs font-semibold text-slate-500 mb-1">Description</div>
-                  <div className="text-slate-700">{demand.description}</div>
+                  <div className="text-xs font-semibold text-zinc-500 mb-1">Description</div>
+                  <div className="text-zinc-700">{demand.description}</div>
                 </div>
               )}
               {demand.business_value && (
                 <div>
-                  <div className="text-xs font-semibold text-slate-500 mb-1">Valeur métier</div>
-                  <div className="text-slate-700">{demand.business_value}</div>
+                  <div className="text-xs font-semibold text-zinc-500 mb-1">Valeur métier</div>
+                  <div className="text-zinc-700">{demand.business_value}</div>
                 </div>
               )}
               <div className="grid grid-cols-2 gap-3">
                 <div>
-                  <div className="text-xs font-semibold text-slate-500 mb-1">Demandeur</div>
-                  <div className="text-slate-700">{demand.requester}</div>
+                  <div className="text-xs font-semibold text-zinc-500 mb-1">Demandeur</div>
+                  <div className="text-zinc-700">{demand.requester}</div>
                 </div>
                 {demand.requester_department && (
                   <div>
-                    <div className="text-xs font-semibold text-slate-500 mb-1">Direction</div>
-                    <div className="text-slate-700">{demand.requester_department}</div>
+                    <div className="text-xs font-semibold text-zinc-500 mb-1">Direction</div>
+                    <div className="text-zinc-700">{demand.requester_department}</div>
                   </div>
                 )}
               </div>
@@ -422,11 +422,11 @@ export default function DemandModal({ demand, onClose, onSaved, canWrite, onConv
 
         {/* Footer */}
         {(!isEdit || demand?.status === "nouvelle") && canWrite && (
-          <div className="flex justify-end gap-3 px-6 py-4 border-t border-slate-100">
+          <div className="flex justify-end gap-3 px-6 py-4 border-t border-zinc-100">
             <button
               data-testid="demand-modal-cancel"
               onClick={onClose}
-              className="px-4 py-2 rounded-lg border border-slate-200 text-sm text-slate-600 hover:bg-slate-50 transition-colors"
+              className="px-4 py-2 rounded-lg border border-zinc-200 text-sm text-zinc-600 hover:bg-zinc-50 transition-colors"
             >
               Annuler
             </button>
@@ -434,7 +434,7 @@ export default function DemandModal({ demand, onClose, onSaved, canWrite, onConv
               data-testid="demand-modal-save"
               onClick={handleSave}
               disabled={loading}
-              className="px-5 py-2 rounded-lg bg-[#0052CC] text-white text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-60"
+              className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-60"
             >
               {loading ? "Enregistrement…" : isEdit ? "Mettre à jour" : "Créer la demande"}
             </button>

@@ -4,11 +4,11 @@ import { Layers, BookOpen, FileText, ChevronRight, ChevronDown } from "lucide-re
 const LEVEL_CONFIG = {
   feature:    { label: "FEATURE",    Icon: Layers,   bg: "bg-blue-50",   text: "text-blue-700",   border: "border-blue-200" },
   user_story: { label: "USER STORY", Icon: BookOpen, bg: "bg-violet-50", text: "text-violet-700", border: "border-violet-200" },
-  task:       { label: "TÂCHE",      Icon: FileText, bg: "bg-slate-50",  text: "text-slate-600",  border: "border-slate-200" },
+  task:       { label: "TÂCHE",      Icon: FileText, bg: "bg-zinc-50",  text: "text-zinc-600",  border: "border-zinc-200" },
 };
 
 const PHASE_COLORS = {
-  backlog:        "bg-slate-100 text-slate-600",
+  backlog:        "bg-zinc-100 text-zinc-600",
   review:         "bg-blue-50 text-blue-600",
   analysis:       "bg-amber-50 text-amber-700",
   implementation: "bg-indigo-50 text-indigo-700",
@@ -19,13 +19,13 @@ const PHASE_COLORS = {
 };
 
 const STATUS_LABELS = {
-  not_started: { label: "À faire",  cls: "bg-slate-200 text-slate-600" },
+  not_started: { label: "À faire",  cls: "bg-zinc-200 text-zinc-600" },
   in_progress: { label: "En cours", cls: "bg-blue-500 text-white" },
   done:        { label: "Fait",     cls: "bg-emerald-500 text-white" },
   blocked:     { label: "Bloqué",   cls: "bg-rose-500 text-white" },
   delayed:     { label: "Retard",   cls: "bg-amber-500 text-white" },
   review:      { label: "Révision", cls: "bg-amber-500 text-white" },
-  cancelled:   { label: "Annulé",   cls: "bg-slate-400 text-white" },
+  cancelled:   { label: "Annulé",   cls: "bg-zinc-400 text-white" },
 };
 
 /**
@@ -56,7 +56,7 @@ export default function TaskTreeView({ tasks, onSelectTask }) {
 
   if (!tasks || tasks.length === 0) {
     return (
-      <div className="text-center py-8 text-slate-400 text-sm">
+      <div className="text-center py-8 text-zinc-400 text-sm">
         Aucune tâche pour ce projet.
       </div>
     );
@@ -84,7 +84,7 @@ export default function TaskTreeView({ tasks, onSelectTask }) {
   const hasDirectChildren = (taskId) => tasks.some(t => t.parent_id === taskId);
 
   return (
-    <div className="border border-gray-200 rounded overflow-hidden" data-testid="task-tree-view">
+    <div className="border border-zinc-200 rounded-lg overflow-hidden" data-testid="task-tree-view">
       {flatTree.filter(({ task }) => !isHidden(task)).map(({ task, depth }) => {
         const level = task.task_level || "task";
         const cfg = LEVEL_CONFIG[level] || LEVEL_CONFIG.task;
@@ -97,7 +97,7 @@ export default function TaskTreeView({ tasks, onSelectTask }) {
         return (
           <div
             key={task.task_id}
-            className="flex items-center gap-2 px-3 py-2 hover:bg-gray-50/80 cursor-pointer border-b border-gray-50 transition-colors"
+            className="flex items-center gap-2 px-3 py-2 hover:bg-zinc-50/80 cursor-pointer border-b border-zinc-50 transition-colors"
             style={{ paddingLeft: `${12 + depth * 20}px` }}
             onClick={() => onSelectTask && onSelectTask(task)}
             data-testid={`task-tree-row-${task.task_id}`}
@@ -106,7 +106,7 @@ export default function TaskTreeView({ tasks, onSelectTask }) {
             <div className="w-4 flex-shrink-0 flex items-center justify-center">
               {hasKids ? (
                 <button
-                  className="text-slate-400 hover:text-slate-600 p-0.5"
+                  className="text-zinc-400 hover:text-zinc-600 p-0.5"
                   onClick={(e) => toggleCollapse(task.task_id, e)}
                 >
                   {isCollapsed
@@ -119,17 +119,17 @@ export default function TaskTreeView({ tasks, onSelectTask }) {
             </div>
 
             {/* Level badge */}
-            <span className={`flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded border flex-shrink-0 ${cfg.bg} ${cfg.text} ${cfg.border}`}>
+            <span className={`flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-lg border flex-shrink-0 ${cfg.bg} ${cfg.text} ${cfg.border}`}>
               <Icon size={9} />
               {cfg.label}
             </span>
 
             {/* Name */}
-            <span className="text-sm text-slate-800 flex-1 truncate font-medium">{task.name}</span>
+            <span className="text-sm text-zinc-800 flex-1 truncate font-medium">{task.name}</span>
 
             {/* Phase */}
             {phase && phase !== "backlog" && (
-              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded flex-shrink-0 ${PHASE_COLORS[phase] || "bg-slate-100 text-slate-600"}`}>
+              <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-lg flex-shrink-0 ${PHASE_COLORS[phase] || "bg-zinc-100 text-zinc-600"}`}>
                 {phase.toUpperCase()}
               </span>
             )}
@@ -141,7 +141,7 @@ export default function TaskTreeView({ tasks, onSelectTask }) {
 
             {/* JH */}
             {(task.jh_planned > 0 || task.jh_consumed > 0) && (
-              <span className="text-[11px] font-mono text-slate-400 flex-shrink-0 hidden lg:block whitespace-nowrap">
+              <span className="text-[11px] font-mono text-zinc-400 flex-shrink-0 hidden lg:block whitespace-nowrap">
                 {(task.jh_consumed || 0).toFixed(0)}/{(task.jh_planned || 0).toFixed(0)} JH
               </span>
             )}

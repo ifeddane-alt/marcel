@@ -92,7 +92,7 @@ export default function ProjectGantt({ tasks = [], milestones = [], onTaskClick 
 
   if (ganttTasks.length === 0) {
     return (
-      <div className="py-10 text-center text-sm text-slate-400" data-testid="gantt-empty">
+      <div className="py-10 text-center text-sm text-zinc-400" data-testid="gantt-empty">
         Aucune tâche avec des dates planifiées. Ajoutez des dates de début et fin pour afficher le Gantt.
       </div>
     );
@@ -107,16 +107,16 @@ export default function ProjectGantt({ tasks = [], milestones = [], onTaskClick 
             key={mode}
             onClick={() => setViewMode(mode)}
             data-testid={`gantt-view-${mode.toLowerCase().replace(" ", "-")}`}
-            className={`px-3 py-1.5 text-xs font-medium rounded transition-colors ${
+            className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
               viewMode === mode
-                ? "bg-[#0052CC] text-white"
-                : "text-slate-600 border border-gray-200 hover:bg-gray-50"
+                ? "bg-blue-600 text-white"
+                : "text-zinc-600 border border-zinc-200 hover:bg-zinc-50"
             }`}
           >
             {VIEW_LABELS[mode]}
           </button>
         ))}
-        <span className="text-xs text-slate-400 ml-2">
+        <span className="text-xs text-zinc-400 ml-2">
           {ganttTasks.length} tâche{ganttTasks.length > 1 ? "s" : ""}
         </span>
       </div>
@@ -128,7 +128,7 @@ export default function ProjectGantt({ tasks = [], milestones = [], onTaskClick 
 
       <style>{`
         .gantt .bar-completed rect { fill: #10B981; }
-        .gantt .bar-in-progress rect { fill: #0052CC; }
+        .gantt .bar-in-progress rect { fill: #2563eb; }
         .gantt .bar-not-started rect { fill: #94A3B8; }
         .gantt .milestone-green rect { fill: #10B981; }
         .gantt .milestone-orange rect { fill: #F59E0B; }
@@ -145,7 +145,7 @@ export default function ProjectGantt({ tasks = [], milestones = [], onTaskClick 
         .gantt .ms-gold-strategic rect,
         .gantt .ms-violet-strategic rect,
         .gantt .ms-green-strategic rect { fill: inherit; stroke: #3B82F6; stroke-width: 2; }
-        .gantt .bar-label { font-size: 11px; fill: #0F172A; font-weight: 500; }
+        .gantt .bar-label { font-size: 11px; fill: #09090b; font-weight: 500; }
         .gantt .today-highlight { fill: rgba(0,82,204,0.07); }
       `}</style>
     </div>

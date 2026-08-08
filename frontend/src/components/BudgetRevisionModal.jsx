@@ -3,14 +3,14 @@ import { Loader2 } from "lucide-react";
 import Modal from "@/components/Modal";
 import api from "@/api";
 
-const INPUT_CLS = "w-full text-sm border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
 
 function Field({ label, required, error, hint, children }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-slate-600 mb-1">
+      <label className="block text-xs font-semibold text-zinc-600 mb-1">
         {label}{required && <span className="text-rose-500 ml-0.5">*</span>}
-        {hint && <span className="text-slate-400 font-normal ml-1">({hint})</span>}
+        {hint && <span className="text-zinc-400 font-normal ml-1">({hint})</span>}
       </label>
       {children}
       {error && <p className="text-[11px] text-rose-500 mt-0.5">{error}</p>}
@@ -63,11 +63,11 @@ export default function BudgetRevisionModal({ isOpen, onClose, project, onSaved 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title="Réviser l'EAC (Estimate At Completion)">
       <form onSubmit={handleSubmit} className="space-y-4" data-testid="budget-revision-form">
-        {apiError && <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded px-3 py-2">{apiError}</div>}
+        {apiError && <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{apiError}</div>}
 
-        <div className="bg-slate-50 border border-gray-200 rounded p-3 flex items-center justify-between text-sm">
-          <span className="text-slate-500">EAC actuel :</span>
-          <span className="font-mono-data font-bold text-[#0F172A]">{currentEacK.toLocaleString("fr-FR")} K€</span>
+        <div className="bg-zinc-50 border border-zinc-200 rounded-lg p-3 flex items-center justify-between text-sm">
+          <span className="text-zinc-500">EAC actuel :</span>
+          <span className="font-mono-data font-bold text-zinc-950">{currentEacK.toLocaleString("fr-FR")} K€</span>
         </div>
 
         <Field label="Nouvel EAC" required hint="en K€" error={errors.eac}>
@@ -79,9 +79,9 @@ export default function BudgetRevisionModal({ isOpen, onClose, project, onSaved 
         </Field>
 
         {form.eac && !isNaN(Number(form.eac)) && (
-          <div className={`flex items-center justify-between rounded px-3 py-2 text-sm ${drift > 0 ? "bg-rose-50 border border-rose-200" : drift < 0 ? "bg-emerald-50 border border-emerald-200" : "bg-gray-50 border border-gray-200"}`}>
-            <span className="text-slate-500">Variation :</span>
-            <span className={`font-mono-data font-bold ${drift > 0 ? "text-rose-600" : drift < 0 ? "text-emerald-600" : "text-slate-500"}`}>
+          <div className={`flex items-center justify-between rounded-lg px-3 py-2 text-sm ${drift > 0 ? "bg-rose-50 border border-rose-200" : drift < 0 ? "bg-emerald-50 border border-emerald-200" : "bg-zinc-50 border border-zinc-200"}`}>
+            <span className="text-zinc-500">Variation :</span>
+            <span className={`font-mono-data font-bold ${drift > 0 ? "text-rose-600" : drift < 0 ? "text-emerald-600" : "text-zinc-500"}`}>
               {drift > 0 ? "+" : ""}{drift.toLocaleString("fr-FR")} K€
               {currentEacK > 0 ? ` (${drift > 0 ? "+" : ""}${Math.round(drift / currentEacK * 100)}%)` : ""}
             </span>
@@ -104,10 +104,10 @@ export default function BudgetRevisionModal({ isOpen, onClose, project, onSaved 
           />
         </Field>
 
-        <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
-          <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-600 border border-gray-200 rounded hover:bg-gray-50 transition-colors">Annuler</button>
+        <div className="flex justify-end gap-3 pt-2 border-t border-zinc-100">
+          <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">Annuler</button>
           <button type="submit" disabled={saving} data-testid="revision-form-submit"
-            className="flex items-center gap-2 px-5 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] disabled:opacity-50 transition-colors">
+            className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
             {saving && <Loader2 size={14} className="animate-spin" />}
             Enregistrer la révision
           </button>

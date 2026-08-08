@@ -24,11 +24,11 @@ export default function Modal({ isOpen, onClose, title, children, size = "md" })
         className={`relative bg-white rounded-lg shadow-2xl w-full ${widths[size] || widths.md} flex flex-col`}
         data-testid="modal-container"
       >
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-200 bg-[#0F172A] rounded-t-lg">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-200 bg-zinc-950 rounded-t-lg">
           <h2 className="font-heading font-bold text-base text-white tracking-wide">{title}</h2>
           <button
             onClick={onClose}
-            className="text-slate-400 hover:text-white transition-colors p-1 rounded"
+            className="text-zinc-400 hover:text-white transition-colors p-1 rounded-lg"
             data-testid="modal-close-btn"
           >
             <X size={18} />

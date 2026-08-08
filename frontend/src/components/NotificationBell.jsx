@@ -13,7 +13,7 @@ const TYPE_CONFIG = {
   milestone_approaching: { icon: Calendar,       color: "text-purple-600",  bg: "bg-purple-50" },
   alert_triggered:       { icon: AlertTriangle,  color: "text-rose-600",    bg: "bg-rose-50" },
   decision_created:      { icon: Info,           color: "text-blue-600",    bg: "bg-blue-50" },
-  demand_status_changed: { icon: Info,           color: "text-slate-600",   bg: "bg-slate-50" },
+  demand_status_changed: { icon: Info,           color: "text-zinc-600",   bg: "bg-zinc-50" },
 };
 
 function timeAgo(iso) {
@@ -119,7 +119,7 @@ export default function NotificationBell() {
       <button
         onClick={() => setOpen(!open)}
         data-testid="notification-bell"
-        className="relative p-2 rounded-lg text-slate-500 hover:text-slate-800 hover:bg-gray-100 transition-colors"
+        className="relative p-2 rounded-lg text-zinc-500 hover:text-zinc-800 hover:bg-zinc-100 transition-colors"
       >
         <Bell size={18} />
         {unreadCount > 0 && (
@@ -135,13 +135,13 @@ export default function NotificationBell() {
       {open && (
         <div
           data-testid="notification-dropdown"
-          className="absolute right-0 top-full mt-2 w-96 bg-white border border-gray-200 rounded-xl shadow-2xl z-50 overflow-hidden"
+          className="absolute right-0 top-full mt-2 w-96 bg-white border border-zinc-200 rounded-xl shadow-2xl z-50 overflow-hidden"
         >
           {/* Header */}
-          <div className="flex items-center justify-between px-4 py-3 border-b border-gray-100">
+          <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-100">
             <div className="flex items-center gap-2">
-              <Bell size={14} className="text-slate-600" />
-              <span className="font-bold text-sm text-slate-800">Notifications</span>
+              <Bell size={14} className="text-zinc-600" />
+              <span className="font-bold text-sm text-zinc-800">Notifications</span>
               {unreadCount > 0 && (
                 <span className="text-[10px] font-bold bg-rose-100 text-rose-700 px-1.5 py-0.5 rounded-full">
                   {unreadCount} non lue{unreadCount > 1 ? "s" : ""}
@@ -160,9 +160,9 @@ export default function NotificationBell() {
           </div>
 
           {/* List */}
-          <div className="max-h-96 overflow-y-auto divide-y divide-gray-50">
+          <div className="max-h-96 overflow-y-auto divide-y divide-zinc-50">
             {notifications.length === 0 ? (
-              <div className="flex flex-col items-center justify-center py-10 text-slate-400">
+              <div className="flex flex-col items-center justify-center py-10 text-zinc-400">
                 <Bell size={22} className="mb-2 opacity-30" />
                 <p className="text-xs">Aucune notification</p>
               </div>
@@ -182,12 +182,12 @@ export default function NotificationBell() {
                     </div>
                     <div className="flex-1 min-w-0">
                       <div className="flex items-center justify-between gap-1">
-                        <span className={`text-xs font-semibold ${n.read ? "text-slate-600" : "text-slate-800"}`}>
+                        <span className={`text-xs font-semibold ${n.read ? "text-zinc-600" : "text-zinc-800"}`}>
                           {n.label}
                         </span>
-                        <span className="text-[9px] text-slate-400 whitespace-nowrap">{timeAgo(n.created_at)}</span>
+                        <span className="text-[9px] text-zinc-400 whitespace-nowrap">{timeAgo(n.created_at)}</span>
                       </div>
-                      <p className="text-[11px] text-slate-500 mt-0.5 line-clamp-2">{n.message}</p>
+                      <p className="text-[11px] text-zinc-500 mt-0.5 line-clamp-2">{n.message}</p>
                     </div>
                     {!n.read && (
                       <div className="w-2 h-2 rounded-full bg-blue-500 flex-shrink-0 mt-1.5" />

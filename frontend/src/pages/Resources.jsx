@@ -68,20 +68,20 @@ export default function Resources() {
     catch { /* ignore */ } finally { setDeleting(false); }
   };
 
-  if (loading) return <div className="p-8 text-slate-400 text-sm">Chargement des ressources...</div>;
+  if (loading) return <div className="p-8 text-zinc-400 text-sm">Chargement des ressources...</div>;
 
   return (
     <div className="p-4 md:p-6 lg:p-8" data-testid="resources-page">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">Ressources</h1>
-          <p className="text-sm text-slate-500 mt-0.5">{resources.length} ressources · Capacités et allocations</p>
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">Ressources</h1>
+          <p className="text-sm text-zinc-500 mt-0.5">{resources.length} ressources · Capacités et allocations</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <ExcelToolbar entity="resources" onImported={fetchAll} canImport={canCreate} />
           {canCreate && (
             <button onClick={openCreate} data-testid="btn-new-resource"
-              className="flex items-center gap-2 px-4 py-2.5 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] transition-colors shadow-sm">
+              className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
               <Plus size={15} /> Nouvelle ressource
             </button>
           )}
@@ -89,7 +89,7 @@ export default function Resources() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-5 border-b border-gray-200">
+      <div className="flex gap-1 mb-5 border-b border-zinc-200">
         {[
           { id: "resources", label: "Annuaire ressources" },
           { id: "heatmap", label: "Heatmap capacités", icon: BarChart3 },
@@ -100,8 +100,8 @@ export default function Resources() {
             data-testid={`tab-${id}`}
             className={`flex items-center gap-2 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors -mb-px ${
               activeTab === id
-                ? "border-[#0052CC] text-[#0052CC]"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent text-zinc-500 hover:text-zinc-700"
             }`}
           >
             {Icon && <Icon size={14} />}
@@ -119,10 +119,10 @@ export default function Resources() {
               { label: "Équipes", value: new Set(resources.map((r) => r.team).filter(Boolean)).size, sub: "distinctes" },
               { label: "Allocations actives", value: allocations.length, sub: "entrées" },
             ].map((card) => (
-              <div key={card.label} className="bg-white border border-gray-200 rounded shadow-sm p-4 border-l-4 border-l-[#0052CC]">
-                <div className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold">{card.label}</div>
-                <div className="font-heading text-2xl font-bold text-[#0F172A] mt-2">{card.value}</div>
-                <div className="text-xs text-slate-400 mt-0.5">{card.sub}</div>
+              <div key={card.label} className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4 border-l-4 border-l-[#2563eb]">
+                <div className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">{card.label}</div>
+                <div className="font-heading text-2xl font-bold text-zinc-950 mt-2">{card.value}</div>
+                <div className="text-xs text-zinc-400 mt-0.5">{card.sub}</div>
               </div>
             ))}
           </div>
@@ -130,7 +130,7 @@ export default function Resources() {
           <div className="relative mb-4 max-w-xs">
             <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
               placeholder="Rechercher une ressource..." data-testid="resources-search-input"
-              className="w-full pl-4 pr-3 py-2 text-sm border border-gray-200 rounded bg-white focus:outline-none focus:border-[#0052CC]" />
+              className="w-full pl-4 pr-3 py-2 text-sm border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-blue-600" />
           </div>
 
           {/* Filtres par type */}
@@ -145,29 +145,29 @@ export default function Resources() {
                 key={id}
                 onClick={() => setTypeFilter(id)}
                 data-testid={`filter-type-${id}`}
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded border transition-all ${
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border transition-all ${
                   typeFilter === id
-                    ? `${bg || "bg-slate-100"} ${text || "text-slate-700"} ${border || "border-slate-300"}`
-                    : "bg-white border-gray-200 text-slate-500 hover:border-gray-300"
+                    ? `${bg || "bg-zinc-100"} ${text || "text-zinc-700"} ${border || "border-zinc-300"}`
+                    : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"
                 }`}
               >
                 {Icon && <Icon size={11} />}
                 {label}
-                <span className={`text-[10px] font-mono ml-0.5 ${typeFilter === id ? "" : "text-slate-400"}`}>
+                <span className={`text-[10px] font-mono ml-0.5 ${typeFilter === id ? "" : "text-zinc-400"}`}>
                   {id === "all" ? resources.length : resources.filter(r => r.resource_type === id || (!r.resource_type && id === "interne")).length}
                 </span>
               </button>
             ))}
           </div>
 
-          <div className="bg-white border border-gray-200 rounded shadow-sm overflow-x-auto">
+          <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-x-auto">
             <table className="w-full text-sm" data-testid="resources-table">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-200 text-left">
+                <tr className="bg-zinc-50 border-b border-zinc-200 text-left">
                   {["Ressource","Type","Rôle","Équipe","TJM","Dispo","Capa effective","JH alloués","Charge"].map((h) => (
-                    <th key={h} className="px-4 py-3 text-xs font-semibold text-slate-600">{h}</th>
+                    <th key={h} className="px-4 py-3 text-xs font-semibold text-zinc-600">{h}</th>
                   ))}
-                  {(canEdit || hasPermission("resources.delete")) && <th className="px-4 py-3 text-xs font-semibold text-slate-600 text-right">Actions</th>}
+                  {(canEdit || hasPermission("resources.delete")) && <th className="px-4 py-3 text-xs font-semibold text-zinc-600 text-right">Actions</th>}
                 </tr>
               </thead>
               <tbody>
@@ -180,13 +180,13 @@ export default function Resources() {
                   const initials = r.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
                   const teamLabel = r.team || "—";
                   return (
-                    <tr key={r.resource_id} className="border-b border-gray-100 hover:bg-gray-50/60 transition-colors" data-testid={`resource-row-${r.resource_id}`}>
+                    <tr key={r.resource_id} className="border-b border-zinc-100 hover:bg-zinc-50/60 transition-colors" data-testid={`resource-row-${r.resource_id}`}>
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded bg-[#0052CC]/10 flex items-center justify-center flex-shrink-0">
-                            <span className="text-[10px] font-bold text-[#0052CC]">{initials}</span>
+                          <div className="w-7 h-7 rounded-lg bg-blue-600/10 flex items-center justify-center flex-shrink-0">
+                            <span className="text-[10px] font-bold text-blue-600">{initials}</span>
                           </div>
-                          <span className="font-medium text-slate-800">{r.name}</span>
+                          <span className="font-medium text-zinc-800">{r.name}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3">
@@ -194,7 +194,7 @@ export default function Resources() {
                           const cfg = TYPE_CONFIG[r.resource_type || "interne"];
                           const { Icon } = cfg;
                           return (
-                            <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded border ${cfg.bg} ${cfg.text} ${cfg.border}`}
+                            <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-2 py-0.5 rounded-lg border ${cfg.bg} ${cfg.text} ${cfg.border}`}
                               data-testid={`resource-type-badge-${r.resource_id}`}>
                               <Icon size={10} />
                               {cfg.label}
@@ -202,42 +202,42 @@ export default function Resources() {
                           );
                         })()}
                       </td>
-                      <td className="px-4 py-3 text-slate-600">{r.role}</td>
+                      <td className="px-4 py-3 text-zinc-600">{r.role}</td>
                       <td className="px-4 py-3">
-                        {teamLabel !== "—" ? <span className="text-xs bg-slate-100 text-slate-600 px-2 py-0.5 rounded border border-slate-200">{teamLabel}</span> : <span className="text-slate-300">—</span>}
+                        {teamLabel !== "—" ? <span className="text-xs bg-zinc-100 text-zinc-600 px-2 py-0.5 rounded-lg border border-zinc-200">{teamLabel}</span> : <span className="text-zinc-300">—</span>}
                       </td>
-                      <td className="px-4 py-3 font-mono text-xs text-slate-700">
-                        {r.tjm_eur ? `${r.tjm_eur.toLocaleString("fr-FR")} €` : <span className="text-slate-300">—</span>}
+                      <td className="px-4 py-3 font-mono text-xs text-zinc-700">
+                        {r.tjm_eur ? `${r.tjm_eur.toLocaleString("fr-FR")} €` : <span className="text-zinc-300">—</span>}
                       </td>
-                      <td className="px-4 py-3 text-xs text-slate-600">
-                        {availRate < 100 ? <span className="text-amber-600 font-semibold">{availRate}%</span> : <span className="text-slate-400">100%</span>}
+                      <td className="px-4 py-3 text-xs text-zinc-600">
+                        {availRate < 100 ? <span className="text-amber-600 font-semibold">{availRate}%</span> : <span className="text-zinc-400">100%</span>}
                       </td>
-                      <td className="px-4 py-3 font-mono text-sm font-bold text-slate-700">{capaEffective} JH</td>
-                      <td className="px-4 py-3 font-mono text-sm text-slate-700">
-                        {totalAllocated > 0 ? `${totalAllocated} JH` : <span className="text-slate-300">—</span>}
+                      <td className="px-4 py-3 font-mono text-sm font-bold text-zinc-700">{capaEffective} JH</td>
+                      <td className="px-4 py-3 font-mono text-sm text-zinc-700">
+                        {totalAllocated > 0 ? `${totalAllocated} JH` : <span className="text-zinc-300">—</span>}
                       </td>
                       <td className="px-4 py-3">
                         {totalAllocated > 0 ? (
                           <div className="flex items-center gap-2">
-                            <div className="h-1.5 w-20 bg-gray-100 rounded-full overflow-hidden">
-                              <div className={`h-full rounded-full ${overloaded ? "bg-rose-500" : "bg-[#0052CC]"}`} style={{ width: `${Math.min(chargeRate, 100)}%` }} />
+                            <div className="h-1.5 w-20 bg-zinc-100 rounded-full overflow-hidden">
+                              <div className={`h-full rounded-full ${overloaded ? "bg-rose-500" : "bg-blue-600"}`} style={{ width: `${Math.min(chargeRate, 100)}%` }} />
                             </div>
-                            <span className={`font-mono text-xs font-semibold ${overloaded ? "text-rose-600" : "text-slate-600"}`}>{chargeRate}%</span>
+                            <span className={`font-mono text-xs font-semibold ${overloaded ? "text-rose-600" : "text-zinc-600"}`}>{chargeRate}%</span>
                           </div>
-                        ) : <span className="text-slate-300 text-xs">Non allouée</span>}
+                        ) : <span className="text-zinc-300 text-xs">Non allouée</span>}
                       </td>
                       {(canEdit || hasPermission("resources.delete")) && (
                         <td className="px-4 py-3">
                           <div className="flex items-center justify-end gap-1">
                             {canEdit && (
                             <button onClick={(e) => openEdit(e, r)} data-testid={`btn-edit-resource-${r.resource_id}`}
-                              className="p-1.5 text-slate-400 hover:text-[#0052CC] hover:bg-blue-50 rounded transition-colors" title="Modifier">
+                              className="p-1.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Modifier">
                               <Pencil size={13} />
                             </button>
                             )}
                             {hasPermission("resources.delete") && (
                               <button onClick={(e) => { e.stopPropagation(); setConfirmDelete(r); }} data-testid={`btn-delete-resource-${r.resource_id}`}
-                                className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors" title="Supprimer">
+                                className="p-1.5 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Supprimer">
                                 <Trash2 size={13} />
                               </button>
                             )}
@@ -254,10 +254,10 @@ export default function Resources() {
       )}
 
       {activeTab === "heatmap" && (
-        <div className="bg-white border border-gray-200 rounded shadow-sm p-5" data-testid="heatmap-section">
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-5" data-testid="heatmap-section">
           <div className="mb-4">
-            <h2 className="font-heading text-base font-bold text-[#0F172A] uppercase tracking-tight">Heatmap capacité × période</h2>
-            <p className="text-xs text-slate-500 mt-0.5">Taux d'utilisation par équipe (allocations mensuelle / capacité effective)</p>
+            <h2 className="font-heading text-base font-bold text-zinc-950 tracking-tight">Heatmap capacité × période</h2>
+            <p className="text-xs text-zinc-500 mt-0.5">Taux d'utilisation par équipe (allocations mensuelle / capacité effective)</p>
           </div>
           <CapacityHeatmap
             data={heatmapData}

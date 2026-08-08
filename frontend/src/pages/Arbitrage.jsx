@@ -57,10 +57,10 @@ function CriteriaBar({ value }) {
   const pct = ((value || 0) / 5) * 100;
   return (
     <div className="flex items-center gap-1">
-      <div className="w-12 h-1.5 bg-slate-100 rounded-full overflow-hidden">
+      <div className="w-12 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
         <div className="h-full bg-blue-500 rounded-full transition-all" style={{ width: `${pct}%` }} />
       </div>
-      <span className="text-xs font-mono text-slate-500 w-4">{value || "—"}</span>
+      <span className="text-xs font-mono text-zinc-500 w-4">{value || "—"}</span>
     </div>
   );
 }
@@ -334,7 +334,7 @@ export default function Arbitrage() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-full">
-        <div className="text-slate-400 text-sm">Chargement de l'arbitrage...</div>
+        <div className="text-zinc-400 text-sm">Chargement de l'arbitrage...</div>
       </div>
     );
   }
@@ -347,8 +347,8 @@ export default function Arbitrage() {
       {/* ── Header ── */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 font-heading">Arbitrage Portefeuille</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-zinc-800 font-heading">Arbitrage Portefeuille</h1>
+          <p className="text-sm text-zinc-500 mt-0.5">
             Scoring multi-critères · Enveloppes budgétaires · Simulateur What-if
           </p>
         </div>
@@ -357,7 +357,7 @@ export default function Arbitrage() {
             onClick={handleExportPdf}
             disabled={exportingPdf}
             data-testid="btn-export-pdf"
-            className="flex items-center gap-2 px-4 py-2 border border-slate-200 text-slate-600 text-sm rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-60"
+            className="flex items-center gap-2 px-4 py-2 border border-zinc-200 text-zinc-600 text-sm rounded-lg hover:bg-zinc-50 transition-colors disabled:opacity-60"
           >
             <FileDown size={14} />
             {exportingPdf ? "Export..." : "Export PDF"}
@@ -366,7 +366,7 @@ export default function Arbitrage() {
             <button
               onClick={() => setShowWeightsModal(true)}
               data-testid="btn-configure-weights"
-              className="flex items-center gap-2 px-4 py-2 bg-slate-800 text-white text-sm rounded-lg hover:bg-slate-700 transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-zinc-800 text-white text-sm rounded-lg hover:bg-zinc-700 transition-colors"
             >
               <Sliders size={14} /> Configurer les poids
             </button>
@@ -376,28 +376,28 @@ export default function Arbitrage() {
 
       {/* ── KPI rapides ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white border border-slate-200 rounded-lg p-4" data-testid="kpi-projects-count">
-          <div className="text-xs text-slate-500 uppercase tracking-wider">Projets</div>
-          <div className="text-2xl font-bold text-slate-800 mt-1">{projects.length}</div>
+        <div className="bg-white border border-zinc-200 rounded-lg p-4" data-testid="kpi-projects-count">
+          <div className="text-xs text-zinc-500 uppercase tracking-wider">Projets</div>
+          <div className="text-2xl font-bold text-zinc-800 mt-1">{projects.length}</div>
         </div>
-        <div className="bg-white border border-slate-200 rounded-lg p-4" data-testid="kpi-avg-score">
-          <div className="text-xs text-slate-500 uppercase tracking-wider">Score moyen</div>
-          <div className="text-2xl font-bold text-slate-800 mt-1">
+        <div className="bg-white border border-zinc-200 rounded-lg p-4" data-testid="kpi-avg-score">
+          <div className="text-xs text-zinc-500 uppercase tracking-wider">Score moyen</div>
+          <div className="text-2xl font-bold text-zinc-800 mt-1">
             {projects.length ? Math.round(projects.reduce((s, p) => s + p.score, 0) / projects.length) : "—"}
           </div>
         </div>
-        <div className="bg-white border border-slate-200 rounded-lg p-4" data-testid="kpi-total-capex">
-          <div className="text-xs text-slate-500 uppercase tracking-wider">CAPEX total</div>
-          <div className="text-xl font-bold text-slate-800 mt-1">{formatEuro(totals.capex_planned)}</div>
+        <div className="bg-white border border-zinc-200 rounded-lg p-4" data-testid="kpi-total-capex">
+          <div className="text-xs text-zinc-500 uppercase tracking-wider">CAPEX total</div>
+          <div className="text-xl font-bold text-zinc-800 mt-1">{formatEuro(totals.capex_planned)}</div>
         </div>
-        <div className="bg-white border border-slate-200 rounded-lg p-4" data-testid="kpi-total-opex">
-          <div className="text-xs text-slate-500 uppercase tracking-wider">OPEX total</div>
-          <div className="text-xl font-bold text-slate-800 mt-1">{formatEuro(totals.opex_planned)}</div>
+        <div className="bg-white border border-zinc-200 rounded-lg p-4" data-testid="kpi-total-opex">
+          <div className="text-xs text-zinc-500 uppercase tracking-wider">OPEX total</div>
+          <div className="text-xl font-bold text-zinc-800 mt-1">{formatEuro(totals.opex_planned)}</div>
         </div>
       </div>
 
       {/* ── Onglets ── */}
-      <div className="flex gap-1 border-b border-slate-200 overflow-x-auto">
+      <div className="flex gap-1 border-b border-zinc-200 overflow-x-auto">
         {[
           { key: "scoring",    icon: Target,      label: "Scoring Projets" },
           { key: "envelopes",  icon: BarChart2,   label: "Enveloppes Budget" },
@@ -411,7 +411,7 @@ export default function Arbitrage() {
             className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors
               ${activeTab === key
                 ? "border-blue-600 text-blue-700"
-                : "border-transparent text-slate-500 hover:text-slate-700"}`}
+                : "border-transparent text-zinc-500 hover:text-zinc-700"}`}
           >
             <Icon size={14} /> {label}
           </button>
@@ -424,20 +424,20 @@ export default function Arbitrage() {
       {activeTab === "scoring" && (
         <div className="space-y-5">
           {/* Table Scoring */}
-          <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-            <div className="px-4 py-3 border-b border-slate-100 bg-slate-50">
+          <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden">
+            <div className="px-4 py-3 border-b border-zinc-100 bg-zinc-50">
               <div className="flex items-center gap-2">
-                <Target size={14} className="text-slate-500" />
-                <span className="text-sm font-semibold text-slate-700">Matrice de scoring — cliquer une cellule pour éditer</span>
+                <Target size={14} className="text-zinc-500" />
+                <span className="text-sm font-semibold text-zinc-700">Matrice de scoring — cliquer une cellule pour éditer</span>
                 {canEdit && (
-                  <span className="ml-2 text-xs text-slate-400">(Scale 1–5 · cliquer pour éditer)</span>
+                  <span className="ml-2 text-xs text-zinc-400">(Scale 1–5 · cliquer pour éditer)</span>
                 )}
               </div>
             </div>
             <div className="overflow-x-auto">
               <table className="w-full text-sm" data-testid="scoring-table">
                 <thead>
-                  <tr className="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider">
+                  <tr className="bg-zinc-50 text-xs text-zinc-500 uppercase tracking-wider">
                     <th className="px-4 py-2.5 text-left">Projet</th>
                     {CRITERIA_LABELS.map(c => (
                       <th key={c.key} className="px-2 py-2.5 text-center whitespace-nowrap">
@@ -447,17 +447,17 @@ export default function Arbitrage() {
                     <th className="px-4 py-2.5 text-center">Score</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-zinc-100">
                   {projects.map((proj, idx) => (
-                    <tr key={proj.project_id} className="hover:bg-slate-50 transition-colors">
+                    <tr key={proj.project_id} className="hover:bg-zinc-50 transition-colors">
                       <td className="px-4 py-2.5">
                         <div className="flex items-center gap-2">
-                          <span className="text-xs font-mono text-slate-400 w-4">#{idx + 1}</span>
+                          <span className="text-xs font-mono text-zinc-400 w-4">#{idx + 1}</span>
                           <div
                             className="w-2 h-2 rounded-full flex-shrink-0"
                             style={{ backgroundColor: RAG_COLORS[proj.status_rag] || "#94A3B8" }}
                           />
-                          <span className="font-medium text-slate-700 truncate max-w-[200px]" title={proj.name}>
+                          <span className="font-medium text-zinc-700 truncate max-w-[200px]" title={proj.name}>
                             {proj.name}
                           </span>
                         </div>
@@ -475,21 +475,21 @@ export default function Arbitrage() {
                                   onChange={e => setEditingValue(e.target.value)}
                                   onKeyDown={e => { if (e.key === "Enter") handleCellSave(); if (e.key === "Escape") setEditingCell(null); }}
                                   autoFocus
-                                  className="w-12 text-center border border-blue-300 rounded px-1 py-0.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+                                  className="w-12 text-center border border-blue-300 rounded-lg px-1 py-0.5 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
                                 />
                                 <button onClick={handleCellSave} className="text-emerald-600 hover:text-emerald-700">
                                   <Check size={12} />
                                 </button>
-                                <button onClick={() => setEditingCell(null)} className="text-slate-400 hover:text-red-500">
+                                <button onClick={() => setEditingCell(null)} className="text-zinc-400 hover:text-red-500">
                                   <X size={12} />
                                 </button>
                               </div>
                             ) : (
                               <button
                                 onClick={() => handleCellEdit(proj.project_id, c.key, proj[c.key])}
-                                className={`inline-flex items-center justify-center w-8 h-7 rounded text-xs font-semibold transition-colors
+                                className={`inline-flex items-center justify-center w-8 h-7 rounded-lg text-xs font-semibold transition-colors
                                   ${canEdit ? "hover:ring-2 hover:ring-offset-1 cursor-pointer" : "cursor-default"}
-                                  ${proj[c.key] ? "bg-slate-100 text-slate-700" : "bg-slate-50 text-slate-400"}`}
+                                  ${proj[c.key] ? "bg-zinc-100 text-zinc-700" : "bg-zinc-50 text-zinc-400"}`}
                                 style={proj[c.key] ? { borderLeft: `2px solid ${c.color}` } : {}}
                                 data-testid={`score-cell-${proj.project_id}-${c.key}`}
                               >
@@ -510,11 +510,11 @@ export default function Arbitrage() {
           </div>
 
           {/* Bubble Chart */}
-          <div className="bg-white border border-slate-200 rounded-lg p-5">
+          <div className="bg-white border border-zinc-200 rounded-lg p-5">
             <div className="flex items-center gap-2 mb-4">
-              <BarChart2 size={14} className="text-slate-500" />
-              <span className="text-sm font-semibold text-slate-700">Carte Valeur vs Risque</span>
-              <span className="text-xs text-slate-400">(X = Valeur Business · Y = Risque · Taille = Budget total · Couleur = RAG)</span>
+              <BarChart2 size={14} className="text-zinc-500" />
+              <span className="text-sm font-semibold text-zinc-700">Carte Valeur vs Risque</span>
+              <span className="text-xs text-zinc-400">(X = Valeur Business · Y = Risque · Taille = Budget total · Couleur = RAG)</span>
             </div>
             <div className="h-56 sm:h-[320px]">
             <ResponsiveContainer width="100%" height="100%">
@@ -539,9 +539,9 @@ export default function Arbitrage() {
                     if (!active || !payload?.length) return null;
                     const d = payload[0]?.payload;
                     return (
-                      <div className="bg-white border border-slate-200 rounded-lg shadow-lg p-3 text-xs max-w-[220px]">
-                        <div className="font-semibold text-slate-800 mb-1 truncate">{d?.name}</div>
-                        <div className="space-y-0.5 text-slate-600">
+                      <div className="bg-white border border-zinc-200 rounded-lg shadow-lg p-3 text-xs max-w-[220px]">
+                        <div className="font-semibold text-zinc-800 mb-1 truncate">{d?.name}</div>
+                        <div className="space-y-0.5 text-zinc-600">
                           <div>Valeur Business : <span className="font-medium">{d?.x}</span></div>
                           <div>Risque : <span className="font-medium">{d?.y}</span></div>
                           <div>Budget : <span className="font-medium">{formatEuro(d?.rawBudget)}</span></div>
@@ -573,18 +573,18 @@ export default function Arbitrage() {
             </div>
             <div className="flex items-center gap-4 mt-2 justify-center flex-wrap">
               {Object.entries(RAG_COLORS).map(([k, c]) => (
-                <div key={k} className="flex items-center gap-1.5 text-xs text-slate-500">
+                <div key={k} className="flex items-center gap-1.5 text-xs text-zinc-500">
                   <div className="w-3 h-3 rounded-full" style={{ backgroundColor: c }} />
                   <span>{{green:"Vert",orange:"Orange",red:"Rouge"}[k]}</span>
                 </div>
               ))}
-              <span className="text-xs text-slate-400">· Taille ∝ Budget total</span>
+              <span className="text-xs text-zinc-400">· Taille ∝ Budget total</span>
             </div>
             {/* Quadrants label */}
-            <div className="grid grid-cols-2 gap-2 mt-3 text-xs text-slate-400">
+            <div className="grid grid-cols-2 gap-2 mt-3 text-xs text-zinc-400">
               <div className="text-right pr-3 text-emerald-600">◤ Haute valeur / Faible risque → Priorité absolue</div>
               <div className="text-left pl-3 text-amber-600">◥ Haute valeur / Haut risque → Gérer activement</div>
-              <div className="text-right pr-3 text-slate-400">◣ Faible valeur / Faible risque → Quick wins</div>
+              <div className="text-right pr-3 text-zinc-400">◣ Faible valeur / Faible risque → Quick wins</div>
               <div className="text-left pl-3 text-red-500">◢ Faible valeur / Haut risque → Reconsidérer</div>
             </div>
           </div>
@@ -609,7 +609,7 @@ export default function Arbitrage() {
           )}
 
           {envelopes.length === 0 ? (
-            <div className="bg-white border border-dashed border-slate-300 rounded-lg p-10 text-center text-slate-400">
+            <div className="bg-white border border-dashed border-zinc-300 rounded-lg p-10 text-center text-zinc-400">
               <BarChart2 size={32} className="mx-auto mb-2 opacity-30" />
               <p className="text-sm">Aucune enveloppe définie.</p>
               {canEdit && <p className="text-xs mt-1">Cliquez "Ajouter / Modifier enveloppe" pour créer une enveloppe 2026.</p>}
@@ -626,17 +626,17 @@ export default function Arbitrage() {
               const totalPct   = env.total_envelope > 0 ? (totalUsed / env.total_envelope) * 100 : 0;
 
               return (
-                <div key={env.envelope_id} className="bg-white border border-slate-200 rounded-lg overflow-hidden" data-testid={`envelope-card-${env.year}`}>
+                <div key={env.envelope_id} className="bg-white border border-zinc-200 rounded-lg overflow-hidden" data-testid={`envelope-card-${env.year}`}>
                   {/* Header */}
-                  <div className="px-5 py-3 bg-slate-50 border-b border-slate-100 flex items-center justify-between">
+                  <div className="px-5 py-3 bg-zinc-50 border-b border-zinc-100 flex items-center justify-between">
                     <div>
-                      <h3 className="font-semibold text-slate-700">{env.label}</h3>
-                      <p className="text-xs text-slate-400">Exercice {env.year}</p>
+                      <h3 className="font-semibold text-zinc-700">{env.label}</h3>
+                      <p className="text-xs text-zinc-400">Exercice {env.year}</p>
                     </div>
                     {canEdit && (
                       <button
                         onClick={() => { setEnvForm({ year: env.year, capex_envelope: env.capex_envelope, opex_envelope: env.opex_envelope }); setEnvModal(true); }}
-                        className="p-1.5 rounded text-slate-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                        className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
                       >
                         <Edit3 size={13} />
                       </button>
@@ -648,24 +648,24 @@ export default function Arbitrage() {
                     <div data-testid="envelope-capex-section">
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-slate-700">CAPEX</span>
+                          <span className="text-sm font-semibold text-zinc-700">CAPEX</span>
                           {capexOver && (
                             <span className="flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
                               <AlertTriangle size={10} /> Dépassement
                             </span>
                           )}
                         </div>
-                        <div className="text-right text-xs text-slate-500">
-                          <span className={`font-semibold text-sm ${capexOver ? "text-red-600" : "text-slate-700"}`}>
+                        <div className="text-right text-xs text-zinc-500">
+                          <span className={`font-semibold text-sm ${capexOver ? "text-red-600" : "text-zinc-700"}`}>
                             {formatEuro(capexUsed)}
                           </span>
-                          <span className="text-slate-400"> / {formatEuro(env.capex_envelope)}</span>
+                          <span className="text-zinc-400"> / {formatEuro(env.capex_envelope)}</span>
                           <span className={`ml-2 font-bold ${capexOver ? "text-red-600" : "text-emerald-600"}`}>
                             ({Math.round(capexPct)}%)
                           </span>
                         </div>
                       </div>
-                      <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-3 bg-zinc-100 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all ${capexOver ? "bg-red-500" : capexPct > 80 ? "bg-amber-400" : "bg-emerald-500"}`}
                           style={{ width: `${Math.min(capexPct, 100)}%` }}
@@ -683,24 +683,24 @@ export default function Arbitrage() {
                     <div data-testid="envelope-opex-section">
                       <div className="flex items-center justify-between mb-1.5">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-slate-700">OPEX</span>
+                          <span className="text-sm font-semibold text-zinc-700">OPEX</span>
                           {opexOver && (
                             <span className="flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
                               <AlertTriangle size={10} /> Dépassement
                             </span>
                           )}
                         </div>
-                        <div className="text-right text-xs text-slate-500">
-                          <span className={`font-semibold text-sm ${opexOver ? "text-red-600" : "text-slate-700"}`}>
+                        <div className="text-right text-xs text-zinc-500">
+                          <span className={`font-semibold text-sm ${opexOver ? "text-red-600" : "text-zinc-700"}`}>
                             {formatEuro(opexUsed)}
                           </span>
-                          <span className="text-slate-400"> / {formatEuro(env.opex_envelope)}</span>
+                          <span className="text-zinc-400"> / {formatEuro(env.opex_envelope)}</span>
                           <span className={`ml-2 font-bold ${opexOver ? "text-red-600" : "text-emerald-600"}`}>
                             ({Math.round(opexPct)}%)
                           </span>
                         </div>
                       </div>
-                      <div className="h-3 bg-slate-100 rounded-full overflow-hidden">
+                      <div className="h-3 bg-zinc-100 rounded-full overflow-hidden">
                         <div
                           className={`h-full rounded-full transition-all ${opexOver ? "bg-red-500" : opexPct > 80 ? "bg-amber-400" : "bg-emerald-500"}`}
                           style={{ width: `${Math.min(opexPct, 100)}%` }}
@@ -716,12 +716,12 @@ export default function Arbitrage() {
 
                     {/* Détail par projet */}
                     <div>
-                      <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider mb-2">
+                      <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider mb-2">
                         Répartition par projet
                       </div>
-                      <div className="rounded-lg border border-slate-100 overflow-hidden">
+                      <div className="rounded-lg border border-zinc-100 overflow-hidden">
                         <table className="w-full text-xs">
-                          <thead className="bg-slate-50 text-slate-400 uppercase tracking-wider">
+                          <thead className="bg-zinc-50 text-zinc-400 uppercase tracking-wider">
                             <tr>
                               <th className="px-3 py-2 text-left">Projet</th>
                               <th className="px-3 py-2 text-right">CAPEX</th>
@@ -730,25 +730,25 @@ export default function Arbitrage() {
                               <th className="px-3 py-2 text-right">% enveloppe</th>
                             </tr>
                           </thead>
-                          <tbody className="divide-y divide-slate-50">
+                          <tbody className="divide-y divide-zinc-50">
                             {projects.map(p => (
-                              <tr key={p.project_id} className="hover:bg-slate-50">
+                              <tr key={p.project_id} className="hover:bg-zinc-50">
                                 <td className="px-3 py-1.5">
                                   <div className="flex items-center gap-1.5">
                                     <div className="w-1.5 h-1.5 rounded-full" style={{ backgroundColor: RAG_COLORS[p.status_rag] }} />
                                     <span className="truncate max-w-[180px]" title={p.name}>{p.name}</span>
                                   </div>
                                 </td>
-                                <td className="px-3 py-1.5 text-right text-slate-600">{formatEuro(p.capex_planned)}</td>
-                                <td className="px-3 py-1.5 text-right text-slate-600">{formatEuro(p.opex_planned)}</td>
-                                <td className="px-3 py-1.5 text-right font-medium text-slate-700">{formatEuro(p.budget_total)}</td>
-                                <td className="px-3 py-1.5 text-right text-slate-500">
+                                <td className="px-3 py-1.5 text-right text-zinc-600">{formatEuro(p.capex_planned)}</td>
+                                <td className="px-3 py-1.5 text-right text-zinc-600">{formatEuro(p.opex_planned)}</td>
+                                <td className="px-3 py-1.5 text-right font-medium text-zinc-700">{formatEuro(p.budget_total)}</td>
+                                <td className="px-3 py-1.5 text-right text-zinc-500">
                                   {formatPct(p.budget_total, env.total_envelope)}
                                 </td>
                               </tr>
                             ))}
                           </tbody>
-                          <tfoot className="bg-slate-50 font-semibold text-slate-700">
+                          <tfoot className="bg-zinc-50 font-semibold text-zinc-700">
                             <tr>
                               <td className="px-3 py-2">Total portefeuille</td>
                               <td className="px-3 py-2 text-right">{formatEuro(totals.capex_planned)}</td>
@@ -791,7 +791,7 @@ export default function Arbitrage() {
               <button
                 onClick={resetSandbox}
                 data-testid="btn-reset-sandbox"
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-zinc-200 rounded-lg text-zinc-600 hover:bg-zinc-50 transition-colors"
               >
                 <RotateCcw size={13} /> Réinitialiser
               </button>
@@ -827,7 +827,7 @@ export default function Arbitrage() {
               <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
                 <div>
                   <div className="text-xs text-amber-600">CAPEX nouveau</div>
-                  <div className="font-semibold text-slate-700">{formatEuro(sandboxImpact.newCapex)}</div>
+                  <div className="font-semibold text-zinc-700">{formatEuro(sandboxImpact.newCapex)}</div>
                 </div>
                 <div>
                   <div className="text-xs text-amber-600">Delta CAPEX</div>
@@ -837,7 +837,7 @@ export default function Arbitrage() {
                 </div>
                 <div>
                   <div className="text-xs text-amber-600">OPEX nouveau</div>
-                  <div className="font-semibold text-slate-700">{formatEuro(sandboxImpact.newOpex)}</div>
+                  <div className="font-semibold text-zinc-700">{formatEuro(sandboxImpact.newOpex)}</div>
                 </div>
                 <div>
                   <div className="text-xs text-amber-600">Delta OPEX</div>
@@ -850,11 +850,11 @@ export default function Arbitrage() {
           )}
 
           {/* Sandbox table */}
-          <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
+          <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden">
             <div className="overflow-x-auto">
               <table className="w-full text-sm" data-testid="simulator-table">
                 <thead>
-                  <tr className="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider">
+                  <tr className="bg-zinc-50 text-xs text-zinc-500 uppercase tracking-wider">
                     <th className="px-4 py-2.5 text-left">Projet</th>
                     <th className="px-3 py-2.5 text-center">Statut</th>
                     <th className="px-3 py-2.5 text-right">CAPEX planifié</th>
@@ -863,7 +863,7 @@ export default function Arbitrage() {
                     <th className="px-3 py-2.5 text-center">Δ Score</th>
                   </tr>
                 </thead>
-                <tbody className="divide-y divide-slate-100">
+                <tbody className="divide-y divide-zinc-100">
                   {(sandbox || []).map(sp => {
                     const orig = summary?.projects.find(p => p.project_id === sp.project_id);
                     const simScore = computeSandboxScore(sp);
@@ -873,13 +873,13 @@ export default function Arbitrage() {
                     return (
                       <tr
                         key={sp.project_id}
-                        className={`transition-colors ${isModified ? "bg-amber-50/40" : "hover:bg-slate-50"}`}
+                        className={`transition-colors ${isModified ? "bg-amber-50/40" : "hover:bg-zinc-50"}`}
                         data-testid={`sim-row-${sp.project_id}`}
                       >
                         <td className="px-4 py-2.5">
                           <div className="flex items-center gap-2">
                             <div className="w-2 h-2 rounded-full" style={{ backgroundColor: RAG_COLORS[sp.status_rag] || "#94a3b8" }} />
-                            <span className={`font-medium truncate max-w-[180px] ${isModified ? "text-amber-800" : "text-slate-700"}`} title={sp.name}>
+                            <span className={`font-medium truncate max-w-[180px] ${isModified ? "text-amber-800" : "text-zinc-700"}`} title={sp.name}>
                               {sp.name}
                             </span>
                             {isModified && <span className="text-xs text-amber-500">*</span>}
@@ -889,7 +889,7 @@ export default function Arbitrage() {
                           <select
                             value={sp.status}
                             onChange={e => handleSandboxChange(sp.project_id, "status", e.target.value)}
-                            className="text-xs border border-slate-200 rounded px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white"
+                            className="text-xs border border-zinc-200 rounded-lg px-1.5 py-0.5 focus:outline-none focus:ring-1 focus:ring-blue-400 bg-white"
                             data-testid={`sim-status-${sp.project_id}`}
                           >
                             {Object.entries(STATUS_LABELS).map(([v, l]) => (
@@ -902,7 +902,7 @@ export default function Arbitrage() {
                             type="number"
                             value={sp.capex_planned}
                             onChange={e => handleSandboxChange(sp.project_id, "capex_planned", parseFloat(e.target.value) || 0)}
-                            className="text-xs text-right border border-slate-200 rounded px-1.5 py-0.5 w-28 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                            className="text-xs text-right border border-zinc-200 rounded-lg px-1.5 py-0.5 w-28 focus:outline-none focus:ring-1 focus:ring-blue-400"
                             data-testid={`sim-capex-${sp.project_id}`}
                           />
                         </td>
@@ -911,7 +911,7 @@ export default function Arbitrage() {
                             type="number"
                             value={sp.opex_planned}
                             onChange={e => handleSandboxChange(sp.project_id, "opex_planned", parseFloat(e.target.value) || 0)}
-                            className="text-xs text-right border border-slate-200 rounded px-1.5 py-0.5 w-28 focus:outline-none focus:ring-1 focus:ring-blue-400"
+                            className="text-xs text-right border border-zinc-200 rounded-lg px-1.5 py-0.5 w-28 focus:outline-none focus:ring-1 focus:ring-blue-400"
                             data-testid={`sim-opex-${sp.project_id}`}
                           />
                         </td>
@@ -924,7 +924,7 @@ export default function Arbitrage() {
                               {delta > 0 ? "+" : ""}{delta}
                             </span>
                           ) : (
-                            <span className="text-xs text-slate-300">—</span>
+                            <span className="text-xs text-zinc-300">—</span>
                           )}
                         </td>
                       </tr>
@@ -937,18 +937,18 @@ export default function Arbitrage() {
 
           {/* Scénarios sauvegardés */}
           {scenarios.length > 0 && (
-            <div className="bg-white border border-slate-200 rounded-lg">
-              <div className="px-4 py-3 border-b border-slate-100 flex items-center gap-2">
-                <Save size={13} className="text-slate-500" />
-                <span className="text-sm font-semibold text-slate-700">Scénarios sauvegardés</span>
+            <div className="bg-white border border-zinc-200 rounded-lg">
+              <div className="px-4 py-3 border-b border-zinc-100 flex items-center gap-2">
+                <Save size={13} className="text-zinc-500" />
+                <span className="text-sm font-semibold text-zinc-700">Scénarios sauvegardés</span>
               </div>
-              <div className="divide-y divide-slate-50">
+              <div className="divide-y divide-zinc-50">
                 {scenarios.map(sc => (
-                  <div key={sc.scenario_id} className="px-4 py-3 flex items-center justify-between hover:bg-slate-50" data-testid={`scenario-row-${sc.scenario_id}`}>
+                  <div key={sc.scenario_id} className="px-4 py-3 flex items-center justify-between hover:bg-zinc-50" data-testid={`scenario-row-${sc.scenario_id}`}>
                     <div>
-                      <div className="text-sm font-medium text-slate-700">{sc.name}</div>
-                      {sc.description && <div className="text-xs text-slate-400">{sc.description}</div>}
-                      <div className="text-xs text-slate-400 mt-0.5">
+                      <div className="text-sm font-medium text-zinc-700">{sc.name}</div>
+                      {sc.description && <div className="text-xs text-zinc-400">{sc.description}</div>}
+                      <div className="text-xs text-zinc-400 mt-0.5">
                         {sc.modifications?.length || 0} modification(s) · {new Date(sc.created_at).toLocaleDateString("fr-FR")}
                         {sc.status === "applied" && (
                           <span className="ml-2 text-emerald-600 font-medium">Appliqué</span>
@@ -971,8 +971,8 @@ export default function Arbitrage() {
           {/* Header actions */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Save size={15} className="text-[#0052CC]" />
-              <span className="text-sm font-semibold text-slate-800">
+              <Save size={15} className="text-blue-600" />
+              <span className="text-sm font-semibold text-zinc-800">
                 {scenarios.length} scénario{scenarios.length > 1 ? "s" : ""} sauvegardé{scenarios.length > 1 ? "s" : ""}
               </span>
             </div>
@@ -980,7 +980,7 @@ export default function Arbitrage() {
               <button
                 onClick={() => { setCompareMode(true); setCompareA(null); setCompareB(null); }}
                 data-testid="btn-compare-mode"
-                className="flex items-center gap-1.5 text-xs px-3 py-2 bg-[#0052CC] text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-1.5 text-xs px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
               >
                 <GitCompare size={13} /> Comparer 2 scénarios
               </button>
@@ -988,7 +988,7 @@ export default function Arbitrage() {
             {compareMode && (
               <button
                 onClick={() => { setCompareMode(false); setCompareA(null); setCompareB(null); }}
-                className="flex items-center gap-1.5 text-xs px-3 py-2 border border-slate-200 rounded-lg text-slate-500 hover:bg-slate-50"
+                className="flex items-center gap-1.5 text-xs px-3 py-2 border border-zinc-200 rounded-lg text-zinc-500 hover:bg-zinc-50"
               >
                 <X size={13} /> Annuler comparaison
               </button>
@@ -1009,14 +1009,14 @@ export default function Arbitrage() {
           )}
 
           {scenarios.length === 0 ? (
-            <div className="bg-white border border-slate-200 rounded-lg flex flex-col items-center justify-center py-16 text-center">
-              <Save size={32} className="text-slate-200 mb-3" />
-              <p className="text-slate-500 font-medium">Aucun scénario sauvegardé</p>
-              <p className="text-slate-400 text-xs mt-1">Créez un scénario depuis l&apos;onglet Simulateur</p>
+            <div className="bg-white border border-zinc-200 rounded-lg flex flex-col items-center justify-center py-16 text-center">
+              <Save size={32} className="text-zinc-200 mb-3" />
+              <p className="text-zinc-500 font-medium">Aucun scénario sauvegardé</p>
+              <p className="text-zinc-400 text-xs mt-1">Créez un scénario depuis l&apos;onglet Simulateur</p>
             </div>
           ) : (
-            <div className="bg-white border border-slate-200 rounded-lg overflow-hidden">
-              <div className="divide-y divide-slate-100">
+            <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden">
+              <div className="divide-y divide-zinc-100">
                 {scenarios.map(sc => {
                   const isSelectedA = compareA?.scenario_id === sc.scenario_id;
                   const isSelectedB = compareB?.scenario_id === sc.scenario_id;
@@ -1025,13 +1025,13 @@ export default function Arbitrage() {
                     <div
                       key={sc.scenario_id}
                       data-testid={`scenario-row-${sc.scenario_id}`}
-                      className={`px-5 py-4 flex items-center justify-between hover:bg-slate-50 transition-colors
+                      className={`px-5 py-4 flex items-center justify-between hover:bg-zinc-50 transition-colors
                         ${isSelectedA ? "bg-blue-50 border-l-4 border-l-blue-500" : ""}
                         ${isSelectedB ? "bg-violet-50 border-l-4 border-l-violet-500" : ""}`}
                     >
                       <div className="flex-1 min-w-0">
                         <div className="flex items-center gap-2">
-                          <span className="text-sm font-semibold text-slate-800">{sc.name}</span>
+                          <span className="text-sm font-semibold text-zinc-800">{sc.name}</span>
                           {sc.status === "applied" && (
                             <span className="text-[10px] font-bold text-emerald-700 bg-emerald-100 px-2 py-0.5 rounded-full border border-emerald-200">
                               Appliqué
@@ -1040,8 +1040,8 @@ export default function Arbitrage() {
                           {isSelectedA && <span className="text-[10px] font-bold text-blue-700 bg-blue-100 px-2 py-0.5 rounded-full">A</span>}
                           {isSelectedB && <span className="text-[10px] font-bold text-violet-700 bg-violet-100 px-2 py-0.5 rounded-full">B</span>}
                         </div>
-                        {sc.description && <div className="text-xs text-slate-400 mt-0.5 truncate">{sc.description}</div>}
-                        <div className="text-xs text-slate-400 mt-1">
+                        {sc.description && <div className="text-xs text-zinc-400 mt-0.5 truncate">{sc.description}</div>}
+                        <div className="text-xs text-zinc-400 mt-1">
                           {sc.modifications?.length || 0} modification(s) ·{" "}
                           {new Date(sc.created_at).toLocaleDateString("fr-FR")}
                         </div>
@@ -1067,7 +1067,7 @@ export default function Arbitrage() {
                                   if (isSelectedA) setCompareA(null);
                                   if (isSelectedB) setCompareB(null);
                                 }}
-                                className="text-xs px-2 py-1.5 text-slate-400 hover:text-slate-600"
+                                className="text-xs px-2 py-1.5 text-zinc-400 hover:text-zinc-600"
                               ><X size={12} /></button>
                             )}
                           </>
@@ -1076,7 +1076,7 @@ export default function Arbitrage() {
                             <button
                               onClick={() => setDetailScenario(detailScenario?.scenario_id === sc.scenario_id ? null : sc)}
                               data-testid={`btn-detail-${sc.scenario_id}`}
-                              className="text-xs px-2.5 py-1.5 border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50 flex items-center gap-1"
+                              className="text-xs px-2.5 py-1.5 border border-zinc-200 rounded-lg text-zinc-600 hover:bg-zinc-50 flex items-center gap-1"
                             >
                               <Eye size={12} /> Détail
                             </button>
@@ -1104,24 +1104,24 @@ export default function Arbitrage() {
 
           {/* Détail scénario */}
           {detailScenario && !compareMode && (
-            <div className="bg-white border border-slate-200 rounded-xl p-5">
+            <div className="bg-white border border-zinc-200 rounded-xl p-5">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Eye size={15} className="text-[#0052CC]" />
-                  <h3 className="font-semibold text-slate-800">Détail — {detailScenario.name}</h3>
+                  <Eye size={15} className="text-blue-600" />
+                  <h3 className="font-semibold text-zinc-800">Détail — {detailScenario.name}</h3>
                 </div>
-                <button onClick={() => setDetailScenario(null)} className="text-slate-400 hover:text-slate-600"><X size={16} /></button>
+                <button onClick={() => setDetailScenario(null)} className="text-zinc-400 hover:text-zinc-600"><X size={16} /></button>
               </div>
               {detailScenario.description && (
-                <p className="text-xs text-slate-500 mb-3">{detailScenario.description}</p>
+                <p className="text-xs text-zinc-500 mb-3">{detailScenario.description}</p>
               )}
               <div className="overflow-x-auto">
                 <table className="w-full text-xs" data-testid="scenario-detail-table">
                   <thead>
-                    <tr className="border-b border-slate-200">
-                      <th className="text-left py-2 px-3 text-slate-500 font-semibold">Projet ID</th>
-                      <th className="text-left py-2 px-3 text-slate-500 font-semibold">Champ modifié</th>
-                      <th className="text-left py-2 px-3 text-slate-500 font-semibold">Nouvelle valeur</th>
+                    <tr className="border-b border-zinc-200">
+                      <th className="text-left py-2 px-3 text-zinc-500 font-semibold">Projet ID</th>
+                      <th className="text-left py-2 px-3 text-zinc-500 font-semibold">Champ modifié</th>
+                      <th className="text-left py-2 px-3 text-zinc-500 font-semibold">Nouvelle valeur</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -1129,14 +1129,14 @@ export default function Arbitrage() {
                       Object.entries(mod)
                         .filter(([k]) => k !== "project_id")
                         .map(([field, value], fi) => (
-                          <tr key={`${mi}-${fi}`} className="border-b border-slate-50 hover:bg-slate-50">
+                          <tr key={`${mi}-${fi}`} className="border-b border-zinc-50 hover:bg-zinc-50">
                             {fi === 0 && (
-                              <td className="py-2 px-3 font-mono text-slate-500" rowSpan={Object.keys(mod).length - 1}>
+                              <td className="py-2 px-3 font-mono text-zinc-500" rowSpan={Object.keys(mod).length - 1}>
                                 {mod.project_id?.slice(0, 8)}…
                               </td>
                             )}
-                            <td className="py-2 px-3 text-slate-700">{field}</td>
-                            <td className="py-2 px-3 font-medium text-[#0052CC]">{String(value)}</td>
+                            <td className="py-2 px-3 text-zinc-700">{field}</td>
+                            <td className="py-2 px-3 font-medium text-blue-600">{String(value)}</td>
                           </tr>
                         ))
                     )}
@@ -1148,10 +1148,10 @@ export default function Arbitrage() {
 
           {/* Comparaison côte à côte */}
           {compareMode && compareA && compareB && (
-            <div className="bg-white border border-slate-200 rounded-xl p-5">
+            <div className="bg-white border border-zinc-200 rounded-xl p-5">
               <div className="flex items-center gap-2 mb-4">
-                <GitCompare size={15} className="text-[#0052CC]" />
-                <h3 className="font-semibold text-slate-800">
+                <GitCompare size={15} className="text-blue-600" />
+                <h3 className="font-semibold text-zinc-800">
                   Comparaison : {compareA.name} <ArrowRight size={13} className="inline" /> {compareB.name}
                 </h3>
               </div>
@@ -1168,13 +1168,13 @@ export default function Arbitrage() {
                   // All keys
                   const allKeys = Object.keys(modsMap);
                   return (
-                    <div key={label} className={`border border-slate-200 border-l-4 ${borderColor} rounded-lg p-4`}>
+                    <div key={label} className={`border border-zinc-200 border-l-4 ${borderColor} rounded-lg p-4`}>
                       <div className={`inline-flex items-center gap-1 text-xs font-bold px-2 py-0.5 rounded-full mb-3 ${bg}`}>
                         Scénario {label} — {sc.name}
                       </div>
                       <div className="space-y-1.5">
                         {allKeys.length === 0 ? (
-                          <p className="text-xs text-slate-400">Aucune modification</p>
+                          <p className="text-xs text-zinc-400">Aucune modification</p>
                         ) : allKeys.map(key => {
                           const [pid, field] = key.split("__");
                           const valA = compareA.modifications?.find(m => m.project_id === pid)?.[field];
@@ -1182,9 +1182,9 @@ export default function Arbitrage() {
                           const diff = label === "B" && valA !== undefined && valB !== undefined && valA !== valB;
                           const isHigher = label === "B" && typeof valA === "number" && typeof valB === "number" && valB > valA;
                           return (
-                            <div key={key} className={`flex items-center justify-between text-xs px-2 py-1 rounded ${diff ? (isHigher ? "bg-emerald-50" : "bg-rose-50") : "bg-slate-50"}`}>
-                              <span className="text-slate-500 truncate flex-1">{field} <span className="text-[10px] text-slate-400">(…{pid?.slice(-4)})</span></span>
-                              <span className={`font-mono font-semibold ml-2 ${diff ? (isHigher ? "text-emerald-700" : "text-rose-700") : "text-slate-700"}`}>
+                            <div key={key} className={`flex items-center justify-between text-xs px-2 py-1 rounded-lg ${diff ? (isHigher ? "bg-emerald-50" : "bg-rose-50") : "bg-zinc-50"}`}>
+                              <span className="text-zinc-500 truncate flex-1">{field} <span className="text-[10px] text-zinc-400">(…{pid?.slice(-4)})</span></span>
+                              <span className={`font-mono font-semibold ml-2 ${diff ? (isHigher ? "text-emerald-700" : "text-rose-700") : "text-zinc-700"}`}>
                                 {String(modsMap[key])}
                                 {diff && (
                                   <span className="ml-1 text-[9px] opacity-75">
@@ -1214,32 +1214,32 @@ export default function Arbitrage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="bg-white rounded-none sm:rounded-xl shadow-2xl w-full max-h-screen sm:max-h-[90vh] overflow-y-auto sm:max-w-md p-6" data-testid="weights-modal">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-800">Configurer les poids de scoring</h3>
-              <button onClick={() => setShowWeightsModal(false)} className="text-slate-400 hover:text-slate-600">
+              <h3 className="text-lg font-semibold text-zinc-800">Configurer les poids de scoring</h3>
+              <button onClick={() => setShowWeightsModal(false)} className="text-zinc-400 hover:text-zinc-600">
                 <X size={18} />
               </button>
             </div>
-            <p className="text-xs text-slate-500 mb-4">
+            <p className="text-xs text-zinc-500 mb-4">
               Formule : Score = W1×Alignement + W2×Valeur + W3×ROI + W4×Urgence − W5×Risque − W6×Complexité
             </p>
             <div className="space-y-3">
               {WEIGHT_KEYS.map(({ key, label, sign }) => (
                 <div key={key} className="flex items-center gap-3">
-                  <div className="w-5 text-center text-xs font-bold text-slate-400">{sign}</div>
-                  <label className="flex-1 text-sm text-slate-700">{label}</label>
+                  <div className="w-5 text-center text-xs font-bold text-zinc-400">{sign}</div>
+                  <label className="flex-1 text-sm text-zinc-700">{label}</label>
                   <input
                     type="number"
                     step="0.01" min="0" max="1"
                     value={pendingWeights[key]}
                     onChange={e => setPendingWeights(prev => ({ ...prev, [key]: parseFloat(e.target.value) || 0 }))}
-                    className="w-20 text-right border border-slate-200 rounded px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+                    className="w-20 text-right border border-zinc-200 rounded-lg px-2 py-1 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
                     data-testid={`weight-input-${key}`}
                   />
                 </div>
               ))}
             </div>
             <div className="flex justify-end gap-2 mt-5">
-              <button onClick={() => { setPendingWeights({ ...weights }); setShowWeightsModal(false); }} className="px-4 py-2 text-sm border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50">
+              <button onClick={() => { setPendingWeights({ ...weights }); setShowWeightsModal(false); }} className="px-4 py-2 text-sm border border-zinc-200 rounded-lg text-zinc-600 hover:bg-zinc-50">
                 Annuler
               </button>
               <button
@@ -1260,37 +1260,37 @@ export default function Arbitrage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="bg-white rounded-none sm:rounded-xl shadow-2xl w-full max-h-screen sm:max-h-[90vh] overflow-y-auto sm:max-w-sm p-6" data-testid="envelope-modal">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-800">Enveloppe budgétaire</h3>
-              <button onClick={() => setEnvModal(false)} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>
+              <h3 className="text-lg font-semibold text-zinc-800">Enveloppe budgétaire</h3>
+              <button onClick={() => setEnvModal(false)} className="text-zinc-400 hover:text-zinc-600"><X size={18} /></button>
             </div>
             <div className="space-y-3">
               <div>
-                <label className="text-xs text-slate-500 font-medium uppercase">Année</label>
+                <label className="text-xs text-zinc-500 font-medium uppercase">Année</label>
                 <input type="number" value={envForm.year}
                   onChange={e => setEnvForm(p => ({ ...p, year: parseInt(e.target.value) || 2026 }))}
-                  className="mt-1 w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+                  className="mt-1 w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
                   data-testid="env-year-input"
                 />
               </div>
               <div>
-                <label className="text-xs text-slate-500 font-medium uppercase">Enveloppe CAPEX (€)</label>
+                <label className="text-xs text-zinc-500 font-medium uppercase">Enveloppe CAPEX (€)</label>
                 <input type="number" value={envForm.capex_envelope}
                   onChange={e => setEnvForm(p => ({ ...p, capex_envelope: parseFloat(e.target.value) || 0 }))}
-                  className="mt-1 w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+                  className="mt-1 w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
                   data-testid="env-capex-input"
                 />
               </div>
               <div>
-                <label className="text-xs text-slate-500 font-medium uppercase">Enveloppe OPEX (€)</label>
+                <label className="text-xs text-zinc-500 font-medium uppercase">Enveloppe OPEX (€)</label>
                 <input type="number" value={envForm.opex_envelope}
                   onChange={e => setEnvForm(p => ({ ...p, opex_envelope: parseFloat(e.target.value) || 0 }))}
-                  className="mt-1 w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+                  className="mt-1 w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
                   data-testid="env-opex-input"
                 />
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-5">
-              <button onClick={() => setEnvModal(false)} className="px-4 py-2 text-sm border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50">Annuler</button>
+              <button onClick={() => setEnvModal(false)} className="px-4 py-2 text-sm border border-zinc-200 rounded-lg text-zinc-600 hover:bg-zinc-50">Annuler</button>
               <button onClick={handleUpsertEnvelope} data-testid="btn-save-envelope" className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">
                 Sauvegarder
               </button>
@@ -1304,33 +1304,33 @@ export default function Arbitrage() {
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/30 backdrop-blur-sm">
           <div className="bg-white rounded-none sm:rounded-xl shadow-2xl w-full max-h-screen sm:max-h-[90vh] overflow-y-auto sm:max-w-sm p-6" data-testid="save-scenario-modal">
             <div className="flex items-center justify-between mb-4">
-              <h3 className="text-lg font-semibold text-slate-800">Sauvegarder le scénario</h3>
-              <button onClick={() => setSaveScenarioModal(false)} className="text-slate-400 hover:text-slate-600"><X size={18} /></button>
+              <h3 className="text-lg font-semibold text-zinc-800">Sauvegarder le scénario</h3>
+              <button onClick={() => setSaveScenarioModal(false)} className="text-zinc-400 hover:text-zinc-600"><X size={18} /></button>
             </div>
             <div className="space-y-3">
               <div>
-                <label className="text-xs text-slate-500 font-medium uppercase">Nom du scénario *</label>
+                <label className="text-xs text-zinc-500 font-medium uppercase">Nom du scénario *</label>
                 <input
                   value={scenarioName}
                   onChange={e => setScenarioName(e.target.value)}
                   placeholder="Ex: Réduction budgétaire Q2 2026"
-                  className="mt-1 w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
+                  className="mt-1 w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400"
                   data-testid="scenario-name-input"
                 />
               </div>
               <div>
-                <label className="text-xs text-slate-500 font-medium uppercase">Description</label>
+                <label className="text-xs text-zinc-500 font-medium uppercase">Description</label>
                 <textarea
                   value={scenarioDesc}
                   onChange={e => setScenarioDesc(e.target.value)}
                   rows={2}
-                  className="mt-1 w-full border border-slate-200 rounded px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 resize-none"
+                  className="mt-1 w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-400 resize-none"
                   data-testid="scenario-desc-input"
                 />
               </div>
             </div>
             <div className="flex justify-end gap-2 mt-5">
-              <button onClick={() => setSaveScenarioModal(false)} className="px-4 py-2 text-sm border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-50">Annuler</button>
+              <button onClick={() => setSaveScenarioModal(false)} className="px-4 py-2 text-sm border border-zinc-200 rounded-lg text-zinc-600 hover:bg-zinc-50">Annuler</button>
               <button
                 onClick={handleSaveScenario}
                 disabled={!scenarioName}

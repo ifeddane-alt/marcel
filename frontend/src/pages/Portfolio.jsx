@@ -128,7 +128,7 @@ export default function Portfolio() {
     }
   };
 
-  if (loading) return <div className="p-4 md:p-8 text-slate-400 text-sm">Chargement...</div>;
+  if (loading) return <div className="p-4 md:p-8 text-zinc-400 text-sm">Chargement...</div>;
 
   const ragCounts = { green: 0, orange: 0, red: 0 };
   projects.forEach((p) => { if (p.status_rag in ragCounts) ragCounts[p.status_rag]++; });
@@ -137,8 +137,8 @@ export default function Portfolio() {
     <div className="p-4 md:p-6 lg:p-8" data-testid="portfolio-page">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">Portefeuille</h1>
-          <p className="text-sm text-slate-500 mt-0.5">{projects.length} projets — {ragCounts.red} rouge · {ragCounts.orange} orange · {ragCounts.green} vert</p>
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">Portefeuille</h1>
+          <p className="text-sm text-zinc-500 mt-0.5">{projects.length} projets — {ragCounts.red} rouge · {ragCounts.orange} orange · {ragCounts.green} vert</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <ExcelToolbar entity="projects" onImported={fetchAll} canImport={canCreate} />
@@ -146,7 +146,7 @@ export default function Portfolio() {
             <button
               onClick={openCreate}
               data-testid="btn-new-project"
-              className="flex items-center gap-2 px-4 py-2.5 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] transition-colors shadow-sm"
+              className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
             >
               <Plus size={15} /> Nouveau projet
             </button>
@@ -157,7 +157,7 @@ export default function Portfolio() {
       {/* Export COPIL action bar */}
       {selectedProjects.size > 0 && (
         <div
-          className="flex items-center gap-4 px-5 py-3 mb-4 bg-[#0052CC] rounded-lg shadow-md"
+          className="flex items-center gap-4 px-5 py-3 mb-4 bg-blue-600 rounded-lg shadow-md"
           data-testid="export-action-bar"
         >
           <span className="text-white font-semibold text-sm">
@@ -166,7 +166,7 @@ export default function Portfolio() {
           <button
             onClick={() => setExportModalOpen(true)}
             data-testid="btn-export-copil"
-            className="flex items-center gap-2 px-4 py-1.5 bg-white text-[#0052CC] text-sm font-bold rounded hover:bg-blue-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-1.5 bg-white text-blue-600 text-sm font-bold rounded-lg hover:bg-blue-50 transition-colors"
           >
             <Presentation size={14} /> Export COPIL
           </button>
@@ -183,20 +183,20 @@ export default function Portfolio() {
       {/* Filters */}
       <div className="flex flex-wrap items-center gap-3 mb-4">
         <div className="relative">
-          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-slate-400" />
+          <Search size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input
             type="text" value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher..." data-testid="portfolio-search"
-            className="pl-8 pr-3 py-2 text-sm border border-gray-200 rounded bg-white focus:outline-none focus:border-[#0052CC] w-52"
+            className="pl-8 pr-3 py-2 text-sm border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-blue-600 w-52"
           />
         </div>
         <select value={filterRag} onChange={(e) => setFilterRag(e.target.value)} data-testid="portfolio-filter-rag"
-          className="text-sm border border-gray-200 rounded px-3 py-2 bg-white focus:outline-none focus:border-[#0052CC]">
+          className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600">
           <option value="">Tous RAG</option>
           {["green","orange","red"].map((r) => <option key={r} value={r}>{RAG_LABELS[r]}</option>)}
         </select>
         <select value={filterMethod} onChange={(e) => setFilterMethod(e.target.value)} data-testid="portfolio-filter-methodology"
-          className="text-sm border border-gray-200 rounded px-3 py-2 bg-white focus:outline-none focus:border-[#0052CC]">
+          className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600">
           <option value="">Toutes méthodos</option>
           <option value="waterfall">Waterfall</option>
           <option value="agile">Agile</option>
@@ -204,13 +204,13 @@ export default function Portfolio() {
         </select>
         {programs.length > 0 && (
           <select value={filterProgram} onChange={(e) => setFilterProgram(e.target.value)} data-testid="portfolio-filter-program"
-            className="text-sm border border-gray-200 rounded px-3 py-2 bg-white focus:outline-none focus:border-[#0052CC]">
+            className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600">
             <option value="">Tous programmes</option>
             {programs.map((prog) => <option key={prog.program_id} value={prog.program_id}>{prog.name}</option>)}
           </select>
         )}
         <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} data-testid="portfolio-filter-status"
-          className="text-sm border border-gray-200 rounded px-3 py-2 bg-white focus:outline-none focus:border-[#0052CC]">
+          className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600">
           <option value="">Tous statuts</option>
           <option value="en_preparation">En préparation</option>
           <option value="actif">Actif</option>
@@ -221,10 +221,10 @@ export default function Portfolio() {
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-gray-200 rounded shadow-sm overflow-x-auto">
+      <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-x-auto">
         <table className="w-full text-sm" data-testid="portfolio-table">
           <thead>
-            <tr className="bg-gray-50 border-b border-gray-200 text-left">
+            <tr className="bg-zinc-50 border-b border-zinc-200 text-left">
               <th className="px-4 py-3 w-8">
                 <input
                   ref={selectAllRef}
@@ -232,16 +232,16 @@ export default function Portfolio() {
                   checked={selectedProjects.size === filtered.length && filtered.length > 0}
                   onChange={toggleSelectAll}
                   data-testid="checkbox-select-all"
-                  className="w-4 h-4 rounded border-gray-300 text-[#0052CC] focus:ring-[#0052CC] cursor-pointer"
+                  className="w-4 h-4 rounded-lg border-zinc-300 text-blue-600 focus:ring-blue-600 cursor-pointer"
                 />
               </th>
               {[["status_rag","RAG"],["name","Nom"],["methodology","Méthodo"],["budget_total","Budget total"],["budget_forecast","Forecast"],["end_date_forecast","Fin prévue"]].map(([key, label]) => (
                 <th key={key} onClick={() => toggleSort(key)}
-                  className="px-4 py-3 text-xs font-semibold text-slate-600 cursor-pointer hover:text-[#0052CC] select-none whitespace-nowrap">
+                  className="px-4 py-3 text-xs font-semibold text-zinc-600 cursor-pointer hover:text-blue-600 select-none whitespace-nowrap">
                   {label}{sortKey === key ? (sortDir === "asc" ? " ↑" : " ↓") : ""}
                 </th>
               ))}
-              {(canEdit || canDelete) && <th className="px-4 py-3 text-xs font-semibold text-slate-600 text-right">Actions</th>}
+              {(canEdit || canDelete) && <th className="px-4 py-3 text-xs font-semibold text-zinc-600 text-right">Actions</th>}
             </tr>
           </thead>
           <tbody>
@@ -249,7 +249,7 @@ export default function Portfolio() {
               const prog = programs.find((pr) => pr.program_id === p.program_id);
               const overBudget = p.budget_forecast > p.budget_total * 1.05;
               return (
-                <tr key={p.project_id} className="border-b border-gray-100 hover:bg-blue-50/30 transition-colors" data-testid={`project-row-${p.project_id}`}>
+                <tr key={p.project_id} className="border-b border-zinc-100 hover:bg-blue-50/30 transition-colors" data-testid={`project-row-${p.project_id}`}>
                   <td className="px-4 py-3 w-8">
                     <input
                       type="checkbox"
@@ -257,39 +257,39 @@ export default function Portfolio() {
                       onChange={() => toggleSelect(p.project_id)}
                       onClick={(e) => e.stopPropagation()}
                       data-testid={`checkbox-project-${p.project_id}`}
-                      className="w-4 h-4 rounded border-gray-300 text-[#0052CC] focus:ring-[#0052CC] cursor-pointer"
+                      className="w-4 h-4 rounded-lg border-zinc-300 text-blue-600 focus:ring-blue-600 cursor-pointer"
                     />
                   </td>
                   <td className="px-4 py-3"><RAGBadge status={p.status_rag} /></td>
                   <td className="px-4 py-3 max-w-xs">
-                    <Link to={`/projects/${p.project_id}`} className="text-[#0052CC] hover:text-[#0047B3] font-medium text-sm leading-snug" data-testid={`project-link-${p.project_id}`}>
-                      {p.code && <span className="font-mono text-[10px] font-semibold text-slate-400 mr-1.5" data-testid={`project-code-${p.project_id}`}>{p.code}</span>}
+                    <Link to={`/projects/${p.project_id}`} className="text-blue-600 hover:text-blue-700 font-medium text-sm leading-snug" data-testid={`project-link-${p.project_id}`}>
+                      {p.code && <span className="font-mono text-[10px] font-semibold text-zinc-400 mr-1.5" data-testid={`project-code-${p.project_id}`}>{p.code}</span>}
                       {p.name}
                     </Link>
                     <div className="flex items-center gap-2 mt-0.5">
-                      {prog && <div className="text-[10px] text-slate-400 truncate">{prog.name}</div>}
-                      {prog && p.status && <span className="text-slate-200">·</span>}
+                      {prog && <div className="text-[10px] text-zinc-400 truncate">{prog.name}</div>}
+                      {prog && p.status && <span className="text-zinc-200">·</span>}
                       {p.status && <ProjectStatusBadge status={p.status} />}
                     </div>
                   </td>
                   <td className="px-4 py-3"><MethodologyBadge methodology={p.methodology} /></td>
-                  <td className="px-4 py-3 font-mono-data text-xs text-slate-700">{formatEuro(p.budget_total)}</td>
+                  <td className="px-4 py-3 font-mono-data text-xs text-zinc-700">{formatEuro(p.budget_total)}</td>
                   <td className="px-4 py-3 font-mono-data text-xs">
-                    <span className={overBudget ? "text-rose-600 font-semibold" : "text-slate-700"}>{formatEuro(p.budget_forecast)}</span>
+                    <span className={overBudget ? "text-rose-600 font-semibold" : "text-zinc-700"}>{formatEuro(p.budget_forecast)}</span>
                   </td>
-                  <td className="px-4 py-3 font-mono-data text-xs text-slate-600">{formatDate(p.end_date_forecast)}</td>
+                  <td className="px-4 py-3 font-mono-data text-xs text-zinc-600">{formatDate(p.end_date_forecast)}</td>
                   {(canEdit || canDelete) && (
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
                         {canEdit && (
                         <button onClick={(e) => openEdit(e, p)} data-testid={`btn-edit-project-${p.project_id}`}
-                          className="p-1.5 text-slate-400 hover:text-[#0052CC] hover:bg-blue-50 rounded transition-colors" title="Modifier">
+                          className="p-1.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Modifier">
                           <Pencil size={13} />
                         </button>
                         )}
                         {canDelete && (
                           <button onClick={(e) => openDelete(e, p)} data-testid={`btn-delete-project-${p.project_id}`}
-                            className="p-1.5 text-slate-400 hover:text-rose-600 hover:bg-rose-50 rounded transition-colors" title="Supprimer">
+                            className="p-1.5 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Supprimer">
                             <Trash2 size={13} />
                           </button>
                         )}
@@ -300,7 +300,7 @@ export default function Portfolio() {
               );
             })}
             {filtered.length === 0 && (
-              <tr><td colSpan={(canEdit || canDelete) ? 8 : 7} className="text-center py-12 text-slate-400 text-sm">Aucun projet correspondant aux filtres</td></tr>
+              <tr><td colSpan={(canEdit || canDelete) ? 8 : 7} className="text-center py-12 text-zinc-400 text-sm">Aucun projet correspondant aux filtres</td></tr>
             )}
           </tbody>
         </table>

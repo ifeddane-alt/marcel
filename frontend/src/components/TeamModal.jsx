@@ -49,24 +49,24 @@ export default function TeamModal({ isOpen, onClose, team, resources, onSaved })
   return (
     <div className="fixed inset-0 bg-black/40 z-50 flex items-center justify-center p-4">
       <div className="bg-white rounded-lg shadow-xl w-full max-w-md">
-        <div className="flex items-center justify-between px-5 py-4 border-b border-gray-200">
-          <h2 className="font-heading text-lg font-bold text-[#0F172A] uppercase tracking-tight">
+        <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-200">
+          <h2 className="font-heading text-lg font-bold text-zinc-950 tracking-tight">
             {isEdit ? "Modifier l'équipe" : "Nouvelle équipe"}
           </h2>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600 transition-colors">
             <X size={18} />
           </button>
         </div>
 
         <form onSubmit={handleSubmit} className="p-5 space-y-4">
           {error && (
-            <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded px-3 py-2">
+            <div className="text-sm text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">
               {error}
             </div>
           )}
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
+            <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-wide mb-1.5">
               Nom de l'équipe *
             </label>
             <input
@@ -75,19 +75,19 @@ export default function TeamModal({ isOpen, onClose, team, resources, onSaved })
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="Ex: Dev A, Infra, QA…"
               data-testid="team-modal-name"
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded focus:outline-none focus:border-[#0052CC]"
+              className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:border-blue-600"
             />
           </div>
 
           <div>
-            <label className="block text-xs font-semibold text-slate-600 uppercase tracking-wide mb-1.5">
+            <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-wide mb-1.5">
               Manager
             </label>
             <select
               value={form.manager_resource_id}
               onChange={(e) => setForm({ ...form, manager_resource_id: e.target.value })}
               data-testid="team-modal-manager"
-              className="w-full px-3 py-2 text-sm border border-gray-200 rounded focus:outline-none focus:border-[#0052CC] bg-white"
+              className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:border-blue-600 bg-white"
             >
               <option value="">— Aucun manager —</option>
               {resources.map((r) => (
@@ -102,7 +102,7 @@ export default function TeamModal({ isOpen, onClose, team, resources, onSaved })
             <button
               type="button"
               onClick={onClose}
-              className="px-4 py-2 text-sm text-slate-600 border border-gray-200 rounded hover:bg-gray-50 transition-colors"
+              className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors"
             >
               Annuler
             </button>
@@ -110,7 +110,7 @@ export default function TeamModal({ isOpen, onClose, team, resources, onSaved })
               type="submit"
               disabled={saving}
               data-testid="team-modal-submit"
-              className="px-5 py-2 text-sm font-semibold bg-[#0052CC] text-white rounded hover:bg-[#0047B3] transition-colors disabled:opacity-60"
+              className="px-5 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60"
             >
               {saving ? "Enregistrement…" : isEdit ? "Mettre à jour" : "Créer"}
             </button>

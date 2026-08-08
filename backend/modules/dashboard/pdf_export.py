@@ -14,7 +14,7 @@ from core.database import db
 from core.auth import TokenPayload
 from . import service
 
-BLUE = colors.HexColor("#0052CC")
+BLUE = colors.HexColor("#2563EB")
 DARK = colors.HexColor("#0F172A")
 GREY = colors.HexColor("#64748B")
 RAG_COLORS = {

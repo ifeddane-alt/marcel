@@ -12,7 +12,7 @@ import ExcelToolbar from "@/components/ExcelToolbar";
 
 // ─── Constantes ─────────────────────────────────────────────────────────────
 const STATUS_CFG = {
-  draft:       { label: "Brouillon",      bg: "bg-gray-100",     text: "text-gray-600",    border: "border-gray-200" },
+  draft:       { label: "Brouillon",      bg: "bg-zinc-100",     text: "text-zinc-600",    border: "border-zinc-200" },
   submitted:   { label: "Soumis",         bg: "bg-blue-50",      text: "text-blue-700",    border: "border-blue-200" },
   cp_reviewed: { label: "Validé N+1",     bg: "bg-amber-50",     text: "text-amber-700",   border: "border-amber-200" },
   validated:   { label: "Validé CP",      bg: "bg-emerald-50",   text: "text-emerald-700", border: "border-emerald-200" },
@@ -68,14 +68,14 @@ function WorkflowStepper({ currentStatus }) {
         <React.Fragment key={step.key}>
           <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold border transition-all ${
             i < idx  ? "bg-emerald-50 text-emerald-600 border-emerald-200" :
-            i === idx ? "bg-[#0052CC] text-white border-[#0052CC]" :
-                        "bg-gray-50 text-gray-400 border-gray-200"
+            i === idx ? "bg-blue-600 text-white border-blue-600" :
+                        "bg-zinc-50 text-zinc-400 border-zinc-200"
           }`}>
             {i < idx && <CheckCircle size={9} />}
             {step.label}
           </div>
           {i < WORKFLOW_STEPS.length - 1 && (
-            <ArrowRight size={10} className={i < idx ? "text-emerald-400" : "text-gray-300"} />
+            <ArrowRight size={10} className={i < idx ? "text-emerald-400" : "text-zinc-300"} />
           )}
         </React.Fragment>
       ))}
@@ -180,7 +180,7 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
   };
 
   const cellBg = (status, day) => {
-    if (grid?.holidays?.[day]?.length) return "bg-gray-100";
+    if (grid?.holidays?.[day]?.length) return "bg-zinc-100";
     if ((grid?.leaves?.[day] ?? 0) >= 1.0) return "bg-indigo-50";
     if (!status || status === "draft")  return "";
     if (status === "submitted")         return "bg-blue-50";
@@ -196,7 +196,7 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
         <div className="flex items-center gap-3">
           <select value={resourceId || ""} onChange={(e) => onResourceChange(e.target.value)}
             data-testid="resource-picker"
-            className="text-sm border border-gray-200 rounded px-3 py-2 text-slate-700 focus:outline-none focus:border-[#0052CC] bg-white min-w-[200px]">
+            className="text-sm border border-zinc-200 rounded-lg px-3 py-2 text-zinc-700 focus:outline-none focus:border-blue-600 bg-white min-w-[200px]">
             <option value="">— Sélectionner une ressource —</option>
             {allResources.map((r) => (
               <option key={r.resource_id} value={r.resource_id}>
@@ -204,22 +204,22 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
               </option>
             ))}
           </select>
-          <div className="flex items-center gap-1 border border-gray-200 rounded overflow-hidden">
+          <div className="flex items-center gap-1 border border-zinc-200 rounded-lg overflow-hidden">
             <button onClick={() => setWeekStart((w) => shiftWeek(w, -1))} data-testid="week-prev"
-              className="p-2 hover:bg-gray-50 text-slate-500"><ChevronLeft size={14} /></button>
-            <span className="px-3 text-sm text-slate-700 font-medium whitespace-nowrap" data-testid="week-label">
+              className="p-2 hover:bg-zinc-50 text-zinc-500"><ChevronLeft size={14} /></button>
+            <span className="px-3 text-sm text-zinc-700 font-medium whitespace-nowrap" data-testid="week-label">
               {weekLabel(weekStart)}
             </span>
             <button onClick={() => setWeekStart((w) => shiftWeek(w, 1))} data-testid="week-next"
-              className="p-2 hover:bg-gray-50 text-slate-500"><ChevronRight size={14} /></button>
+              className="p-2 hover:bg-zinc-50 text-zinc-500"><ChevronRight size={14} /></button>
           </div>
           <button onClick={() => setWeekStart(getThisMonday())}
-            className="text-xs text-[#0052CC] hover:underline px-2">Semaine en cours</button>
+            className="text-xs text-blue-600 hover:underline px-2">Semaine en cours</button>
         </div>
         <button onClick={handleSubmit}
           disabled={!grid?.can_submit || submitting || !resourceId}
           data-testid="submit-week-btn"
-          className="flex items-center gap-2 px-4 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] disabled:opacity-40 transition-colors">
+          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-40 transition-colors">
           {submitting ? <RefreshCw size={13} className="animate-spin" /> : <Send size={13} />}
           Soumettre la semaine
         </button>
@@ -235,28 +235,28 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
       </div>
 
       {!resourceId ? (
-        <div className="py-16 text-center text-slate-400 text-sm border-2 border-dashed border-gray-200 rounded-lg">
+        <div className="py-16 text-center text-zinc-400 text-sm border-2 border-dashed border-zinc-200 rounded-lg">
           Sélectionnez une ressource pour saisir ses temps
         </div>
       ) : loading ? (
-        <div className="py-16 text-center text-slate-400 text-sm">Chargement...</div>
+        <div className="py-16 text-center text-zinc-400 text-sm">Chargement...</div>
       ) : !grid || grid.rows.length === 0 ? (
-        <div className="py-16 text-center text-slate-400 text-sm border-2 border-dashed border-gray-200 rounded-lg">
+        <div className="py-16 text-center text-zinc-400 text-sm border-2 border-dashed border-zinc-200 rounded-lg">
           Aucune allocation de travail pour cette ressource
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded shadow-sm overflow-x-auto" data-testid="timesheet-grid">
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-x-auto" data-testid="timesheet-grid">
           <table className="w-full">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-500 min-w-[240px]">
+              <tr className="bg-zinc-50 border-b border-zinc-200">
+                <th className="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-zinc-500 min-w-[240px]">
                   Projet / Tâche / Phase
                 </th>
                 {grid.days.map((day, i) => {
                   const hols = grid.holidays?.[day] ?? [];
                   const isHoliday = hols.length > 0;
                   return (
-                    <th key={day} className={`px-2 py-2 text-center text-[10px] font-bold uppercase tracking-widest min-w-[80px] ${isHoliday ? "bg-gray-100 text-gray-400" : "text-slate-500"}`}>
+                    <th key={day} className={`px-2 py-2 text-center text-[10px] font-bold uppercase tracking-widest min-w-[80px] ${isHoliday ? "bg-zinc-100 text-zinc-400" : "text-zinc-500"}`}>
                       <div>{DOW[i]}</div>
                       <div className="text-[9px] font-normal mt-0.5">
                         {new Date(day + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "2-digit" })}
@@ -269,7 +269,7 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
                     </th>
                   );
                 })}
-                <th className="px-3 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-slate-500 min-w-[70px]">Total</th>
+                <th className="px-3 py-2.5 text-right text-[10px] font-bold uppercase tracking-widest text-zinc-500 min-w-[70px]">Total</th>
               </tr>
             </thead>
             <tbody>
@@ -287,8 +287,8 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
                   const val  = grid.leaves?.[day] ?? 0;
                   if (hols.length > 0) {
                     return (
-                      <td key={day} className="px-2 py-2 text-center bg-gray-100">
-                        <span className="text-[9px] text-gray-400 font-medium block truncate" title={hols.map(h=>h.name).join(", ")}>
+                      <td key={day} className="px-2 py-2 text-center bg-zinc-100">
+                        <span className="text-[9px] text-zinc-400 font-medium block truncate" title={hols.map(h=>h.name).join(", ")}>
                           Férié
                         </span>
                       </td>
@@ -299,8 +299,8 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
                       <button
                         onClick={() => handleLeave(day)}
                         data-testid={`absence-cell-${day}`}
-                        className={`w-14 mx-auto flex items-center justify-center text-xs font-bold rounded py-1 border transition-all cursor-pointer
-                          ${val === 0   ? "border-gray-200 text-gray-400 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600" : ""}
+                        className={`w-14 mx-auto flex items-center justify-center text-xs font-bold rounded-lg py-1 border transition-all cursor-pointer
+                          ${val === 0   ? "border-zinc-200 text-zinc-400 hover:border-indigo-300 hover:bg-indigo-50 hover:text-indigo-600" : ""}
                           ${val === 0.5 ? "border-indigo-300 bg-indigo-100 text-indigo-700" : ""}
                           ${val === 1.0 ? "border-indigo-500 bg-indigo-200 text-indigo-800" : ""}
                         `}
@@ -313,20 +313,20 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
                 <td className="px-3 py-2 text-right text-xs font-bold text-indigo-700 tabular-nums">
                   {Object.values(grid.leaves ?? {}).reduce((s, v) => s + v, 0) > 0
                     ? Object.values(grid.leaves ?? {}).reduce((s, v) => s + v, 0) + " j"
-                    : <span className="text-slate-300">—</span>}
+                    : <span className="text-zinc-300">—</span>}
                 </td>
               </tr>
               {/* ── Lignes Projets ─────────────────────────────────────── */}
               {grid.rows.map((row) => (
-                <tr key={row.work_allocation_id} className="border-b border-gray-50 hover:bg-gray-50/50"
+                <tr key={row.work_allocation_id} className="border-b border-zinc-50 hover:bg-zinc-50/50"
                   data-testid={`grid-row-${row.work_allocation_id}`}>
                   <td className="px-4 py-2.5">
-                    <div className="text-xs font-semibold text-slate-800 leading-snug truncate max-w-[220px]">
+                    <div className="text-xs font-semibold text-zinc-800 leading-snug truncate max-w-[220px]">
                       {row.project_name.split("—")[0].trim().slice(0, 30)}
                     </div>
-                    <div className="text-[10px] text-slate-500 mt-0.5">
+                    <div className="text-[10px] text-zinc-500 mt-0.5">
                       {row.task_name.slice(0, 40)}
-                      {row.phase && row.phase !== "—" && <span className="ml-1 text-slate-400">· {row.phase}</span>}
+                      {row.phase && row.phase !== "—" && <span className="ml-1 text-zinc-400">· {row.phase}</span>}
                     </div>
                   </td>
                   {grid.days.map((day) => {
@@ -343,10 +343,10 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
                             onChange={(ev) => handleCell(row.work_allocation_id, day, ev.target.value)}
                             disabled={!editable}
                             data-testid={`cell-${row.work_allocation_id}-${day}`}
-                            className={`w-16 text-center text-xs rounded border py-1 px-1 transition-colors
+                            className={`w-16 text-center text-xs rounded-lg border py-1 px-1 transition-colors
                               ${editable
-                                ? "border-gray-200 focus:border-[#0052CC] focus:outline-none focus:ring-1 focus:ring-[#0052CC]/30"
-                                : "border-transparent bg-transparent text-slate-500 cursor-not-allowed"}
+                                ? "border-zinc-200 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600/30"
+                                : "border-transparent bg-transparent text-zinc-500 cursor-not-allowed"}
                               ${e?.status === "submitted"   ? "text-blue-700" : ""}
                               ${e?.status === "cp_reviewed" ? "text-amber-700 font-semibold" : ""}
                               ${e?.status === "validated"   ? "text-emerald-700 font-semibold" : ""}
@@ -355,7 +355,7 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
                           />
                           {/* Tooltip motif rejet */}
                           {e?.status === "rejected" && e?.rejection_reason && (
-                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-rose-800 text-white text-[10px] rounded shadow-lg z-10 w-48 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
+                            <div className="absolute bottom-full left-1/2 -translate-x-1/2 mb-1 px-2 py-1 bg-rose-800 text-white text-[10px] rounded-lg shadow-lg z-10 w-48 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none">
                               Rejeté : {e.rejection_reason}
                             </div>
                           )}
@@ -363,30 +363,30 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
                       </td>
                     );
                   })}
-                  <td className="px-3 py-2.5 text-right text-xs font-semibold text-slate-700 tabular-nums">
-                    {row.week_total > 0 ? row.week_total : <span className="text-slate-300">—</span>}
+                  <td className="px-3 py-2.5 text-right text-xs font-semibold text-zinc-700 tabular-nums">
+                    {row.week_total > 0 ? row.week_total : <span className="text-zinc-300">—</span>}
                   </td>
                 </tr>
               ))}
-              <tr className="bg-[#EBF2FF] border-t-2 border-[#0052CC]/20">
-                <td className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-[#0052CC]">Total / jour</td>
+              <tr className="bg-blue-50 border-t-2 border-blue-600/20">
+                <td className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-blue-600">Total / jour</td>
                 {grid.days.map((day) => {
                   const dayCap = grid.day_caps?.[day] ?? grid.daily_cap_jh;
                   const exceeded = dayCap > 0 && grid.day_totals[day] > dayCap;
                   return (
-                    <td key={day} className="px-2 py-2 text-center text-xs font-bold text-[#0052CC] tabular-nums">
+                    <td key={day} className="px-2 py-2 text-center text-xs font-bold text-blue-600 tabular-nums">
                       {grid.day_totals[day] > 0 ? grid.day_totals[day] : "—"}
                       {exceeded && <AlertTriangle size={10} className="inline ml-1 text-rose-500" />}
                     </td>
                   );
                 })}
-                <td className="px-3 py-2 text-right text-xs font-bold text-[#0052CC] tabular-nums">
+                <td className="px-3 py-2 text-right text-xs font-bold text-blue-600 tabular-nums">
                   {grid.week_grand_total || "—"}
                 </td>
               </tr>
             </tbody>
           </table>
-          <div className="px-4 py-2 text-[10px] text-slate-400 border-t border-gray-100">
+          <div className="px-4 py-2 text-[10px] text-zinc-400 border-t border-zinc-100">
             Capacité journalière : {grid.daily_cap_jh} JH · {grid.resource_name}
           </div>
         </div>
@@ -405,19 +405,19 @@ function GroupCard({
   showStatus = false,
 }) {
   return (
-    <div className="bg-white border border-gray-200 rounded shadow-sm mb-4"
+    <div className="bg-white border border-zinc-200 rounded-lg shadow-sm mb-4"
       data-testid={`validation-group-${g.resource_id}`}>
       <div
-        className="flex items-center justify-between px-5 py-3 border-b border-gray-100 cursor-pointer"
+        className="flex items-center justify-between px-5 py-3 border-b border-zinc-100 cursor-pointer"
         onClick={onToggle}
       >
         <div className="flex items-center gap-3">
           <input type="checkbox" checked={!!selected}
             onChange={(e) => { e.stopPropagation(); onSelect(e.target.checked); }}
-            className="accent-[#0052CC]" data-testid={`group-check-${g.resource_id}`} />
+            className="accent-[#2563eb]" data-testid={`group-check-${g.resource_id}`} />
           <div>
-            <span className="font-semibold text-slate-800 text-sm">{g.resource_name}</span>
-            <span className="text-slate-400 text-xs ml-2">Semaine du {g.week_start}</span>
+            <span className="font-semibold text-zinc-800 text-sm">{g.resource_name}</span>
+            <span className="text-zinc-400 text-xs ml-2">Semaine du {g.week_start}</span>
           </div>
           <span className="text-[10px] font-bold text-amber-700 bg-amber-50 border border-amber-200 px-2 py-0.5 rounded-full">
             {g.total_jh} JH
@@ -431,7 +431,7 @@ function GroupCard({
           )}
           {/* Projets */}
           {g.project_names?.length > 0 && (
-            <span className="text-[10px] text-slate-400 hidden md:block truncate max-w-[160px]">
+            <span className="text-[10px] text-zinc-400 hidden md:block truncate max-w-[160px]">
               {g.project_names[0]}
             </span>
           )}
@@ -439,12 +439,12 @@ function GroupCard({
         <div className="flex items-center gap-2">
           <button onClick={(e) => { e.stopPropagation(); onAction(g.ts_ids); }}
             data-testid={`action-btn-${g.resource_id}`}
-            className={`flex items-center gap-1 px-3 py-1.5 text-white text-xs font-semibold rounded ${actionClass}`}>
+            className={`flex items-center gap-1 px-3 py-1.5 text-white text-xs font-semibold rounded-lg ${actionClass}`}>
             <ActionIcon size={11} /> {actionLabel}
           </button>
           <button onClick={(e) => { e.stopPropagation(); onReject(g.ts_ids); }}
             data-testid={`reject-btn-${g.resource_id}`}
-            className="flex items-center gap-1 px-3 py-1.5 bg-rose-600 text-white text-xs font-semibold rounded hover:bg-rose-700">
+            className="flex items-center gap-1 px-3 py-1.5 bg-rose-600 text-white text-xs font-semibold rounded-lg hover:bg-rose-700">
             <X size={11} /> Rejeter
           </button>
         </div>
@@ -452,22 +452,22 @@ function GroupCard({
       {open && (
         <table className="w-full text-xs">
           <thead>
-            <tr className="bg-gray-50">
-              <th className="px-4 py-2 text-left text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Projet</th>
-              <th className="px-3 py-2 text-left text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Tâche</th>
-              <th className="px-3 py-2 text-left text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Phase</th>
-              <th className="px-3 py-2 text-left text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Date</th>
-              <th className="px-3 py-2 text-right text-[10px] uppercase tracking-widest text-slate-400 font-semibold">JH</th>
-              {showStatus && <th className="px-3 py-2 text-center text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Statut</th>}
+            <tr className="bg-zinc-50">
+              <th className="px-4 py-2 text-left text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Projet</th>
+              <th className="px-3 py-2 text-left text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Tâche</th>
+              <th className="px-3 py-2 text-left text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Phase</th>
+              <th className="px-3 py-2 text-left text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Date</th>
+              <th className="px-3 py-2 text-right text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">JH</th>
+              {showStatus && <th className="px-3 py-2 text-center text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Statut</th>}
             </tr>
           </thead>
           <tbody>
             {g.entries.map((e) => (
-              <tr key={e.timesheet_id} className="border-t border-gray-50 hover:bg-blue-50/20">
-                <td className="px-4 py-2 text-slate-700 truncate max-w-[180px]">{e.project_name}</td>
-                <td className="px-3 py-2 text-slate-600 truncate max-w-[160px]">{e.task_name}</td>
-                <td className="px-3 py-2 text-slate-500">{e.phase}</td>
-                <td className="px-3 py-2 text-slate-500 font-mono">
+              <tr key={e.timesheet_id} className="border-t border-zinc-50 hover:bg-blue-50/20">
+                <td className="px-4 py-2 text-zinc-700 truncate max-w-[180px]">{e.project_name}</td>
+                <td className="px-3 py-2 text-zinc-600 truncate max-w-[160px]">{e.task_name}</td>
+                <td className="px-3 py-2 text-zinc-500">{e.phase}</td>
+                <td className="px-3 py-2 text-zinc-500 font-mono">
                   {new Date(e.date + "T00:00:00").toLocaleDateString("fr-FR")}
                 </td>
                 <td className="px-3 py-2 text-right font-semibold text-amber-700 tabular-nums">{e.jh_value}</td>
@@ -487,24 +487,24 @@ function RejectModal({ onConfirm, onClose }) {
   return (
     <div className="fixed inset-0 bg-black/50 z-50 flex items-center justify-center p-0 sm:p-4">
       <div className="bg-white rounded-xl shadow-2xl p-6 w-full max-w-md" data-testid="reject-modal">
-        <h3 className="font-bold text-slate-800 text-base mb-3 flex items-center gap-2">
+        <h3 className="font-bold text-zinc-800 text-base mb-3 flex items-center gap-2">
           <AlertTriangle size={16} className="text-rose-500" /> Motif du rejet
         </h3>
-        <p className="text-xs text-slate-500 mb-3">
+        <p className="text-xs text-zinc-500 mb-3">
           Le motif sera transmis à la ressource. La feuille de temps sera remise en brouillon pour correction.
         </p>
         <textarea value={reason} onChange={(e) => setReason(e.target.value)}
           placeholder="Expliquez la raison du rejet (obligatoire)…"
-          className="w-full border border-gray-200 rounded-lg p-3 text-sm focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-200"
+          className="w-full border border-zinc-200 rounded-lg p-3 text-sm focus:outline-none focus:border-rose-400 focus:ring-1 focus:ring-rose-200"
           rows={3} data-testid="reject-reason-input" />
         <div className="flex justify-end gap-2 mt-4">
           <button onClick={onClose}
-            className="px-4 py-2 text-sm text-slate-600 border border-gray-200 rounded hover:bg-gray-50">
+            className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50">
             Annuler
           </button>
           <button onClick={() => onConfirm(reason)} disabled={!reason.trim()}
             data-testid="confirm-reject-btn"
-            className="px-4 py-2 text-sm text-white bg-rose-600 rounded hover:bg-rose-700 disabled:opacity-40">
+            className="px-4 py-2 text-sm text-white bg-rose-600 rounded-lg hover:bg-rose-700 disabled:opacity-40">
             Confirmer le rejet
           </button>
         </div>
@@ -551,11 +551,11 @@ function ValidationSubView({ view, actionLabel, actionIcon: ActionIcon, actionCl
 
   const selectedAll = groups.flatMap((g, i) => selected[i] ? g.ts_ids : []);
 
-  if (loading) return <div className="py-12 text-center text-slate-400 text-sm">Chargement...</div>;
+  if (loading) return <div className="py-12 text-center text-zinc-400 text-sm">Chargement...</div>;
   if (!groups.length) return (
-    <div className="py-12 text-center border-2 border-dashed border-gray-200 rounded-lg" data-testid={`validation-empty-${view}`}>
+    <div className="py-12 text-center border-2 border-dashed border-zinc-200 rounded-lg" data-testid={`validation-empty-${view}`}>
       <CheckCircle size={32} className="text-emerald-300 mx-auto mb-2" />
-      <p className="text-sm text-slate-400">Aucune soumission en attente</p>
+      <p className="text-sm text-zinc-400">Aucune soumission en attente</p>
     </div>
   );
 
@@ -563,24 +563,24 @@ function ValidationSubView({ view, actionLabel, actionIcon: ActionIcon, actionCl
     <div data-testid={`validation-view-${view}`}>
       {/* Bulk actions */}
       <div className="flex items-center justify-between mb-4">
-        <label className="flex items-center gap-2 text-xs text-slate-600 cursor-pointer">
+        <label className="flex items-center gap-2 text-xs text-zinc-600 cursor-pointer">
           <input type="checkbox"
             checked={groups.length > 0 && groups.every((_, i) => selected[i])}
             onChange={(e) => setSelected(Object.fromEntries(groups.map((_, i) => [i, e.target.checked])))}
-            data-testid="bulk-select-all" className="accent-[#0052CC]" />
+            data-testid="bulk-select-all" className="accent-[#2563eb]" />
           Tout sélectionner
           {selectedAll.length > 0 && (
-            <span className="text-[#0052CC] font-semibold ml-1">({selectedAll.length})</span>
+            <span className="text-blue-600 font-semibold ml-1">({selectedAll.length})</span>
           )}
         </label>
         {selectedAll.length > 0 && (
           <div className="flex gap-2">
             <button onClick={() => handleAction(selectedAll)} data-testid="bulk-validate-btn"
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-semibold rounded ${actionClass}`}>
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-white text-xs font-semibold rounded-lg ${actionClass}`}>
               <ActionIcon size={12} /> Valider la sélection
             </button>
             <button onClick={() => setRejectIds(selectedAll)}
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 text-white text-xs font-semibold rounded hover:bg-rose-700">
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-rose-600 text-white text-xs font-semibold rounded-lg hover:bg-rose-700">
               <X size={12} /> Rejeter
             </button>
           </div>
@@ -627,7 +627,7 @@ function ValidationView({ user, refresh }) {
     valideur: {
       actionLabel: "Valider (→ CP)",
       actionIcon: CheckCircle,
-      actionClass: "bg-[#0052CC] hover:bg-[#0047B3]",
+      actionClass: "bg-blue-600 hover:bg-blue-700",
       actionToastFn: (d) => `${d.advanced_to_cp_reviewed ?? 0} timesheet(s) transmis au Chef de Projet`,
       showTimeout: false, showStatus: false,
     },
@@ -652,15 +652,15 @@ function ValidationView({ user, refresh }) {
   return (
     <div data-testid="validation-view">
       {/* Sub-tabs */}
-      <div className="flex gap-1 mb-5 border-b border-gray-200">
+      <div className="flex gap-1 mb-5 border-b border-zinc-200">
         {SUB_TABS.map(({ id, label, icon: Icon, desc }) => (
           <button key={id} onClick={() => setSubView(id)}
             data-testid={`sub-tab-${id}`}
             title={desc}
             className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold border-b-2 -mb-px transition-colors ${
               subView === id
-                ? "border-[#0052CC] text-[#0052CC]"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent text-zinc-500 hover:text-zinc-700"
             }`}>
             <Icon size={13} /> {label}
           </button>
@@ -668,9 +668,9 @@ function ValidationView({ user, refresh }) {
       </div>
 
       {/* Description de la vue active */}
-      <div className="flex items-start gap-2 mb-4 px-3 py-2 bg-slate-50 border border-slate-100 rounded-lg">
-        <Info size={13} className="text-slate-400 mt-0.5 shrink-0" />
-        <p className="text-[11px] text-slate-500">
+      <div className="flex items-start gap-2 mb-4 px-3 py-2 bg-zinc-50 border border-zinc-100 rounded-lg">
+        <Info size={13} className="text-zinc-400 mt-0.5 shrink-0" />
+        <p className="text-[11px] text-zinc-500">
           {SUB_TABS.find((t) => t.id === subView)?.desc}
         </p>
       </div>
@@ -721,29 +721,29 @@ function ReportsView() {
 
   return (
     <div data-testid="reports-view">
-      <div className="bg-white border border-gray-200 rounded shadow-sm p-4 mb-6">
+      <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4 mb-6">
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-widest">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 uppercase tracking-widest">
             <Filter size={11} /> Filtres
           </div>
           <select value={dim} onChange={(e) => setDim(e.target.value)} data-testid="report-dimension"
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:border-[#0052CC] bg-white text-slate-600">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600 bg-white text-zinc-600">
             <option value="resource">Par ressource</option>
             <option value="team">Par équipe</option>
             <option value="project">Par projet</option>
           </select>
           <input type="date" value={start} onChange={(e) => setStart(e.target.value)} data-testid="report-start"
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:border-[#0052CC]" />
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600" />
           <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} data-testid="report-end"
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:border-[#0052CC]" />
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600" />
           <button onClick={load} disabled={loading} data-testid="report-load-btn"
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0052CC] text-white text-xs font-semibold rounded hover:bg-[#0047B3] disabled:opacity-50">
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50">
             {loading ? <RefreshCw size={11} className="animate-spin" /> : <Filter size={11} />}
             Actualiser
           </button>
           {rows.length > 0 && (
             <button onClick={downloadCsv} data-testid="export-csv-btn"
-              className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 text-slate-600 text-xs font-semibold rounded hover:bg-gray-50 ml-auto">
+              className="flex items-center gap-1.5 px-3 py-1.5 border border-zinc-200 text-zinc-600 text-xs font-semibold rounded-lg hover:bg-zinc-50 ml-auto">
               <Download size={11} /> Exporter CSV
             </button>
           )}
@@ -751,35 +751,35 @@ function ReportsView() {
       </div>
 
       {rows.length === 0 ? (
-        <div className="py-16 text-center border-2 border-dashed border-gray-200 rounded-lg text-slate-400 text-sm">
+        <div className="py-16 text-center border-2 border-dashed border-zinc-200 rounded-lg text-zinc-400 text-sm">
           {loading ? "Chargement…" : "Aucune donnée validée sur la période. Cliquez sur Actualiser."}
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded shadow-sm overflow-x-auto" data-testid="report-table">
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-x-auto" data-testid="report-table">
           <table className="w-full text-xs">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
-                <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-widest text-slate-500 font-bold min-w-[180px]">
+              <tr className="bg-zinc-50 border-b border-zinc-200">
+                <th className="px-4 py-2.5 text-left text-[10px] uppercase tracking-widest text-zinc-500 font-bold min-w-[180px]">
                   {dim === "resource" ? "Ressource" : dim === "team" ? "Équipe" : "Projet"}
                 </th>
                 {allPeriods.map((p) => (
-                  <th key={p} className="px-3 py-2.5 text-right text-[10px] uppercase tracking-widest text-slate-500 font-bold whitespace-nowrap min-w-[80px]">
+                  <th key={p} className="px-3 py-2.5 text-right text-[10px] uppercase tracking-widest text-zinc-500 font-bold whitespace-nowrap min-w-[80px]">
                     {p}
                   </th>
                 ))}
-                <th className="px-4 py-2.5 text-right text-[10px] uppercase tracking-widest text-[#0052CC] font-bold">Total JH</th>
+                <th className="px-4 py-2.5 text-right text-[10px] uppercase tracking-widest text-blue-600 font-bold">Total JH</th>
               </tr>
             </thead>
             <tbody>
               {rows.map((r) => (
-                <tr key={r.dimension_id} className="border-b border-gray-50 hover:bg-blue-50/20">
-                  <td className="px-4 py-2.5 font-semibold text-slate-800 truncate max-w-[200px]">{r.dimension_label}</td>
+                <tr key={r.dimension_id} className="border-b border-zinc-50 hover:bg-blue-50/20">
+                  <td className="px-4 py-2.5 font-semibold text-zinc-800 truncate max-w-[200px]">{r.dimension_label}</td>
                   {allPeriods.map((p) => (
-                    <td key={p} className="px-3 py-2.5 text-right tabular-nums text-slate-600">
-                      {r.periods[p] || <span className="text-slate-300">—</span>}
+                    <td key={p} className="px-3 py-2.5 text-right tabular-nums text-zinc-600">
+                      {r.periods[p] || <span className="text-zinc-300">—</span>}
                     </td>
                   ))}
-                  <td className="px-4 py-2.5 text-right font-bold text-[#0052CC] tabular-nums">{r.total_jh}</td>
+                  <td className="px-4 py-2.5 text-right font-bold text-blue-600 tabular-nums">{r.total_jh}</td>
                 </tr>
               ))}
             </tbody>
@@ -856,7 +856,7 @@ function AbsencesCalendar({ allResources, defaultResourceId }) {
 
   const dayClass = (day) => {
     if (!day) return "";
-    if (day.is_weekend)     return "bg-gray-50 text-gray-300 cursor-default";
+    if (day.is_weekend)     return "bg-zinc-50 text-zinc-300 cursor-default";
     if (day.is_holiday)     return "bg-indigo-50 cursor-default";
     if (day.absence_value === 1.0) return "bg-indigo-500 text-white cursor-pointer hover:bg-indigo-600";
     if (day.absence_value === 0.5) return "bg-indigo-200 text-indigo-800 cursor-pointer hover:bg-indigo-300";
@@ -871,16 +871,16 @@ function AbsencesCalendar({ allResources, defaultResourceId }) {
       <div className="flex items-center justify-between mb-5 flex-wrap gap-3">
         <div className="flex items-center gap-2">
           <button onClick={() => shiftMonth(-1)} data-testid="cal-prev-month"
-            className="p-1.5 border border-gray-200 rounded hover:bg-gray-50 text-slate-500"><ChevronLeft size={14} /></button>
-          <span className="text-base font-bold text-slate-800 min-w-[160px] text-center">
+            className="p-1.5 border border-zinc-200 rounded-lg hover:bg-zinc-50 text-zinc-500"><ChevronLeft size={14} /></button>
+          <span className="text-base font-bold text-zinc-800 min-w-[160px] text-center">
             {FR_MONTHS[month - 1]} {year}
           </span>
           <button onClick={() => shiftMonth(1)} data-testid="cal-next-month"
-            className="p-1.5 border border-gray-200 rounded hover:bg-gray-50 text-slate-500"><ChevronRight size={14} /></button>
+            className="p-1.5 border border-zinc-200 rounded-lg hover:bg-zinc-50 text-zinc-500"><ChevronRight size={14} /></button>
         </div>
         <select value={resourceId} onChange={(e) => setResourceId(e.target.value)}
           data-testid="cal-resource-picker"
-          className="text-sm border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-[#0052CC] bg-white min-w-[200px]">
+          className="text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 bg-white min-w-[200px]">
           <option value="">— Sélectionner une ressource —</option>
           {allResources.map((r) => (
             <option key={r.resource_id} value={r.resource_id}>{r.name}</option>
@@ -889,32 +889,32 @@ function AbsencesCalendar({ allResources, defaultResourceId }) {
       </div>
 
       {!resourceId ? (
-        <div className="py-16 text-center border-2 border-dashed border-gray-200 rounded-lg text-slate-400 text-sm">
+        <div className="py-16 text-center border-2 border-dashed border-zinc-200 rounded-lg text-zinc-400 text-sm">
           Sélectionnez une ressource pour voir son calendrier d'absences
         </div>
       ) : loading ? (
-        <div className="py-12 text-center text-slate-400 text-sm">Chargement...</div>
+        <div className="py-12 text-center text-zinc-400 text-sm">Chargement...</div>
       ) : cal && (
         <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
           {/* Calendrier */}
-          <div className="lg:col-span-2 bg-white border border-gray-200 rounded shadow-sm overflow-hidden">
-            <div className="grid grid-cols-7 bg-gray-50 border-b border-gray-200">
+          <div className="lg:col-span-2 bg-white border border-zinc-200 rounded-lg shadow-sm overflow-hidden">
+            <div className="grid grid-cols-7 bg-zinc-50 border-b border-zinc-200">
               {DOW_FULL.map((d, i) => (
-                <div key={d} className={`py-2 text-center text-[10px] font-bold uppercase tracking-widest ${i >= 5 ? "text-gray-300" : "text-slate-500"}`}>
+                <div key={d} className={`py-2 text-center text-[10px] font-bold uppercase tracking-widest ${i >= 5 ? "text-zinc-300" : "text-zinc-500"}`}>
                   {d}
                 </div>
               ))}
             </div>
             {buildWeeks(cal.days).map((week, wi) => (
-              <div key={wi} className="grid grid-cols-7 border-b border-gray-100">
+              <div key={wi} className="grid grid-cols-7 border-b border-zinc-100">
                 {week.map((day, di) => {
-                  if (!day) return <div key={di} className="p-2 bg-gray-50/50 min-h-[52px]" />;
+                  if (!day) return <div key={di} className="p-2 bg-zinc-50/50 min-h-[52px]" />;
                   const dayNum = parseInt(day.date.split("-")[2]);
                   return (
                     <div key={day.date} onClick={() => handleDayClick(day)}
                       data-testid={`cal-day-${day.date}`}
-                      className={`p-2 min-h-[52px] border-r border-gray-100 flex flex-col transition-colors ${dayClass(day)}`}>
-                      <span className={`text-xs font-semibold mb-1 ${day.is_holiday ? "text-indigo-600" : day.is_weekend ? "text-gray-300" : "text-slate-700"}`}>
+                      className={`p-2 min-h-[52px] border-r border-zinc-100 flex flex-col transition-colors ${dayClass(day)}`}>
+                      <span className={`text-xs font-semibold mb-1 ${day.is_holiday ? "text-indigo-600" : day.is_weekend ? "text-zinc-300" : "text-zinc-700"}`}>
                         {dayNum}
                       </span>
                       {day.is_holiday && day.holidays.length > 0 && (
@@ -928,7 +928,7 @@ function AbsencesCalendar({ allResources, defaultResourceId }) {
                         </span>
                       )}
                       {!day.is_weekend && !day.is_holiday && day.absence_value === 0 && (
-                        <span className="text-[9px] text-gray-300 mt-auto opacity-0 group-hover:opacity-100">+</span>
+                        <span className="text-[9px] text-zinc-300 mt-auto opacity-0 group-hover:opacity-100">+</span>
                       )}
                     </div>
                   );
@@ -940,48 +940,48 @@ function AbsencesCalendar({ allResources, defaultResourceId }) {
           {/* Stats & légende */}
           <div className="space-y-4">
             {stats && (
-              <div className="bg-white border border-gray-200 rounded shadow-sm p-4" data-testid="cal-stats">
-                <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Résumé du mois</h3>
+              <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4" data-testid="cal-stats">
+                <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-3">Résumé du mois</h3>
                 <div className="space-y-2">
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-slate-600">Jours ouvrés</span>
-                    <span className="text-sm font-bold text-slate-800" data-testid="stat-working">{stats.total_working} j</span>
+                    <span className="text-xs text-zinc-600">Jours ouvrés</span>
+                    <span className="text-sm font-bold text-zinc-800" data-testid="stat-working">{stats.total_working} j</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-slate-600">Jours fériés</span>
+                    <span className="text-xs text-zinc-600">Jours fériés</span>
                     <span className="text-sm font-semibold text-indigo-600" data-testid="stat-holidays">{stats.holiday_days} j</span>
                   </div>
                   <div className="flex justify-between items-center">
-                    <span className="text-xs text-slate-600">Absences saisies</span>
+                    <span className="text-xs text-zinc-600">Absences saisies</span>
                     <span className="text-sm font-semibold text-amber-600" data-testid="stat-absences">{stats.absence_jh} j</span>
                   </div>
-                  <div className="h-px bg-gray-100 my-1" />
+                  <div className="h-px bg-zinc-100 my-1" />
                   <div className="flex justify-between items-center">
-                    <span className="text-xs font-semibold text-slate-700">JH disponibles nettes</span>
-                    <span className="text-base font-bold text-[#0052CC]" data-testid="stat-available">{stats.available_jh} j</span>
+                    <span className="text-xs font-semibold text-zinc-700">JH disponibles nettes</span>
+                    <span className="text-base font-bold text-blue-600" data-testid="stat-available">{stats.available_jh} j</span>
                   </div>
                 </div>
               </div>
             )}
 
-            <div className="bg-white border border-gray-200 rounded shadow-sm p-4">
-              <h3 className="text-xs font-bold uppercase tracking-widest text-slate-500 mb-3">Légende</h3>
+            <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4">
+              <h3 className="text-xs font-bold uppercase tracking-widest text-zinc-500 mb-3">Légende</h3>
               <div className="space-y-1.5">
                 {[
-                  { cls: "bg-white border border-gray-200", label: "Jour ouvré disponible (clic pour ajouter)" },
+                  { cls: "bg-white border border-zinc-200", label: "Jour ouvré disponible (clic pour ajouter)" },
                   { cls: "bg-indigo-200 border border-indigo-300", label: "Demi-journée d'absence" },
                   { cls: "bg-indigo-500 border border-indigo-600", label: "Journée entière d'absence" },
                   { cls: "bg-indigo-50 border border-indigo-200", label: "Jour férié (FR ou MA)" },
-                  { cls: "bg-gray-50 border border-gray-200", label: "Week-end" },
+                  { cls: "bg-zinc-50 border border-zinc-200", label: "Week-end" },
                 ].map(({ cls, label }) => (
                   <div key={label} className="flex items-center gap-2">
-                    <div className={`w-5 h-5 rounded ${cls} shrink-0`} />
-                    <span className="text-[11px] text-slate-600">{label}</span>
+                    <div className={`w-5 h-5 rounded-lg ${cls} shrink-0`} />
+                    <span className="text-[11px] text-zinc-600">{label}</span>
                   </div>
                 ))}
               </div>
-              <div className="mt-3 pt-3 border-t border-gray-100">
-                <p className="text-[10px] text-slate-400">Cliquez sur un jour pour cycler : disponible → ½j → 1j → disponible</p>
+              <div className="mt-3 pt-3 border-t border-zinc-100">
+                <p className="text-[10px] text-zinc-400">Cliquez sur un jour pour cycler : disponible → ½j → 1j → disponible</p>
               </div>
             </div>
           </div>
@@ -1026,10 +1026,10 @@ export default function Timesheets() {
       <div className="mb-4 md:mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
           <div className="flex items-center gap-2 mb-1">
-            <Clock size={18} className="text-[#0052CC]" />
-            <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">Timesheets</h1>
+            <Clock size={18} className="text-blue-600" />
+            <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">Timesheets</h1>
           </div>
-          <p className="text-sm text-slate-500">
+          <p className="text-sm text-zinc-500">
             Saisie des temps · Absences · Validation multi-acteurs (N+1 → Chef de Projet → PMO)
           </p>
         </div>
@@ -1038,12 +1038,12 @@ export default function Timesheets() {
         </div>
       </div>
 
-      <div className="flex items-center gap-1 mb-4 md:mb-6 border-b border-gray-200 overflow-x-auto">
+      <div className="flex items-center gap-1 mb-4 md:mb-6 border-b border-zinc-200 overflow-x-auto">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button key={id} onClick={() => { setTab(id); if (id === "validation") setValidRefresh((n) => n + 1); }}
             data-testid={`tab-${id}`}
             className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
-              tab === id ? "border-[#0052CC] text-[#0052CC]" : "border-transparent text-slate-500 hover:text-slate-700"
+              tab === id ? "border-blue-600 text-blue-600" : "border-transparent text-zinc-500 hover:text-zinc-700"
             }`}>
             <Icon size={13} /> {label}
           </button>

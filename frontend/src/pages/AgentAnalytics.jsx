@@ -17,19 +17,19 @@ function KpiCard({ icon: Icon, label, value, sub, color = "blue" }) {
     green:  { bg: "bg-emerald-50",border: "border-l-emerald-500",text: "text-emerald-700" },
     amber:  { bg: "bg-amber-50",  border: "border-l-amber-500",  text: "text-amber-700" },
     purple: { bg: "bg-violet-50", border: "border-l-violet-500", text: "text-violet-700" },
-    slate:  { bg: "bg-slate-50",  border: "border-l-slate-400",  text: "text-slate-700" },
+    slate:  { bg: "bg-zinc-50",  border: "border-l-slate-400",  text: "text-zinc-700" },
   };
   const c = colorMap[color] || colorMap.blue;
   return (
-    <div className={`${c.bg} border border-gray-200 border-l-4 ${c.border} rounded-xl p-4 shadow-sm`}>
+    <div className={`${c.bg} border border-zinc-200 border-l-4 ${c.border} rounded-xl p-4 shadow-sm`}>
       <div className="flex items-center gap-2 mb-2">
         <Icon size={15} className={c.text} />
-        <span className="text-xs uppercase tracking-widest text-slate-500 font-semibold">{label}</span>
+        <span className="text-xs uppercase tracking-widest text-zinc-500 font-semibold">{label}</span>
       </div>
       <div className={`text-2xl font-heading font-bold ${c.text}`} data-testid={`kpi-${label}`}>
         {value}
       </div>
-      {sub && <div className="text-xs text-slate-400 mt-1">{sub}</div>}
+      {sub && <div className="text-xs text-zinc-400 mt-1">{sub}</div>}
     </div>
   );
 }
@@ -54,7 +54,7 @@ export default function AgentAnalytics() {
 
   if (!canView) {
     return (
-      <div className="p-8 flex items-center justify-center h-64 text-slate-400 text-sm">
+      <div className="p-8 flex items-center justify-center h-64 text-zinc-400 text-sm">
         Accès réservé aux administrateurs.
       </div>
     );
@@ -65,10 +65,10 @@ export default function AgentAnalytics() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">
             Analytics Agent IA
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <p className="text-sm text-zinc-500 mt-0.5">
             Tableau de bord d&apos;adoption et d&apos;usage de l&apos;Agent PMO
           </p>
         </div>
@@ -76,7 +76,7 @@ export default function AgentAnalytics() {
           onClick={load}
           disabled={loading}
           data-testid="analytics-refresh-btn"
-          className="flex items-center gap-2 text-xs px-3 py-2 border border-gray-200 rounded-lg hover:border-gray-300 hover:bg-gray-50 text-slate-600 transition-colors disabled:opacity-50"
+          className="flex items-center gap-2 text-xs px-3 py-2 border border-zinc-200 rounded-lg hover:border-zinc-300 hover:bg-zinc-50 text-zinc-600 transition-colors disabled:opacity-50"
         >
           <RefreshCw size={13} className={loading ? "animate-spin" : ""} />
           Actualiser
@@ -84,11 +84,11 @@ export default function AgentAnalytics() {
       </div>
 
       {loading ? (
-        <div className="flex items-center justify-center py-24 text-slate-400 text-sm gap-2">
+        <div className="flex items-center justify-center py-24 text-zinc-400 text-sm gap-2">
           <RefreshCw size={14} className="animate-spin" /> Chargement des analytics…
         </div>
       ) : !data ? (
-        <div className="flex items-center justify-center py-24 text-slate-400 text-sm">
+        <div className="flex items-center justify-center py-24 text-zinc-400 text-sm">
           Données non disponibles.
         </div>
       ) : (
@@ -104,10 +104,10 @@ export default function AgentAnalytics() {
           </div>
 
           {/* Chart 30 jours */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 mb-6">
+          <div className="bg-white border border-zinc-200 rounded-xl shadow-sm p-5 mb-6">
             <div className="flex items-center gap-2 mb-4">
-              <BarChart2 size={16} className="text-[#0052CC]" />
-              <h2 className="font-semibold text-slate-800 text-sm">Activité 30 derniers jours</h2>
+              <BarChart2 size={16} className="text-blue-600" />
+              <h2 className="font-semibold text-zinc-800 text-sm">Activité 30 derniers jours</h2>
             </div>
             {data.daily_usage?.length > 0 ? (
               <div className="h-36 sm:h-[220px]">
@@ -126,42 +126,42 @@ export default function AgentAnalytics() {
                     labelFormatter={(v) => `Date : ${v}`}
                   />
                   <Legend wrapperStyle={{ fontSize: 11 }} />
-                  <Bar dataKey="messages" name="Messages" fill="#0052CC" radius={[3, 3, 0, 0]} />
+                  <Bar dataKey="messages" name="Messages" fill="#2563eb" radius={[3, 3, 0, 0]} />
                   <Bar dataKey="simulations" name="Simulations" fill="#8B5CF6" radius={[3, 3, 0, 0]} />
                 </BarChart>
               </ResponsiveContainer>
               </div>
             ) : (
-              <div className="flex items-center justify-center h-40 text-slate-400 text-sm">
+              <div className="flex items-center justify-center h-40 text-zinc-400 text-sm">
                 Aucune activité sur les 30 derniers jours.
               </div>
             )}
           </div>
 
           {/* Top 10 Questions */}
-          <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5">
+          <div className="bg-white border border-zinc-200 rounded-xl shadow-sm p-5">
             <div className="flex items-center gap-2 mb-4">
-              <TrendingUp size={16} className="text-[#0052CC]" />
-              <h2 className="font-semibold text-slate-800 text-sm">
+              <TrendingUp size={16} className="text-blue-600" />
+              <h2 className="font-semibold text-zinc-800 text-sm">
                 Top {data.top_questions?.length || 0} questions les plus posées
               </h2>
             </div>
             {data.top_questions?.length > 0 ? (
               <div className="space-y-2" data-testid="top-questions-list">
                 {data.top_questions.map((q, i) => (
-                  <div key={i} className="flex items-center gap-3 px-3 py-2 bg-slate-50 rounded-lg">
-                    <span className="text-xs font-bold text-slate-400 w-5 text-right flex-shrink-0">
+                  <div key={i} className="flex items-center gap-3 px-3 py-2 bg-zinc-50 rounded-lg">
+                    <span className="text-xs font-bold text-zinc-400 w-5 text-right flex-shrink-0">
                       {i + 1}
                     </span>
-                    <span className="flex-1 text-xs text-slate-700 truncate">{q.question}</span>
-                    <span className="flex-shrink-0 text-xs font-bold text-[#0052CC] bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full">
+                    <span className="flex-1 text-xs text-zinc-700 truncate">{q.question}</span>
+                    <span className="flex-shrink-0 text-xs font-bold text-blue-600 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full">
                       ×{q.count}
                     </span>
                   </div>
                 ))}
               </div>
             ) : (
-              <div className="text-slate-400 text-sm text-center py-8">
+              <div className="text-zinc-400 text-sm text-center py-8">
                 Aucune question enregistrée pour l&apos;instant.
               </div>
             )}

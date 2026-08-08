@@ -16,10 +16,10 @@ const EMPTY = {
   sprint_id: "",
 };
 
-const INPUT_CLS = "w-full text-sm border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
 
 const LEVEL_OPTIONS = [
-  { value: "task",       label: "Tâche",       icon: FileText, bg: "bg-slate-50  border-slate-300  text-slate-600" },
+  { value: "task",       label: "Tâche",       icon: FileText, bg: "bg-zinc-50  border-zinc-300  text-zinc-600" },
   { value: "feature",    label: "Feature",     icon: Layers,   bg: "bg-blue-50   border-blue-300   text-blue-700" },
   { value: "user_story", label: "User Story",  icon: BookOpen, bg: "bg-violet-50 border-violet-300 text-violet-700" },
 ];
@@ -27,7 +27,7 @@ const LEVEL_OPTIONS = [
 function Field({ label, required, error, children }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-slate-600 mb-1">
+      <label className="block text-xs font-semibold text-zinc-600 mb-1">
         {label}{required && <span className="text-rose-500 ml-0.5">*</span>}
       </label>
       {children}
@@ -147,7 +147,7 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
     <Modal isOpen={isOpen} onClose={onClose} title={task ? "Modifier la tâche" : "Nouvelle tâche"} size="lg">
       <form onSubmit={handleSubmit} className="space-y-4" data-testid="task-form">
         {apiError && (
-          <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded px-3 py-2">{apiError}</div>
+          <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{apiError}</div>
         )}
 
         {/* Niveau SAFe */}
@@ -159,8 +159,8 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
                 type="button"
                 data-testid={`task-level-${value}`}
                 onClick={() => setForm(f => ({ ...f, task_level: value, parent_id: value !== "user_story" ? "" : f.parent_id }))}
-                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded border-2 transition-all ${
-                  form.task_level === value ? bg : "bg-white border-gray-200 text-slate-500 hover:border-gray-300"
+                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg border-2 transition-all ${
+                  form.task_level === value ? bg : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"
                 }`}
               >
                 <Icon size={12} />
@@ -251,8 +251,8 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
           </Field>
         </div>
 
-        <div className="border-t border-gray-100 pt-4">
-          <div className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-2">Budget & Charge</div>
+        <div className="border-t border-zinc-100 pt-4">
+          <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mb-2">Budget & Charge</div>
           <div className="grid grid-cols-2 gap-3">
             <Field label="Budget prévu (K€)">
               <input data-testid="task-form-budget-planned" type="number" className={INPUT_CLS} value={form.budget_planned_k} onChange={set("budget_planned_k")} placeholder="Ex : 100" min="0" />
@@ -281,22 +281,22 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
           const availableDeps = allTasks.filter((t) => t.task_id !== task?.task_id);
           if (availableDeps.length === 0) return null;
           return (
-            <div className="border-t border-gray-100 pt-4">
-              <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-2">
+            <div className="border-t border-zinc-100 pt-4">
+              <div className="flex items-center gap-1.5 text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mb-2">
                 <GitBranch size={11} />
                 Dépendances (tâches prérequises)
               </div>
-              <div className="max-h-32 overflow-y-auto border border-gray-200 rounded divide-y divide-gray-50" data-testid="dependencies-picker">
+              <div className="max-h-32 overflow-y-auto border border-zinc-200 rounded-lg divide-y divide-zinc-50" data-testid="dependencies-picker">
                 {availableDeps.map((t) => {
                   const checked = form.dependencies.includes(t.task_id);
                   return (
                     <label key={t.task_id}
-                      className={`flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-gray-50 transition-colors ${checked ? "bg-blue-50/50" : ""}`}
+                      className={`flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-zinc-50 transition-colors ${checked ? "bg-blue-50/50" : ""}`}
                     >
-                      <input type="checkbox" className="accent-[#0052CC] flex-shrink-0"
+                      <input type="checkbox" className="accent-[#2563eb] flex-shrink-0"
                         checked={checked} onChange={() => toggleDep(t.task_id)}
                         data-testid={`dep-checkbox-${t.task_id}`} />
-                      <span className="text-xs text-slate-700 leading-snug line-clamp-1 flex-1">{t.name}</span>
+                      <span className="text-xs text-zinc-700 leading-snug line-clamp-1 flex-1">{t.name}</span>
                       {t.task_level && t.task_level !== "task" && (
                         <span className="text-[9px] font-bold text-blue-600 flex-shrink-0">{t.task_level.toUpperCase()}</span>
                       )}
@@ -305,7 +305,7 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
                 })}
               </div>
               {form.dependencies.length > 0 && (
-                <p className="text-[10px] text-[#0052CC] mt-1">
+                <p className="text-[10px] text-blue-600 mt-1">
                   {form.dependencies.length} dépendance{form.dependencies.length > 1 ? "s" : ""} sélectionnée{form.dependencies.length > 1 ? "s" : ""}
                 </p>
               )}
@@ -313,12 +313,12 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
           );
         })()}
 
-        <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
-          <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-600 border border-gray-200 rounded hover:bg-gray-50 transition-colors">
+        <div className="flex items-center justify-end gap-3 pt-2 border-t border-zinc-100">
+          <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">
             Annuler
           </button>
           <button type="submit" disabled={saving} data-testid="task-form-submit"
-            className="flex items-center gap-2 px-5 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] disabled:opacity-50 transition-colors">
+            className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
             {saving && <Loader2 size={14} className="animate-spin" />}
             {task ? "Enregistrer" : "Créer la tâche"}
           </button>

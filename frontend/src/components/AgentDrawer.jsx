@@ -19,7 +19,7 @@ function FormattedMessage({ text }) {
       return <li key={i} className="ml-3 text-xs leading-relaxed list-none flex gap-1"><span className="text-blue-400 flex-shrink-0">{line.match(/^\d+/)[0]}.</span><span>{formatInline(line.replace(/^\d+\.\s/, ""))}</span></li>;
     // Simulation
     if (line.includes("SIMULATION"))
-      return <p key={i} className="text-amber-600 text-xs font-semibold mt-2 p-1.5 bg-amber-50 rounded border border-amber-200">{line}</p>;
+      return <p key={i} className="text-amber-600 text-xs font-semibold mt-2 p-1.5 bg-amber-50 rounded-lg border border-amber-200">{line}</p>;
     // Ligne normale
     return <p key={i} className="text-xs leading-relaxed">{formatInline(line)}</p>;
   });
@@ -196,7 +196,7 @@ export default function AgentDrawer() {
         data-testid="agent-drawer-toggle"
         onClick={() => isOpen ? setIsOpen(false) : openDrawer()}
         className="fixed bottom-20 right-4 sm:right-6 z-50 flex items-center gap-2 px-3 sm:px-4 py-2.5 sm:py-3 rounded-full shadow-xl text-white font-semibold text-sm transition-all hover:scale-105"
-        style={{ background: "linear-gradient(135deg, #0052CC 0%, #0747A6 100%)" }}
+        style={{ background: "linear-gradient(135deg, #2563eb 0%, #0747A6 100%)" }}
       >
         <BotMessageSquare size={18} strokeWidth={2} />
         <span className="hidden sm:inline">Agent IA PMO</span>
@@ -210,19 +210,19 @@ export default function AgentDrawer() {
         >
           <div
             data-testid="agent-drawer-panel"
-            className="absolute right-0 top-0 h-full w-full sm:w-[380px] xl:w-[420px] bg-white border-l border-gray-200 shadow-2xl flex flex-col"
+            className="absolute right-0 top-0 h-full w-full sm:w-[380px] xl:w-[420px] bg-white border-l border-zinc-200 shadow-2xl flex flex-col"
             style={{ pointerEvents: "all" }}
           >
             {/* Header */}
-            <div className="flex items-center justify-between px-4 py-3 border-b border-gray-200 flex-shrink-0"
-              style={{ background: "linear-gradient(135deg, #0F172A 0%, #1E293B 100%)" }}>
+            <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 flex-shrink-0"
+              style={{ background: "linear-gradient(135deg, #09090b 0%, #1E293B 100%)" }}>
               <div className="flex items-center gap-2.5">
                 <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
                   <BotMessageSquare size={15} className="text-white" />
                 </div>
                 <div>
                   <div className="text-white font-bold text-sm leading-none">Agent IA PMO</div>
-                  <div className="text-slate-400 text-[10px] mt-0.5">MARCEL — Groupe Altair</div>
+                  <div className="text-zinc-400 text-[10px] mt-0.5">MARCEL — Groupe Altair</div>
                 </div>
               </div>
               <div className="flex items-center gap-2">
@@ -230,14 +230,14 @@ export default function AgentDrawer() {
                   data-testid="agent-new-session"
                   onClick={startNewSession}
                   title="Nouvelle conversation"
-                  className="flex items-center gap-1 text-xs text-slate-400 hover:text-white px-2 py-1 rounded border border-white/10 hover:border-white/30 transition-colors"
+                  className="flex items-center gap-1 text-xs text-zinc-400 hover:text-white px-2 py-1 rounded-lg border border-white/10 hover:border-white/30 transition-colors"
                 >
                   <Plus size={12} /> Nouveau
                 </button>
                 <button
                   onClick={() => setIsOpen(false)}
                   data-testid="agent-drawer-close"
-                  className="text-slate-400 hover:text-white transition-colors p-1 rounded hover:bg-white/10"
+                  className="text-zinc-400 hover:text-white transition-colors p-1 rounded-lg hover:bg-white/10"
                 >
                   <X size={16} />
                 </button>
@@ -246,10 +246,10 @@ export default function AgentDrawer() {
 
             {/* Session selector */}
             {sessions.length > 0 && (
-              <div className="px-3 py-2 border-b border-gray-100 flex-shrink-0">
+              <div className="px-3 py-2 border-b border-zinc-100 flex-shrink-0">
                 <button
                   onClick={() => setShowSessions(!showSessions)}
-                  className="w-full flex items-center justify-between text-xs text-slate-600 hover:text-slate-800 px-2 py-1.5 rounded border border-gray-200 hover:border-gray-300 bg-white transition-colors"
+                  className="w-full flex items-center justify-between text-xs text-zinc-600 hover:text-zinc-800 px-2 py-1.5 rounded-lg border border-zinc-200 hover:border-zinc-300 bg-white transition-colors"
                   data-testid="agent-session-selector"
                 >
                   <span className="truncate">
@@ -260,10 +260,10 @@ export default function AgentDrawer() {
                   <ChevronDown size={12} className={`flex-shrink-0 ml-1 transition-transform ${showSessions ? "rotate-180" : ""}`} />
                 </button>
                 {showSessions && (
-                  <div className="absolute left-0 right-0 mx-3 mt-1 bg-white border border-gray-200 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
+                  <div className="absolute left-0 right-0 mx-3 mt-1 bg-white border border-zinc-200 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
                     <button
                       onClick={startNewSession}
-                      className="w-full text-left px-3 py-2 text-xs text-blue-600 hover:bg-blue-50 flex items-center gap-2 border-b border-gray-100"
+                      className="w-full text-left px-3 py-2 text-xs text-blue-600 hover:bg-blue-50 flex items-center gap-2 border-b border-zinc-100"
                     >
                       <Plus size={11} /> Nouvelle conversation
                     </button>
@@ -271,10 +271,10 @@ export default function AgentDrawer() {
                       <button
                         key={s.session_id}
                         onClick={() => selectSession(s.session_id)}
-                        className={`w-full text-left px-3 py-2 hover:bg-gray-50 transition-colors ${s.session_id === currentSessionId ? "bg-blue-50" : ""}`}
+                        className={`w-full text-left px-3 py-2 hover:bg-zinc-50 transition-colors ${s.session_id === currentSessionId ? "bg-blue-50" : ""}`}
                       >
-                        <div className="text-xs text-slate-700 font-medium truncate">{s.first_message}</div>
-                        <div className="text-[10px] text-slate-400 mt-0.5">
+                        <div className="text-xs text-zinc-700 font-medium truncate">{s.first_message}</div>
+                        <div className="text-[10px] text-zinc-400 mt-0.5">
                           {new Date(s.last_activity).toLocaleDateString("fr-FR", { day: "2-digit", month: "short", hour: "2-digit", minute: "2-digit" })} — {s.message_count} msg
                         </div>
                       </button>
@@ -287,7 +287,7 @@ export default function AgentDrawer() {
             {/* Messages */}
             <div className="flex-1 overflow-y-auto px-3 py-3 space-y-3" onClick={() => setShowSessions(false)}>
               {loadingHistory && (
-                <div className="flex items-center justify-center py-8 text-slate-400 text-xs gap-2">
+                <div className="flex items-center justify-center py-8 text-zinc-400 text-xs gap-2">
                   <Loader2 size={14} className="animate-spin" /> Chargement de l'historique...
                 </div>
               )}
@@ -297,14 +297,14 @@ export default function AgentDrawer() {
                   <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-3">
                     <BotMessageSquare size={22} className="text-blue-600" />
                   </div>
-                  <p className="text-slate-700 font-semibold text-sm mb-1">Bonjour, je suis votre Agent IA PMO</p>
-                  <p className="text-slate-400 text-xs mb-4 px-4">Posez-moi une question sur votre portefeuille, ou essayez une suggestion :</p>
+                  <p className="text-zinc-700 font-semibold text-sm mb-1">Bonjour, je suis votre Agent IA PMO</p>
+                  <p className="text-zinc-400 text-xs mb-4 px-4">Posez-moi une question sur votre portefeuille, ou essayez une suggestion :</p>
                   <div className="space-y-1.5 px-2">
                     {QUICK_QUESTIONS.map(q => (
                       <button
                         key={q}
                         onClick={() => { setInputText(q); inputRef.current?.focus(); }}
-                        className="w-full text-left text-xs px-3 py-2 rounded-lg border border-gray-200 hover:border-blue-300 hover:bg-blue-50 text-slate-600 hover:text-blue-700 transition-all"
+                        className="w-full text-left text-xs px-3 py-2 rounded-lg border border-zinc-200 hover:border-blue-300 hover:bg-blue-50 text-zinc-600 hover:text-blue-700 transition-all"
                       >
                         <Zap size={10} className="inline mr-1.5 text-blue-500" />{q}
                       </button>
@@ -319,7 +319,7 @@ export default function AgentDrawer() {
                     <div
                       data-testid={`agent-user-msg-${idx}`}
                       className="max-w-[85%] px-3 py-2 rounded-2xl rounded-tr-sm text-white text-xs leading-relaxed shadow-sm"
-                      style={{ background: "linear-gradient(135deg, #0052CC 0%, #0747A6 100%)" }}
+                      style={{ background: "linear-gradient(135deg, #2563eb 0%, #0747A6 100%)" }}
                     >
                       {msg.content}
                     </div>
@@ -327,7 +327,7 @@ export default function AgentDrawer() {
                     <div className="max-w-[90%] flex flex-col gap-1">
                       <div
                         data-testid={`agent-assistant-msg-${idx}`}
-                        className="px-3 py-2.5 rounded-2xl rounded-tl-sm bg-gray-50 border border-gray-200 text-slate-700 shadow-sm"
+                        className="px-3 py-2.5 rounded-2xl rounded-tl-sm bg-zinc-50 border border-zinc-200 text-zinc-700 shadow-sm"
                       >
                         <FormattedMessage text={msg.content} />
                       </div>
@@ -349,7 +349,7 @@ export default function AgentDrawer() {
                           </span>
                         )}
                         {msg.duration_ms && (
-                          <span className="text-[9px] text-slate-300">{(msg.duration_ms / 1000).toFixed(1)}s</span>
+                          <span className="text-[9px] text-zinc-300">{(msg.duration_ms / 1000).toFixed(1)}s</span>
                         )}
                       </div>
                       {/* Avertissements guardrail */}
@@ -365,13 +365,13 @@ export default function AgentDrawer() {
 
               {isLoading && (
                 <div className="flex justify-start">
-                  <div className="bg-gray-50 border border-gray-200 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2">
+                  <div className="bg-zinc-50 border border-zinc-200 rounded-2xl rounded-tl-sm px-4 py-3 flex items-center gap-2">
                     <div className="flex gap-1">
                       {[0, 1, 2].map(i => (
                         <div key={i} className="w-1.5 h-1.5 rounded-full bg-blue-400 animate-bounce" style={{ animationDelay: `${i * 0.15}s` }} />
                       ))}
                     </div>
-                    <span className="text-[10px] text-slate-400">L'agent analyse...</span>
+                    <span className="text-[10px] text-zinc-400">L'agent analyse...</span>
                   </div>
                 </div>
               )}
@@ -379,7 +379,7 @@ export default function AgentDrawer() {
             </div>
 
             {/* Input */}
-            <div className="px-3 py-3 border-t border-gray-200 flex-shrink-0 bg-white">
+            <div className="px-3 py-3 border-t border-zinc-200 flex-shrink-0 bg-white">
               <div className="flex gap-2 items-end">
                 <textarea
                   ref={inputRef}
@@ -389,7 +389,7 @@ export default function AgentDrawer() {
                   onKeyDown={handleKeyDown}
                   placeholder="Posez votre question PMO..."
                   rows={1}
-                  className="flex-1 resize-none text-xs border border-gray-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-400 text-slate-700 placeholder-slate-400 max-h-24 overflow-y-auto"
+                  className="flex-1 resize-none text-xs border border-zinc-200 rounded-xl px-3 py-2.5 focus:outline-none focus:border-blue-400 text-zinc-700 placeholder-zinc-400 max-h-24 overflow-y-auto"
                   style={{ minHeight: "38px" }}
                 />
                 <button
@@ -397,15 +397,15 @@ export default function AgentDrawer() {
                   onClick={sendMessage}
                   disabled={!inputText.trim() || isLoading}
                   className="flex-shrink-0 w-9 h-9 rounded-xl flex items-center justify-center transition-all disabled:opacity-40 disabled:cursor-not-allowed hover:scale-105"
-                  style={{ background: inputText.trim() && !isLoading ? "linear-gradient(135deg, #0052CC 0%, #0747A6 100%)" : "#E2E8F0" }}
+                  style={{ background: inputText.trim() && !isLoading ? "linear-gradient(135deg, #2563eb 0%, #0747A6 100%)" : "#E2E8F0" }}
                 >
                   {isLoading
                     ? <Loader2 size={15} className="text-blue-600 animate-spin" />
-                    : <Send size={14} className={inputText.trim() ? "text-white" : "text-slate-400"} />
+                    : <Send size={14} className={inputText.trim() ? "text-white" : "text-zinc-400"} />
                   }
                 </button>
               </div>
-              <p className="text-[9px] text-slate-300 mt-1.5 text-center">
+              <p className="text-[9px] text-zinc-300 mt-1.5 text-center">
                 Les réponses sont générées à partir de vos données MARCEL uniquement.
               </p>
             </div>

@@ -8,9 +8,10 @@ module.exports = {
   theme: {
         extend: {
                 fontFamily: {
-                        heading: ["'Barlow Condensed'", "sans-serif"],
+                        heading: ["'Outfit'", "sans-serif"],
                         "mono-data": ["'JetBrains Mono'", "monospace"],
-                        sans: ["'Inter'", "-apple-system", "sans-serif"],
+                        mono: ["'JetBrains Mono'", "monospace"],
+                        sans: ["'Plus Jakarta Sans'", "-apple-system", "sans-serif"],
                 },
                 borderRadius: {
                         lg: 'var(--radius)',

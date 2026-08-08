@@ -4,12 +4,12 @@ import { safeAPI, tasksAPI } from "@/api";
 
 const LEVEL_CFG = {
   feature:    { label: "FEATURE",    bg: "bg-blue-50",   text: "text-blue-700",   border: "border-blue-200" },
-  task:       { label: "TÂCHE",      bg: "bg-slate-50",  text: "text-slate-600",  border: "border-slate-200" },
+  task:       { label: "TÂCHE",      bg: "bg-zinc-50",  text: "text-zinc-600",  border: "border-zinc-200" },
   user_story: { label: "US",         bg: "bg-violet-50", text: "text-violet-700", border: "border-violet-200" },
 };
 
 const STATUS_CFG = {
-  not_started: { label: "À faire",  cls: "bg-slate-200 text-slate-600" },
+  not_started: { label: "À faire",  cls: "bg-zinc-200 text-zinc-600" },
   in_progress: { label: "En cours", cls: "bg-blue-500 text-white" },
   done:        { label: "Fait",     cls: "bg-emerald-500 text-white" },
   delayed:     { label: "Retard",   cls: "bg-amber-500 text-white" },
@@ -34,21 +34,21 @@ function FeatureCard({ task, onAssign, sprints }) {
     <div className={`bg-white rounded-lg border shadow-sm p-3 hover:shadow-md transition-shadow ${cfg.border}`}
       data-testid={`pi-plan-card-${task.task_id}`}>
       <div className="flex items-start justify-between gap-2 mb-2">
-        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
+        <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-lg border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
           {cfg.label}
         </span>
         <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-full ${status.cls}`}>{status.label}</span>
       </div>
-      <div className="text-sm font-medium text-slate-800 leading-snug mb-2 line-clamp-2">{task.name}</div>
+      <div className="text-sm font-medium text-zinc-800 leading-snug mb-2 line-clamp-2">{task.name}</div>
       {task.jh_planned > 0 && (
-        <div className="text-[10px] text-slate-400 mb-2">
+        <div className="text-[10px] text-zinc-400 mb-2">
           {task.jh_consumed || 0}/{task.jh_planned} JH
         </div>
       )}
 
       {/* Sélecteur sprint */}
       <select
-        className="w-full text-[11px] border border-gray-200 rounded px-2 py-1.5 bg-gray-50 focus:outline-none focus:border-[#0052CC] disabled:opacity-60"
+        className="w-full text-[11px] border border-zinc-200 rounded-lg px-2 py-1.5 bg-zinc-50 focus:outline-none focus:border-blue-600 disabled:opacity-60"
         value={task.sprint_id || ""}
         onChange={(e) => handleAssign(e.target.value)}
         disabled={assigning}
@@ -71,15 +71,15 @@ function SprintColumn({ sprint, features, onAssign, sprints }) {
   return (
     <div className="flex flex-col min-w-[200px]" data-testid={`sprint-col-${sprint.sprint_id}`}>
       {/* En-tête colonne */}
-      <div className="bg-white border border-gray-200 rounded-lg p-3 mb-2 shadow-sm sticky top-0">
-        <div className="font-bold text-sm text-slate-800">{sprint.name}</div>
-        <div className="text-[10px] text-slate-400 flex items-center gap-1 mt-0.5">
+      <div className="bg-white border border-zinc-200 rounded-lg p-3 mb-2 shadow-sm sticky top-0">
+        <div className="font-bold text-sm text-zinc-800">{sprint.name}</div>
+        <div className="text-[10px] text-zinc-400 flex items-center gap-1 mt-0.5">
           <Clock size={9} />
           {sprint.start_date?.slice(0,10)} → {sprint.end_date?.slice(0,10)}
         </div>
         {sprint.capacity_jh && (
           <div className="mt-2">
-            <div className="flex justify-between text-[10px] text-slate-500 mb-0.5">
+            <div className="flex justify-between text-[10px] text-zinc-500 mb-0.5">
               <span>Charge : {totalJH}/{sprint.capacity_jh} JH</span>
               {loadPct != null && (
                 <span className={`font-bold ${loadPct > 100 ? "text-rose-600" : loadPct > 80 ? "text-amber-600" : "text-emerald-600"}`}>
@@ -87,7 +87,7 @@ function SprintColumn({ sprint, features, onAssign, sprints }) {
                 </span>
               )}
             </div>
-            <div className="h-1.5 bg-gray-100 rounded-full overflow-hidden">
+            <div className="h-1.5 bg-zinc-100 rounded-full overflow-hidden">
               <div
                 className={`h-full rounded-full ${loadPct > 100 ? "bg-rose-500" : loadPct > 80 ? "bg-amber-500" : "bg-emerald-500"}`}
                 style={{ width: `${Math.min(loadPct || 0, 100)}%` }}
@@ -95,7 +95,7 @@ function SprintColumn({ sprint, features, onAssign, sprints }) {
             </div>
           </div>
         )}
-        <div className="text-[10px] text-slate-400 mt-1">{features.length} item{features.length !== 1 ? "s" : ""}</div>
+        <div className="text-[10px] text-zinc-400 mt-1">{features.length} item{features.length !== 1 ? "s" : ""}</div>
       </div>
 
       {/* Cards features */}
@@ -104,7 +104,7 @@ function SprintColumn({ sprint, features, onAssign, sprints }) {
           <FeatureCard key={f.task_id} task={f} sprints={sprints} onAssign={onAssign} />
         ))}
         {features.length === 0 && (
-          <div className="border border-dashed border-gray-200 rounded-lg py-6 text-center text-[11px] text-slate-300">
+          <div className="border border-dashed border-zinc-200 rounded-lg py-6 text-center text-[11px] text-zinc-300">
             Vide
           </div>
         )}
@@ -151,8 +151,8 @@ export default function PIPlanning({ trainId, piId }) {
 
   useEffect(() => { loadData(); }, [loadData]);
 
-  if (!piId) return <div className="text-slate-400 text-sm p-4">Sélectionnez un PI.</div>;
-  if (loading) return <div className="text-slate-400 text-sm p-4">Chargement du PI Planning…</div>;
+  if (!piId) return <div className="text-zinc-400 text-sm p-4">Sélectionnez un PI.</div>;
+  if (loading) return <div className="text-zinc-400 text-sm p-4">Chargement du PI Planning…</div>;
 
   const backlogTasks = tasks.filter(t => !t.sprint_id || !sprints.find(s => s.sprint_id === t.sprint_id));
   const tasksBySprint = Object.fromEntries(sprints.map(s => [
@@ -162,7 +162,7 @@ export default function PIPlanning({ trainId, piId }) {
 
   return (
     <div data-testid="pi-planning-board" className="pb-4">
-      <div className="flex items-center gap-2 mb-4 text-[10px] uppercase tracking-widest text-slate-400 font-semibold">
+      <div className="flex items-center gap-2 mb-4 text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">
         <Target size={11} />
         PI Planning — {linkedProjectIds.length} projet{linkedProjectIds.length !== 1 ? "s" : ""} liés · {tasks.length} tâches
       </div>

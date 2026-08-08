@@ -49,7 +49,7 @@ function LanguageToggle() {
     <button
       onClick={() => i18n.changeLanguage(isEN ? "fr" : "en")}
       data-testid="lang-toggle"
-      className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded border border-gray-200 text-slate-600 hover:bg-gray-50 transition-colors"
+      className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 transition-colors"
       title={isEN ? "Passer en français" : "Switch to English"}
     >
       <span className="text-sm leading-none">{isEN ? "🇬🇧" : "🇫🇷"}</span>
@@ -152,16 +152,16 @@ export default function Layout() {
   const SidebarContent = ({ isDrawer = false }) => (
     <>
       {/* Logo */}
-      <div className="px-4 py-4 border-b border-white/10 flex items-center justify-between flex-shrink-0">
+      <div className="px-4 py-4 border-b border-zinc-100 flex items-center justify-between flex-shrink-0">
         <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-7 h-7 rounded bg-[#0052CC] flex items-center justify-center flex-shrink-0">
+          <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
             <Building2 size={14} className="text-white" strokeWidth={2} />
           </div>
           <div className={isDrawer ? "block" : "hidden md:block xl:block"}>
-            <div className="font-heading text-white text-base font-bold tracking-wide leading-none whitespace-nowrap">
+            <div className="font-heading text-zinc-950 text-base font-bold tracking-tight leading-none whitespace-nowrap">
               MARCEL
             </div>
-            <div className="text-[10px] text-slate-400 font-mono mt-0.5 tracking-wider uppercase">
+            <div className="text-[10px] text-zinc-400 font-mono mt-0.5 tracking-wider uppercase">
               {user?.name?.split(" ")[0] || "Groupe"}
             </div>
           </div>
@@ -170,7 +170,7 @@ export default function Layout() {
         {isDrawer && (
           <button
             onClick={() => setMobileDrawerOpen(false)}
-            className="text-slate-500 hover:text-white ml-2 flex-shrink-0"
+            className="text-zinc-400 hover:text-zinc-950 ml-2 flex-shrink-0"
             data-testid="sidebar-close-btn"
             aria-label="Fermer le menu"
           >
@@ -181,7 +181,7 @@ export default function Layout() {
 
       {/* Nav */}
       <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
-        <div className={`text-[10px] uppercase tracking-widest text-slate-500 px-3 mb-2 font-semibold whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:opacity-0 md:group-hover:opacity-100 xl:opacity-100"}`}>
+        <div className={`text-[10px] uppercase tracking-widest text-zinc-500 px-3 mb-2 font-semibold whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:opacity-0 md:group-hover:opacity-100 xl:opacity-100"}`}>
           Navigation
         </div>
 
@@ -227,7 +227,7 @@ export default function Layout() {
 
         {(hasPermission("agent.chat") || hasPermission("agent.recommend") || hasPermission("*")) && (
           <>
-            <div className={`text-[10px] uppercase tracking-widest text-slate-500 px-3 pt-3 pb-1 font-semibold whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:opacity-0 md:group-hover:opacity-100 xl:opacity-100"}`}>Agent IA</div>
+            <div className={`text-[10px] uppercase tracking-widest text-zinc-500 px-3 pt-3 pb-1 font-semibold whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:opacity-0 md:group-hover:opacity-100 xl:opacity-100"}`}>Agent IA</div>
             {(hasPermission("agent.recommend") || hasPermission("*")) && (
               <NavLink to="/agent/recommandations" data-testid="nav-agent-recommandations" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Recommandations">
                 <Lightbulb size={16} strokeWidth={1.75} className="flex-shrink-0" />
@@ -245,7 +245,7 @@ export default function Layout() {
 
         {canAccessNav("trains.view", "safe") && (
           <>
-            <div className={`text-[10px] uppercase tracking-widest text-slate-500 px-3 pt-3 pb-1 font-semibold whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:opacity-0 md:group-hover:opacity-100 xl:opacity-100"}`}>SAFe</div>
+            <div className={`text-[10px] uppercase tracking-widest text-zinc-500 px-3 pt-3 pb-1 font-semibold whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:opacity-0 md:group-hover:opacity-100 xl:opacity-100"}`}>SAFe</div>
             <NavLink to="/safe/trains" data-testid="nav-trains-safe" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Trains SAFe">
               <Train size={16} strokeWidth={1.75} className="flex-shrink-0" />
               <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Trains SAFe</span>
@@ -255,7 +255,7 @@ export default function Layout() {
 
         {canAccessNav("vendors.view", "vendors") && (
           <>
-            <div className={`text-[10px] uppercase tracking-widest text-slate-500 px-3 pt-3 pb-1 font-semibold whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:opacity-0 md:group-hover:opacity-100 xl:opacity-100"}`}>Achats / Finances</div>
+            <div className={`text-[10px] uppercase tracking-widest text-zinc-500 px-3 pt-3 pb-1 font-semibold whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:opacity-0 md:group-hover:opacity-100 xl:opacity-100"}`}>Achats / Finances</div>
             <NavLink to="/vendors" data-testid="nav-suivi-fournisseurs" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Suivi Fournisseurs">
               <Handshake size={16} strokeWidth={1.75} className="flex-shrink-0" />
               <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Suivi Fournisseurs</span>
@@ -265,7 +265,7 @@ export default function Layout() {
 
         {hasPermission("import.csv") && (
           <>
-            <div className={`text-[10px] uppercase tracking-widest text-slate-500 px-3 pt-3 pb-1 font-semibold whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:opacity-0 md:group-hover:opacity-100 xl:opacity-100"}`}>Outils</div>
+            <div className={`text-[10px] uppercase tracking-widest text-zinc-500 px-3 pt-3 pb-1 font-semibold whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:opacity-0 md:group-hover:opacity-100 xl:opacity-100"}`}>Outils</div>
             <NavLink to="/import" data-testid="nav-import" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Import CSV">
               <Upload size={16} strokeWidth={1.75} className="flex-shrink-0" />
               <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Import CSV</span>
@@ -276,7 +276,7 @@ export default function Layout() {
         {hasAnyPermission("admin.profiles", "admin.users", "admin.config", "*") &&
          (hasPermission("admin.profiles") || hasPermission("admin.users") || hasPermission("admin.config") || hasPermission("*")) && (
           <>
-            <div className={`text-[10px] uppercase tracking-widest text-slate-500 px-3 pt-3 pb-1 font-semibold whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:opacity-0 md:group-hover:opacity-100 xl:opacity-100"}`}>Administration</div>
+            <div className={`text-[10px] uppercase tracking-widest text-zinc-500 px-3 pt-3 pb-1 font-semibold whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:opacity-0 md:group-hover:opacity-100 xl:opacity-100"}`}>Administration</div>
             {hasPermission("admin.profiles") && (
               <NavLink to="/admin/profiles" data-testid="nav-admin-profils" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Profils">
                 <Shield size={16} strokeWidth={1.75} className="flex-shrink-0" />
@@ -330,16 +330,16 @@ export default function Layout() {
       </nav>
 
       {/* User footer */}
-      <div className="px-2 pb-3 border-t border-white/10 pt-3 flex-shrink-0">
+      <div className="px-2 pb-3 border-t border-zinc-100 pt-3 flex-shrink-0">
         <div className={`flex items-center gap-3 px-2 py-2 ${isDrawer ? "flex" : "md:justify-center md:group-hover:justify-start xl:justify-start"}`}>
-          <div className="w-8 h-8 rounded bg-[#0052CC]/40 flex items-center justify-center flex-shrink-0">
-            <span className="text-xs font-bold text-white">
+          <div className="w-8 h-8 rounded-full bg-blue-100 border border-white shadow-sm flex items-center justify-center flex-shrink-0">
+            <span className="text-xs font-bold text-blue-700">
               {user?.name?.slice(0, 2).toUpperCase() || "?"}
             </span>
           </div>
           <div className={`flex-1 min-w-0 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>
-            <div className="text-sm text-white font-medium truncate">{user?.name}</div>
-            <div className="text-[10px] text-slate-400 truncate" data-testid="sidebar-profile-label">
+            <div className="text-sm text-zinc-900 font-medium truncate">{user?.name}</div>
+            <div className="text-[10px] text-zinc-400 truncate" data-testid="sidebar-profile-label">
               {profileLabel}
             </div>
           </div>
@@ -347,7 +347,7 @@ export default function Layout() {
         <button
           onClick={handleLogout}
           data-testid="logout-btn"
-          className="sidebar-item w-full mt-1 text-slate-400 hover:text-rose-300"
+          className="sidebar-item w-full mt-1 text-zinc-500 hover:text-rose-600"
           title="Déconnexion"
         >
           <LogOut size={15} strokeWidth={1.75} />
@@ -358,7 +358,7 @@ export default function Layout() {
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-[#F8F9FA]">
+    <div className="flex h-screen overflow-hidden bg-zinc-50">
 
       {/* ── Overlay mobile (drawer ouvert) ─────────────────── */}
       {mobileDrawerOpen && (
@@ -373,7 +373,7 @@ export default function Layout() {
       <aside
         data-testid="sidebar-mobile"
         className={`
-          fixed top-0 left-0 h-full z-30 w-72 bg-[#0F172A] flex flex-col
+          fixed top-0 left-0 h-full z-30 w-72 bg-white border-r border-zinc-200 flex flex-col
           transform transition-transform duration-300 ease-in-out
           ${mobileDrawerOpen ? "translate-x-0" : "-translate-x-full"}
           md:hidden
@@ -386,7 +386,7 @@ export default function Layout() {
       <aside
         data-testid="sidebar"
         className="
-          hidden md:flex flex-col flex-shrink-0 bg-[#0F172A]
+          hidden md:flex flex-col flex-shrink-0 bg-white border-r border-zinc-200
           w-[60px] xl:w-60
           hover:w-60 transition-all duration-200 ease-in-out
           overflow-hidden group
@@ -398,12 +398,12 @@ export default function Layout() {
       {/* ── Main content ──────────────────────────────────── */}
       <div className="flex-1 flex flex-col overflow-hidden min-w-0">
         {/* Topbar */}
-        <header className="h-12 bg-white border-b border-gray-200 flex items-center px-3 md:px-4 lg:px-6 flex-shrink-0">
+        <header className="h-12 bg-white border-b border-zinc-200 flex items-center px-3 md:px-4 lg:px-6 flex-shrink-0">
           {/* Hamburger — mobile uniquement */}
           <button
             onClick={() => setMobileDrawerOpen(true)}
             data-testid="sidebar-open-btn"
-            className="mr-3 text-slate-500 hover:text-slate-700 md:hidden flex-shrink-0"
+            className="mr-3 text-zinc-500 hover:text-zinc-700 md:hidden flex-shrink-0"
             aria-label="Ouvrir le menu"
           >
             <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -413,10 +413,10 @@ export default function Layout() {
             </svg>
           </button>
 
-          <div className="flex items-center gap-1 text-sm text-slate-500 min-w-0">
-            <span className="text-slate-800 font-medium truncate text-xs sm:text-sm">Groupe Altair Industries</span>
-            <ChevronRight size={14} className="text-slate-400 flex-shrink-0 hidden sm:block" />
-            <span className="text-slate-500 truncate hidden sm:block text-xs">Portefeuille Projets</span>
+          <div className="flex items-center gap-1 text-sm text-zinc-500 min-w-0">
+            <span className="text-zinc-800 font-medium truncate text-xs sm:text-sm">Groupe Altair Industries</span>
+            <ChevronRight size={14} className="text-zinc-400 flex-shrink-0 hidden sm:block" />
+            <span className="text-zinc-500 truncate hidden sm:block text-xs">Portefeuille Projets</span>
           </div>
 
           <GlobalSearch />
@@ -425,7 +425,7 @@ export default function Layout() {
             <LanguageToggle />
             <NotificationBell />
             <span
-              className="text-xs font-mono-data text-slate-500 bg-slate-100 px-2 py-0.5 rounded hidden md:block"
+              className="text-xs font-mono-data text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-lg hidden md:block"
               data-testid="header-profile-badge"
             >
               {profileLabel}

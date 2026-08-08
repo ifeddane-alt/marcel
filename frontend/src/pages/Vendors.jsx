@@ -7,11 +7,11 @@ import { vendorsAPI } from "@/api";
 
 function StatCard({ label, value, sub, accent, alert }) {
   return (
-    <div className={`bg-white border rounded shadow-sm p-4 border-l-4 ${alert ? "border-l-rose-500" : `border-l-[${accent || "#0052CC"}]`}`}
-      style={!alert ? { borderLeftColor: accent || "#0052CC" } : {}}>
-      <div className="text-[10px] uppercase tracking-widest text-slate-500 font-semibold">{label}</div>
-      <div className={`font-heading text-2xl font-bold mt-2 ${alert ? "text-rose-600" : "text-[#0F172A]"}`}>{value}</div>
-      {sub && <div className="text-xs text-slate-400 mt-0.5">{sub}</div>}
+    <div className={`bg-white border rounded-lg shadow-sm p-4 border-l-4 ${alert ? "border-l-rose-500" : `border-l-[${accent || "#2563eb"}]`}`}
+      style={!alert ? { borderLeftColor: accent || "#2563eb" } : {}}>
+      <div className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">{label}</div>
+      <div className={`font-heading text-2xl font-bold mt-2 ${alert ? "text-rose-600" : "text-zinc-950"}`}>{value}</div>
+      {sub && <div className="text-xs text-zinc-400 mt-0.5">{sub}</div>}
     </div>
   );
 }
@@ -19,7 +19,7 @@ function StatCard({ label, value, sub, accent, alert }) {
 function AlertBadge({ level, message }) {
   const isC = level === "critical";
   return (
-    <div className={`flex items-start gap-2 px-3 py-2 rounded text-xs ${isC ? "bg-rose-50 border border-rose-200 text-rose-700" : "bg-amber-50 border border-amber-200 text-amber-700"}`}>
+    <div className={`flex items-start gap-2 px-3 py-2 rounded-lg text-xs ${isC ? "bg-rose-50 border border-rose-200 text-rose-700" : "bg-amber-50 border border-amber-200 text-amber-700"}`}>
       <AlertTriangle size={13} className="flex-shrink-0 mt-0.5" />
       <span>{message}</span>
     </div>
@@ -30,10 +30,10 @@ function ProgressBar({ pct, warn }) {
   const color = pct > 95 ? "bg-rose-500" : pct > 85 ? "bg-amber-500" : "bg-violet-500";
   return (
     <div className="flex items-center gap-2">
-      <div className="flex-1 h-2 bg-gray-100 rounded-full overflow-hidden">
+      <div className="flex-1 h-2 bg-zinc-100 rounded-full overflow-hidden">
         <div className={`h-full rounded-full ${color}`} style={{ width: `${Math.min(pct, 100)}%` }} />
       </div>
-      <span className={`font-mono text-xs font-bold w-10 text-right ${warn ? "text-rose-600" : "text-slate-700"}`}>
+      <span className={`font-mono text-xs font-bold w-10 text-right ${warn ? "text-rose-600" : "text-zinc-700"}`}>
         {pct.toFixed(0)}%
       </span>
     </div>
@@ -47,31 +47,31 @@ function VendorCard({ vendor }) {
   const totalAlerts = vendor.alerts.length;
 
   return (
-    <div className="bg-white border border-gray-200 rounded shadow-sm overflow-hidden" data-testid={`vendor-card-${vendor.vendor.replace(/\s/g, "-").toLowerCase()}`}>
+    <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-hidden" data-testid={`vendor-card-${vendor.vendor.replace(/\s/g, "-").toLowerCase()}`}>
       {/* En-tête fournisseur */}
       <div
-        className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-gray-50/70 transition-colors"
+        className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-zinc-50/70 transition-colors"
         onClick={() => setExpanded((e) => !e)}
       >
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-[#0052CC]/10 flex items-center justify-center flex-shrink-0">
-            <Building2 size={16} className="text-[#0052CC]" />
+          <div className="w-9 h-9 rounded-lg bg-blue-600/10 flex items-center justify-center flex-shrink-0">
+            <Building2 size={16} className="text-blue-600" />
           </div>
           <div>
-            <div className="font-bold text-slate-800 text-sm">{vendor.vendor}</div>
+            <div className="font-bold text-zinc-800 text-sm">{vendor.vendor}</div>
             <div className="flex items-center gap-2 mt-0.5">
               {hasRegie && (
-                <span className="text-[10px] font-bold bg-orange-50 text-orange-700 border border-orange-200 px-2 py-0.5 rounded">
+                <span className="text-[10px] font-bold bg-orange-50 text-orange-700 border border-orange-200 px-2 py-0.5 rounded-lg">
                   {vendor.resources_regie.length} RÉGIE
                 </span>
               )}
               {hasForfait && (
-                <span className="text-[10px] font-bold bg-violet-50 text-violet-700 border border-violet-200 px-2 py-0.5 rounded">
+                <span className="text-[10px] font-bold bg-violet-50 text-violet-700 border border-violet-200 px-2 py-0.5 rounded-lg">
                   {vendor.resources_forfait.length} FORFAIT
                 </span>
               )}
               {totalAlerts > 0 && (
-                <span className="text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200 px-2 py-0.5 rounded flex items-center gap-1">
+                <span className="text-[10px] font-bold bg-rose-50 text-rose-600 border border-rose-200 px-2 py-0.5 rounded-lg flex items-center gap-1">
                   <AlertTriangle size={9} /> {totalAlerts} alerte{totalAlerts > 1 ? "s" : ""}
                 </span>
               )}
@@ -81,7 +81,7 @@ function VendorCard({ vendor }) {
         <div className="flex items-center gap-4">
           {hasRegie && (
             <div className="text-right">
-              <div className="text-[10px] text-slate-400 uppercase tracking-widest">Enveloppe TJM</div>
+              <div className="text-[10px] text-zinc-400 uppercase tracking-widest">Enveloppe TJM</div>
               <div className="font-mono-data text-sm font-bold text-orange-700">
                 {vendor.total_tjm_contractuel.toLocaleString("fr-FR")} €/j
               </div>
@@ -89,21 +89,21 @@ function VendorCard({ vendor }) {
           )}
           {hasForfait && (
             <div className="text-right">
-              <div className="text-[10px] text-slate-400 uppercase tracking-widest">Forfait total</div>
+              <div className="text-[10px] text-zinc-400 uppercase tracking-widest">Forfait total</div>
               <div className="font-mono-data text-sm font-bold text-violet-700">
                 {(vendor.total_forfait_envelope / 1000).toFixed(0)} K€
               </div>
             </div>
           )}
-          {expanded ? <ChevronDown size={16} className="text-slate-400" /> : <ChevronRight size={16} className="text-slate-400" />}
+          {expanded ? <ChevronDown size={16} className="text-zinc-400" /> : <ChevronRight size={16} className="text-zinc-400" />}
         </div>
       </div>
 
       {expanded && (
-        <div className="border-t border-gray-100">
+        <div className="border-t border-zinc-100">
           {/* Alertes */}
           {totalAlerts > 0 && (
-            <div className="px-5 py-3 space-y-2 border-b border-gray-100 bg-slate-50/50">
+            <div className="px-5 py-3 space-y-2 border-b border-zinc-100 bg-zinc-50/50">
               {vendor.alerts.map((a, i) => (
                 <AlertBadge key={i} level={a.level} message={a.message} />
               ))}
@@ -119,7 +119,7 @@ function VendorCard({ vendor }) {
               </div>
               <table className="w-full text-sm" data-testid={`regie-table-${vendor.vendor}`}>
                 <thead>
-                  <tr className="text-[10px] uppercase text-slate-400 text-left">
+                  <tr className="text-[10px] uppercase text-zinc-400 text-left">
                     <th className="pb-2 font-semibold">Consultant</th>
                     <th className="pb-2 font-semibold text-right">TJM Contrat</th>
                     <th className="pb-2 font-semibold text-right">TJM Facturé</th>
@@ -134,15 +134,15 @@ function VendorCard({ vendor }) {
                     const variance = ctjm > 0 ? ((ftjm - ctjm) / ctjm * 100) : 0;
                     const varOver = variance > 0;
                     return (
-                      <tr key={r.resource_id} className="border-t border-gray-50 hover:bg-gray-50/50">
+                      <tr key={r.resource_id} className="border-t border-zinc-50 hover:bg-zinc-50/50">
                         <td className="py-2.5">
-                          <div className="font-medium text-slate-800 text-sm">{r.name}</div>
-                          <div className="text-xs text-slate-400">{r.role}</div>
+                          <div className="font-medium text-zinc-800 text-sm">{r.name}</div>
+                          <div className="text-xs text-zinc-400">{r.role}</div>
                         </td>
-                        <td className="py-2.5 text-right font-mono-data text-sm text-slate-600">
+                        <td className="py-2.5 text-right font-mono-data text-sm text-zinc-600">
                           {ctjm > 0 ? `${ctjm.toLocaleString("fr-FR")} €` : "—"}
                         </td>
-                        <td className="py-2.5 text-right font-mono-data text-sm font-bold text-slate-800">
+                        <td className="py-2.5 text-right font-mono-data text-sm font-bold text-zinc-800">
                           {ftjm > 0 ? `${ftjm.toLocaleString("fr-FR")} €` : "—"}
                         </td>
                         <td className="py-2.5 text-right">
@@ -150,14 +150,14 @@ function VendorCard({ vendor }) {
                             <span className={`text-xs font-bold font-mono-data ${varOver ? "text-rose-600" : "text-emerald-600"}`}>
                               {varOver ? "+" : ""}{variance.toFixed(1)}%
                             </span>
-                          ) : <span className="text-slate-300 text-xs">—</span>}
+                          ) : <span className="text-zinc-300 text-xs">—</span>}
                         </td>
                         <td className="py-2.5 text-right">
                           {r.contract_end ? (
-                            <span className="text-xs text-slate-500">
+                            <span className="text-xs text-zinc-500">
                               {new Date(r.contract_end).toLocaleDateString("fr-FR", { month: "short", year: "numeric" })}
                             </span>
-                          ) : <span className="text-slate-300 text-xs">—</span>}
+                          ) : <span className="text-zinc-300 text-xs">—</span>}
                         </td>
                       </tr>
                     );
@@ -169,7 +169,7 @@ function VendorCard({ vendor }) {
 
           {/* Ressources Forfait */}
           {hasForfait && (
-            <div className={`px-5 py-4 ${hasRegie ? "border-t border-gray-100" : ""}`}>
+            <div className={`px-5 py-4 ${hasRegie ? "border-t border-zinc-100" : ""}`}>
               <div className="flex items-center gap-2 mb-3">
                 <span className="text-[10px] uppercase tracking-widest font-bold text-violet-600">Forfait</span>
                 <span className="h-px flex-1 bg-violet-100" />
@@ -182,25 +182,25 @@ function VendorCard({ vendor }) {
                       data-testid={`forfait-row-${f.resource_id}`}>
                       <div className="flex items-start justify-between mb-2">
                         <div>
-                          <div className="font-semibold text-slate-800 text-sm">{f.name}</div>
-                          <div className="text-xs text-slate-400">{f.role}</div>
+                          <div className="font-semibold text-zinc-800 text-sm">{f.name}</div>
+                          <div className="text-xs text-zinc-400">{f.role}</div>
                         </div>
                         <div className="text-right">
                           <div className="font-mono-data text-sm font-bold text-violet-700">
                             {(f.forfait_envelope / 1000).toFixed(0)} K€
                           </div>
-                          <div className="text-[11px] text-slate-400">enveloppe</div>
+                          <div className="text-[11px] text-zinc-400">enveloppe</div>
                         </div>
                       </div>
                       <ProgressBar pct={f.pct_consumed} warn={warn} />
-                      <div className="flex justify-between text-xs text-slate-400 mt-1.5">
-                        <span>Consommé : <strong className="text-slate-600">{(f.forfait_consumed / 1000).toFixed(0)} K€</strong></span>
+                      <div className="flex justify-between text-xs text-zinc-400 mt-1.5">
+                        <span>Consommé : <strong className="text-zinc-600">{(f.forfait_consumed / 1000).toFixed(0)} K€</strong></span>
                         <span>Reste : <strong className={warn ? "text-rose-600" : "text-emerald-600"}>
                           {((f.forfait_envelope - f.forfait_consumed) / 1000).toFixed(0)} K€
                         </strong></span>
                       </div>
                       {f.contract_end && (
-                        <div className="flex items-center gap-1 mt-2 text-[11px] text-slate-400">
+                        <div className="flex items-center gap-1 mt-2 text-[11px] text-zinc-400">
                           <Clock size={10} />
                           Contrat jusqu'au {new Date(f.contract_end).toLocaleDateString("fr-FR")}
                         </div>
@@ -263,7 +263,7 @@ export default function Vendors() {
     } catch (e) { console.error("Export CSV error", e); }
   };
 
-  if (loading) return <div className="p-8 text-slate-400 text-sm">Chargement des fournisseurs...</div>;
+  if (loading) return <div className="p-8 text-zinc-400 text-sm">Chargement des fournisseurs...</div>;
   if (error) return <div className="p-8 text-rose-600 text-sm">{error}</div>;
 
   const { vendors = [], summary = {} } = data || {};
@@ -276,11 +276,11 @@ export default function Vendors() {
       {/* En-tête */}
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight flex items-center gap-2">
-            <Handshake size={26} className="text-[#0052CC]" />
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight flex items-center gap-2">
+            <Handshake size={26} className="text-blue-600" />
             Suivi Fournisseurs
           </h1>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <p className="text-sm text-zinc-500 mt-0.5">
             {summary.total_vendors} fournisseur{summary.total_vendors !== 1 ? "s" : ""} actifs ·
             {summary.total_regie_resources} régie · {summary.total_forfait_resources} forfait
           </p>
@@ -288,7 +288,7 @@ export default function Vendors() {
         <button
           onClick={handleExportCSV}
           data-testid="export-csv-btn"
-          className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-[#0052CC] border border-[#0052CC]/30 rounded hover:bg-[#0052CC]/5 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-blue-600 border border-blue-600/30 rounded-lg hover:bg-blue-600/5 transition-colors"
         >
           <Download size={14} />
           Export CSV
@@ -301,7 +301,7 @@ export default function Vendors() {
           label="Fournisseurs"
           value={summary.total_vendors}
           sub={`${summary.total_regie_resources} régie · ${summary.total_forfait_resources} forfait`}
-          accent="#0052CC"
+          accent="#2563eb"
         />
         <StatCard
           label="Enveloppe TJM régie"
@@ -325,7 +325,7 @@ export default function Vendors() {
 
       {/* Alerte globale si forfait consommé */}
       {summary.total_alerts > 0 && (
-        <div className="mb-5 bg-rose-50 border border-rose-200 rounded px-4 py-3 flex items-start gap-3" data-testid="vendors-global-alert">
+        <div className="mb-5 bg-rose-50 border border-rose-200 rounded-lg px-4 py-3 flex items-start gap-3" data-testid="vendors-global-alert">
           <AlertTriangle size={15} className="text-rose-500 flex-shrink-0 mt-0.5" />
           <div className="text-sm text-rose-700">
             <strong>{summary.total_alerts} alerte{summary.total_alerts > 1 ? "s" : ""}</strong> détectée{summary.total_alerts > 1 ? "s" : ""} :
@@ -336,10 +336,10 @@ export default function Vendors() {
 
       {/* Liste des fournisseurs */}
       {vendors.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded shadow-sm p-12 text-center">
-          <Package size={32} className="text-slate-300 mx-auto mb-3" />
-          <div className="text-slate-500 text-sm font-medium">Aucune ressource externe configurée</div>
-          <div className="text-slate-400 text-xs mt-1">
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-12 text-center">
+          <Package size={32} className="text-zinc-300 mx-auto mb-3" />
+          <div className="text-zinc-500 text-sm font-medium">Aucune ressource externe configurée</div>
+          <div className="text-zinc-400 text-xs mt-1">
             Ajoutez des ressources de type "Externe Régie" ou "Externe Forfait" depuis la page Ressources.
           </div>
         </div>

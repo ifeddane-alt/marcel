@@ -27,12 +27,12 @@ const EMPTY = {
   impact: "3", status: "identifié", mitigation_plan: "", owner: "", due_date: "",
 };
 
-const INPUT_CLS = "w-full text-sm border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
 
 function Field({ label, required, error, children }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-slate-600 mb-1">
+      <label className="block text-xs font-semibold text-zinc-600 mb-1">
         {label}{required && <span className="text-rose-500 ml-0.5">*</span>}
       </label>
       {children}
@@ -145,7 +145,7 @@ export default function RiskModal({ isOpen, onClose, risk, projectId, onSaved })
     <Modal isOpen={isOpen} onClose={onClose} title={risk ? "Modifier le risque" : "Nouveau risque"} size="lg">
       <form onSubmit={handleSubmit} className="space-y-4" data-testid="risk-form">
         {apiError && (
-          <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded px-3 py-2">{apiError}</div>
+          <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{apiError}</div>
         )}
 
         {/* Titre */}
@@ -173,8 +173,8 @@ export default function RiskModal({ isOpen, onClose, risk, projectId, onSaved })
         </div>
 
         {/* Probabilité + Impact */}
-        <div className="border-t border-gray-100 pt-3">
-          <div className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-2">
+        <div className="border-t border-zinc-100 pt-3">
+          <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mb-2">
             Évaluation P × I
           </div>
           <div className="grid grid-cols-2 gap-3 mb-3">
@@ -186,7 +186,7 @@ export default function RiskModal({ isOpen, onClose, risk, projectId, onSaved })
             </Field>
           </div>
           <div className="flex items-center gap-2">
-            <span className="text-xs text-slate-500">Criticité auto-calculée :</span>
+            <span className="text-xs text-zinc-500">Criticité auto-calculée :</span>
             <CritBadge crit={criticality} />
           </div>
         </div>
@@ -206,15 +206,15 @@ export default function RiskModal({ isOpen, onClose, risk, projectId, onSaved })
           </Field>
         </div>
 
-        <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
-          <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 border border-gray-200 rounded hover:bg-gray-50 transition-colors">
+        <div className="flex items-center justify-end gap-3 pt-2 border-t border-zinc-100">
+          <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 hover:text-zinc-800 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">
             Annuler
           </button>
           <button
             type="submit"
             disabled={saving}
             data-testid="risk-form-submit"
-            className="flex items-center gap-2 px-5 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
             {saving && <Loader2 size={14} className="animate-spin" />}
             {risk ? "Enregistrer" : "Créer le risque"}

@@ -98,13 +98,13 @@ export default function GlobalSearch() {
       testId = `global-search-result-${item.project_id}`;
       content = (
         <>
-          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${RAG_DOT[item.status_rag] || "bg-slate-300"}`} />
+          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${RAG_DOT[item.status_rag] || "bg-zinc-300"}`} />
           {item.code && (
-            <span className="font-mono text-[10px] font-semibold text-[#0052CC] bg-[#EBF2FF] border border-[#0052CC]/20 rounded px-1.5 py-0.5 flex-shrink-0">
+            <span className="font-mono text-[10px] font-semibold text-blue-600 bg-blue-50 border border-blue-600/20 rounded-lg px-1.5 py-0.5 flex-shrink-0">
               {item.code}
             </span>
           )}
-          <span className="text-xs text-slate-700 truncate flex-1">{item.name}</span>
+          <span className="text-xs text-zinc-700 truncate flex-1">{item.name}</span>
         </>
       );
     } else {
@@ -117,10 +117,10 @@ export default function GlobalSearch() {
           : item.status || "";
       content = (
         <>
-          <span className="text-xs text-slate-700 truncate flex-1">{title}</span>
-          {meta && <span className="text-[10px] text-slate-400 flex-shrink-0">{meta}</span>}
+          <span className="text-xs text-zinc-700 truncate flex-1">{title}</span>
+          {meta && <span className="text-[10px] text-zinc-400 flex-shrink-0">{meta}</span>}
           {item.project_code && (
-            <span className="font-mono text-[10px] text-slate-400 flex-shrink-0">{item.project_code}</span>
+            <span className="font-mono text-[10px] text-zinc-400 flex-shrink-0">{item.project_code}</span>
           )}
         </>
       );
@@ -131,10 +131,10 @@ export default function GlobalSearch() {
         data-testid={testId}
         onMouseDown={(e) => { e.preventDefault(); go(entry); }}
         onMouseEnter={() => setHi(idx)}
-        className={`w-full flex items-center gap-2 px-3 py-2 text-left transition-colors ${active ? "bg-[#EBF2FF]" : "hover:bg-gray-50"}`}
+        className={`w-full flex items-center gap-2 px-3 py-2 text-left transition-colors ${active ? "bg-blue-50" : "hover:bg-zinc-50"}`}
       >
         {content}
-        {active && <CornerDownLeft size={11} className="text-slate-300 flex-shrink-0" />}
+        {active && <CornerDownLeft size={11} className="text-zinc-300 flex-shrink-0" />}
       </button>
     );
   };
@@ -145,7 +145,7 @@ export default function GlobalSearch() {
   return (
     <div ref={boxRef} className="relative hidden sm:block mx-3 md:mx-6 flex-1 max-w-md">
       <div className="relative">
-        <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none" />
+        <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
         <input
           ref={inputRef}
           data-testid="global-search-input"
@@ -154,19 +154,19 @@ export default function GlobalSearch() {
           onFocus={() => { setRecent(getRecentProjects(user?.user_id)); setOpen(true); setHi(0); }}
           onKeyDown={onKeyDown}
           placeholder="Rechercher : projet, jalon, risque, décision…"
-          className="w-full h-8 pl-8 pr-14 text-xs bg-slate-50 border border-gray-200 rounded-lg focus:outline-none focus:border-[#0052CC] focus:bg-white focus:ring-1 focus:ring-[#0052CC] transition-colors placeholder:text-slate-400"
+          className="w-full h-8 pl-8 pr-14 text-xs bg-zinc-50 border border-zinc-200 rounded-lg focus:outline-none focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600 transition-colors placeholder:text-zinc-400"
         />
-        <kbd className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-mono text-slate-400 bg-white border border-gray-200 rounded px-1 py-0.5 pointer-events-none hidden md:block">
+        <kbd className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-mono text-zinc-400 bg-white border border-zinc-200 rounded-lg px-1 py-0.5 pointer-events-none hidden md:block">
           Ctrl K
         </kbd>
       </div>
 
       {open && (showRecent ? recent.length > 0 : true) && (
         <div data-testid="global-search-results"
-          className="absolute top-9 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-xl z-50 overflow-hidden max-h-[70vh] overflow-y-auto">
+          className="absolute top-9 left-0 right-0 bg-white border border-zinc-200 rounded-lg shadow-xl z-50 overflow-hidden max-h-[70vh] overflow-y-auto">
           {showRecent ? (
             <div data-testid="global-search-recent">
-              <div className="flex items-center gap-1.5 px-3 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400 bg-slate-50/60">
+              <div className="flex items-center gap-1.5 px-3 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-400 bg-zinc-50/60">
                 <History size={10} /> Récemment consultés
               </div>
               {recent.map((item) => {
@@ -175,9 +175,9 @@ export default function GlobalSearch() {
               })}
             </div>
           ) : loading && !res ? (
-            <div className="px-3 py-3 text-xs text-slate-400">Recherche…</div>
+            <div className="px-3 py-3 text-xs text-zinc-400">Recherche…</div>
           ) : !hasResults ? (
-            <div className="px-3 py-3 text-xs text-slate-400" data-testid="global-search-empty">
+            <div className="px-3 py-3 text-xs text-zinc-400" data-testid="global-search-empty">
               Aucun résultat pour « {q} »
             </div>
           ) : (
@@ -186,7 +186,7 @@ export default function GlobalSearch() {
               if (!items.length) return null;
               return (
                 <div key={key} data-testid={`global-search-group-${key}`}>
-                  <div className="flex items-center gap-1.5 px-3 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400 bg-slate-50/60">
+                  <div className="flex items-center gap-1.5 px-3 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-zinc-400 bg-zinc-50/60">
                     <Icon size={10} /> {label}
                   </div>
                   {items.map((item) => {

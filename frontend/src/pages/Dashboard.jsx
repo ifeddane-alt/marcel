@@ -224,7 +224,7 @@ export default function Dashboard() {
 
   if (loading) {
     return (
-      <div className="p-8 flex items-center justify-center h-64 text-slate-400 text-sm">
+      <div className="p-8 flex items-center justify-center h-64 text-zinc-400 text-sm">
         Chargement du tableau de bord...
       </div>
     );
@@ -278,10 +278,10 @@ export default function Dashboard() {
       {/* Header */}
       <div className="mb-5 flex items-start justify-between gap-3">
         <div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">
             Tableau de Bord
           </h1>
-          <p className="text-xs sm:text-sm text-slate-500 mt-0.5">
+          <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">
             Vue synthétique du portefeuille projets — personnalisable
           </p>
         </div>
@@ -291,7 +291,7 @@ export default function Dashboard() {
               data-testid="dashboard-export-pdf-btn"
               onClick={exportPdf}
               disabled={exportingPdf}
-              className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 bg-white rounded-lg text-sm text-slate-600 hover:bg-gray-50 transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-2 border border-zinc-200 bg-white rounded-lg text-sm text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-50"
               title="Exporter le rapport COMEX en PDF"
             >
               {exportingPdf ? <RefreshCw size={13} className="animate-spin" /> : <FileDown size={13} />}
@@ -303,7 +303,7 @@ export default function Dashboard() {
               <button
                 data-testid="dashboard-reset-layout-btn"
                 onClick={resetLayout}
-                className="flex items-center gap-1.5 px-3 py-2 border border-gray-200 bg-white rounded-lg text-sm text-slate-500 hover:bg-gray-50 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-2 border border-zinc-200 bg-white rounded-lg text-sm text-zinc-500 hover:bg-zinc-50 transition-colors"
                 title="Réinitialiser la disposition"
               >
                 <RotateCcw size={13} /> <span className="hidden sm:inline">Réinitialiser</span>
@@ -321,7 +321,7 @@ export default function Dashboard() {
           <button
             data-testid="dashboard-customize-btn"
             onClick={() => setCustomizing((v) => !v)}
-            className={`flex items-center gap-1.5 px-3 py-2 border rounded-lg text-sm transition-colors ${customizing ? "bg-[#0052CC] border-[#0052CC] text-white" : "bg-white border-gray-200 text-slate-600 hover:bg-gray-50"}`}
+            className={`flex items-center gap-1.5 px-3 py-2 border rounded-lg text-sm transition-colors ${customizing ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}
           >
             {customizing ? <X size={14} /> : <Settings2 size={14} />}
             <span className="hidden sm:inline">{customizing ? "Quitter l'édition" : "Personnaliser"}</span>
@@ -331,8 +331,8 @@ export default function Dashboard() {
 
       {/* Barre de choix des blocs */}
       {customizing && (
-        <div className="mb-4 bg-white border border-[#0052CC]/30 rounded-xl px-3 py-2.5" data-testid="dashboard-blocks-bar">
-          <p className="text-[11px] font-semibold text-slate-500 mb-2">
+        <div className="mb-4 bg-white border border-blue-600/30 rounded-xl px-3 py-2.5" data-testid="dashboard-blocks-bar">
+          <p className="text-[11px] font-semibold text-zinc-500 mb-2">
             Blocs du tableau de bord — cliquez pour afficher / masquer, ou <strong>glissez n'importe quel bloc vers l'emplacement voulu dans la grille</strong> :
           </p>
           <div className="flex flex-wrap items-center gap-1.5">
@@ -351,7 +351,7 @@ export default function Dashboard() {
                   }}
                   onDragEnd={() => setDragWidget(null)}
                   title={on ? "Cliquer pour masquer, ou glisser pour repositionner dans la grille" : "Cliquer pour ajouter, ou glisser dans la grille"}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors cursor-grab active:cursor-grabbing ${on ? "bg-[#EBF2FF] border-[#0052CC] text-[#0052CC]" : "bg-gray-50 border-gray-200 text-slate-400 hover:border-slate-400"}`}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors cursor-grab active:cursor-grabbing ${on ? "bg-blue-50 border-blue-600 text-blue-600" : "bg-zinc-50 border-zinc-200 text-zinc-400 hover:border-zinc-400"}`}
                 >
                   {on ? <Check size={10} /> : <GripVertical size={10} />}
                   <GripVertical size={10} className={on ? "opacity-40" : "hidden"} /> {WIDGET_LABELS[w] || w}
@@ -362,8 +362,8 @@ export default function Dashboard() {
         </div>
       )}
       {customizing && (
-        <p className="mb-4 text-[11px] text-slate-400 flex items-center gap-1.5" data-testid="dashboard-edit-hint">
-          <Move size={11} className="text-[#0052CC]" />
+        <p className="mb-4 text-[11px] text-zinc-400 flex items-center gap-1.5" data-testid="dashboard-edit-hint">
+          <Move size={11} className="text-blue-600" />
           Glissez-déposez chaque bloc pour le repositionner, tirez le coin bas-droit pour le redimensionner, croix pour masquer un bloc.
         </p>
       )}
@@ -373,7 +373,7 @@ export default function Dashboard() {
         ref={gridWrapRef}
         onDragOver={handleGridDragOver}
         onDrop={handleGridDrop}
-        className={dragWidget ? "ring-2 ring-dashed ring-[#0052CC]/50 rounded-xl" : ""}
+        className={dragWidget ? "ring-2 ring-dashed ring-blue-600/50 rounded-xl" : ""}
         data-testid="dashboard-grid-dropzone"
       >
       <ResponsiveGridLayout
@@ -399,17 +399,17 @@ export default function Dashboard() {
           <div
             key={w}
             data-grid={{ i: w, ...DEFAULT_GRID[w] }}
-            className={`h-full rounded flex flex-col ${customizing ? "ring-2 ring-[#0052CC]/30 ring-offset-2 cursor-move bg-white/50" : ""}`}
+            className={`h-full rounded-lg flex flex-col ${customizing ? "ring-2 ring-blue-600/30 ring-offset-2 cursor-move bg-white/50" : ""}`}
             data-testid={`grid-item-${w}`}
           >
             {customizing && (
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-[#0052CC] text-white text-[10px] font-semibold rounded-t shrink-0">
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-600 text-white text-[10px] font-semibold rounded-t shrink-0">
                 <Move size={10} />
                 <span className="flex-1 truncate">{WIDGET_LABELS[w]}</span>
                 <button
                   data-testid={`dashboard-widget-hide-${w}`}
                   onClick={() => hideWidget(w)}
-                  className="p-0.5 rounded hover:bg-white/20 transition-colors"
+                  className="p-0.5 rounded-lg hover:bg-white/20 transition-colors"
                   title="Masquer ce bloc"
                 >
                   <X size={11} />
@@ -418,7 +418,7 @@ export default function Dashboard() {
             )}
             <div className="flex-1 overflow-y-auto overflow-x-hidden">
               {hasContent(w) ? RENDERERS[w]() : (
-                <div className="h-full flex items-center justify-center bg-slate-50 border border-dashed border-slate-200 rounded text-xs text-slate-400 p-4 text-center">
+                <div className="h-full flex items-center justify-center bg-zinc-50 border border-dashed border-zinc-200 rounded-lg text-xs text-zinc-400 p-4 text-center">
                   {WIDGET_LABELS[w]} — aucune donnée actuellement (masqué hors édition)
                 </div>
               )}

@@ -15,7 +15,7 @@ const CONNECTOR_META = {
     label: "Jira",
     description: "Synchronisation Epics / Stories ↔ features & tâches MARCEL",
     icon: GitBranch,
-    color: "#0052CC",
+    color: "#2563eb",
     bg: "#E6F0FF",
   },
   sap: {
@@ -68,23 +68,23 @@ function ConnectorCard({ connector, onConfigure, onSync, onLogs, syncing }) {
   const isConnected = isEnabled && isConfigured;
 
   const connStatus = !isConfigured
-    ? { label: "Non configuré", dot: "bg-slate-400", color: "text-slate-500" }
+    ? { label: "Non configuré", dot: "bg-zinc-400", color: "text-zinc-500" }
     : !isEnabled
-    ? { label: "Désactivé",    dot: "bg-slate-400", color: "text-slate-500" }
+    ? { label: "Désactivé",    dot: "bg-zinc-400", color: "text-zinc-500" }
     : { label: "Activé",       dot: "bg-emerald-500", color: "text-emerald-700" };
 
   return (
-    <div className="bg-white rounded-xl border border-slate-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow" data-testid={`connector-card-${connector.type}`}>
+    <div className="bg-white rounded-xl border border-zinc-200 overflow-hidden shadow-sm hover:shadow-md transition-shadow" data-testid={`connector-card-${connector.type}`}>
       {/* Header */}
-      <div className="p-5 border-b border-slate-100">
+      <div className="p-5 border-b border-zinc-100">
         <div className="flex items-start justify-between">
           <div className="flex items-center gap-3">
             <div className="w-10 h-10 rounded-xl flex items-center justify-center" style={{ backgroundColor: meta.bg }}>
               <Icon size={20} style={{ color: meta.color }} />
             </div>
             <div>
-              <h3 className="font-bold text-slate-800 text-base">{meta.label}</h3>
-              <p className="text-xs text-slate-500 mt-0.5 max-w-[200px]">{meta.description}</p>
+              <h3 className="font-bold text-zinc-800 text-base">{meta.label}</h3>
+              <p className="text-xs text-zinc-500 mt-0.5 max-w-[200px]">{meta.description}</p>
             </div>
           </div>
           <div className="flex items-center gap-1.5">
@@ -99,11 +99,11 @@ function ConnectorCard({ connector, onConfigure, onSync, onLogs, syncing }) {
         {connector.last_sync_at ? (
           <>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500">Dernière sync</span>
-              <span className="text-slate-700 font-medium">{formatDate(connector.last_sync_at)}</span>
+              <span className="text-zinc-500">Dernière sync</span>
+              <span className="text-zinc-700 font-medium">{formatDate(connector.last_sync_at)}</span>
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-slate-500">Statut</span>
+              <span className="text-zinc-500">Statut</span>
               <StatusBadge status={connector.last_sync_status} />
             </div>
             {connector.last_sync_error && (
@@ -112,24 +112,24 @@ function ConnectorCard({ connector, onConfigure, onSync, onLogs, syncing }) {
               </div>
             )}
             {connector.base_url && (
-              <div className="text-xs text-slate-400 truncate" title={connector.base_url}>
+              <div className="text-xs text-zinc-400 truncate" title={connector.base_url}>
                 {connector.base_url}
               </div>
             )}
           </>
         ) : (
-          <div className="text-xs text-slate-400 py-2">
+          <div className="text-xs text-zinc-400 py-2">
             {isConfigured ? "Aucune synchronisation effectuée" : "Configurez ce connecteur pour démarrer"}
           </div>
         )}
       </div>
 
       {/* Actions */}
-      <div className="px-5 py-3 bg-slate-50 border-t border-slate-100 flex items-center gap-2">
+      <div className="px-5 py-3 bg-zinc-50 border-t border-zinc-100 flex items-center gap-2">
         <button
           onClick={onConfigure}
           data-testid={`btn-configure-${connector.type}`}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-white border border-slate-200 rounded-lg text-slate-700 hover:bg-slate-50 hover:border-slate-300 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-white border border-zinc-200 rounded-lg text-zinc-700 hover:bg-zinc-50 hover:border-zinc-300 transition-colors"
         >
           <Settings size={12} /> Configurer
         </button>
@@ -145,7 +145,7 @@ function ConnectorCard({ connector, onConfigure, onSync, onLogs, syncing }) {
         <button
           onClick={onLogs}
           data-testid={`btn-logs-${connector.type}`}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors ml-auto"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium border border-zinc-200 rounded-lg text-zinc-600 hover:bg-zinc-100 transition-colors ml-auto"
         >
           <History size={12} /> Logs
         </button>
@@ -263,23 +263,23 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-2xl max-h-[90vh] flex flex-col" data-testid={`modal-${connector.type}`}>
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-slate-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
           <div className="flex items-center gap-3">
             <div className="w-9 h-9 rounded-xl flex items-center justify-center" style={{ backgroundColor: meta.bg }}>
               <Icon size={18} style={{ color: meta.color }} />
             </div>
             <div>
-              <h3 className="font-bold text-slate-800">{meta.label}</h3>
-              <p className="text-xs text-slate-500">Configuration du connecteur</p>
+              <h3 className="font-bold text-zinc-800">{meta.label}</h3>
+              <p className="text-xs text-zinc-500">Configuration du connecteur</p>
             </div>
           </div>
-          <button onClick={onClose} className="p-1.5 rounded-lg text-slate-400 hover:text-slate-600 hover:bg-slate-100 transition-colors">
+          <button onClick={onClose} className="p-1.5 rounded-lg text-zinc-400 hover:text-zinc-600 hover:bg-zinc-100 transition-colors">
             <X size={18} />
           </button>
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-0 border-b border-slate-100 px-6">
+        <div className="flex gap-0 border-b border-zinc-100 px-6">
           {[
             { key: "config",  label: "Configuration" },
             { key: "mapping", label: "Mapping champs" },
@@ -290,7 +290,7 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
               onClick={() => setActiveTab(t.key)}
               data-testid={`connector-tab-${t.key}`}
               className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors
-                ${activeTab === t.key ? "border-blue-600 text-blue-700" : "border-transparent text-slate-500 hover:text-slate-700"}`}
+                ${activeTab === t.key ? "border-blue-600 text-blue-700" : "border-transparent text-zinc-500 hover:text-zinc-700"}`}
             >
               {t.label}
             </button>
@@ -303,15 +303,15 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
           {activeTab === "config" && (
             <div className="space-y-5">
               {/* Enabled toggle */}
-              <div className="flex items-center justify-between p-4 bg-slate-50 rounded-xl border border-slate-200">
+              <div className="flex items-center justify-between p-4 bg-zinc-50 rounded-xl border border-zinc-200">
                 <div>
-                  <div className="font-medium text-slate-700 text-sm">Connecteur activé</div>
-                  <div className="text-xs text-slate-400">Active la synchronisation automatique selon la fréquence configurée</div>
+                  <div className="font-medium text-zinc-700 text-sm">Connecteur activé</div>
+                  <div className="text-xs text-zinc-400">Active la synchronisation automatique selon la fréquence configurée</div>
                 </div>
                 <button
                   onClick={() => setConfig(p => ({ ...p, enabled: !p.enabled }))}
                   data-testid={`toggle-enabled-${connector.type}`}
-                  className={`relative w-11 h-6 rounded-full transition-colors ${config.enabled ? "bg-blue-600" : "bg-slate-300"}`}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${config.enabled ? "bg-blue-600" : "bg-zinc-300"}`}
                 >
                   <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${config.enabled ? "translate-x-5" : "translate-x-0.5"}`} />
                 </button>
@@ -319,24 +319,24 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
 
               {/* URL */}
               <div>
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">URL de l'instance</label>
+                <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">URL de l'instance</label>
                 <input
                   type="url"
                   value={config.base_url}
                   onChange={e => setConfig(p => ({ ...p, base_url: e.target.value }))}
                   placeholder={connector.type === "jira" ? "https://monentreprise.atlassian.net" : connector.type === "sap" ? "https://sap.monentreprise.fr/odata" : "https://monentreprise.service-now.com"}
-                  className="mt-1.5 w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="mt-1.5 w-full border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                   data-testid={`input-url-${connector.type}`}
                 />
               </div>
 
               {/* Auth type */}
               <div>
-                <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Type d'authentification</label>
+                <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Type d'authentification</label>
                 <select
                   value={config.auth_type}
                   onChange={e => setConfig(p => ({ ...p, auth_type: e.target.value }))}
-                  className="mt-1.5 w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                  className="mt-1.5 w-full border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                   data-testid={`select-auth-type-${connector.type}`}
                 >
                   {(connector.type === "jira"
@@ -349,24 +349,24 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
               {/* Credential fields */}
               {currentAuthFields.length > 0 && (
                 <div className="space-y-3">
-                  <div className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Credentials</div>
+                  <div className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Credentials</div>
                   {currentAuthFields.map(f => (
                     <div key={f.key}>
-                      <label className="text-xs text-slate-600 font-medium">{f.label}</label>
+                      <label className="text-xs text-zinc-600 font-medium">{f.label}</label>
                       <div className="relative mt-1">
                         <input
                           type={f.type === "password" && !showPasswords[f.key] ? "password" : "text"}
                           value={creds[f.key] || ""}
                           onChange={e => setCreds(p => ({ ...p, [f.key]: e.target.value }))}
                           placeholder={f.type === "password" ? "••••••••" : ""}
-                          className="w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 pr-10"
+                          className="w-full border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400 pr-10"
                           data-testid={`input-cred-${f.key}`}
                         />
                         {f.type === "password" && (
                           <button
                             type="button"
                             onClick={() => setShowPasswords(p => ({ ...p, [f.key]: !p[f.key] }))}
-                            className="absolute right-2.5 top-2.5 text-slate-400 hover:text-slate-600"
+                            className="absolute right-2.5 top-2.5 text-zinc-400 hover:text-zinc-600"
                           >
                             {showPasswords[f.key] ? <EyeOff size={15} /> : <Eye size={15} />}
                           </button>
@@ -380,11 +380,11 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
               {/* Direction + Fréquence */}
               <div className="grid grid-cols-2 gap-4">
                 <div>
-                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Direction de sync</label>
+                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Direction de sync</label>
                   <select
                     value={config.sync_direction}
                     onChange={e => setConfig(p => ({ ...p, sync_direction: e.target.value }))}
-                    className="mt-1.5 w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="mt-1.5 w-full border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                     data-testid={`select-direction-${connector.type}`}
                   >
                     <option value="import">Import seul</option>
@@ -393,11 +393,11 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-semibold text-slate-500 uppercase tracking-wider">Fréquence</label>
+                  <label className="text-xs font-semibold text-zinc-500 uppercase tracking-wider">Fréquence</label>
                   <select
                     value={config.sync_frequency}
                     onChange={e => setConfig(p => ({ ...p, sync_frequency: e.target.value }))}
-                    className="mt-1.5 w-full border border-slate-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
+                    className="mt-1.5 w-full border border-zinc-200 rounded-lg px-3 py-2.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-400"
                     data-testid={`select-frequency-${connector.type}`}
                   >
                     <option value="manual">Manuel</option>
@@ -423,30 +423,30 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
           {/* ── Mapping Tab ── */}
           {activeTab === "mapping" && (
             <div>
-              <div className="text-xs text-slate-500 mb-4">
+              <div className="text-xs text-zinc-500 mb-4">
                 Configurez la correspondance entre les champs source et les champs MARCEL.
                 Les champs désactivés sont ignorés lors de la synchronisation.
               </div>
-              <div className="rounded-xl border border-slate-200 overflow-hidden">
+              <div className="rounded-xl border border-zinc-200 overflow-hidden">
                 <table className="w-full text-sm" data-testid="mapping-table">
                   <thead>
-                    <tr className="bg-slate-50 text-xs text-slate-500 uppercase tracking-wider">
+                    <tr className="bg-zinc-50 text-xs text-zinc-500 uppercase tracking-wider">
                       <th className="px-4 py-2.5 text-left">Champ source</th>
                       <th className="px-4 py-2.5 text-left">Champ MARCEL</th>
                       <th className="px-4 py-2.5 text-left hidden md:table-cell">Description</th>
                       <th className="px-4 py-2.5 text-center">Actif</th>
                     </tr>
                   </thead>
-                  <tbody className="divide-y divide-slate-100">
+                  <tbody className="divide-y divide-zinc-100">
                     {mapping.map((row, i) => (
-                      <tr key={i} className={`hover:bg-slate-50 transition-colors ${!row.enabled ? "opacity-50" : ""}`}>
+                      <tr key={i} className={`hover:bg-zinc-50 transition-colors ${!row.enabled ? "opacity-50" : ""}`}>
                         <td className="px-4 py-2.5">
                           <input
                             value={row.source}
                             onChange={e => {
                               const m = [...mapping]; m[i] = { ...m[i], source: e.target.value }; setMapping(m);
                             }}
-                            className="text-xs font-mono border border-slate-200 rounded px-2 py-1 w-full focus:outline-none focus:ring-1 focus:ring-blue-400"
+                            className="text-xs font-mono border border-zinc-200 rounded-lg px-2 py-1 w-full focus:outline-none focus:ring-1 focus:ring-blue-400"
                             data-testid={`mapping-source-${i}`}
                           />
                         </td>
@@ -456,19 +456,19 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
                             onChange={e => {
                               const m = [...mapping]; m[i] = { ...m[i], target: e.target.value }; setMapping(m);
                             }}
-                            className="text-xs font-mono border border-slate-200 rounded px-2 py-1 w-full focus:outline-none focus:ring-1 focus:ring-blue-400"
+                            className="text-xs font-mono border border-zinc-200 rounded-lg px-2 py-1 w-full focus:outline-none focus:ring-1 focus:ring-blue-400"
                             data-testid={`mapping-target-${i}`}
                           />
                         </td>
                         <td className="px-4 py-2.5 hidden md:table-cell">
-                          <span className="text-xs text-slate-500">{row.label}</span>
+                          <span className="text-xs text-zinc-500">{row.label}</span>
                         </td>
                         <td className="px-4 py-2.5 text-center">
                           <button
                             onClick={() => {
                               const m = [...mapping]; m[i] = { ...m[i], enabled: !m[i].enabled }; setMapping(m);
                             }}
-                            className={`w-9 h-5 rounded-full transition-colors ${row.enabled ? "bg-blue-600" : "bg-slate-200"}`}
+                            className={`w-9 h-5 rounded-full transition-colors ${row.enabled ? "bg-blue-600" : "bg-zinc-200"}`}
                             data-testid={`mapping-toggle-${i}`}
                           >
                             <span className={`block w-4 h-4 bg-white rounded-full shadow transition-transform mx-0.5 ${row.enabled ? "translate-x-4" : "translate-x-0"}`} />
@@ -486,9 +486,9 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
           {activeTab === "logs" && (
             <div>
               {logsLoading ? (
-                <div className="text-center py-8 text-slate-400 text-sm">Chargement...</div>
+                <div className="text-center py-8 text-zinc-400 text-sm">Chargement...</div>
               ) : logs.length === 0 ? (
-                <div className="text-center py-8 text-slate-400 text-sm">Aucun log de synchronisation</div>
+                <div className="text-center py-8 text-zinc-400 text-sm">Aucun log de synchronisation</div>
               ) : (
                 <div className="space-y-2">
                   {logs.map(log => (
@@ -501,14 +501,14 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
         </div>
 
         {/* Footer */}
-        <div className="flex items-center justify-between px-6 py-4 border-t border-slate-100 bg-slate-50">
+        <div className="flex items-center justify-between px-6 py-4 border-t border-zinc-100 bg-zinc-50">
           <div className="flex items-center gap-2">
             {activeTab !== "logs" && (
               <button
                 onClick={handleTest}
                 disabled={testing || !config.base_url}
                 data-testid={`btn-test-${connector.type}`}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm border border-slate-200 rounded-lg text-slate-700 bg-white hover:bg-slate-50 disabled:opacity-50 transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm border border-zinc-200 rounded-lg text-zinc-700 bg-white hover:bg-zinc-50 disabled:opacity-50 transition-colors"
               >
                 {testing ? <Loader size={13} className="animate-spin" /> : <Zap size={13} />}
                 Tester la connexion
@@ -527,7 +527,7 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
             )}
           </div>
           <div className="flex items-center gap-2">
-            <button onClick={onClose} className="px-4 py-2 text-sm border border-slate-200 rounded-lg text-slate-600 hover:bg-slate-100 transition-colors">
+            <button onClick={onClose} className="px-4 py-2 text-sm border border-zinc-200 rounded-lg text-zinc-600 hover:bg-zinc-100 transition-colors">
               Fermer
             </button>
             {activeTab !== "logs" && (
@@ -535,7 +535,7 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
                 onClick={() => handleSave(false)}
                 disabled={saving}
                 data-testid={`btn-save-config-${connector.type}`}
-                className="flex items-center gap-1.5 px-4 py-2 text-sm bg-slate-800 text-white rounded-lg hover:bg-slate-700 disabled:opacity-60 transition-colors"
+                className="flex items-center gap-1.5 px-4 py-2 text-sm bg-zinc-800 text-white rounded-lg hover:bg-zinc-700 disabled:opacity-60 transition-colors"
               >
                 {saving ? <Loader size={13} className="animate-spin" /> : <Save size={13} />}
                 {saving ? "Sauvegarde..." : "Sauvegarder"}
@@ -556,28 +556,28 @@ function LogRow({ log }) {
     : null;
 
   return (
-    <div className="border border-slate-200 rounded-xl overflow-hidden" data-testid={`log-row-${log.log_id}`}>
+    <div className="border border-zinc-200 rounded-xl overflow-hidden" data-testid={`log-row-${log.log_id}`}>
       <div
-        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-slate-50 transition-colors"
+        className="flex items-center gap-3 px-4 py-3 cursor-pointer hover:bg-zinc-50 transition-colors"
         onClick={() => setExpanded(v => !v)}
       >
         <StatusBadge status={log.status} />
         <div className="flex-1 min-w-0">
-          <div className="flex items-center gap-3 text-xs text-slate-600">
+          <div className="flex items-center gap-3 text-xs text-zinc-600">
             <span className="font-medium">{formatDate(log.started_at)}</span>
-            <span className="text-slate-400">→</span>
+            <span className="text-zinc-400">→</span>
             <span className={`font-semibold ${log.direction === "import" ? "text-blue-600" : "text-purple-600"}`}>
               {DIRECTION_LABELS[log.direction] || log.direction}
             </span>
           </div>
         </div>
         <div className="flex items-center gap-3 text-xs shrink-0">
-          <span className="text-slate-600">{log.items_processed} traités</span>
+          <span className="text-zinc-600">{log.items_processed} traités</span>
           {log.items_created > 0  && <span className="text-emerald-600">+{log.items_created} créés</span>}
           {log.items_updated > 0  && <span className="text-blue-600">↻{log.items_updated} màj</span>}
           {log.items_failed  > 0  && <span className="text-red-600">✗{log.items_failed} échecs</span>}
-          {duration !== null       && <span className="text-slate-400">{duration}s</span>}
-          {expanded ? <ChevronUp size={13} className="text-slate-400" /> : <ChevronDown size={13} className="text-slate-400" />}
+          {duration !== null       && <span className="text-zinc-400">{duration}s</span>}
+          {expanded ? <ChevronUp size={13} className="text-zinc-400" /> : <ChevronDown size={13} className="text-zinc-400" />}
         </div>
       </div>
       {expanded && log.errors?.length > 0 && (
@@ -645,7 +645,7 @@ export default function Connectors() {
   if (loading) {
     return (
       <div className="flex items-center justify-center h-64">
-        <Loader size={24} className="animate-spin text-slate-400" />
+        <Loader size={24} className="animate-spin text-zinc-400" />
       </div>
     );
   }
@@ -655,14 +655,14 @@ export default function Connectors() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-slate-800 font-heading">Connecteurs</h1>
-          <p className="text-sm text-slate-500 mt-0.5">
+          <h1 className="text-2xl font-bold text-zinc-800 font-heading">Connecteurs</h1>
+          <p className="text-sm text-zinc-500 mt-0.5">
             Synchronisation MARCEL avec vos outils DSI · Jira · SAP · ServiceNow
           </p>
         </div>
         <button
           onClick={load}
-          className="flex items-center gap-2 px-3 py-2 border border-slate-200 rounded-lg text-slate-600 text-sm hover:bg-slate-50 transition-colors"
+          className="flex items-center gap-2 px-3 py-2 border border-zinc-200 rounded-lg text-zinc-600 text-sm hover:bg-zinc-50 transition-colors"
           data-testid="btn-refresh-connectors"
         >
           <RefreshCw size={13} /> Actualiser
@@ -673,7 +673,7 @@ export default function Connectors() {
       {!canManage && (
         <div className="flex items-start gap-2 p-3 bg-amber-50 border border-amber-200 rounded-lg text-sm text-amber-800">
           <AlertTriangle size={14} className="mt-0.5 flex-shrink-0" />
-          Vous avez accès en lecture seule. La configuration des connecteurs nécessite la permission <code className="bg-amber-100 px-1 rounded">admin.config</code>.
+          Vous avez accès en lecture seule. La configuration des connecteurs nécessite la permission <code className="bg-amber-100 px-1 rounded-lg">admin.config</code>.
         </div>
       )}
 
@@ -692,17 +692,17 @@ export default function Connectors() {
       </div>
 
       {/* Architecture info */}
-      <div className="bg-slate-50 border border-slate-200 rounded-xl p-5">
+      <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-5">
         <div className="flex items-center gap-2 mb-3">
-          <Activity size={14} className="text-slate-500" />
-          <span className="text-sm font-semibold text-slate-700">Architecture des connecteurs</span>
+          <Activity size={14} className="text-zinc-500" />
+          <span className="text-sm font-semibold text-zinc-700">Architecture des connecteurs</span>
         </div>
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-slate-600">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-4 text-xs text-zinc-600">
           <div>
-            <div className="font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
-              <GitBranch size={12} style={{ color: "#0052CC" }} /> Jira
+            <div className="font-semibold text-zinc-700 mb-1 flex items-center gap-1.5">
+              <GitBranch size={12} style={{ color: "#2563eb" }} /> Jira
             </div>
-            <ul className="space-y-0.5 text-slate-500">
+            <ul className="space-y-0.5 text-zinc-500">
               <li>• Epics → Capabilities / Features</li>
               <li>• Stories → User Stories MARCEL</li>
               <li>• Statuts : mapping configurable</li>
@@ -710,10 +710,10 @@ export default function Connectors() {
             </ul>
           </div>
           <div>
-            <div className="font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
+            <div className="font-semibold text-zinc-700 mb-1 flex items-center gap-1.5">
               <Database size={12} style={{ color: "#007DC6" }} /> SAP
             </div>
-            <ul className="space-y-0.5 text-slate-500">
+            <ul className="space-y-0.5 text-zinc-500">
               <li>• Centres de coût → Projets</li>
               <li>• Budgets → CAPEX / OPEX</li>
               <li>• Engagements → Consommé</li>
@@ -721,10 +721,10 @@ export default function Connectors() {
             </ul>
           </div>
           <div>
-            <div className="font-semibold text-slate-700 mb-1 flex items-center gap-1.5">
+            <div className="font-semibold text-zinc-700 mb-1 flex items-center gap-1.5">
               <LifeBuoy size={12} style={{ color: "#62BE24" }} /> ServiceNow
             </div>
-            <ul className="space-y-0.5 text-slate-500">
+            <ul className="space-y-0.5 text-zinc-500">
               <li>• Change Requests → Demandes</li>
               <li>• Incidents critiques → Risques</li>
               <li>• Priorités : mapping 1-4</li>
@@ -732,7 +732,7 @@ export default function Connectors() {
             </ul>
           </div>
         </div>
-        <div className="mt-3 pt-3 border-t border-slate-200 flex items-center gap-2 text-xs text-slate-400">
+        <div className="mt-3 pt-3 border-t border-zinc-200 flex items-center gap-2 text-xs text-zinc-400">
           <CheckCircle size={11} className="text-emerald-500" />
           Credentials chiffrés AES en base de données — jamais transmis en clair
         </div>

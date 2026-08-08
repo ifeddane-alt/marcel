@@ -1,4 +1,4 @@
-@import url('https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;600;700&family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+@import url('https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;600&display=swap');
 
 /* frappe-gantt styles */
 @import '../node_modules/frappe-gantt/dist/frappe-gantt.css';
@@ -9,27 +9,27 @@
 
 @layer base {
   :root {
-    --background: 0 0% 100%;
-    --foreground: 222 47% 11%;
+    --background: 0 0% 98%;
+    --foreground: 240 10% 4%;
     --card: 0 0% 100%;
-    --card-foreground: 222 47% 11%;
+    --card-foreground: 240 10% 4%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222 47% 11%;
-    --primary: 222 47% 11%;
-    --primary-foreground: 0 0% 98%;
-    --secondary: 210 40% 96%;
-    --secondary-foreground: 222 47% 11%;
-    --muted: 210 40% 96%;
-    --muted-foreground: 215 16% 47%;
-    --accent: 221 100% 40%;
+    --popover-foreground: 240 10% 4%;
+    --primary: 221 83% 53%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 240 5% 96%;
+    --secondary-foreground: 240 10% 4%;
+    --muted: 240 5% 96%;
+    --muted-foreground: 240 4% 46%;
+    --accent: 221 83% 53%;
     --accent-foreground: 0 0% 100%;
     --destructive: 0 84% 60%;
     --destructive-foreground: 0 0% 98%;
-    --border: 214 32% 91%;
-    --input: 214 32% 91%;
-    --ring: 222 47% 11%;
-    --radius: 0.25rem;
-    --chart-1: 221 100% 40%;
+    --border: 240 6% 90%;
+    --input: 240 6% 90%;
+    --ring: 221 83% 53%;
+    --radius: 0.5rem;
+    --chart-1: 221 83% 53%;
     --chart-2: 173 58% 39%;
     --chart-3: 43 74% 56%;
     --chart-4: 0 84% 60%;
@@ -42,27 +42,33 @@
     @apply border-border;
   }
   body {
-    @apply bg-[#F8F9FA] text-foreground;
-    font-family: 'Inter', -apple-system, sans-serif;
+    @apply bg-zinc-50 text-foreground;
+    font-family: 'Plus Jakarta Sans', -apple-system, sans-serif;
     -webkit-font-smoothing: antialiased;
   }
   h1, h2, h3, h4, h5 {
-    font-family: 'Barlow Condensed', sans-serif;
-    letter-spacing: -0.01em;
+    font-family: 'Outfit', sans-serif;
+    letter-spacing: -0.02em;
+  }
+  ::selection {
+    @apply bg-blue-100 text-blue-900;
   }
 }
 
 @layer utilities {
   .font-heading {
-    font-family: 'Barlow Condensed', sans-serif;
+    font-family: 'Outfit', sans-serif;
   }
   .font-mono-data {
     font-family: 'JetBrains Mono', monospace;
   }
   .sidebar-item {
-    @apply flex items-center gap-3 px-3 py-2 rounded text-sm text-slate-300 hover:text-white hover:bg-white/10 transition-colors duration-150 cursor-pointer;
+    @apply flex items-center gap-3 px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 hover:text-zinc-950 hover:bg-zinc-100 transition-colors duration-150 cursor-pointer;
   }
   .sidebar-item-active {
-    @apply bg-white/15 text-white font-medium;
+    @apply bg-blue-50 text-blue-700 font-semibold hover:bg-blue-50 hover:text-blue-700;
+  }
+  .card-surface {
+    @apply bg-white rounded-xl border border-zinc-200 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] transition-shadow duration-200 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)];
   }
 }

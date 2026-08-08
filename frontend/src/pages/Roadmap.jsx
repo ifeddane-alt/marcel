@@ -73,7 +73,7 @@ function ScopeBar({ label, start, end, timeMin, timeMax, color, icon }) {
   return (
     <div className="relative h-5 mb-1">
       <div
-        className={`absolute top-0 h-5 rounded flex items-center px-1.5 overflow-hidden ${color}`}
+        className={`absolute top-0 h-5 rounded-lg flex items-center px-1.5 overflow-hidden ${color}`}
         style={{ left: `${left}%`, width: `${width}%`, minWidth: "3px" }}
         title={`${label}: ${new Date(start).toLocaleDateString("fr-FR")} → ${new Date(end).toLocaleDateString("fr-FR")}`}
       >
@@ -123,15 +123,15 @@ function ScopeVsReelView({ projects, snapshots, selectedSnapshotId, setSelectedS
       {/* Controls */}
       <div className="flex items-center gap-4 flex-wrap mb-5">
         <div className="flex items-center gap-2">
-          <Layers size={14} className="text-[#0052CC]" />
-          <span className="text-sm font-semibold text-slate-700">Snapshot de référence</span>
+          <Layers size={14} className="text-blue-600" />
+          <span className="text-sm font-semibold text-zinc-700">Snapshot de référence</span>
         </div>
         {snapshots.length > 0 ? (
           <select
             value={selectedSnapshotId}
             onChange={e => setSelectedSnapshotId(e.target.value)}
             data-testid="scope-snapshot-select"
-            className="text-xs border border-gray-200 rounded px-3 py-1.5 text-slate-600 focus:outline-none focus:border-[#0052CC] bg-white"
+            className="text-xs border border-zinc-200 rounded-lg px-3 py-1.5 text-zinc-600 focus:outline-none focus:border-blue-600 bg-white"
           >
             {snapshots.map(s => (
               <option key={s.snapshot_id || s._id} value={s.snapshot_id || s._id}>
@@ -141,11 +141,11 @@ function ScopeVsReelView({ projects, snapshots, selectedSnapshotId, setSelectedS
             ))}
           </select>
         ) : (
-          <span className="text-xs text-slate-400">Aucun snapshot disponible — créez un snapshot SEC dans le module Scope</span>
+          <span className="text-xs text-zinc-400">Aucun snapshot disponible — créez un snapshot SEC dans le module Scope</span>
         )}
 
         {loading && (
-          <span className="flex items-center gap-1.5 text-xs text-slate-400">
+          <span className="flex items-center gap-1.5 text-xs text-zinc-400">
             <RefreshCw size={11} className="animate-spin" /> Chargement…
           </span>
         )}
@@ -163,42 +163,42 @@ function ScopeVsReelView({ projects, snapshots, selectedSnapshotId, setSelectedS
           <div className="text-2xl font-bold text-emerald-700">{onTimeCount}</div>
           <div className="text-[10px] text-emerald-400">projet{onTimeCount > 1 ? "s" : ""} respectant le scope</div>
         </div>
-        <div className="bg-slate-50 border border-slate-200 border-l-4 border-l-slate-300 rounded-lg p-3">
-          <div className="text-xs text-slate-500 font-semibold uppercase tracking-wider mb-1">Sans scope</div>
-          <div className="text-2xl font-bold text-slate-500">{noScopeCount}</div>
-          <div className="text-[10px] text-slate-400">pas de données dans le snapshot</div>
+        <div className="bg-zinc-50 border border-zinc-200 border-l-4 border-l-slate-300 rounded-lg p-3">
+          <div className="text-xs text-zinc-500 font-semibold uppercase tracking-wider mb-1">Sans scope</div>
+          <div className="text-2xl font-bold text-zinc-500">{noScopeCount}</div>
+          <div className="text-[10px] text-zinc-400">pas de données dans le snapshot</div>
         </div>
       </div>
 
       {/* Legend */}
-      <div className="flex items-center gap-4 text-[10px] text-slate-500 mb-4">
+      <div className="flex items-center gap-4 text-[10px] text-zinc-500 mb-4">
         <span className="flex items-center gap-1">
-          <span className="w-8 h-3 rounded bg-[#0052CC] inline-block opacity-70" /> Scope figé (snapshot)
+          <span className="w-8 h-3 rounded-lg bg-blue-600 inline-block opacity-70" /> Scope figé (snapshot)
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-8 h-3 rounded bg-emerald-500 inline-block" /> Réel (dans les délais)
+          <span className="w-8 h-3 rounded-lg bg-emerald-500 inline-block" /> Réel (dans les délais)
         </span>
         <span className="flex items-center gap-1">
-          <span className="w-8 h-3 rounded bg-rose-500 inline-block" /> Réel (en retard)
+          <span className="w-8 h-3 rounded-lg bg-rose-500 inline-block" /> Réel (en retard)
         </span>
       </div>
 
       {/* Gantt Comparison */}
       {projects.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded-lg py-16 text-center text-slate-400 text-sm">
+        <div className="bg-white border border-zinc-200 rounded-lg py-16 text-center text-zinc-400 text-sm">
           Aucun projet disponible.
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded-lg overflow-hidden shadow-sm">
+        <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden shadow-sm">
           {/* Header timeline */}
-          <div className="flex border-b border-gray-200 bg-slate-50 text-[10px] text-slate-400 uppercase font-semibold">
-            <div className="flex-shrink-0 border-r border-gray-200 px-4 py-2" style={{ width: 240 }}>
+          <div className="flex border-b border-zinc-200 bg-zinc-50 text-[10px] text-zinc-400 uppercase font-semibold">
+            <div className="flex-shrink-0 border-r border-zinc-200 px-4 py-2" style={{ width: 240 }}>
               Projet
             </div>
             <div className="flex-1 px-4 py-2">
               <div className="relative flex items-center gap-4">
                 <span>Chronologie comparée</span>
-                <span className="text-[9px] text-slate-300 ml-auto">
+                <span className="text-[9px] text-zinc-300 ml-auto">
                   {new Date(timeMin).getFullYear()} — {new Date(timeMax).getFullYear()}
                 </span>
               </div>
@@ -206,13 +206,13 @@ function ScopeVsReelView({ projects, snapshots, selectedSnapshotId, setSelectedS
           </div>
 
           {/* Rows */}
-          <div className="divide-y divide-slate-100">
+          <div className="divide-y divide-zinc-100">
             {projects.map(p => {
               const status = getDelayStatus(p);
               const scope = scopeDates[p.project_id];
               const realStart = dateToMs(p.start_date);
               const realEnd   = dateToMs(p.end_date_forecast || p.end_date_baseline);
-              const realColor  = status === "delayed" ? "bg-rose-500" : status === "on_time" ? "bg-emerald-500" : "bg-slate-300";
+              const realColor  = status === "delayed" ? "bg-rose-500" : status === "on_time" ? "bg-emerald-500" : "bg-zinc-300";
               const statusBadge = status === "delayed"
                 ? <span className="text-[9px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-1.5 py-0.5 rounded-full ml-2">Retard</span>
                 : status === "on_time"
@@ -220,20 +220,20 @@ function ScopeVsReelView({ projects, snapshots, selectedSnapshotId, setSelectedS
                 : null;
 
               return (
-                <div key={p.project_id} className="flex items-center hover:bg-slate-50 transition-colors"
+                <div key={p.project_id} className="flex items-center hover:bg-zinc-50 transition-colors"
                   style={{ minHeight: 68 }}
                   data-testid={`svr-row-${p.project_id}`}>
                   {/* Left label */}
-                  <div className="flex-shrink-0 border-r border-gray-100 px-4 py-3" style={{ width: 240 }}>
+                  <div className="flex-shrink-0 border-r border-zinc-100 px-4 py-3" style={{ width: 240 }}>
                     <div className="flex items-center gap-1">
-                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${p.status_rag === "green" ? "bg-emerald-500" : p.status_rag === "orange" ? "bg-amber-500" : p.status_rag === "red" ? "bg-rose-500" : "bg-slate-300"}`} />
-                      <span className="text-xs font-semibold text-slate-700 truncate">
-                        {p.code && <span className="font-mono text-[10px] text-slate-400 mr-1">{p.code}</span>}
+                      <div className={`w-2 h-2 rounded-full flex-shrink-0 ${p.status_rag === "green" ? "bg-emerald-500" : p.status_rag === "orange" ? "bg-amber-500" : p.status_rag === "red" ? "bg-rose-500" : "bg-zinc-300"}`} />
+                      <span className="text-xs font-semibold text-zinc-700 truncate">
+                        {p.code && <span className="font-mono text-[10px] text-zinc-400 mr-1">{p.code}</span>}
                         {p.name}
                       </span>
                       {statusBadge}
                     </div>
-                    <div className="text-[10px] text-slate-400 mt-1">{p.owner || ""}</div>
+                    <div className="text-[10px] text-zinc-400 mt-1">{p.owner || ""}</div>
                     {scope?.end && realEnd && (
                       <div className={`text-[10px] mt-0.5 ${status === "delayed" ? "text-rose-500 font-semibold" : "text-emerald-500"}`}>
                         {status === "delayed"
@@ -253,11 +253,11 @@ function ScopeVsReelView({ projects, snapshots, selectedSnapshotId, setSelectedS
                         end={scope.end}
                         timeMin={timeMin}
                         timeMax={timeMax}
-                        color="bg-[#0052CC] opacity-60"
+                        color="bg-blue-600 opacity-60"
                       />
                     )}
                     {!scope?.start && (
-                      <div className="text-[9px] text-slate-300 italic h-5 mb-1 flex items-center">
+                      <div className="text-[9px] text-zinc-300 italic h-5 mb-1 flex items-center">
                         Pas de données scope dans ce snapshot
                       </div>
                     )}
@@ -508,7 +508,7 @@ export default function Roadmap() {
     }).catch(() => setLoadingScope(false));
   }, [selectedSnapshotId]);
 
-  if (loading) return <div className="p-8 text-slate-400 text-sm">Chargement de la roadmap...</div>;
+  if (loading) return <div className="p-8 text-zinc-400 text-sm">Chargement de la roadmap...</div>;
 
   return (
     <div className="p-4 md:p-6 lg:p-8" data-testid="roadmap-page">
@@ -517,12 +517,12 @@ export default function Roadmap() {
         <div className="flex items-center justify-between">
           <div>
             <div className="flex items-center gap-2 mb-1">
-              <Map size={18} className="text-[#0052CC]" />
-              <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">
+              <Map size={18} className="text-blue-600" />
+              <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">
                 Roadmap Portefeuille
               </h1>
             </div>
-            <p className="text-sm text-slate-500">
+            <p className="text-sm text-zinc-500">
               Vue consolidée multi-projets — {filtered.length} projet{filtered.length !== 1 ? "s" : ""}
               {visibleDeps.length > 0 && (
                 <span className="ml-2 text-violet-500 font-medium">
@@ -537,11 +537,11 @@ export default function Roadmap() {
             {activeRoadmapTab === "timeline" && (
               <div className="flex items-center gap-2" data-testid="roadmap-zoom-controls">
                 <button onClick={() => setIsQuarter(false)} data-testid="zoom-month-btn"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded transition-colors ${!isQuarter ? "bg-[#0052CC] text-white" : "border border-gray-200 text-slate-600 hover:bg-gray-50"}`}>
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${!isQuarter ? "bg-blue-600 text-white" : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}>
                   <ZoomIn size={12} /> Mois
                 </button>
                 <button onClick={() => setIsQuarter(true)} data-testid="zoom-quarter-btn"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded transition-colors ${isQuarter ? "bg-[#0052CC] text-white" : "border border-gray-200 text-slate-600 hover:bg-gray-50"}`}>
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${isQuarter ? "bg-blue-600 text-white" : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}>
                   <ZoomOut size={12} /> Trimestre
                 </button>
               </div>
@@ -551,7 +551,7 @@ export default function Roadmap() {
       </div>
 
       {/* Tab switcher */}
-      <div className="flex gap-1 border-b border-slate-200 mb-5 overflow-x-auto">
+      <div className="flex gap-1 border-b border-zinc-200 mb-5 overflow-x-auto">
         {[
           { key: "timeline",      icon: Map,        label: "Timeline Projets" },
           { key: "scope_vs_reel", icon: GitCompare, label: "Scope vs Réel" },
@@ -562,8 +562,8 @@ export default function Roadmap() {
             data-testid={`roadmap-tab-${key}`}
             className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors
               ${activeRoadmapTab === key
-                ? "border-[#0052CC] text-[#0052CC]"
-                : "border-transparent text-slate-500 hover:text-slate-700"}`}
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent text-zinc-500 hover:text-zinc-700"}`}
           >
             <Icon size={14} /> {label}
           </button>
@@ -576,26 +576,26 @@ export default function Roadmap() {
       {activeRoadmapTab === "timeline" && (
       <>
       {/* Filters */}
-      <div className="bg-white border border-gray-200 rounded shadow-sm p-4 mb-6" data-testid="roadmap-filters">
+      <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4 mb-6" data-testid="roadmap-filters">
         {/* Row 1: project filters */}
         <div className="flex items-center gap-3 flex-wrap mb-3">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-widest">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 uppercase tracking-widest">
             <Filter size={11} /> Projets
           </div>
           <select value={filterProgram} onChange={(e) => setFilterProgram(e.target.value)} data-testid="filter-program"
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 text-slate-600 focus:outline-none focus:border-[#0052CC] bg-white">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-blue-600 bg-white">
             <option value="">Tous programmes</option>
             {programs.map((p) => <option key={p.program_id} value={p.program_id}>{p.name}</option>)}
           </select>
           <select value={filterRag} onChange={(e) => setFilterRag(e.target.value)} data-testid="filter-rag"
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 text-slate-600 focus:outline-none focus:border-[#0052CC] bg-white">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-blue-600 bg-white">
             <option value="">Tous RAG</option>
             <option value="green">Vert</option>
             <option value="orange">Orange</option>
             <option value="red">Rouge</option>
           </select>
           <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} data-testid="filter-status"
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 text-slate-600 focus:outline-none focus:border-[#0052CC] bg-white">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-blue-600 bg-white">
             <option value="">Tous statuts</option>
             {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
@@ -608,43 +608,43 @@ export default function Roadmap() {
           </div>
           <select value={filterMsFamily} onChange={(e) => { setFilterMsFamily(e.target.value); setFilterMsType(""); }}
             data-testid="filter-ms-family"
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 text-slate-600 focus:outline-none focus:border-violet-400 bg-white">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-violet-400 bg-white">
             <option value="">Toutes familles</option>
             {Object.entries(FAMILY_CONFIG).map(([k, v]) => <option key={k} value={k}>{v.label}</option>)}
           </select>
           <select value={filterMsType} onChange={(e) => setFilterMsType(e.target.value)}
             disabled={!filterMsFamily} data-testid="filter-ms-type"
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 text-slate-600 focus:outline-none focus:border-violet-400 bg-white disabled:opacity-50">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-violet-400 bg-white disabled:opacity-50">
             <option value="">Tous types</option>
             {availableTypes.map((t) => <option key={t.value} value={t.value}>{t.label}</option>)}
           </select>
           <select value={filterMsAttribute} onChange={(e) => setFilterMsAttribute(e.target.value)}
             data-testid="filter-ms-attribute"
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 text-slate-600 focus:outline-none focus:border-violet-400 bg-white">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-violet-400 bg-white">
             <option value="">Tous attributs</option>
             <option value="critical">Critical</option>
             <option value="strategic">Strategic</option>
           </select>
           <button type="button" onClick={() => setFilterMsBlocking(!filterMsBlocking)}
             data-testid="filter-ms-blocking"
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded border transition-colors ${filterMsBlocking ? "bg-rose-50 border-rose-300 text-rose-700" : "border-gray-200 text-slate-500 hover:bg-gray-50"}`}>
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${filterMsBlocking ? "bg-rose-50 border-rose-300 text-rose-700" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50"}`}>
             ⚑ Bloquants uniquement
           </button>
           <button type="button" onClick={() => setShowDeps(!showDeps)}
             data-testid="toggle-deps"
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded border transition-colors ${showDeps ? "bg-violet-50 border-violet-300 text-violet-700" : "border-gray-200 text-slate-500 hover:bg-gray-50"}`}>
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${showDeps ? "bg-violet-50 border-violet-300 text-violet-700" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50"}`}>
             ⟶ Dépendances
           </button>
           {hasFilters && (
             <button onClick={resetFilters} data-testid="filter-reset"
-              className="flex items-center gap-1 text-xs text-slate-400 hover:text-rose-500 border border-gray-200 px-2 py-1 rounded">
+              className="flex items-center gap-1 text-xs text-zinc-400 hover:text-rose-500 border border-zinc-200 px-2 py-1 rounded-lg">
               <X size={10} /> Tout réinitialiser
             </button>
           )}
         </div>
 
         {/* Legend */}
-        <div className="flex items-center gap-4 mt-3 text-[10px] text-slate-400 flex-wrap">
+        <div className="flex items-center gap-4 mt-3 text-[10px] text-zinc-400 flex-wrap">
           <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block" /> Vert</span>
           <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-amber-500 inline-block" /> Orange</span>
           <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-rose-500 inline-block" /> Rouge</span>
@@ -678,22 +678,22 @@ export default function Roadmap() {
       </div>
 
       {filtered.length === 0 ? (
-        <div className="bg-white border border-gray-200 rounded shadow-sm py-16 text-center text-slate-400 text-sm">
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm py-16 text-center text-zinc-400 text-sm">
           Aucun projet ne correspond aux filtres sélectionnés.
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded shadow-sm overflow-hidden" data-testid="roadmap-chart">
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-hidden" data-testid="roadmap-chart">
           {/* Sticky header row */}
-          <div className="flex border-b border-gray-200 bg-gray-50 sticky top-0 z-10">
-            <div className="flex-shrink-0 bg-gray-50 z-20 border-r border-gray-200 flex items-center px-4"
+          <div className="flex border-b border-zinc-200 bg-zinc-50 sticky top-0 z-10">
+            <div className="flex-shrink-0 bg-zinc-50 z-20 border-r border-zinc-200 flex items-center px-4"
               style={{ width: LEFT_PANEL_W, minWidth: LEFT_PANEL_W }}>
-              <span className="text-[10px] font-bold uppercase tracking-widest text-slate-500">Projet</span>
+              <span className="text-[10px] font-bold uppercase tracking-widest text-zinc-500">Projet</span>
             </div>
             <div className="overflow-hidden" ref={scrollRef}>
               <div className="flex" style={{ width: totalW }}>
                 {headers.map((h, i) => (
                   <div key={i}
-                    className="text-center text-[10px] font-semibold text-slate-500 py-2 border-r border-gray-100 flex-shrink-0"
+                    className="text-center text-[10px] font-semibold text-zinc-500 py-2 border-r border-zinc-100 flex-shrink-0"
                     style={{ width: colWidth }}>
                     {h.label}
                   </div>
@@ -708,12 +708,12 @@ export default function Roadmap() {
               {grouped.map(([programId, projList]) => (
                 <div key={programId}>
                   {/* Program group header */}
-                  <div className="flex items-center bg-slate-50 border-b border-gray-100 px-4"
+                  <div className="flex items-center bg-zinc-50 border-b border-zinc-100 px-4"
                     style={{ minWidth: LEFT_PANEL_W + totalW, height: GROUP_HEADER_H }}>
-                    <div className="text-[10px] font-bold uppercase tracking-widest text-slate-500" style={{ width: LEFT_PANEL_W - 16 }}>
+                    <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-500" style={{ width: LEFT_PANEL_W - 16 }}>
                       {programId === "__none__" ? "Sans programme" : (programMap[programId] || programId)}
                     </div>
-                    <div className="text-[10px] text-slate-400 ml-4">
+                    <div className="text-[10px] text-zinc-400 ml-4">
                       {projList.length} projet{projList.length > 1 ? "s" : ""}
                     </div>
                   </div>
@@ -728,39 +728,39 @@ export default function Roadmap() {
 
                     return (
                       <div key={p.project_id}
-                        className="flex items-center border-b border-gray-50 hover:bg-blue-50/30 transition-colors"
+                        className="flex items-center border-b border-zinc-50 hover:bg-blue-50/30 transition-colors"
                         style={{ height: ROW_HEIGHT }}
                         data-testid={`roadmap-row-${p.project_id}`}>
                         {/* Left: project name */}
-                        <div className="flex-shrink-0 flex items-center gap-2 px-4 border-r border-gray-100"
+                        <div className="flex-shrink-0 flex items-center gap-2 px-4 border-r border-zinc-100"
                           style={{ width: LEFT_PANEL_W, minWidth: LEFT_PANEL_W }}>
                           <span className={`w-1.5 h-4 rounded-sm flex-shrink-0 ${ragCfg.bg}`} />
                           <Link to={`/projects/${p.project_id}`}
-                            className="text-xs text-slate-700 font-medium hover:text-[#0052CC] truncate flex-1"
+                            className="text-xs text-zinc-700 font-medium hover:text-blue-600 truncate flex-1"
                             title={p.code ? `${p.code} · ${p.name}` : p.name} data-testid={`roadmap-project-link-${p.project_id}`}>
-                            {p.code && <span className="font-mono text-[10px] text-slate-400 mr-1">{p.code}</span>}
+                            {p.code && <span className="font-mono text-[10px] text-zinc-400 mr-1">{p.code}</span>}
                             {p.name.split("—")[0].trim().slice(0, 26)}
                           </Link>
-                          <ExternalLink size={9} className="text-slate-300 flex-shrink-0" />
+                          <ExternalLink size={9} className="text-zinc-300 flex-shrink-0" />
                         </div>
 
                         {/* Right: timeline bar */}
                         <div className="relative flex-1" style={{ minWidth: totalW, height: ROW_HEIGHT }}>
                           {/* Today line */}
                           {todayX >= 0 && todayX <= totalW && (
-                            <div className="absolute top-0 bottom-0 w-px bg-[#0052CC]/30 z-10 pointer-events-none"
+                            <div className="absolute top-0 bottom-0 w-px bg-blue-600/30 z-10 pointer-events-none"
                               style={{ left: todayX }} />
                           )}
                           {/* Column separators */}
                           {headers.map((h, i) => (
                             <div key={i}
-                              className="absolute top-0 bottom-0 border-r border-gray-50 pointer-events-none"
+                              className="absolute top-0 bottom-0 border-r border-zinc-50 pointer-events-none"
                               style={{ left: i * colWidth, width: colWidth }} />
                           ))}
                           {/* Project bar */}
                           {barX && (
                             <div
-                              className={`absolute top-2.5 h-5 rounded ${ragCfg.bg} ${ragCfg.border} border cursor-pointer flex items-center px-1.5 overflow-hidden z-20 transition-opacity hover:opacity-90`}
+                              className={`absolute top-2.5 h-5 rounded-lg ${ragCfg.bg} ${ragCfg.border} border cursor-pointer flex items-center px-1.5 overflow-hidden z-20 transition-opacity hover:opacity-90`}
                               style={{ left: barX.left, width: Math.max(barX.right - barX.left, 6) }}
                               title={`${p.code ? `${p.code} · ` : ""}${p.name}\n${formatDate(p.start_date)} → ${formatDate(p.end_date_forecast || p.end_date_baseline)}`}
                               onClick={() => setTooltip(tooltip?.id === p.project_id ? null : {
@@ -783,7 +783,7 @@ export default function Roadmap() {
                             if (!msMs) return null;
                             const mx = toX(msMs);
                             const fCfg = FAMILY_CONFIG[ms.family];
-                            const fill = fCfg?.fill || "#0052CC";
+                            const fill = fCfg?.fill || "#2563eb";
                             const stroke = ms.attribute === "critical" ? "#EF4444" : ms.attribute === "strategic" ? "#3B82F6" : "none";
                             const typeLabel = fCfg?.types?.find((t) => t.value === ms.type)?.label || ms.type || "";
                             const tooltipTxt = [ms.name, typeLabel, ms.deliverable, ms.comment, ms.is_blocking ? "⚑ Bloquant" : null].filter(Boolean).join(" | ");
@@ -810,10 +810,10 @@ export default function Roadmap() {
               ))}
 
               {/* Today label at bottom */}
-              <div className="relative border-t border-gray-100 bg-gray-50" style={{ minWidth: LEFT_PANEL_W + totalW, height: 24 }}>
+              <div className="relative border-t border-zinc-100 bg-zinc-50" style={{ minWidth: LEFT_PANEL_W + totalW, height: 24 }}>
                 {todayX >= 0 && todayX <= totalW && (
                   <div className="absolute top-1" style={{ left: LEFT_PANEL_W + todayX - 20 }}>
-                    <span className="text-[9px] font-bold text-[#0052CC] bg-blue-50 border border-blue-200 rounded px-1 py-0.5">
+                    <span className="text-[9px] font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded-lg px-1 py-0.5">
                       Aujourd'hui
                     </span>
                   </div>
@@ -865,28 +865,28 @@ export default function Roadmap() {
 
       {/* Tooltip card */}
       {tooltip && (
-        <div className="fixed bottom-6 right-6 bg-white border border-gray-200 rounded-lg shadow-xl p-4 z-50 min-w-[220px]"
+        <div className="fixed bottom-6 right-6 bg-white border border-zinc-200 rounded-lg shadow-xl p-4 z-50 min-w-[220px]"
           data-testid="roadmap-tooltip">
           <div className="flex items-start justify-between gap-2 mb-2">
-            <div className="text-sm font-bold text-slate-800 leading-snug">{tooltip.name}</div>
-            <button onClick={() => setTooltip(null)} className="text-slate-300 hover:text-slate-600">
+            <div className="text-sm font-bold text-zinc-800 leading-snug">{tooltip.name}</div>
+            <button onClick={() => setTooltip(null)} className="text-zinc-300 hover:text-zinc-600">
               <X size={13} />
             </button>
           </div>
           <RAGBadge status={tooltip.rag} />
-          <div className="mt-2 space-y-1 text-xs text-slate-600">
-            <div className="flex justify-between"><span className="text-slate-400">Début</span><span>{tooltip.start}</span></div>
-            <div className="flex justify-between"><span className="text-slate-400">Fin forecast</span><span>{tooltip.end}</span></div>
-            <div className="flex justify-between"><span className="text-slate-400">Statut</span><span>{tooltip.status}</span></div>
+          <div className="mt-2 space-y-1 text-xs text-zinc-600">
+            <div className="flex justify-between"><span className="text-zinc-400">Début</span><span>{tooltip.start}</span></div>
+            <div className="flex justify-between"><span className="text-zinc-400">Fin forecast</span><span>{tooltip.end}</span></div>
+            <div className="flex justify-between"><span className="text-zinc-400">Statut</span><span>{tooltip.status}</span></div>
             {tooltip.budget && (
               <div className="flex justify-between">
-                <span className="text-slate-400">Budget</span>
+                <span className="text-zinc-400">Budget</span>
                 <span className="font-mono-data">{Math.round(tooltip.budget / 1000).toLocaleString("fr-FR")} K€</span>
               </div>
             )}
           </div>
           <Link to={`/projects/${tooltip.id}`}
-            className="mt-3 flex items-center gap-1 text-[11px] text-[#0052CC] hover:underline">
+            className="mt-3 flex items-center gap-1 text-[11px] text-blue-600 hover:underline">
             <ExternalLink size={10} /> Voir le projet
           </Link>
         </div>

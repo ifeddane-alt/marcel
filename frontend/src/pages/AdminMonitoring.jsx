@@ -60,11 +60,11 @@ export default function AdminMonitoring() {
         <div className="flex items-center gap-3">
           <Activity className="w-7 h-7 text-blue-600" />
           <div>
-            <h1 className="text-2xl font-bold text-slate-800">Monitoring Production</h1>
-            <p className="text-sm text-slate-500">
+            <h1 className="text-2xl font-bold text-zinc-800">Monitoring Production</h1>
+            <p className="text-sm text-zinc-500">
               Statut des services MARCEL
               {lastUpdated && (
-                <span className="ml-2 text-slate-400">
+                <span className="ml-2 text-zinc-400">
                   · Mis à jour {lastUpdated.toLocaleTimeString("fr-FR")}
                 </span>
               )}
@@ -72,12 +72,12 @@ export default function AdminMonitoring() {
           </div>
         </div>
         <div className="flex items-center gap-3">
-          <span className="text-xs text-slate-400">Actualisation dans {countdown}s</span>
+          <span className="text-xs text-zinc-400">Actualisation dans {countdown}s</span>
           <button
             data-testid="monitoring-refresh-btn"
             onClick={fetchStats}
             disabled={loading}
-            className="flex items-center gap-2 px-3 py-2 text-sm bg-white border border-slate-200 rounded-lg hover:bg-slate-50 transition-colors disabled:opacity-50"
+            className="flex items-center gap-2 px-3 py-2 text-sm bg-white border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors disabled:opacity-50"
           >
             <RefreshCw className={`w-4 h-4 ${loading ? "animate-spin" : ""}`} />
             Actualiser
@@ -97,7 +97,7 @@ export default function AdminMonitoring() {
       {loading && !data && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
           {[...Array(4)].map((_, i) => (
-            <div key={i} className="h-28 bg-slate-100 rounded-xl animate-pulse" />
+            <div key={i} className="h-28 bg-zinc-100 rounded-xl animate-pulse" />
           ))}
         </div>
       )}
@@ -118,7 +118,7 @@ export default function AdminMonitoring() {
               <p className={`font-semibold ${statusColor(data.status)}`}>
                 {data.status === "ok" ? "Tous les services opérationnels" : "Service dégradé"}
               </p>
-              <p className="text-xs text-slate-500">MARCEL v{data.version}</p>
+              <p className="text-xs text-zinc-500">MARCEL v{data.version}</p>
             </div>
           </div>
 
@@ -157,20 +157,20 @@ export default function AdminMonitoring() {
 
           {/* Collections MongoDB */}
           {data.collections && Object.keys(data.collections).length > 0 && (
-            <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-              <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-                <FileText className="w-4 h-4 text-slate-500" />
-                <h2 className="font-semibold text-slate-700 text-sm">Collections MongoDB</h2>
+            <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden">
+              <div className="px-5 py-4 border-b border-zinc-100 flex items-center gap-2">
+                <FileText className="w-4 h-4 text-zinc-500" />
+                <h2 className="font-semibold text-zinc-700 text-sm">Collections MongoDB</h2>
               </div>
               <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-6 gap-0">
                 {Object.entries(data.collections).map(([col, count], i) => (
                   <div
                     key={col}
                     data-testid={`mongo-col-${col}`}
-                    className={`px-4 py-3 ${i < Object.keys(data.collections).length - 1 ? "border-r border-slate-100" : ""}`}
+                    className={`px-4 py-3 ${i < Object.keys(data.collections).length - 1 ? "border-r border-zinc-100" : ""}`}
                   >
-                    <p className="text-xl font-bold text-slate-800">{count.toLocaleString("fr-FR")}</p>
-                    <p className="text-xs text-slate-500 mt-0.5 capitalize">{col}</p>
+                    <p className="text-xl font-bold text-zinc-800">{count.toLocaleString("fr-FR")}</p>
+                    <p className="text-xs text-zinc-500 mt-0.5 capitalize">{col}</p>
                   </div>
                 ))}
               </div>
@@ -178,10 +178,10 @@ export default function AdminMonitoring() {
           )}
 
           {/* Erreurs détail */}
-          <div className="bg-white border border-slate-200 rounded-xl overflow-hidden">
-            <div className="px-5 py-4 border-b border-slate-100 flex items-center gap-2">
-              <TrendingUp className="w-4 h-4 text-slate-500" />
-              <h2 className="font-semibold text-slate-700 text-sm">Compteurs d'erreurs (depuis dernier redémarrage)</h2>
+          <div className="bg-white border border-zinc-200 rounded-xl overflow-hidden">
+            <div className="px-5 py-4 border-b border-zinc-100 flex items-center gap-2">
+              <TrendingUp className="w-4 h-4 text-zinc-500" />
+              <h2 className="font-semibold text-zinc-700 text-sm">Compteurs d'erreurs (depuis dernier redémarrage)</h2>
             </div>
             <div className="p-5 grid grid-cols-2 gap-4">
               <ErrorRow
@@ -197,7 +197,7 @@ export default function AdminMonitoring() {
                 testid="error-429"
               />
             </div>
-            <p className="px-5 pb-4 text-xs text-slate-400">
+            <p className="px-5 pb-4 text-xs text-zinc-400">
               * Les compteurs sont remis à zéro lors du redémarrage de l'API. Déployez un outil APM (Sentry, Datadog) pour la persistance.
             </p>
           </div>
@@ -207,12 +207,12 @@ export default function AdminMonitoring() {
   );
 }
 
-function KpiCard({ icon, label, value, sub, valueClass = "text-slate-800", testid }) {
+function KpiCard({ icon, label, value, sub, valueClass = "text-zinc-800", testid }) {
   return (
-    <div data-testid={testid} className="bg-white border border-slate-200 rounded-xl p-4 space-y-2">
-      <div className="flex items-center gap-2 text-slate-500">{icon}<span className="text-xs">{label}</span></div>
+    <div data-testid={testid} className="bg-white border border-zinc-200 rounded-xl p-4 space-y-2">
+      <div className="flex items-center gap-2 text-zinc-500">{icon}<span className="text-xs">{label}</span></div>
       <p className={`text-xl font-bold ${valueClass}`}>{value}</p>
-      {sub && <p className="text-xs text-slate-400">{sub}</p>}
+      {sub && <p className="text-xs text-zinc-400">{sub}</p>}
     </div>
   );
 }
@@ -225,9 +225,9 @@ function ErrorRow({ label, count, color, testid }) {
   const c = colors[color];
   return (
     <div data-testid={testid} className={`${c.bg} rounded-lg p-4`}>
-      <p className="text-xs text-slate-500 mb-1">{label}</p>
+      <p className="text-xs text-zinc-500 mb-1">{label}</p>
       <p className={`text-2xl font-bold ${c.text}`}>{count}</p>
-      <div className="mt-2 h-1.5 bg-slate-200 rounded-full overflow-hidden">
+      <div className="mt-2 h-1.5 bg-zinc-200 rounded-full overflow-hidden">
         <div
           className={`h-full ${c.bar} rounded-full transition-all`}
           style={{ width: count > 0 ? "100%" : "0%" }}

@@ -11,9 +11,9 @@ const COLOR_CFG = {
   red:     { bg: "bg-rose-100",    text: "text-rose-700",    border: "border-rose-200",    label: "≤ 30j" },
   orange:  { bg: "bg-amber-100",   text: "text-amber-700",   border: "border-amber-200",   label: "31-90j" },
   green:   { bg: "bg-emerald-100", text: "text-emerald-700", border: "border-emerald-200", label: "> 90j" },
-  overdue: { bg: "bg-gray-100",    text: "text-gray-400 line-through", border: "border-gray-200", label: "Retard" },
-  done:    { bg: "bg-slate-50",    text: "text-slate-400",   border: "border-slate-200",   label: "Terminé" },
-  grey:    { bg: "bg-gray-50",     text: "text-gray-400",    border: "border-gray-200",    label: "—" },
+  overdue: { bg: "bg-zinc-100",    text: "text-zinc-400 line-through", border: "border-zinc-200", label: "Retard" },
+  done:    { bg: "bg-zinc-50",    text: "text-zinc-400",   border: "border-zinc-200",   label: "Terminé" },
+  grey:    { bg: "bg-zinc-50",     text: "text-zinc-400",    border: "border-zinc-200",    label: "—" },
 };
 
 function DaysChip({ days, color }) {
@@ -32,7 +32,7 @@ function DaysChip({ days, color }) {
 
 function TypeBadge({ type }) {
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-bold uppercase tracking-wide border
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-bold uppercase tracking-wide border
       ${type === "regulatory"
         ? "bg-blue-50 text-blue-700 border-blue-200"
         : "bg-orange-50 text-orange-700 border-orange-200"}`}>
@@ -44,7 +44,7 @@ function TypeBadge({ type }) {
 function AttributeBadge({ attribute }) {
   if (!attribute) return null;
   return (
-    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold border
+    <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-semibold border
       ${attribute === "critical"
         ? "bg-rose-50 text-rose-700 border-rose-200"
         : "bg-violet-50 text-violet-700 border-violet-200"}`}>
@@ -147,17 +147,17 @@ export default function Conformite() {
   };
 
   const thCls = (col) =>
-    `px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-500 cursor-pointer hover:text-[#0052CC] whitespace-nowrap select-none`;
+    `px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-zinc-500 cursor-pointer hover:text-blue-600 whitespace-nowrap select-none`;
 
   return (
     <div className="p-4 md:p-6 lg:p-8" data-testid="conformite-page">
       {/* En-tête */}
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-1">
-          <ShieldAlert size={18} className="text-[#0052CC]" />
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">Conformité</h1>
+          <ShieldAlert size={18} className="text-blue-600" />
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">Conformité</h1>
         </div>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-zinc-500">
           Suivi des jalons réglementaires et de décommissionnement — portefeuille complet
         </p>
       </div>
@@ -173,14 +173,14 @@ export default function Conformite() {
       )}
 
       {/* Filtres */}
-      <div className="bg-white border border-gray-200 rounded shadow-sm p-4 mb-5">
+      <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4 mb-5">
         <div className="flex items-center gap-3 flex-wrap">
-          <div className="flex items-center gap-1.5 text-xs font-semibold text-slate-500 uppercase tracking-widest">
+          <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 uppercase tracking-widest">
             <Filter size={11} /> Filtres
           </div>
           <select value={filterProgram} onChange={(e) => { setFilterProgram(e.target.value); setFilterProject(""); }}
             data-testid="filter-programme"
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:border-[#0052CC] bg-white text-slate-600 min-w-[160px]">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600 bg-white text-zinc-600 min-w-[160px]">
             <option value="">Tous les programmes</option>
             {programs.map((p) => (
               <option key={p.program_id} value={p.program_id}>{p.name?.slice(0, 35)}</option>
@@ -188,7 +188,7 @@ export default function Conformite() {
           </select>
           <select value={filterProject} onChange={(e) => setFilterProject(e.target.value)}
             data-testid="filter-project"
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:border-[#0052CC] bg-white text-slate-600 min-w-[160px]">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600 bg-white text-zinc-600 min-w-[160px]">
             <option value="">Tous les projets</option>
             {projects
               .filter((p) => !filterProgram || p.program_id === filterProgram)
@@ -198,26 +198,26 @@ export default function Conformite() {
           </select>
           <select value={filterType} onChange={(e) => setFilterType(e.target.value)}
             data-testid="filter-type"
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:border-[#0052CC] bg-white text-slate-600">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600 bg-white text-zinc-600">
             <option value="">Tous les types</option>
             <option value="regulatory">Réglementaire</option>
             <option value="decomm">Décommissionnement</option>
           </select>
           <select value={filterAttribute} onChange={(e) => setFilterAttribute(e.target.value)}
             data-testid="filter-attribute"
-            className="text-xs border border-gray-200 rounded px-2.5 py-1.5 focus:outline-none focus:border-[#0052CC] bg-white text-slate-600">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600 bg-white text-zinc-600">
             <option value="">Tous les attributs</option>
             <option value="critical">Critique</option>
             <option value="strategic">Stratégique</option>
           </select>
           <button onClick={loadData} disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-[#0052CC] text-white text-xs font-semibold rounded hover:bg-[#0047B3] disabled:opacity-50">
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50">
             {loading ? <RefreshCw size={11} className="animate-spin" /> : <Filter size={11} />}
             Actualiser
           </button>
           {milestones.length > 0 && (
             <button onClick={handleCsvExport} data-testid="export-csv-btn"
-              className="flex items-center gap-1.5 px-3 py-1.5 border border-gray-200 text-slate-600 text-xs font-semibold rounded hover:bg-gray-50 ml-auto">
+              className="flex items-center gap-1.5 px-3 py-1.5 border border-zinc-200 text-zinc-600 text-xs font-semibold rounded-lg hover:bg-zinc-50 ml-auto">
               <Download size={11} /> Exporter CSV
             </button>
           )}
@@ -226,16 +226,16 @@ export default function Conformite() {
 
       {/* Table */}
       {loading ? (
-        <div className="py-12 text-center text-slate-400 text-sm">Chargement...</div>
+        <div className="py-12 text-center text-zinc-400 text-sm">Chargement...</div>
       ) : sorted.length === 0 ? (
-        <div className="py-12 text-center border-2 border-dashed border-gray-200 rounded-lg text-slate-400 text-sm">
+        <div className="py-12 text-center border-2 border-dashed border-zinc-200 rounded-lg text-zinc-400 text-sm">
           Aucun jalon réglementaire ou décommissionnement trouvé
         </div>
       ) : (
-        <div className="bg-white border border-gray-200 rounded shadow-sm overflow-x-auto" data-testid="regulatory-table">
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-x-auto" data-testid="regulatory-table">
           <table className="w-full text-xs">
             <thead>
-              <tr className="bg-gray-50 border-b border-gray-200">
+              <tr className="bg-zinc-50 border-b border-zinc-200">
                 <th className={thCls("project_name")} onClick={() => handleSort("project_name")}>
                   Projet <SortIcon col="project_name" />
                 </th>
@@ -257,35 +257,35 @@ export default function Conformite() {
                 <th className={thCls("days_remaining")} onClick={() => handleSort("days_remaining")}>
                   Jours rest. <SortIcon col="days_remaining" />
                 </th>
-                <th className="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-slate-500">Attribut</th>
+                <th className="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-zinc-500">Attribut</th>
               </tr>
             </thead>
             <tbody>
               {sorted.map((m) => (
                 <tr key={m.milestone_id}
-                  className={`border-b border-gray-50 hover:bg-blue-50/20 ${m.urgency_color === "overdue" ? "opacity-75" : ""}`}
+                  className={`border-b border-zinc-50 hover:bg-blue-50/20 ${m.urgency_color === "overdue" ? "opacity-75" : ""}`}
                   data-testid={`regulatory-row-${m.milestone_id}`}>
-                  <td className="px-4 py-3 font-semibold text-slate-800 max-w-[160px] truncate" title={m.project_name}>
+                  <td className="px-4 py-3 font-semibold text-zinc-800 max-w-[160px] truncate" title={m.project_name}>
                     {m.project_name?.slice(0, 25)}
                   </td>
                   <td className="px-4 py-3"><TypeBadge type={m.type} /></td>
-                  <td className="px-4 py-3 text-slate-700 max-w-[220px] truncate" title={m.name}>
+                  <td className="px-4 py-3 text-zinc-700 max-w-[220px] truncate" title={m.name}>
                     <div className="flex items-center gap-1.5">
                       {m.is_blocking && <span className="text-rose-400" title="Bloquant">⚠</span>}
                       {m.name}
                     </div>
                   </td>
-                  <td className="px-4 py-3 font-mono text-slate-600 whitespace-nowrap">
+                  <td className="px-4 py-3 font-mono text-zinc-600 whitespace-nowrap">
                     {m.target_date
                       ? new Date(m.target_date + "T00:00:00").toLocaleDateString("fr-FR", { day: "2-digit", month: "short", year: "numeric" })
-                      : <span className="text-gray-400">—</span>}
+                      : <span className="text-zinc-400">—</span>}
                   </td>
-                  <td className="px-4 py-3 text-slate-600">{m.owner_name}</td>
+                  <td className="px-4 py-3 text-zinc-600">{m.owner_name}</td>
                   <td className="px-4 py-3">
-                    <span className={`inline-flex items-center px-2 py-0.5 rounded text-[10px] font-semibold border
+                    <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-semibold border
                       ${m.status === "done" || m.status === "completed" ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                         : m.status === "in_progress" ? "bg-blue-50 text-blue-700 border-blue-200"
-                        : "bg-gray-50 text-gray-600 border-gray-200"}`}>
+                        : "bg-zinc-50 text-zinc-600 border-zinc-200"}`}>
                       {m.status === "in_progress" ? "En cours"
                         : m.status === "done" || m.status === "completed" ? "Terminé"
                         : m.status === "planned" ? "Planifié"
@@ -300,7 +300,7 @@ export default function Conformite() {
               ))}
             </tbody>
           </table>
-          <div className="px-4 py-2 text-[10px] text-slate-400 border-t border-gray-100">
+          <div className="px-4 py-2 text-[10px] text-zinc-400 border-t border-zinc-100">
             {sorted.length} jalon(s) affiché(s)
           </div>
         </div>

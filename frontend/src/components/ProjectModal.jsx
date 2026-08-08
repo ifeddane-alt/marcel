@@ -24,9 +24,9 @@ const EMPTY = {
 function Field({ label, required, error, hint, children }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-slate-600 mb-1">
+      <label className="block text-xs font-semibold text-zinc-600 mb-1">
         {label}{required && <span className="text-rose-500 ml-0.5">*</span>}
-        {hint && <span className="text-slate-400 font-normal ml-1">({hint})</span>}
+        {hint && <span className="text-zinc-400 font-normal ml-1">({hint})</span>}
       </label>
       {children}
       {error && <p className="text-[11px] text-rose-500 mt-0.5">{error}</p>}
@@ -34,7 +34,7 @@ function Field({ label, required, error, hint, children }) {
   );
 }
 
-const INPUT_CLS = "w-full text-sm border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
 
 export default function ProjectModal({ isOpen, onClose, project, resources = [], programs = [], onSaved }) {
   const { config } = useTenantConfig();
@@ -192,7 +192,7 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
     <Modal isOpen={isOpen} onClose={onClose} title={project ? "Modifier le projet" : "Nouveau projet"} size="lg">
       <form onSubmit={handleSubmit} className="space-y-4" data-testid="project-form">
         {apiError && (
-          <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded px-3 py-2">{apiError}</div>
+          <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{apiError}</div>
         )}
 
         {/* Nom + Code */}
@@ -201,7 +201,7 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
             <input data-testid="project-form-name" className={INPUT_CLS} value={form.name} onChange={set("name")} placeholder="Ex : Projet Phoenix" />
           </Field>
           <Field label="Code projet" hint="généré automatiquement">
-            <input data-testid="project-form-code" className={`${INPUT_CLS} bg-slate-50 text-slate-500 font-mono cursor-not-allowed`}
+            <input data-testid="project-form-code" className={`${INPUT_CLS} bg-zinc-50 text-zinc-500 font-mono cursor-not-allowed`}
               value={project ? (project.code || "—") : (nextCode || "…")} readOnly disabled />
           </Field>
         </div>
@@ -251,8 +251,8 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
         </div>
 
         {/* Dates */}
-        <div className="border-t border-gray-100 pt-3">
-          <div className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-2">Calendrier</div>
+        <div className="border-t border-zinc-100 pt-3">
+          <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mb-2">Calendrier</div>
           <div className="grid grid-cols-3 gap-3">
             <Field label="Début prévu" required error={errors.start_date}>
               <input data-testid="project-form-start" type="date" className={INPUT_CLS} value={form.start_date} onChange={set("start_date")} />
@@ -272,15 +272,15 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
         </div>
 
         {/* Budget CAPEX / OPEX */}
-        <div className="border-t border-gray-100 pt-3">
+        <div className="border-t border-zinc-100 pt-3">
           <div className="flex items-center justify-between mb-2">
-            <div className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">Budget CAPEX / OPEX</div>
+            <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Budget CAPEX / OPEX</div>
             {totalKEur > 0 && (
-              <div className="flex items-center gap-1.5 text-xs text-slate-500 font-mono-data">
-                Total budget : <span className="font-bold text-[#0052CC]">{totalKEur.toLocaleString("fr-FR")} K€</span>
+              <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-mono-data">
+                Total budget : <span className="font-bold text-blue-600">{totalKEur.toLocaleString("fr-FR")} K€</span>
                 <span className="relative group cursor-help">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-slate-200 text-slate-500 text-[10px] font-bold">?</span>
-                  <span className="absolute right-0 bottom-full mb-2 w-64 p-2 bg-slate-800 text-white text-[11px] rounded shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 leading-relaxed">
+                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-zinc-200 text-zinc-500 text-[10px] font-bold">?</span>
+                  <span className="absolute right-0 bottom-full mb-2 w-64 p-2 bg-zinc-800 text-white text-[11px] rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 leading-relaxed">
                     L'EAC initial est égal au budget total (CAPEX + OPEX). Utilisez le bouton "Réviser l'EAC" sur le détail du projet pour enregistrer une révision avec historique.
                   </span>
                 </span>
@@ -289,7 +289,7 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div className="bg-blue-50/40 border border-blue-100 rounded-lg p-3 space-y-2">
-              <div className="text-[10px] font-bold uppercase tracking-wide text-[#0052CC]">CAPEX</div>
+              <div className="text-[10px] font-bold uppercase tracking-wide text-blue-600">CAPEX</div>
               <Field label="Prévu" required error={errors.capex_planned} hint="K€">
                 <input data-testid="project-form-capex-planned" type="number" className={INPUT_CLS} value={form.capex_planned} onChange={set("capex_planned")} placeholder="Ex : 1260" min="0" />
               </Field>
@@ -310,8 +310,8 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
         </div>
 
         {/* JH */}
-        <div className="border-t border-gray-100 pt-3">
-          <div className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold mb-2">Charges (JH)</div>
+        <div className="border-t border-zinc-100 pt-3">
+          <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mb-2">Charges (JH)</div>
           <div className="grid grid-cols-2 gap-3">
             <Field label="JH prévus" required error={errors.jh_planned}>
               <input data-testid="project-form-jh" type="number" className={INPUT_CLS} value={form.jh_planned} onChange={set("jh_planned")} placeholder="Ex : 1000" min="0" />
@@ -324,12 +324,12 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
 
         {/* Template (création uniquement) */}
         {!project && selectedTemplate && (
-          <div className="border-t border-gray-100 pt-3">
+          <div className="border-t border-zinc-100 pt-3">
             <button
               type="button"
               data-testid="template-toggle"
               onClick={() => setShowTemplate(v => !v)}
-              className="flex items-center gap-2 w-full text-left text-sm font-semibold text-slate-700 hover:text-[#0052CC] transition-colors"
+              className="flex items-center gap-2 w-full text-left text-sm font-semibold text-zinc-700 hover:text-blue-600 transition-colors"
             >
               <Layers size={15} />
               <span>Pré-charger depuis le template {selectedTemplate.name}</span>
@@ -337,7 +337,7 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
             </button>
 
             {showTemplate && (
-              <div className="mt-3 space-y-2 bg-slate-50 rounded-lg p-3 border border-slate-200">
+              <div className="mt-3 space-y-2 bg-zinc-50 rounded-lg p-3 border border-zinc-200">
                 {methodTemplates.length > 1 && (
                   <Field label="Template à appliquer">
                     <select
@@ -354,12 +354,12 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
                     </select>
                   </Field>
                 )}
-                <p className="text-xs text-slate-500 mb-2">Sélectionnez les phases à pré-charger :</p>
+                <p className="text-xs text-zinc-500 mb-2">Sélectionnez les phases à pré-charger :</p>
                 {selectedTemplate.phases.map(phase => (
                   <label
                     key={phase.name}
                     data-testid={`template-phase-${phase.name}`}
-                    className="flex items-start gap-2 cursor-pointer hover:bg-white rounded p-2 transition-colors"
+                    className="flex items-start gap-2 cursor-pointer hover:bg-white rounded-lg p-2 transition-colors"
                   >
                     <input
                       type="checkbox"
@@ -371,11 +371,11 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
                           setSelectedPhases(prev => prev.filter(n => n !== phase.name));
                         }
                       }}
-                      className="mt-0.5 accent-[#0052CC]"
+                      className="mt-0.5 accent-[#2563eb]"
                     />
                     <div>
-                      <span className="text-sm font-medium text-slate-700">{phase.name}</span>
-                      <span className="text-xs text-slate-400 ml-2">
+                      <span className="text-sm font-medium text-zinc-700">{phase.name}</span>
+                      <span className="text-xs text-zinc-400 ml-2">
                         {phase.milestones?.length || 0} jalons · {phase.tasks?.length || 0} tâches
                       </span>
                     </div>
@@ -386,15 +386,15 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
           </div>
         )}
 
-        <div className="flex items-center justify-end gap-3 pt-2 border-t border-gray-100">
-          <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-slate-600 hover:text-slate-800 border border-gray-200 rounded hover:bg-gray-50 transition-colors">
+        <div className="flex items-center justify-end gap-3 pt-2 border-t border-zinc-100">
+          <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 hover:text-zinc-800 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">
             Annuler
           </button>
           <button
             type="submit"
             disabled={saving}
             data-testid="project-form-submit"
-            className="flex items-center gap-2 px-5 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
           >
             {saving && <Loader2 size={14} className="animate-spin" />}
             {project ? "Enregistrer" : (showTemplate && selectedTemplate ? "Créer + Appliquer le template" : "Créer le projet")}

@@ -10,7 +10,7 @@ import { useTenantConfig } from "@/contexts/TenantConfigContext";
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
-const INPUT_CLS = "w-full text-sm border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
 
 const TOGGLEABLE_MODULES = [
   { id: "safe",       label: "Trains SAFe",               desc: "Gestion des Trains SAFe, PIs, Sprints, Capabilities, OKRs" },
@@ -70,12 +70,12 @@ const MAROC_2026 = [
 
 function SaveBar({ onSave, saving, dirty, success }) {
   return (
-    <div className={`flex items-center gap-3 mt-6 pt-4 border-t border-gray-200 transition-opacity ${dirty ? "opacity-100" : "opacity-50 pointer-events-none"}`}>
+    <div className={`flex items-center gap-3 mt-6 pt-4 border-t border-zinc-200 transition-opacity ${dirty ? "opacity-100" : "opacity-50 pointer-events-none"}`}>
       <button
         onClick={onSave}
         disabled={saving || !dirty}
         data-testid="admin-config-save-btn"
-        className="flex items-center gap-2 px-5 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] disabled:opacity-50"
+        className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50"
       >
         {saving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
         {saving ? "Sauvegarde…" : "Enregistrer"}
@@ -124,24 +124,24 @@ function ModulesSection({ config, onSave }) {
               key={mod.id}
               data-testid={`module-toggle-${mod.id}`}
               className={`flex items-center gap-4 p-4 rounded-lg border transition-all cursor-pointer ${
-                isOn ? "border-[#0052CC]/30 bg-blue-50/40" : "border-gray-200 bg-gray-50/50 opacity-60"
+                isOn ? "border-blue-600/30 bg-blue-50/40" : "border-zinc-200 bg-zinc-50/50 opacity-60"
               }`}
               onClick={() => toggle(mod.id)}
             >
               <button
-                className="flex-shrink-0 text-[#0052CC] transition-colors"
+                className="flex-shrink-0 text-blue-600 transition-colors"
                 aria-label={`Toggle ${mod.label}`}
               >
                 {isOn
-                  ? <ToggleRight size={28} className="text-[#0052CC]" />
-                  : <ToggleLeft size={28} className="text-slate-400" />
+                  ? <ToggleRight size={28} className="text-blue-600" />
+                  : <ToggleLeft size={28} className="text-zinc-400" />
                 }
               </button>
               <div className="flex-1 min-w-0">
-                <div className="font-semibold text-sm text-slate-800">{mod.label}</div>
-                <div className="text-[11px] text-slate-400 mt-0.5">{mod.desc}</div>
+                <div className="font-semibold text-sm text-zinc-800">{mod.label}</div>
+                <div className="text-[11px] text-zinc-400 mt-0.5">{mod.desc}</div>
               </div>
-              <span className={`text-[11px] font-bold px-2 py-0.5 rounded ${isOn ? "bg-emerald-100 text-emerald-700" : "bg-gray-200 text-gray-500"}`}>
+              <span className={`text-[11px] font-bold px-2 py-0.5 rounded-lg ${isOn ? "bg-emerald-100 text-emerald-700" : "bg-zinc-200 text-zinc-500"}`}>
                 {isOn ? "Activé" : "Désactivé"}
               </span>
             </div>
@@ -197,21 +197,21 @@ function WorkflowsSection({ config, onSave }) {
   return (
     <div className="space-y-6" data-testid="section-workflows">
       {/* Timesheet */}
-      <div className="bg-white border border-gray-200 rounded-lg p-5">
-        <div className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
-          <Workflow size={15} className="text-[#0052CC]" /> Workflow Timesheets
+      <div className="bg-white border border-zinc-200 rounded-lg p-5">
+        <div className="font-semibold text-zinc-800 mb-4 flex items-center gap-2">
+          <Workflow size={15} className="text-blue-600" /> Workflow Timesheets
         </div>
         <div className="space-y-4">
           <div>
-            <label className="text-xs font-semibold text-slate-600 block mb-2">
+            <label className="text-xs font-semibold text-zinc-600 block mb-2">
               Nombre d'étapes de validation
             </label>
             <div className="flex gap-3">
               {[2, 3].map(n => (
                 <label key={n} className="flex items-center gap-2 cursor-pointer">
                   <input type="radio" value={n} checked={steps === n} onChange={() => { setSteps(n); setSuccess(false); }}
-                    className="accent-[#0052CC]" data-testid={`ts-steps-${n}`} />
-                  <span className="text-sm text-slate-700">
+                    className="accent-[#2563eb]" data-testid={`ts-steps-${n}`} />
+                  <span className="text-sm text-zinc-700">
                     {n === 2 ? "2 étapes (Valideur → Validé)" : "3 étapes (Valideur → CP → Validé)"}
                   </span>
                 </label>
@@ -221,7 +221,7 @@ function WorkflowsSection({ config, onSave }) {
           {steps === 3 && (
             <div className="grid grid-cols-2 gap-4">
               <div>
-                <label className="text-xs font-semibold text-slate-600 block mb-1">
+                <label className="text-xs font-semibold text-zinc-600 block mb-1">
                   Timeout CP (jours ouvrés)
                 </label>
                 <input type="number" min="1" max="30" value={cpTimeout}
@@ -229,7 +229,7 @@ function WorkflowsSection({ config, onSave }) {
                   className={INPUT_CLS} data-testid="ts-cp-timeout" />
               </div>
               <div>
-                <label className="text-xs font-semibold text-slate-600 block mb-2">
+                <label className="text-xs font-semibold text-zinc-600 block mb-2">
                   Auto-validation si timeout
                 </label>
                 <div
@@ -237,10 +237,10 @@ function WorkflowsSection({ config, onSave }) {
                   onClick={() => { setAutoValidate(a => !a); setSuccess(false); }}
                 >
                   {autoValidate
-                    ? <ToggleRight size={24} className="text-[#0052CC]" />
-                    : <ToggleLeft size={24} className="text-slate-400" />
+                    ? <ToggleRight size={24} className="text-blue-600" />
+                    : <ToggleLeft size={24} className="text-zinc-400" />
                   }
-                  <span className="text-sm text-slate-700" data-testid="ts-auto-validate">
+                  <span className="text-sm text-zinc-700" data-testid="ts-auto-validate">
                     {autoValidate ? "Activé" : "Désactivé"}
                   </span>
                 </div>
@@ -251,23 +251,23 @@ function WorkflowsSection({ config, onSave }) {
       </div>
 
       {/* Demandes */}
-      <div className="bg-white border border-gray-200 rounded-lg p-5">
-        <div className="font-semibold text-slate-800 mb-4 flex items-center gap-2">
-          <Workflow size={15} className="text-[#0052CC]" /> Workflow Demandes
+      <div className="bg-white border border-zinc-200 rounded-lg p-5">
+        <div className="font-semibold text-zinc-800 mb-4 flex items-center gap-2">
+          <Workflow size={15} className="text-blue-600" /> Workflow Demandes
         </div>
-        <label className="text-xs font-semibold text-slate-600 block mb-3">
+        <label className="text-xs font-semibold text-zinc-600 block mb-3">
           Étapes actives du workflow
         </label>
         <div className="space-y-2">
           {DEMAND_STATUSES_ALL.map(s => (
             <label key={s.value}
-              className="flex items-center gap-3 p-2 rounded hover:bg-gray-50 cursor-pointer"
+              className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-50 cursor-pointer"
               data-testid={`demand-status-${s.value}`}
             >
-              <input type="checkbox" className="accent-[#0052CC]"
+              <input type="checkbox" className="accent-[#2563eb]"
                 checked={activeStatuses.includes(s.value)}
                 onChange={() => toggleStatus(s.value)} />
-              <span className="text-sm text-slate-700">{s.label}</span>
+              <span className="text-sm text-zinc-700">{s.label}</span>
             </label>
           ))}
         </div>
@@ -298,15 +298,15 @@ function EnumEditor({ items, onChange, allowDelete = true }) {
         <div key={i} className="flex items-center gap-2 group" data-testid={`enum-item-${i}`}>
           <div className="flex flex-col gap-0.5">
             <button onClick={() => move(i, -1)} disabled={i === 0}
-              className="p-0.5 text-slate-300 hover:text-slate-600 disabled:opacity-20 transition-colors">
+              className="p-0.5 text-zinc-300 hover:text-zinc-600 disabled:opacity-20 transition-colors">
               <ChevronUp size={11} />
             </button>
             <button onClick={() => move(i, 1)} disabled={i === items.length - 1}
-              className="p-0.5 text-slate-300 hover:text-slate-600 disabled:opacity-20 transition-colors">
+              className="p-0.5 text-zinc-300 hover:text-zinc-600 disabled:opacity-20 transition-colors">
               <ChevronDown size={11} />
             </button>
           </div>
-          <GripVertical size={12} className="text-slate-200 flex-shrink-0" />
+          <GripVertical size={12} className="text-zinc-200 flex-shrink-0" />
           <input
             className={`${INPUT_CLS} flex-1`}
             placeholder="Label affiché…"
@@ -323,9 +323,9 @@ function EnumEditor({ items, onChange, allowDelete = true }) {
             title={item.is_system ? "Valeur système non modifiable" : ""}
           />
           {item.is_system
-            ? <span className="text-[10px] bg-slate-100 text-slate-500 px-2 py-0.5 rounded font-semibold border border-slate-200 flex-shrink-0">SYS</span>
+            ? <span className="text-[10px] bg-zinc-100 text-zinc-500 px-2 py-0.5 rounded-lg font-semibold border border-zinc-200 flex-shrink-0">SYS</span>
             : allowDelete && (
-              <button onClick={() => remove(i)} className="p-1 text-slate-300 hover:text-rose-500 transition-colors" data-testid={`enum-delete-${i}`}>
+              <button onClick={() => remove(i)} className="p-1 text-zinc-300 hover:text-rose-500 transition-colors" data-testid={`enum-delete-${i}`}>
                 <Trash2 size={13} />
               </button>
             )
@@ -334,7 +334,7 @@ function EnumEditor({ items, onChange, allowDelete = true }) {
       ))}
       <button
         onClick={add}
-        className="flex items-center gap-1.5 text-[11px] text-[#0052CC] hover:text-[#0047B3] font-semibold mt-2"
+        className="flex items-center gap-1.5 text-[11px] text-blue-600 hover:text-blue-700 font-semibold mt-2"
         data-testid="enum-add-btn"
       >
         <Plus size={11} /> Ajouter une valeur
@@ -377,7 +377,7 @@ function EnumsSection({ config, onSave }) {
 
   return (
     <div data-testid="section-enums">
-      <div className="flex gap-1 mb-4 border-b border-gray-200">
+      <div className="flex gap-1 mb-4 border-b border-zinc-200">
         {ENUM_SECTIONS.map(s => (
           <button
             key={s.key}
@@ -385,8 +385,8 @@ function EnumsSection({ config, onSave }) {
             data-testid={`enum-tab-${s.key}`}
             className={`px-3 py-2 text-sm font-semibold border-b-2 transition-colors ${
               activeEnum === s.key
-                ? "border-[#0052CC] text-[#0052CC]"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent text-zinc-500 hover:text-zinc-700"
             }`}
           >
             {s.label}
@@ -395,11 +395,11 @@ function EnumsSection({ config, onSave }) {
       </div>
 
       {ENUM_SECTIONS.filter(s => s.key === activeEnum).map(s => (
-        <div key={s.key} className="bg-white border border-gray-200 rounded-lg p-5">
+        <div key={s.key} className="bg-white border border-zinc-200 rounded-lg p-5">
           <div className="flex items-start gap-2 mb-4">
             <div>
-              <div className="font-semibold text-slate-800 text-sm">{s.label}</div>
-              <div className="text-[11px] text-slate-400 flex items-center gap-1 mt-0.5">
+              <div className="font-semibold text-zinc-800 text-sm">{s.label}</div>
+              <div className="text-[11px] text-zinc-400 flex items-center gap-1 mt-0.5">
                 <Info size={10} /> {s.info}
               </div>
             </div>
@@ -458,45 +458,45 @@ function HolidaysSection({ config, onSave }) {
         <button
           onClick={() => loadPreset("FR")}
           data-testid="load-holidays-fr"
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded text-sm text-blue-700 font-semibold hover:bg-blue-100"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-50 border border-blue-200 rounded-lg text-sm text-blue-700 font-semibold hover:bg-blue-100"
         >
           <Calendar size={13} /> Charger fériés France 2026
         </button>
         <button
           onClick={() => loadPreset("MA")}
           data-testid="load-holidays-ma"
-          className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded text-sm text-green-700 font-semibold hover:bg-green-100"
+          className="flex items-center gap-1.5 px-3 py-1.5 bg-green-50 border border-green-200 rounded-lg text-sm text-green-700 font-semibold hover:bg-green-100"
         >
           <Calendar size={13} /> Charger fériés Maroc 2026
         </button>
         <button
           onClick={addHoliday}
           data-testid="add-holiday-btn"
-          className="flex items-center gap-1.5 px-3 py-1.5 border border-dashed border-gray-300 rounded text-sm text-slate-600 hover:border-[#0052CC] hover:text-[#0052CC]"
+          className="flex items-center gap-1.5 px-3 py-1.5 border border-dashed border-zinc-300 rounded-lg text-sm text-zinc-600 hover:border-blue-600 hover:text-blue-600"
         >
           <Plus size={13} /> Ajouter un jour férié
         </button>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg overflow-hidden">
+      <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden">
         <table className="w-full text-sm" data-testid="holidays-table">
           <thead>
-            <tr className="bg-gray-50 border-b border-gray-200">
-              <th className="px-4 py-2.5 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Date</th>
-              <th className="px-4 py-2.5 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Libellé</th>
-              <th className="px-4 py-2.5 text-left text-[11px] font-bold text-slate-400 uppercase tracking-widest">Pays</th>
+            <tr className="bg-zinc-50 border-b border-zinc-200">
+              <th className="px-4 py-2.5 text-left text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Date</th>
+              <th className="px-4 py-2.5 text-left text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Libellé</th>
+              <th className="px-4 py-2.5 text-left text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Pays</th>
               <th className="w-10" />
             </tr>
           </thead>
-          <tbody className="divide-y divide-gray-100">
+          <tbody className="divide-y divide-zinc-100">
             {holidays.length === 0 ? (
               <tr>
-                <td colSpan={4} className="px-4 py-8 text-center text-slate-400 text-sm">
+                <td colSpan={4} className="px-4 py-8 text-center text-zinc-400 text-sm">
                   Aucun jour férié configuré — chargez un pays ou ajoutez manuellement
                 </td>
               </tr>
             ) : holidays.map((h, i) => (
-              <tr key={i} className="hover:bg-gray-50/70" data-testid={`holiday-row-${i}`}>
+              <tr key={i} className="hover:bg-zinc-50/70" data-testid={`holiday-row-${i}`}>
                 <td className="px-3 py-1.5">
                   <input type="date" className={INPUT_CLS + " text-xs"} value={h.date}
                     onChange={e => set(i, "date", e.target.value)} />
@@ -516,7 +516,7 @@ function HolidaysSection({ config, onSave }) {
                   </select>
                 </td>
                 <td className="px-3 py-1.5 text-center">
-                  <button onClick={() => remove(i)} className="p-1 text-slate-300 hover:text-rose-500"
+                  <button onClick={() => remove(i)} className="p-1 text-zinc-300 hover:text-rose-500"
                     data-testid={`holiday-delete-${i}`}>
                     <Trash2 size={13} />
                   </button>
@@ -526,7 +526,7 @@ function HolidaysSection({ config, onSave }) {
           </tbody>
         </table>
         {holidays.length > 0 && (
-          <div className="px-4 py-2 bg-gray-50 border-t border-gray-200 text-[11px] text-slate-400">
+          <div className="px-4 py-2 bg-zinc-50 border-t border-zinc-200 text-[11px] text-zinc-400">
             {holidays.length} jour{holidays.length > 1 ? "s" : ""} férié{holidays.length > 1 ? "s" : ""} configuré{holidays.length > 1 ? "s" : ""}
             {Object.entries(grouped).map(([country, list]) => ` · ${list.length} ${country}`).join("")}
           </div>
@@ -595,7 +595,7 @@ function AlertsSection({ config, onSave }) {
     },
     {
       group: "Divers",
-      color: "text-slate-600",
+      color: "text-zinc-600",
       items: [
         { key: "tjm_variance_pct",   label: "Écart TJM maximum",     unit: "%",   min: 0, max: 100, step: 1 },
         { key: "regulatory_days",    label: "Alerte réglementaire",   unit: "jours", min: 1, max: 365, step: 1 },
@@ -607,12 +607,12 @@ function AlertsSection({ config, onSave }) {
   return (
     <div className="space-y-4" data-testid="section-alerts">
       {FIELDS.map(group => (
-        <div key={group.group} className="bg-white border border-gray-200 rounded-lg p-5">
+        <div key={group.group} className="bg-white border border-zinc-200 rounded-lg p-5">
           <div className={`font-semibold text-sm mb-4 ${group.color}`}>{group.group}</div>
           <div className="grid grid-cols-2 gap-4">
             {group.items.map(f => (
               <div key={f.key}>
-                <label className="text-xs font-semibold text-slate-600 block mb-1">
+                <label className="text-xs font-semibold text-zinc-600 block mb-1">
                   {f.label}
                 </label>
                 <div className="flex items-center gap-2">
@@ -623,7 +623,7 @@ function AlertsSection({ config, onSave }) {
                     className={INPUT_CLS + " max-w-24 font-mono text-center"}
                     data-testid={`threshold-${f.key}`}
                   />
-                  <span className="text-xs text-slate-500">{f.unit}</span>
+                  <span className="text-xs text-zinc-500">{f.unit}</span>
                 </div>
               </div>
             ))}
@@ -694,9 +694,9 @@ function BrandingSection({ config, onSave }) {
         style={{ background: `linear-gradient(135deg, ${form.primary_color} 0%, ${form.secondary_color} 100%)` }}
       >
         {form.logo_base64 ? (
-          <img src={form.logo_base64} alt="Logo" className="h-10 w-auto object-contain bg-white/10 rounded p-1" />
+          <img src={form.logo_base64} alt="Logo" className="h-10 w-auto object-contain bg-white/10 rounded-lg p-1" />
         ) : (
-          <div className="w-12 h-10 bg-white/10 rounded flex items-center justify-center text-white/50 text-[10px] font-bold border border-white/20">
+          <div className="w-12 h-10 bg-white/10 rounded-lg flex items-center justify-center text-white/50 text-[10px] font-bold border border-white/20">
             LOGO
           </div>
         )}
@@ -708,15 +708,15 @@ function BrandingSection({ config, onSave }) {
         </div>
       </div>
 
-      <div className="bg-white border border-gray-200 rounded-lg p-5">
+      <div className="bg-white border border-zinc-200 rounded-lg p-5">
         <div className="grid grid-cols-2 gap-4">
           <div>
-            <label className="text-xs font-semibold text-slate-600 block mb-1">Nom entreprise</label>
+            <label className="text-xs font-semibold text-zinc-600 block mb-1">Nom entreprise</label>
             <input className={INPUT_CLS} value={form.company_name} onChange={set("company_name")}
               placeholder="Groupe Altair Industries" data-testid="branding-company-name" />
           </div>
           <div>
-            <label className="text-xs font-semibold text-slate-600 block mb-1">Police PPT</label>
+            <label className="text-xs font-semibold text-zinc-600 block mb-1">Police PPT</label>
             <select className={INPUT_CLS} value={form.font} onChange={set("font")} data-testid="branding-font">
               {FONTS.map(f => <option key={f} value={f}>{f}</option>)}
             </select>
@@ -728,10 +728,10 @@ function BrandingSection({ config, onSave }) {
             { key: "accent_color",    label: "Couleur accent" },
           ].map(({ key, label }) => (
             <div key={key}>
-              <label className="text-xs font-semibold text-slate-600 block mb-1">{label}</label>
+              <label className="text-xs font-semibold text-zinc-600 block mb-1">{label}</label>
               <div className="flex items-center gap-2">
                 <input type="color" value={form[key]} onChange={set(key)}
-                  className="w-10 h-9 rounded border border-gray-200 cursor-pointer p-0.5"
+                  className="w-10 h-9 rounded-lg border border-zinc-200 cursor-pointer p-0.5"
                   data-testid={`branding-${key}`} />
                 <input className={INPUT_CLS + " font-mono text-xs flex-1"} value={form[key]}
                   onChange={set(key)} placeholder="#000000" maxLength={7} />
@@ -740,11 +740,11 @@ function BrandingSection({ config, onSave }) {
           ))}
 
           <div>
-            <label className="text-xs font-semibold text-slate-600 block mb-1">Logo (PNG/SVG)</label>
-            <label className="flex items-center gap-2 border border-dashed border-gray-300 rounded px-3 py-2 cursor-pointer hover:border-[#0052CC] hover:bg-blue-50/30 transition-colors"
+            <label className="text-xs font-semibold text-zinc-600 block mb-1">Logo (PNG/SVG)</label>
+            <label className="flex items-center gap-2 border border-dashed border-zinc-300 rounded-lg px-3 py-2 cursor-pointer hover:border-blue-600 hover:bg-blue-50/30 transition-colors"
               data-testid="branding-logo-upload">
-              <Upload size={14} className="text-slate-400" />
-              <span className="text-sm text-slate-500 truncate">
+              <Upload size={14} className="text-zinc-400" />
+              <span className="text-sm text-zinc-500 truncate">
                 {logoFile || form.logo_base64 ? (logoFile || "Logo chargé") : "Choisir un fichier…"}
               </span>
               <input type="file" accept="image/png,image/svg+xml,image/jpeg" onChange={handleLogoChange} className="hidden" />
@@ -800,8 +800,8 @@ function WebhooksSection({ config, onSave }) {
     <div className="space-y-6" data-testid="section-webhooks">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="font-semibold text-slate-800">Webhook Projet</h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <h2 className="font-semibold text-zinc-800">Webhook Projet</h2>
+          <p className="text-xs text-zinc-500 mt-0.5">
             MARCEL envoie un POST JSON à l'URL configurée lors des événements sélectionnés.
             Utile pour déclencher un refresh Power BI, notifier Slack/Teams, etc.
           </p>
@@ -810,7 +810,7 @@ function WebhooksSection({ config, onSave }) {
           data-testid="webhooks-save-btn"
           onClick={save}
           disabled={saving}
-          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-[#0052CC] text-white rounded-lg hover:bg-[#0040a6] transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
         >
           {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />}
           Sauvegarder
@@ -825,10 +825,10 @@ function WebhooksSection({ config, onSave }) {
       )}
 
       {/* Activation */}
-      <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl">
+      <div className="flex items-center justify-between p-4 bg-zinc-50 border border-zinc-200 rounded-xl">
         <div>
-          <p className="text-sm font-medium text-slate-700">Activer le webhook</p>
-          <p className="text-xs text-slate-500">Les requêtes ne seront envoyées que si cette option est activée.</p>
+          <p className="text-sm font-medium text-zinc-700">Activer le webhook</p>
+          <p className="text-xs text-zinc-500">Les requêtes ne seront envoyées que si cette option est activée.</p>
         </div>
         <button
           data-testid="webhook-toggle"
@@ -836,15 +836,15 @@ function WebhooksSection({ config, onSave }) {
           className="focus:outline-none"
         >
           {form.enabled
-            ? <ToggleRight size={32} className="text-[#0052CC]" />
-            : <ToggleLeft size={32} className="text-slate-400" />
+            ? <ToggleRight size={32} className="text-blue-600" />
+            : <ToggleLeft size={32} className="text-zinc-400" />
           }
         </button>
       </div>
 
       {/* URL */}
       <div>
-        <label className="block text-xs font-semibold text-slate-600 mb-1">URL de destination</label>
+        <label className="block text-xs font-semibold text-zinc-600 mb-1">URL de destination</label>
         <input
           data-testid="webhook-url-input"
           type="url"
@@ -853,12 +853,12 @@ function WebhooksSection({ config, onSave }) {
           placeholder="https://hooks.powerbi.com/... ou https://hooks.slack.com/..."
           className={INPUT_CLS}
         />
-        <p className="text-xs text-slate-400 mt-1">Doit être une URL HTTPS accessible publiquement.</p>
+        <p className="text-xs text-zinc-400 mt-1">Doit être une URL HTTPS accessible publiquement.</p>
       </div>
 
       {/* Événements */}
       <div>
-        <label className="block text-xs font-semibold text-slate-600 mb-2">Événements déclencheurs</label>
+        <label className="block text-xs font-semibold text-zinc-600 mb-2">Événements déclencheurs</label>
         <div className="space-y-2">
           {ALL_EVENTS.map(ev => (
             <label key={ev.value} className="flex items-center gap-3 cursor-pointer" data-testid={`webhook-event-${ev.value}`}>
@@ -866,10 +866,10 @@ function WebhooksSection({ config, onSave }) {
                 type="checkbox"
                 checked={form.events.includes(ev.value)}
                 onChange={() => toggleEvent(ev.value)}
-                className="w-4 h-4 accent-[#0052CC]"
+                className="w-4 h-4 accent-[#2563eb]"
               />
-              <span className="text-sm text-slate-700">{ev.label}</span>
-              <code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{ev.value}</code>
+              <span className="text-sm text-zinc-700">{ev.label}</span>
+              <code className="text-xs bg-zinc-100 px-1.5 py-0.5 rounded-lg text-zinc-500">{ev.value}</code>
             </label>
           ))}
         </div>
@@ -877,7 +877,7 @@ function WebhooksSection({ config, onSave }) {
 
       {/* Secret HMAC */}
       <div>
-        <label className="block text-xs font-semibold text-slate-600 mb-1">Secret HMAC <span className="text-slate-400 font-normal">(optionnel)</span></label>
+        <label className="block text-xs font-semibold text-zinc-600 mb-1">Secret HMAC <span className="text-zinc-400 font-normal">(optionnel)</span></label>
         <input
           data-testid="webhook-secret-input"
           type="password"
@@ -886,14 +886,14 @@ function WebhooksSection({ config, onSave }) {
           placeholder="Clé secrète pour valider les requêtes reçues"
           className={INPUT_CLS}
         />
-        <p className="text-xs text-slate-400 mt-1">
+        <p className="text-xs text-zinc-400 mt-1">
           Si renseigné, le header <code>X-MARCEL-Signature</code> sera ajouté à chaque requête pour validation HMAC.
         </p>
       </div>
 
       {/* Payload example */}
-      <div className="bg-slate-800 rounded-xl p-4">
-        <p className="text-xs text-slate-400 mb-2 font-mono">Exemple de payload :</p>
+      <div className="bg-zinc-800 rounded-xl p-4">
+        <p className="text-xs text-zinc-400 mb-2 font-mono">Exemple de payload :</p>
         <pre className="text-xs text-emerald-400 font-mono overflow-x-auto">{JSON.stringify({
           event: "project.updated",
           timestamp: "2026-02-01T10:00:00Z",
@@ -954,20 +954,20 @@ function EmailAlertsSubSection({ config, onSave }) {
   };
 
   return (
-    <div className="border-t border-gray-200 pt-6 space-y-4" data-testid="section-email-alerts">
+    <div className="border-t border-zinc-200 pt-6 space-y-4" data-testid="section-email-alerts">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="font-semibold text-slate-800">Alertes Email</h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <h2 className="font-semibold text-zinc-800">Alertes Email</h2>
+          <p className="text-xs text-zinc-500 mt-0.5">
             Envoi automatique d'un email (via Resend) aux destinataires configurés lors des événements projet.
-            Nécessite la variable <code className="bg-slate-100 px-1 rounded">RESEND_API_KEY</code> côté serveur.
+            Nécessite la variable <code className="bg-zinc-100 px-1 rounded-lg">RESEND_API_KEY</code> côté serveur.
           </p>
         </div>
         <button
           data-testid="email-alerts-save-btn"
           onClick={save}
           disabled={saving}
-          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-[#0052CC] text-white rounded-lg hover:bg-[#0040a6] transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
         >
           {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />}
           Sauvegarder
@@ -981,10 +981,10 @@ function EmailAlertsSubSection({ config, onSave }) {
         </div>
       )}
 
-      <div className="flex items-center justify-between p-4 bg-slate-50 border border-slate-200 rounded-xl">
+      <div className="flex items-center justify-between p-4 bg-zinc-50 border border-zinc-200 rounded-xl">
         <div>
-          <p className="text-sm font-medium text-slate-700">Activer les alertes email</p>
-          <p className="text-xs text-slate-500">Aucun email ne sera envoyé si cette option est désactivée.</p>
+          <p className="text-sm font-medium text-zinc-700">Activer les alertes email</p>
+          <p className="text-xs text-zinc-500">Aucun email ne sera envoyé si cette option est désactivée.</p>
         </div>
         <button
           data-testid="email-alerts-toggle"
@@ -992,14 +992,14 @@ function EmailAlertsSubSection({ config, onSave }) {
           className="focus:outline-none"
         >
           {form.enabled
-            ? <ToggleRight size={32} className="text-[#0052CC]" />
-            : <ToggleLeft size={32} className="text-slate-400" />
+            ? <ToggleRight size={32} className="text-blue-600" />
+            : <ToggleLeft size={32} className="text-zinc-400" />
           }
         </button>
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-slate-600 mb-1">Destinataires (séparés par des virgules)</label>
+        <label className="block text-xs font-semibold text-zinc-600 mb-1">Destinataires (séparés par des virgules)</label>
         <input
           data-testid="email-alerts-recipients-input"
           type="text"
@@ -1011,7 +1011,7 @@ function EmailAlertsSubSection({ config, onSave }) {
       </div>
 
       <div>
-        <label className="block text-xs font-semibold text-slate-600 mb-2">Événements déclencheurs</label>
+        <label className="block text-xs font-semibold text-zinc-600 mb-2">Événements déclencheurs</label>
         <div className="space-y-2">
           {ALL_EVENTS.map(ev => (
             <label key={ev.value} className="flex items-center gap-3 cursor-pointer" data-testid={`email-alert-event-${ev.value}`}>
@@ -1019,10 +1019,10 @@ function EmailAlertsSubSection({ config, onSave }) {
                 type="checkbox"
                 checked={form.events.includes(ev.value)}
                 onChange={() => toggleEvent(ev.value)}
-                className="w-4 h-4 accent-[#0052CC]"
+                className="w-4 h-4 accent-[#2563eb]"
               />
-              <span className="text-sm text-slate-700">{ev.label}</span>
-              <code className="text-xs bg-slate-100 px-1.5 py-0.5 rounded text-slate-500">{ev.value}</code>
+              <span className="text-sm text-zinc-700">{ev.label}</span>
+              <code className="text-xs bg-zinc-100 px-1.5 py-0.5 rounded-lg text-zinc-500">{ev.value}</code>
             </label>
           ))}
         </div>
@@ -1080,7 +1080,7 @@ function SSOSection({ config, onSave }) {
 
   const Toggle = ({ on, onClick, testid }) => (
     <button data-testid={testid} onClick={onClick} className="focus:outline-none flex-shrink-0">
-      {on ? <ToggleRight size={30} className="text-[#0052CC]" /> : <ToggleLeft size={30} className="text-slate-400" />}
+      {on ? <ToggleRight size={30} className="text-blue-600" /> : <ToggleLeft size={30} className="text-zinc-400" />}
     </button>
   );
 
@@ -1088,8 +1088,8 @@ function SSOSection({ config, onSave }) {
     <div className="space-y-6" data-testid="section-sso">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="font-semibold text-slate-800">Single Sign-On (SSO)</h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <h2 className="font-semibold text-zinc-800">Single Sign-On (SSO)</h2>
+          <p className="text-xs text-zinc-500 mt-0.5">
             Connexion via Google, Microsoft Entra ID (OIDC) ou tout IdP SAML 2.0 (Okta, Keycloak, ADFS…).
           </p>
         </div>
@@ -1097,7 +1097,7 @@ function SSOSection({ config, onSave }) {
           data-testid="sso-save-btn"
           onClick={save}
           disabled={saving}
-          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-[#0052CC] text-white rounded-lg hover:bg-[#0040a6] transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
         >
           {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />}
           Sauvegarder
@@ -1112,67 +1112,67 @@ function SSOSection({ config, onSave }) {
       )}
 
       {/* Google */}
-      <div className="border border-gray-200 rounded-xl p-4 space-y-3" data-testid="sso-google-card">
+      <div className="border border-zinc-200 rounded-xl p-4 space-y-3" data-testid="sso-google-card">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold text-slate-700">Google (OIDC)</p>
-            <p className="text-xs text-slate-400">Google Cloud Console → Credentials → OAuth client ID (Web)</p>
+            <p className="text-sm font-semibold text-zinc-700">Google (OIDC)</p>
+            <p className="text-xs text-zinc-400">Google Cloud Console → Credentials → OAuth client ID (Web)</p>
           </div>
           <Toggle on={form.google.enabled} onClick={() => setProvider("google", "enabled", !form.google.enabled)} testid="sso-google-toggle" />
         </div>
         <input data-testid="sso-google-client-id" placeholder="Client ID" value={form.google.client_id} onChange={e => setProvider("google", "client_id", e.target.value)} className={INPUT_CLS} />
         <input data-testid="sso-google-client-secret" type="password" placeholder="Client Secret" value={form.google.client_secret} onChange={e => setProvider("google", "client_secret", e.target.value)} className={INPUT_CLS} />
-        <p className="text-[11px] text-slate-400">URI de redirection à déclarer : <code className="bg-slate-100 px-1 rounded">{origin}/api/auth/sso/callback/google</code></p>
+        <p className="text-[11px] text-zinc-400">URI de redirection à déclarer : <code className="bg-zinc-100 px-1 rounded-lg">{origin}/api/auth/sso/callback/google</code></p>
       </div>
 
       {/* Entra ID */}
-      <div className="border border-gray-200 rounded-xl p-4 space-y-3" data-testid="sso-entra-card">
+      <div className="border border-zinc-200 rounded-xl p-4 space-y-3" data-testid="sso-entra-card">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold text-slate-700">Microsoft Entra ID (OIDC)</p>
-            <p className="text-xs text-slate-400">Entra admin center → App registrations → New registration (Web)</p>
+            <p className="text-sm font-semibold text-zinc-700">Microsoft Entra ID (OIDC)</p>
+            <p className="text-xs text-zinc-400">Entra admin center → App registrations → New registration (Web)</p>
           </div>
           <Toggle on={form.entra.enabled} onClick={() => setProvider("entra", "enabled", !form.entra.enabled)} testid="sso-entra-toggle" />
         </div>
         <input data-testid="sso-entra-client-id" placeholder="Application (client) ID" value={form.entra.client_id} onChange={e => setProvider("entra", "client_id", e.target.value)} className={INPUT_CLS} />
         <input data-testid="sso-entra-client-secret" type="password" placeholder="Client Secret" value={form.entra.client_secret} onChange={e => setProvider("entra", "client_secret", e.target.value)} className={INPUT_CLS} />
         <input data-testid="sso-entra-ms-tenant" placeholder="Tenant ID Microsoft (ou 'organizations')" value={form.entra.ms_tenant} onChange={e => setProvider("entra", "ms_tenant", e.target.value)} className={INPUT_CLS} />
-        <p className="text-[11px] text-slate-400">URI de redirection à déclarer : <code className="bg-slate-100 px-1 rounded">{origin}/api/auth/sso/callback/entra</code></p>
+        <p className="text-[11px] text-zinc-400">URI de redirection à déclarer : <code className="bg-zinc-100 px-1 rounded-lg">{origin}/api/auth/sso/callback/entra</code></p>
       </div>
 
       {/* SAML */}
-      <div className="border border-gray-200 rounded-xl p-4 space-y-3" data-testid="sso-saml-card">
+      <div className="border border-zinc-200 rounded-xl p-4 space-y-3" data-testid="sso-saml-card">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold text-slate-700">SAML 2.0 (Okta, Keycloak, ADFS…)</p>
-            <p className="text-xs text-slate-400">Valeurs disponibles dans les métadonnées de votre IdP</p>
+            <p className="text-sm font-semibold text-zinc-700">SAML 2.0 (Okta, Keycloak, ADFS…)</p>
+            <p className="text-xs text-zinc-400">Valeurs disponibles dans les métadonnées de votre IdP</p>
           </div>
           <Toggle on={form.saml.enabled} onClick={() => setProvider("saml", "enabled", !form.saml.enabled)} testid="sso-saml-toggle" />
         </div>
         <input data-testid="sso-saml-entity-id" placeholder="IdP Entity ID (issuer)" value={form.saml.idp_entity_id} onChange={e => setProvider("saml", "idp_entity_id", e.target.value)} className={INPUT_CLS} />
         <input data-testid="sso-saml-sso-url" placeholder="URL SSO de l'IdP (HTTP-Redirect)" value={form.saml.sso_url} onChange={e => setProvider("saml", "sso_url", e.target.value)} className={INPUT_CLS} />
         <textarea data-testid="sso-saml-cert" rows={4} placeholder="Certificat X.509 de signature (PEM ou base64)" value={form.saml.x509_cert} onChange={e => setProvider("saml", "x509_cert", e.target.value)} className={`${INPUT_CLS} font-mono text-xs`} />
-        <p className="text-[11px] text-slate-400">
-          À déclarer côté IdP — ACS : <code className="bg-slate-100 px-1 rounded">{origin}/api/auth/sso/saml/acs/&lt;tenant_id&gt;</code>{" "}
-          · Entity ID / métadonnées SP : <code className="bg-slate-100 px-1 rounded">{origin}/api/auth/sso/saml/metadata/&lt;tenant_id&gt;</code>
+        <p className="text-[11px] text-zinc-400">
+          À déclarer côté IdP — ACS : <code className="bg-zinc-100 px-1 rounded-lg">{origin}/api/auth/sso/saml/acs/&lt;tenant_id&gt;</code>{" "}
+          · Entity ID / métadonnées SP : <code className="bg-zinc-100 px-1 rounded-lg">{origin}/api/auth/sso/saml/metadata/&lt;tenant_id&gt;</code>
         </p>
       </div>
 
       {/* Provisioning */}
-      <div className="border border-gray-200 rounded-xl p-4 space-y-3" data-testid="sso-provisioning-card">
+      <div className="border border-zinc-200 rounded-xl p-4 space-y-3" data-testid="sso-provisioning-card">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm font-semibold text-slate-700">Auto-provisioning</p>
-            <p className="text-xs text-slate-400">Créer automatiquement les utilisateurs inconnus à la première connexion SSO</p>
+            <p className="text-sm font-semibold text-zinc-700">Auto-provisioning</p>
+            <p className="text-xs text-zinc-400">Créer automatiquement les utilisateurs inconnus à la première connexion SSO</p>
           </div>
           <Toggle on={form.auto_provision} onClick={() => setForm(f => ({ ...f, auto_provision: !f.auto_provision }))} testid="sso-autoprovision-toggle" />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1">Domaines email autorisés (séparés par des virgules)</label>
+          <label className="block text-xs font-semibold text-zinc-600 mb-1">Domaines email autorisés (séparés par des virgules)</label>
           <input data-testid="sso-allowed-domains" placeholder="entreprise.fr, filiale.com" value={form.allowed_domains} onChange={e => setForm(f => ({ ...f, allowed_domains: e.target.value }))} className={INPUT_CLS} />
         </div>
         <div>
-          <label className="block text-xs font-semibold text-slate-600 mb-1">Profil par défaut des nouveaux utilisateurs</label>
+          <label className="block text-xs font-semibold text-zinc-600 mb-1">Profil par défaut des nouveaux utilisateurs</label>
           <select data-testid="sso-default-profile" value={form.default_profile_id} onChange={e => setForm(f => ({ ...f, default_profile_id: e.target.value }))} className={INPUT_CLS}>
             <option value="">— Lecture seule (fallback) —</option>
             {profiles.map(p => (
@@ -1242,8 +1242,8 @@ function ProjectCodesSection({ config, onSave }) {
     <div className="space-y-6" data-testid="section-project-codes">
       <div className="flex items-start justify-between">
         <div>
-          <h2 className="font-semibold text-slate-800">Codification des projets</h2>
-          <p className="text-xs text-slate-500 mt-0.5">
+          <h2 className="font-semibold text-zinc-800">Codification des projets</h2>
+          <p className="text-xs text-zinc-500 mt-0.5">
             Chaque projet reçoit automatiquement un code unique au format <span className="font-mono font-semibold">PRÉFIXE-001</span>,
             séquentiel par préfixe. Le préfixe est déterminé par le programme du projet.
           </p>
@@ -1252,7 +1252,7 @@ function ProjectCodesSection({ config, onSave }) {
           data-testid="project-codes-save-btn"
           onClick={save}
           disabled={saving}
-          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-[#0052CC] text-white rounded-lg hover:bg-[#0040a6] transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
         >
           {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />}
           Sauvegarder
@@ -1267,8 +1267,8 @@ function ProjectCodesSection({ config, onSave }) {
       )}
 
       {/* Préfixe par défaut */}
-      <div className="p-4 bg-slate-50 border border-slate-200 rounded-xl">
-        <label className="block text-xs font-semibold text-slate-600 mb-1">
+      <div className="p-4 bg-zinc-50 border border-zinc-200 rounded-xl">
+        <label className="block text-xs font-semibold text-zinc-600 mb-1">
           Préfixe par défaut (projets hors programme)
         </label>
         <input
@@ -1278,32 +1278,32 @@ function ProjectCodesSection({ config, onSave }) {
           placeholder="PRJ"
           className={`${INPUT_CLS} max-w-[180px] font-mono`}
         />
-        <p className="text-xs text-slate-400 mt-1">
+        <p className="text-xs text-zinc-400 mt-1">
           Exemple : <span className="font-mono">{form.default_prefix || "PRJ"}-001</span>, <span className="font-mono">{form.default_prefix || "PRJ"}-002</span>…
         </p>
       </div>
 
       {/* Table programmes → préfixes */}
       <div>
-        <h3 className="text-sm font-semibold text-slate-700 mb-2">Préfixe par programme</h3>
+        <h3 className="text-sm font-semibold text-zinc-700 mb-2">Préfixe par programme</h3>
         {programs.length === 0 ? (
-          <p className="text-xs text-slate-400">Aucun programme dans le portefeuille.</p>
+          <p className="text-xs text-zinc-400">Aucun programme dans le portefeuille.</p>
         ) : (
-          <div className="border border-gray-200 rounded-xl overflow-hidden">
+          <div className="border border-zinc-200 rounded-xl overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-gray-50 border-b border-gray-200 text-left">
-                  <th className="px-4 py-2.5 text-xs font-semibold text-slate-600">Programme</th>
-                  <th className="px-4 py-2.5 text-xs font-semibold text-slate-600 w-40">Préfixe</th>
-                  <th className="px-4 py-2.5 text-xs font-semibold text-slate-600">Aperçu</th>
+                <tr className="bg-zinc-50 border-b border-zinc-200 text-left">
+                  <th className="px-4 py-2.5 text-xs font-semibold text-zinc-600">Programme</th>
+                  <th className="px-4 py-2.5 text-xs font-semibold text-zinc-600 w-40">Préfixe</th>
+                  <th className="px-4 py-2.5 text-xs font-semibold text-zinc-600">Aperçu</th>
                 </tr>
               </thead>
               <tbody>
                 {programs.map(prog => {
                   const prefix = form.program_prefixes[prog.program_id] || "";
                   return (
-                    <tr key={prog.program_id} className="border-b border-gray-50 last:border-0">
-                      <td className="px-4 py-2.5 text-slate-700">{prog.name}</td>
+                    <tr key={prog.program_id} className="border-b border-zinc-50 last:border-0">
+                      <td className="px-4 py-2.5 text-zinc-700">{prog.name}</td>
                       <td className="px-4 py-2.5">
                         <input
                           data-testid={`project-codes-prefix-${prog.program_id}`}
@@ -1313,7 +1313,7 @@ function ProjectCodesSection({ config, onSave }) {
                           className={`${INPUT_CLS} font-mono`}
                         />
                       </td>
-                      <td className="px-4 py-2.5 font-mono text-xs text-slate-400">
+                      <td className="px-4 py-2.5 font-mono text-xs text-zinc-400">
                         {(prefix || form.default_prefix || "PRJ")}-001
                       </td>
                     </tr>
@@ -1323,7 +1323,7 @@ function ProjectCodesSection({ config, onSave }) {
             </table>
           </div>
         )}
-        <p className="text-xs text-slate-400 mt-2">
+        <p className="text-xs text-zinc-400 mt-2">
           Si un programme n'a pas de préfixe, le préfixe par défaut est utilisé. Lettres et chiffres uniquement (max 8 caractères).
         </p>
       </div>
@@ -1331,8 +1331,8 @@ function ProjectCodesSection({ config, onSave }) {
       {/* Backfill */}
       <div className="flex items-center justify-between p-4 bg-amber-50 border border-amber-200 rounded-xl">
         <div>
-          <p className="text-sm font-medium text-slate-700">Projets existants sans code</p>
-          <p className="text-xs text-slate-500">
+          <p className="text-sm font-medium text-zinc-700">Projets existants sans code</p>
+          <p className="text-xs text-zinc-500">
             Génère un code pour tous les projets qui n'en ont pas encore, selon leur programme (sauvegarde d'abord la configuration ci-dessus).
           </p>
         </div>
@@ -1393,7 +1393,7 @@ export default function AdminConfig() {
 
   if (loading) {
     return (
-      <div className="flex items-center justify-center py-20 text-slate-400">
+      <div className="flex items-center justify-center py-20 text-zinc-400">
         <RefreshCw size={18} className="animate-spin mr-2" /> Chargement de la configuration…
       </div>
     );
@@ -1413,17 +1413,17 @@ export default function AdminConfig() {
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto" data-testid="admin-config-page">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-9 h-9 bg-[#0052CC] rounded flex items-center justify-center flex-shrink-0">
+        <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
           <Wrench size={18} className="text-white" />
         </div>
         <div>
-          <h1 className="text-xl font-heading font-bold text-slate-800">Configuration du Tenant</h1>
-          <p className="text-xs text-slate-400">Paramètres d'administration réservés aux administrateurs</p>
+          <h1 className="text-xl font-heading font-bold text-zinc-800">Configuration du Tenant</h1>
+          <p className="text-xs text-zinc-400">Paramètres d'administration réservés aux administrateurs</p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-gray-200 mb-6 overflow-x-auto">
+      <div className="flex gap-1 border-b border-zinc-200 mb-6 overflow-x-auto">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
@@ -1431,8 +1431,8 @@ export default function AdminConfig() {
             onClick={() => setActiveTab(id)}
             className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
               activeTab === id
-                ? "border-[#0052CC] text-[#0052CC]"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+                ? "border-blue-600 text-blue-600"
+                : "border-transparent text-zinc-500 hover:text-zinc-700"
             }`}
           >
             <Icon size={13} />

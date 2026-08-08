@@ -13,7 +13,7 @@ const EMPTY = {
   contract_start: "", contract_end: "",
 };
 
-const INPUT_CLS = "w-full text-sm border border-gray-200 rounded px-3 py-2 focus:outline-none focus:border-[#0052CC] focus:ring-1 focus:ring-[#0052CC] bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
 
 const TYPE_OPTIONS = [
   { value: "interne",         label: "Interne",         icon: User,      bg: "bg-blue-50 border-blue-300 text-blue-700" },
@@ -24,9 +24,9 @@ const TYPE_OPTIONS = [
 function Field({ label, required, error, hint, children }) {
   return (
     <div>
-      <label className="block text-xs font-semibold text-slate-600 mb-1">
+      <label className="block text-xs font-semibold text-zinc-600 mb-1">
         {label}{required && <span className="text-rose-500 ml-0.5">*</span>}
-        {hint && <span className="text-slate-400 font-normal ml-1">({hint})</span>}
+        {hint && <span className="text-zinc-400 font-normal ml-1">({hint})</span>}
       </label>
       {children}
       {error && <p className="text-[11px] text-rose-500 mt-0.5">{error}</p>}
@@ -143,7 +143,7 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
     <Modal isOpen={isOpen} onClose={onClose} title={resource ? "Modifier la ressource" : "Nouvelle ressource"}>
       <form onSubmit={handleSubmit} className="space-y-4" data-testid="resource-form">
         {apiError && (
-          <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded px-3 py-2">{apiError}</div>
+          <div className="text-xs text-rose-600 bg-rose-50 border border-rose-200 rounded-lg px-3 py-2">{apiError}</div>
         )}
 
         {/* Sélecteur type ressource */}
@@ -155,8 +155,8 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
                 type="button"
                 data-testid={`resource-type-${value}`}
                 onClick={() => setForm((f) => ({ ...f, resource_type: value }))}
-                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded border-2 transition-all ${
-                  form.resource_type === value ? bg : "bg-white border-gray-200 text-slate-500 hover:border-gray-300"
+                className={`flex items-center gap-1.5 px-3 py-2 text-xs font-semibold rounded-lg border-2 transition-all ${
+                  form.resource_type === value ? bg : "bg-white border-zinc-200 text-zinc-500 hover:border-zinc-300"
                 }`}
               >
                 <Icon size={12} />
@@ -213,15 +213,15 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
         </div>
 
         {capaEffective !== null && Number(form.availability_rate) < 100 && (
-          <p className="text-xs text-slate-500 -mt-2">
+          <p className="text-xs text-zinc-500 -mt-2">
             Capacité effective : <strong>{capaEffective} JH/mois</strong> ({form.availability_rate}% de {form.capacity_jh_month} JH)
           </p>
         )}
 
         {/* Champs fournisseur — uniquement pour ressources externes */}
         {isExterne && (
-          <div className="border-t border-gray-100 pt-4 space-y-3">
-            <div className="text-[10px] uppercase tracking-widest text-slate-400 font-semibold">
+          <div className="border-t border-zinc-100 pt-4 space-y-3">
+            <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">
               Données contractuelles fournisseur
             </div>
 
@@ -278,13 +278,13 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
 
             {isForfait && form.forfait_envelope && form.forfait_consumed && (
               <div className="space-y-1">
-                <div className="flex justify-between text-xs text-slate-500">
+                <div className="flex justify-between text-xs text-zinc-500">
                   <span>Consommation forfait</span>
                   <span className="font-semibold">
                     {Math.round(Number(form.forfait_consumed) / Number(form.forfait_envelope) * 100)}%
                   </span>
                 </div>
-                <div className="h-2 bg-gray-100 rounded-full overflow-hidden">
+                <div className="h-2 bg-zinc-100 rounded-full overflow-hidden">
                   <div
                     className={`h-full rounded-full ${
                       Number(form.forfait_consumed) / Number(form.forfait_envelope) > 0.85
@@ -320,13 +320,13 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
           </div>
         )}
 
-        <div className="flex justify-end gap-3 pt-2 border-t border-gray-100">
+        <div className="flex justify-end gap-3 pt-2 border-t border-zinc-100">
           <button type="button" onClick={onClose}
-            className="px-4 py-2 text-sm text-slate-600 border border-gray-200 rounded hover:bg-gray-50 transition-colors">
+            className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">
             Annuler
           </button>
           <button type="submit" disabled={saving} data-testid="resource-form-submit"
-            className="flex items-center gap-2 px-5 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] disabled:opacity-50 transition-colors">
+            className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
             {saving && <Loader2 size={14} className="animate-spin" />}
             {resource ? "Enregistrer" : "Créer la ressource"}
           </button>

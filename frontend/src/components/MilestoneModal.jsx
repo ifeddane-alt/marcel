@@ -136,14 +136,14 @@ export default function MilestoneModal({ milestone, projectId, resources, onSave
     <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" data-testid="milestone-modal">
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         {/* Header */}
-        <div className="flex items-center justify-between px-6 py-4 border-b border-gray-100">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
           <div className="flex items-center gap-2">
-            <Diamond size={16} className="text-[#0052CC]" />
-            <h2 className="font-heading text-lg font-bold text-[#0F172A]">
+            <Diamond size={16} className="text-blue-600" />
+            <h2 className="font-heading text-lg font-bold text-zinc-950">
               {isEdit ? "Modifier le jalon" : "Nouveau jalon"}
             </h2>
           </div>
-          <button onClick={onClose} className="text-slate-400 hover:text-slate-600 transition-colors">
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600 transition-colors">
             <X size={18} />
           </button>
         </div>
@@ -151,7 +151,7 @@ export default function MilestoneModal({ milestone, projectId, resources, onSave
         <form onSubmit={handleSubmit} className="p-6 space-y-5">
           {/* Step 1 — Family selection */}
           <div>
-            <label className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-2">
+            <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-2">
               Famille *
             </label>
             <div className="grid grid-cols-3 gap-2">
@@ -164,18 +164,18 @@ export default function MilestoneModal({ milestone, projectId, resources, onSave
                   className={`p-3 rounded-lg border-2 text-left transition-all ${
                     family === key
                       ? `${cfg.border} ${cfg.bg}`
-                      : "border-gray-200 hover:border-gray-300 bg-white"
+                      : "border-zinc-200 hover:border-zinc-300 bg-white"
                   }`}
                 >
                   <div className="flex items-center gap-2 mb-1">
                     <svg width="12" height="12" viewBox="0 0 12 12">
                       <polygon points="6,1 11,6 6,11 1,6" fill={family === key ? cfg.fill : "#CBD5E1"} />
                     </svg>
-                    <span className={`text-xs font-bold ${family === key ? cfg.color : "text-slate-500"}`}>
+                    <span className={`text-xs font-bold ${family === key ? cfg.color : "text-zinc-500"}`}>
                       {cfg.label}
                     </span>
                   </div>
-                  <p className="text-[10px] text-slate-400 leading-snug">{cfg.desc}</p>
+                  <p className="text-[10px] text-zinc-400 leading-snug">{cfg.desc}</p>
                 </button>
               ))}
             </div>
@@ -184,7 +184,7 @@ export default function MilestoneModal({ milestone, projectId, resources, onSave
           {/* Step 2 — Type (filtered by family) */}
           {family && (
             <div>
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
+              <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">
                 Type *
               </label>
               <select
@@ -192,7 +192,7 @@ export default function MilestoneModal({ milestone, projectId, resources, onSave
                 onChange={(e) => setType(e.target.value)}
                 required
                 data-testid="milestone-type-select"
-                className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0052CC]"
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600"
               >
                 <option value="">— Sélectionner le type —</option>
                 {filteredTypes.map((t) => (
@@ -204,7 +204,7 @@ export default function MilestoneModal({ milestone, projectId, resources, onSave
 
           {/* Name */}
           <div>
-            <label className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
+            <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">
               Nom du jalon *
             </label>
             <input
@@ -215,54 +215,54 @@ export default function MilestoneModal({ milestone, projectId, resources, onSave
               maxLength={120}
               placeholder="Ex: Go-Live SI Finance"
               data-testid="milestone-name-input"
-              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0052CC]"
+              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600"
             />
           </div>
 
           {/* Dates row */}
           <div className="grid grid-cols-3 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
+              <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">
                 Date baseline *
               </label>
               <input type="date" value={dateBaseline} onChange={(e) => setDateBaseline(e.target.value)} required data-testid="milestone-date-baseline"
-                className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0052CC]" />
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
+              <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">
                 Date forecast
               </label>
               <input type="date" value={dateForecast} onChange={(e) => setDateForecast(e.target.value)} data-testid="milestone-date-forecast"
-                className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0052CC]" />
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
+              <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">
                 Date réelle
               </label>
               <input type="date" value={dateActual} onChange={(e) => setDateActual(e.target.value)} data-testid="milestone-date-actual"
-                className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0052CC]" />
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
             </div>
           </div>
 
           {/* Status + Governance row */}
           <div className="grid grid-cols-2 gap-3">
             <div>
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
+              <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">
                 Statut
               </label>
               <select value={status} onChange={(e) => setStatus(e.target.value)} data-testid="milestone-status-select"
-                className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0052CC]">
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600">
                 {MILESTONE_STATUSES.map((s) => (
                   <option key={s.value} value={s.value}>{s.label}</option>
                 ))}
               </select>
             </div>
             <div>
-              <label className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
+              <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">
                 Owner
               </label>
               <select value={ownerResId} onChange={(e) => setOwnerResId(e.target.value)} data-testid="milestone-owner-select"
-                className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0052CC]">
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600">
                 <option value="">— Aucun owner —</option>
                 {resources.map((r) => (
                   <option key={r.resource_id} value={r.resource_id}>{r.name} ({r.role})</option>
@@ -273,25 +273,25 @@ export default function MilestoneModal({ milestone, projectId, resources, onSave
 
           {/* Deliverable */}
           <div>
-            <label className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
+            <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">
               Livrable attendu
             </label>
             <input type="text" value={deliverable} onChange={(e) => setDeliverable(e.target.value)} maxLength={200}
               placeholder="Ex: PV de recette signé, Rapport GAP Analysis..."
               data-testid="milestone-deliverable-input"
-              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0052CC]" />
+              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
           </div>
 
           {/* Comment */}
           <div>
-            <label className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
+            <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">
               Commentaire CP
             </label>
             <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={2} maxLength={500}
               placeholder="Contexte, risques, points d'attention..."
               data-testid="milestone-comment-input"
-              className="w-full text-sm border border-gray-200 rounded-lg px-3 py-2 focus:outline-none focus:border-[#0052CC] resize-none" />
-            <div className="text-[10px] text-slate-400 text-right">{comment.length}/500</div>
+              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 resize-none" />
+            <div className="text-[10px] text-zinc-400 text-right">{comment.length}/500</div>
           </div>
 
           {/* Toggles row */}
@@ -299,7 +299,7 @@ export default function MilestoneModal({ milestone, projectId, resources, onSave
             {/* Attribute (ADMIN/PMO only) */}
             {isAdmin && (
               <div>
-                <label className="block text-xs font-semibold text-slate-600 uppercase tracking-widest mb-1.5">
+                <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">
                   Attribut
                 </label>
                 <div className="flex items-center gap-2">
@@ -311,8 +311,8 @@ export default function MilestoneModal({ milestone, projectId, resources, onSave
                         attribute === val
                           ? val === "critical" ? "bg-rose-100 border-rose-400 text-rose-700"
                             : val === "strategic" ? "bg-blue-100 border-blue-400 text-blue-700"
-                            : "bg-slate-100 border-slate-300 text-slate-600"
-                          : "bg-white border-gray-200 text-slate-400 hover:border-gray-300"
+                            : "bg-zinc-100 border-zinc-300 text-zinc-600"
+                          : "bg-white border-zinc-200 text-zinc-400 hover:border-zinc-300"
                       }`}>
                       {val === "" ? "Aucun" : val === "critical" ? "Critical" : "Strategic"}
                     </button>
@@ -325,20 +325,20 @@ export default function MilestoneModal({ milestone, projectId, resources, onSave
             <div className="flex items-center gap-2 mt-1">
               <button type="button" onClick={() => setIsBlocking(!isBlocking)}
                 data-testid="milestone-blocking-toggle"
-                className={`relative w-9 h-5 rounded-full transition-colors ${isBlocking ? "bg-rose-500" : "bg-gray-200"}`}>
+                className={`relative w-9 h-5 rounded-full transition-colors ${isBlocking ? "bg-rose-500" : "bg-zinc-200"}`}>
                 <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${isBlocking ? "translate-x-4" : ""}`} />
               </button>
-              <span className="text-xs font-medium text-slate-600">Bloquant</span>
+              <span className="text-xs font-medium text-zinc-600">Bloquant</span>
             </div>
 
             {/* Governance toggle */}
             <div className="flex items-center gap-2 mt-1">
               <button type="button" onClick={() => setIsGovernance(!isGovernance)}
                 data-testid="milestone-governance-toggle"
-                className={`relative w-9 h-5 rounded-full transition-colors ${isGovernance ? "bg-[#0052CC]" : "bg-gray-200"}`}>
+                className={`relative w-9 h-5 rounded-full transition-colors ${isGovernance ? "bg-blue-600" : "bg-zinc-200"}`}>
                 <span className={`absolute top-0.5 left-0.5 w-4 h-4 bg-white rounded-full shadow transition-transform ${isGovernance ? "translate-x-4" : ""}`} />
               </button>
-              <span className="text-xs font-medium text-slate-600">Gouvernance</span>
+              <span className="text-xs font-medium text-zinc-600">Gouvernance</span>
             </div>
           </div>
 
@@ -346,13 +346,13 @@ export default function MilestoneModal({ milestone, projectId, resources, onSave
           {error && <p className="text-sm text-rose-600 font-medium">{error}</p>}
 
           {/* Actions */}
-          <div className="flex items-center justify-end gap-2 pt-2 border-t border-gray-100">
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100">
             <button type="button" onClick={onClose}
-              className="px-4 py-2 text-sm text-slate-600 border border-gray-200 rounded-lg hover:bg-gray-50 transition-colors">
+              className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">
               Annuler
             </button>
             <button type="submit" disabled={saving} data-testid="milestone-save-btn"
-              className="px-4 py-2 text-sm font-semibold bg-[#0052CC] text-white rounded-lg hover:bg-[#0047B3] transition-colors disabled:opacity-60">
+              className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60">
               {saving ? "Sauvegarde..." : isEdit ? "Enregistrer" : "Créer le jalon"}
             </button>
           </div>

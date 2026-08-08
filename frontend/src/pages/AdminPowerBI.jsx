@@ -162,7 +162,7 @@ function CopyButton({ text, "data-testid": testId, small = false }) {
     <button
       onClick={copy}
       data-testid={testId}
-      className={`flex-shrink-0 rounded hover:bg-slate-200 text-slate-500 hover:text-slate-700 transition-colors ${small ? "p-1" : "p-1.5"}`}
+      className={`flex-shrink-0 rounded-lg hover:bg-zinc-200 text-zinc-500 hover:text-zinc-700 transition-colors ${small ? "p-1" : "p-1.5"}`}
       title="Copier"
     >
       {copied ? <Check size={small ? 12 : 14} className="text-green-600" /> : <Copy size={small ? 12 : 14} />}
@@ -229,11 +229,11 @@ export default function AdminPowerBI() {
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-1">
           <Database size={20} className="text-[#F2C811]" />
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">
             Connecteur Power BI
           </h1>
         </div>
-        <p className="text-sm text-slate-500">
+        <p className="text-sm text-zinc-500">
           Connectez Power BI Desktop à vos données MARCEL via le <strong>Web Connector</strong>.
           Authentification par JWT ou clé API dédiée.
         </p>
@@ -247,14 +247,14 @@ export default function AdminPowerBI() {
       )}
 
       {/* Clé API */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 mb-6" data-testid="api-key-section">
+      <div className="bg-white border border-zinc-200 rounded-xl shadow-sm p-5 mb-6" data-testid="api-key-section">
         <div className="flex items-center gap-2 mb-4">
-          <Key size={16} className="text-[#0052CC]" />
-          <h2 className="font-semibold text-slate-800">Clé API Power BI</h2>
+          <Key size={16} className="text-blue-600" />
+          <h2 className="font-semibold text-zinc-800">Clé API Power BI</h2>
         </div>
 
         {loading ? (
-          <div className="text-sm text-slate-400">Chargement...</div>
+          <div className="text-sm text-zinc-400">Chargement...</div>
         ) : (
           <>
             {/* Clé fraîchement générée — affichage unique */}
@@ -263,8 +263,8 @@ export default function AdminPowerBI() {
                 <div className="text-xs font-semibold text-amber-700 mb-2 uppercase tracking-wide">
                   Clé générée — Copiez-la maintenant, elle ne sera plus affichée
                 </div>
-                <div className="flex items-center gap-2 bg-white border border-amber-200 rounded px-3 py-2 font-mono text-xs break-all">
-                  <span className="flex-1 text-slate-800" data-testid="new-api-key">{newKey}</span>
+                <div className="flex items-center gap-2 bg-white border border-amber-200 rounded-lg px-3 py-2 font-mono text-xs break-all">
+                  <span className="flex-1 text-zinc-800" data-testid="new-api-key">{newKey}</span>
                   <CopyButton text={newKey} data-testid="copy-new-key-btn" />
                 </div>
               </div>
@@ -272,10 +272,10 @@ export default function AdminPowerBI() {
 
             <div className="flex flex-wrap items-center gap-3">
               <div className="flex-1 min-w-0">
-                <span className="text-sm text-slate-600">
+                <span className="text-sm text-zinc-600">
                   {keyInfo?.has_key
-                    ? <>Clé active : <code className="bg-slate-100 px-1.5 py-0.5 rounded text-xs">{keyInfo.masked_key}</code></>
-                    : <span className="text-slate-400">Aucune clé API configurée</span>
+                    ? <>Clé active : <code className="bg-zinc-100 px-1.5 py-0.5 rounded-lg text-xs">{keyInfo.masked_key}</code></>
+                    : <span className="text-zinc-400">Aucune clé API configurée</span>
                   }
                 </span>
               </div>
@@ -284,7 +284,7 @@ export default function AdminPowerBI() {
                   onClick={generateKey}
                   disabled={generating}
                   data-testid="generate-key-btn"
-                  className="flex items-center gap-1.5 px-3 py-2 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] disabled:opacity-60 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-60 transition-colors"
                 >
                   <RefreshCw size={14} className={generating ? "animate-spin" : ""} />
                   {keyInfo?.has_key ? "Régénérer" : "Générer une clé"}
@@ -294,7 +294,7 @@ export default function AdminPowerBI() {
                     onClick={revokeKey}
                     disabled={revoking}
                     data-testid="revoke-key-btn"
-                    className="flex items-center gap-1.5 px-3 py-2 border border-rose-200 text-rose-600 text-sm font-semibold rounded hover:bg-rose-50 disabled:opacity-60 transition-colors"
+                    className="flex items-center gap-1.5 px-3 py-2 border border-rose-200 text-rose-600 text-sm font-semibold rounded-lg hover:bg-rose-50 disabled:opacity-60 transition-colors"
                   >
                     <Trash2 size={14} />
                     Révoquer
@@ -302,7 +302,7 @@ export default function AdminPowerBI() {
                 )}
               </div>
             </div>
-            <p className="text-xs text-slate-400 mt-2">
+            <p className="text-xs text-zinc-400 mt-2">
               Envoyez la clé dans le header <code>X-API-Key</code> ou utilisez le header
               <code> Authorization: Bearer &lt;JWT&gt;</code>.
             </p>
@@ -311,37 +311,37 @@ export default function AdminPowerBI() {
       </div>
 
       {/* Endpoints */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 mb-6" data-testid="endpoints-section">
+      <div className="bg-white border border-zinc-200 rounded-xl shadow-sm p-5 mb-6" data-testid="endpoints-section">
         <div className="flex items-center gap-2 mb-4">
-          <Zap size={16} className="text-[#0052CC]" />
-          <h2 className="font-semibold text-slate-800">Endpoints disponibles</h2>
+          <Zap size={16} className="text-blue-600" />
+          <h2 className="font-semibold text-zinc-800">Endpoints disponibles</h2>
         </div>
 
         <div className="space-y-3">
           {ENDPOINTS.map((ep) => {
             const fullUrl = `${BASE_URL}${ep.path}`;
             return (
-              <div key={ep.path} className="border border-slate-200 rounded-lg p-3" data-testid={`endpoint-${ep.label.toLowerCase()}`}>
+              <div key={ep.path} className="border border-zinc-200 rounded-lg p-3" data-testid={`endpoint-${ep.label.toLowerCase()}`}>
                 <div className="flex flex-wrap items-center justify-between gap-2 mb-1">
                   <div className="flex items-center gap-2">
-                    <span className="text-xs font-bold text-green-700 bg-green-100 px-1.5 py-0.5 rounded">GET</span>
-                    <span className="font-semibold text-slate-800 text-sm">{ep.label}</span>
+                    <span className="text-xs font-bold text-green-700 bg-green-100 px-1.5 py-0.5 rounded-lg">GET</span>
+                    <span className="font-semibold text-zinc-800 text-sm">{ep.label}</span>
                   </div>
                   <a
                     href={fullUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-xs text-[#0052CC] hover:underline flex items-center gap-1"
+                    className="text-xs text-blue-600 hover:underline flex items-center gap-1"
                   >
                     Tester <ExternalLink size={11} />
                   </a>
                 </div>
-                <div className="flex items-center gap-2 bg-slate-50 border border-slate-200 rounded px-2 py-1.5 mb-2">
-                  <code className="text-xs text-slate-700 flex-1 break-all">{fullUrl}</code>
+                <div className="flex items-center gap-2 bg-zinc-50 border border-zinc-200 rounded-lg px-2 py-1.5 mb-2">
+                  <code className="text-xs text-zinc-700 flex-1 break-all">{fullUrl}</code>
                   <CopyButton text={fullUrl} data-testid={`copy-${ep.label.toLowerCase()}-url`} />
                 </div>
-                <p className="text-xs text-slate-500 mb-1">{ep.description}</p>
-                <p className="text-xs text-slate-400 font-mono">{ep.fields}</p>
+                <p className="text-xs text-zinc-500 mb-1">{ep.description}</p>
+                <p className="text-xs text-zinc-400 font-mono">{ep.fields}</p>
               </div>
             );
           })}
@@ -349,10 +349,10 @@ export default function AdminPowerBI() {
       </div>
 
       {/* Tuto connexion Power BI Desktop */}
-      <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5 mb-6" data-testid="tutorial-section">
+      <div className="bg-white border border-zinc-200 rounded-xl shadow-sm p-5 mb-6" data-testid="tutorial-section">
         <div className="flex items-center gap-2 mb-4">
-          <BookOpen size={16} className="text-[#0052CC]" />
-          <h2 className="font-semibold text-slate-800">Connexion depuis Power BI Desktop</h2>
+          <BookOpen size={16} className="text-blue-600" />
+          <h2 className="font-semibold text-zinc-800">Connexion depuis Power BI Desktop</h2>
         </div>
 
         <div className="space-y-4">
@@ -384,12 +384,12 @@ export default function AdminPowerBI() {
             },
           ].map(({ step, title, detail }) => (
             <div key={step} className="flex gap-3">
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-[#0052CC] text-white text-xs font-bold flex items-center justify-center mt-0.5">
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center mt-0.5">
                 {step}
               </div>
               <div>
-                <div className="text-sm font-semibold text-slate-800">{title}</div>
-                <div className="text-xs text-slate-500 mt-0.5">{detail}</div>
+                <div className="text-sm font-semibold text-zinc-800">{title}</div>
+                <div className="text-xs text-zinc-500 mt-0.5">{detail}</div>
               </div>
             </div>
           ))}
@@ -408,8 +408,8 @@ export default function AdminPowerBI() {
       </div>
 
       {/* Permission requise */}
-      <div className="bg-slate-50 border border-slate-200 rounded-xl p-4 text-xs text-slate-500 mb-6">
-        <span className="font-semibold text-slate-700">Permission requise :</span> <code>export.powerbi</code> — 
+      <div className="bg-zinc-50 border border-zinc-200 rounded-xl p-4 text-xs text-zinc-500 mb-6">
+        <span className="font-semibold text-zinc-700">Permission requise :</span> <code>export.powerbi</code> — 
         accordée aux profils <strong>Administrateur</strong>, <strong>Direction SI (CIO)</strong>, 
         <strong> PMO Portefeuille</strong> et <strong>Finance / Contrôle de gestion</strong>.
       </div>
@@ -452,13 +452,13 @@ function MQuerySection({ baseUrl, apiKey }) {
   ];
 
   return (
-    <div className="bg-white border border-gray-200 rounded-xl shadow-sm p-5" data-testid="mquery-section">
+    <div className="bg-white border border-zinc-200 rounded-xl shadow-sm p-5" data-testid="mquery-section">
       <div className="flex items-center gap-2 mb-1">
         <Code2 size={16} className="text-[#F2C811]" />
-        <h2 className="font-semibold text-slate-800">Scripts M-Query (Power Query)</h2>
+        <h2 className="font-semibold text-zinc-800">Scripts M-Query (Power Query)</h2>
       </div>
       <div className="flex items-center justify-between mb-4">
-        <p className="text-xs text-slate-500">
+        <p className="text-xs text-zinc-500">
           Collez chaque script dans <strong>Power BI Desktop → Éditeur Power Query → Nouvelle requête → Requête vide → Éditeur avancé</strong>.
           Commencez par les deux paramètres, puis créez une requête par table.
         </p>
@@ -466,7 +466,7 @@ function MQuerySection({ baseUrl, apiKey }) {
           data-testid="download-template-btn"
           onClick={downloadTemplate}
           disabled={downloading}
-          className="flex-shrink-0 ml-4 flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-[#F2C811] text-slate-900 rounded-lg hover:bg-[#e6bc00] transition-colors disabled:opacity-50"
+          className="flex-shrink-0 ml-4 flex items-center gap-2 px-4 py-2 text-sm font-semibold bg-[#F2C811] text-zinc-900 rounded-lg hover:bg-[#e6bc00] transition-colors disabled:opacity-50"
         >
           {downloading ? <RefreshCw size={14} className="animate-spin" /> : <BookOpen size={14} />}
           Télécharger .zip
@@ -474,7 +474,7 @@ function MQuerySection({ baseUrl, apiKey }) {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-slate-200 mb-4 overflow-x-auto">
+      <div className="flex gap-1 border-b border-zinc-200 mb-4 overflow-x-auto">
         {allTabs.map((tab, i) => (
           <button
             key={i}
@@ -482,8 +482,8 @@ function MQuerySection({ baseUrl, apiKey }) {
             data-testid={`mquery-tab-${tab.label.toLowerCase()}`}
             className={`flex-shrink-0 px-3 py-2 text-xs font-semibold rounded-t border-b-2 transition-colors ${
               activeTab === i
-                ? "border-[#0052CC] text-[#0052CC] bg-blue-50"
-                : "border-transparent text-slate-500 hover:text-slate-700"
+                ? "border-blue-600 text-blue-600 bg-blue-50"
+                : "border-transparent text-zinc-500 hover:text-zinc-700"
             }`}
           >
             {tab.isParam ? "Paramètres" : tab.label}
@@ -504,7 +504,7 @@ function MQuerySection({ baseUrl, apiKey }) {
             )}
             <div className="relative">
               <pre
-                className="bg-slate-900 text-slate-100 text-xs p-4 rounded-lg overflow-x-auto leading-relaxed whitespace-pre"
+                className="bg-zinc-900 text-zinc-100 text-xs p-4 rounded-lg overflow-x-auto leading-relaxed whitespace-pre"
                 data-testid={`mquery-script-${tab.label.toLowerCase()}`}
                 style={{ fontFamily: "'JetBrains Mono', 'Fira Code', monospace", maxHeight: 380 }}
               >
@@ -519,7 +519,7 @@ function MQuerySection({ baseUrl, apiKey }) {
               </div>
             </div>
             {!tab.isParam && (
-              <p className="text-xs text-slate-400 mt-2">
+              <p className="text-xs text-zinc-400 mt-2">
                 Nommez la requête <strong>{tab.label}</strong> dans le panneau de gauche de l'Éditeur Power Query.
               </p>
             )}
@@ -527,8 +527,8 @@ function MQuerySection({ baseUrl, apiKey }) {
         )
       ))}
 
-      <div className="mt-4 bg-slate-50 border border-slate-200 rounded-lg p-3 text-xs text-slate-500">
-        <strong className="text-slate-700">Relations recommandées dans Power BI :</strong>
+      <div className="mt-4 bg-zinc-50 border border-zinc-200 rounded-lg p-3 text-xs text-zinc-500">
+        <strong className="text-zinc-700">Relations recommandées dans Power BI :</strong>
         <ul className="mt-1 space-y-0.5 list-disc list-inside">
           <li><code>Budget[project_name]</code> → <code>Projets[name]</code> (Many-to-One)</li>
           <li><code>Risques[project_name]</code> → <code>Projets[name]</code> (Many-to-One)</li>

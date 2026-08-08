@@ -17,13 +17,13 @@ export default function CapacityAlertBanner({ alerts, compact = false }) {
   if (compact) {
     // Version dashboard widget compacte
     return (
-      <div className="bg-white border border-gray-200 rounded shadow-sm" data-testid="capacity-alerts-widget">
-        <div className="flex items-center justify-between px-5 py-3 border-b border-gray-100">
-          <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-slate-500 font-semibold">
+      <div className="bg-white border border-zinc-200 rounded-lg shadow-sm" data-testid="capacity-alerts-widget">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
+          <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold">
             <AlertTriangle size={13} className="text-rose-400" />
             Alertes capacité équipes
           </div>
-          <Link to="/teams" className="text-[10px] text-[#0052CC] hover:underline">
+          <Link to="/teams" className="text-[10px] text-blue-600 hover:underline">
             Voir heatmap →
           </Link>
         </div>
@@ -36,7 +36,7 @@ export default function CapacityAlertBanner({ alerts, compact = false }) {
                   <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${cfg.dot}`} />
                   <div>
                     <span className={`text-xs font-semibold ${cfg.text}`}>{a.team_name}</span>
-                    <span className="text-[10px] text-slate-400 ml-2">{a.period}</span>
+                    <span className="text-[10px] text-zinc-400 ml-2">{a.period}</span>
                   </div>
                 </div>
                 <div className="flex items-center gap-2">
@@ -49,7 +49,7 @@ export default function CapacityAlertBanner({ alerts, compact = false }) {
             );
           })}
           {alerts.length > 5 && (
-            <p className="text-[10px] text-slate-400 text-center pt-1">
+            <p className="text-[10px] text-zinc-400 text-center pt-1">
               +{alerts.length - 5} autre(s) alerte(s)
             </p>
           )}
@@ -67,7 +67,7 @@ export default function CapacityAlertBanner({ alerts, compact = false }) {
           {critiques.length} équipe{critiques.length > 1 ? "s" : ""} en surcharge
           {oranges.length > 0 && `, ${oranges.length} en alerte orange`}
         </span>
-        <Link to="/resources?tab=heatmap" className="ml-auto text-xs text-[#0052CC] hover:underline font-medium">
+        <Link to="/resources?tab=heatmap" className="ml-auto text-xs text-blue-600 hover:underline font-medium">
           Voir heatmap →
         </Link>
       </div>
@@ -83,11 +83,11 @@ export default function CapacityAlertBanner({ alerts, compact = false }) {
                 </span>
               </div>
               <div className={`text-lg font-mono font-bold ${cfg.text}`}>{a.utilization_pct}%</div>
-              <div className="text-[10px] text-slate-500 mt-0.5">
+              <div className="text-[10px] text-zinc-500 mt-0.5">
                 {a.allocated_jh} / {a.capacity_jh} JH · {a.period}
               </div>
               {a.overloaded_resources?.slice(0, 2).map((r) => (
-                <div key={r.resource_id} className="text-[10px] text-slate-400 mt-0.5 truncate">
+                <div key={r.resource_id} className="text-[10px] text-zinc-400 mt-0.5 truncate">
                   ↳ {r.name} : {r.utilization_pct}%
                 </div>
               ))}
