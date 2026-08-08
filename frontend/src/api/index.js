@@ -147,6 +147,10 @@ export const dashboardAPI = {
   exportPdf: () => api.get("/dashboard/export/pdf", { responseType: "blob" }),
 };
 
+export const searchAPI = {
+  global: (q) => api.get("/search/global", { params: { q } }),
+};
+
 export const excelAPI = {
   exportEntity:  (entity)           => api.get(`/excel/${entity}/export`, { responseType: "blob" }),
   importPreview: (entity, formData) => api.post(`/excel/${entity}/import/preview`, formData, { headers: { "Content-Type": "multipart/form-data" } }),

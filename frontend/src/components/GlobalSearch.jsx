@@ -1,23 +1,27 @@
-import React, { useEffect, useRef, useState, useCallback } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { Search, CornerDownLeft } from "lucide-react";
-import { projectsAPI } from "@/api";
+import { Search, CornerDownLeft, FolderKanban, Flag, AlertTriangle, Gavel } from "lucide-react";
+import { searchAPI } from "@/api";
 
 const RAG_DOT = { green: "bg-emerald-500", orange: "bg-amber-500", red: "bg-rose-500" };
+
+const GROUPS = [
+  { key: "projects", label: "Projets", Icon: FolderKanban },
+  { key: "milestones", label: "Jalons", Icon: Flag },
+  { key: "risks", label: "Risques", Icon: AlertTriangle },
+  { key: "decisions", label: "Décisions", Icon: Gavel },
+];
 
 export default function GlobalSearch() {
   const navigate = useNavigate();
   const inputRef = useRef(null);
   const boxRef = useRef(null);
+  const timerRef = useRef(null);
   const [q, setQ] = useState("");
-  const [projects, setProjects] = useState(null);
+  const [res, setRes] = useState(null);
   const [open, setOpen] = useState(false);
   const [hi, setHi] = useState(0);
-
-  const loadProjects = useCallback(() => {
-    if (projects !== null) return;
-    projectsAPI.list().then(({ data }) => setProjects(data)).catch(() => setProjects([]));
-  }, [projects]);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const onKey = (e) => {
@@ -38,40 +42,98 @@ export default function GlobalSearch() {
     };
   }, []);
 
-  const query = q.trim().toLowerCase();
-  const results = !query || !projects ? [] : projects
-    .map((p) => {
-      const code = (p.code || "").toLowerCase();
-      const name = (p.name || "").toLowerCase();
-      let score = -1;
-      if (code === query) score = 100;
-      else if (code.startsWith(query)) score = 80;
-      else if (code.includes(query)) score = 60;
-      else if (name.startsWith(query)) score = 40;
-      else if (name.includes(query)) score = 20;
-      return { p, score };
-    })
-    .filter((r) => r.score >= 0)
-    .sort((a, b) => b.score - a.score)
-    .slice(0, 8)
-    .map((r) => r.p);
+  const runSearch = (value) => {
+    clearTimeout(timerRef.current);
+    if (value.trim().length < 2) { setRes(null); return; }
+    timerRef.current = setTimeout(() => {
+      setLoading(true);
+      searchAPI.global(value.trim())
+        .then(({ data }) => setRes(data))
+        .catch(() => setRes(null))
+        .finally(() => setLoading(false));
+    }, 250);
+  };
 
-  const go = (p) => {
+  // Liste aplatie pour la navigation clavier
+  const flat = [];
+  if (res) {
+    for (const g of GROUPS) {
+      for (const item of res[g.key] || []) flat.push({ group: g.key, item });
+    }
+  }
+
+  const go = (entry) => {
+    const pid = entry.group === "projects" ? entry.item.project_id : entry.item.project_id;
     setQ("");
+    setRes(null);
     setOpen(false);
     inputRef.current?.blur();
-    navigate(`/projects/${p.project_id}`);
+    if (pid) navigate(`/projects/${pid}`);
   };
 
   const onKeyDown = (e) => {
-    if (e.key === "ArrowDown") { e.preventDefault(); setHi((h) => Math.min(h + 1, results.length - 1)); }
+    if (e.key === "ArrowDown") { e.preventDefault(); setHi((h) => Math.min(h + 1, flat.length - 1)); }
     else if (e.key === "ArrowUp") { e.preventDefault(); setHi((h) => Math.max(h - 1, 0)); }
-    else if (e.key === "Enter" && results.length) {
+    else if (e.key === "Enter" && flat.length) {
       e.preventDefault();
-      const exact = results.find((p) => (p.code || "").toLowerCase() === query);
-      go(exact || results[hi] || results[0]);
+      const ql = q.trim().toLowerCase();
+      const exact = flat.find((f) => f.group === "projects" && (f.item.code || "").toLowerCase() === ql);
+      go(exact || flat[hi] || flat[0]);
     }
   };
+
+  const renderItem = (entry, idx) => {
+    const { group, item } = entry;
+    const active = idx === hi;
+    const key = item.project_id + (item.milestone_id || item.risk_id || item.decision_id || "");
+    let testId, content;
+    if (group === "projects") {
+      testId = `global-search-result-${item.project_id}`;
+      content = (
+        <>
+          <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${RAG_DOT[item.status_rag] || "bg-slate-300"}`} />
+          {item.code && (
+            <span className="font-mono text-[10px] font-semibold text-[#0052CC] bg-[#EBF2FF] border border-[#0052CC]/20 rounded px-1.5 py-0.5 flex-shrink-0">
+              {item.code}
+            </span>
+          )}
+          <span className="text-xs text-slate-700 truncate flex-1">{item.name}</span>
+        </>
+      );
+    } else {
+      testId = `global-search-${group}-${item.milestone_id || item.risk_id || item.decision_id}`;
+      const title = item.name || item.title;
+      const meta = group === "risks"
+        ? `Criticité ${item.criticality}`
+        : group === "milestones" && item.date
+          ? item.date.split("-").reverse().join("/")
+          : item.status || "";
+      content = (
+        <>
+          <span className="text-xs text-slate-700 truncate flex-1">{title}</span>
+          {meta && <span className="text-[10px] text-slate-400 flex-shrink-0">{meta}</span>}
+          {item.project_code && (
+            <span className="font-mono text-[10px] text-slate-400 flex-shrink-0">{item.project_code}</span>
+          )}
+        </>
+      );
+    }
+    return (
+      <button
+        key={key}
+        data-testid={testId}
+        onMouseDown={(e) => { e.preventDefault(); go(entry); }}
+        onMouseEnter={() => setHi(idx)}
+        className={`w-full flex items-center gap-2 px-3 py-2 text-left transition-colors ${active ? "bg-[#EBF2FF]" : "hover:bg-gray-50"}`}
+      >
+        {content}
+        {active && <CornerDownLeft size={11} className="text-slate-300 flex-shrink-0" />}
+      </button>
+    );
+  };
+
+  let flatIdx = -1;
+  const hasResults = flat.length > 0;
 
   return (
     <div ref={boxRef} className="relative hidden sm:block mx-3 md:mx-6 flex-1 max-w-md">
@@ -81,10 +143,10 @@ export default function GlobalSearch() {
           ref={inputRef}
           data-testid="global-search-input"
           value={q}
-          onChange={(e) => { setQ(e.target.value); setOpen(true); setHi(0); }}
-          onFocus={() => { loadProjects(); if (q) setOpen(true); }}
+          onChange={(e) => { setQ(e.target.value); setOpen(true); setHi(0); runSearch(e.target.value); }}
+          onFocus={() => { if (q.trim().length >= 2) setOpen(true); }}
           onKeyDown={onKeyDown}
-          placeholder="Rechercher un projet (code ou nom)…"
+          placeholder="Rechercher : projet, jalon, risque, décision…"
           className="w-full h-8 pl-8 pr-14 text-xs bg-slate-50 border border-gray-200 rounded-lg focus:outline-none focus:border-[#0052CC] focus:bg-white focus:ring-1 focus:ring-[#0052CC] transition-colors placeholder:text-slate-400"
         />
         <kbd className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-mono text-slate-400 bg-white border border-gray-200 rounded px-1 py-0.5 pointer-events-none hidden md:block">
@@ -92,32 +154,31 @@ export default function GlobalSearch() {
         </kbd>
       </div>
 
-      {open && query && (
+      {open && q.trim().length >= 2 && (
         <div data-testid="global-search-results"
-          className="absolute top-9 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-xl z-50 overflow-hidden">
-          {results.length === 0 ? (
+          className="absolute top-9 left-0 right-0 bg-white border border-gray-200 rounded-lg shadow-xl z-50 overflow-hidden max-h-[70vh] overflow-y-auto">
+          {loading && !res ? (
+            <div className="px-3 py-3 text-xs text-slate-400">Recherche…</div>
+          ) : !hasResults ? (
             <div className="px-3 py-3 text-xs text-slate-400" data-testid="global-search-empty">
-              Aucun projet ne correspond à « {q} »
+              Aucun résultat pour « {q} »
             </div>
           ) : (
-            results.map((p, i) => (
-              <button
-                key={p.project_id}
-                data-testid={`global-search-result-${p.project_id}`}
-                onMouseDown={(e) => { e.preventDefault(); go(p); }}
-                onMouseEnter={() => setHi(i)}
-                className={`w-full flex items-center gap-2 px-3 py-2 text-left transition-colors ${i === hi ? "bg-[#EBF2FF]" : "hover:bg-gray-50"}`}
-              >
-                <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${RAG_DOT[p.status_rag] || "bg-slate-300"}`} />
-                {p.code && (
-                  <span className="font-mono text-[10px] font-semibold text-[#0052CC] bg-[#EBF2FF] border border-[#0052CC]/20 rounded px-1.5 py-0.5 flex-shrink-0">
-                    {p.code}
-                  </span>
-                )}
-                <span className="text-xs text-slate-700 truncate flex-1">{p.name}</span>
-                {i === hi && <CornerDownLeft size={11} className="text-slate-300 flex-shrink-0" />}
-              </button>
-            ))
+            GROUPS.map(({ key, label, Icon }) => {
+              const items = res?.[key] || [];
+              if (!items.length) return null;
+              return (
+                <div key={key} data-testid={`global-search-group-${key}`}>
+                  <div className="flex items-center gap-1.5 px-3 pt-2.5 pb-1 text-[10px] font-semibold uppercase tracking-wide text-slate-400 bg-slate-50/60">
+                    <Icon size={10} /> {label}
+                  </div>
+                  {items.map((item) => {
+                    flatIdx += 1;
+                    return renderItem({ group: key, item }, flatIdx);
+                  })}
+                </div>
+              );
+            })
           )}
         </div>
       )}
