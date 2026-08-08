@@ -56,6 +56,13 @@ def _table_style(header_cols: int) -> list:
     ]
 
 
+def _pc(item, name_key="project_name", code_key="project_code") -> str:
+    """Nom projet préfixé du code (« P01-002 — Nom »)."""
+    code = item.get(code_key) or ""
+    name = str(item.get(name_key) or "—")
+    return f"{code} — {name}" if code else name
+
+
 async def export_dashboard_pdf(current_user: TokenPayload) -> bytes:
     tenant = await db.tenants.find_one(
         {"tenant_id": current_user.tenant_id}, {"_id": 0, "name": 1}
@@ -185,7 +192,7 @@ async def export_dashboard_pdf(current_user: TokenPayload) -> bytes:
             crit = r.get("criticality") or 0
             risk_data.append([
                 Paragraph(str(r.get("title") or "—")[:80], p_cell),
-                Paragraph(str(r.get("project_name") or "—")[:45], p_cell),
+                Paragraph(_pc(r)[:55], p_cell),
                 str(crit),
                 str(r.get("status") or "—"),
             ])
@@ -210,7 +217,7 @@ async def export_dashboard_pdf(current_user: TokenPayload) -> bytes:
         for i, m in enumerate(upcoming, 1):
             ms_data.append([
                 Paragraph(str(m.get("name") or "—")[:70], p_cell),
-                Paragraph(str(m.get("project_name") or "—")[:45], p_cell),
+                Paragraph(_pc(m)[:55], p_cell),
                 _date_fr(m.get("date_forecast")),
                 "EN RETARD" if m.get("late") else "OK",
             ])
@@ -263,7 +270,7 @@ async def export_dashboard_pdf(current_user: TokenPayload) -> bytes:
         for d in decisions:
             d_data.append([
                 Paragraph(str(d.get("title") or "—")[:80], p_cell),
-                Paragraph(str(d.get("project_name") or "—")[:45], p_cell),
+                Paragraph(_pc(d)[:55], p_cell),
                 str(d.get("status") or "—"),
                 _date_fr(d.get("decision_date")),
             ])

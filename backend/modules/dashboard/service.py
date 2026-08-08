@@ -62,9 +62,10 @@ DASHBOARD_DEFAULT_WIDGETS = [
 async def get_extras(current_user: TokenPayload) -> dict:
     """Données des widgets additionnels du dashboard principal."""
     projects = await db.projects.find(
-        _project_query(current_user), {"_id": 0, "project_id": 1, "name": 1}
+        _project_query(current_user), {"_id": 0, "project_id": 1, "name": 1, "code": 1}
     ).to_list(None)
     pnames = {p["project_id"]: p["name"] for p in projects}
+    pcodes = {p["project_id"]: p.get("code") or "" for p in projects}
     pids = list(pnames.keys())
     today = datetime.now(timezone.utc).date()
     horizon = (today + timedelta(days=30)).isoformat()
@@ -86,6 +87,7 @@ async def get_extras(current_user: TokenPayload) -> dict:
             "name": m.get("name"),
             "project_id": m.get("project_id"),
             "project_name": pnames.get(m.get("project_id"), "—"),
+            "project_code": pcodes.get(m.get("project_id"), ""),
             "date_forecast": fc,
             "days_remaining": days,
             "late": (m.get("date_forecast") or "") > (m.get("date_baseline") or "9999")
@@ -123,6 +125,7 @@ async def get_extras(current_user: TokenPayload) -> dict:
             "category": d.get("category"),
             "project_id": d.get("project_id"),
             "project_name": pnames.get(d.get("project_id"), "—"),
+            "project_code": pcodes.get(d.get("project_id"), ""),
             "decision_date": d.get("decision_date") or (d.get("created_at") or "")[:10],
         }
         for d in decisions
@@ -252,16 +255,18 @@ async def update_cxo_preferences(widgets: list, current_user: TokenPayload) -> d
 async def get_top_risks(current_user: TokenPayload) -> list:
     # Filtrer d'abord les projets autorisés
     allowed_projects = await db.projects.find(
-        _project_query(current_user), {"_id": 0, "project_id": 1, "name": 1}
+        _project_query(current_user), {"_id": 0, "project_id": 1, "name": 1, "code": 1}
     ).to_list(None)
     allowed_ids = [p["project_id"] for p in allowed_projects]
     project_map = {p["project_id"]: p["name"] for p in allowed_projects}
+    code_map = {p["project_id"]: p.get("code") or "" for p in allowed_projects}
 
     risks = await db.risks.find(
         {"tenant_id": current_user.tenant_id, "project_id": {"$in": allowed_ids}}, {"_id": 0}
     ).sort("criticality", -1).to_list(None)
     return [
-        {**r, "project_name": project_map.get(r["project_id"], "—")}
+        {**r, "project_name": project_map.get(r["project_id"], "—"),
+         "project_code": code_map.get(r["project_id"], "")}
         for r in risks[:10]
     ]
 

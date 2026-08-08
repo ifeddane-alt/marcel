@@ -2,6 +2,14 @@
 from pptx_base import *
 from pptx_base import _brand, _set_brand, _blank_slide, _rect, _tb, _clear, _run, _header, _footer, _section_label, _styled_table, _kv_table, _CURRENT_BRAND
 
+
+def _cname(p, default="?"):
+    """Nom du projet préfixé de son code (« P01-002 · Nom »)."""
+    name = p.get("name") or default
+    code = p.get("code")
+    return f"{code} · {name}" if code else name
+
+
 def add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_date, dependencies=None, brand=None):
     """Génère un slide Roadmap avec un diagramme Gantt matplotlib multi-projets.
     Losanges colorés par famille (or/violet/vert), bordures critical/strategic, flèches dépendances."""
@@ -34,7 +42,7 @@ def add_slide_roadmap(prs, projects, all_milestones, instance_name, instance_dat
         if not end or end <= start:
             end = start + timedelta(days=90)
         rows.append({
-            "name": (p.get("name") or "?")[:35],
+            "name": _cname(p)[:42],
             "start": start, "end": end,
             "rag": p.get("status_rag", "green"),
             "pid": p.get("project_id"),
@@ -283,7 +291,7 @@ def add_slide_garde(prs, instance_name, instance_date, projects, brand=None):
         ntb = _tb(slide, Inches(0.58), row_y + Inches(0.07), Inches(10.0), row_h)
         _clear(ntb.text_frame)
         rn = ntb.text_frame.paragraphs[0].add_run()
-        rn.text = trunc(p_data.get("name", "?"), 65)
+        rn.text = trunc(_cname(p_data), 65)
         rn.font.size = Pt(9)
         rn.font.bold = True
         rn.font.name = FONT
@@ -339,7 +347,7 @@ def add_slide_sommaire(prs, projects, instance_name="", instance_date="", brand=
         rows.append([
             (rag_label(rag), {"bg": {"green": LIGHT_GREEN, "orange": LIGHT_AMBER, "red": LIGHT_RED}.get(rag, BG),
                               "color": rag_color(rag), "bold": True, "align": PP_ALIGN.CENTER, "size": 8}),
-            (trunc(p.get("name", "?"), 55), {}),
+            (trunc(_cname(p), 55), {}),
             (trunc(p.get("owner_name", p.get("metadata", {}).get("sponsor", "—")), 22), {"color": MID}),
             (f"{int(total/1000):,}".replace(",", "\u202f"), {"align": PP_ALIGN.RIGHT}),
             (f"{int(eac/1000):,}".replace(",", "\u202f"), {"align": PP_ALIGN.RIGHT, "bold": True}),
@@ -567,7 +575,7 @@ def add_slide_fiche(prs, project, milestones, risks, decisions, instance_name=""
     co      = (brand or {}).get("company_name", "MARCEL")
 
     name = project.get("name", "?")
-    code = project.get("source_id", "")
+    code = project.get("code") or project.get("source_id", "")
     rag = project.get("status_rag", "green")
     status = project.get("status", "")
     methodology = project.get("methodology", "—")
@@ -789,7 +797,7 @@ def add_slide_team_consumption(prs, project, team_rows, instance_name, instance_
     # Background
     _rect(slide, Emu(0), Emu(0), SW, SH, fill=WHITE)
 
-    proj_name = project.get("name", "?")
+    proj_name = _cname(project)
     _header(slide, f"{proj_name.upper()}  ·  CONSOMMATION PAR ÉQUIPE",
             subtitle="Répartition JH & coûts · RAF valorisé · Atterrissage", height_in=1.2, brand=brand)
 
@@ -967,7 +975,7 @@ def add_slide_cloture(prs, projects, all_risks, instance_name="", instance_date=
         lambda r: (
             LIGHT_RED,
             f"[{r.get('criticality', 0)}/25] {r.get('title', '?')}",
-            proj_map.get(r.get("project_id", ""), {}).get("name", "—")[:22]
+            _cname(proj_map.get(r.get("project_id", ""), {}), "—")[:26]
         )
     )
 
@@ -981,7 +989,7 @@ def add_slide_cloture(prs, projects, all_risks, instance_name="", instance_date=
         "Aucun projet rouge",
         lambda p: (
             LIGHT_RED,
-            p.get("name", "?"),
+            _cname(p),
             rag_label(p.get("status_rag", ""))
         )
     )
@@ -997,7 +1005,7 @@ def add_slide_cloture(prs, projects, all_risks, instance_name="", instance_date=
         "Aucun dépassement EAC > 10 %",
         lambda p: (
             LIGHT_AMBER,
-            p.get("name", "?"),
+            _cname(p),
             f"+{round((p.get('budget_forecast', 0) / max(p.get('budget_total', 1), 1) - 1) * 100)} %"
         )
     )
@@ -1028,7 +1036,7 @@ def generate_copil_pptx(instance_name, instance_date, projects,
     brand = _brand(branding)
     _CURRENT_BRAND = brand  # Appliqué à toutes les slides via _run() et _footer()
 
-    proj_names = {p["project_id"]: p["name"] for p in projects}
+    proj_names = {p["project_id"]: _cname(p) for p in projects}
     tc_by_proj = team_consumption_by_project or {}
 
     # Enrich decisions with project_name

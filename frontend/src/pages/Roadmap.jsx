@@ -227,7 +227,10 @@ function ScopeVsReelView({ projects, snapshots, selectedSnapshotId, setSelectedS
                   <div className="flex-shrink-0 border-r border-gray-100 px-4 py-3" style={{ width: 240 }}>
                     <div className="flex items-center gap-1">
                       <div className={`w-2 h-2 rounded-full flex-shrink-0 ${p.status_rag === "green" ? "bg-emerald-500" : p.status_rag === "orange" ? "bg-amber-500" : p.status_rag === "red" ? "bg-rose-500" : "bg-slate-300"}`} />
-                      <span className="text-xs font-semibold text-slate-700 truncate">{p.name}</span>
+                      <span className="text-xs font-semibold text-slate-700 truncate">
+                        {p.code && <span className="font-mono text-[10px] text-slate-400 mr-1">{p.code}</span>}
+                        {p.name}
+                      </span>
                       {statusBadge}
                     </div>
                     <div className="text-[10px] text-slate-400 mt-1">{p.owner || ""}</div>
@@ -734,7 +737,8 @@ export default function Roadmap() {
                           <span className={`w-1.5 h-4 rounded-sm flex-shrink-0 ${ragCfg.bg}`} />
                           <Link to={`/projects/${p.project_id}`}
                             className="text-xs text-slate-700 font-medium hover:text-[#0052CC] truncate flex-1"
-                            title={p.name} data-testid={`roadmap-project-link-${p.project_id}`}>
+                            title={p.code ? `${p.code} · ${p.name}` : p.name} data-testid={`roadmap-project-link-${p.project_id}`}>
+                            {p.code && <span className="font-mono text-[10px] text-slate-400 mr-1">{p.code}</span>}
                             {p.name.split("—")[0].trim().slice(0, 26)}
                           </Link>
                           <ExternalLink size={9} className="text-slate-300 flex-shrink-0" />
@@ -758,9 +762,9 @@ export default function Roadmap() {
                             <div
                               className={`absolute top-2.5 h-5 rounded ${ragCfg.bg} ${ragCfg.border} border cursor-pointer flex items-center px-1.5 overflow-hidden z-20 transition-opacity hover:opacity-90`}
                               style={{ left: barX.left, width: Math.max(barX.right - barX.left, 6) }}
-                              title={`${p.name}\n${formatDate(p.start_date)} → ${formatDate(p.end_date_forecast || p.end_date_baseline)}`}
+                              title={`${p.code ? `${p.code} · ` : ""}${p.name}\n${formatDate(p.start_date)} → ${formatDate(p.end_date_forecast || p.end_date_baseline)}`}
                               onClick={() => setTooltip(tooltip?.id === p.project_id ? null : {
-                                id: p.project_id, name: p.name,
+                                id: p.project_id, name: p.code ? `${p.code} · ${p.name}` : p.name,
                                 start: formatDate(p.start_date),
                                 end: formatDate(p.end_date_forecast || p.end_date_baseline),
                                 rag: p.status_rag, status: STATUS_LABELS[p.status] || p.status, budget: p.budget_total,
