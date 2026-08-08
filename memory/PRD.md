@@ -230,6 +230,11 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - SSH pod opérationnel ; deploy = ssh /opt/marcel : git pull, docker compose build+up, restart nginx-http, prune du cache après build
 - Licence MARCEL_LICENSE_KEY requise dans /opt/marcel/.env (générée jusqu'à 2030)
 
+## 2026-06 — Refonte design EN PAUSE (décision utilisateur "on verra plus tard")
+- Migration globale des styles déjà appliquée dans le code (polices Outfit/Plus Jakarta Sans/JetBrains Mono, couleurs zinc + bleu #2563EB, 66 fichiers) — NON validée par l'utilisateur, Login garde l'ancien style sombre
+- 3 propositions de design maquettées et présentées : /app/frontend/public/mockups/proposition1.html (Épure moderne), proposition2.html (Split navy), proposition3.html (Vitaminé façon Monday) — consultables sur {preview}/mockups/propositionN.html
+- L'utilisateur n'a pas encore choisi de direction ; reprendre par ce choix avant tout travail visuel
+
 ## 2026-06 — SSO Entra/Okta REPORTÉ (décision utilisateur)
 - L'utilisateur n'a pas de compte Azure ; Okta idem. À reprendre plus tard.
 - Tout est prêt côté MARCEL : code SSO déployé en prod, procédure complète documentée dans la conversation (App registration Azure → Redirect URI https://marcel-ppm.com/api/auth/sso/callback/entra → config Admin > Configuration > SSO)
