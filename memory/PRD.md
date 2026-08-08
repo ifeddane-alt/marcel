@@ -210,3 +210,6 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - Import Microsoft Project .mpp binaire (MPXJ + JRE) et XML MSPDI sur la Roadmap (choix projet cible)
 - Dockerfile backend : default-jre-headless ajouté (requis au prochain déploiement VPS)
 - Commits: 6d80c09 (drag&drop barre), d6f380f (Excel/MPP)
+
+## 2026-06 — Export PDF COMEX (livré, auto-testé)
+- GET /api/dashboard/export/pdf + bouton « PDF COMEX » sur le dashboard — rapport hebdo portefeuille prêt COMEX

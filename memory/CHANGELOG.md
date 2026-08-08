@@ -75,3 +75,9 @@
 - Composants frontend : ExcelToolbar.jsx, MsProjectImport.jsx — boutons sur 9 pages
 - Dockerfile : ajout default-jre-headless (nécessaire pour le déploiement VPS)
 - Testé : agent iteration_51 = 16/16 backend, frontend 100% (fix import manquant Timesheets.jsx)
+
+## 2026-06 — Export PDF COMEX du dashboard
+- Endpoint GET /api/dashboard/export/pdf (reportlab) : KPIs, météo RAG, top 5 projets budget, top risques (criticité colorée), jalons 30j (retards en rouge), charge équipes mois courant, dernières décisions
+- Bouton « PDF COMEX » sur le dashboard (data-testid dashboard-export-pdf-btn)
+- Fichiers : backend/modules/dashboard/pdf_export.py, router.py, frontend Dashboard.jsx, api/index.js
+- Auto-testé : HTTP 200, PDF 2 pages valide (contrôle visuel OK), téléchargement UI vérifié
