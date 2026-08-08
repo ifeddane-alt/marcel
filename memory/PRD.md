@@ -216,3 +216,6 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 
 ## 2026-06 — Codification unique des projets (livré, auto-testé)
 - Préfixes par programme configurables (admin), code auto verrouillé PREFIX-001, backfill projets existants, anti-doublon serveur
+
+## 2026-06 — Recherche globale par code (livré, auto-testé)
+- Barre de recherche topbar : code ou nom → ouverture directe de la fiche projet, Ctrl+K

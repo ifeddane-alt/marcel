@@ -97,3 +97,9 @@
 - Roadmap.jsx : code mono gris devant le nom (timeline + Scope vs Réel + tooltips)
 - Fix : lignes résiduelles dupliquées dans pdf_export.py (SyntaxError) corrigées
 - Auto-testé : 4 codes retrouvés dans le texte PPT, 6 codes dans le PDF, screenshot Roadmap OK
+
+## 2026-06 — Recherche globale par code projet
+- Nouveau composant GlobalSearch.jsx dans la topbar (Layout.jsx)
+- Recherche par code (priorité : exact > préfixe > contient) puis par nom ; badge code bleu + pastille RAG dans les résultats
+- Enter sur un code exact ouvre directement la fiche projet ; navigation clavier (flèches) ; raccourci Ctrl/Cmd+K
+- Auto-testé : DATA-001 → fiche ouverte, recherche par nom 'phoenix' OK
