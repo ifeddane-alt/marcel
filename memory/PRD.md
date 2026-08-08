@@ -229,3 +229,7 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 ## 2026-06 — Production déployée (marcel-ppm.com, VPS Scaleway)
 - SSH pod opérationnel ; deploy = ssh /opt/marcel : git pull, docker compose build+up, restart nginx-http, prune du cache après build
 - Licence MARCEL_LICENSE_KEY requise dans /opt/marcel/.env (générée jusqu'à 2030)
+
+## 2026-06 — SSO Entra/Okta REPORTÉ (décision utilisateur)
+- L'utilisateur n'a pas de compte Azure ; Okta idem. À reprendre plus tard.
+- Tout est prêt côté MARCEL : code SSO déployé en prod, procédure complète documentée dans la conversation (App registration Azure → Redirect URI https://marcel-ppm.com/api/auth/sso/callback/entra → config Admin > Configuration > SSO)
