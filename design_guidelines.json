@@ -1,199 +1,130 @@
 {
-  "design_system": {
-    "identity": {
-      "name": "MARCEL",
-      "personality": "The Swiss Architect",
-      "core_values": [
-        "Precision",
-        "Authority",
-        "Clarity",
-        "Density"
-      ],
-      "aesthetic": "Swiss International Style meets Enterprise functionality. Rigid grids, high contrast, information density, and absolute typographical hierarchy."
+  "project_context": "Refonte UI/UX de MARCEL PPM SaaS. Style cible : SaaS moderne, dynamique et lisible (type Monday.com, ClickUp). Haute densité de données mais aspect aéré. Ne pas casser le fonctionnel.",
+  "typography": {
+    "heading_font": {
+      "name": "Outfit",
+      "import_url": "https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap",
+      "usage": "font-heading"
     },
-    "typography": {
-      "font_family": {
-        "headings": "Barlow Condensed, sans-serif",
-        "body": "Inter, sans-serif",
-        "mono": "JetBrains Mono, monospace"
-      },
-      "weights": {
-        "headings": "700",
-        "subheadings": "500",
-        "body": "400",
-        "bold": "600"
-      },
-      "scale": {
-        "h1": "text-4xl tracking-tight font-bold uppercase",
-        "h2": "text-2xl tracking-tight font-semibold",
-        "h3": "text-xl font-medium",
-        "body": "text-sm leading-relaxed",
-        "small": "text-xs tracking-wide text-muted-foreground",
-        "label": "text-[10px] uppercase tracking-widest font-bold text-muted-foreground"
-      },
-      "imports": [
-        "https://fonts.googleapis.com/css2?family=Barlow+Condensed:wght@400;500;700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap"
-      ]
+    "body_font": {
+      "name": "Plus Jakarta Sans",
+      "import_url": "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap",
+      "usage": "font-sans"
     },
-    "colors": {
-      "palette": {
-        "primary": {
-          "DEFAULT": "#0F172A",
-          "foreground": "#F8FAFC"
-        },
-        "secondary": {
-          "DEFAULT": "#F1F5F9",
-          "foreground": "#0F172A"
-        },
-        "accent": {
-          "DEFAULT": "#0052CC",
-          "foreground": "#FFFFFF"
-        },
-        "background": "#F8F9FA",
-        "card": "#FFFFFF",
-        "border": "#E2E8F0",
-        "muted": "#64748B",
-        "functional": {
-          "success": "#10B981",
-          "warning": "#F59E0B",
-          "danger": "#EF4444",
-          "info": "#3B82F6"
-        }
+    "mono_font": {
+      "name": "JetBrains Mono",
+      "import_url": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap",
+      "usage": "font-mono"
+    },
+    "scale": {
+      "h1": "text-3xl font-bold tracking-tight text-zinc-950 font-heading",
+      "h2": "text-2xl font-semibold tracking-tight text-zinc-900 font-heading",
+      "h3": "text-xl font-medium tracking-tight text-zinc-900 font-heading",
+      "body": "text-sm text-zinc-600 font-sans leading-relaxed",
+      "project_code": "text-xs font-mono bg-zinc-100 text-zinc-800 px-1.5 py-0.5 rounded-md border border-zinc-200 uppercase"
+    }
+  },
+  "colors": {
+    "brand_evolution": {
+      "description": "Remplacement du bleu corporatif #0052CC par un bleu plus électrique et moderne (#2563EB) en s'inspirant de Monday.com.",
+      "brand_50": "#eff6ff",
+      "brand_100": "#dbeafe",
+      "brand_500": "#3b82f6",
+      "brand_600": "#2563eb",
+      "brand_700": "#1d4ed8"
+    },
+    "neutrals": {
+      "app_bg": "#fafafa (zinc-50)",
+      "surface_bg": "#ffffff (white)",
+      "border": "#e4e4e7 (zinc-200)",
+      "text_primary": "#09090b (zinc-950)",
+      "text_secondary": "#71717a (zinc-500)",
+      "text_tertiary": "#a1a1aa (zinc-400)"
+    },
+    "semantic_rag": {
+      "red": {
+        "classes": "bg-red-100 text-red-700 border-red-200",
+        "hex": "#fee2e2, #b91c1c"
       },
-      "usage": {
-        "sidebar": "bg-[#0F172A] text-white",
-        "header": "bg-white border-b border-gray-200",
-        "app_bg": "bg-[#F8F9FA]",
-        "cards": "bg-white border border-gray-200 shadow-sm"
+      "amber": {
+        "classes": "bg-amber-100 text-amber-700 border-amber-200",
+        "hex": "#fef3c7, #b45309"
+      },
+      "green": {
+        "classes": "bg-emerald-100 text-emerald-700 border-emerald-200",
+        "hex": "#d1fae5, #047857"
       }
-    },
-    "spacing": {
-      "container_padding": "p-8",
-      "section_gap": "gap-8",
-      "element_gap": "gap-4",
-      "dense_padding": "p-2",
-      "card_padding": "p-6"
-    },
-    "borders": {
-      "radius": "rounded-sm",
-      "width": "border",
-      "color": "border-gray-200",
-      "style": "solid"
-    },
-    "shadows": {
-      "card": "shadow-[0_1px_2px_0_rgba(0,0,0,0.05)]",
-      "dropdown": "shadow-lg border border-gray-100",
-      "hover": "shadow-md"
-    },
-    "motion": {
-      "duration": "duration-200",
-      "ease": "ease-out",
-      "hover_transform": "hover:-translate-y-[1px]"
     }
   },
-  "layout_strategies": {
-    "dashboard": {
-      "type": "bento_grid_dense",
-      "columns": "grid-cols-1 md:grid-cols-4 lg:grid-cols-12",
-      "gap": "gap-4",
-      "areas": [
-        {
-          "name": "summary_metrics",
-          "span": "col-span-12 lg:col-span-12 h-auto"
-        },
-        {
-          "name": "main_chart",
-          "span": "col-span-12 lg:col-span-8 row-span-2"
-        },
-        {
-          "name": "status_breakdown",
-          "span": "col-span-12 lg:col-span-4 row-span-1"
-        },
-        {
-          "name": "recent_activity",
-          "span": "col-span-12 lg:col-span-4 row-span-1"
-        }
-      ]
-    },
-    "project_detail": {
-      "type": "sidebar_content",
-      "structure": "Fixed sidebar, scrollable content area. Header contains breadcrumbs and primary actions."
+  "color_migration_mapping": {
+    "instructions": "Rechercher et remplacer les classes Tailwind arbitraires par les nouvelles classes sémantiques.",
+    "replacements": {
+      "bg-[#0052CC]": "bg-blue-600",
+      "text-[#0052CC]": "text-blue-600",
+      "border-[#0052CC]": "border-blue-600",
+      "hover:bg-[#003D99]": "hover:bg-blue-700",
+      "bg-[#F8FAFC]": "bg-zinc-50",
+      "text-[#0F172A]": "text-zinc-950",
+      "text-[#475569]": "text-zinc-500",
+      "text-[#64748B]": "text-zinc-500"
     }
   },
-  "components": {
+  "grids_and_layouts": {
+    "app_shell": "flex h-screen w-full bg-zinc-50 overflow-hidden",
+    "sidebar": "w-64 bg-white border-r border-zinc-200 flex-shrink-0 z-20 flex flex-col",
+    "main_content": "flex-1 flex flex-col min-w-0 overflow-hidden",
+    "topbar": "h-14 bg-white border-b border-zinc-200 flex items-center justify-between px-4 sm:px-6 z-10 flex-shrink-0",
+    "page_container": "flex-1 overflow-auto p-4 sm:p-6 md:p-8 space-y-6",
+    "dashboard_grid": "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-min",
+    "dashboard_bento_rules": "Varier les col-span et row-span. Cartes KPI en tête (col-span-1), tableaux larges et Gantt en dessous (col-span-full ou md:col-span-2)."
+  },
+  "component_styling": {
+    "cards_and_widgets": "bg-white rounded-xl border border-zinc-200 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] p-5 transition-shadow duration-200 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
     "buttons": {
-      "primary": "bg-[#0F172A] text-white hover:bg-[#1E293B] rounded-sm px-4 py-2 text-sm font-medium transition-colors",
-      "secondary": "bg-white text-[#0F172A] border border-gray-300 hover:bg-gray-50 rounded-sm px-4 py-2 text-sm font-medium transition-colors",
-      "ghost": "hover:bg-gray-100 text-gray-700 rounded-sm px-3 py-2 text-sm font-medium transition-colors",
-      "danger": "bg-red-600 text-white hover:bg-red-700 rounded-sm px-4 py-2 text-sm font-medium transition-colors"
+      "primary": "inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2",
+      "secondary": "inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-sm font-medium text-zinc-700 border border-zinc-200 shadow-sm hover:bg-zinc-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2",
+      "ghost": "inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 transition-colors"
     },
-    "cards": {
-      "default": "bg-white border border-gray-200 rounded-sm shadow-sm p-6 hover:shadow-md transition-shadow",
-      "metric": "flex flex-col justify-between p-6 bg-white border-l-4 border-l-[#0F172A] border-y border-r border-gray-200 rounded-sm shadow-sm"
-    },
-    "tables": {
-      "container": "w-full border-collapse text-sm",
-      "header": "bg-gray-50 text-left font-semibold text-gray-900 border-b border-gray-200",
-      "row": "border-b border-gray-100 hover:bg-gray-50/50 transition-colors",
-      "cell": "py-3 px-4 text-gray-700 align-middle",
-      "status_badge": "inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium capitalize"
-    },
-    "badges": {
-      "styles": {
-        "success": "bg-emerald-100 text-emerald-800",
-        "warning": "bg-amber-100 text-amber-800",
-        "danger": "bg-rose-100 text-rose-800",
-        "neutral": "bg-gray-100 text-gray-800"
-      }
-    },
-    "inputs": {
-      "default": "flex h-10 w-full rounded-sm border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
-    }
+    "tables": "w-full text-sm text-left text-zinc-600. Header: bg-zinc-50/80 text-xs font-semibold uppercase tracking-wider text-zinc-500 py-3 px-4 border-y border-zinc-200. Cellules: py-3 px-4 border-b border-zinc-100. Lignes au survol: hover:bg-zinc-50/50.",
+    "rag_badges": "inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold border",
+    "inputs": "flex h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all",
+    "modals": "fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/40 backdrop-blur-sm. Contenu: bg-white rounded-2xl shadow-2xl border border-zinc-100 overflow-hidden w-full max-w-lg",
+    "sidebar_links": "flex items-center px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950 transition-colors group. État actif: bg-blue-50 text-blue-700 font-semibold"
   },
-  "assets": {
-    "libraries": [
-      {
-        "name": "lucide-react",
-        "usage": "For all icons. Use strict 1.5px stroke width for consistency."
-      },
-      {
-        "name": "recharts",
-        "usage": "For data visualization (budget trends, status distribution)."
-      },
-      {
-        "name": "clsx",
-        "usage": "For conditional class merging."
-      },
-      {
-        "name": "tailwind-merge",
-        "usage": "For safe tailwind class merging."
-      }
-    ],
-    "images": {
-      "logo": "placeholder",
-      "avatars": "placeholder"
-    }
+  "motion_and_interactions": {
+    "hover_states": "Appliquer des états hover explicites sur tous les éléments cliquables (changement de fond ou -translate-y-px pour les cartes).",
+    "transitions": "Utiliser `transition-colors duration-200` (exclure 'all' pour ne pas casser les animations complexes).",
+    "toast": "Sonner (Toasts) : position bottom-right, bordures arrondies (rounded-xl), fond blanc, ombre douce."
+  },
+  "visual_enhancers": {
+    "icons": "lucide-react : taille 18px (w-4.5 h-4.5) pour la sidebar afin de coller au style net de ClickUp.",
+    "empty_states": "Centrer le contenu, icône Lucide grisée (taille 48px, text-zinc-300), texte d'explication net, bouton CTA primaire juste en dessous.",
+    "avatars": "rounded-full, text-xs font-medium bg-blue-100 text-blue-700 border border-white shadow-sm flex items-center justify-center"
   },
   "accessibility": {
-    "contrast": "Strict WCAG AA compliance. Text on colored badges must check contrast.",
-    "focus": "Visible focus rings on all interactive elements.",
-    "aria": "All icon-only buttons must have aria-label."
+    "contrast": "Le bleu #2563EB garantit un contraste de 4.5:1 sur du texte blanc. Privilégier les textes zinc-950/zinc-600 sur fond clair.",
+    "focus": "Tous les inputs/boutons doivent posséder focus-visible:ring-2.",
+    "data_testid": "MANDATORY: Tous les éléments interactifs doivent inclure un attribut data-testid (ex: data-testid='login-submit-button')."
   },
-  "universal_guidelines": [
-    "Do not use gradients for backgrounds. Stick to flat, solid colors.",
-    "Use 'Barlow Condensed' for all headings to give a distinct 'MARCEL' look.",
-    "Data density is key. Avoid excessive padding in tables. Use 'p-3' or 'p-2' for table cells.",
-    "All financial figures must be right-aligned and monospaced (JetBrains Mono).",
-    "Dates should be formatted as 'DD MMM YYYY' (e.g., 12 Oct 2025).",
-    "Status badges (RAG) are the primary visual indicator in lists.",
-    "Sidebar should remain dark (#0F172A) to anchor the layout.",
-    "Use a 'breadcrumb' navigation on all detail pages."
-  ],
   "instructions_to_main_agent": {
-    "setup": "Install fonts via Google Fonts import in index.css. Configure tailwind.config.js with the custom colors.",
-    "layout": "Create a persistent Layout component with the Sidebar and Topbar.",
-    "routing": "Use React Router. Protect routes based on roles.",
-    "mocking": "Mock all API calls with realistic French enterprise data (e.g., 'Projet Phoenix', 'Transformation Digitale 2025').",
-    "charts": "Use Recharts for the Dashboard. Keep them simple: Bar Charts and Pie Charts only."
-  }
+    "step_1": "Mettre à jour l'import Google Fonts dans le fichier CSS principal pour charger Outfit, Plus Jakarta Sans et JetBrains Mono.",
+    "step_2": "Mettre à jour tailwind.config.js pour configurer les variables font-heading, font-sans, et font-mono.",
+    "step_3": "Exécuter un remplacement global (Search/Replace) des couleurs codées en dur (#0052CC, #0F172A, #F8FAFC) en s'appuyant sur color_migration_mapping.",
+    "step_4": "Refactoriser l'App Shell (Sidebar, Topbar) pour implémenter la nouvelle esthétique aérée et les fonds clairs, interdisant le transparent si du contenu défile dessous.",
+    "step_5": "Mettre à jour les Dashboard Widgets (Cards) et les styles RAG (Red/Amber/Green) pour utiliser les nouvelles palettes pastel claires avec textes contrastés.",
+    "step_6": "Appliquer la nouvelle densité aux Tableaux et Listes avec des paddings nets et la police Mono pour les codes projets (P01-001).",
+    "step_7": "Assurer que tous les composants interactifs (boutons, inputs) reçoivent data-testid et utilisent les composants shadcn/ui."
+  },
+  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
+    "Les fichiers à modifier utilisent l'extension .js/.jsx. Les composants UI sont en HTML/Tailwind classique via React.",
+    "Vous transformez MARCEL d'un outil corporatif classique en un espace PMO vivant, moderne et fluide.",
+    "Ne PAS utiliser `<select>` natif ou `input type='date'`. Privilégiez TOUJOURS les composants Shadcn (DropdownMenu, Calendar, Select).",
+    "Remplacez TOUTES les couleurs legacy hardcodées (`bg-[#0052CC]`) par des classes Tailwind sémantiques (`bg-blue-600`).",
+    "Ne JAMAIS utiliser de fonds transparents pour la Topbar ou les menus modaux (z-index + fond plein obligatoire).",
+    "Utilisez des bordures douces (`rounded-lg`, `rounded-xl`) et des ombres légères pour recréer l'esthétique 'Monday.com'.",
+    "Ne jamais appliquer `transition: all` de façon globale, cela casse les animations de transformation.",
+    "Ne pas centrer les gros blocs de texte ou les tableaux. L'alignement à gauche est primordial pour la densité et la lisibilité des données (Dashboards/Tables).",
+    "Rendre les statuts RAG extrêmement visibles. Ne vous contentez pas de petits points ; utilisez des badges colorés (fond teinté + texte foncé).",
+    "Insérez `data-testid` sur tous les boutons, liens et formulaires pour les tests automatisés."
+  ]
 }
