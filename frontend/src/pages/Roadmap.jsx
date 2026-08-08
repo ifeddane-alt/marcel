@@ -5,6 +5,8 @@ import { projectsAPI, programsAPI, milestonesAPI, projectDependenciesAPI, scopeA
 import RAGBadge from "@/components/RAGBadge";
 import { FAMILY_CONFIG } from "@/components/MilestoneModal";
 import { formatDate } from "@/utils/format";
+import ExcelToolbar from "@/components/ExcelToolbar";
+import MsProjectImport from "@/components/MsProjectImport";
 
 const RAG_BAR_COLORS = {
   green:  { bg: "bg-emerald-500", border: "border-emerald-600", text: "text-white" },
@@ -315,7 +317,7 @@ export default function Roadmap() {
   const [tooltip, setTooltip] = useState(null);
   const scrollRef = useRef(null);
 
-  useEffect(() => {
+  const loadAll = () => {
     Promise.all([
       projectsAPI.list(),
       programsAPI.list(),
@@ -328,7 +330,10 @@ export default function Roadmap() {
       setAllDeps(dRes.data);
       setLoading(false);
     }).catch(() => setLoading(false));
-  }, []);
+  };
+
+  // eslint-disable-next-line react-hooks/exhaustive-deps
+  useEffect(() => { loadAll(); }, []);
 
   const programMap = useMemo(() => {
     const m = {};
@@ -523,18 +528,22 @@ export default function Roadmap() {
               )}
             </p>
           </div>
-          {activeRoadmapTab === "timeline" && (
-            <div className="flex items-center gap-2" data-testid="roadmap-zoom-controls">
-              <button onClick={() => setIsQuarter(false)} data-testid="zoom-month-btn"
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded transition-colors ${!isQuarter ? "bg-[#0052CC] text-white" : "border border-gray-200 text-slate-600 hover:bg-gray-50"}`}>
-                <ZoomIn size={12} /> Mois
-              </button>
-              <button onClick={() => setIsQuarter(true)} data-testid="zoom-quarter-btn"
-                className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded transition-colors ${isQuarter ? "bg-[#0052CC] text-white" : "border border-gray-200 text-slate-600 hover:bg-gray-50"}`}>
-                <ZoomOut size={12} /> Trimestre
-              </button>
-            </div>
-          )}
+          <div className="flex flex-wrap items-center gap-2 justify-end">
+            <ExcelToolbar entity="milestones" label="Jalons" onImported={loadAll} />
+            <MsProjectImport projects={projects} onImported={loadAll} />
+            {activeRoadmapTab === "timeline" && (
+              <div className="flex items-center gap-2" data-testid="roadmap-zoom-controls">
+                <button onClick={() => setIsQuarter(false)} data-testid="zoom-month-btn"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded transition-colors ${!isQuarter ? "bg-[#0052CC] text-white" : "border border-gray-200 text-slate-600 hover:bg-gray-50"}`}>
+                  <ZoomIn size={12} /> Mois
+                </button>
+                <button onClick={() => setIsQuarter(true)} data-testid="zoom-quarter-btn"
+                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded transition-colors ${isQuarter ? "bg-[#0052CC] text-white" : "border border-gray-200 text-slate-600 hover:bg-gray-50"}`}>
+                  <ZoomOut size={12} /> Trimestre
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

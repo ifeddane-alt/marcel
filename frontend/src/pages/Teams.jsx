@@ -7,6 +7,7 @@ import { teamsAPI, resourcesAPI } from "@/api";
 import TeamModal from "@/components/TeamModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import CapacityAlertBanner from "@/components/CapacityAlertBanner";
+import ExcelToolbar from "@/components/ExcelToolbar";
 
 export default function Teams() {
   const { user } = useAuth();
@@ -57,15 +58,18 @@ export default function Teams() {
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">Équipes</h1>
           <p className="text-sm text-slate-500 mt-0.5">{teams.length} équipe{teams.length > 1 ? "s" : ""} · Gestion des groupes ressources</p>
         </div>
-        {canCreate && (
-          <button
-            onClick={() => { setSelectedTeam(null); setModalOpen(true); }}
-            data-testid="btn-new-team"
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] transition-colors shadow-sm"
-          >
-            <Plus size={15} /> Nouvelle équipe
-          </button>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          <ExcelToolbar entity="teams" onImported={fetchAll} canImport={canCreate} />
+          {canCreate && (
+            <button
+              onClick={() => { setSelectedTeam(null); setModalOpen(true); }}
+              data-testid="btn-new-team"
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] transition-colors shadow-sm"
+            >
+              <Plus size={15} /> Nouvelle équipe
+            </button>
+          )}
+        </div>
       </div>
 
       <CapacityAlertBanner alerts={alerts} />

@@ -8,6 +8,7 @@ import {
   ChevronDown, ChevronRight, X, Edit2, ChevronUp,
 } from "lucide-react";
 import { budgetAPI } from "@/api";
+import ExcelToolbar from "@/components/ExcelToolbar";
 import { usePermissions } from "@/hooks/usePermissions";
 
 // ── Helpers ────────────────────────────────────────────────────────────────
@@ -440,14 +441,15 @@ export default function BudgetPage() {
           <h1 className="text-2xl font-bold text-slate-800" data-testid="budget-page-title">Budget Portefeuille</h1>
           <p className="text-sm text-slate-500 mt-0.5">Suivi financier consolidé — CAPEX · OPEX · EAC · RAF</p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex flex-wrap gap-2">
+          <ExcelToolbar entity="budget" onImported={load} />
           <button onClick={() => budgetAPI.exportExcel().then((r) => {
             const url = window.URL.createObjectURL(new Blob([r.data]));
             const a = document.createElement("a"); a.href = url;
             a.download = "budget_portefeuille.xlsx"; a.click();
           })} data-testid="export-excel-btn"
             className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-gray-200 rounded-lg bg-white hover:bg-gray-50 text-slate-600">
-            <Download size={14} /> Excel
+            <Download size={14} /> Excel détaillé
           </button>
           <button onClick={() => budgetAPI.exportPdf().then((r) => {
             const url = window.URL.createObjectURL(new Blob([r.data], { type: "application/pdf" }));

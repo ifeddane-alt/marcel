@@ -1,4 +1,9 @@
-"""Connecteur MS Project — export/import au format XML MSPDI (ouvrable dans MS Project)."""
+"""Connecteur MS Project — export/import XML MSPDI + import binaire .mpp (MPXJ)."""
+import asyncio
+import json
+import os
+import sys
+import tempfile
 import uuid
 import xml.etree.ElementTree as ET
 from datetime import datetime, timezone
@@ -153,6 +158,96 @@ async def import_project_xml(project_id: str, content: bytes, user: TokenPayload
                 "date_debut": start,
                 "date_fin": finish,
                 "source": "msproject",
+                "created_at": _now(),
+            })
+            tasks_created += 1
+
+    return {
+        "project_id": project_id,
+        "tasks_created": tasks_created,
+        "milestones_created": milestones_created,
+    }
+
+
+async def import_project_file(project_id: str, filename: str, content: bytes, user: TokenPayload) -> dict:
+    """Route l'import selon le format : XML MSPDI ou binaire .mpp."""
+    head = content.lstrip()[:5]
+    if (filename or "").lower().endswith(".xml") or head.startswith(b"<?xml") or head.startswith(b"<"):
+        return await import_project_xml(project_id, content, user)
+    return await import_project_mpp(project_id, content, user)
+
+
+async def import_project_mpp(project_id: str, content: bytes, user: TokenPayload) -> dict:
+    """Parse un fichier binaire Microsoft Project (.mpp) via MPXJ et crée tâches/jalons."""
+    require_write(user)
+    project = await db.projects.find_one(
+        {"project_id": project_id, "tenant_id": user.tenant_id}, {"_id": 0}
+    )
+    if not project:
+        raise HTTPException(404, "Projet introuvable")
+
+    with tempfile.NamedTemporaryFile(suffix=".mpp", delete=False) as f:
+        f.write(content)
+        tmp_path = f.name
+    out_path = tmp_path + ".json"
+    try:
+        script = os.path.join(os.path.dirname(__file__), "mpp_parser.py")
+        proc = await asyncio.create_subprocess_exec(
+            sys.executable, script, tmp_path, out_path,
+            stdout=asyncio.subprocess.PIPE, stderr=asyncio.subprocess.PIPE,
+        )
+        try:
+            out, err = await asyncio.wait_for(proc.communicate(), timeout=120)
+        except asyncio.TimeoutError:
+            proc.kill()
+            raise HTTPException(400, "Lecture du fichier .mpp trop longue (timeout)")
+        if proc.returncode != 0 and not os.path.exists(out_path):
+            raise HTTPException(400, f"Fichier .mpp illisible : {err.decode(errors='ignore')[-300:]}")
+        with open(out_path) as f:
+            parsed = json.load(f)
+    finally:
+        os.unlink(tmp_path)
+        if os.path.exists(out_path):
+            os.unlink(out_path)
+
+    if parsed.get("error"):
+        raise HTTPException(400, f"Fichier .mpp illisible : {parsed['error']}")
+
+    tasks_created = 0
+    milestones_created = 0
+    current_phase = None
+    for t in parsed.get("tasks", []):
+        if t.get("summary"):
+            current_phase = t["name"]
+            continue
+        if t.get("milestone"):
+            d = t.get("start") or t.get("finish") or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+            await db.milestones.insert_one({
+                "milestone_id": str(uuid.uuid4()),
+                "project_id": project_id,
+                "tenant_id": user.tenant_id,
+                "name": t["name"],
+                "family": "delivery",
+                "date_baseline": d,
+                "date_forecast": d,
+                "status": "not_done",
+                "phase": current_phase,
+                "source": "msproject_mpp",
+                "created_at": _now(),
+            })
+            milestones_created += 1
+        else:
+            await db.tasks.insert_one({
+                "task_id": str(uuid.uuid4()),
+                "project_id": project_id,
+                "tenant_id": user.tenant_id,
+                "name": t["name"],
+                "phase": current_phase,
+                "scope_status": "SEC",
+                "status": "todo",
+                "date_debut": t.get("start"),
+                "date_fin": t.get("finish"),
+                "source": "msproject_mpp",
                 "created_at": _now(),
             })
             tasks_created += 1

@@ -6,6 +6,7 @@ import { resourcesAPI, allocationsAPI, teamsAPI } from "@/api";
 import ResourceModal from "@/components/ResourceModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import CapacityHeatmap from "@/components/CapacityHeatmap";
+import ExcelToolbar from "@/components/ExcelToolbar";
 
 const TYPE_CONFIG = {
   interne:         { label: "INTERNE",  Icon: User,      bg: "bg-blue-50",   text: "text-blue-700",   border: "border-blue-200" },
@@ -76,12 +77,15 @@ export default function Resources() {
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">Ressources</h1>
           <p className="text-sm text-slate-500 mt-0.5">{resources.length} ressources · Capacités et allocations</p>
         </div>
-        {canCreate && (
-          <button onClick={openCreate} data-testid="btn-new-resource"
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] transition-colors shadow-sm">
-            <Plus size={15} /> Nouvelle ressource
-          </button>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          <ExcelToolbar entity="resources" onImported={fetchAll} canImport={canCreate} />
+          {canCreate && (
+            <button onClick={openCreate} data-testid="btn-new-resource"
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] transition-colors shadow-sm">
+              <Plus size={15} /> Nouvelle ressource
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Tabs */}

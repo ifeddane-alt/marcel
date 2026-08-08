@@ -9,6 +9,7 @@ import ProjectModal from "@/components/ProjectModal";
 import ExportCopilModal from "@/components/ExportCopilModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { formatEuro, formatDate } from "@/utils/format";
+import ExcelToolbar from "@/components/ExcelToolbar";
 
 const RAG_LABELS = { green: "Vert", orange: "Orange", red: "Rouge" };
 
@@ -139,15 +140,18 @@ export default function Portfolio() {
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">Portefeuille</h1>
           <p className="text-sm text-slate-500 mt-0.5">{projects.length} projets — {ragCounts.red} rouge · {ragCounts.orange} orange · {ragCounts.green} vert</p>
         </div>
-        {canCreate && (
-          <button
-            onClick={openCreate}
-            data-testid="btn-new-project"
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] transition-colors shadow-sm"
-          >
-            <Plus size={15} /> Nouveau projet
-          </button>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          <ExcelToolbar entity="projects" onImported={fetchAll} canImport={canCreate} />
+          {canCreate && (
+            <button
+              onClick={openCreate}
+              data-testid="btn-new-project"
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] transition-colors shadow-sm"
+            >
+              <Plus size={15} /> Nouveau projet
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Export COPIL action bar */}

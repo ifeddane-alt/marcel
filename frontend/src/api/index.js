@@ -145,6 +145,12 @@ export const dashboardAPI = {
   updateCxoPreferences: (d) => api.put("/dashboard/cxo/preferences", d),
 };
 
+export const excelAPI = {
+  exportEntity:  (entity)           => api.get(`/excel/${entity}/export`, { responseType: "blob" }),
+  importPreview: (entity, formData) => api.post(`/excel/${entity}/import/preview`, formData, { headers: { "Content-Type": "multipart/form-data" } }),
+  importCommit:  (entity, rows)     => api.post(`/excel/${entity}/import/commit`, { rows }),
+};
+
 export const msprojectAPI = {
   exportXml: (projectId) => api.get(`/msproject/export/${projectId}`, { responseType: "blob" }),
   importXml: (projectId, formData) => api.post(`/msproject/import/${projectId}`, formData, { headers: { "Content-Type": "multipart/form-data" } }),

@@ -10,6 +10,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { toast } from "sonner";
 import DemandModal from "@/components/DemandModal";
 import ConvertProjectModal from "@/components/ConvertProjectModal";
+import ExcelToolbar from "@/components/ExcelToolbar";
 
 // ─── Config ────────────────────────────────────────────────────────────────
 const URGENCY_CFG = {
@@ -304,6 +305,7 @@ export default function Demands() {
             <p className="text-sm text-slate-500 mt-0.5">Qualification et priorisation des demandes projets</p>
           </div>
           <div className="flex items-center gap-2">
+            <ExcelToolbar entity="demands" onImported={load} />
             <button
               onClick={load}
               className="p-2 text-slate-500 hover:text-slate-700 hover:bg-slate-100 rounded-lg transition-colors"

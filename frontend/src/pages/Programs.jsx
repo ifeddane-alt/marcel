@@ -8,6 +8,7 @@ import RAGBadge from "@/components/RAGBadge";
 import ProgramModal from "@/components/ProgramModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { formatEuro } from "@/utils/format";
+import ExcelToolbar from "@/components/ExcelToolbar";
 
 const STATUS_LABELS = { active: "Actif", on_hold: "En pause", completed: "Terminé", cancelled: "Annulé" };
 const STATUS_COLORS = {
@@ -58,12 +59,15 @@ export default function Programs() {
           <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">Programmes</h1>
           <p className="text-sm text-slate-500 mt-0.5">{programs.length} programme{programs.length > 1 ? "s" : ""} · {totalProjects} projets</p>
         </div>
-        {canCreate && (
-          <button onClick={openCreate} data-testid="btn-new-program"
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] transition-colors shadow-sm">
-            <Plus size={15} /> Nouveau programme
-          </button>
-        )}
+        <div className="flex flex-wrap items-center gap-2">
+          <ExcelToolbar entity="programs" onImported={fetchAll} canImport={canCreate} />
+          {canCreate && (
+            <button onClick={openCreate} data-testid="btn-new-program"
+              className="flex items-center gap-2 px-4 py-2.5 bg-[#0052CC] text-white text-sm font-semibold rounded hover:bg-[#0047B3] transition-colors shadow-sm">
+              <Plus size={15} /> Nouveau programme
+            </button>
+          )}
+        </div>
       </div>
 
       {/* Summary strip */}

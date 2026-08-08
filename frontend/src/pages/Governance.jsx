@@ -12,6 +12,7 @@ import DecisionModal from "@/components/DecisionModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import ExportCopilModal from "@/components/ExportCopilModal";
 import { formatDate } from "@/utils/format";
+import ExcelToolbar from "@/components/ExcelToolbar";
 
 const DECISION_STATUS_COLORS = {
   proposée:  "bg-sky-100 text-sky-700 border-sky-200",
@@ -146,13 +147,19 @@ export default function Governance() {
 
   return (
     <div className="p-4 md:p-6 lg:p-8" data-testid="governance-page">
-      <div className="mb-6">
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">
-          Gouvernance
-        </h1>
-        <p className="text-sm text-slate-500 mt-0.5">
-          Instances de gouvernance, sanity checks et registre des décisions du portefeuille
-        </p>
+      <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">
+            Gouvernance
+          </h1>
+          <p className="text-sm text-slate-500 mt-0.5">
+            Instances de gouvernance, sanity checks et registre des décisions du portefeuille
+          </p>
+        </div>
+        <div className="flex flex-wrap items-center gap-2">
+          <ExcelToolbar entity="risks" label="Risques" onImported={fetchAll} />
+          <ExcelToolbar entity="decisions" label="Décisions" onImported={fetchAll} />
+        </div>
       </div>
 
       {/* Summary cards */}

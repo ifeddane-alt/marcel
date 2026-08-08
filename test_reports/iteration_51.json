@@ -1,0 +1,40 @@
+{
+  "summary": "Tested Excel export/import (10 entities) and MS Project .mpp import backend + frontend UI flows for MARCEL. All 16 backend tests pass. Frontend Excel toolbar validated on 9 pages. Found and fixed a critical crash on /timesheets (missing ExcelToolbar import). Portfolio Excel import UI end-to-end flow works. MS Project modal opens correctly on /roadmap.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "Timesheets.jsx",
+        "issue": "ReferenceError: ExcelToolbar is not defined — component was used at line 1036 but not imported, causing full page crash (Uncaught runtime error) with a blank page for users. FIXED by adding `import ExcelToolbar from '@/components/ExcelToolbar'` at top of file.",
+        "selector": "[data-testid=\"excel-export-btn-timesheets\"]",
+        "priority": "HIGH"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_excel_msproject_io.py",
+    "/app/test_reports/pytest/excel_msproject_results.xml"
+  ],
+  "action_items": [
+    "Task description referenced `/programs` for the Programmes page, but the actual route is `/programmes` (see App.js:80). Route is correct and Excel toolbar renders correctly there. No fix needed on frontend; suggest aligning docs.",
+    "Consider adding a lint rule (react/jsx-no-undef, already default in CRA) — the Timesheets.jsx missing import was not caught pre-deploy; recommend running `yarn lint` before merges."
+  ],
+  "critical_code_review_comments": [
+    "Timesheets.jsx (1073 lines) exceeds 700-line guideline; consider splitting into subcomponents.",
+    "Preview response uses `errors: []` list on each row while frontend UI badge label mixes singular/plural inconsistently (`Mise à jours`). Minor l10n polish suggested.",
+    "commit_import expects raw field:value dicts (no wrapper) while preview returns rows as `{action, errors, data}`. Frontend must remember to send `row.data`. Consider accepting the wrapper shape on the backend too for symmetry, or document this contract in the router docstring."
+  ],
+  "updated_files": [
+    "/app/frontend/src/pages/Timesheets.jsx (added missing ExcelToolbar import)",
+    "/app/backend/tests/test_excel_msproject_io.py (new pytest file, 16 tests)"
+  ],
+  "success_rate": {"backend": "100% (16/16)", "frontend": "100% after fixing Timesheets import"},
+  "test_credentials": "admin@altair.fr / Admin2026! (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "All test artifacts cleaned up after each test (TEST ROUNDTRIP PROJ, TEST MPP IMPORT, TEST UI IMPORT deleted; capex/opex restored where modified). Tenant Altair now has 10 projects; the task expected 11 but pre-existing state was already 10 real + 1 'Projet Test Template' which appears to be seed data left by a previous iteration — not touched.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Backend routes are /api/excel/{entity}/{export|import/preview|import/commit} with entities: projects, programs, teams, resources, milestones, risks, decisions, demands, budget, timesheets. Preview returns rows as `{row_num, action, errors[], data{}}`. Commit expects `{rows: [ {field:value,...} ]}` — send preview_row.data, not the wrapper. Projects response key is `project_id` not `id`. Programmes route is /programmes (French). MS Project .mpp binary sample: /tmp/sample.mpp (OLE signature d0cf11e0, 8 tasks). JVM subprocess is warm after first call. Test file: /app/backend/tests/test_excel_msproject_io.py.",
+  "rca_of_the_issue": "Timesheets.jsx crash — RCA: developer added `<ExcelToolbar entity=\"timesheets\" ... />` inline at line 1036 but forgot to add the corresponding `import ExcelToolbar from '@/components/ExcelToolbar'` at the top of the file. Reproduction: navigate to /timesheets while logged in → whole app shows Uncaught runtime error overlay 'ExcelToolbar is not defined'. Mitigation applied: added the missing import; page now loads and Excel toolbar renders."
+}

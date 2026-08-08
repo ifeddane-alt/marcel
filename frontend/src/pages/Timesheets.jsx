@@ -8,6 +8,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import { timesheetsAPI, resourcesAPI, leavesAPI } from "@/api";
 import { toast } from "sonner";
+import ExcelToolbar from "@/components/ExcelToolbar";
 
 // ─── Constantes ─────────────────────────────────────────────────────────────
 const STATUS_CFG = {
@@ -1022,14 +1023,19 @@ export default function Timesheets() {
 
   return (
     <div className="p-4 md:p-6 lg:p-8" data-testid="timesheets-page">
-      <div className="mb-4 md:mb-6">
-        <div className="flex items-center gap-2 mb-1">
-          <Clock size={18} className="text-[#0052CC]" />
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">Timesheets</h1>
+      <div className="mb-4 md:mb-6 flex flex-wrap items-start justify-between gap-3">
+        <div>
+          <div className="flex items-center gap-2 mb-1">
+            <Clock size={18} className="text-[#0052CC]" />
+            <h1 className="font-heading text-2xl sm:text-3xl font-bold text-[#0F172A] uppercase tracking-tight">Timesheets</h1>
+          </div>
+          <p className="text-sm text-slate-500">
+            Saisie des temps · Absences · Validation multi-acteurs (N+1 → Chef de Projet → PMO)
+          </p>
         </div>
-        <p className="text-sm text-slate-500">
-          Saisie des temps · Absences · Validation multi-acteurs (N+1 → Chef de Projet → PMO)
-        </p>
+        <div className="flex items-center gap-2">
+          <ExcelToolbar entity="timesheets" onImported={() => window.location.reload()} />
+        </div>
       </div>
 
       <div className="flex items-center gap-1 mb-4 md:mb-6 border-b border-gray-200 overflow-x-auto">

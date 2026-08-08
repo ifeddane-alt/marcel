@@ -23,4 +23,4 @@ async def import_msproject(
     current_user: TokenPayload = Depends(get_current_user),
 ):
     content = await file.read()
-    return await service.import_project_xml(project_id, content, current_user)
+    return await service.import_project_file(project_id, file.filename or "", content, current_user)
