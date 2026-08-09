@@ -1,7 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
-  ArrowLeft, ChevronRight, AlertTriangle, TrendingUp, Calendar, Flag, Presentation,
+  AlertTriangle, TrendingUp, Calendar, Flag, Presentation,
 } from "lucide-react";
 import { programsAPI } from "@/api";
 import ExportCopilModal from "@/components/ExportCopilModal";
@@ -47,10 +47,10 @@ export default function ProgramDetail() {
     <div className="p-4 md:p-6 lg:p-8" data-testid="program-detail-page">
       {/* Fil d'Ariane */}
       <nav className="flex items-center gap-1.5 text-xs text-[#8a87a0] mb-4">
-        <Link to="/programmes" className="hover:text-[#2e5fe8] flex items-center gap-1">
-          <ArrowLeft size={13} /> Programmes
-        </Link>
-        <ChevronRight size={12} />
+        <span>Accueil</span>
+        <span>/</span>
+        <Link to="/programmes" className="hover:text-[#2e5fe8]" data-testid="breadcrumb-programmes">Programmes</Link>
+        <span>/</span>
         <span className="text-[#352c6e] font-semibold truncate max-w-xs">{program.name}</span>
       </nav>
 
