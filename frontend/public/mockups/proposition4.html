@@ -1,0 +1,171 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Proposition 4 — Clarity</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',sans-serif;color:#1b2733;background:#f2f4f7}
+h1,h2,h3{font-family:'Outfit',sans-serif;letter-spacing:-0.01em}
+.artboard{height:800px;position:relative;overflow:hidden}
+svg{width:18px;height:18px}
+.badge-note{position:absolute;top:24px;left:24px;background:#243b53;color:#fff;font-size:12px;font-weight:600;padding:6px 14px;border-radius:999px;font-family:'Outfit';z-index:9}
+/* ============ LOGIN ============ */
+#login{display:flex;align-items:center;justify-content:center;background:#243b53;background-image:linear-gradient(rgba(255,255,255,.03) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.03) 1px,transparent 1px);background-size:40px 40px}
+.login-wrap{width:420px}
+.login-brand{display:flex;align-items:center;gap:12px;justify-content:center;margin-bottom:26px}
+.mark{width:44px;height:44px;border-radius:8px;background:#0aa8a7;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Outfit';font-weight:700;font-size:22px}
+.login-brand b{color:#fff;font-family:'Outfit';font-size:26px;font-weight:700;letter-spacing:.04em}
+.login-brand span{display:block;color:#8ba3bc;font-size:12px;font-weight:500;margin-top:1px}
+.login-card{background:#fff;border-radius:10px;box-shadow:0 20px 50px -18px rgba(0,0,0,.45);overflow:hidden}
+.card-accent{height:4px;background:#0aa8a7}
+.card-in{padding:36px 36px 32px}
+.login-title{font-size:22px;font-weight:600;color:#102a43;margin-bottom:4px}
+.login-sub{font-size:13.5px;color:#627d98;margin-bottom:26px}
+.field label{display:block;font-size:12.5px;font-weight:600;color:#334e68;margin-bottom:6px}
+.field input{width:100%;height:42px;border:1px solid #bcccdc;border-radius:6px;padding:0 12px;font-size:14px;font-family:inherit;background:#fff}
+.field{margin-bottom:16px}
+.btn-primary{width:100%;height:44px;border:none;border-radius:6px;background:#0aa8a7;color:#fff;font-size:14.5px;font-weight:600;font-family:inherit;cursor:pointer}
+.divider{display:flex;align-items:center;gap:12px;color:#9fb3c8;font-size:12px;margin:20px 0}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:#d9e2ec}
+.sso-row{display:flex;gap:10px}
+.sso-btn{flex:1;height:42px;border:1px solid #bcccdc;border-radius:6px;background:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:600;color:#334e68;font-family:inherit}
+.g-dot{width:15px;height:15px;border-radius:50%;background:conic-gradient(#ea4335 0 25%,#fbbc05 25% 50%,#34a853 50% 75%,#4285f4 75%)}
+.ms-dot{width:13px;height:13px;display:grid;grid-template-columns:1fr 1fr;gap:1px}
+.ms-dot i{display:block}
+.login-foot{text-align:center;color:#627d98;font-size:12px;margin-top:18px}
+/* ============ DASHBOARD ============ */
+#dashboard{display:flex;background:#f2f4f7}
+.rail{width:220px;background:#243b53;display:flex;flex-direction:column;padding:14px 10px}
+.rail-logo{display:flex;align-items:center;gap:10px;padding:6px 10px 18px}
+.rail-logo .mark{width:32px;height:32px;font-size:16px;border-radius:6px}
+.rail-logo b{color:#fff;font-family:'Outfit';font-size:17px;font-weight:700;letter-spacing:.04em}
+.nav-label{font-size:10.5px;font-weight:700;color:#627d98;text-transform:uppercase;letter-spacing:.1em;padding:12px 12px 6px}
+.nav-item{display:flex;align-items:center;gap:11px;padding:9px 12px;border-radius:6px;font-size:13px;font-weight:500;color:#bcccdc;margin-bottom:1px;border-left:3px solid transparent}
+.nav-item svg{color:#829ab1;width:16px;height:16px}
+.nav-item.active{background:rgba(10,168,167,.14);color:#fff;border-left-color:#0aa8a7;font-weight:600}
+.nav-item.active svg{color:#0aa8a7}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:52px;background:#fff;border-bottom:1px solid #d9e2ec;display:flex;align-items:center;justify-content:space-between;padding:0 24px}
+.crumb{font-size:12.5px;color:#627d98}
+.crumb b{color:#102a43;font-weight:600}
+.top-right{display:flex;align-items:center;gap:14px}
+.search-pill{width:300px;height:34px;background:#f0f4f8;border:1px solid #d9e2ec;border-radius:6px;display:flex;align-items:center;gap:9px;padding:0 12px;color:#829ab1;font-size:12.5px}
+.kbd{margin-left:auto;font-family:'JetBrains Mono';font-size:10.5px;background:#fff;border:1px solid #d9e2ec;border-radius:4px;padding:1px 5px;color:#627d98}
+.avatar{width:32px;height:32px;border-radius:50%;background:#243b53;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12px;font-weight:700}
+.page-head{background:#fff;border-bottom:1px solid #d9e2ec;padding:18px 24px 0}
+.page-title-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.page-title{font-size:22px;font-weight:600;color:#102a43}
+.page-meta{font-size:12.5px;color:#627d98;margin-top:3px}
+.btn-sm{height:36px;padding:0 16px;border-radius:6px;background:#0aa8a7;color:#fff;border:none;font-size:13px;font-weight:600;font-family:inherit;display:inline-flex;align-items:center;gap:7px}
+.btn-ghost{height:36px;padding:0 14px;border-radius:6px;background:#fff;color:#334e68;border:1px solid #bcccdc;font-size:13px;font-weight:600;font-family:inherit;display:inline-flex;align-items:center;gap:7px;margin-right:8px}
+.tabs{display:flex;gap:2px}
+.tab{padding:10px 16px;font-size:13.5px;font-weight:600;color:#627d98;border-bottom:3px solid transparent}
+.tab.active{color:#0aa8a7;border-bottom-color:#0aa8a7}
+.content{flex:1;padding:20px 24px;overflow:hidden}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpi{background:#fff;border:1px solid #d9e2ec;border-radius:8px;padding:16px 18px;position:relative;overflow:hidden}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px}
+.kpi.b::before{background:#2680c2}.kpi.g::before{background:#3ebd93}.kpi.a::before{background:#f7c948}.kpi.r::before{background:#ef4e4e}
+.kpi-label{font-size:12px;font-weight:600;color:#627d98;text-transform:uppercase;letter-spacing:.05em;margin-bottom:8px}
+.kpi-value{font-family:'Outfit';font-size:27px;font-weight:600;color:#102a43}
+.kpi-delta{font-size:12px;font-weight:600;margin-top:4px}
+.panel{background:#fff;border:1px solid #d9e2ec;border-radius:8px;overflow:hidden}
+.panel-head{display:flex;align-items:center;justify-content:space-between;padding:13px 18px;border-bottom:1px solid #d9e2ec;background:#fff}
+.panel-title{font-family:'Outfit';font-size:14.5px;font-weight:600;color:#102a43}
+.filters{display:flex;gap:8px;padding:10px 18px;border-bottom:1px solid #e6ecf2;background:#f8fafc}
+.fchip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#334e68;background:#fff;border:1px solid #bcccdc;border-radius:5px;padding:4px 10px}
+.fchip.on{background:#e1f7f6;border-color:#0aa8a7;color:#077]}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;font-size:11px;text-transform:uppercase;letter-spacing:.06em;color:#627d98;font-weight:700;background:#f0f4f8;padding:9px 18px;border-bottom:1px solid #d9e2ec}
+td{padding:10px 18px;border-bottom:1px solid #e6ecf2;color:#334e68}
+tr{position:relative}
+.row-bar{display:inline-block;width:4px;height:26px;border-radius:2px;vertical-align:middle;margin-right:0}
+.code{font-family:'JetBrains Mono';font-size:11px;background:#f0f4f8;border:1px solid #d9e2ec;color:#334e68;padding:2px 6px;border-radius:4px}
+.rag{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600}
+.dot{width:9px;height:9px;border-radius:50%}
+.pct{font-family:'JetBrains Mono';font-size:12px;color:#102a43}
+.bar{height:6px;border-radius:3px;background:#e6ecf2;width:110px;overflow:hidden;display:inline-block;vertical-align:middle;margin-right:8px}
+.bar i{display:block;height:100%}
+</style>
+</head>
+<body>
+
+<section id="login" class="artboard">
+  <div class="badge-note">Proposition 4 — Clarity</div>
+  <div class="login-wrap">
+    <div class="login-brand"><div class="mark">M</div><div><b>MARCEL</b><span>Project Portfolio Management</span></div></div>
+    <div class="login-card">
+      <div class="card-accent"></div>
+      <div class="card-in">
+        <div class="login-title">Connexion</div>
+        <div class="login-sub">Accédez à votre espace de pilotage portefeuille.</div>
+        <div class="field"><label>Email</label><input placeholder="prenom.nom@entreprise.fr"></div>
+        <div class="field"><label>Mot de passe</label><input type="password" value="••••••••••"></div>
+        <button class="btn-primary">Se connecter</button>
+        <div class="divider">ou continuer avec</div>
+        <div class="sso-row">
+          <button class="sso-btn"><span class="g-dot"></span> Google</button>
+          <button class="sso-btn"><span class="ms-dot"><i style="background:#f25022"></i><i style="background:#7fba00"></i><i style="background:#00a4ef"></i><i style="background:#ffb900"></i></span> Microsoft</button>
+        </div>
+      </div>
+    </div>
+    <div class="login-foot">© 2026 MARCEL · marcel-ppm.com</div>
+  </div>
+</section>
+
+<section id="dashboard" class="artboard">
+  <aside class="rail">
+    <div class="rail-logo"><div class="mark">M</div><b>MARCEL</b></div>
+    <div class="nav-label">Pilotage</div>
+    <div class="nav-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg> Dashboard</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg> Portefeuille</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg> Budget</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg> Roadmap</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg> Équipes</div>
+    <div class="nav-label">Gouvernance</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg> Risques</div>
+    <div class="nav-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg> Administration</div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div class="crumb">Accueil / <b>Dashboard portefeuille</b></div>
+      <div class="top-right">
+        <div class="search-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Rechercher… <span class="kbd">⌘K</span></div>
+        <span style="font-size:12.5px;color:#627d98">Altair · PMO</span><div class="avatar">AD</div>
+      </div>
+    </div>
+    <div class="page-head">
+      <div class="page-title-row">
+        <div><div class="page-title">Dashboard portefeuille</div><div class="page-meta">24 projets actifs · mis à jour il y a 5 min</div></div>
+        <div><button class="btn-ghost">Exporter PDF</button><button class="btn-sm">+ Nouveau projet</button></div>
+      </div>
+      <div class="tabs"><div class="tab active">Vue d'ensemble</div><div class="tab">Budget</div><div class="tab">Jalons</div><div class="tab">Risques</div><div class="tab">Équipes</div></div>
+    </div>
+    <div class="content">
+      <div class="kpis">
+        <div class="kpi b"><div class="kpi-label">Projets actifs</div><div class="kpi-value">24</div><div class="kpi-delta" style="color:#199473">+3 ce mois</div></div>
+        <div class="kpi g"><div class="kpi-label">Budget consommé</div><div class="kpi-value">4,2 M€</div><div class="kpi-delta" style="color:#627d98">sur 6,8 M€ engagés</div></div>
+        <div class="kpi a"><div class="kpi-label">Jalons à 30 jours</div><div class="kpi-value">11</div><div class="kpi-delta" style="color:#cb6e17">2 en retard</div></div>
+        <div class="kpi r"><div class="kpi-label">Risques critiques</div><div class="kpi-value">3</div><div class="kpi-delta" style="color:#d64545">action requise</div></div>
+      </div>
+      <div class="panel">
+        <div class="panel-head"><span class="panel-title">Projets du portefeuille</span><span style="font-size:12px;color:#0aa8a7;font-weight:700">Voir tout →</span></div>
+        <div class="filters">
+          <span class="fchip" style="background:#e1f7f6;border-color:#0aa8a7;color:#0a6c6b">Programme : Tous ✕</span>
+          <span class="fchip">RAG : Tous</span><span class="fchip">Méthodologie</span><span class="fchip">+ Filtre</span>
+        </div>
+        <table>
+          <tr><th style="width:6px;padding:0"></th><th>Code</th><th>Projet</th><th>Programme</th><th>Statut</th><th>Avancement</th><th>EAC</th></tr>
+          <tr><td style="padding:0 0 0 6px"><span class="row-bar" style="background:#3ebd93"></span></td><td><span class="code">P01-001</span></td><td style="font-weight:600;color:#102a43">Migration ERP S/4HANA</td><td>Transformation SI</td><td><span class="rag"><span class="dot" style="background:#3ebd93"></span>Dans les temps</span></td><td><span class="bar"><i style="width:72%;background:#2680c2"></i></span><span class="pct">72%</span></td><td class="pct">1,4 M€</td></tr>
+          <tr><td style="padding:0 0 0 6px"><span class="row-bar" style="background:#f7c948"></span></td><td><span class="code">P01-002</span></td><td style="font-weight:600;color:#102a43">Refonte portail client</td><td>Transformation SI</td><td><span class="rag"><span class="dot" style="background:#f7c948"></span>À surveiller</span></td><td><span class="bar"><i style="width:45%;background:#2680c2"></i></span><span class="pct">45%</span></td><td class="pct">620 K€</td></tr>
+          <tr><td style="padding:0 0 0 6px"><span class="row-bar" style="background:#ef4e4e"></span></td><td><span class="code">DATA-001</span></td><td style="font-weight:600;color:#102a43">Data Platform v2</td><td>Data & IA</td><td><span class="rag"><span class="dot" style="background:#ef4e4e"></span>Critique</span></td><td><span class="bar"><i style="width:28%;background:#2680c2"></i></span><span class="pct">28%</span></td><td class="pct">980 K€</td></tr>
+        </table>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
