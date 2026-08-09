@@ -155,7 +155,7 @@ export default function Conformite() {
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-1">
           <ShieldAlert size={18} className="text-blue-600" />
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">Conformité</h1>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Conformité</h1>
         </div>
         <p className="text-sm text-zinc-500">
           Suivi des jalons réglementaires et de décommissionnement — portefeuille complet

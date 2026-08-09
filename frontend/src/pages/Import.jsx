@@ -120,7 +120,7 @@ export default function Import() {
     <div className="p-8 max-w-4xl mx-auto" data-testid="import-page">
       {/* Header */}
       <div className="mb-6">
-        <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">
+        <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">
           Import CSV
         </h1>
         <p className="text-sm text-zinc-500 mt-0.5">

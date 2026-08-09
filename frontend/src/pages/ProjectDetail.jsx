@@ -82,6 +82,7 @@ export default function ProjectDetail() {
   const [scopeSnapshots, setScopeSnapshots] = useState([]);
   const [loading, setLoading] = useState(true);
   const [taskView, setTaskView] = useState("table"); // "table" | "gantt" | "tree"
+  const [activeTab, setActiveTab] = useState("apercu");
 
   // Modal state
   const [editModalOpen, setEditModalOpen] = useState(false);
@@ -245,29 +246,31 @@ export default function ProjectDetail() {
 
   return (
     <div className="p-4 md:p-6 lg:p-8" data-testid="project-detail-page">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-1 text-xs text-zinc-500 mb-6">
-        <Link to="/portfolio" className="hover:text-blue-600 flex items-center gap-1">
+      {/* Fil d'Ariane */}
+      <nav className="flex items-center gap-1.5 text-xs text-[#8a87a0] mb-4">
+        <Link to="/portfolio" className="hover:text-[#2e5fe8] flex items-center gap-1">
           <ArrowLeft size={13} />
           Portefeuille
         </Link>
         <ChevronRight size={12} />
-        <span className="text-zinc-800 font-medium truncate max-w-xs">{project.name}</span>
+        <span className="text-[#352c6e] font-semibold truncate max-w-xs">{project.name}</span>
+        {project.code && (
+          <span className="font-mono-data text-[10.5px] font-semibold text-[#3d3564] bg-[#f0eefc] border border-[#e7e3f2] px-1.5 py-px rounded ml-1">
+            {project.code}
+          </span>
+        )}
       </nav>
 
       {/* Header */}
       <div className="flex flex-wrap items-start justify-between gap-3 mb-5">
         <div className="flex-1 min-w-0">
-          <div className="flex flex-wrap items-center gap-2 mb-2">
-            <span className="font-mono-data text-xs text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-lg">
-              {project.source_id || "—"}
-            </span>
-            <RAGBadge status={project.status_rag} />
-            <MethodologyBadge methodology={project.methodology} />
-          </div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 leading-tight" data-testid="project-name">
-            {project.code && <span className="font-mono text-base font-semibold text-zinc-400 mr-2 align-middle" data-testid="project-detail-code">{project.code}</span>}
+          <h1 className="font-heading text-2xl sm:text-[28px] font-extrabold text-[#26243a] leading-tight flex flex-wrap items-center gap-x-3 gap-y-1" data-testid="project-name">
+            {project.code && <span className="font-mono-data text-base font-semibold text-[#8a87a0]" data-testid="project-detail-code">{project.code}</span>}
             {project.name}
+            <span className="inline-flex items-center gap-2 align-middle">
+              <RAGBadge status={project.status_rag} />
+              <MethodologyBadge methodology={project.methodology} />
+            </span>
           </h1>
           {project.description && (
             <p className="text-xs sm:text-sm text-zinc-500 mt-1 max-w-2xl">{project.description}</p>
@@ -371,11 +374,40 @@ export default function ProjectDetail() {
         </div>
       )}
 
+      {/* Onglets façon Clarity */}
+      <div className="flex gap-1 border-b border-[#e7e3f2] mb-5 overflow-x-auto" data-testid="project-tabs">
+        {[
+          { id: "apercu", label: "Aperçu" },
+          { id: "taches", label: "Tâches", count: tasks.length },
+          { id: "jalons", label: "Jalons", count: milestones.length },
+          { id: "risques", label: "Risques", count: risks.length },
+          { id: "decisions", label: "Décisions", count: decisions.length },
+          { id: "equipe", label: "Équipe", count: workAllocations.length + allocations.length },
+          ...(scopeSnapshots.length > 0 ? [{ id: "scope", label: "Scope", count: scopeSnapshots.length }] : []),
+        ].map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setActiveTab(t.id)}
+            data-testid={`project-tab-${t.id}`}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold whitespace-nowrap border-b-[3px] -mb-px transition-colors ${
+              activeTab === t.id ? "text-[#2e5fe8] border-[#2e5fe8]" : "text-[#8a87a0] border-transparent hover:text-[#26243a]"
+            }`}
+          >
+            {t.label}
+            {t.count > 0 && (
+              <span className={`text-[10px] font-bold px-1.5 py-px rounded-full ${activeTab === t.id ? "bg-[#e9effe] text-[#2e5fe8]" : "bg-[#f0eefc] text-[#8a87a0]"}`}>
+                {t.count}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left column */}
-        <div className="col-span-1 lg:col-span-8 space-y-4">
+        <div className={`col-span-1 space-y-4 ${activeTab === "apercu" ? "lg:col-span-8" : "lg:col-span-12"}`}>
           {/* Budget CAPEX / OPEX + EAC */}
-          <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4 md:p-5" data-testid="budget-section">
+          <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm p-4 md:p-5 ${activeTab === "apercu" ? "" : "hidden"}`} data-testid="budget-section">
             <div className="flex items-center justify-between mb-4">
               <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold">
                 Budget CAPEX / OPEX & EAC
@@ -531,7 +563,7 @@ export default function ProjectDetail() {
 
           {/* Coûts Externes (Régie + Forfait) */}
           {externalCosts && externalCosts.resources && externalCosts.resources.length > 0 && (
-            <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-5" data-testid="external-costs-section">
+            <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm p-5 ${activeTab === "apercu" ? "" : "hidden"}`} data-testid="external-costs-section">
               <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold mb-4 flex items-center gap-2">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-600">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
@@ -601,7 +633,7 @@ export default function ProjectDetail() {
           )}
 
           {/* Tasks — Décomposition du projet */}
-          <div className="bg-white border border-zinc-200 rounded-lg shadow-sm" data-testid="tasks-section">
+          <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "taches" ? "" : "hidden"}`} data-testid="tasks-section">
             <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
               <div className="flex-1">
                 <div className="flex items-center gap-3">
@@ -1005,7 +1037,7 @@ export default function ProjectDetail() {
           </div>
 
           {/* Milestones — enrichis 3 familles */}
-          <div className="bg-white border border-zinc-200 rounded-lg shadow-sm" data-testid="milestones-section">
+          <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "jalons" ? "" : "hidden"}`} data-testid="milestones-section">
             <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
               <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold">
                 <Diamond size={13} className="text-yellow-500" />
@@ -1027,7 +1059,7 @@ export default function ProjectDetail() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-zinc-50 border-b border-zinc-100 text-left">
+                    <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
                       {["Famille / Type", "Jalon", "Baseline", "Forecast", "Réelle", "Statut", "Attribut", ""].map((h) => (
                         <th key={h} className="px-3 py-2.5 text-xs font-semibold text-zinc-600 whitespace-nowrap">{h}</th>
                       ))}
@@ -1117,7 +1149,7 @@ export default function ProjectDetail() {
           </div>
 
           {/* Dépendances inter-projets */}
-          <div className="bg-white border border-zinc-200 rounded-lg shadow-sm" data-testid="dependencies-section">
+          <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "jalons" ? "" : "hidden"}`} data-testid="dependencies-section">
             <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
               <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold">
                 <GitFork size={13} className="text-violet-500" />
@@ -1139,7 +1171,7 @@ export default function ProjectDetail() {
               <div className="overflow-x-auto">
                 <table className="w-full text-sm">
                   <thead>
-                    <tr className="bg-zinc-50 border-b border-zinc-100 text-left">
+                    <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
                       {["Direction", "Projet lié", "Nature", "Impact", "Échéance", "Statut", ""].map((h) => (
                         <th key={h} className="px-3 py-2.5 text-xs font-semibold text-zinc-600 whitespace-nowrap">{h}</th>
                       ))}
@@ -1201,7 +1233,7 @@ export default function ProjectDetail() {
           </div>
 
           {/* Registre des risques */}
-          <div className="bg-white border border-zinc-200 rounded-lg shadow-sm" data-testid="risks-section">
+          <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "risques" ? "" : "hidden"}`} data-testid="risks-section">
             <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
               <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold">
                 <ShieldAlert size={13} className="text-rose-400" />
@@ -1228,9 +1260,9 @@ export default function ProjectDetail() {
                 <div className="col-span-1 lg:col-span-8 overflow-x-auto border-r border-zinc-100">
                   <table className="w-full text-sm" data-testid="risks-table">
                     <thead>
-                      <tr className="bg-zinc-50 text-left">
+                      <tr className="bg-[#fbfaff] text-left">
                         {["Crit.", "Risque", "Catégorie", "P", "I", "Statut", "Échéance", ""].map((h) => (
-                          <th key={h} className="px-3 py-2 text-xs font-semibold text-zinc-500 border-b border-zinc-200 whitespace-nowrap">{h}</th>
+                          <th key={h} className="px-3 py-2 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] border-b border-[#e8e6f0] whitespace-nowrap">{h}</th>
                         ))}
                       </tr>
                     </thead>
@@ -1321,7 +1353,7 @@ export default function ProjectDetail() {
               conformité: "text-teal-700", gouvernance: "text-zinc-600",
             };
             return (
-              <div className="bg-white border border-zinc-200 rounded-lg shadow-sm" data-testid="decisions-section">
+              <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "decisions" ? "" : "hidden"}`} data-testid="decisions-section">
                 <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
                   <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold">
                     <ClipboardList size={13} className="text-blue-600" />
@@ -1346,9 +1378,9 @@ export default function ProjectDetail() {
                   <div className="overflow-x-auto">
                     <table className="w-full text-sm" data-testid="decisions-table">
                       <thead>
-                        <tr className="bg-zinc-50 text-left">
+                        <tr className="bg-[#fbfaff] text-left">
                           {["Date", "Décision", "Catégorie", "Statut", "Responsable", "Échéance", ""].map((h) => (
-                            <th key={h} className="px-3 py-2 text-xs font-semibold text-zinc-500 border-b border-zinc-200 whitespace-nowrap">{h}</th>
+                            <th key={h} className="px-3 py-2 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] border-b border-[#e8e6f0] whitespace-nowrap">{h}</th>
                           ))}
                         </tr>
                       </thead>
@@ -1404,7 +1436,7 @@ export default function ProjectDetail() {
 
           {/* Allocations */}
           {allocations.length > 0 && (
-            <div className="bg-white border border-zinc-200 rounded-lg shadow-sm" data-testid="allocations-section">
+            <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "equipe" ? "" : "hidden"}`} data-testid="allocations-section">
               <div className="px-5 py-3 border-b border-zinc-100">
                 <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold">
                   Allocations ({allocations.length})
@@ -1412,9 +1444,9 @@ export default function ProjectDetail() {
               </div>
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-zinc-50 border-b border-zinc-100 text-left">
+                  <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
                     {["Ressource", "Période", "JH alloués", "JH consommés", "Taux"].map((h) => (
-                      <th key={h} className="px-4 py-2.5 text-xs font-semibold text-zinc-600">{h}</th>
+                      <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -1447,7 +1479,7 @@ export default function ProjectDetail() {
         </div>
 
         {/* Work Allocations — S1-05 */}
-        <div className="col-span-12 bg-white border border-zinc-200 rounded-lg shadow-sm" data-testid="work-allocations-section">
+        <div className={`col-span-12 bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "equipe" ? "" : "hidden"}`} data-testid="work-allocations-section">
           <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
             <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold">
               <Clock size={13} className="text-blue-600" />
@@ -1471,9 +1503,9 @@ export default function ProjectDetail() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm" data-testid="work-allocations-table">
                 <thead>
-                  <tr className="bg-zinc-50 border-b border-zinc-100 text-left">
+                  <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
                     {["Ressource", "Phase", "JH prévus", "JH consommés", "Coût prévu", "Coût consommé", "RAF €", ""].map((h) => (
-                      <th key={h} className="px-3 py-2 text-xs font-semibold text-zinc-500 whitespace-nowrap">{h}</th>
+                      <th key={h} className="px-3 py-2 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -1519,7 +1551,7 @@ export default function ProjectDetail() {
 
         {/* Team Consumption — S1-06 */}
         {teamConsumption.length > 0 && (
-          <div className="col-span-12 bg-white border border-zinc-200 rounded-lg shadow-sm" data-testid="team-consumption-section">
+          <div className={`col-span-12 bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "equipe" ? "" : "hidden"}`} data-testid="team-consumption-section">
             <div className="px-5 py-3 border-b border-zinc-100">
               <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold">
                 <Users size={13} className="text-blue-600" />
@@ -1529,9 +1561,9 @@ export default function ProjectDetail() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm" data-testid="team-consumption-table">
                 <thead>
-                  <tr className="bg-zinc-50 border-b border-zinc-100 text-left">
+                  <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
                     {["Équipe", "JH prévus", "JH consommés", "Coût prévu", "Coût consommé", "RAF JH", "RAF €"].map((h) => (
-                      <th key={h} className="px-3 py-2 text-xs font-semibold text-zinc-500 whitespace-nowrap">{h}</th>
+                      <th key={h} className="px-3 py-2 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] whitespace-nowrap">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -1562,7 +1594,7 @@ export default function ProjectDetail() {
 
         {/* ── Section Scope reçu ─────────────────────────────────── */}
         {scopeSnapshots.length > 0 && (
-          <div className="col-span-12 bg-white border border-zinc-200 rounded-lg shadow-sm" data-testid="scope-received-section">
+          <div className={`col-span-12 bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "scope" ? "" : "hidden"}`} data-testid="scope-received-section">
             <div className="px-5 py-3 border-b border-zinc-100 flex items-center justify-between">
               <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold">
                 <Lock size={13} className="text-blue-600" />
@@ -1640,7 +1672,7 @@ export default function ProjectDetail() {
           </div>
         )}
 
-        <div className="col-span-1 lg:col-span-4 space-y-4">
+        <div className={`col-span-1 lg:col-span-4 space-y-4 ${activeTab === "apercu" ? "" : "hidden"}`}>
           <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-5">
             <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold mb-4">
               Informations projet

@@ -1,3 +1,4 @@
+import DateField from "@/components/ui/DateField";
 import React, { useEffect, useState, useCallback } from "react";
 import {
   Wrench, ToggleLeft, ToggleRight, Workflow, BookOpen, Calendar,
@@ -498,8 +499,8 @@ function HolidaysSection({ config, onSave }) {
             ) : holidays.map((h, i) => (
               <tr key={i} className="hover:bg-zinc-50/70" data-testid={`holiday-row-${i}`}>
                 <td className="px-3 py-1.5">
-                  <input type="date" className={INPUT_CLS + " text-xs"} value={h.date}
-                    onChange={e => set(i, "date", e.target.value)} />
+                  <DateField className={INPUT_CLS + " text-xs"} value={h.date}
+ onChange={e => set(i, "date", v)} />
                 </td>
                 <td className="px-3 py-1.5">
                   <input className={INPUT_CLS + " text-xs"} value={h.name}

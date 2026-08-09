@@ -229,7 +229,7 @@ export default function AdminPowerBI() {
       <div className="mb-6">
         <div className="flex items-center gap-2 mb-1">
           <Database size={20} className="text-[#F2C811]" />
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">
             Connecteur Power BI
           </h1>
         </div>

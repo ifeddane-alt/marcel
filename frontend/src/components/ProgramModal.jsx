@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Loader2 } from "lucide-react";
 import Modal from "@/components/Modal";
 import { programsAPI } from "@/api";
+import DateField from "@/components/ui/DateField";
 
 const EMPTY = { name: "", description: "", owner: "", start_date: "", end_date: "", budget_keur: "", status: "active" };
 const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
@@ -100,10 +101,10 @@ export default function ProgramModal({ isOpen, onClose, program, onSaved }) {
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Date début">
-            <input type="date" className={INPUT_CLS} value={form.start_date} onChange={set("start_date")} />
+            <DateField className={INPUT_CLS} value={form.start_date} onChange={set("start_date")} />
           </Field>
           <Field label="Date fin prévue">
-            <input type="date" className={INPUT_CLS} value={form.end_date} onChange={set("end_date")} />
+            <DateField className={INPUT_CLS} value={form.end_date} onChange={set("end_date")} />
           </Field>
         </div>
 

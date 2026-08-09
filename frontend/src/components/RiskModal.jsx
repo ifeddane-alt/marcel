@@ -3,6 +3,7 @@ import { Loader2, ShieldAlert } from "lucide-react";
 import Modal from "@/components/Modal";
 import { risksAPI } from "@/api";
 import { useTenantConfig } from "@/contexts/TenantConfigContext";
+import DateField from "@/components/ui/DateField";
 
 const DEFAULT_CATEGORIES = [
   { value: "technique",  label: "Technique" },
@@ -202,7 +203,7 @@ export default function RiskModal({ isOpen, onClose, risk, projectId, onSaved })
             <input data-testid="risk-form-owner" className={INPUT_CLS} value={form.owner} onChange={set("owner")} placeholder="Ex : Sophie Martin" />
           </Field>
           <Field label="Échéance de traitement">
-            <input data-testid="risk-form-due-date" type="date" className={INPUT_CLS} value={form.due_date} onChange={set("due_date")} />
+            <DateField testId="risk-form-due-date" className={INPUT_CLS} value={form.due_date} onChange={set("due_date")} />
           </Field>
         </div>
 

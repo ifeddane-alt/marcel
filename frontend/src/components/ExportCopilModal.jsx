@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Loader2, Presentation, Calendar, Building2 } from "lucide-react";
 import Modal from "@/components/Modal";
 import { exportAPI, governanceAPI } from "@/api";
+import DateField from "@/components/ui/DateField";
 
 const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
 
@@ -102,13 +103,9 @@ export default function ExportCopilModal({ isOpen, onClose, selectedProjectIds =
         <Field label="Date du COPIL *">
           <div className="relative">
             <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
-            <input
-              data-testid="export-copil-date"
-              type="date"
-              className={`${INPUT_CLS} pl-8`}
-              value={form.instanceDate}
-              onChange={set("instanceDate")}
-            />
+            <DateField testId="export-copil-date"
+ value={form.instanceDate}
+ onChange={set("instanceDate")} />
           </div>
         </Field>
 

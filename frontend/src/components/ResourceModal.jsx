@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Loader2, User, Building2, FileText } from "lucide-react";
 import Modal from "@/components/Modal";
 import { resourcesAPI, teamsAPI } from "@/api";
+import DateField from "@/components/ui/DateField";
 
 const EMPTY = {
   name: "", role: "", team: "", team_id: "",
@@ -299,22 +300,16 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
 
             <div className="grid grid-cols-2 gap-3">
               <Field label="Début de contrat">
-                <input
-                  data-testid="resource-form-contract-start"
-                  type="date"
-                  className={INPUT_CLS}
-                  value={form.contract_start}
-                  onChange={set("contract_start")}
-                />
+                <DateField testId="resource-form-contract-start"
+ className={INPUT_CLS}
+ value={form.contract_start}
+ onChange={set("contract_start")} />
               </Field>
               <Field label="Fin de contrat">
-                <input
-                  data-testid="resource-form-contract-end"
-                  type="date"
-                  className={INPUT_CLS}
-                  value={form.contract_end}
-                  onChange={set("contract_end")}
-                />
+                <DateField testId="resource-form-contract-end"
+ className={INPUT_CLS}
+ value={form.contract_end}
+ onChange={set("contract_end")} />
               </Field>
             </div>
           </div>

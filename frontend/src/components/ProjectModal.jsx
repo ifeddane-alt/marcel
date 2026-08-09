@@ -3,6 +3,7 @@ import { Loader2, ChevronDown, ChevronUp, CheckSquare, Square, Layers } from "lu
 import Modal from "@/components/Modal";
 import { projectsAPI, projectTemplatesAPI } from "@/api";
 import { useTenantConfig } from "@/contexts/TenantConfigContext";
+import DateField from "@/components/ui/DateField";
 
 const DEFAULT_STATUS_OPTIONS = [
   { value: "en_preparation", label: "En préparation" },
@@ -255,18 +256,18 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
           <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mb-2">Calendrier</div>
           <div className="grid grid-cols-3 gap-3">
             <Field label="Début prévu" required error={errors.start_date}>
-              <input data-testid="project-form-start" type="date" className={INPUT_CLS} value={form.start_date} onChange={set("start_date")} />
+              <DateField testId="project-form-start" className={INPUT_CLS} value={form.start_date} onChange={set("start_date")} />
             </Field>
             <Field label="Fin prévue initiale (baseline)" required error={errors.end_date_baseline}>
-              <input data-testid="project-form-end-baseline" type="date" className={INPUT_CLS} value={form.end_date_baseline} onChange={set("end_date_baseline")} />
+              <DateField testId="project-form-end-baseline" className={INPUT_CLS} value={form.end_date_baseline} onChange={set("end_date_baseline")} />
             </Field>
             <Field label="Fin prévue actuelle (forecast)" required error={errors.end_date_forecast}>
-              <input data-testid="project-form-end-forecast" type="date" className={INPUT_CLS} value={form.end_date_forecast} onChange={set("end_date_forecast")} />
+              <DateField testId="project-form-end-forecast" className={INPUT_CLS} value={form.end_date_forecast} onChange={set("end_date_forecast")} />
             </Field>
           </div>
           <div className="mt-3">
             <Field label="Fin réelle" hint="si projet clôturé">
-              <input data-testid="project-form-end-actual" type="date" className={INPUT_CLS} value={form.end_date_actual} onChange={set("end_date_actual")} />
+              <DateField testId="project-form-end-actual" className={INPUT_CLS} value={form.end_date_actual} onChange={set("end_date_actual")} />
             </Field>
           </div>
         </div>

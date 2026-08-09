@@ -1,0 +1,27 @@
+{
+  "summary": "Phase 2 Clarity redesign frontend testing. Dashboard KPI donuts + budget widgets OK, no fatal console errors. Project detail page: breadcrumb + code + tabs (Aperçu/Tâches/Jalons/Risques/Décisions/Équipe) all working, correct sections displayed per tab (budget-section, tasks-section, milestones-section+dependencies-section, risks-section, decisions-section, work-allocations-section). Budget/Roadmap/Governance/Timesheets pages load with correct h1. Nav rail + Ctrl+K search OK. Export COPIL modal opens with DateField. CRITICAL BUG discovered: selecting a date in the shadcn Calendar popup triggers a page error 'Cannot read properties of undefined (reading value)' in ProjectModal (and likely several other modals). Root cause: DateField.onChange returns a string yyyy-MM-dd directly, but many modals still use the legacy helper `const set = (k) => (e) => setForm({...f,[k]:e.target.value})` which expects an event object. Result: date changes are silently ignored (setForm never runs) in ProjectModal, TaskModal, RiskModal, DecisionModal, ProgramModal, ResourceModal, BudgetRevisionModal, ExportCopilModal.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "ProjectModal (and TaskModal, RiskModal, DecisionModal, ProgramModal, ResourceModal, BudgetRevisionModal, ExportCopilModal)", "issue": "DateField onChange emits string but legacy `set = (k) => (e) => setForm({...f,[k]:e.target.value})` helper is still used → throws 'Cannot read properties of undefined (reading value)' and date change is NOT persisted. Reproduced: open project via portfolio, click Modifier, click 'Début prévu' date button, calendar opens (French locale OK), click any day → pageerror captured and form state not updated.", "selector": "[data-testid='project-form-start'] / [data-testid='task-form-end-planned'] / [data-testid='risk-form-due-date'] / [data-testid='decision-form-date'] / [data-testid='decision-form-due-date'] / [data-testid='resource-form-contract-start'] / [data-testid='export-copil-date']", "priority": "CRITICAL"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Fix DateField integration in modals that still use the event-based `set` helper. Two options: (a) In each affected modal, replace `<DateField onChange={set('field')} />` with `<DateField onChange={(v) => setForm(f => ({...f,[field]: v}))} />`; OR (b) Make DateField backward-compatible by calling onChange with a synthetic {target:{value}} object. Affected files: /app/frontend/src/components/ProjectModal.jsx (l.259,262,265,270), TaskModal.jsx (l.242,245,248,251), RiskModal.jsx (l.206), DecisionModal.jsx (l.159,162), ProgramModal.jsx (l.104,107), ResourceModal.jsx (l.303,309), BudgetRevisionModal.jsx (if it uses DateField), ExportCopilModal.jsx (l.106). MilestoneModal, DependencyModal, ConvertProjectModal, Timesheets, Scope, AdminConfig already use direct string handlers and are OK."
+  ],
+  "critical_code_review_comments": [
+    "DateField API changed from event-based to string-based but not all consumers were updated — regression risk was not caught because the initial render works and the bug only fires on user interaction (calendar day click).",
+    "Recommend making DateField robust: accept both string and event, or centralize a `useForm` helper with a `setValue(k, v)` primitive to avoid this class of bug."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (skipped per request)", "frontend": "80% — layout/navigation OK, but date editing broken across 8 modals"},
+  "test_credentials": "admin@altair.fr / Admin2026! (used)",
+  "seed_data_creation": "None — all tests read-only; no persisted changes.",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "After main agent fixes the DateField/set helper mismatch, retest: (1) open ProjectModal via btn-edit-project → change Début prévu to another date via calendar → Save → verify project detail shows new start date; (2) TaskModal date change persists; (3) RiskModal due_date change persists; (4) DecisionModal decision_date + due_date change persist; (5) ExportCopilModal date change persists (no pageerror). MilestoneModal uses direct handler and was implicitly OK. Regression sweep: no other console errors observed on Dashboard/Portfolio/Project tabs.",
+  "rca of the issue": "DateField (components/ui/DateField.jsx) implements `onChange(d ? format(d,'yyyy-MM-dd') : '')` — passes a string. Legacy modal helper `const set = (k) => (e) => setForm(f => ({...f,[k]: e.target.value}))` expects an event, so `e.target.value` becomes `undefined.value` → TypeError. React swallows the error but setForm is never called, so the picked date is lost. Fix by refactoring `set` in each affected modal to accept the value directly for DateField props, or by extending DateField to pass a fake event."
+}

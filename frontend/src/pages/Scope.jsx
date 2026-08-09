@@ -1,3 +1,4 @@
+import DateField from "@/components/ui/DateField";
 import React, { useState, useEffect, useCallback, useMemo } from "react";
 import {
   LayoutList, ChevronDown, ChevronRight, Lock, Send,
@@ -946,14 +947,10 @@ export default function Scope() {
             {SCOPE_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             <option value="__none__">Non arbitré</option>
           </select>
-          <input
-            type="date" value={filterStartDate} onChange={(e) => setFilterStartDate(e.target.value)}
-            className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none"
-            data-testid="filter-start-date" placeholder="Début" />
-          <input
-            type="date" value={filterEndDate} onChange={(e) => setFilterEndDate(e.target.value)}
-            className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none"
-            data-testid="filter-end-date" placeholder="Fin" />
+          <DateField value={filterStartDate} onChange={(v) => setFilterStartDate(v)}
+ testId="filter-start-date" placeholder="Début" />
+          <DateField value={filterEndDate} onChange={(v) => setFilterEndDate(v)}
+ testId="filter-end-date" placeholder="Fin" />
           <div className="relative flex-1 min-w-[180px]">
             <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input

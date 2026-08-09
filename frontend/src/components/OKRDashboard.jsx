@@ -581,7 +581,7 @@ export default function OKRDashboard({ selectedTrainId }) {
               <span className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">{label}</span>
               <Icon size={13} style={{ color: accent }} />
             </div>
-            <div className="font-heading text-2xl font-bold text-zinc-800">{value ?? 0}</div>
+            <div className="font-heading font-heading text-2xl font-extrabold text-[#26243a]">{value ?? 0}</div>
           </div>
         ))}
       </div>

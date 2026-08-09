@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X, GitFork } from "lucide-react";
 import { useTenantConfig } from "@/contexts/TenantConfigContext";
+import DateField from "@/components/ui/DateField";
 
 const DEFAULT_NATURES = [
   { value: "deliverable", label: "Livrable" },
@@ -166,9 +167,8 @@ export default function DependencyModal({
               <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">
                 Échéance
               </label>
-              <input type="date" value={targetDate} onChange={(e) => setTargetDate(e.target.value)}
-                data-testid="dep-target-date"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+              <DateField value={targetDate} onChange={(v) => setTargetDate(v)}
+ testId="dep-target-date" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">

@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { X, Briefcase } from "lucide-react";
 import { demandsAPI, programsAPI } from "@/api";
 import { toast } from "sonner";
+import DateField from "@/components/ui/DateField";
 
 function formatDate(d) {
   return d instanceof Date ? d.toISOString().slice(0, 10) : d;
@@ -111,28 +112,20 @@ export default function ConvertProjectModal({ demand, onClose, onConverted }) {
               <label className="block text-xs font-semibold text-zinc-600 mb-1">
                 Date de début <span className="text-rose-500">*</span>
               </label>
-              <input
-                data-testid="convert-start-date-input"
-                type="date"
-                className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
-                value={form.start_date}
-                onChange={(e) => change("start_date", e.target.value)}
-              />
+              <DateField testId="convert-start-date-input"
+ value={form.start_date}
+ onChange={(v) => change("start_date", v)} />
             </div>
             <div>
               <label className="block text-xs font-semibold text-zinc-600 mb-1">
                 Date de fin (baseline) <span className="text-rose-500">*</span>
               </label>
-              <input
-                data-testid="convert-end-date-input"
-                type="date"
-                className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
-                value={form.end_date_baseline}
-                onChange={(e) => {
-                  change("end_date_baseline", e.target.value);
-                  change("end_date_forecast", e.target.value);
-                }}
-              />
+              <DateField testId="convert-end-date-input"
+ value={form.end_date_baseline}
+ onChange={(v) => {
+ change("end_date_baseline", v);
+ change("end_date_forecast", v);
+ }} />
             </div>
           </div>
 

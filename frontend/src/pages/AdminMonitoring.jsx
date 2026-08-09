@@ -60,7 +60,7 @@ export default function AdminMonitoring() {
         <div className="flex items-center gap-3">
           <Activity className="w-7 h-7 text-blue-600" />
           <div>
-            <h1 className="text-2xl font-bold text-zinc-800">Monitoring Production</h1>
+            <h1 className="font-heading text-2xl font-extrabold text-[#26243a]">Monitoring Production</h1>
             <p className="text-sm text-zinc-500">
               Statut des services MARCEL
               {lastUpdated && (

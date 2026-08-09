@@ -516,9 +516,10 @@ export default function Roadmap() {
       <div className="mb-4">
         <div className="flex items-center justify-between">
           <div>
+            <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Roadmap</span></div>
             <div className="flex items-center gap-2 mb-1">
-              <Map size={18} className="text-blue-600" />
-              <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">
+              <Map size={18} className="text-[#2e5fe8]" />
+              <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">
                 Roadmap Portefeuille
               </h1>
             </div>

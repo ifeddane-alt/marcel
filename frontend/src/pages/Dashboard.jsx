@@ -278,7 +278,8 @@ export default function Dashboard() {
       {/* Header */}
       <div className="mb-5 flex items-start justify-between gap-3">
         <div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">
+          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Tableau de bord</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">
             Tableau de Bord
           </h1>
           <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">
@@ -321,7 +322,7 @@ export default function Dashboard() {
           <button
             data-testid="dashboard-customize-btn"
             onClick={() => setCustomizing((v) => !v)}
-            className={`flex items-center gap-1.5 px-3 py-2 border rounded-lg text-sm transition-colors ${customizing ? "bg-blue-600 border-blue-600 text-white" : "bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}
+            className={`flex items-center gap-1.5 px-3 py-2 border rounded-lg text-sm transition-colors ${customizing ? "bg-[#2e5fe8] border-[#2e5fe8] text-white" : "bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}
           >
             {customizing ? <X size={14} /> : <Settings2 size={14} />}
             <span className="hidden sm:inline">{customizing ? "Quitter l'édition" : "Personnaliser"}</span>

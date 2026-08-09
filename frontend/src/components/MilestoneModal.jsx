@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { X, Diamond } from "lucide-react";
 import { useTenantConfig } from "@/contexts/TenantConfigContext";
+import DateField from "@/components/ui/DateField";
 
 export const FAMILY_CONFIG = {
   epic_lifecycle: {
@@ -225,22 +226,19 @@ export default function MilestoneModal({ milestone, projectId, resources, onSave
               <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">
                 Date baseline *
               </label>
-              <input type="date" value={dateBaseline} onChange={(e) => setDateBaseline(e.target.value)} required data-testid="milestone-date-baseline"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+              <DateField value={dateBaseline} onChange={(v) => setDateBaseline(v)} required testId="milestone-date-baseline" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">
                 Date forecast
               </label>
-              <input type="date" value={dateForecast} onChange={(e) => setDateForecast(e.target.value)} data-testid="milestone-date-forecast"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+              <DateField value={dateForecast} onChange={(v) => setDateForecast(v)} testId="milestone-date-forecast" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">
                 Date réelle
               </label>
-              <input type="date" value={dateActual} onChange={(e) => setDateActual(e.target.value)} data-testid="milestone-date-actual"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+              <DateField value={dateActual} onChange={(v) => setDateActual(v)} testId="milestone-date-actual" />
             </div>
           </div>
 

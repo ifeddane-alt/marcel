@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Loader2, GitBranch, Layers, BookOpen, FileText, Zap } from "lucide-react";
 import Modal from "@/components/Modal";
 import { tasksAPI, safeAPI } from "@/api";
+import DateField from "@/components/ui/DateField";
 
 const EMPTY = {
   name: "", type: "tâche", status: "not_started",
@@ -238,16 +239,16 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Début prévu">
-            <input type="date" className={INPUT_CLS} value={form.date_start_planned} onChange={set("date_start_planned")} />
+            <DateField className={INPUT_CLS} value={form.date_start_planned} onChange={set("date_start_planned")} />
           </Field>
           <Field label="Fin prévue">
-            <input data-testid="task-form-end-planned" type="date" className={INPUT_CLS} value={form.date_end_planned} onChange={set("date_end_planned")} />
+            <DateField testId="task-form-end-planned" className={INPUT_CLS} value={form.date_end_planned} onChange={set("date_end_planned")} />
           </Field>
           <Field label="Début réel">
-            <input type="date" className={INPUT_CLS} value={form.date_start_actual} onChange={set("date_start_actual")} />
+            <DateField className={INPUT_CLS} value={form.date_start_actual} onChange={set("date_start_actual")} />
           </Field>
           <Field label="Fin réelle">
-            <input type="date" className={INPUT_CLS} value={form.date_end_actual} onChange={set("date_end_actual")} />
+            <DateField className={INPUT_CLS} value={form.date_end_actual} onChange={set("date_end_actual")} />
           </Field>
         </div>
 

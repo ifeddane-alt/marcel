@@ -55,7 +55,7 @@ export default function Teams() {
     <div className="p-4 md:p-6 lg:p-8" data-testid="teams-page">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">Équipes</h1>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Équipes</h1>
           <p className="text-sm text-zinc-500 mt-0.5">{teams.length} équipe{teams.length > 1 ? "s" : ""} · Gestion des groupes ressources</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">

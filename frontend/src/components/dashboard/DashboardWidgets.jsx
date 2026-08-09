@@ -13,20 +13,37 @@ import RiskHeatmap from "@/components/RiskHeatmap";
 import CapacityAlertBanner from "@/components/CapacityAlertBanner";
 import { formatEuro, formatDate } from "@/utils/format";
 
-function MetricCard({ label, value, sub, icon: Icon, accent = "#2563eb", testId }) {
+function Donut({ pct, color, children }) {
+  const p = Math.min(Math.max(pct || 0, 0), 100);
+  return (
+    <div
+      className="w-[52px] h-[52px] rounded-full flex items-center justify-center flex-shrink-0"
+      style={{ background: `conic-gradient(${color} 0 ${p}%, #ece9f4 ${p}%)` }}
+    >
+      <div className="w-[40px] h-[40px] rounded-full bg-white flex items-center justify-center font-heading text-[11.5px] font-extrabold text-[#26243a]">
+        {children}
+      </div>
+    </div>
+  );
+}
+
+function MetricCard({ label, value, sub, icon: Icon, accent = "#2e5fe8", pct, testId }) {
   return (
     <div
       data-testid={testId}
-      className="bg-white border border-zinc-200 rounded-lg shadow-sm p-5 flex flex-col justify-between hover:shadow-md transition-shadow"
-      style={{ borderLeftColor: accent, borderLeftWidth: 4 }}
+      className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 h-full flex items-center gap-3.5 hover:shadow-md transition-shadow"
     >
-      <div className="flex items-start justify-between">
-        <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold">{label}</div>
-        <Icon size={16} className="text-zinc-300" strokeWidth={1.5} />
-      </div>
-      <div className="mt-3">
-        <div className="font-heading text-3xl font-bold text-zinc-950">{value}</div>
-        {sub && <div className="text-xs text-zinc-500 mt-1">{sub}</div>}
+      {pct != null ? (
+        <Donut pct={pct} color={accent}>{pct}%</Donut>
+      ) : (
+        <div className="w-[52px] h-[52px] rounded-xl flex items-center justify-center flex-shrink-0" style={{ background: `${accent}14` }}>
+          <Icon size={22} style={{ color: accent }} strokeWidth={1.75} />
+        </div>
+      )}
+      <div className="min-w-0">
+        <div className="text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wide truncate">{label}</div>
+        <div className="font-heading text-[25px] font-extrabold text-[#26243a] leading-tight truncate">{value}</div>
+        {sub && <div className="text-[11px] text-[#8a87a0] truncate">{sub}</div>}
       </div>
     </div>
   );
@@ -50,15 +67,15 @@ function CustomTooltip({ active, payload, label }) {
 
 function WidgetShell({ title, icon: Icon, badge, link, linkLabel = "Voir tout", children, testId }) {
   return (
-    <div className="bg-white border border-zinc-200 rounded-lg shadow-sm mb-5" data-testid={testId}>
-      <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
-        <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold">
-          {Icon && <Icon size={13} className="text-blue-600" />}
+    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] mb-5" data-testid={testId}>
+      <div className="flex items-center justify-between px-5 py-3 border-b border-[#f0eff6]">
+        <div className="flex items-center gap-2 font-heading text-[13px] font-bold text-[#26243a]">
+          {Icon && <Icon size={14} className="text-[#2e5fe8]" />}
           {title}
           {badge}
         </div>
         {link && (
-          <Link to={link} className="text-xs text-blue-600 hover:underline flex items-center gap-1">
+          <Link to={link} className="text-xs text-[#2e5fe8] font-semibold hover:underline flex items-center gap-1">
             {linkLabel} <ArrowRight size={11} />
           </Link>
         )}
@@ -71,11 +88,12 @@ function WidgetShell({ title, icon: Icon, badge, link, linkLabel = "Voir tout", 
 // ─── Widgets ──────────────────────────────────────────────────────────────────
 
 export function MetricSingleWidget({ summary, kind }) {
+  const total = summary.total_projects || 1;
   const M = {
-    metric_projects: { label: "Projets totaux", value: summary.total_projects, sub: "dans le portefeuille", icon: Briefcase, accent: "#2563eb" },
-    metric_green: { label: "Projets verts", value: summary.rag_counts.green, sub: "dans les délais et budget", icon: CheckCircle, accent: "#10B981" },
-    metric_at_risk: { label: "Projets à risque", value: summary.rag_counts.orange + summary.rag_counts.red, sub: `${summary.rag_counts.orange} orange, ${summary.rag_counts.red} rouge`, icon: AlertTriangle, accent: "#EF4444" },
-    metric_budget: { label: "Budget total", value: formatEuro(summary.budget.total), sub: `${summary.budget.consumption_rate}% consommé`, icon: TrendingUp, accent: "#F59E0B" },
+    metric_projects: { label: "Projets totaux", value: summary.total_projects, sub: "dans le portefeuille", icon: Briefcase, accent: "#2e5fe8" },
+    metric_green: { label: "Projets verts", value: summary.rag_counts.green, sub: "dans les délais et budget", icon: CheckCircle, accent: "#3f8a34", pct: Math.round((summary.rag_counts.green / total) * 100) },
+    metric_at_risk: { label: "Projets à risque", value: summary.rag_counts.orange + summary.rag_counts.red, sub: `${summary.rag_counts.orange} orange, ${summary.rag_counts.red} rouge`, icon: AlertTriangle, accent: "#cc4f45", pct: Math.round(((summary.rag_counts.orange + summary.rag_counts.red) / total) * 100) },
+    metric_budget: { label: "Budget total", value: formatEuro(summary.budget.total), sub: `${summary.budget.consumption_rate}% consommé`, icon: TrendingUp, accent: "#e0a800", pct: summary.budget.consumption_rate },
   }[kind];
   if (!M) return null;
   return <div className="h-full [&>div]:h-full"><MetricCard testId={kind} {...M} /></div>;
@@ -83,19 +101,19 @@ export function MetricSingleWidget({ summary, kind }) {
 
 export function BudgetSingleWidget({ summary, kind }) {
   const M = {
-    budget_consumed: { label: "Budget consommé", value: formatEuro(summary.budget.consumed), pct: summary.budget.consumption_rate, color: "bg-blue-600" },
-    budget_forecast: { label: "Budget forecast", value: formatEuro(summary.budget.forecast), pct: Math.round((summary.budget.forecast / summary.budget.total) * 100), color: "bg-amber-500" },
-    jh_progress: { label: "JH consommés / planifiés", value: `${summary.jh.consumed.toLocaleString("fr-FR")} / ${summary.jh.planned.toLocaleString("fr-FR")}`, pct: Math.round((summary.jh.consumed / summary.jh.planned) * 100), color: "bg-indigo-500" },
+    budget_consumed: { label: "Budget consommé", value: formatEuro(summary.budget.consumed), pct: summary.budget.consumption_rate, color: "#2e5fe8" },
+    budget_forecast: { label: "Budget forecast", value: formatEuro(summary.budget.forecast), pct: Math.round((summary.budget.forecast / summary.budget.total) * 100), color: "#e0a800" },
+    jh_progress: { label: "JH consommés / planifiés", value: `${summary.jh.consumed.toLocaleString("fr-FR")} / ${summary.jh.planned.toLocaleString("fr-FR")}`, pct: Math.round((summary.jh.consumed / summary.jh.planned) * 100), color: "#6d28d9" },
   }[kind];
   if (!M) return null;
   return (
-    <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-5 h-full" data-testid={`${kind}-widget`}>
-      <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold mb-2">{M.label}</div>
-      <div className="font-mono-data text-xl font-bold text-zinc-950">{M.value}</div>
-      <div className="mt-3 h-1.5 bg-zinc-100 rounded-full overflow-hidden">
-        <div className={`h-full ${M.color} rounded-full transition-all duration-700`} style={{ width: `${Math.min(M.pct, 100)}%` }} />
+    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 h-full flex items-center gap-3.5" data-testid={`${kind}-widget`}>
+      <Donut pct={M.pct} color={M.color}>{Math.min(M.pct, 999)}%</Donut>
+      <div className="min-w-0">
+        <div className="text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wide truncate">{M.label}</div>
+        <div className="font-mono-data text-lg font-bold text-[#26243a] truncate">{M.value}</div>
+        <div className="text-[11px] text-[#8a87a0]">{M.pct}% du prévu</div>
       </div>
-      <div className="text-xs text-zinc-400 mt-1">{M.pct}% du budget total</div>
     </div>
   );
 }
@@ -474,9 +492,9 @@ export function TopProjectsWidget({ cxo }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-zinc-50 text-left">
+            <tr className="bg-[#fbfaff] text-left">
               {["Projet", "Budget", "Consommé", "RAG"].map((h) => (
-                <th key={h} className="px-4 py-2.5 text-xs font-semibold text-zinc-600 border-b border-zinc-200">{h}</th>
+                <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] border-b border-[#e8e6f0]">{h}</th>
               ))}
             </tr>
           </thead>
@@ -612,9 +630,9 @@ export function RecentProjectsWidget({ summary }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm" data-testid="recent-projects-table">
           <thead>
-            <tr className="bg-zinc-50 text-left">
+            <tr className="bg-[#fbfaff] text-left">
               {["Projet", "Méthodo", "Statut", "Budget total", "Consommé", "Fin prévue"].map((h) => (
-                <th key={h} className="px-4 py-2.5 text-xs font-semibold text-zinc-600 border-b border-zinc-200">{h}</th>
+                <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] border-b border-[#e8e6f0]">{h}</th>
               ))}
             </tr>
           </thead>
@@ -647,9 +665,9 @@ export function TopRisksWidget({ topRisks }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm" data-testid="top-risks-table">
           <thead>
-            <tr className="bg-zinc-50 text-left">
+            <tr className="bg-[#fbfaff] text-left">
               {["Crit.", "Risque", "Catégorie", "Projet", "Statut", "Échéance"].map((h) => (
-                <th key={h} className="px-4 py-2.5 text-xs font-semibold text-zinc-600 border-b border-zinc-200">{h}</th>
+                <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] border-b border-[#e8e6f0]">{h}</th>
               ))}
             </tr>
           </thead>

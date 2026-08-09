@@ -119,7 +119,7 @@ export default function Recommandations() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">
             Recommandations IA
           </h1>
           <p className="text-sm text-zinc-500 mt-0.5">

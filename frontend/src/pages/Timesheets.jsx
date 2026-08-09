@@ -1,3 +1,4 @@
+import DateField from "@/components/ui/DateField";
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import {
   Clock, CheckCircle, AlertTriangle, ChevronLeft, ChevronRight,
@@ -732,10 +733,8 @@ function ReportsView() {
             <option value="team">Par équipe</option>
             <option value="project">Par projet</option>
           </select>
-          <input type="date" value={start} onChange={(e) => setStart(e.target.value)} data-testid="report-start"
-            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600" />
-          <input type="date" value={end} onChange={(e) => setEnd(e.target.value)} data-testid="report-end"
-            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600" />
+          <DateField value={start} onChange={(v) => setStart(v)} testId="report-start" />
+          <DateField value={end} onChange={(v) => setEnd(v)} testId="report-end" />
           <button onClick={load} disabled={loading} data-testid="report-load-btn"
             className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50">
             {loading ? <RefreshCw size={11} className="animate-spin" /> : <Filter size={11} />}
@@ -1027,7 +1026,7 @@ export default function Timesheets() {
         <div>
           <div className="flex items-center gap-2 mb-1">
             <Clock size={18} className="text-blue-600" />
-            <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 tracking-tight">Timesheets</h1>
+            <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Timesheets</h1>
           </div>
           <p className="text-sm text-zinc-500">
             Saisie des temps · Absences · Validation multi-acteurs (N+1 → Chef de Projet → PMO)

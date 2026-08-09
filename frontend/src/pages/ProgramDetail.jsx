@@ -131,9 +131,9 @@ export default function ProgramDetail() {
             ) : (
               <table className="w-full text-sm" data-testid="program-projects-table">
                 <thead>
-                  <tr className="bg-zinc-50 border-b border-zinc-100 text-left">
+                  <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
                     {["RAG", "Nom", "Méthodo", "Budget total", "Consommé", "Forecast", "Fin prévue"].map((h) => (
-                      <th key={h} className="px-4 py-2.5 text-xs font-semibold text-zinc-600">{h}</th>
+                      <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -218,9 +218,9 @@ export default function ProgramDetail() {
               </div>
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-zinc-50 border-b border-zinc-100 text-left">
+                  <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
                     {["Jalon", "Projet", "Baseline", "Forecast", "Statut"].map((h) => (
-                      <th key={h} className="px-4 py-2.5 text-xs font-semibold text-zinc-600">{h}</th>
+                      <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">{h}</th>
                     ))}
                   </tr>
                 </thead>

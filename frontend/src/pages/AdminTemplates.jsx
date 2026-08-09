@@ -294,7 +294,7 @@ export default function AdminTemplates() {
     <div className="p-6 max-w-4xl mx-auto space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-800">Templates Projets</h1>
+          <h1 className="font-heading text-2xl font-extrabold text-[#26243a]">Templates Projets</h1>
           <p className="text-sm text-zinc-500 mt-1">Gérez les templates utilisés à la création de projets</p>
         </div>
         {canAdmin && (
