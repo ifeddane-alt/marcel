@@ -1,0 +1,32 @@
+{
+  "summary": "Frontend Clarity restyle pass tested end-to-end for all Lot B pages. Login OK (admin@altair.fr). Arbitrage, Conformité, Recommandations, Mes Alertes, Import, Trains SAFe and Programmes all render with breadcrumb 'Accueil / <Page>', Clarity H1, KPI cards and expected data-testids. Functional flows verified: Arbitrage 4 tabs cliquables + inline score edit (score-cell click -> input -> Enter, valeur enregistrée); Conformité filtres + CSV export (téléchargement 'conformite_jalons.csv' déclenché); Alertes création via modal (metric + threshold=10 + save) — la table est bien passée de 2 -> 3 lignes; Import 3 entity buttons + download-template-btn présents; Trains SAFe onglets Clarity cliquables; Programmes 4 cartes -> navigation vers /programmes/:id fonctionne (fiche Programme s'affiche avec header, budget KPI et onglets Aperçu/Projets/Jalons visibles et fonctionnels). Régression OK: /portfolio (H1 'Portefeuille') et /dashboard (H1 'Tableau de Bord') se chargent sans erreur. Aucune erreur JS applicative détectée (seulement warnings Recharts sur charts hors viewport et WebSocket handshake — non bloquants).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Fiche Programme (/programmes/:id)", "issues": [
+        "Breadcrumb utilise 'Programmes > <Nom>' (chevron) au lieu du pattern Clarity 'Accueil / <Page>' appliqué partout ailleurs — incohérent avec la signature Clarity du lot",
+        "Onglets Aperçu/Projets/Jalons présents et fonctionnels mais ne portent PAS les data-testid attendus par la review (program-tab-overview / program-tab-projects / program-tab-milestones). Style visuel des onglets sur cette page semble aussi moins 'Clarity' (pas de bordure bleue basse 3px + pastilles bien alignées comme dans Arbitrage/SAFe). À aligner pour cohérence."
+      ]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Aligner le breadcrumb de la fiche Programme sur le pattern 'Accueil / Programmes / <Nom>' comme le reste du lot Clarity.",
+    "Ajouter les data-testid program-tab-overview / program-tab-projects / program-tab-milestones sur les onglets de la fiche Programme (les onglets existent et fonctionnent — c'est un ajout d'attributs).",
+    "(Optionnel) Vérifier le style Clarity des onglets sur la fiche Programme (bordure basse 3px #2e5fe8 + pastilles de compte) pour cohérence visuelle avec Arbitrage/SAFe."
+  ],
+  "critical_code_review_comments": [
+    "Recharts émet plusieurs warnings 'width(-1) height(-1)' — un ResponsiveContainer parent n'a pas de dimensions au premier rendu; ajouter minHeight/minWidth ou aspect pour éviter le bruit console.",
+    "WebSocket wss://.../api/ws se ferme avant handshake sur toutes les pages: soit le backend ne monte pas ce endpoint, soit l'ingress ne le proxifie pas. Non bloquant pour ce lot mais à investiguer côté connexion temps réel."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (skipped)", "frontend": "95%"},
+  "test_credentials": "admin@altair.fr / Admin2026! (OK)",
+  "seed_data_creation": "1 règle d'alerte créée pendant le test (tenant Altair) — la table est passée de 2 à 3 lignes. Peut être nettoyée si besoin.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Toutes les pages du lot B (Arbitrage, Conformité, Recommandations, Alertes, Import, SAFe Trains, Programmes) sont restylées Clarity et fonctionnelles. Seul point restant: la fiche Programme (/programmes/:id) — breadcrumb chevron au lieu de 'Accueil / ...' et onglets Aperçu/Projets/Jalons sans les data-testid program-tab-*. Régression Portfolio + Dashboard OK.",
+  "rca of the issue": "N/A — pas de bug fonctionnel bloquant, seulement 2 incohérences de style/attributs sur la fiche Programme."
+}

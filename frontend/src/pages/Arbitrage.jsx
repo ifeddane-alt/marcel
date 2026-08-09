@@ -343,11 +343,12 @@ export default function Arbitrage() {
   const totals   = summary?.totals   || {};
 
   return (
-    <div className="p-4 md:p-6 space-y-4 md:space-y-5">
+    <div className="p-4 md:p-6 lg:p-8 space-y-4 md:space-y-5" data-testid="arbitrage-page">
       {/* ── Header ── */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-800 font-heading">Arbitrage Portefeuille</h1>
+          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Arbitrage</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Arbitrage Portefeuille</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             Scoring multi-critères · Enveloppes budgétaires · Simulateur What-if
           </p>
@@ -376,44 +377,49 @@ export default function Arbitrage() {
 
       {/* ── KPI rapides ── */}
       <div className="grid grid-cols-2 sm:grid-cols-4 gap-3">
-        <div className="bg-white border border-zinc-200 rounded-lg p-4" data-testid="kpi-projects-count">
-          <div className="text-xs text-zinc-500 uppercase tracking-wider">Projets</div>
-          <div className="text-2xl font-bold text-zinc-800 mt-1">{projects.length}</div>
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4" data-testid="kpi-projects-count">
+          <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Projets</div>
+          <div className="font-mono-data text-2xl font-bold text-zinc-950 mt-1">{projects.length}</div>
         </div>
-        <div className="bg-white border border-zinc-200 rounded-lg p-4" data-testid="kpi-avg-score">
-          <div className="text-xs text-zinc-500 uppercase tracking-wider">Score moyen</div>
-          <div className="text-2xl font-bold text-zinc-800 mt-1">
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4" data-testid="kpi-avg-score">
+          <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Score moyen</div>
+          <div className="font-mono-data text-2xl font-bold text-zinc-950 mt-1">
             {projects.length ? Math.round(projects.reduce((s, p) => s + p.score, 0) / projects.length) : "—"}
           </div>
         </div>
-        <div className="bg-white border border-zinc-200 rounded-lg p-4" data-testid="kpi-total-capex">
-          <div className="text-xs text-zinc-500 uppercase tracking-wider">CAPEX total</div>
-          <div className="text-xl font-bold text-zinc-800 mt-1">{formatEuro(totals.capex_planned)}</div>
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4" data-testid="kpi-total-capex">
+          <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">CAPEX total</div>
+          <div className="font-mono-data text-xl font-bold text-zinc-950 mt-1">{formatEuro(totals.capex_planned)}</div>
         </div>
-        <div className="bg-white border border-zinc-200 rounded-lg p-4" data-testid="kpi-total-opex">
-          <div className="text-xs text-zinc-500 uppercase tracking-wider">OPEX total</div>
-          <div className="text-xl font-bold text-zinc-800 mt-1">{formatEuro(totals.opex_planned)}</div>
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4" data-testid="kpi-total-opex">
+          <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">OPEX total</div>
+          <div className="font-mono-data text-xl font-bold text-zinc-950 mt-1">{formatEuro(totals.opex_planned)}</div>
         </div>
       </div>
 
       {/* ── Onglets ── */}
-      <div className="flex gap-1 border-b border-zinc-200 overflow-x-auto">
+      <div className="flex gap-1 border-b border-[#e7e3f2] overflow-x-auto">
         {[
           { key: "scoring",    icon: Target,      label: "Scoring Projets" },
           { key: "envelopes",  icon: BarChart2,   label: "Enveloppes Budget" },
           { key: "simulator",  icon: PlayCircle,  label: "Simulateur What-if" },
-          { key: "scenarios",  icon: Save,        label: `Scénarios (${scenarios.length})` },
-        ].map(({ key, icon: Icon, label }) => (
+          { key: "scenarios",  icon: Save,        label: "Scénarios", count: scenarios.length },
+        ].map(({ key, icon: Icon, label, count }) => (
           <button
             key={key}
             onClick={() => setActiveTab(key)}
             data-testid={`tab-${key}`}
-            className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold whitespace-nowrap border-b-[3px] -mb-px transition-colors
               ${activeTab === key
-                ? "border-blue-600 text-blue-700"
-                : "border-transparent text-zinc-500 hover:text-zinc-700"}`}
+                ? "text-[#2e5fe8] border-[#2e5fe8]"
+                : "text-[#8a87a0] border-transparent hover:text-[#26243a]"}`}
           >
             <Icon size={14} /> {label}
+            {count > 0 && (
+              <span className={`text-[10px] font-bold px-1.5 py-px rounded-full ${activeTab === key ? "bg-[#e9effe] text-[#2e5fe8]" : "bg-[#f0eefc] text-[#8a87a0]"}`}>
+                {count}
+              </span>
+            )}
           </button>
         ))}
       </div>
@@ -437,7 +443,7 @@ export default function Arbitrage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm" data-testid="scoring-table">
                 <thead>
-                  <tr className="bg-zinc-50 text-xs text-zinc-500 uppercase tracking-wider">
+                  <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-[10.5px] text-[#8a87a0] uppercase tracking-wider font-bold">
                     <th className="px-4 py-2.5 text-left">Projet</th>
                     {CRITERIA_LABELS.map(c => (
                       <th key={c.key} className="px-2 py-2.5 text-center whitespace-nowrap">
@@ -721,7 +727,7 @@ export default function Arbitrage() {
                       </div>
                       <div className="rounded-lg border border-zinc-100 overflow-hidden">
                         <table className="w-full text-xs">
-                          <thead className="bg-zinc-50 text-zinc-400 uppercase tracking-wider">
+                          <thead className="bg-[#fbfaff] text-[#8a87a0] uppercase tracking-wider font-bold">
                             <tr>
                               <th className="px-3 py-2 text-left">Projet</th>
                               <th className="px-3 py-2 text-right">CAPEX</th>
@@ -854,7 +860,7 @@ export default function Arbitrage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm" data-testid="simulator-table">
                 <thead>
-                  <tr className="bg-zinc-50 text-xs text-zinc-500 uppercase tracking-wider">
+                  <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-[10.5px] text-[#8a87a0] uppercase tracking-wider font-bold">
                     <th className="px-4 py-2.5 text-left">Projet</th>
                     <th className="px-3 py-2.5 text-center">Statut</th>
                     <th className="px-3 py-2.5 text-right">CAPEX planifié</th>

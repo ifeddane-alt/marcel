@@ -391,6 +391,7 @@ export default function TrainsSafe() {
       {/* Header */}
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
+          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Trains SAFe</span></div>
           <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight flex items-center gap-2">
             <Train size={26} className="text-blue-600" />
             Trains SAFe
@@ -493,7 +494,7 @@ export default function TrainsSafe() {
           </div>
 
           {/* Tabs : Overview | PI Planning | Dashboard Programme */}
-          <div className="flex gap-1 mb-5 border-b border-zinc-200">
+          <div className="flex gap-1 mb-5 border-b border-[#e7e3f2]">
             {[
               { id: "overview",   label: "Vue d'ensemble",       Icon: BarChart3 },
               { id: "planning",   label: "PI Planning",          Icon: Layout },
@@ -503,10 +504,10 @@ export default function TrainsSafe() {
                 key={id}
                 data-testid={`train-tab-${id}`}
                 onClick={() => setActiveTab(id)}
-                className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors ${
+                className={`flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold whitespace-nowrap border-b-[3px] -mb-px transition-colors ${
                   activeTab === id
-                    ? "border-blue-600 text-blue-600"
-                    : "border-transparent text-zinc-500 hover:text-zinc-700"
+                    ? "text-[#2e5fe8] border-[#2e5fe8]"
+                    : "text-[#8a87a0] border-transparent hover:text-[#26243a]"
                 }`}
               >
                 <Icon size={14} />

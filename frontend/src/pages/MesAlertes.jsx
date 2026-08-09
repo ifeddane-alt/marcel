@@ -188,6 +188,7 @@ export default function MesAlertes() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
+          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Mes alertes</span></div>
           <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">
             Mes alertes
           </h1>
@@ -205,7 +206,7 @@ export default function MesAlertes() {
       </div>
 
       {/* Tableau des règles */}
-      <div className="bg-white border border-zinc-200 rounded-xl shadow-sm" data-testid="alert-rules-table">
+      <div className="bg-white border border-zinc-200 rounded-lg shadow-sm" data-testid="alert-rules-table">
         <div className="px-5 py-3 border-b border-zinc-100 flex items-center gap-2">
           <Bell size={14} className="text-blue-600" />
           <span className="text-sm font-bold text-zinc-800">Règles d'alerte actives</span>
@@ -229,9 +230,9 @@ export default function MesAlertes() {
         ) : (
           <table className="w-full text-sm" data-testid="alert-rules-list">
             <thead>
-              <tr className="bg-zinc-50">
+              <tr className="bg-[#fbfaff]">
                 {["Indicateur", "Seuil", "Périmètre", "Libellé", "Statut", "Actions"].map(h => (
-                  <th key={h} className="px-4 py-2.5 text-xs font-semibold text-zinc-600 text-left border-b border-zinc-200">{h}</th>
+                  <th key={h} className="px-4 py-2.5 text-[10.5px] font-bold uppercase tracking-wider text-[#8a87a0] text-left border-b border-[#e8e6f0]">{h}</th>
                 ))}
               </tr>
             </thead>

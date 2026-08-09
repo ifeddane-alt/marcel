@@ -119,6 +119,7 @@ export default function Recommandations() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
+          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Recommandations IA</span></div>
           <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">
             Recommandations IA
           </h1>
@@ -161,17 +162,17 @@ export default function Recommandations() {
 
       {/* KPI row */}
       <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 mb-6">
-        <div className="bg-white border border-zinc-200 rounded-xl shadow-sm p-4 border-l-4 border-l-rose-500">
-          <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold">Critiques</div>
-          <div className="text-3xl font-heading font-bold text-zinc-950 mt-2" data-testid="rec-critical-count">{criticalCount}</div>
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4 border-l-4 border-l-rose-500">
+          <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Critiques</div>
+          <div className="font-mono-data text-3xl font-bold text-zinc-950 mt-2" data-testid="rec-critical-count">{criticalCount}</div>
         </div>
-        <div className="bg-white border border-zinc-200 rounded-xl shadow-sm p-4 border-l-4 border-l-amber-400">
-          <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold">Attentions</div>
-          <div className="text-3xl font-heading font-bold text-zinc-950 mt-2" data-testid="rec-warning-count">{warningCount}</div>
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4 border-l-4 border-l-amber-400">
+          <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Attentions</div>
+          <div className="font-mono-data text-3xl font-bold text-zinc-950 mt-2" data-testid="rec-warning-count">{warningCount}</div>
         </div>
-        <div className="bg-white border border-zinc-200 rounded-xl shadow-sm p-4 border-l-4 border-l-blue-500">
-          <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold">Total</div>
-          <div className="text-3xl font-heading font-bold text-zinc-950 mt-2" data-testid="rec-total-count">{recs.length}</div>
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4 border-l-4 border-l-blue-500">
+          <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Total</div>
+          <div className="font-mono-data text-3xl font-bold text-zinc-950 mt-2" data-testid="rec-total-count">{recs.length}</div>
         </div>
       </div>
 

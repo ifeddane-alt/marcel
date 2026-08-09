@@ -56,6 +56,7 @@ export default function Programs() {
     <div className="p-4 md:p-6 lg:p-8" data-testid="programs-page">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
+          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Programmes</span></div>
           <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Programmes</h1>
           <p className="text-sm text-zinc-500 mt-0.5">{programs.length} programme{programs.length > 1 ? "s" : ""} · {totalProjects} projets</p>
         </div>
@@ -81,7 +82,7 @@ export default function Programs() {
             <div className={`${color} flex-shrink-0`}><Icon size={22} strokeWidth={1.75} /></div>
             <div>
               <div className={`font-mono-data text-xl font-bold ${color}`}>{value}</div>
-              <div className="text-xs text-zinc-500 mt-0.5">{label}</div>
+              <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mt-0.5">{label}</div>
             </div>
           </div>
         ))}

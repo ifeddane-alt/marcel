@@ -55,19 +55,20 @@ function AttributeBadge({ attribute }) {
 
 function KpiCard({ label, value, icon: Icon, color, testId }) {
   const colors = {
-    blue:    "bg-blue-50 border-blue-100 text-blue-700",
-    red:     "bg-rose-50 border-rose-100 text-rose-700",
-    amber:   "bg-amber-50 border-amber-100 text-amber-700",
-    emerald: "bg-emerald-50 border-emerald-100 text-emerald-700",
+    blue:    { icon: "bg-blue-50 text-blue-600",       value: "text-zinc-950" },
+    red:     { icon: "bg-rose-50 text-rose-600",       value: "text-rose-600" },
+    amber:   { icon: "bg-amber-50 text-amber-600",     value: "text-amber-600" },
+    emerald: { icon: "bg-emerald-50 text-emerald-600", value: "text-emerald-600" },
   };
+  const cfg = colors[color] || colors.blue;
   return (
-    <div className={`flex items-center gap-4 rounded-xl border p-4 ${colors[color]}`} data-testid={testId}>
-      <div className="p-2 rounded-lg bg-white/60">
+    <div className="flex items-center gap-4 bg-white border border-zinc-200 rounded-lg shadow-sm p-4" data-testid={testId}>
+      <div className={`p-2 rounded-lg ${cfg.icon}`}>
         <Icon size={18} />
       </div>
       <div>
-        <div className="text-2xl font-bold tabular-nums">{value}</div>
-        <div className="text-[11px] font-medium mt-0.5 opacity-80">{label}</div>
+        <div className={`font-mono-data text-2xl font-bold ${cfg.value}`}>{value}</div>
+        <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mt-0.5">{label}</div>
       </div>
     </div>
   );
@@ -147,12 +148,13 @@ export default function Conformite() {
   };
 
   const thCls = (col) =>
-    `px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-zinc-500 cursor-pointer hover:text-blue-600 whitespace-nowrap select-none`;
+    `px-4 py-2.5 text-left text-[10.5px] font-bold uppercase tracking-wider text-[#8a87a0] cursor-pointer hover:text-[#2e5fe8] whitespace-nowrap select-none`;
 
   return (
     <div className="p-4 md:p-6 lg:p-8" data-testid="conformite-page">
       {/* En-tête */}
       <div className="mb-6">
+        <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Conformité</span></div>
         <div className="flex items-center gap-2 mb-1">
           <ShieldAlert size={18} className="text-blue-600" />
           <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Conformité</h1>
@@ -235,7 +237,7 @@ export default function Conformite() {
         <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-x-auto" data-testid="regulatory-table">
           <table className="w-full text-xs">
             <thead>
-              <tr className="bg-zinc-50 border-b border-zinc-200">
+              <tr className="bg-[#fbfaff] border-b border-[#e8e6f0]">
                 <th className={thCls("project_name")} onClick={() => handleSort("project_name")}>
                   Projet <SortIcon col="project_name" />
                 </th>
@@ -257,7 +259,7 @@ export default function Conformite() {
                 <th className={thCls("days_remaining")} onClick={() => handleSort("days_remaining")}>
                   Jours rest. <SortIcon col="days_remaining" />
                 </th>
-                <th className="px-4 py-2.5 text-left text-[10px] font-bold uppercase tracking-widest text-zinc-500">Attribut</th>
+                <th className="px-4 py-2.5 text-left text-[10.5px] font-bold uppercase tracking-wider text-[#8a87a0]">Attribut</th>
               </tr>
             </thead>
             <tbody>

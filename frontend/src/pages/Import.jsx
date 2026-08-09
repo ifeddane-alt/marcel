@@ -117,9 +117,10 @@ export default function Import() {
   };
 
   return (
-    <div className="p-8 max-w-4xl mx-auto" data-testid="import-page">
+    <div className="p-4 md:p-6 lg:p-8 max-w-4xl" data-testid="import-page">
       {/* Header */}
       <div className="mb-6">
+        <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Import CSV</span></div>
         <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">
           Import CSV
         </h1>
