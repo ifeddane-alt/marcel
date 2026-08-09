@@ -80,6 +80,10 @@ SPECS = {
             col("availability_rate", "Disponibilité (%)", "number"),
             col("resource_type", "Type", "enum", options=RESOURCE_TYPE_LABELS),
             col("vendor", "Fournisseur"),
+            col("entry_date", "Date d'entrée", "date"),
+            col("contract_ref", "Réf. contrat"),
+            col("contract_start", "Début contrat", "date"),
+            col("contract_end", "Expiration contrat", "date"),
         ],
     },
     "milestones": {

@@ -12,6 +12,7 @@ const EMPTY = {
   vendor: "", contract_tjm: "",
   forfait_envelope: "", forfait_consumed: "",
   contract_start: "", contract_end: "",
+  entry_date: "", contract_ref: "",
 };
 
 const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
@@ -65,6 +66,8 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
         forfait_consumed:      resource.forfait_consumed != null ? String(resource.forfait_consumed) : "",
         contract_start:        resource.contract_start || "",
         contract_end:          resource.contract_end || "",
+        entry_date:            resource.entry_date || "",
+        contract_ref:          resource.contract_ref || "",
       });
     } else {
       setForm(EMPTY);
@@ -121,8 +124,10 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
         contract_tjm:          isRegie && form.contract_tjm ? Number(form.contract_tjm) : null,
         forfait_envelope:      isForfait && form.forfait_envelope ? Number(form.forfait_envelope) : null,
         forfait_consumed:      isForfait && form.forfait_consumed ? Number(form.forfait_consumed) : null,
-        contract_start:        isExterne ? (form.contract_start || null) : null,
-        contract_end:          isExterne ? (form.contract_end || null) : null,
+        contract_start:        form.contract_start || null,
+        contract_end:          form.contract_end || null,
+        entry_date:            form.entry_date || null,
+        contract_ref:          form.contract_ref || null,
       };
       if (resource) {
         await resourcesAPI.update(resource.resource_id, payload);
@@ -200,6 +205,21 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
           </select>
         </Field>
 
+        {/* Référentiel */}
+        <div className={`grid gap-3 ${isExterne ? "grid-cols-2" : "grid-cols-3"}`}>
+          <Field label="Date d'entrée">
+            <DateField testId="resource-form-entry-date" value={form.entry_date} onChange={(v) => set("entry_date")({ target: { value: v } })} />
+          </Field>
+          <Field label="Référence contrat">
+            <input data-testid="resource-form-contract-ref" className={INPUT_CLS} value={form.contract_ref} onChange={set("contract_ref")} placeholder="Ex : CTR-2026-042" />
+          </Field>
+          {!isExterne && (
+            <Field label="Expiration contrat" hint="si CDD">
+              <DateField testId="resource-form-contract-end" value={form.contract_end} onChange={(v) => set("contract_end")({ target: { value: v } })} />
+            </Field>
+          )}
+        </div>
+
         {/* Capacité & coûts */}
         <div className="grid grid-cols-3 gap-3">
           <Field label="Capacité (JH/mois)">
@@ -216,6 +236,7 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
         {capaEffective !== null && Number(form.availability_rate) < 100 && (
           <p className="text-xs text-zinc-500 -mt-2">
             Capacité effective : <strong>{capaEffective} JH/mois</strong> ({form.availability_rate}% de {form.capacity_jh_month} JH)
+            — soit <strong>{capaEffective * 12} JH/an</strong>
           </p>
         )}
 
@@ -300,16 +321,10 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
 
             <div className="grid grid-cols-2 gap-3">
               <Field label="Début de contrat">
-                <DateField testId="resource-form-contract-start"
-
- value={form.contract_start}
- onChange={(v) => set("contract_start")({ target: { value: v } })} />
+                <DateField testId="resource-form-contract-start" value={form.contract_start} onChange={(v) => set("contract_start")({ target: { value: v } })} />
               </Field>
-              <Field label="Fin de contrat">
-                <DateField testId="resource-form-contract-end"
-
- value={form.contract_end}
- onChange={(v) => set("contract_end")({ target: { value: v } })} />
+              <Field label="Expiration contrat">
+                <DateField testId="resource-form-contract-end" value={form.contract_end} onChange={(v) => set("contract_end")({ target: { value: v } })} />
               </Field>
             </div>
           </div>

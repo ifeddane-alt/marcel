@@ -135,6 +135,27 @@ export default function ResourceDetail() {
             {resource.team && <span className="text-xs bg-[#f0eefc] text-[#3d3564] px-2 py-0.5 rounded-lg border border-[#e7e3f2]">{resource.team}</span>}
             {resource.tjm_eur != null && <span className="font-mono-data text-xs">TJM {resource.tjm_eur.toLocaleString("fr-FR")} €</span>}
             <span className="text-xs text-[#8a87a0]">Disponibilité {availRate}%</span>
+            {resource.entry_date && (
+              <span className="text-xs text-[#8a87a0]" data-testid="resource-entry-date">
+                Entrée le <b className="font-mono-data text-[#5d5a75]">{new Date(resource.entry_date).toLocaleDateString("fr-FR")}</b>
+              </span>
+            )}
+            {resource.contract_ref && (
+              <span className="font-mono-data text-[10.5px] font-semibold text-[#3d3564] bg-[#f0eefc] border border-[#e7e3f2] px-1.5 py-px rounded" data-testid="resource-contract-ref">
+                {resource.contract_ref}
+              </span>
+            )}
+            {resource.contract_end && (() => {
+              const days = Math.ceil((new Date(resource.contract_end) - Date.now()) / 86400000);
+              const d = new Date(resource.contract_end).toLocaleDateString("fr-FR");
+              return days < 0 ? (
+                <span className="inline-flex text-[10px] font-bold px-2 py-0.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200" data-testid="resource-contract-expiry">Contrat expiré · {d}</span>
+              ) : days <= 60 ? (
+                <span className="inline-flex text-[10px] font-bold px-2 py-0.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200" data-testid="resource-contract-expiry">Contrat jusqu'au {d} · J-{days}</span>
+              ) : (
+                <span className="text-xs text-[#8a87a0]" data-testid="resource-contract-expiry">Contrat jusqu'au <b className="font-mono-data text-[#5d5a75]">{d}</b></span>
+              );
+            })()}
           </div>
         </div>
       </div>
@@ -150,6 +171,57 @@ export default function ResourceDetail() {
         <Kpi label="Projets" value={byProject.length} sub="avec allocation"
           donut={<Donut pct={100} color="#6d28d9">{byProject.length}</Donut>} />
       </div>
+
+      {/* Frise de charge mensuelle */}
+      {(() => {
+        const byMonth = new Map();
+        for (const a of allocations) {
+          const m = (a.period_month || "").slice(0, 7);
+          if (!m) continue;
+          byMonth.set(m, (byMonth.get(m) || 0) + (a.jh_allocated || 0));
+        }
+        const monthly = [...byMonth.entries()]
+          .sort((x, y) => x[0].localeCompare(y[0]))
+          .map(([month, jh]) => ({ month, jh, pct: capaEffective ? Math.round((jh / capaEffective) * 100) : 0 }));
+        const SCALE = Math.max(130, ...monthly.map((m) => m.pct));
+        const colorOf = (pct) => (pct > 90 ? "#cc4f45" : pct >= 70 ? "#e0a800" : "#3f8a34");
+        return (
+          <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] mb-6 overflow-hidden" data-testid="resource-load-timeline">
+            <div className="flex flex-wrap items-center justify-between gap-2 px-5 py-3 border-b border-[#f0eff6]">
+              <span className="font-heading text-[13px] font-bold text-[#26243a]">Charge mensuelle</span>
+              <div className="flex items-center gap-3 text-[10.5px] font-semibold text-[#8a87a0]">
+                <span className="flex items-center gap-1"><i className="w-2 h-2 rounded-full inline-block" style={{ background: "#3f8a34" }} /> &lt; 70%</span>
+                <span className="flex items-center gap-1"><i className="w-2 h-2 rounded-full inline-block" style={{ background: "#e0a800" }} /> 70–90%</span>
+                <span className="flex items-center gap-1"><i className="w-2 h-2 rounded-full inline-block" style={{ background: "#cc4f45" }} /> &gt; 90% / surcharge</span>
+                <span className="text-[#a39fb8]">Capacité effective : {capaEffective} JH/mois</span>
+              </div>
+            </div>
+            {monthly.length === 0 ? (
+              <div className="px-5 py-8 text-center text-sm text-zinc-400">Aucune allocation mensuelle.</div>
+            ) : (
+              <div className="flex items-end gap-4 px-5 pt-4 pb-3 overflow-x-auto">
+                {monthly.map((m) => (
+                  <div key={m.month} className="flex flex-col items-center gap-1 min-w-[54px]" data-testid={`load-month-${m.month}`}>
+                    <span className="text-[10.5px] font-extrabold font-heading" style={{ color: colorOf(m.pct) }}>
+                      {m.pct}%{m.pct > 100 && " ⚠"}
+                    </span>
+                    <div className="relative h-24 w-9 bg-[#f0eefc] rounded-md overflow-hidden flex items-end">
+                      <div
+                        className="absolute left-0 right-0 border-t border-dashed border-[#a39fb8] z-10"
+                        style={{ bottom: `${(100 / SCALE) * 100}%` }}
+                        title={`Capacité : ${capaEffective} JH`}
+                      />
+                      <div className="w-full rounded-t-sm transition-all" style={{ height: `${(m.pct / SCALE) * 100}%`, background: colorOf(m.pct) }} />
+                    </div>
+                    <span className="font-mono-data text-[10px] font-semibold text-[#26243a]">{m.jh} JH</span>
+                    <span className="text-[9.5px] text-[#8a87a0] capitalize whitespace-nowrap">{fmtMonth(m.month)}</span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
+        );
+      })()}
 
       {/* Allocations par projet */}
       <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-hidden" data-testid="resource-allocations-section">

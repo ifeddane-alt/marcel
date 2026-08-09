@@ -23,6 +23,8 @@ class ResourceCreate(BaseModel):
     forfait_consumed: Optional[float] = None   # Consommé sur forfait (€)
     contract_start: Optional[str] = None
     contract_end: Optional[str] = None
+    entry_date: Optional[str] = None           # Date d'entrée (référentiel)
+    contract_ref: Optional[str] = None         # Référence du contrat
 
 
 class ResourceUpdate(BaseModel):
@@ -43,3 +45,5 @@ class ResourceUpdate(BaseModel):
     forfait_consumed: Optional[float] = None
     contract_start: Optional[str] = None
     contract_end: Optional[str] = None
+    entry_date: Optional[str] = None
+    contract_ref: Optional[str] = None

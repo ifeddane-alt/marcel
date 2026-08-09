@@ -94,6 +94,7 @@ export default function Resources() {
       <div className="flex gap-1 mb-5 border-b border-zinc-200">
         {[
           { id: "resources", label: "Annuaire ressources" },
+          { id: "referentiel", label: "Référentiel", icon: FileText },
           { id: "heatmap", label: "Heatmap capacités", icon: BarChart3 },
         ].map(({ id, label, icon: Icon }) => (
           <button
@@ -258,6 +259,68 @@ export default function Resources() {
             </table>
           </div>
         </>
+      )}
+
+      {activeTab === "referentiel" && (
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-x-auto" data-testid="referentiel-section">
+          <table className="w-full text-sm" data-testid="referentiel-table">
+            <thead>
+              <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+                {["Ressource", "Type", "Rôle", "Équipe", "Date d'entrée", "Capacité annuelle", "Réf. contrat", "Fournisseur", "Expiration contrat"].map((h) => (
+                  <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] whitespace-nowrap">{h}</th>
+                ))}
+              </tr>
+            </thead>
+            <tbody>
+              {filtered.map((r) => {
+                const cfg = TYPE_CONFIG[r.resource_type || "interne"];
+                const capaAnnuelle = Math.round((r.capacity_jh_month || 0) * 12 * ((r.availability_rate ?? 100) / 100));
+                const days = r.contract_end ? Math.ceil((new Date(r.contract_end) - Date.now()) / 86400000) : null;
+                const fmt = (d) => (d ? new Date(d).toLocaleDateString("fr-FR") : null);
+                return (
+                  <tr
+                    key={r.resource_id}
+                    onClick={() => navigate(`/resources/${r.resource_id}`)}
+                    className="border-b border-zinc-100 hover:bg-zinc-50/60 transition-colors cursor-pointer"
+                    data-testid={`ref-row-${r.resource_id}`}
+                  >
+                    <td className="px-4 py-3 font-medium text-zinc-800 whitespace-nowrap">{r.name}</td>
+                    <td className="px-4 py-3">
+                      <span className={`inline-flex items-center gap-1 text-[10px] font-bold px-1.5 py-0.5 rounded-lg border ${cfg.bg} ${cfg.text} ${cfg.border}`}>
+                        <cfg.Icon size={9} />
+                        {cfg.label}
+                      </span>
+                    </td>
+                    <td className="px-4 py-3 text-zinc-600">{r.role}</td>
+                    <td className="px-4 py-3 text-zinc-500 text-xs">{r.team || "—"}</td>
+                    <td className="px-4 py-3 font-mono-data text-xs text-zinc-600" data-testid={`ref-entry-${r.resource_id}`}>{fmt(r.entry_date) || "—"}</td>
+                    <td className="px-4 py-3 font-mono-data text-sm font-semibold text-[#26243a]">{capaAnnuelle} JH</td>
+                    <td className="px-4 py-3 font-mono-data text-xs text-zinc-600" data-testid={`ref-contract-${r.resource_id}`}>{r.contract_ref || "—"}</td>
+                    <td className="px-4 py-3 text-xs text-zinc-500">{r.vendor || "—"}</td>
+                    <td className="px-4 py-3 whitespace-nowrap" data-testid={`ref-expiry-${r.resource_id}`}>
+                      {days == null ? (
+                        <span className="text-zinc-300">—</span>
+                      ) : days < 0 ? (
+                        <span className="inline-flex items-center text-[10.5px] font-bold px-2 py-0.5 rounded-lg bg-rose-50 text-rose-700 border border-rose-200">
+                          Expiré · {fmt(r.contract_end)}
+                        </span>
+                      ) : days <= 60 ? (
+                        <span className="inline-flex items-center text-[10.5px] font-bold px-2 py-0.5 rounded-lg bg-amber-50 text-amber-700 border border-amber-200">
+                          {fmt(r.contract_end)} · J-{days}
+                        </span>
+                      ) : (
+                        <span className="font-mono-data text-xs text-zinc-600">{fmt(r.contract_end)}</span>
+                      )}
+                    </td>
+                  </tr>
+                );
+              })}
+              {filtered.length === 0 && (
+                <tr><td colSpan={9} className="px-4 py-10 text-center text-zinc-400 text-sm">Aucune ressource</td></tr>
+              )}
+            </tbody>
+          </table>
+        </div>
       )}
 
       {activeTab === "heatmap" && (
