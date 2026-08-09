@@ -7,7 +7,6 @@ import {
   ShieldCheck,
   ShieldAlert,
   LogOut,
-  ChevronRight,
   Building2,
   FolderKanban,
   Upload,
@@ -23,7 +22,6 @@ import {
   Target,
   TrendingUp,
   Plug,
-  BotMessageSquare,
   Bell,
   Lightbulb,
   BarChart2,
@@ -49,7 +47,7 @@ function LanguageToggle() {
     <button
       onClick={() => i18n.changeLanguage(isEN ? "fr" : "en")}
       data-testid="lang-toggle"
-      className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg border border-zinc-200 text-zinc-600 hover:bg-zinc-50 transition-colors"
+      className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg border border-[#e8e6f0] text-[#5d5a75] hover:bg-[#f7f6fb] transition-colors"
       title={isEN ? "Passer en français" : "Switch to English"}
     >
       <span className="text-sm leading-none">{isEN ? "🇬🇧" : "🇫🇷"}</span>
@@ -59,7 +57,6 @@ function LanguageToggle() {
 }
 
 // ── Entrées principales ─────────────────────────────────────────────
-// perm: permission requise (string) ou [p1,p2] (OR logique)
 const MAIN_NAV = [
   { to: "/dashboard",  icon: LayoutDashboard, label: "Tableau de bord", perm: "dashboard.view" },
   { to: "/programmes", icon: FolderKanban,     label: "Programmes",     perm: "portfolio.view" },
@@ -75,7 +72,6 @@ const MAIN_NAV = [
   { to: "/governance", icon: ShieldCheck,  label: "Gouvernance",  perm: "governance.view" },
 ];
 
-// Entrées conditionnelles par module + permission
 const MODULE_NAV = [
   { to: "/roadmap",    icon: Map,         label: "Roadmap",    perm: "roadmap.view",    mod: "roadmap" },
   { to: "/scope",      icon: Target,      label: "Scope",      perm: ["scope.arbitrate", "scope.freeze", "scope.receive"], mod: null },
@@ -119,7 +115,6 @@ export default function Layout() {
     navigate("/login");
   };
 
-  // Filtre les entrées selon permissions + modules
   const visibleMain = MAIN_NAV.filter(({ perm }) =>
     Array.isArray(perm) ? hasAnyPermission(...perm) : hasPermission(perm)
   );
@@ -127,19 +122,51 @@ export default function Layout() {
     canAccessNav(perm, mod)
   );
 
-  // Profil affiché : profile_name si dispo, sinon fallback role
+  // ── Sections agent / SAFe / achats / outils / admin ──
+  const agentItems = [];
+  if (hasPermission("agent.chat") || hasPermission("agent.recommend") || hasPermission("*")) {
+    if (hasPermission("agent.recommend") || hasPermission("*"))
+      agentItems.push({ to: "/agent/recommandations", icon: Lightbulb, label: "Recommandations" });
+    if (hasPermission("agent.alerts") || hasPermission("agent.chat") || hasPermission("*"))
+      agentItems.push({ to: "/agent/alertes", icon: Bell, label: "Mes alertes" });
+  }
+  const safeItems = canAccessNav("trains.view", "safe")
+    ? [{ to: "/safe/trains", icon: Train, label: "Trains SAFe" }] : [];
+  const vendorItems = canAccessNav("vendors.view", "vendors")
+    ? [{ to: "/vendors", icon: Handshake, label: "Suivi Fournisseurs" }] : [];
+  const toolItems = hasPermission("import.csv")
+    ? [{ to: "/import", icon: Upload, label: "Import CSV" }] : [];
+  const adminItems = [];
+  if (hasAnyPermission("admin.profiles", "admin.users", "admin.config", "*")) {
+    if (hasPermission("admin.profiles")) adminItems.push({ to: "/admin/profiles", icon: Shield, label: "Profils", tid: "nav-admin-profils" });
+    if (hasPermission("admin.users")) adminItems.push({ to: "/admin/users", icon: Settings, label: "Utilisateurs", tid: "nav-admin-utilisateurs" });
+    if (hasPermission("admin.config")) adminItems.push({ to: "/admin/config", icon: Wrench, label: "Configuration", tid: "nav-admin-configuration" });
+    if (hasPermission("admin.config")) adminItems.push({ to: "/admin/connectors", icon: Plug, label: "Connecteurs", tid: "nav-admin-connectors" });
+    if (hasPermission("admin.config") || hasPermission("*")) adminItems.push({ to: "/admin/agent-analytics", icon: BarChart2, label: "Analytics IA", tid: "nav-admin-agent-analytics" });
+    if (hasPermission("admin.config") || hasPermission("*")) adminItems.push({ to: "/admin/powerbi", icon: Database, label: "Power BI", tid: "nav-admin-powerbi" });
+    if (hasPermission("admin.templates") || hasPermission("*")) adminItems.push({ to: "/admin/templates", icon: Layers, label: "Templates", tid: "nav-admin-templates" });
+    if (hasPermission("admin.config") || hasPermission("*")) adminItems.push({ to: "/admin/monitoring", icon: Activity, label: "Monitoring", tid: "nav-admin-monitoring" });
+  }
+
+  const sections = [
+    { title: "Pilotage", items: visibleMain },
+    { title: "Modules", items: visibleModules },
+    { title: "Agent IA", items: agentItems },
+    { title: "SAFe", items: safeItems },
+    { title: "Achats / Finances", items: vendorItems },
+    { title: "Outils", items: toolItems },
+    { title: "Administration", items: adminItems },
+  ].filter((s) => s.items.length > 0);
+
   const profileLabel = user?.profile_name || user?.role || "";
 
-  // Mobile drawer : fermé par défaut
   const [mobileDrawerOpen, setMobileDrawerOpen] = useState(false);
   const location = useLocation();
 
-  // Fermer le drawer mobile au changement de route
   useEffect(() => {
     setMobileDrawerOpen(false);
   }, [location.pathname]);
 
-  // Fermer le drawer si on redimensionne vers tablette/desktop
   useEffect(() => {
     const handleResize = () => {
       if (window.innerWidth >= 768) setMobileDrawerOpen(false);
@@ -148,198 +175,90 @@ export default function Layout() {
     return () => window.removeEventListener("resize", handleResize);
   }, []);
 
-  // Contenu commun de la sidebar (nav + footer)
-  const SidebarContent = ({ isDrawer = false }) => (
+  // Badge count par entrée (Équipes / Timesheets)
+  const badgeFor = (label) => {
+    if (label === "Équipes" && alertCount > 0) return { count: alertCount, cls: "bg-rose-500", tid: "sidebar-alert-badge" };
+    if (label === "Timesheets" && pendingCount > 0) return { count: pendingCount, cls: "bg-amber-500", tid: "sidebar-ts-badge" };
+    return null;
+  };
+
+  // ── Item du rail (icône + libellé visible à l'expansion) ──
+  const RailItem = ({ to, icon: Icon, label, tid, isDrawer }) => {
+    const badge = badgeFor(label);
+    return (
+      <NavLink
+        key={to}
+        to={to}
+        data-testid={tid || `nav-${label.toLowerCase().replace(/ /g, "-")}`}
+        className={({ isActive }) =>
+          `rail-item ${isActive ? "rail-item-active" : ""} ${isDrawer ? "px-3 py-2" : "px-[9px] py-2"}`
+        }
+        title={label}
+      >
+        <span className="relative flex-shrink-0 flex items-center justify-center w-[22px]">
+          <Icon size={17} strokeWidth={1.75} />
+          {badge && (
+            <span className={`absolute -top-1.5 -right-1.5 w-2 h-2 rounded-full ${badge.cls} ${isDrawer ? "hidden" : "group-hover:hidden"}`} />
+          )}
+        </span>
+        <span className={`flex-1 whitespace-nowrap overflow-hidden ${isDrawer ? "block" : "hidden group-hover:block"}`}>{label}</span>
+        {badge && (
+          <span
+            className={`ml-auto flex-shrink-0 min-w-[18px] h-[18px] items-center justify-center rounded-full ${badge.cls} text-white text-[10px] font-bold px-1 ${isDrawer ? "flex" : "hidden group-hover:flex"}`}
+            data-testid={badge.tid}
+          >
+            {badge.count}
+          </span>
+        )}
+      </NavLink>
+    );
+  };
+
+  // ── Contenu du rail / drawer ──
+  const RailContent = ({ isDrawer = false }) => (
     <>
-      {/* Logo */}
-      <div className="px-4 py-4 border-b border-zinc-100 flex items-center justify-between flex-shrink-0">
-        <div className="flex items-center gap-2.5 min-w-0">
-          <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
-            <Building2 size={14} className="text-white" strokeWidth={2} />
+      {isDrawer && (
+        <div className="px-4 py-4 border-b border-[#f0eff6] flex items-center justify-between flex-shrink-0">
+          <div className="flex items-center gap-2.5">
+            <div className="w-8 h-8 rounded-lg bg-[#352c6e] flex items-center justify-center text-white font-heading font-extrabold text-base">M</div>
+            <span className="font-heading text-[#352c6e] text-base font-extrabold tracking-tight">MARCEL</span>
           </div>
-          <div className={isDrawer ? "block" : "hidden md:block xl:block"}>
-            <div className="font-heading text-zinc-950 text-base font-bold tracking-tight leading-none whitespace-nowrap">
-              MARCEL
-            </div>
-            <div className="text-[10px] text-zinc-400 font-mono mt-0.5 tracking-wider uppercase">
-              {user?.name?.split(" ")[0] || "Groupe"}
-            </div>
-          </div>
-        </div>
-        {/* Bouton fermeture drawer (mobile uniquement) */}
-        {isDrawer && (
           <button
             onClick={() => setMobileDrawerOpen(false)}
-            className="text-zinc-400 hover:text-zinc-950 ml-2 flex-shrink-0"
+            className="text-[#a39fb8] hover:text-[#26243a] ml-2 flex-shrink-0"
             data-testid="sidebar-close-btn"
             aria-label="Fermer le menu"
           >
             <X size={18} />
           </button>
-        )}
-      </div>
-
-      {/* Nav */}
-      <nav className="flex-1 px-2 py-3 space-y-0.5 overflow-y-auto">
-        <div className={`text-[10px] uppercase tracking-widest text-zinc-500 px-3 mb-2 font-semibold whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:opacity-0 md:group-hover:opacity-100 xl:opacity-100"}`}>
-          Navigation
         </div>
+      )}
 
-        {visibleMain.map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            data-testid={`nav-${label.toLowerCase().replace(/ /g, "-")}`}
-            className={({ isActive }) =>
-              `sidebar-item ${isActive ? "sidebar-item-active" : ""}`
-            }
-            title={label}
-          >
-            <Icon size={16} strokeWidth={1.75} className="flex-shrink-0" />
-            <span className={`flex-1 whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>{label}</span>
-            {label === "Équipes" && alertCount > 0 && (
-              <span className={`ml-auto flex-shrink-0 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-rose-500 text-white text-[10px] font-bold px-1 ${isDrawer ? "block" : "md:hidden md:group-hover:flex xl:flex"}`} data-testid="sidebar-alert-badge">
-                {alertCount}
-              </span>
-            )}
-          </NavLink>
+      <nav className="flex-1 py-2.5 space-y-0.5 overflow-y-auto overflow-x-hidden [scrollbar-width:thin]">
+        {sections.map((section, si) => (
+          <React.Fragment key={section.title}>
+            {si > 0 && <div className="mx-3 my-2 border-t border-[#f0eff6]" />}
+            <div className={`text-[9.5px] uppercase tracking-widest text-[#a39fb8] px-3 pb-1 font-bold whitespace-nowrap overflow-hidden ${isDrawer ? "block" : "hidden group-hover:block"}`}>
+              {section.title}
+            </div>
+            {section.items.map((item) => (
+              <RailItem key={item.to} {...item} isDrawer={isDrawer} />
+            ))}
+          </React.Fragment>
         ))}
-
-        {visibleModules.map(({ to, icon: Icon, label }) => (
-          <NavLink
-            key={to}
-            to={to}
-            data-testid={`nav-${label.toLowerCase().replace(/ /g, "-")}`}
-            className={({ isActive }) =>
-              `sidebar-item ${isActive ? "sidebar-item-active" : ""}`
-            }
-            title={label}
-          >
-            <Icon size={16} strokeWidth={1.75} className="flex-shrink-0" />
-            <span className={`flex-1 whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>{label}</span>
-            {label === "Timesheets" && pendingCount > 0 && (
-              <span className={`ml-auto flex-shrink-0 min-w-[18px] h-[18px] flex items-center justify-center rounded-full bg-amber-500 text-white text-[10px] font-bold px-1 ${isDrawer ? "block" : "md:hidden md:group-hover:flex xl:flex"}`} data-testid="sidebar-ts-badge">
-                {pendingCount}
-              </span>
-            )}
-          </NavLink>
-        ))}
-
-        {(hasPermission("agent.chat") || hasPermission("agent.recommend") || hasPermission("*")) && (
-          <>
-            <div className={`text-[10px] uppercase tracking-widest text-zinc-500 px-3 pt-3 pb-1 font-semibold whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:opacity-0 md:group-hover:opacity-100 xl:opacity-100"}`}>Agent IA</div>
-            {(hasPermission("agent.recommend") || hasPermission("*")) && (
-              <NavLink to="/agent/recommandations" data-testid="nav-agent-recommandations" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Recommandations">
-                <Lightbulb size={16} strokeWidth={1.75} className="flex-shrink-0" />
-                <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Recommandations</span>
-              </NavLink>
-            )}
-            {(hasPermission("agent.alerts") || hasPermission("agent.chat") || hasPermission("*")) && (
-              <NavLink to="/agent/alertes" data-testid="nav-agent-alertes" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Mes alertes">
-                <Bell size={16} strokeWidth={1.75} className="flex-shrink-0" />
-                <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Mes alertes</span>
-              </NavLink>
-            )}
-          </>
-        )}
-
-        {canAccessNav("trains.view", "safe") && (
-          <>
-            <div className={`text-[10px] uppercase tracking-widest text-zinc-500 px-3 pt-3 pb-1 font-semibold whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:opacity-0 md:group-hover:opacity-100 xl:opacity-100"}`}>SAFe</div>
-            <NavLink to="/safe/trains" data-testid="nav-trains-safe" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Trains SAFe">
-              <Train size={16} strokeWidth={1.75} className="flex-shrink-0" />
-              <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Trains SAFe</span>
-            </NavLink>
-          </>
-        )}
-
-        {canAccessNav("vendors.view", "vendors") && (
-          <>
-            <div className={`text-[10px] uppercase tracking-widest text-zinc-500 px-3 pt-3 pb-1 font-semibold whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:opacity-0 md:group-hover:opacity-100 xl:opacity-100"}`}>Achats / Finances</div>
-            <NavLink to="/vendors" data-testid="nav-suivi-fournisseurs" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Suivi Fournisseurs">
-              <Handshake size={16} strokeWidth={1.75} className="flex-shrink-0" />
-              <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Suivi Fournisseurs</span>
-            </NavLink>
-          </>
-        )}
-
-        {hasPermission("import.csv") && (
-          <>
-            <div className={`text-[10px] uppercase tracking-widest text-zinc-500 px-3 pt-3 pb-1 font-semibold whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:opacity-0 md:group-hover:opacity-100 xl:opacity-100"}`}>Outils</div>
-            <NavLink to="/import" data-testid="nav-import" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Import CSV">
-              <Upload size={16} strokeWidth={1.75} className="flex-shrink-0" />
-              <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Import CSV</span>
-            </NavLink>
-          </>
-        )}
-
-        {hasAnyPermission("admin.profiles", "admin.users", "admin.config", "*") &&
-         (hasPermission("admin.profiles") || hasPermission("admin.users") || hasPermission("admin.config") || hasPermission("*")) && (
-          <>
-            <div className={`text-[10px] uppercase tracking-widest text-zinc-500 px-3 pt-3 pb-1 font-semibold whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:opacity-0 md:group-hover:opacity-100 xl:opacity-100"}`}>Administration</div>
-            {hasPermission("admin.profiles") && (
-              <NavLink to="/admin/profiles" data-testid="nav-admin-profils" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Profils">
-                <Shield size={16} strokeWidth={1.75} className="flex-shrink-0" />
-                <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Profils</span>
-              </NavLink>
-            )}
-            {hasPermission("admin.users") && (
-              <NavLink to="/admin/users" data-testid="nav-admin-utilisateurs" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Utilisateurs">
-                <Settings size={16} strokeWidth={1.75} className="flex-shrink-0" />
-                <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Utilisateurs</span>
-              </NavLink>
-            )}
-            {hasPermission("admin.config") && (
-              <NavLink to="/admin/config" data-testid="nav-admin-configuration" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Configuration">
-                <Wrench size={16} strokeWidth={1.75} className="flex-shrink-0" />
-                <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Configuration</span>
-              </NavLink>
-            )}
-            {hasPermission("admin.config") && (
-              <NavLink to="/admin/connectors" data-testid="nav-admin-connectors" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Connecteurs">
-                <Plug size={16} strokeWidth={1.75} className="flex-shrink-0" />
-                <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Connecteurs</span>
-              </NavLink>
-            )}
-            {(hasPermission("admin.config") || hasPermission("*")) && (
-              <NavLink to="/admin/agent-analytics" data-testid="nav-admin-agent-analytics" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Analytics IA">
-                <BarChart2 size={16} strokeWidth={1.75} className="flex-shrink-0" />
-                <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Analytics IA</span>
-              </NavLink>
-            )}
-            {(hasPermission("admin.config") || hasPermission("*")) && (
-              <NavLink to="/admin/powerbi" data-testid="nav-admin-powerbi" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Connecteur Power BI">
-                <Database size={16} strokeWidth={1.75} className="flex-shrink-0" />
-                <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Power BI</span>
-              </NavLink>
-            )}
-            {(hasPermission("admin.templates") || hasPermission("*")) && (
-              <NavLink to="/admin/templates" data-testid="nav-admin-templates" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Templates Projets">
-                <Layers size={16} strokeWidth={1.75} className="flex-shrink-0" />
-                <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Templates</span>
-              </NavLink>
-            )}
-            {(hasPermission("admin.config") || hasPermission("*")) && (
-              <NavLink to="/admin/monitoring" data-testid="nav-admin-monitoring" className={({ isActive }) => `sidebar-item ${isActive ? "sidebar-item-active" : ""}`} title="Monitoring">
-                <Activity size={16} strokeWidth={1.75} className="flex-shrink-0" />
-                <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Monitoring</span>
-              </NavLink>
-            )}
-          </>
-        )}
       </nav>
 
-      {/* User footer */}
-      <div className="px-2 pb-3 border-t border-zinc-100 pt-3 flex-shrink-0">
-        <div className={`flex items-center gap-3 px-2 py-2 ${isDrawer ? "flex" : "md:justify-center md:group-hover:justify-start xl:justify-start"}`}>
-          <div className="w-8 h-8 rounded-full bg-blue-100 border border-white shadow-sm flex items-center justify-center flex-shrink-0">
-            <span className="text-xs font-bold text-blue-700">
+      {/* Footer utilisateur */}
+      <div className="pb-2.5 border-t border-[#f0eff6] pt-2 flex-shrink-0">
+        <div className={`flex items-center gap-2.5 mx-1.5 px-[7px] py-1.5 ${isDrawer ? "" : ""}`}>
+          <div className="w-[26px] h-[26px] rounded-full bg-[#352c6e] flex items-center justify-center flex-shrink-0">
+            <span className="text-[10px] font-bold text-white">
               {user?.name?.slice(0, 2).toUpperCase() || "?"}
             </span>
           </div>
-          <div className={`flex-1 min-w-0 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>
-            <div className="text-sm text-zinc-900 font-medium truncate">{user?.name}</div>
-            <div className="text-[10px] text-zinc-400 truncate" data-testid="sidebar-profile-label">
+          <div className={`flex-1 min-w-0 ${isDrawer ? "block" : "hidden group-hover:block"}`}>
+            <div className="text-[12.5px] text-[#26243a] font-semibold truncate">{user?.name}</div>
+            <div className="text-[10px] text-[#a39fb8] truncate" data-testid="sidebar-profile-label">
               {profileLabel}
             </div>
           </div>
@@ -347,94 +266,100 @@ export default function Layout() {
         <button
           onClick={handleLogout}
           data-testid="logout-btn"
-          className="sidebar-item w-full mt-1 text-zinc-500 hover:text-rose-600"
+          className={`rail-item w-[calc(100%-12px)] mt-0.5 text-[#8a87a0] hover:text-rose-600 hover:bg-rose-50 ${isDrawer ? "px-3 py-2" : "px-[9px] py-2"}`}
           title="Déconnexion"
         >
-          <LogOut size={15} strokeWidth={1.75} />
-          <span className={`whitespace-nowrap overflow-hidden transition-all duration-200 ${isDrawer ? "block" : "md:hidden md:group-hover:block xl:block"}`}>Déconnexion</span>
+          <span className="flex-shrink-0 flex items-center justify-center w-[22px]"><LogOut size={16} strokeWidth={1.75} /></span>
+          <span className={`whitespace-nowrap overflow-hidden ${isDrawer ? "block" : "hidden group-hover:block"}`}>Déconnexion</span>
         </button>
       </div>
     </>
   );
 
   return (
-    <div className="flex h-screen overflow-hidden bg-zinc-50">
+    <div className="flex flex-col h-screen overflow-hidden bg-[#f7f6fb]">
 
-      {/* ── Overlay mobile (drawer ouvert) ─────────────────── */}
-      {mobileDrawerOpen && (
-        <div
-          className="fixed inset-0 bg-black/50 z-20 md:hidden"
-          onClick={() => setMobileDrawerOpen(false)}
-          data-testid="mobile-overlay"
-        />
-      )}
+      {/* ── Barre d'application ───────────────────────────── */}
+      <header className="h-[50px] bg-white border-b border-[#e8e6f0] flex items-center px-3 md:px-4 flex-shrink-0 z-30">
+        {/* Hamburger — mobile uniquement */}
+        <button
+          onClick={() => setMobileDrawerOpen(true)}
+          data-testid="sidebar-open-btn"
+          className="mr-3 text-[#5d5a75] hover:text-[#26243a] md:hidden flex-shrink-0"
+          aria-label="Ouvrir le menu"
+        >
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
+            <line x1="3" y1="6" x2="21" y2="6" />
+            <line x1="3" y1="12" x2="21" y2="12" />
+            <line x1="3" y1="18" x2="21" y2="18" />
+          </svg>
+        </button>
 
-      {/* ── Sidebar Mobile : drawer overlay (<768px) ──────── */}
-      <aside
-        data-testid="sidebar-mobile"
-        className={`
-          fixed top-0 left-0 h-full z-30 w-72 bg-white border-r border-zinc-200 flex flex-col
-          transform transition-transform duration-300 ease-in-out
-          ${mobileDrawerOpen ? "translate-x-0" : "-translate-x-full"}
-          md:hidden
-        `}
-      >
-        <SidebarContent isDrawer={true} />
-      </aside>
+        <div className="flex items-center gap-2.5 flex-shrink-0 mr-4">
+          <div className="w-[30px] h-[30px] rounded-lg bg-[#352c6e] flex items-center justify-center text-white font-heading font-extrabold text-[15px]">M</div>
+          <span className="font-heading text-[#352c6e] text-[17px] font-extrabold tracking-tight hidden sm:block">MARCEL</span>
+        </div>
 
-      {/* ── Sidebar Tablette / Desktop (≥768px) ───────────── */}
-      <aside
-        data-testid="sidebar"
-        className="
-          hidden md:flex flex-col flex-shrink-0 bg-white border-r border-zinc-200
-          w-[60px] xl:w-60
-          hover:w-60 transition-all duration-200 ease-in-out
-          overflow-hidden group
-        "
-      >
-        <SidebarContent isDrawer={false} />
-      </aside>
+        <div className="hidden lg:flex items-center gap-1.5 text-xs text-[#8a87a0] min-w-0 border-l border-[#e8e6f0] pl-4">
+          <Building2 size={13} className="flex-shrink-0" />
+          <span className="text-[#5d5a75] font-semibold truncate">Groupe Altair Industries</span>
+        </div>
 
-      {/* ── Main content ──────────────────────────────────── */}
-      <div className="flex-1 flex flex-col overflow-hidden min-w-0">
-        {/* Topbar */}
-        <header className="h-12 bg-white border-b border-zinc-200 flex items-center px-3 md:px-4 lg:px-6 flex-shrink-0">
-          {/* Hamburger — mobile uniquement */}
-          <button
-            onClick={() => setMobileDrawerOpen(true)}
-            data-testid="sidebar-open-btn"
-            className="mr-3 text-zinc-500 hover:text-zinc-700 md:hidden flex-shrink-0"
-            aria-label="Ouvrir le menu"
+        <GlobalSearch />
+
+        <div className="ml-auto flex items-center gap-2 flex-shrink-0">
+          <LanguageToggle />
+          <NotificationBell />
+          <span
+            className="text-[11px] font-mono-data text-[#5d5a75] bg-[#f0eefc] px-2 py-0.5 rounded-lg hidden md:block"
+            data-testid="header-profile-badge"
           >
-            <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
-              <line x1="3" y1="6" x2="21" y2="6" />
-              <line x1="3" y1="12" x2="21" y2="12" />
-              <line x1="3" y1="18" x2="21" y2="18" />
-            </svg>
-          </button>
+            {profileLabel}
+          </span>
+        </div>
+      </header>
 
-          <div className="flex items-center gap-1 text-sm text-zinc-500 min-w-0">
-            <span className="text-zinc-800 font-medium truncate text-xs sm:text-sm">Groupe Altair Industries</span>
-            <ChevronRight size={14} className="text-zinc-400 flex-shrink-0 hidden sm:block" />
-            <span className="text-zinc-500 truncate hidden sm:block text-xs">Portefeuille Projets</span>
-          </div>
+      <div className="flex flex-1 overflow-hidden">
 
-          <GlobalSearch />
+        {/* ── Overlay mobile ───────────────────────────────── */}
+        {mobileDrawerOpen && (
+          <div
+            className="fixed inset-0 bg-black/50 z-40 md:hidden"
+            onClick={() => setMobileDrawerOpen(false)}
+            data-testid="mobile-overlay"
+          />
+        )}
 
-          <div className="ml-auto flex items-center gap-2 flex-shrink-0">
-            <LanguageToggle />
-            <NotificationBell />
-            <span
-              className="text-xs font-mono-data text-zinc-500 bg-zinc-100 px-2 py-0.5 rounded-lg hidden md:block"
-              data-testid="header-profile-badge"
-            >
-              {profileLabel}
-            </span>
-          </div>
-        </header>
+        {/* ── Drawer mobile (<768px) ───────────────────────── */}
+        <aside
+          data-testid="sidebar-mobile"
+          className={`
+            fixed top-0 left-0 h-full z-50 w-72 bg-white border-r border-[#e8e6f0] flex flex-col
+            transform transition-transform duration-300 ease-in-out
+            ${mobileDrawerOpen ? "translate-x-0" : "-translate-x-full"}
+            md:hidden
+          `}
+        >
+          <RailContent isDrawer={true} />
+        </aside>
 
-        {/* Page content */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden">
+        {/* ── Rail d'icônes desktop (≥768px) — s'étend au survol ── */}
+        <div className="hidden md:block relative w-[54px] flex-shrink-0">
+          <aside
+            data-testid="sidebar"
+            className="
+              absolute inset-y-0 left-0 z-30 w-[54px] hover:w-[236px]
+              bg-white border-r border-[#e8e6f0] flex flex-col
+              transition-[width] duration-200 ease-out overflow-hidden group
+              hover:shadow-[8px_0_30px_-12px_rgba(53,44,110,0.18)]
+            "
+          >
+            <RailContent isDrawer={false} />
+          </aside>
+        </div>
+
+        {/* ── Contenu ──────────────────────────────────────── */}
+        <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0">
           <Outlet />
         </main>
       </div>

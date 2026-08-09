@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Search, Plus, Pencil, Trash2, Presentation } from "lucide-react";
+import { Search, Plus, Pencil, Trash2, Presentation, LayoutGrid, List } from "lucide-react";
 import { projectsAPI, programsAPI, resourcesAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -10,6 +10,7 @@ import ExportCopilModal from "@/components/ExportCopilModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { formatEuro, formatDate } from "@/utils/format";
 import ExcelToolbar from "@/components/ExcelToolbar";
+import ProjectTile from "@/components/ProjectTile";
 
 const RAG_LABELS = { green: "Vert", orange: "Orange", red: "Rouge" };
 
@@ -32,6 +33,8 @@ export default function Portfolio() {
   const [filterStatus, setFilterStatus] = useState("");
   const [sortKey, setSortKey] = useState("name");
   const [sortDir, setSortDir] = useState("asc");
+  const [view, setView] = useState(() => localStorage.getItem("portfolio_view") || "tiles");
+  const switchView = (v) => { setView(v); localStorage.setItem("portfolio_view", v); };
 
   // Selection state
   const [selectedProjects, setSelectedProjects] = useState(new Set());
@@ -218,10 +221,51 @@ export default function Portfolio() {
           <option value="cloture">Clôturé</option>
           <option value="archive">Archivé</option>
         </select>
+        {/* Bascule tuiles / liste */}
+        <div className="ml-auto flex border border-[#dcd9ea] rounded-lg overflow-hidden bg-white">
+          <button
+            onClick={() => switchView("tiles")}
+            data-testid="view-toggle-tiles"
+            className={`w-9 h-9 flex items-center justify-center transition-colors ${view === "tiles" ? "bg-[#e9effe] text-[#2e5fe8]" : "text-[#8a87a0] hover:bg-[#f7f6fb]"}`}
+            title="Vue tuiles"
+          >
+            <LayoutGrid size={15} />
+          </button>
+          <button
+            onClick={() => switchView("list")}
+            data-testid="view-toggle-list"
+            className={`w-9 h-9 flex items-center justify-center transition-colors border-l border-[#dcd9ea] ${view === "list" ? "bg-[#e9effe] text-[#2e5fe8]" : "text-[#8a87a0] hover:bg-[#f7f6fb]"}`}
+            title="Vue liste"
+          >
+            <List size={15} />
+          </button>
+        </div>
       </div>
 
+      {/* Vue tuiles */}
+      {view === "tiles" && (
+        <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 2xl:grid-cols-4 gap-5" data-testid="portfolio-tiles">
+          {filtered.map((p) => (
+            <ProjectTile
+              key={p.project_id}
+              project={p}
+              program={programs.find((pr) => pr.program_id === p.program_id)}
+              selected={selectedProjects.has(p.project_id)}
+              onToggleSelect={() => toggleSelect(p.project_id)}
+              onEdit={openEdit}
+              onDelete={openDelete}
+              canEdit={canEdit}
+              canDelete={canDelete}
+            />
+          ))}
+          {filtered.length === 0 && (
+            <div className="col-span-full text-center py-16 text-zinc-400 text-sm">Aucun projet correspondant aux filtres</div>
+          )}
+        </div>
+      )}
+
       {/* Table */}
-      <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-x-auto">
+      <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm overflow-x-auto ${view === "tiles" ? "hidden" : ""}`}>
         <table className="w-full text-sm" data-testid="portfolio-table">
           <thead>
             <tr className="bg-zinc-50 border-b border-zinc-200 text-left">

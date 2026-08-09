@@ -1,10 +1,29 @@
 import React, { useState, useEffect } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
-import { Building2, Eye, EyeOff, AlertCircle, KeyRound } from "lucide-react";
+import { Eye, EyeOff, AlertCircle, KeyRound, Check } from "lucide-react";
 import { authAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 
 const BACKEND = process.env.REACT_APP_BACKEND_URL;
+
+const DEMO_ACCOUNTS = [
+  { email: "admin@altair.fr",   pwd: "Admin2026!",  name: "Sophie Martin",    profile: "Administrateur" },
+  { email: "pmo@altair.fr",     pwd: "Pmo1234!",    name: "Thomas Dubois",    profile: "PMO Portefeuille" },
+  { email: "cp@altair.fr",      pwd: "Altair2026!", name: "Nicolas Petit",    profile: "Chef de Projet" },
+  { email: "manager@altair.fr", pwd: "Altair2026!", name: "Isabelle Bernard", profile: "Manager Portfolio" },
+  { email: "viewer@altair.fr",  pwd: "View1234!",   name: "Marie Leclerc",    profile: "Direction SI" },
+  { email: "user@altair.fr",    pwd: "Altair2026!", name: "Julien Girard",    profile: "Utilisateur" },
+  { email: "achats@altair.fr",  pwd: "Altair2026!", name: "Marc Lefebvre",    profile: "Achats / Vendor" },
+];
+
+function BrandMark({ size = "lg" }) {
+  const cls = size === "lg" ? "w-11 h-11 rounded-xl text-[22px]" : "w-8 h-8 rounded-lg text-base";
+  return (
+    <div className={`${cls} bg-[#352c6e] flex items-center justify-center text-white font-heading font-extrabold flex-shrink-0`}>
+      M
+    </div>
+  );
+}
 
 export default function Login() {
   const [email, setEmail] = useState("admin@altair.fr");
@@ -88,193 +107,177 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen bg-zinc-950 flex">
-      {/* Left brand panel */}
-      <div className="hidden lg:flex flex-col justify-between w-2/5 bg-[#0A1120] px-12 py-10 border-r border-white/5">
-        <div className="flex items-center gap-3">
-          <div className="w-8 h-8 rounded-lg bg-blue-600 flex items-center justify-center">
-            <Building2 size={16} className="text-white" strokeWidth={2} />
+    <div className="min-h-screen bg-[#efeaf8] flex">
+      {/* ── Panneau branding gauche ─────────────────────────── */}
+      <div className="hidden lg:flex flex-col justify-center flex-1 px-14 xl:px-20 relative overflow-hidden">
+        <div className="absolute -bottom-32 -left-24 w-[420px] h-[420px] rounded-full bg-white/40 blur-3xl pointer-events-none" />
+        <div className="relative">
+          <div className="flex items-center gap-3 mb-12">
+            <BrandMark />
+            <div>
+              <div className="font-heading text-[#352c6e] text-2xl font-extrabold tracking-tight leading-none">MARCEL</div>
+              <div className="text-[11px] text-[#75708c] font-medium mt-0.5">Project Portfolio Management</div>
+            </div>
           </div>
-          <span className="font-heading text-white text-xl font-bold tracking-wide">MARCEL</span>
-        </div>
-        <div>
-          <h1 className="font-heading text-white text-5xl font-bold leading-tight mb-4">
-            Pilotage de Portefeuille Projets + Agent IA PMO
+          <h1 className="font-heading text-[#352c6e] text-4xl xl:text-5xl font-extrabold leading-[1.12] mb-5 max-w-xl">
+            Le pilotage de vos projets et portefeuilles
           </h1>
-          <p className="text-zinc-400 text-sm leading-relaxed">
-            Plateforme SaaS multi-tenant pour la gestion de portefeuilles projets grands comptes.
-            Suivi budgétaire, gouvernance et reporting en temps réel.
+          <p className="text-[#5d5877] text-base xl:text-lg leading-relaxed max-w-md mb-9">
+            Plus de visibilité. De meilleures décisions. Un succès durable.
           </p>
-          <div className="mt-8 grid grid-cols-2 gap-3">
+          <div className="space-y-3.5">
             {[
-              { val: "8", label: "Projets actifs" },
-              { val: "17,3M€", label: "Budget portefeuille" },
-              { val: "5", label: "Instances gouvernance" },
-              { val: "10", label: "Ressources allouées" },
-            ].map((item) => (
-              <div key={item.label} className="bg-white/5 rounded-lg p-3 border border-white/10">
-                <div className="font-mono-data text-blue-600 text-xl font-bold">{item.val}</div>
-                <div className="text-zinc-400 text-xs mt-0.5">{item.label}</div>
+              "Portefeuilles, budgets, jalons & risques unifiés",
+              "Dashboards temps réel prêts pour le COMEX",
+              "Agent IA PMO intégré",
+            ].map((pt) => (
+              <div key={pt} className="flex items-center gap-3 text-[#3d3564] text-sm font-semibold">
+                <Check size={18} strokeWidth={2.5} className="text-[#352c6e] flex-shrink-0" />
+                {pt}
               </div>
             ))}
           </div>
-        </div>
-        <div className="text-zinc-600 text-xs">
-          © 2025 MARCEL — Groupe Altair Industries
+          <div className="text-[#a39fb8] text-xs mt-14">© 2026 MARCEL — Groupe Altair Industries</div>
         </div>
       </div>
 
-      {/* Right login form */}
-      <div className="flex-1 flex items-center justify-center px-6">
-        <div className="w-full max-w-sm">
-          {/* Mobile logo */}
-          <div className="flex items-center gap-2 mb-8 lg:hidden">
-            <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center">
-              <Building2 size={14} className="text-white" strokeWidth={2} />
-            </div>
-            <span className="font-heading text-white text-xl font-bold tracking-wide">MARCEL</span>
+      {/* ── Formulaire droite ───────────────────────────────── */}
+      <div className="flex-1 lg:flex-none lg:w-[560px] flex items-center justify-center px-5 py-10">
+        <div className="w-full max-w-[420px]">
+          {/* Logo mobile */}
+          <div className="flex items-center gap-2.5 mb-6 lg:hidden">
+            <BrandMark size="sm" />
+            <span className="font-heading text-[#352c6e] text-xl font-extrabold tracking-tight">MARCEL</span>
           </div>
 
-          <div className="mb-8">
-            <h2 className="font-heading text-white text-3xl font-bold mb-1">Connexion</h2>
-            <p className="text-zinc-400 text-sm">Bienvenue — authentifiez-vous pour continuer</p>
-          </div>
+          <div className="bg-white rounded-2xl shadow-[0_24px_60px_-22px_rgba(53,44,110,0.35)] p-8 sm:p-9">
+            <h2 className="font-heading text-[#26243a] text-2xl font-bold mb-1">Connexion</h2>
+            <p className="text-[#75708c] text-sm mb-7">Accédez à votre espace de pilotage.</p>
 
-          <form onSubmit={handleSubmit} className="space-y-4" data-testid="login-form">
-            <div>
-              <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">
-                Adresse e-mail
-              </label>
-              <input
-                type="email"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                required
-                data-testid="login-email-input"
-                className="w-full bg-white/5 border border-white/15 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors"
-                placeholder="vous@entreprise.fr"
-              />
-            </div>
-
-            <div>
-              <label className="block text-xs font-semibold text-zinc-400 uppercase tracking-wider mb-1.5">
-                Mot de passe
-              </label>
-              <div className="relative">
+            <form onSubmit={handleSubmit} className="space-y-4" data-testid="login-form">
+              <div>
+                <label className="block text-[12.5px] font-bold text-[#3d3564] mb-1.5">Email</label>
                 <input
-                  type={showPwd ? "text" : "password"}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
+                  type="email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
                   required
-                  data-testid="login-password-input"
-                  className="w-full bg-white/5 border border-white/15 rounded-lg px-3 py-2.5 text-sm text-white placeholder-zinc-500 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 transition-colors pr-10"
-                  placeholder="••••••••"
+                  data-testid="login-email-input"
+                  className="w-full h-11 bg-[#fbfaff] border-[1.5px] border-[#dcd7ea] rounded-[10px] px-3.5 text-sm text-[#26243a] placeholder-[#a39fb8] focus:outline-none focus:border-[#2e5fe8] focus:ring-2 focus:ring-[#2e5fe8]/20 transition-colors"
+                  placeholder="prenom.nom@entreprise.fr"
                 />
+              </div>
+
+              <div>
+                <label className="block text-[12.5px] font-bold text-[#3d3564] mb-1.5">Mot de passe</label>
+                <div className="relative">
+                  <input
+                    type={showPwd ? "text" : "password"}
+                    value={password}
+                    onChange={(e) => setPassword(e.target.value)}
+                    required
+                    data-testid="login-password-input"
+                    className="w-full h-11 bg-[#fbfaff] border-[1.5px] border-[#dcd7ea] rounded-[10px] px-3.5 pr-10 text-sm text-[#26243a] placeholder-[#a39fb8] focus:outline-none focus:border-[#2e5fe8] focus:ring-2 focus:ring-[#2e5fe8]/20 transition-colors"
+                    placeholder="••••••••"
+                  />
+                  <button
+                    type="button"
+                    onClick={() => setShowPwd(!showPwd)}
+                    className="absolute right-3 top-1/2 -translate-y-1/2 text-[#a39fb8] hover:text-[#5d5a75]"
+                  >
+                    {showPwd ? <EyeOff size={15} /> : <Eye size={15} />}
+                  </button>
+                </div>
+              </div>
+
+              {error && (
+                <div
+                  data-testid="login-error"
+                  className="flex items-center gap-2 bg-rose-50 border border-rose-200 rounded-[10px] px-3 py-2 text-rose-700 text-sm"
+                >
+                  <AlertCircle size={15} />
+                  {error}
+                </div>
+              )}
+
+              {waking && (
+                <div
+                  data-testid="login-waking"
+                  className="flex items-center gap-2 bg-amber-50 border border-amber-200 rounded-[10px] px-3 py-2 text-amber-700 text-sm"
+                >
+                  <AlertCircle size={15} className="animate-pulse" />
+                  L'environnement démarre… nouvelle tentative automatique ({waking}/8)
+                </div>
+              )}
+
+              <button
+                type="submit"
+                disabled={loading}
+                data-testid="login-submit-btn"
+                className="w-full h-[46px] bg-[#2e5fe8] hover:bg-[#2450c7] text-white font-bold text-sm rounded-[10px] transition-colors disabled:opacity-50 disabled:cursor-not-allowed shadow-[0_8px_20px_-8px_rgba(46,95,232,0.6)]"
+              >
+                {waking ? "Démarrage de l'environnement..." : loading ? "Connexion en cours..." : "Se connecter"}
+              </button>
+            </form>
+
+            {/* SSO */}
+            <div className="mt-5">
+              <div className="flex items-center gap-3 mb-3">
+                <div className="flex-1 h-px bg-[#e7e3f2]" />
+                <span className="text-[10px] uppercase tracking-widest text-[#a39fb8] font-bold">ou continuer avec</span>
+                <div className="flex-1 h-px bg-[#e7e3f2]" />
+              </div>
+              <div className="grid grid-cols-3 gap-2">
                 <button
                   type="button"
-                  onClick={() => setShowPwd(!showPwd)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-zinc-400 hover:text-zinc-200"
+                  onClick={() => startSSO("google")}
+                  data-testid="sso-google-btn"
+                  className="flex items-center justify-center gap-1.5 bg-white border-[1.5px] border-[#dcd7ea] rounded-[10px] py-2 text-xs font-semibold text-[#3d3564] hover:bg-[#f7f6fb] transition-colors"
                 >
-                  {showPwd ? <EyeOff size={15} /> : <Eye size={15} />}
+                  <svg width="13" height="13" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
+                  Google
+                </button>
+                <button
+                  type="button"
+                  onClick={() => startSSO("entra")}
+                  data-testid="sso-entra-btn"
+                  className="flex items-center justify-center gap-1.5 bg-white border-[1.5px] border-[#dcd7ea] rounded-[10px] py-2 text-xs font-semibold text-[#3d3564] hover:bg-[#f7f6fb] transition-colors"
+                >
+                  <svg width="13" height="13" viewBox="0 0 23 23"><path fill="#f35325" d="M1 1h10v10H1z"/><path fill="#81bc06" d="M12 1h10v10H12z"/><path fill="#05a6f0" d="M1 12h10v10H1z"/><path fill="#ffba08" d="M12 12h10v10H12z"/></svg>
+                  Microsoft
+                </button>
+                <button
+                  type="button"
+                  onClick={() => startSSO("saml")}
+                  data-testid="sso-saml-btn"
+                  className="flex items-center justify-center gap-1.5 bg-white border-[1.5px] border-[#dcd7ea] rounded-[10px] py-2 text-xs font-semibold text-[#3d3564] hover:bg-[#f7f6fb] transition-colors"
+                >
+                  <KeyRound size={13} className="text-[#8a87a0]" />
+                  SAML
                 </button>
               </div>
             </div>
-
-            {error && (
-              <div
-                data-testid="login-error"
-                className="flex items-center gap-2 bg-rose-500/10 border border-rose-500/30 rounded-lg px-3 py-2 text-rose-400 text-sm"
-              >
-                <AlertCircle size={15} />
-                {error}
-              </div>
-            )}
-
-            {waking && (
-              <div
-                data-testid="login-waking"
-                className="flex items-center gap-2 bg-amber-500/10 border border-amber-500/30 rounded-lg px-3 py-2 text-amber-400 text-sm"
-              >
-                <AlertCircle size={15} className="animate-pulse" />
-                L'environnement démarre… nouvelle tentative automatique ({waking}/8)
-              </div>
-            )}
-
-            <button
-              type="submit"
-              disabled={loading}
-              data-testid="login-submit-btn"
-              className="w-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-sm py-2.5 rounded-lg transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {waking ? "Démarrage de l'environnement..." : loading ? "Connexion en cours..." : "Se connecter"}
-            </button>
-          </form>
-
-          {/* SSO */}
-          <div className="mt-5">
-            <div className="flex items-center gap-3 mb-3">
-              <div className="flex-1 h-px bg-white/10" />
-              <span className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">ou connexion SSO</span>
-              <div className="flex-1 h-px bg-white/10" />
-            </div>
-            <div className="grid grid-cols-3 gap-2">
-              <button
-                type="button"
-                onClick={() => startSSO("google")}
-                data-testid="sso-google-btn"
-                className="flex items-center justify-center gap-1.5 bg-white/5 border border-white/15 rounded-lg py-2 text-xs text-zinc-200 hover:bg-white/10 transition-colors"
-              >
-                <svg width="13" height="13" viewBox="0 0 24 24"><path fill="#4285F4" d="M22.56 12.25c0-.78-.07-1.53-.2-2.25H12v4.26h5.92c-.26 1.37-1.04 2.53-2.21 3.31v2.77h3.57c2.08-1.92 3.28-4.74 3.28-8.09z"/><path fill="#34A853" d="M12 23c2.97 0 5.46-.98 7.28-2.66l-3.57-2.77c-.98.66-2.23 1.06-3.71 1.06-2.86 0-5.29-1.93-6.16-4.53H2.18v2.84C3.99 20.53 7.7 23 12 23z"/><path fill="#FBBC05" d="M5.84 14.09c-.22-.66-.35-1.36-.35-2.09s.13-1.43.35-2.09V7.07H2.18C1.43 8.55 1 10.22 1 12s.43 3.45 1.18 4.93l2.85-2.22.81-.62z"/><path fill="#EA4335" d="M12 5.38c1.62 0 3.06.56 4.21 1.64l3.15-3.15C17.45 2.09 14.97 1 12 1 7.7 1 3.99 3.47 2.18 7.07l3.66 2.84c.87-2.6 3.3-4.53 6.16-4.53z"/></svg>
-                Google
-              </button>
-              <button
-                type="button"
-                onClick={() => startSSO("entra")}
-                data-testid="sso-entra-btn"
-                className="flex items-center justify-center gap-1.5 bg-white/5 border border-white/15 rounded-lg py-2 text-xs text-zinc-200 hover:bg-white/10 transition-colors"
-              >
-                <svg width="13" height="13" viewBox="0 0 23 23"><path fill="#f35325" d="M1 1h10v10H1z"/><path fill="#81bc06" d="M12 1h10v10H12z"/><path fill="#05a6f0" d="M1 12h10v10H1z"/><path fill="#ffba08" d="M12 12h10v10H12z"/></svg>
-                Microsoft
-              </button>
-              <button
-                type="button"
-                onClick={() => startSSO("saml")}
-                data-testid="sso-saml-btn"
-                className="flex items-center justify-center gap-1.5 bg-white/5 border border-white/15 rounded-lg py-2 text-xs text-zinc-200 hover:bg-white/10 transition-colors"
-              >
-                <KeyRound size={13} className="text-zinc-400" />
-                SAML
-              </button>
-            </div>
           </div>
 
-          {/* Demo accounts — 7 comptes */}
-          <div className="mt-6 p-4 bg-white/5 rounded-lg border border-white/10">
-            <div className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold mb-3">
+          {/* Comptes de démonstration */}
+          <div className="mt-4 p-4 bg-white/70 rounded-2xl border border-[#e0dcf0]">
+            <div className="text-[10px] uppercase tracking-widest text-[#8a87a0] font-bold mb-2.5">
               Comptes de démonstration — clic pour pré-remplir
             </div>
-            <div className="space-y-1">
-              {[
-                { email: "admin@altair.fr",   pwd: "Admin2026!",  name: "Sophie Martin",    profile: "Administrateur" },
-                { email: "pmo@altair.fr",      pwd: "Pmo1234!",    name: "Thomas Dubois",    profile: "PMO Portefeuille" },
-                { email: "cp@altair.fr",       pwd: "Altair2026!", name: "Nicolas Petit",    profile: "Chef de Projet" },
-                { email: "manager@altair.fr",  pwd: "Altair2026!", name: "Isabelle Bernard", profile: "Manager Portfolio" },
-                { email: "viewer@altair.fr",   pwd: "View1234!",   name: "Marie Leclerc",    profile: "Direction SI" },
-                { email: "user@altair.fr",     pwd: "Altair2026!", name: "Julien Girard",    profile: "Utilisateur" },
-                { email: "achats@altair.fr",   pwd: "Altair2026!", name: "Marc Lefebvre",    profile: "Achats / Vendor" },
-              ].map((acc) => (
+            <div className="space-y-0.5">
+              {DEMO_ACCOUNTS.map((acc) => (
                 <button
                   key={acc.email}
                   type="button"
                   onClick={() => { setEmail(acc.email); setPassword(acc.pwd); }}
                   data-testid={`demo-account-${acc.email.split("@")[0]}`}
-                  className="w-full text-left px-2.5 py-2 rounded-lg hover:bg-white/10 transition-colors group flex items-center justify-between gap-2"
+                  className="w-full text-left px-2.5 py-1.5 rounded-lg hover:bg-white transition-colors flex items-center justify-between gap-2"
                 >
                   <div className="min-w-0">
-                    <div className="text-[11px] text-zinc-200 font-mono truncate">{acc.email}</div>
-                    <div className="text-[10px] text-zinc-500 truncate">{acc.name}</div>
+                    <div className="text-[11px] text-[#3d3564] font-mono-data truncate">{acc.email}</div>
+                    <div className="text-[10px] text-[#a39fb8] truncate">{acc.name}</div>
                   </div>
-                  <span className="flex-shrink-0 text-[9px] font-semibold text-blue-600 bg-blue-900/30 border border-blue-800/40 px-1.5 py-0.5 rounded-full uppercase tracking-wide">
+                  <span className="flex-shrink-0 text-[9px] font-bold text-[#2e5fe8] bg-[#e9effe] border border-[#d4e0fc] px-1.5 py-0.5 rounded-full uppercase tracking-wide">
                     {acc.profile}
                   </span>
                 </button>

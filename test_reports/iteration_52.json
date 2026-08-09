@@ -1,0 +1,29 @@
+{
+  "summary": "Frontend-only regression testing of MARCEL Clarity redesign (Phase 1: Login, Layout shell, Portfolio tiles). Executed 13/13 requested scenarios via Playwright against the public REACT_APP_BACKEND_URL. All critical flows PASS: login (admin@altair.fr / Admin2026!), demo-account prefill (pmo -> pmo@altair.fr), header (search Ctrl+K opens dialog, notif bell, profile badge, lang-toggle EN<->FR), sidebar hover-expand with sections (Pilotage, Modules, Agent IA, SAFe, Achats/Finances, Outils, Administration), nav to Dashboard/Budget/Roadmap/Governance/Teams/Portfolio without red screens, Portfolio tiles view (10 tiles, statut badges, project codes, checkboxes, ring visuals), export-action-bar toggling on tile-checkbox, tiles<->list toggle with localStorage persistence (portfolio_view='list' survives reload), search filter (SAP -> 1 tile), new project modal (Nouveau projet), edit project modal (Modifier le projet), mobile drawer at 390px opens via sidebar-open-btn and navigates, logout returns to /login.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Project modal (Nouveau/Modifier projet)", "issues": ["Uses browser-default date pickers (mm/dd/yyyy) instead of shadcn Calendar component - inconsistent with the Clarity redesign and locale (French UI expects dd/mm/yyyy)"]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [
+    "(Optional/low priority) Consider swapping native <input type=date> in the project modal for the shadcn Calendar/DatePicker to match the Clarity design and French date format.",
+    "(Optional) Recharts warnings 'width(-1) and height(-1)' on Dashboard - container size race on first render; consider setting min-height on ResponsiveContainer parents."
+  ],
+  "critical_code_review_comments": [
+    "Two elements share data-testid=\"logout-btn\" and data-testid=\"nav-portefeuille\" (desktop rail + mobile drawer). Both render simultaneously; only one is visible per viewport. This is acceptable but tests must use :visible or scope by parent (sidebar / sidebar-mobile).",
+    "Modals use custom [data-testid=modal-container] instead of role=\"dialog\". Consider adding role=\"dialog\" and aria-modal for a11y and to align with shadcn Dialog conventions.",
+    "WebSocket wss://.../api/ws closes immediately after connect (warning in console). Not blocking any UI flow but worth investigating (auth token in query string, backend ws handler)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "not_tested", "frontend": "100%"},
+  "test_credentials": "admin@altair.fr / Admin2026! (used); demo accounts pre-fill verified for pmo",
+  "seed_data_creation": "None - used existing Altair tenant seed (10 projects)",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Layout refactor (icon rail + hover-expand + drawer) and Portfolio tiles view are stable. All data-testids from the request are present and functional. Note that nav-* and logout-btn testids are duplicated across desktop rail and mobile drawer - always filter by :visible or by parent [data-testid=sidebar] / [data-testid=sidebar-mobile]. Modal dialogs use [data-testid=modal-container] rather than role=dialog. Preview env may need ~30s warm-up on first request; login-submit-btn has built-in retry.",
+  "rca of the issue": "N/A - no critical bugs found in the Phase 1 redesign."
+}
