@@ -1,0 +1,379 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Proposition 6 — Clarity Tiles</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',sans-serif;color:#26243a;background:#f7f6fb}
+h1,h2,h3{font-family:'Outfit',sans-serif;letter-spacing:-0.015em}
+.artboard{height:900px;position:relative;overflow:hidden;display:flex;flex-direction:column}
+svg{width:16px;height:16px}
+.badge-note{position:absolute;bottom:16px;right:20px;background:#352c6e;color:#fff;font-size:11.5px;font-weight:600;padding:5px 13px;border-radius:999px;font-family:'Outfit';z-index:9}
+/* ====== FRAME (header + rail) ====== */
+.appbar{height:50px;background:#fff;border-bottom:1px solid #e8e6f0;display:flex;align-items:center;justify-content:space-between;padding:0 18px;flex-shrink:0}
+.brand{display:flex;align-items:center;gap:9px}
+.mark{width:30px;height:30px;border-radius:8px;background:#352c6e;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Outfit';font-weight:800;font-size:15px}
+.brand b{font-family:'Outfit';font-size:17px;font-weight:800;color:#352c6e}
+.appbar-right{display:flex;align-items:center;gap:13px;color:#8a87a0}
+.avatar{width:30px;height:30px;border-radius:50%;background:#352c6e;color:#fff;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:700}
+.body{flex:1;display:flex;min-height:0}
+.rail{width:52px;background:#fff;border-right:1px solid #e8e6f0;display:flex;flex-direction:column;align-items:center;padding:10px 0;gap:4px;flex-shrink:0}
+.rail-item{width:36px;height:36px;border-radius:9px;display:flex;align-items:center;justify-content:center;color:#8a87a0}
+.rail-item.active{background:#e9effe;color:#2e5fe8}
+.main{flex:1;min-width:0;padding:18px 24px;overflow:hidden}
+/* ====== PAGE HEAD ====== */
+.crumb{font-size:12px;color:#8a87a0;margin-bottom:4px}
+.crumb b{color:#352c6e;font-weight:700}
+.page-row{display:flex;align-items:center;justify-content:space-between;margin-bottom:14px}
+.page-title{font-size:22px;font-weight:800;color:#26243a;display:flex;align-items:center;gap:10px}
+.actionbar{display:flex;align-items:center;gap:10px;margin-bottom:16px}
+.btn-blue{height:36px;padding:0 15px;border-radius:8px;background:#2e5fe8;color:#fff;border:none;font-size:12.5px;font-weight:700;font-family:inherit}
+.filter-box{height:36px;border:1px solid #dcd9ea;border-radius:8px;background:#fff;display:flex;align-items:center;padding:0 11px;font-size:12px;color:#5d5a75;gap:8px}
+.filter-box small{font-size:9.5px;font-weight:700;color:#8a87a0;text-transform:uppercase;letter-spacing:.05em;display:block}
+.search-input{flex:1;max-width:420px;height:36px;border:1px solid #dcd9ea;border-radius:8px;background:#fff;display:flex;align-items:center;padding:0 12px;color:#a3a0b8;font-size:12.5px;gap:8px}
+.view-toggle{margin-left:auto;display:flex;border:1px solid #dcd9ea;border-radius:8px;overflow:hidden}
+.vt{width:34px;height:34px;display:flex;align-items:center;justify-content:center;color:#8a87a0;background:#fff}
+.vt.on{background:#e9effe;color:#2e5fe8}
+/* ====== TILES ====== */
+.tiles{display:grid;grid-template-columns:repeat(4,1fr);gap:18px;grid-auto-rows:min-content}
+.tile{background:#fff;border:1px solid #e8e6f0;border-radius:12px;position:relative;box-shadow:0 2px 8px -3px rgba(53,44,110,.08);margin-top:10px}
+.status-badge{position:absolute;top:-10px;right:12px;font-size:10px;font-weight:800;padding:3px 10px;border-radius:6px;color:#fff;font-family:'Outfit';letter-spacing:.02em;z-index:2}
+.tile-head{padding:12px 14px 10px;border-radius:12px 12px 0 0}
+.tile.g .tile-head{background:#ddf0d8}.tile.y .tile-head{background:#f3edb5}.tile.p .tile-head{background:#f7d9ea}.tile.t .tile-head{background:#d5efec}
+.tile.g .status-badge{background:#3f8a34}.tile.y .status-badge{background:#a3891a}.tile.p .status-badge{background:#c2408f}.tile.t .status-badge{background:#22948c}
+.tile-name{font-family:'Outfit';font-size:13.5px;font-weight:700;color:#26243a;line-height:1.25}
+.tile-code{font-family:'JetBrains Mono';font-size:10.5px;color:#5d5a75;margin-top:3px}
+.tile-body{padding:10px 14px 12px}
+.timeline{position:relative;height:26px;margin:2px 0 4px}
+.timeline .track{position:absolute;left:0;right:0;top:12px;height:2px;background:#dcd9ea}
+.timeline .fill{position:absolute;left:0;top:12px;height:2px}
+.dia{position:absolute;top:8px;width:9px;height:9px;transform:rotate(45deg);border-radius:2px;background:#fff;border:2px solid}
+.tl-dates{display:flex;justify-content:space-between;font-size:10px;color:#8a87a0;margin-bottom:10px}
+.rings{display:flex;justify-content:space-between;padding:0 2px}
+.ring-block{display:flex;flex-direction:column;align-items:center;gap:5px}
+.ring{width:54px;height:54px;border-radius:50%;display:flex;align-items:center;justify-content:center}
+.ring i{width:42px;height:42px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-style:normal;font-family:'Outfit';font-weight:800;font-size:12px;color:#26243a}
+.ring i small{font-size:8px;font-weight:700;color:#8a87a0;text-transform:uppercase}
+.circle{width:54px;height:54px;border-radius:50%;border:2px solid #e8e6f0;display:flex;flex-direction:column;align-items:center;justify-content:center;font-family:'Outfit'}
+.circle b{font-size:15px;font-weight:800;color:#26243a;line-height:1}
+.circle small{font-size:8.5px;font-weight:700;color:#8a87a0;text-transform:uppercase}
+.ring-label{font-size:9px;font-weight:700;color:#8a87a0;text-align:center}
+.tile-foot{display:flex;gap:14px;padding:9px 14px;border-top:1px solid #f0eff6;color:#a3a0b8}
+.tile-foot svg{width:14px;height:14px}
+/* ====== ARTBOARD 2 : fiche projet ====== */
+.tabs{display:flex;gap:2px;border-bottom:1px solid #e8e6f0;margin-bottom:16px}
+.tab{padding:10px 15px;font-size:13px;font-weight:600;color:#8a87a0;border-bottom:3px solid transparent}
+.tab.active{color:#2e5fe8;border-bottom-color:#2e5fe8;font-weight:700}
+.detail-grid{display:grid;grid-template-columns:340px 1fr;gap:18px}
+.panel{background:#fff;border:1px solid #e8e6f0;border-radius:12px;box-shadow:0 2px 8px -3px rgba(53,44,110,.08);overflow:hidden}
+.panel-head{padding:13px 16px;border-bottom:1px solid #f0eff6;font-family:'Outfit';font-size:13.5px;font-weight:700;color:#26243a;display:flex;justify-content:space-between;align-items:center}
+.donut-wrap{display:flex;align-items:center;gap:20px;padding:20px 16px}
+.big-donut{width:130px;height:130px;border-radius:50%;background:conic-gradient(#2e5fe8 0 34%,#22948c 34% 58%,#c2408f 58% 74%,#e0a800 74% 88%,#dcd9ea 88%);display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.big-donut i{width:82px;height:82px;border-radius:50%;background:#fff;display:flex;flex-direction:column;align-items:center;justify-content:center;font-style:normal;font-family:'Outfit'}
+.big-donut b{font-size:22px;font-weight:800;color:#26243a}
+.big-donut small{font-size:9px;font-weight:700;color:#8a87a0;text-transform:uppercase}
+.legend{display:flex;flex-direction:column;gap:8px}
+.leg{display:flex;align-items:center;gap:8px;font-size:12px;color:#5d5a75;font-weight:600}
+.leg i{width:10px;height:10px;border-radius:3px}
+.leg b{margin-left:auto;font-family:'JetBrains Mono';font-size:11.5px;color:#26243a}
+table{width:100%;border-collapse:collapse;font-size:12.5px}
+th{text-align:left;font-size:10.5px;text-transform:uppercase;letter-spacing:.06em;color:#8a87a0;font-weight:700;background:#fbfaff;padding:9px 16px;border-bottom:1px solid #e8e6f0}
+td{padding:9px 16px;border-bottom:1px solid #f0eff6;color:#5d5a75}
+td b{color:#26243a;font-weight:700}
+.mono{font-family:'JetBrains Mono';font-size:11px}
+.chip{display:inline-flex;align-items:center;gap:5px;font-size:11px;font-weight:700;padding:3px 9px;border-radius:6px}
+.chip.g{background:#ddf0d8;color:#2e6b26}.chip.y{background:#f3edb5;color:#77630a}.chip.r{background:#fadedd;color:#a83a31}
+.dia-inline{display:inline-block;width:8px;height:8px;transform:rotate(45deg);border-radius:1.5px;margin-right:7px}
+.kpi-strip{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:16px}
+.kpi-cell{background:#fff;border:1px solid #e8e6f0;border-radius:12px;padding:12px 15px}
+.kpi-cell .lb{font-size:10.5px;font-weight:700;color:#8a87a0;text-transform:uppercase;letter-spacing:.05em}
+.kpi-cell .vl{font-family:'Outfit';font-size:21px;font-weight:800;color:#26243a;margin-top:2px}
+.kpi-cell .dl{font-size:11px;font-weight:600;margin-top:1px}
+</style>
+</head>
+<body>
+
+<!-- ================= ARTBOARD 1 : PORTEFEUILLE EN TUILES ================= -->
+<section class="artboard">
+  <div class="badge-note">Proposition 6 — Portefeuille « Tuiles projets »</div>
+  <div class="appbar">
+    <div class="brand"><div class="mark">M</div><b>MARCEL</b></div>
+    <div class="appbar-right">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"/><line x1="12" y1="17" x2="12.01" y2="17"/></svg>
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <div class="avatar">AD</div>
+    </div>
+  </div>
+  <div class="body">
+    <aside class="rail">
+      <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
+      <div class="rail-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+      <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></div>
+      <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+      <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+      <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+      <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 1 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 1 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 1 1-2.83-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 1 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 1 1 2.83-2.83l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 1 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 1 1 2.83 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 1 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg></div>
+    </aside>
+    <div class="main">
+      <div class="crumb">Accueil / <b>Portefeuille</b></div>
+      <div class="page-row"><div class="page-title">Tuiles projets</div></div>
+      <div class="actionbar">
+        <button class="btn-blue">+ Nouveau depuis modèle</button>
+        <div class="filter-box"><div><small>Chef de projet</small>Dana Lewis; Ian Arpel</div><span style="color:#c9c6da">✕</span></div>
+        <div class="search-input"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:13px;height:13px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Rechercher ou filtrer…</div>
+        <div class="view-toggle">
+          <span class="vt on"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></span>
+          <span class="vt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg></span>
+          <span class="vt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg></span>
+        </div>
+      </div>
+      <div class="tiles">
+        <!-- Tile 1 -->
+        <div class="tile g">
+          <span class="status-badge">Dans les temps</span>
+          <div class="tile-head"><div class="tile-name">Migration ERP S/4HANA</div><div class="tile-code">P01-001</div></div>
+          <div class="tile-body">
+            <div class="timeline"><span class="track"></span><span class="fill" style="width:65%;background:#3f8a34"></span>
+              <span class="dia" style="left:8%;border-color:#3f8a34;background:#3f8a34"></span><span class="dia" style="left:34%;border-color:#3f8a34;background:#3f8a34"></span><span class="dia" style="left:62%;border-color:#3f8a34"></span><span class="dia" style="left:88%;border-color:#c9c6da"></span>
+            </div>
+            <div class="tl-dates"><span>30 mars 2024</span><span>14 févr. 2027</span></div>
+            <div class="rings">
+              <div class="ring-block"><span class="ring" style="background:conic-gradient(#3f8a34 0 65%,#e8e6f0 65%)"><i>65%<small>fait</small></i></span><span class="ring-label">% Avancement</span></div>
+              <div class="ring-block"><span class="circle"><small>Mai</small><b>08</b></span><span class="ring-label">Proch. jalon</span></div>
+              <div class="ring-block"><span class="circle"><small>Févr</small><b>14</b></span><span class="ring-label">Date de fin</span></div>
+            </div>
+          </div>
+          <div class="tile-foot">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+        </div>
+        <!-- Tile 2 -->
+        <div class="tile y">
+          <span class="status-badge">À surveiller</span>
+          <div class="tile-head"><div class="tile-name">Refonte portail client</div><div class="tile-code">P01-002</div></div>
+          <div class="tile-body">
+            <div class="timeline"><span class="track"></span><span class="fill" style="width:45%;background:#a3891a"></span>
+              <span class="dia" style="left:12%;border-color:#a3891a;background:#a3891a"></span><span class="dia" style="left:45%;border-color:#a3891a"></span><span class="dia" style="left:78%;border-color:#c9c6da"></span>
+            </div>
+            <div class="tl-dates"><span>3 janv. 2025</span><span>3 juin 2026</span></div>
+            <div class="rings">
+              <div class="ring-block"><span class="ring" style="background:conic-gradient(#a3891a 0 45%,#e8e6f0 45%)"><i>45%<small>fait</small></i></span><span class="ring-label">% Avancement</span></div>
+              <div class="ring-block"><span class="circle"><small>Juin</small><b>03</b></span><span class="ring-label">Proch. jalon</span></div>
+              <div class="ring-block"><span class="circle"><small>Juin</small><b>03</b></span><span class="ring-label">Date de fin</span></div>
+            </div>
+          </div>
+          <div class="tile-foot">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+        </div>
+        <!-- Tile 3 -->
+        <div class="tile p">
+          <span class="status-badge">Aide requise</span>
+          <div class="tile-head"><div class="tile-name">Data Platform v2</div><div class="tile-code">DATA-001</div></div>
+          <div class="tile-body">
+            <div class="timeline"><span class="track"></span><span class="fill" style="width:10%;background:#c2408f"></span>
+              <span class="dia" style="left:10%;border-color:#c2408f"></span><span class="dia" style="left:42%;border-color:#c9c6da"></span><span class="dia" style="left:74%;border-color:#c9c6da"></span>
+            </div>
+            <div class="tl-dates"><span>14 févr. 2026</span><span>30 mai 2027</span></div>
+            <div class="rings">
+              <div class="ring-block"><span class="ring" style="background:conic-gradient(#c2408f 0 10%,#e8e6f0 10%)"><i>10%<small>fait</small></i></span><span class="ring-label">% Avancement</span></div>
+              <div class="ring-block"><span class="circle"><small>Mai</small><b>30</b></span><span class="ring-label">Proch. jalon</span></div>
+              <div class="ring-block"><span class="circle"><small>Mai</small><b>30</b></span><span class="ring-label">Date de fin</span></div>
+            </div>
+          </div>
+          <div class="tile-foot">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+        </div>
+        <!-- Tile 4 -->
+        <div class="tile t">
+          <span class="status-badge">Dans les temps</span>
+          <div class="tile-head"><div class="tile-name">CRM Ventes Europe</div><div class="tile-code">P02-001</div></div>
+          <div class="tile-body">
+            <div class="timeline"><span class="track"></span><span class="fill" style="width:92%;background:#22948c"></span>
+              <span class="dia" style="left:20%;border-color:#22948c;background:#22948c"></span><span class="dia" style="left:55%;border-color:#22948c;background:#22948c"></span><span class="dia" style="left:92%;border-color:#22948c"></span>
+            </div>
+            <div class="tl-dates"><span>14 juin 2025</span><span>12 nov. 2026</span></div>
+            <div class="rings">
+              <div class="ring-block"><span class="ring" style="background:conic-gradient(#22948c 0 92%,#e8e6f0 92%)"><i>92%<small>fait</small></i></span><span class="ring-label">% Avancement</span></div>
+              <div class="ring-block"><span class="circle"><small>Nov</small><b>12</b></span><span class="ring-label">Proch. jalon</span></div>
+              <div class="ring-block"><span class="circle"><small>Nov</small><b>12</b></span><span class="ring-label">Date de fin</span></div>
+            </div>
+          </div>
+          <div class="tile-foot">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+        </div>
+        <!-- Tile 5 -->
+        <div class="tile p">
+          <span class="status-badge">Aide requise</span>
+          <div class="tile-head"><div class="tile-name">Green Energy 2030</div><div class="tile-code">P03-001</div></div>
+          <div class="tile-body">
+            <div class="timeline"><span class="track"></span><span class="fill" style="width:15%;background:#c2408f"></span>
+              <span class="dia" style="left:15%;border-color:#c2408f"></span><span class="dia" style="left:50%;border-color:#c9c6da"></span><span class="dia" style="left:85%;border-color:#c9c6da"></span>
+            </div>
+            <div class="tl-dates"><span>1 janv. 2026</span><span>31 déc. 2030</span></div>
+            <div class="rings">
+              <div class="ring-block"><span class="ring" style="background:conic-gradient(#c2408f 0 15%,#e8e6f0 15%)"><i>15%<small>fait</small></i></span><span class="ring-label">% Avancement</span></div>
+              <div class="ring-block"><span class="circle"><small>Avr</small><b>13</b></span><span class="ring-label">Proch. jalon</span></div>
+              <div class="ring-block"><span class="circle"><small>Déc</small><b>31</b></span><span class="ring-label">Date de fin</span></div>
+            </div>
+          </div>
+          <div class="tile-foot">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+        </div>
+        <!-- Tile 6 -->
+        <div class="tile y">
+          <span class="status-badge">À risque</span>
+          <div class="tile-head" style="background:#f0ded1"><div class="tile-name">Automatisation processus internes</div><div class="tile-code">P01-003</div></div>
+          <div class="tile-body">
+            <div class="timeline"><span class="track"></span><span class="fill" style="width:25%;background:#c26a2e"></span>
+              <span class="dia" style="left:25%;border-color:#c26a2e"></span><span class="dia" style="left:60%;border-color:#c9c6da"></span><span class="dia" style="left:90%;border-color:#c9c6da"></span>
+            </div>
+            <div class="tl-dates"><span>7 mars 2026</span><span>13 nov. 2026</span></div>
+            <div class="rings">
+              <div class="ring-block"><span class="ring" style="background:conic-gradient(#c26a2e 0 25%,#e8e6f0 25%)"><i>25%<small>fait</small></i></span><span class="ring-label">% Avancement</span></div>
+              <div class="ring-block"><span class="circle"><small>Août</small><b>08</b></span><span class="ring-label">Proch. jalon</span></div>
+              <div class="ring-block"><span class="circle"><small>Nov</small><b>13</b></span><span class="ring-label">Date de fin</span></div>
+            </div>
+          </div>
+          <div class="tile-foot">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+        </div>
+        <!-- Tile 7 -->
+        <div class="tile g">
+          <span class="status-badge">Dans les temps</span>
+          <div class="tile-head"><div class="tile-name">Planification de phase</div><div class="tile-code">P02-002</div></div>
+          <div class="tile-body">
+            <div class="timeline"><span class="track"></span><span class="fill" style="width:25%;background:#3f8a34"></span>
+              <span class="dia" style="left:25%;border-color:#3f8a34"></span><span class="dia" style="left:58%;border-color:#c9c6da"></span><span class="dia" style="left:90%;border-color:#c9c6da"></span>
+            </div>
+            <div class="tl-dates"><span>31 mars 2026</span><span>18 janv. 2027</span></div>
+            <div class="rings">
+              <div class="ring-block"><span class="ring" style="background:conic-gradient(#3f8a34 0 25%,#e8e6f0 25%)"><i>25%<small>fait</small></i></span><span class="ring-label">% Avancement</span></div>
+              <div class="ring-block"><span class="circle"><small>Janv</small><b>18</b></span><span class="ring-label">Proch. jalon</span></div>
+              <div class="ring-block"><span class="circle"><small>Janv</small><b>18</b></span><span class="ring-label">Date de fin</span></div>
+            </div>
+          </div>
+          <div class="tile-foot">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+        </div>
+        <!-- Tile 8 -->
+        <div class="tile t">
+          <span class="status-badge">Dans les temps</span>
+          <div class="tile-head"><div class="tile-name">Études utilisateurs produit</div><div class="tile-code">P03-002</div></div>
+          <div class="tile-body">
+            <div class="timeline"><span class="track"></span><span class="fill" style="width:15%;background:#22948c"></span>
+              <span class="dia" style="left:15%;border-color:#22948c"></span><span class="dia" style="left:52%;border-color:#c9c6da"></span><span class="dia" style="left:88%;border-color:#c9c6da"></span>
+            </div>
+            <div class="tl-dates"><span>15 déc. 2025</span><span>13 mars 2027</span></div>
+            <div class="rings">
+              <div class="ring-block"><span class="ring" style="background:conic-gradient(#22948c 0 15%,#e8e6f0 15%)"><i>15%<small>fait</small></i></span><span class="ring-label">% Avancement</span></div>
+              <div class="ring-block"><span class="circle"><small>Mars</small><b>13</b></span><span class="ring-label">Proch. jalon</span></div>
+              <div class="ring-block"><span class="circle"><small>Mars</small><b>13</b></span><span class="ring-label">Date de fin</span></div>
+            </div>
+          </div>
+          <div class="tile-foot">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><line x1="3" y1="6" x2="3.01" y2="6"/><line x1="3" y1="12" x2="3.01" y2="12"/><line x1="3" y1="18" x2="3.01" y2="18"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 6L9 17l-5-5"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- ================= ARTBOARD 2 : FICHE PROJET ================= -->
+<section class="artboard" style="height:800px">
+  <div class="badge-note">Proposition 6 — Fiche projet avec onglets</div>
+  <div class="appbar">
+    <div class="brand"><div class="mark">M</div><b>MARCEL</b></div>
+    <div class="appbar-right">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
+      <div class="avatar">AD</div>
+    </div>
+  </div>
+  <div class="body">
+    <aside class="rail">
+      <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 9l9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/></svg></div>
+      <div class="rail-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+      <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></div>
+      <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+      <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+      <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+    </aside>
+    <div class="main">
+      <div class="crumb">Portefeuille / <b>Migration ERP S/4HANA</b> <span class="mono" style="background:#f0eff6;border:1px solid #e8e6f0;padding:1px 6px;border-radius:4px;margin-left:6px">P01-001</span></div>
+      <div class="page-row">
+        <div class="page-title">Migration ERP S/4HANA <span class="chip g">● Dans les temps</span></div>
+        <div><button class="btn-blue" style="background:#fff;color:#352c6e;border:1px solid #dcd9ea;margin-right:8px">Exporter</button><button class="btn-blue">Modifier</button></div>
+      </div>
+      <div class="tabs">
+        <div class="tab">Propriétés</div><div class="tab">Budget</div><div class="tab active">Rapport</div><div class="tab">Jalons</div><div class="tab">Risques</div><div class="tab">Équipe</div><div class="tab">Feuilles de temps</div>
+      </div>
+      <div class="kpi-strip">
+        <div class="kpi-cell"><div class="lb">Avancement</div><div class="vl">65%</div><div class="dl" style="color:#3f8a34">+5 pts ce mois</div></div>
+        <div class="kpi-cell"><div class="lb">EAC</div><div class="vl">1,4 M€</div><div class="dl" style="color:#8a87a0">budget 1,5 M€</div></div>
+        <div class="kpi-cell"><div class="lb">RAF</div><div class="vl">490 K€</div><div class="dl" style="color:#8a87a0">consommé 910 K€</div></div>
+        <div class="kpi-cell"><div class="lb">Prochain jalon</div><div class="vl">8 mai</div><div class="dl" style="color:#a3891a">dans 12 jours</div></div>
+      </div>
+      <div class="detail-grid">
+        <div class="panel">
+          <div class="panel-head">Budget par catégorie</div>
+          <div class="donut-wrap">
+            <div class="big-donut"><i><b>62%</b><small>consommé</small></i></div>
+            <div class="legend">
+              <div class="leg"><i style="background:#2e5fe8"></i> Intégration <b>480 K€</b></div>
+              <div class="leg"><i style="background:#22948c"></i> Licences <b>340 K€</b></div>
+              <div class="leg"><i style="background:#c2408f"></i> Infra <b>225 K€</b></div>
+              <div class="leg"><i style="background:#e0a800"></i> Conduite chgt <b>198 K€</b></div>
+              <div class="leg"><i style="background:#dcd9ea"></i> Restant <b>257 K€</b></div>
+            </div>
+          </div>
+        </div>
+        <div class="panel">
+          <div class="panel-head">Jalons <span style="font-size:11.5px;color:#2e5fe8;font-weight:700">Voir la roadmap →</span></div>
+          <table>
+            <tr><th>Jalon</th><th>Type</th><th>Baseline</th><th>Prévision</th><th>Statut</th></tr>
+            <tr><td><span class="dia-inline" style="background:#3f8a34"></span><b>Fin de cadrage</b></td><td>Gate</td><td class="mono">15/01/26</td><td class="mono">15/01/26</td><td><span class="chip g">Atteint</span></td></tr>
+            <tr><td><span class="dia-inline" style="background:#3f8a34"></span><b>Design validé</b></td><td>Gate</td><td class="mono">28/02/26</td><td class="mono">05/03/26</td><td><span class="chip g">Atteint</span></td></tr>
+            <tr><td><span class="dia-inline" style="background:#e0a800"></span><b>Recette métier</b></td><td>Livrable</td><td class="mono">08/05/26</td><td class="mono">08/05/26</td><td><span class="chip y">En cours</span></td></tr>
+            <tr><td><span class="dia-inline" style="background:#c9c6da"></span><b>Go-live pilote</b></td><td>Gate</td><td class="mono">22/07/26</td><td class="mono">05/08/26</td><td><span class="chip r">Retard prévu</span></td></tr>
+            <tr><td><span class="dia-inline" style="background:#c9c6da"></span><b>Transfert vers le run</b></td><td>Gate</td><td class="mono">30/09/26</td><td class="mono">30/09/26</td><td><span class="chip g">Planifié</span></td></tr>
+          </table>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
