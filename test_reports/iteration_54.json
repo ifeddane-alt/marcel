@@ -1,0 +1,19 @@
+{
+  "summary": "Retest of DateField/set() adapter fix across 6 modals. All calendar interactions now work end-to-end with ZERO pageerror. ProjectModal: 'Début prévu' picked 15/02/2025 via shadcn calendar, saved, project detail reflected new date (persisted), restored to 01/02/2025. TaskModal: opened first task, changed 'Fin prévue' via calendar from 31/03/2025 → 22/03/2025, no error (not saved to keep data clean). RiskModal: 'Nouveau risque' modal, due_date set via calendar to 18/08/2026, no error. DecisionModal: new decision, decision_date=10/08/2026 and due_date=25/08/2026 both set via calendar, no error. ExportCopilModal: export-copil-date set to 20/08/2026 via calendar, no error. MilestoneModal (regression): milestone-date-baseline set to 12/08/2026, no error. Zero pageerror captured across all interactions. The adapter pattern `onChange={(v) => set('field')({ target: { value: v } })}` correctly bridges string→event.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Adapter pattern works but is verbose/repetitive across 8 modals — recommend refactoring into a small helper `const setVal = (k) => (v) => setForm(f => ({...f,[k]: v}))` used specifically for DateField/Select value-based inputs, keeping `set()` only for native event inputs. Would prevent similar regressions.",
+    "DateField could still be made backward-compatible by detecting typeof value in a wrapper, but the current adapter approach at call sites is explicit and acceptable."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (skipped)", "frontend": "100% on the 6 DateField modals retested"},
+  "test_credentials": "admin@altair.fr / Admin2026! (used)",
+  "seed_data_creation": "None persisted. ProjectModal start date was temporarily changed then restored. Task/Risk/Decision/Milestone/ExportCopil modals were opened and dates picked in-modal but Escape'd without saving so no data created.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "DateField regression fully resolved. All Phase 2 Clarity date interactions now stable. No further calendar testing needed unless new modals are added.",
+  "rca of the issue": "Previously fixed: DateField.onChange emits string yyyy-MM-dd while modals used `set = (k) => (e) => setForm({...f,[k]:e.target.value})`. Main agent added inline adapter `onChange={(v) => set('field')({ target: { value: v } })}` in 8 modals, wrapping the string into a fake event. Verified in this iteration."
+}

@@ -256,18 +256,18 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
           <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mb-2">Calendrier</div>
           <div className="grid grid-cols-3 gap-3">
             <Field label="Début prévu" required error={errors.start_date}>
-              <DateField testId="project-form-start" className={INPUT_CLS} value={form.start_date} onChange={set("start_date")} />
+              <DateField testId="project-form-start" value={form.start_date} onChange={(v) => set("start_date")({ target: { value: v } })} />
             </Field>
             <Field label="Fin prévue initiale (baseline)" required error={errors.end_date_baseline}>
-              <DateField testId="project-form-end-baseline" className={INPUT_CLS} value={form.end_date_baseline} onChange={set("end_date_baseline")} />
+              <DateField testId="project-form-end-baseline" value={form.end_date_baseline} onChange={(v) => set("end_date_baseline")({ target: { value: v } })} />
             </Field>
             <Field label="Fin prévue actuelle (forecast)" required error={errors.end_date_forecast}>
-              <DateField testId="project-form-end-forecast" className={INPUT_CLS} value={form.end_date_forecast} onChange={set("end_date_forecast")} />
+              <DateField testId="project-form-end-forecast" value={form.end_date_forecast} onChange={(v) => set("end_date_forecast")({ target: { value: v } })} />
             </Field>
           </div>
           <div className="mt-3">
             <Field label="Fin réelle" hint="si projet clôturé">
-              <DateField testId="project-form-end-actual" className={INPUT_CLS} value={form.end_date_actual} onChange={set("end_date_actual")} />
+              <DateField testId="project-form-end-actual" value={form.end_date_actual} onChange={(v) => set("end_date_actual")({ target: { value: v } })} />
             </Field>
           </div>
         </div>

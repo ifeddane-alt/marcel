@@ -301,15 +301,15 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
             <div className="grid grid-cols-2 gap-3">
               <Field label="Début de contrat">
                 <DateField testId="resource-form-contract-start"
- className={INPUT_CLS}
+
  value={form.contract_start}
- onChange={set("contract_start")} />
+ onChange={(v) => set("contract_start")({ target: { value: v } })} />
               </Field>
               <Field label="Fin de contrat">
                 <DateField testId="resource-form-contract-end"
- className={INPUT_CLS}
+
  value={form.contract_end}
- onChange={set("contract_end")} />
+ onChange={(v) => set("contract_end")({ target: { value: v } })} />
               </Field>
             </div>
           </div>

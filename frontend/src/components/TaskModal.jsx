@@ -239,16 +239,16 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Début prévu">
-            <DateField className={INPUT_CLS} value={form.date_start_planned} onChange={set("date_start_planned")} />
+            <DateField value={form.date_start_planned} onChange={(v) => set("date_start_planned")({ target: { value: v } })} />
           </Field>
           <Field label="Fin prévue">
-            <DateField testId="task-form-end-planned" className={INPUT_CLS} value={form.date_end_planned} onChange={set("date_end_planned")} />
+            <DateField testId="task-form-end-planned" value={form.date_end_planned} onChange={(v) => set("date_end_planned")({ target: { value: v } })} />
           </Field>
           <Field label="Début réel">
-            <DateField className={INPUT_CLS} value={form.date_start_actual} onChange={set("date_start_actual")} />
+            <DateField value={form.date_start_actual} onChange={(v) => set("date_start_actual")({ target: { value: v } })} />
           </Field>
           <Field label="Fin réelle">
-            <DateField className={INPUT_CLS} value={form.date_end_actual} onChange={set("date_end_actual")} />
+            <DateField value={form.date_end_actual} onChange={(v) => set("date_end_actual")({ target: { value: v } })} />
           </Field>
         </div>
 

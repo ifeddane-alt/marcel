@@ -156,10 +156,10 @@ export default function DecisionModal({ isOpen, onClose, decision, projectId, go
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Date de décision">
-            <DateField testId="decision-form-date" className={INPUT_CLS} value={form.decision_date} onChange={set("decision_date")} />
+            <DateField testId="decision-form-date" value={form.decision_date} onChange={(v) => set("decision_date")({ target: { value: v } })} />
           </Field>
           <Field label="Échéance d'application">
-            <DateField testId="decision-form-due-date" className={INPUT_CLS} value={form.due_date} onChange={set("due_date")} />
+            <DateField testId="decision-form-due-date" value={form.due_date} onChange={(v) => set("due_date")({ target: { value: v } })} />
           </Field>
         </div>
 

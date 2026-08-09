@@ -101,10 +101,10 @@ export default function ProgramModal({ isOpen, onClose, program, onSaved }) {
 
         <div className="grid grid-cols-2 gap-3">
           <Field label="Date début">
-            <DateField className={INPUT_CLS} value={form.start_date} onChange={set("start_date")} />
+            <DateField value={form.start_date} onChange={(v) => set("start_date")({ target: { value: v } })} />
           </Field>
           <Field label="Date fin prévue">
-            <DateField className={INPUT_CLS} value={form.end_date} onChange={set("end_date")} />
+            <DateField value={form.end_date} onChange={(v) => set("end_date")({ target: { value: v } })} />
           </Field>
         </div>
 

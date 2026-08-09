@@ -105,7 +105,7 @@ export default function ExportCopilModal({ isOpen, onClose, selectedProjectIds =
             <Calendar size={14} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400 pointer-events-none" />
             <DateField testId="export-copil-date"
  value={form.instanceDate}
- onChange={set("instanceDate")} />
+ onChange={(v) => set("instanceDate")({ target: { value: v } })} />
           </div>
         </Field>
 
