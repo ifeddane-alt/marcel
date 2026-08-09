@@ -291,10 +291,11 @@ export default function AdminTemplates() {
   }
 
   return (
-    <div className="p-6 max-w-4xl mx-auto space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 max-w-4xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="font-heading text-2xl font-extrabold text-[#26243a]">Templates Projets</h1>
+          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / Administration / <span className="text-[#352c6e] font-semibold">Templates</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Templates Projets</h1>
           <p className="text-sm text-zinc-500 mt-1">Gérez les templates utilisés à la création de projets</p>
         </div>
         {canAdmin && (

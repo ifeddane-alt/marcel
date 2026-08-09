@@ -227,6 +227,7 @@ export default function AdminPowerBI() {
     <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto" data-testid="admin-powerbi-page">
       {/* Header */}
       <div className="mb-6">
+        <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / Administration / <span className="text-[#352c6e] font-semibold">Power BI</span></div>
         <div className="flex items-center gap-2 mb-1">
           <Database size={20} className="text-[#F2C811]" />
           <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">
@@ -474,16 +475,16 @@ function MQuerySection({ baseUrl, apiKey }) {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-zinc-200 mb-4 overflow-x-auto">
+      <div className="flex gap-1 border-b border-[#e7e3f2] mb-4 overflow-x-auto">
         {allTabs.map((tab, i) => (
           <button
             key={i}
             onClick={() => setActiveTab(i)}
             data-testid={`mquery-tab-${tab.label.toLowerCase()}`}
-            className={`flex-shrink-0 px-3 py-2 text-xs font-semibold rounded-t border-b-2 transition-colors ${
+            className={`flex-shrink-0 px-3 py-2 text-xs font-semibold border-b-[3px] -mb-px transition-colors ${
               activeTab === i
-                ? "border-blue-600 text-blue-600 bg-blue-50"
-                : "border-transparent text-zinc-500 hover:text-zinc-700"
+                ? "text-[#2e5fe8] border-[#2e5fe8]"
+                : "text-[#8a87a0] border-transparent hover:text-[#26243a]"
             }`}
           >
             {tab.isParam ? "Paramètres" : tab.label}

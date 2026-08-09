@@ -279,7 +279,7 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-0 border-b border-zinc-100 px-6">
+        <div className="flex gap-0 border-b border-[#e7e3f2] px-6">
           {[
             { key: "config",  label: "Configuration" },
             { key: "mapping", label: "Mapping champs" },
@@ -289,8 +289,8 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
               key={t.key}
               onClick={() => setActiveTab(t.key)}
               data-testid={`connector-tab-${t.key}`}
-              className={`px-4 py-2.5 text-sm font-medium border-b-2 transition-colors
-                ${activeTab === t.key ? "border-blue-600 text-blue-700" : "border-transparent text-zinc-500 hover:text-zinc-700"}`}
+              className={`px-4 py-2.5 text-[13px] font-semibold border-b-[3px] -mb-px transition-colors
+                ${activeTab === t.key ? "text-[#2e5fe8] border-[#2e5fe8]" : "text-[#8a87a0] border-transparent hover:text-[#26243a]"}`}
             >
               {t.label}
             </button>
@@ -430,7 +430,7 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
               <div className="rounded-xl border border-zinc-200 overflow-hidden">
                 <table className="w-full text-sm" data-testid="mapping-table">
                   <thead>
-                    <tr className="bg-zinc-50 text-xs text-zinc-500 uppercase tracking-wider">
+                    <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-[10.5px] text-[#8a87a0] uppercase tracking-wider font-bold">
                       <th className="px-4 py-2.5 text-left">Champ source</th>
                       <th className="px-4 py-2.5 text-left">Champ MARCEL</th>
                       <th className="px-4 py-2.5 text-left hidden md:table-cell">Description</th>
@@ -651,11 +651,12 @@ export default function Connectors() {
   }
 
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="p-4 md:p-6 lg:p-8 max-w-6xl space-y-6">
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-800 font-heading">Connecteurs</h1>
+          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / Administration / <span className="text-[#352c6e] font-semibold">Connecteurs</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Connecteurs</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             Synchronisation MARCEL avec vos outils DSI · Jira · SAP · ServiceNow
           </p>

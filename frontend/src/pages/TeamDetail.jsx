@@ -32,7 +32,7 @@ const PHASE_LABELS = {
 };
 
 const TH = ({ children, right }) => (
-  <th className={`px-3 py-2.5 text-[10px] font-bold uppercase tracking-widest text-zinc-500 bg-zinc-50 border-b border-zinc-200 whitespace-nowrap ${right ? "text-right" : "text-left"}`}>
+  <th className={`px-3 py-2.5 text-[10.5px] font-bold uppercase tracking-wider text-[#8a87a0] bg-[#fbfaff] border-b border-[#e8e6f0] whitespace-nowrap ${right ? "text-right" : "text-left"}`}>
     {children}
   </th>
 );
@@ -80,16 +80,16 @@ export default function TeamDetail() {
   return (
     <div className="p-8" data-testid="team-detail-page">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-xs text-zinc-400 mb-6">
-        <Link to="/teams" className="hover:text-blue-600 transition-colors flex items-center gap-1">
-          <ArrowLeft size={12} /> Équipes
-        </Link>
-        <ChevronRight size={11} />
-        <span className="text-zinc-700 font-medium">{team.name}</span>
+      <nav className="flex items-center gap-1.5 text-xs text-[#8a87a0] mb-6">
+        <span>Accueil</span>
+        <span>/</span>
+        <Link to="/teams" className="hover:text-[#2e5fe8]">Équipes</Link>
+        <span>/</span>
+        <span className="text-[#352c6e] font-semibold">{team.name}</span>
       </nav>
 
       {/* ── 1. EN-TÊTE ─────────────────────────────────────── */}
-      <div className="bg-[#0B2545] rounded-lg p-6 mb-6 text-white" data-testid="team-header">
+      <div className="bg-[#352c6e] rounded-lg p-6 mb-6 text-white" data-testid="team-header">
         <div className="flex items-start justify-between gap-4">
           <div className="flex items-center gap-4">
             <div className="w-14 h-14 rounded-lg bg-white/10 flex items-center justify-center flex-shrink-0">

@@ -378,16 +378,16 @@ function EnumsSection({ config, onSave }) {
 
   return (
     <div data-testid="section-enums">
-      <div className="flex gap-1 mb-4 border-b border-zinc-200">
+      <div className="flex gap-1 mb-4 border-b border-[#e7e3f2]">
         {ENUM_SECTIONS.map(s => (
           <button
             key={s.key}
             onClick={() => setActiveEnum(s.key)}
             data-testid={`enum-tab-${s.key}`}
-            className={`px-3 py-2 text-sm font-semibold border-b-2 transition-colors ${
+            className={`px-3 py-2 text-[13px] font-semibold border-b-[3px] -mb-px transition-colors ${
               activeEnum === s.key
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-zinc-500 hover:text-zinc-700"
+                ? "text-[#2e5fe8] border-[#2e5fe8]"
+                : "text-[#8a87a0] border-transparent hover:text-[#26243a]"
             }`}
           >
             {s.label}
@@ -482,10 +482,10 @@ function HolidaysSection({ config, onSave }) {
       <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden">
         <table className="w-full text-sm" data-testid="holidays-table">
           <thead>
-            <tr className="bg-zinc-50 border-b border-zinc-200">
-              <th className="px-4 py-2.5 text-left text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Date</th>
-              <th className="px-4 py-2.5 text-left text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Libellé</th>
-              <th className="px-4 py-2.5 text-left text-[11px] font-bold text-zinc-400 uppercase tracking-widest">Pays</th>
+            <tr className="bg-[#fbfaff] border-b border-[#e8e6f0]">
+              <th className="px-4 py-2.5 text-left text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wider">Date</th>
+              <th className="px-4 py-2.5 text-left text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wider">Libellé</th>
+              <th className="px-4 py-2.5 text-left text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wider">Pays</th>
               <th className="w-10" />
             </tr>
           </thead>
@@ -1293,10 +1293,10 @@ function ProjectCodesSection({ config, onSave }) {
           <div className="border border-zinc-200 rounded-xl overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-zinc-50 border-b border-zinc-200 text-left">
-                  <th className="px-4 py-2.5 text-xs font-semibold text-zinc-600">Programme</th>
-                  <th className="px-4 py-2.5 text-xs font-semibold text-zinc-600 w-40">Préfixe</th>
-                  <th className="px-4 py-2.5 text-xs font-semibold text-zinc-600">Aperçu</th>
+                <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+                  <th className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">Programme</th>
+                  <th className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] w-40">Préfixe</th>
+                  <th className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">Aperçu</th>
                 </tr>
               </thead>
               <tbody>
@@ -1418,22 +1418,23 @@ export default function AdminConfig() {
           <Wrench size={18} className="text-white" />
         </div>
         <div>
-          <h1 className="text-xl font-heading font-bold text-zinc-800">Configuration du Tenant</h1>
+          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / Administration / <span className="text-[#352c6e] font-semibold">Configuration</span></div>
+          <h1 className="font-heading text-2xl font-extrabold text-[#26243a] tracking-tight">Configuration du Tenant</h1>
           <p className="text-xs text-zinc-400">Paramètres d'administration réservés aux administrateurs</p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-zinc-200 mb-6 overflow-x-auto">
+      <div className="flex gap-1 border-b border-[#e7e3f2] mb-6 overflow-x-auto">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
             data-testid={`config-tab-${id}`}
             onClick={() => setActiveTab(id)}
-            className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border-b-2 transition-colors whitespace-nowrap ${
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold border-b-[3px] -mb-px transition-colors whitespace-nowrap ${
               activeTab === id
-                ? "border-blue-600 text-blue-600"
-                : "border-transparent text-zinc-500 hover:text-zinc-700"
+                ? "text-[#2e5fe8] border-[#2e5fe8]"
+                : "text-[#8a87a0] border-transparent hover:text-[#26243a]"
             }`}
           >
             <Icon size={13} />

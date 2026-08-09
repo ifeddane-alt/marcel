@@ -65,6 +65,7 @@ export default function AgentAnalytics() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
+          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / Administration / <span className="text-[#352c6e] font-semibold">Analytics IA</span></div>
           <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">
             Analytics Agent IA
           </h1>

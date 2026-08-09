@@ -453,7 +453,7 @@ function GroupCard({
       {open && (
         <table className="w-full text-xs">
           <thead>
-            <tr className="bg-zinc-50">
+            <tr className="bg-[#fbfaff] border-b border-[#e8e6f0]">
               <th className="px-4 py-2 text-left text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Projet</th>
               <th className="px-3 py-2 text-left text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Tâche</th>
               <th className="px-3 py-2 text-left text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Phase</th>
@@ -1024,6 +1024,7 @@ export default function Timesheets() {
     <div className="p-4 md:p-6 lg:p-8" data-testid="timesheets-page">
       <div className="mb-4 md:mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
+          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Timesheets</span></div>
           <div className="flex items-center gap-2 mb-1">
             <Clock size={18} className="text-blue-600" />
             <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Timesheets</h1>
@@ -1037,12 +1038,12 @@ export default function Timesheets() {
         </div>
       </div>
 
-      <div className="flex items-center gap-1 mb-4 md:mb-6 border-b border-zinc-200 overflow-x-auto">
+      <div className="flex items-center gap-1 mb-4 md:mb-6 border-b border-[#e7e3f2] overflow-x-auto">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button key={id} onClick={() => { setTab(id); if (id === "validation") setValidRefresh((n) => n + 1); }}
             data-testid={`tab-${id}`}
-            className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-semibold border-b-2 -mb-px transition-colors ${
-              tab === id ? "border-blue-600 text-blue-600" : "border-transparent text-zinc-500 hover:text-zinc-700"
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold border-b-[3px] -mb-px transition-colors ${
+              tab === id ? "text-[#2e5fe8] border-[#2e5fe8]" : "text-[#8a87a0] border-transparent hover:text-[#26243a]"
             }`}>
             <Icon size={13} /> {label}
           </button>

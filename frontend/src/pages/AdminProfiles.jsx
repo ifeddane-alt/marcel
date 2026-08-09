@@ -296,9 +296,10 @@ export default function AdminProfiles() {
       <div className="bg-white border-b border-zinc-200 px-6 py-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xl font-bold text-zinc-900 flex items-center gap-2">
+            <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / Administration / <span className="text-[#352c6e] font-semibold">Profils</span></div>
+            <h1 className="font-heading text-2xl font-extrabold text-[#26243a] tracking-tight flex items-center gap-2">
               <Shield size={20} className="text-blue-600" />
-              Administration — Profils
+              Profils
             </h1>
             <p className="text-sm text-zinc-500 mt-0.5">
               Gérez les profils et leurs permissions. Les droits viennent uniquement de <code className="bg-zinc-100 px-1 rounded-lg text-xs">permissions[]</code>.

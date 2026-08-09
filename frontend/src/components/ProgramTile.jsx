@@ -83,6 +83,20 @@ export default function ProgramTile({ program: prog, onEdit, onDelete, canEdit, 
           <span>Budget <b className="font-mono-data text-[#26243a]">{formatEuro(prog.budget_total)}</b></span>
           <span>Consommé <b className={`font-mono-data ${overBudget ? "text-[#cc4f45]" : "text-[#26243a]"}`}>{formatEuro(prog.budget_consumed)}</b></span>
         </div>
+
+        {/* Prochains jalons */}
+        {(prog.next_milestones || []).length > 0 && (
+          <div className="mt-2.5 pt-2 border-t border-[#f0eff6] space-y-1" data-testid={`program-tile-milestones-${prog.program_id}`}>
+            <div className="text-[8.5px] font-bold uppercase tracking-widest text-[#a39fb8]">Prochains jalons</div>
+            {prog.next_milestones.map((m, i) => (
+              <div key={i} className="flex items-center gap-1.5 text-[10.5px]">
+                <span className="w-[7px] h-[7px] rotate-45 rounded-[1.5px] flex-shrink-0" style={{ background: m.overdue ? "#cc4f45" : style.fill }} />
+                <span className={`font-mono-data font-semibold flex-shrink-0 ${m.overdue ? "text-[#cc4f45]" : "text-[#26243a]"}`}>{formatDate(m.date)}</span>
+                <span className="text-[#5d5a75] truncate" title={m.name}>{m.name}</span>
+              </div>
+            ))}
+          </div>
+        )}
       </div>
 
       {/* Pied : répartition RAG + actions */}

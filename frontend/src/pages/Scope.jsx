@@ -322,7 +322,7 @@ function CapacityVsLoad({ data }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-zinc-50 text-zinc-500 text-xs">
+            <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-[#8a87a0] text-xs">
               {["", "Équipe", "Capa dispo (JH)", "Charge SEC (JH)", "Charge ÉTENDU (JH)", "Marge (JH)", "Taux (%)", ""].map((h, i) => (
                 <th key={i} className="text-left px-3 py-2 font-semibold whitespace-nowrap">{h}</th>
               ))}
@@ -828,11 +828,12 @@ export default function Scope() {
   const overloadTeams = capacity.filter((t) => t.status === "rouge").length;
 
   return (
-    <div className="p-4 md:p-6 space-y-4 md:space-y-6 bg-zinc-50 min-h-full">
+    <div className="p-4 md:p-6 lg:p-8 space-y-4 md:space-y-6 min-h-full">
       {/* En-tête */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <h1 className="text-2xl font-bold text-zinc-900 font-heading">Arbitrage Scope</h1>
+          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Scope</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Arbitrage Scope</h1>
           <p className="text-sm text-zinc-500 mt-0.5">Sélection, figeage et transmission des features candidates</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -841,7 +842,7 @@ export default function Scope() {
             <button
               onClick={() => setViewMode("table")}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors
-                ${viewMode === "table" ? "bg-zinc-950 text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
+                ${viewMode === "table" ? "bg-[#2e5fe8] text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
               data-testid="view-table-btn">
               <Table2 size={13} />Tableau
             </button>
@@ -849,7 +850,7 @@ export default function Scope() {
               onClick={() => setViewMode("kanban")}
               disabled={!!viewSnap}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors disabled:opacity-40
-                ${viewMode === "kanban" ? "bg-zinc-950 text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
+                ${viewMode === "kanban" ? "bg-[#2e5fe8] text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
               data-testid="view-kanban-btn">
               <KanbanIcon size={13} />Kanban
             </button>
@@ -857,7 +858,7 @@ export default function Scope() {
               onClick={() => setViewMode("timeline")}
               disabled={!viewSnap}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed
-                ${viewMode === "timeline" ? "bg-zinc-950 text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
+                ${viewMode === "timeline" ? "bg-[#2e5fe8] text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
               data-testid="view-timeline-btn"
               title={!viewSnap ? "Sélectionnez une version figée pour afficher la timeline" : ""}>
               <BarChart2 size={13} />Timeline

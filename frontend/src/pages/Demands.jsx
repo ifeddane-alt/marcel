@@ -301,7 +301,8 @@ export default function Demands() {
       <div className="bg-white border-b border-zinc-200 px-6 py-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xl font-bold text-zinc-900">Gestion de la Demande</h1>
+            <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Demandes</span></div>
+            <h1 className="font-heading text-2xl font-extrabold text-[#26243a] tracking-tight">Gestion de la Demande</h1>
             <p className="text-sm text-zinc-500 mt-0.5">Qualification et priorisation des demandes projets</p>
           </div>
           <div className="flex items-center gap-2">

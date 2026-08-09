@@ -268,7 +268,7 @@ export default function Portfolio() {
       <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm overflow-x-auto ${view === "tiles" ? "hidden" : ""}`}>
         <table className="w-full text-sm" data-testid="portfolio-table">
           <thead>
-            <tr className="bg-zinc-50 border-b border-zinc-200 text-left">
+            <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
               <th className="px-4 py-3 w-8">
                 <input
                   ref={selectAllRef}

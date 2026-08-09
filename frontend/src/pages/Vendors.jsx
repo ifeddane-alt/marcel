@@ -276,6 +276,7 @@ export default function Vendors() {
       {/* En-tête */}
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
+          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Suivi Fournisseurs</span></div>
           <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight flex items-center gap-2">
             <Handshake size={26} className="text-blue-600" />
             Suivi Fournisseurs

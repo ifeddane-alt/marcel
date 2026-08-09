@@ -53,9 +53,10 @@ export default function AdminUsers() {
       <div className="bg-white border-b border-zinc-200 px-6 py-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <h1 className="text-xl font-bold text-zinc-900 flex items-center gap-2">
+            <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / Administration / <span className="text-[#352c6e] font-semibold">Utilisateurs</span></div>
+            <h1 className="font-heading text-2xl font-extrabold text-[#26243a] tracking-tight flex items-center gap-2">
               <Users size={20} className="text-blue-600" />
-              Administration — Utilisateurs
+              Utilisateurs
             </h1>
             <p className="text-sm text-zinc-500 mt-0.5">
               Gérez les profils des utilisateurs. Le profil détermine leurs permissions.
@@ -85,11 +86,11 @@ export default function AdminUsers() {
         <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-zinc-50 border-b border-zinc-100">
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide">Utilisateur</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide">Email</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide">Rôle système</th>
-                <th className="text-left px-4 py-3 text-xs font-semibold text-zinc-500 uppercase tracking-wide">Profil</th>
+              <tr className="bg-[#fbfaff] border-b border-[#e8e6f0]">
+                <th className="text-left px-4 py-3 text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wider">Utilisateur</th>
+                <th className="text-left px-4 py-3 text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wider">Email</th>
+                <th className="text-left px-4 py-3 text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wider">Rôle système</th>
+                <th className="text-left px-4 py-3 text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wider">Profil</th>
               </tr>
             </thead>
             <tbody>

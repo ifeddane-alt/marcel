@@ -109,11 +109,12 @@ export default function ResourceDetail() {
     <div className="p-4 md:p-6 lg:p-8" data-testid="resource-detail-page">
       {/* Fil d'Ariane */}
       <nav className="flex items-center gap-1.5 text-xs text-[#8a87a0] mb-4">
-        <Link to="/resources" className="hover:text-[#2e5fe8] flex items-center gap-1">
-          <ArrowLeft size={13} />
+        <span>Accueil</span>
+        <span>/</span>
+        <Link to="/resources" className="hover:text-[#2e5fe8]">
           Ressources
         </Link>
-        <ChevronRight size={12} />
+        <span>/</span>
         <span className="text-[#352c6e] font-semibold">{resource.name}</span>
       </nav>
 

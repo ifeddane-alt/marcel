@@ -1,0 +1,25 @@
+{
+  "summary": "Full pass of Lot A + Lot C Clarity restyle + new next_milestones feature. Backend GET /api/programs vérifié via curl: 4 programmes retournés, chacun avec next_milestones = liste de 2 items {name, date, overdue} — OK. Frontend: login admin@altair.fr OK. Toutes les pages testées se chargent avec breadcrumb 'Accueil / …' Clarity et data-testids attendus: /programmes (4 tuiles avec section 'Prochains jalons' visibles — texte '30 nov. 2025 / Pilote commercial …' + '01 déc. 2025 / Déploiement national Phase 1' pour la tuile 0), /resources (3 onglets tab-resources/tab-referentiel/tab-heatmap OK, click sur ligne annuaire ouvre /resources/:id avec breadcrumb Ressources), /teams (5 cartes cliquables — Note: pas de balise <table> sur la liste, ce sont des cartes; la fiche /teams/:id affiche header indigo #352c6e ✓, 2 tables membres/allocations ✓, breadcrumb 'Équipes' ✓), /vendors (breadcrumb + bouton Export CSV présent), /timesheets (4 onglets Clarity tab-saisie/tab-validation/tab-absences/tab-rapports tous cliquables, saisie d'une valeur dans une cellule de la grille OK — 15 inputs détectés), /demands (breadcrumb + new-demand-btn + bascule Kanban/Tableau OK), /scope (breadcrumb + H1 + bascules Tableau/Kanban OK — Timeline est intentionnellement disabled tant qu'aucune version figée n'est sélectionnée, title tooltip explicite), /admin/config (breadcrumb + 9 config-tab-* + sous-onglets enum-tab-* apparaissent après clic sur onglet Enums — 4 enum-tab-* détectés), /admin/users (breadcrumb + table), /admin/profiles OK, /admin/powerbi (mquery-tab-* OK), /admin/templates OK, /admin/monitoring OK, /agent/analytics (breadcrumb 'Analytics IA' + contenu 13k chars rendu), /connectors (breadcrumb + H1 Clarity). Régression /portfolio, /dashboard, /arbitrage OK. Aucune erreur JS bloquante.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/programmes tuiles", "issues": ["Les dates dans 'Prochains jalons' apparaissent overdue=true pour les 4 programmes du seed (dates 2025) — attendu vu le seed antérieur à 'aujourd'hui', mais à confirmer si la couleur rouge/losange s'applique bien visuellement (non vérifié pixel par pixel dans ce run)."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "OK: next_milestones est bien calculé côté backend et consommé côté frontend (data-testid program-tile-milestones-* présents sur les 4 tuiles).",
+    "Rappel iteration_55 non traité: WebSocket /api/ws ne monte toujours pas, warnings Recharts width(-1) toujours présents (non bloquants)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100% (1/1 endpoint vérifié)", "frontend": "100% (toutes pages Lot A + Lot C + programmes chargent et interactions fonctionnent)"},
+  "test_credentials": "admin@altair.fr / Admin2026! — OK",
+  "seed_data_creation": "1 saisie de valeur '3' dans une cellule de la grille /timesheets pendant le test (à nettoyer si besoin).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Lot A + Lot C + next_milestones sur tuiles programmes: tout OK. Les data-testid attendus sont bien présents (tab-*, config-tab-*, enum-tab-*, mquery-tab-*, program-tile-milestones-*, new-demand-btn). La page /teams utilise des CARTES (pas un <table>) sur la liste — comportement voulu, la fiche /teams/:id contient bien 2 tables et le header indigo #352c6e. /scope Timeline est disabled tant qu'aucune version figée n'est sélectionnée (bouton porte un title explicatif) — comportement normal. Régression Lot B non refaite en détail (déjà validée iteration_55).",
+  "rca of the issue": "N/A — aucun bug détecté sur ce lot."
+}

@@ -54,6 +54,26 @@ async def list_programs(current_user: TokenPayload) -> list:
         programs = [prog for prog in programs if prog["program_id"] in visible_program_ids]
     for prog in programs:
         prog.update(_aggregate_program_metrics(projects_by_program.get(prog["program_id"], [])))
+    # Prochains jalons par programme (2 max, non terminés, à venir)
+    proj_to_prog = {p["project_id"]: p["program_id"] for p in all_projects if p.get("program_id")}
+    ms_by_prog: dict = {}
+    if proj_to_prog:
+        today = datetime.now(timezone.utc).date().isoformat()
+        milestones = await db.milestones.find(
+            {"project_id": {"$in": list(proj_to_prog.keys())}, "status": {"$nin": ["achieved", "done", "completed", "cancelled"]}},
+            {"_id": 0, "project_id": 1, "name": 1, "date_forecast": 1, "date_baseline": 1},
+        ).to_list(None)
+        for m in milestones:
+            d = m.get("date_forecast") or m.get("date_baseline")
+            if not d:
+                continue
+            ms_by_prog.setdefault(proj_to_prog[m["project_id"]], []).append(
+                {"name": m.get("name"), "date": d, "overdue": d < today}
+            )
+    for prog in programs:
+        items = sorted(ms_by_prog.get(prog["program_id"], []), key=lambda x: x["date"])
+        upcoming = [m for m in items if not m["overdue"]]
+        prog["next_milestones"] = upcoming[:2] if upcoming else items[-2:]
     return programs
 
 
