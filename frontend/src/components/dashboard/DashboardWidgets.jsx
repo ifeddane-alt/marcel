@@ -697,6 +697,59 @@ export function TopRisksWidget({ topRisks }) {
   );
 }
 
+// ─── Contrats à renouveler (expiration ≤ 60 jours) ───────────────
+export function ContractsExpiryWidget({ resources }) {
+  const expiring = (resources || [])
+    .filter((r) => r.contract_end)
+    .map((r) => ({ ...r, days: Math.ceil((new Date(r.contract_end) - Date.now()) / 86400000) }))
+    .filter((r) => r.days <= 60)
+    .sort((a, b) => a.days - b.days);
+  return (
+    <WidgetShell
+      title="Contrats à renouveler"
+      icon={Calendar}
+      badge={expiring.length > 0 && (
+        <span className="text-[10px] font-bold bg-rose-100 text-rose-700 px-1.5 py-px rounded-full">{expiring.length}</span>
+      )}
+      link="/resources"
+      linkLabel="Référentiel"
+      testId="contracts-expiry-widget"
+    >
+      {expiring.length === 0 ? (
+        <div className="px-5 py-6 text-center text-xs text-zinc-400">Aucun contrat n'expire sous 60 jours.</div>
+      ) : (
+        <div className="divide-y divide-[#f0eff6]">
+          {expiring.slice(0, 6).map((r) => (
+            <Link
+              key={r.resource_id}
+              to={`/resources/${r.resource_id}`}
+              className="flex items-center gap-3 px-5 py-2.5 hover:bg-[#fbfaff] transition-colors"
+              data-testid={`contract-expiry-${r.resource_id}`}
+            >
+              <div className="min-w-0 flex-1">
+                <div className="text-[13px] font-semibold text-[#26243a] truncate">{r.name}</div>
+                <div className="text-[11px] text-[#8a87a0] truncate">
+                  {r.role}{r.vendor ? ` · ${r.vendor}` : ""}{r.contract_ref ? ` · ${r.contract_ref}` : ""}
+                </div>
+              </div>
+              <div className="text-right flex-shrink-0">
+                <div className="font-mono-data text-[11px] text-[#5d5a75]">{formatDate(r.contract_end)}</div>
+                {r.days < 0 ? (
+                  <span className="inline-flex text-[10px] font-bold px-1.5 py-px rounded bg-rose-100 text-rose-700">Expiré</span>
+                ) : r.days <= 30 ? (
+                  <span className="inline-flex text-[10px] font-bold px-1.5 py-px rounded bg-rose-100 text-rose-700">J-{r.days} · à renouveler</span>
+                ) : (
+                  <span className="inline-flex text-[10px] font-bold px-1.5 py-px rounded bg-amber-100 text-amber-700">J-{r.days} · à anticiper</span>
+                )}
+              </div>
+            </Link>
+          ))}
+        </div>
+      )}
+    </WidgetShell>
+  );
+}
+
 export function HeatmapWidget({ heatmapRisks, programs, allProjects }) {
   const [filterProgram, setFilterProgram] = useState("");
   const [filterProject, setFilterProject] = useState("");

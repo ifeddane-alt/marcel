@@ -3,14 +3,14 @@ import { Responsive, WidthProvider } from "react-grid-layout/legacy";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
 import { Settings2, RefreshCw, Check, X, Move, RotateCcw, Plus, GripVertical, FileDown } from "lucide-react";
-import { dashboardAPI, programsAPI, projectsAPI, teamsAPI, milestonesAPI, arbitrageAPI, agentAPI } from "@/api";
+import { dashboardAPI, programsAPI, projectsAPI, teamsAPI, milestonesAPI, arbitrageAPI, agentAPI, resourcesAPI } from "@/api";
 import { usePermissions } from "@/hooks/usePermissions";
 import {
   MetricSingleWidget, BudgetSingleWidget, CapacityWidget, RegulatoryWidget,
   EnvelopeWidget, RecommendationsWidget, ChartBudgetWidget, ChartRagWidget,
   MilestonesGaugeWidget, UpcomingMilestonesWidget, TopProjectsWidget,
   PendingTimesheetsWidget, RecentDecisionsWidget, RecentProjectsWidget,
-  TopRisksWidget, HeatmapWidget, TeamLoadWidget,
+  TopRisksWidget, HeatmapWidget, TeamLoadWidget, ContractsExpiryWidget,
 } from "@/components/dashboard/DashboardWidgets";
 
 const ResponsiveGridLayout = WidthProvider(Responsive);
@@ -38,6 +38,7 @@ const WIDGET_LABELS = {
   recent_projects: "Projets récents",
   top_risks: "Top risques",
   heatmap: "Cartographie risques",
+  contracts_expiry: "Contrats à renouveler (60j)",
 };
 
 // Grille par défaut (12 colonnes, rowHeight 40)
@@ -57,6 +58,7 @@ const DEFAULT_GRID = {
   team_load:           { x: 0, y: 26, w: 6,  h: 9, minW: 4, minH: 4 },
   milestones_gauge:    { x: 6, y: 26, w: 6,  h: 4, minW: 3, minH: 3 },
   top_projects:        { x: 6, y: 30, w: 6,  h: 5, minW: 4, minH: 4 },
+  contracts_expiry:    { x: 0, y: 30, w: 6,  h: 5, minW: 4, minH: 3 },
   chart_budget:        { x: 0, y: 35, w: 8,  h: 8, minW: 4, minH: 5 },
   chart_rag:           { x: 8, y: 35, w: 4,  h: 8, minW: 3, minH: 5 },
   pending_timesheets:  { x: 0, y: 43, w: 6,  h: 6, minW: 3, minH: 4 },
@@ -111,6 +113,7 @@ export default function Dashboard() {
   const [cxo, setCxo] = useState(null);
   const [extras, setExtras] = useState(null);
   const [teamLoad, setTeamLoad] = useState([]);
+  const [resources, setResources] = useState([]);
   const [loading, setLoading] = useState(true);
 
   const [widgets, setWidgets] = useState(null);
@@ -164,6 +167,8 @@ export default function Dashboard() {
       setLayouts(migrateLayouts(prefRes.data.layouts, migrated));
       setLoading(false);
     }).catch(() => setLoading(false));
+
+    resourcesAPI.list().then((r) => setResources(r.data || [])).catch(() => {});
 
     if (canSeeEnvelope) {
       agentAPI.getRecommendations().then(r => setRecommendations((r.data || []).slice(0, 5))).catch(() => {});
@@ -254,6 +259,7 @@ export default function Dashboard() {
     recent_projects: () => <RecentProjectsWidget summary={summary} />,
     top_risks: () => <TopRisksWidget topRisks={topRisks} />,
     heatmap: () => <HeatmapWidget heatmapRisks={heatmapRisks} programs={programs} allProjects={allProjects} />,
+    contracts_expiry: () => <ContractsExpiryWidget resources={resources} />,
   };
 
   const visible = widgets.filter((w) => RENDERERS[w]);
@@ -269,6 +275,7 @@ export default function Dashboard() {
     recent_decisions: (extras?.recent_decisions || []).length > 0,
     top_risks: topRisks.length > 0,
     heatmap: heatmapRisks.length > 0,
+    contracts_expiry: resources.some((r) => r.contract_end && (new Date(r.contract_end) - Date.now()) / 86400000 <= 60),
   };
   const hasContent = (w) => HAS_CONTENT[w] !== false;
   const gridWidgets = customizing ? visible : visible.filter(hasContent);

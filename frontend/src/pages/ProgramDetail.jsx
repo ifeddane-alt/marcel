@@ -21,6 +21,7 @@ export default function ProgramDetail() {
   const [program, setProgram] = useState(null);
   const [loading, setLoading] = useState(true);
   const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [activeTab, setActiveTab] = useState("apercu");
 
   useEffect(() => {
     programsAPI.get(id).then((r) => {
@@ -44,34 +45,32 @@ export default function ProgramDetail() {
 
   return (
     <div className="p-4 md:p-6 lg:p-8" data-testid="program-detail-page">
-      {/* Breadcrumb */}
-      <nav className="flex items-center gap-1 text-xs text-zinc-500 mb-6">
-        <Link to="/programmes" className="hover:text-blue-600 flex items-center gap-1">
+      {/* Fil d'Ariane */}
+      <nav className="flex items-center gap-1.5 text-xs text-[#8a87a0] mb-4">
+        <Link to="/programmes" className="hover:text-[#2e5fe8] flex items-center gap-1">
           <ArrowLeft size={13} /> Programmes
         </Link>
         <ChevronRight size={12} />
-        <span className="text-zinc-800 font-medium truncate max-w-xs">{program.name}</span>
+        <span className="text-[#352c6e] font-semibold truncate max-w-xs">{program.name}</span>
       </nav>
 
       {/* Header */}
-      <div className="flex items-start justify-between mb-6">
+      <div className="flex items-start justify-between mb-5">
         <div className="flex-1 min-w-0 mr-4">
-          <div className="flex items-center gap-3 mb-2 flex-wrap">
-            <RAGBadge status={metrics.rag_consolidated || "green"} />
-            <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-lg ${STATUS_COLORS[program.status] || STATUS_COLORS.active}`}>
-              {STATUS_LABELS[program.status] || program.status}
-            </span>
-            <span className="text-xs text-zinc-400">
-              {metrics.project_count || 0} projet{(metrics.project_count || 0) > 1 ? "s" : ""}
-            </span>
-          </div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 leading-tight" data-testid="program-name">
+          <h1 className="font-heading text-2xl sm:text-[28px] font-extrabold text-[#26243a] leading-tight flex flex-wrap items-center gap-x-3 gap-y-1" data-testid="program-name">
             {program.name}
+            <span className="inline-flex items-center gap-2 align-middle">
+              <RAGBadge status={metrics.rag_consolidated || "green"} />
+              <span className={`text-[11px] font-semibold px-2 py-0.5 rounded-lg ${STATUS_COLORS[program.status] || STATUS_COLORS.active}`}>
+                {STATUS_LABELS[program.status] || program.status}
+              </span>
+            </span>
           </h1>
           {program.description && (
             <p className="text-sm text-zinc-500 mt-2 max-w-2xl">{program.description}</p>
           )}
           <div className="flex items-center gap-4 mt-2 text-xs text-zinc-400">
+            <span>{metrics.project_count || 0} projet{(metrics.project_count || 0) > 1 ? "s" : ""}</span>
             {program.owner && <span>Owner : <span className="font-medium text-zinc-600">{program.owner}</span></span>}
             {program.start_date && (
               <span className="flex items-center gap-1">
@@ -92,8 +91,33 @@ export default function ProgramDetail() {
         </div>
       </div>
 
+      {/* Onglets façon Clarity */}
+      <div className="flex gap-1 border-b border-[#e7e3f2] mb-5 overflow-x-auto" data-testid="program-tabs">
+        {[
+          { id: "apercu", label: "Aperçu" },
+          { id: "projets", label: "Projets", count: projects.length },
+          { id: "jalons", label: "Jalons", count: milestones.length },
+        ].map((t) => (
+          <button
+            key={t.id}
+            onClick={() => setActiveTab(t.id)}
+            data-testid={`program-tab-${t.id}`}
+            className={`flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold whitespace-nowrap border-b-[3px] -mb-px transition-colors ${
+              activeTab === t.id ? "text-[#2e5fe8] border-[#2e5fe8]" : "text-[#8a87a0] border-transparent hover:text-[#26243a]"
+            }`}
+          >
+            {t.label}
+            {t.count > 0 && (
+              <span className={`text-[10px] font-bold px-1.5 py-px rounded-full ${activeTab === t.id ? "bg-[#e9effe] text-[#2e5fe8]" : "bg-[#f0eefc] text-[#8a87a0]"}`}>
+                {t.count}
+              </span>
+            )}
+          </button>
+        ))}
+      </div>
+
       {/* Metrics cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
+      <div className={`grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6 ${activeTab === "apercu" ? "" : "hidden"}`}>
         {[
           { label: "Budget total", value: formatEuro(metrics.budget_total || 0), alert: false },
           {
@@ -117,10 +141,10 @@ export default function ProgramDetail() {
         ))}
       </div>
 
-      <div className="grid grid-cols-12 gap-4">
+      <div className="space-y-4">
         {/* Projects list */}
-        <div className="col-span-12 lg:col-span-8 space-y-4">
-          <div className="bg-white border border-zinc-200 rounded-lg shadow-sm" data-testid="program-projects-section">
+        <div className="space-y-4">
+          <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "projets" ? "" : "hidden"}`} data-testid="program-projects-section">
             <div className="px-5 py-3 border-b border-zinc-100 flex items-center justify-between">
               <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold">
                 Projets du programme ({projects.length})
@@ -209,7 +233,8 @@ export default function ProgramDetail() {
           </div>
 
           {/* Milestones agrégés */}
-          {sortedMilestones.length > 0 && (
+          <div className={activeTab === "jalons" ? "" : "hidden"}>
+          {sortedMilestones.length > 0 ? (
             <div className="bg-white border border-zinc-200 rounded-lg shadow-sm" data-testid="program-milestones-section">
               <div className="px-5 py-3 border-b border-zinc-100">
                 <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold">
@@ -253,11 +278,16 @@ export default function ProgramDetail() {
                 </tbody>
               </table>
             </div>
+          ) : (
+            <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-8 text-center text-zinc-400 text-sm">
+              Aucun jalon agrégé sur ce programme
+            </div>
           )}
+          </div>
         </div>
 
-        {/* Right panel */}
-        <div className="col-span-12 lg:col-span-4 space-y-4">
+        {/* Panneaux Aperçu */}
+        <div className={`grid md:grid-cols-3 gap-4 items-start ${activeTab === "apercu" ? "" : "hidden"}`}>
           {/* RAG distribution */}
           <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-5">
             <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold mb-3">
