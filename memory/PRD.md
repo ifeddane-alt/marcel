@@ -194,6 +194,7 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 
 ## Backlog / Améliorations futures
 ### P1 — Court terme
+- **Socle IA à coût fixe (Niveau 1 uniquement — spec validée avec l'utilisateur, Juin 2026)** : job planifié (cron APScheduler) 1 appel LLM/tenant/exécution — règles déterministes d'abord (dépassements EAC>budget, risques critiques non mitigés, jalons en retard, décisions en attente, étendre les 6 règles existantes de modules/agent/service.py), LLM uniquement pour rédiger la synthèse des anomalies détectées (0 anomalie = 0 appel). Stockage collection `ai_insights` (horodaté, anomalies structurées + synthèse), déduplication (notifier seulement nouvelles anomalies + résolutions), badge + notifications WebSocket existantes, AUCUN appel LLM à la consultation. Garde-fous : compteur tokens/coût par tenant (agent_logs), suivi coût quotidien dans Analytics IA, alerte + kill-switch si dépassement seuil. Endpoint /api/agent/analyze déclenchable manuellement (admin). Ajustements décidés : cache Mongo TTL (PAS Redis), PAS d'API batch en V1, intent "inconnu" sans fallback LLM. ⚠️ Niveau 2 (chat quota) ABANDONNÉ par l'utilisateur. Questions restées sans réponse : sort du chat IA existant (laisser/désactiver/restreindre), fréquence (nuit vs 6h), modèle (Haiku vs Sonnet).
 - SAP RFC natif : installer `pyrfc` + SAP NW RFC SDK (sous licence SAP) pour remplacer le mock actuel
 
 ### P2 — Moyen terme (restant)
