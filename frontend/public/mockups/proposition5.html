@@ -1,0 +1,203 @@
+<!doctype html>
+<html lang="fr">
+<head>
+<meta charset="utf-8">
+<title>Proposition 5 — Clarity itdesign</title>
+<link href="https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:'Plus Jakarta Sans',sans-serif;color:#241f3d;background:#f4f2fa}
+h1,h2,h3{font-family:'Outfit',sans-serif;letter-spacing:-0.015em}
+.artboard{height:800px;position:relative;overflow:hidden}
+svg{width:18px;height:18px}
+.badge-note{position:absolute;top:24px;left:24px;background:#352c6e;color:#fff;font-size:12px;font-weight:600;padding:6px 14px;border-radius:999px;font-family:'Outfit';z-index:9}
+/* ============ LOGIN ============ */
+#login{display:flex;align-items:center;background:#efeaf8}
+.wave{position:absolute;bottom:0;left:0;right:0;height:180px}
+.login-left{flex:1;padding:0 70px 40px 90px;position:relative}
+.login-brand{display:flex;align-items:center;gap:12px;margin-bottom:44px}
+.mark{width:46px;height:46px;border-radius:12px;background:#352c6e;display:flex;align-items:center;justify-content:center;color:#fff;font-family:'Outfit';font-weight:800;font-size:23px;position:relative}
+.mark::after{content:"";position:absolute;width:13px;height:13px;border-radius:4px;background:#e8365d;bottom:-4px;right:-4px;transform:rotate(45deg)}
+.login-brand b{font-family:'Outfit';font-size:25px;font-weight:800;color:#352c6e;letter-spacing:.01em}
+.hero-title{font-size:46px;font-weight:800;color:#352c6e;line-height:1.12;margin-bottom:18px}
+.hero-sub{font-size:17px;color:#5d5877;line-height:1.55;max-width:460px}
+.hero-points{margin-top:30px;display:flex;flex-direction:column;gap:12px}
+.pt{display:flex;align-items:center;gap:11px;font-size:14.5px;font-weight:600;color:#3d3564}
+.pt svg{width:20px;height:20px;color:#352c6e;flex-shrink:0}
+.login-right{width:520px;display:flex;align-items:center;justify-content:center;position:relative}
+.login-card{width:410px;background:#fff;border-radius:18px;padding:38px 38px 34px;box-shadow:0 24px 60px -22px rgba(53,44,110,.35)}
+.login-title{font-size:24px;font-weight:700;color:#241f3d;margin-bottom:4px}
+.login-sub{font-size:13.5px;color:#75708c;margin-bottom:26px}
+.field label{display:block;font-size:12.5px;font-weight:700;color:#3d3564;margin-bottom:6px}
+.field input{width:100%;height:44px;border:1.5px solid #dcd7ea;border-radius:10px;padding:0 13px;font-size:14px;font-family:inherit;background:#fbfaff}
+.field{margin-bottom:16px}
+.btn-primary{width:100%;height:46px;border:none;border-radius:10px;background:#3d6be8;color:#fff;font-size:14.5px;font-weight:700;font-family:inherit;cursor:pointer;box-shadow:0 8px 20px -8px rgba(61,107,232,.6)}
+.divider{display:flex;align-items:center;gap:12px;color:#a39fb8;font-size:12px;margin:20px 0}
+.divider::before,.divider::after{content:"";flex:1;height:1px;background:#e7e3f2}
+.sso-row{display:flex;gap:10px}
+.sso-btn{flex:1;height:42px;border:1.5px solid #dcd7ea;border-radius:10px;background:#fff;display:flex;align-items:center;justify-content:center;gap:8px;font-size:13px;font-weight:600;color:#3d3564;font-family:inherit}
+.g-dot{width:15px;height:15px;border-radius:50%;background:conic-gradient(#ea4335 0 25%,#fbbc05 25% 50%,#34a853 50% 75%,#4285f4 75%)}
+.ms-dot{width:13px;height:13px;display:grid;grid-template-columns:1fr 1fr;gap:1px}
+.ms-dot i{display:block}
+/* ============ DASHBOARD ============ */
+#dashboard{display:flex;background:#f4f2fa}
+.rail{width:64px;background:#352c6e;display:flex;flex-direction:column;align-items:center;padding:14px 0;gap:6px}
+.rail .mark{width:36px;height:36px;font-size:18px;border-radius:10px;background:#4a3f8f;margin-bottom:14px}
+.rail .mark::after{display:none}
+.rail-item{width:42px;height:42px;border-radius:11px;display:flex;align-items:center;justify-content:center;color:#a79fd6}
+.rail-item svg{width:19px;height:19px}
+.rail-item.active{background:#4a3f8f;color:#fff}
+.main{flex:1;display:flex;flex-direction:column;min-width:0}
+.topbar{height:58px;background:#fff;border-bottom:1px solid #e7e3f2;display:flex;align-items:center;justify-content:space-between;padding:0 26px}
+.tb-left{display:flex;align-items:center;gap:26px}
+.tb-title{font-family:'Outfit';font-size:17px;font-weight:700;color:#352c6e}
+.tabs{display:flex;gap:2px}
+.tab{padding:19px 15px;font-size:13.5px;font-weight:600;color:#75708c;border-bottom:3px solid transparent}
+.tab.active{color:#3d6be8;border-bottom-color:#3d6be8}
+.top-right{display:flex;align-items:center;gap:14px}
+.search-pill{width:280px;height:36px;background:#f4f2fa;border:1px solid #e7e3f2;border-radius:9px;display:flex;align-items:center;gap:9px;padding:0 12px;color:#a39fb8;font-size:12.5px}
+.kbd{margin-left:auto;font-family:'JetBrains Mono';font-size:10.5px;background:#fff;border:1px solid #e7e3f2;border-radius:4px;padding:1px 5px;color:#75708c}
+.btn-sm{height:37px;padding:0 16px;border-radius:9px;background:#3d6be8;color:#fff;border:none;font-size:13px;font-weight:700;font-family:inherit}
+.avatar{width:34px;height:34px;border-radius:50%;background:#352c6e;color:#fff;display:flex;align-items:center;justify-content:center;font-size:12.5px;font-weight:700}
+.content{flex:1;padding:24px 28px;overflow:hidden}
+.page-title{font-size:24px;font-weight:800;color:#352c6e}
+.page-sub{font-size:13px;color:#75708c;margin-top:3px;margin-bottom:20px}
+.kpis{display:grid;grid-template-columns:repeat(4,1fr);gap:14px;margin-bottom:18px}
+.kpi{background:#fff;border:1px solid #e7e3f2;border-radius:14px;padding:16px 18px;display:flex;align-items:center;gap:14px;box-shadow:0 2px 10px -4px rgba(53,44,110,.08)}
+.donut{width:52px;height:52px;border-radius:50%;flex-shrink:0;display:flex;align-items:center;justify-content:center;font-size:11px;font-weight:800;font-family:'Outfit'}
+.donut i{width:36px;height:36px;border-radius:50%;background:#fff;display:flex;align-items:center;justify-content:center;font-style:normal}
+.kpi-label{font-size:12px;font-weight:600;color:#75708c;margin-bottom:3px}
+.kpi-value{font-family:'Outfit';font-size:24px;font-weight:800;color:#241f3d}
+.board-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.board-title{font-family:'Outfit';font-size:15.5px;font-weight:700;color:#352c6e}
+.fchip{display:inline-flex;align-items:center;gap:6px;font-size:12px;font-weight:600;color:#3d3564;background:#fff;border:1px solid #dcd7ea;border-radius:8px;padding:5px 11px;margin-left:8px}
+.board{display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.pcard{background:#fff;border-radius:14px;overflow:hidden;border:1px solid;box-shadow:0 2px 10px -4px rgba(53,44,110,.08)}
+.pcard.g{border-color:#bfe3b8}.pcard.y{border-color:#eee4a3}.pcard.t{border-color:#b7e2df}.pcard.r{border-color:#f3c3bf}
+.pc-head{padding:11px 14px;display:flex;align-items:center;justify-content:space-between}
+.pcard.g .pc-head{background:#e6f4e2}.pcard.y .pc-head{background:#f7f1c8}.pcard.t .pc-head{background:#def0ee}.pcard.r .pc-head{background:#fbe1de}
+.pc-name{font-family:'Outfit';font-size:13.5px;font-weight:700;color:#241f3d;line-height:1.25}
+.pc-badge{font-size:10px;font-weight:800;text-transform:uppercase;letter-spacing:.05em;padding:3px 8px;border-radius:6px;flex-shrink:0;margin-left:8px}
+.pcard.g .pc-badge{background:#4c9a3f;color:#fff}.pcard.y .pc-badge{background:#b19a00;color:#fff}.pcard.t .pc-badge{background:#2b9e97;color:#fff}.pcard.r .pc-badge{background:#cc4f45;color:#fff}
+.pc-body{padding:13px 14px}
+.code{font-family:'JetBrains Mono';font-size:10.5px;background:#f4f2fa;border:1px solid #e7e3f2;color:#3d3564;padding:2px 6px;border-radius:5px}
+.slider{position:relative;height:5px;border-radius:3px;background:#eceaf4;margin:16px 2px 14px}
+.slider i{position:absolute;left:0;top:0;bottom:0;border-radius:3px}
+.slider b{position:absolute;top:50%;width:13px;height:13px;transform:translate(-50%,-50%) rotate(45deg);border-radius:3px}
+.pc-meta{display:flex;justify-content:space-between;font-size:11.5px;color:#75708c}
+.pc-meta b{color:#241f3d;font-weight:700;font-family:'JetBrains Mono';font-size:11.5px}
+.pc-dots{display:flex;gap:5px;margin-top:11px}
+.pc-dots i{width:8px;height:8px;border-radius:2px}
+</style>
+</head>
+<body>
+
+<section id="login" class="artboard">
+  <div class="badge-note">Proposition 5 — Clarity</div>
+  <div class="login-left">
+    <div class="login-brand"><div class="mark">M</div><b>MARCEL</b></div>
+    <div class="hero-title">Le pilotage de vos projets et portefeuilles</div>
+    <div class="hero-sub">Plus de visibilité. De meilleures décisions. Un succès durable.</div>
+    <div class="hero-points">
+      <div class="pt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Portefeuilles, budgets, jalons & risques unifiés</div>
+      <div class="pt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Dashboards temps réel prêts pour le COMEX</div>
+      <div class="pt"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6L9 17l-5-5"/></svg> Agent IA PMO intégré</div>
+    </div>
+  </div>
+  <div class="login-right">
+    <div class="login-card">
+      <div class="login-title">Connexion</div>
+      <div class="login-sub">Accédez à votre espace de pilotage.</div>
+      <div class="field"><label>Email</label><input placeholder="prenom.nom@entreprise.fr"></div>
+      <div class="field"><label>Mot de passe</label><input type="password" value="••••••••••"></div>
+      <button class="btn-primary">Se connecter</button>
+      <div class="divider">ou continuer avec</div>
+      <div class="sso-row">
+        <button class="sso-btn"><span class="g-dot"></span> Google</button>
+        <button class="sso-btn"><span class="ms-dot"><i style="background:#f25022"></i><i style="background:#7fba00"></i><i style="background:#00a4ef"></i><i style="background:#ffb900"></i></span> Microsoft</button>
+      </div>
+    </div>
+  </div>
+  <svg class="wave" viewBox="0 0 1440 180" preserveAspectRatio="none"><path d="M0,120 C360,180 720,40 1080,80 C1260,100 1380,140 1440,150 L1440,180 L0,180 Z" fill="#ffffff" opacity="0.6"/></svg>
+</section>
+
+<section id="dashboard" class="artboard">
+  <aside class="rail">
+    <div class="mark">M</div>
+    <div class="rail-item active"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg></div>
+    <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M22 19a2 2 0 0 1-2 2H4a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5l2 3h9a2 2 0 0 1 2 2z"/></svg></div>
+    <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="12" y1="20" x2="12" y2="10"/><line x1="18" y1="20" x2="18" y2="4"/><line x1="6" y1="20" x2="6" y2="16"/></svg></div>
+    <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="4" width="18" height="17" rx="2"/><line x1="16" y1="2" x2="16" y2="6"/><line x1="8" y1="2" x2="8" y2="6"/><line x1="3" y1="10" x2="21" y2="10"/></svg></div>
+    <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/></svg></div>
+    <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10z"/></svg></div>
+    <div class="rail-item"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/></svg></div>
+  </aside>
+  <div class="main">
+    <div class="topbar">
+      <div class="tb-left">
+        <span class="tb-title">MARCEL</span>
+        <div class="tabs"><div class="tab active">Vue d'ensemble</div><div class="tab">Portefeuille</div><div class="tab">Budget</div><div class="tab">Jalons</div><div class="tab">Risques</div></div>
+      </div>
+      <div class="top-right">
+        <div class="search-pill"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="width:14px;height:14px"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg> Rechercher… <span class="kbd">⌘K</span></div>
+        <button class="btn-sm">+ Nouveau projet</button>
+        <div class="avatar">AD</div>
+      </div>
+    </div>
+    <div class="content">
+      <div class="page-title">Dashboard portefeuille</div>
+      <div class="page-sub">Altair · 24 projets actifs · mis à jour il y a 5 min</div>
+      <div class="kpis">
+        <div class="kpi"><div class="donut" style="background:conic-gradient(#3d6be8 0 72%,#eceaf4 72%)"><i>72%</i></div><div><div class="kpi-label">Projets actifs</div><div class="kpi-value">24</div></div></div>
+        <div class="kpi"><div class="donut" style="background:conic-gradient(#4c9a3f 0 62%,#eceaf4 62%)"><i>62%</i></div><div><div class="kpi-label">Budget consommé</div><div class="kpi-value">4,2 M€</div></div></div>
+        <div class="kpi"><div class="donut" style="background:conic-gradient(#e0a800 0 45%,#eceaf4 45%)"><i>11</i></div><div><div class="kpi-label">Jalons à 30 jours</div><div class="kpi-value">2 en retard</div></div></div>
+        <div class="kpi"><div class="donut" style="background:conic-gradient(#cc4f45 0 25%,#eceaf4 25%)"><i>3</i></div><div><div class="kpi-label">Risques critiques</div><div class="kpi-value">Action requise</div></div></div>
+      </div>
+      <div class="board-head">
+        <span class="board-title">Projets du portefeuille</span>
+        <span><span class="fchip">Programme : Tous ▾</span><span class="fchip">Statut : Tous ▾</span><span class="fchip" style="background:#352c6e;color:#fff;border-color:#352c6e">Vue Board</span></span>
+      </div>
+      <div class="board">
+        <div class="pcard g">
+          <div class="pc-head"><span class="pc-name">Migration ERP S/4HANA</span><span class="pc-badge">Vert</span></div>
+          <div class="pc-body">
+            <span class="code">P01-001</span>
+            <div class="slider"><i style="width:72%;background:#4c9a3f"></i><b style="left:72%;background:#4c9a3f"></b></div>
+            <div class="pc-meta"><span>EAC <b>1,4 M€</b></span><span>Fin <b>12/09</b></span></div>
+            <div class="pc-dots"><i style="background:#4c9a3f"></i><i style="background:#4c9a3f"></i><i style="background:#4c9a3f"></i><i style="background:#dcd7ea"></i></div>
+          </div>
+        </div>
+        <div class="pcard y">
+          <div class="pc-head"><span class="pc-name">Refonte portail client</span><span class="pc-badge">Orange</span></div>
+          <div class="pc-body">
+            <span class="code">P01-002</span>
+            <div class="slider"><i style="width:45%;background:#e0a800"></i><b style="left:45%;background:#e0a800"></b></div>
+            <div class="pc-meta"><span>EAC <b>620 K€</b></span><span>Fin <b>03/11</b></span></div>
+            <div class="pc-dots"><i style="background:#e0a800"></i><i style="background:#e0a800"></i><i style="background:#dcd7ea"></i><i style="background:#dcd7ea"></i></div>
+          </div>
+        </div>
+        <div class="pcard t">
+          <div class="pc-head"><span class="pc-name">CRM Ventes Europe</span><span class="pc-badge">Cadrage</span></div>
+          <div class="pc-body">
+            <span class="code">P02-001</span>
+            <div class="slider"><i style="width:15%;background:#2b9e97"></i><b style="left:15%;background:#2b9e97"></b></div>
+            <div class="pc-meta"><span>EAC <b>340 K€</b></span><span>Fin <b>02/02</b></span></div>
+            <div class="pc-dots"><i style="background:#2b9e97"></i><i style="background:#dcd7ea"></i><i style="background:#dcd7ea"></i><i style="background:#dcd7ea"></i></div>
+          </div>
+        </div>
+        <div class="pcard r">
+          <div class="pc-head"><span class="pc-name">Data Platform v2</span><span class="pc-badge">Rouge</span></div>
+          <div class="pc-body">
+            <span class="code">DATA-001</span>
+            <div class="slider"><i style="width:28%;background:#cc4f45"></i><b style="left:28%;background:#cc4f45"></b></div>
+            <div class="pc-meta"><span>EAC <b>980 K€</b></span><span>Fin <b>28/07</b></span></div>
+            <div class="pc-dots"><i style="background:#cc4f45"></i><i style="background:#cc4f45"></i><i style="background:#dcd7ea"></i><i style="background:#dcd7ea"></i></div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</section>
+
+</body>
+</html>
