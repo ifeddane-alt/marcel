@@ -10,6 +10,7 @@ import ProgramDetail from "@/pages/ProgramDetail";
 import Portfolio from "@/pages/Portfolio";
 import ProjectDetail from "@/pages/ProjectDetail";
 import Resources from "@/pages/Resources";
+import ResourceDetail from "@/pages/ResourceDetail";
 import Governance from "@/pages/Governance";
 import Conformite from "@/pages/Conformite";
 import Import from "@/pages/Import";
@@ -83,6 +84,7 @@ function AppRoutes() {
         <Route path="budget" element={<Budget />} />
         <Route path="projects/:id" element={<ProjectDetail />} />
         <Route path="resources" element={<Resources />} />
+        <Route path="resources/:resourceId" element={<ResourceDetail />} />
         <Route path="teams" element={<Teams />} />
         <Route path="teams/:id" element={<TeamDetail />} />
         <Route path="roadmap" element={<Roadmap />} />

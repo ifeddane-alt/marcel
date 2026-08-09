@@ -239,6 +239,11 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - **Phase 2 livrée (Juin 2026, testée iteration_53 + iteration_54 100%)** : Dashboard Clarity (crumb, MetricCard donuts, BudgetSingleWidget donut, WidgetShell restylé, th denses via /tmp/restyle_clarity.py — 44 remplacements), fiche projet ProjectDetail.jsx avec fil d'Ariane + code chip + ONGLETS (Aperçu/Tâches/Jalons/Risques/Décisions/Équipe/Scope, state activeTab, sections gated hidden), pages Budget/Roadmap/Gouvernance (crumb + titres), DateField (components/ui/DateField.jsx — shadcn Popover+Calendar locale fr, contrat string yyyy-MM-dd) remplaçant les 27 input type=date de 13 fichiers. Bug critique corrigé : modales à helper événementiel set() → adaptateur (v)=>set(k)({target:{value:v}}) dans 7 fichiers. Commits poussés.
 - ⏳ EN ATTENTE validation utilisateur phases 1+2. Restant éventuel : Portefeuille bascule gantt (3e icône du sélecteur de vue maquette), Programmes/fiche programme onglets, restyle GlobalSearch/NotificationBell popovers.
 
+## 2026-06 — Fiche ressource (livré, agent-testé)
+- Bug signalé : clic sur une ressource (ex. Camille Rousseau) sans effet. Cause : aucune fiche ressource n'existait.
+- Livré : page /resources/:resourceId (pages/ResourceDetail.jsx) — fil d'Ariane, en-tête (avatar, type, rôle, équipe, TJM, dispo), 4 KPIs donuts (capacité effective, JH alloués + % conso, taux de charge, nb projets), tableau allocations groupées par projet (code + lien fiche projet, période, mois, JH alloués/consommés, barre conso) avec lignes mensuelles dépliables. Lignes de l'annuaire Resources.jsx cliquables (navigate), boutons edit/delete avec stopPropagation conservés. Route ajoutée dans App.js.
+- Testé par screenshot E2E (clic ligne → fiche → dépliage mensuel). Commit poussé.
+
 ## 2026-06 — SSO Entra/Okta REPORTÉ (décision utilisateur)
 - L'utilisateur n'a pas de compte Azure ; Okta idem. À reprendre plus tard.
 - Tout est prêt côté MARCEL : code SSO déployé en prod, procédure complète documentée dans la conversation (App registration Azure → Redirect URI https://marcel-ppm.com/api/auth/sso/callback/entra → config Admin > Configuration > SSO)

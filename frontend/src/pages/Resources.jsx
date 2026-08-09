@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Plus, Pencil, Trash2, BarChart3, User, Building2, FileText } from "lucide-react";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -17,6 +18,7 @@ const TYPE_CONFIG = {
 export default function Resources() {
   const { user } = useAuth();
   const { hasPermission } = usePermissions();
+  const navigate = useNavigate();
   const canCreate = hasPermission("resources.create");
   const canEdit   = hasPermission("resources.edit");
 
@@ -180,13 +182,18 @@ export default function Resources() {
                   const initials = r.name.split(" ").map((n) => n[0]).join("").toUpperCase().slice(0, 2);
                   const teamLabel = r.team || "—";
                   return (
-                    <tr key={r.resource_id} className="border-b border-zinc-100 hover:bg-zinc-50/60 transition-colors" data-testid={`resource-row-${r.resource_id}`}>
+                    <tr
+                      key={r.resource_id}
+                      className="border-b border-zinc-100 hover:bg-zinc-50/60 transition-colors cursor-pointer"
+                      onClick={() => navigate(`/resources/${r.resource_id}`)}
+                      data-testid={`resource-row-${r.resource_id}`}
+                    >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
                           <div className="w-7 h-7 rounded-lg bg-blue-600/10 flex items-center justify-center flex-shrink-0">
                             <span className="text-[10px] font-bold text-blue-600">{initials}</span>
                           </div>
-                          <span className="font-medium text-zinc-800">{r.name}</span>
+                          <span className="font-medium text-zinc-800 hover:text-[#2e5fe8] hover:underline" data-testid={`resource-link-${r.resource_id}`}>{r.name}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3">
