@@ -359,7 +359,7 @@ export default function Layout() {
         </div>
 
         {/* ── Contenu ──────────────────────────────────────── */}
-        <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0">
+        <main className="flex-1 overflow-y-auto overflow-x-hidden min-w-0 pb-28">
           <Outlet />
         </main>
       </div>

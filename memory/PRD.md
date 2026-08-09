@@ -1,4 +1,12 @@
-# PRD — MARCEL (PPM SaaS Multi-Tenant)
+# PRD — MARCEL
+
+## 2026-06 — Harmonisation "langage tuiles" : page Budget (livrée, auto-testée screenshots)
+- Réclamation utilisateur : design pas en phase avec les dernières évolutions (tuiles Portefeuille/Programmes = référence). Plan validé : harmonisation profonde page par page, en commençant par Budget (choix utilisateur).
+- **Budget.jsx refondu** : 4 cartes KPI style tuile avec anneaux Ring (CAPEX conso %, OPEX conso %, EAC vs prévu %, RAF vs EAC %) + valeurs font-mono-data ; carte enveloppe restylée (micro-label uppercase, barres #3f8a34/#a3891a/#cc4f45) ; filtres en ligne simple ; onglets Clarity avec pastilles de compte ; table dense (thead #fbfaff, colonnes numériques mono, ligne Total #f7f6fb) ; blocs Par programme (titres font-heading, valeurs mono, micro-labels) ; drawer restylé.
+- **Fix global** : `Layout.jsx` main → `pb-28` pour que le bouton flottant Agent IA PMO ne masque plus les dernières lignes des tableaux en fin de scroll.
+- ⚠️ LEÇON : un search_replace d'un batch parallèle a signalé "successful" sans s'appliquer (composant KpiCard) → toujours vérifier par grep après un gros batch.
+- ⏳ Harmonisation restante (backlog utilisateur validé) : fiche Projet (tous onglets + noms de ressources au lieu des IDs bruts dans Allocations — bug vu en prod), Équipes (cartes → tuiles riches), Fiche Équipe (header unifié), Ressources/fiche, Fournisseurs, Dashboard. Prod à redéployer après validation utilisateur.
+ (PPM SaaS Multi-Tenant)
 
 ## Énoncé du problème original
 Construire et développer en continu une application SaaS multi-tenant appelée `MARCEL` — un PPM (Project Portfolio Management) complet.
