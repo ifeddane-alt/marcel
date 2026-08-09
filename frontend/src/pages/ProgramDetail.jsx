@@ -1,10 +1,11 @@
 import React, { useEffect, useState } from "react";
 import { useParams, Link } from "react-router-dom";
 import {
-  AlertTriangle, TrendingUp, Calendar, Flag, Presentation,
+  AlertTriangle, TrendingUp, Calendar, Flag, Presentation, LayoutGrid, List,
 } from "lucide-react";
 import { programsAPI } from "@/api";
 import ExportCopilModal from "@/components/ExportCopilModal";
+import ProjectTile from "@/components/ProjectTile";
 import RAGBadge, { MethodologyBadge, MilestoneBadge } from "@/components/RAGBadge";
 import { formatEuro, formatDate } from "@/utils/format";
 
@@ -22,6 +23,8 @@ export default function ProgramDetail() {
   const [loading, setLoading] = useState(true);
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [activeTab, setActiveTab] = useState("apercu");
+  const [projView, setProjView] = useState(() => localStorage.getItem("program_projects_view") || "tiles");
+  const switchProjView = (v) => { setProjView(v); localStorage.setItem("program_projects_view", v); };
 
   useEffect(() => {
     programsAPI.get(id).then((r) => {
@@ -144,15 +147,40 @@ export default function ProgramDetail() {
       <div className="space-y-4">
         {/* Projects list */}
         <div className="space-y-4">
-          <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "projets" ? "" : "hidden"}`} data-testid="program-projects-section">
-            <div className="px-5 py-3 border-b border-zinc-100 flex items-center justify-between">
+          <div className={activeTab === "projets" ? "" : "hidden"} data-testid="program-projects-section">
+            <div className="flex items-center justify-between mb-3">
               <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold">
                 Projets du programme ({projects.length})
               </div>
+              <div className="flex border border-[#dcd9ea] rounded-lg overflow-hidden bg-white">
+                <button
+                  onClick={() => switchProjView("tiles")}
+                  data-testid="program-view-toggle-tiles"
+                  className={`w-8 h-8 flex items-center justify-center transition-colors ${projView === "tiles" ? "bg-[#e9effe] text-[#2e5fe8]" : "text-[#8a87a0] hover:bg-[#f7f6fb]"}`}
+                  title="Vue tuiles"
+                >
+                  <LayoutGrid size={14} />
+                </button>
+                <button
+                  onClick={() => switchProjView("list")}
+                  data-testid="program-view-toggle-list"
+                  className={`w-8 h-8 flex items-center justify-center transition-colors border-l border-[#dcd9ea] ${projView === "list" ? "bg-[#e9effe] text-[#2e5fe8]" : "text-[#8a87a0] hover:bg-[#f7f6fb]"}`}
+                  title="Vue liste"
+                >
+                  <List size={14} />
+                </button>
+              </div>
             </div>
             {projects.length === 0 ? (
-              <div className="p-8 text-center text-zinc-400 text-sm">Aucun projet rattaché</div>
+              <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-8 text-center text-zinc-400 text-sm">Aucun projet rattaché</div>
+            ) : projView === "tiles" ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 xl:grid-cols-3 gap-5" data-testid="program-projects-tiles">
+                {projects.map((p) => (
+                  <ProjectTile key={p.project_id} project={p} selectable={false} canEdit={false} canDelete={false} />
+                ))}
+              </div>
             ) : (
+              <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-x-auto">
               <table className="w-full text-sm" data-testid="program-projects-table">
                 <thead>
                   <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
@@ -229,6 +257,7 @@ export default function ProgramDetail() {
                   </tr>
                 </tfoot>
               </table>
+              </div>
             )}
           </div>
 

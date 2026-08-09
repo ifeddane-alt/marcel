@@ -11,16 +11,16 @@ const RAG_STYLES = {
 };
 const PREP_STYLE = { head: "bg-[#d5efec]", badge: "bg-[#22948c]", fill: "#22948c", ring: "#22948c", label: "Cadrage" };
 
-const clamp = (v) => Math.max(0, Math.min(100, v));
+export const clamp = (v) => Math.max(0, Math.min(100, v));
 
-function elapsedPct(start, end) {
+export function elapsedPct(start, end) {
   const s = new Date(start).getTime();
   const e = new Date(end).getTime();
   if (!s || !e || e <= s) return 0;
   return clamp(Math.round(((Date.now() - s) / (e - s)) * 100));
 }
 
-function DateCircle({ date, label }) {
+export function DateCircle({ date, label }) {
   const d = date ? new Date(date) : null;
   const valid = d && !isNaN(d.getTime());
   return (
@@ -44,7 +44,7 @@ function DateCircle({ date, label }) {
   );
 }
 
-function Ring({ pct, color, label, caption }) {
+export function Ring({ pct, color, label, caption }) {
   return (
     <div className="flex flex-col items-center gap-1.5">
       <div
@@ -70,6 +70,7 @@ export default function ProjectTile({
   onDelete,
   canEdit,
   canDelete,
+  selectable = true,
 }) {
   const style = p.status === "en_preparation" ? PREP_STYLE : (RAG_STYLES[p.status_rag] || RAG_STYLES.green);
   const progress = elapsedPct(p.start_date, p.end_date_forecast);
@@ -140,6 +141,7 @@ export default function ProjectTile({
 
       {/* Pied : sélection + actions */}
       <div className="flex items-center gap-1 px-3.5 py-2 border-t border-[#f0eff6]">
+        {selectable && (
         <input
           type="checkbox"
           checked={selected}
@@ -149,6 +151,7 @@ export default function ProjectTile({
           className="w-4 h-4 rounded border-[#c9c6da] text-[#2e5fe8] focus:ring-[#2e5fe8] cursor-pointer"
           title="Sélectionner pour export COPIL"
         />
+        )}
         <span className="ml-1"><MethodologyBadge methodology={p.methodology} /></span>
         {p.status && <ProjectStatusBadge status={p.status} />}
         <div className="ml-auto flex items-center">
