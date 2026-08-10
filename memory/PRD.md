@@ -1,5 +1,11 @@
 # PRD — MARCEL
 
+## 2026-06 — Teasers vidéo YouTube 30 s (livrés en téléchargement preview)
+- 4 MP4 1080p/30fps H.264+AAC ~28,5 s : `marcel_teaser_{fr,en}_{femme/homme|female/male}.mp4` — pipeline : voix off OpenAI TTS tts-1-hd via emergentintegrations (nova=féminine, onyx=masculine, speed 1.05, scripts FR/EN ~23 s rédigés), screencast Playwright 1920×1080 de l'app réelle (auth par injection localStorage projetenne_token + user complet de /api/auth/me — la réponse login N'A PAS les permissions, ce qui faisait rediriger /dashboard vers timesheets), plans : portfolio → budget → teams vue croisée → dashboard (route SPA « / » en preview), cartes intro/outro PIL (Liberation Sans — DejaVu ABSENT du pod), assemblage ffmpeg (xfade, fades, adelay 2.2 s, faststart).
+- Scripts et sorties dans `/app/video_teaser/` (gitignoré) ; MP4 servis via `frontend/public/teaser/` (gitignoré, non déployé). Chromium playwright : executable_path /root/.cache/ms-playwright/chromium-1208 requis (pip playwright cherche une autre version).
+- OG image du site régénérée avec Liberation Sans (l'originale était tombée en police fallback) et **déployée prod** (commit fcfef28).
+- Formule b (kit script/miniature/description) non demandée mais proposable.
+
 ## 2026-06 — Site vitrine MARCEL (déployé prod, commits 732d9e1 + 9d6537b)
 - **6 pages HTML statiques pur** (design_agent consulté, CSS partagé `frontend/public/site/site.css`, zéro framework JS — lisible par GPTBot/ClaudeBot qui n'exécutent pas le JS) : FR `site/index.html`, `fonctionnalites.html`, `contact.html` + EN `site/en/index.html`, `features.html`, `contact.html`.
 - **URLs propres via nginx.conf** (frontend Docker) : `/` → site FR, `/fonctionnalites`, `/contact`, `/en/`, `/en/features`, `/en/contact` (locations exactes avant fallback SPA). **L'app React reste intacte** sur /login, /dashboard, etc. En preview (pas de nginx) : accès via /site/*.html. CSP étendu : fonts.googleapis.com (style-src) + fonts.gstatic.com (font-src).
