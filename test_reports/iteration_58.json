@@ -1,0 +1,25 @@
+{
+  "summary": "Frontend testing of the 'langage tuiles' harmonization lot (TeamDetail/Resources/Vendors + clickable month cells on Teams). Discovered a blocking runtime error on /teams (KpiTile is not defined) due to missing import in Teams.jsx. Fixed the import; re-ran the full suite: all targeted features now work end-to-end.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Teams page", "issue": "Missing 'import KpiTile from @/components/KpiTile' caused Uncaught ReferenceError: KpiTile is not defined, breaking the entire /teams page render", "selector": "/app/frontend/src/pages/Teams.jsx", "priority": "CRITICAL (FIXED by testing agent)"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": ["Confirm the KpiTile import fix in Teams.jsx (added by testing agent). No further action required for this lot."],
+  "critical_code_review_comments": [
+    "Teams.jsx used KpiTile without importing it — indicates the refactor was not smoke-tested before hand-off. Recommend a quick lint/pre-commit hook (no-undef via ESLint) to catch such regressions.",
+    "Recharts warnings 'width(-1) height(-1)' still emitted on Teams (containers rendered before layout). Non-blocking but worth stabilising."
+  ],
+  "updated_files": ["/app/frontend/src/pages/Teams.jsx"],
+  "success_rate": {"backend": "N/A (skipped as requested)", "frontend": "100% after fix"},
+  "test_credentials": "admin@altair.fr / Admin2026!",
+  "seed_data_creation": "None",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Verified: login OK; /teams renders 5 team tiles with 15 clickable team-tile-month-* mini-cells; clicking a month navigates to /teams/:id?month=YYYY-MM and the section 'Charge mensuelle' shows month-focus-YYYY-MM label 'Mois sélectionné'. Without ?month, month-focus-2026-08 shows 'Mois en cours'. TeamDetail exposes team-kpi-members/capacity/projects/utilization and standard header (avatar + h1 'Dev A' + Manager) — no full-width indigo banner. Member links member-link-* now correctly link to /resources/:id (verified href=/resources/2845f1eb...). /resources shows resources-kpi-total/capacity/teams/allocations (values 16 / 266 JH / 5 / 32). /vendors shows vendors-kpi-total/tjm/forfait(ring)/alerts and export-csv-btn present. /dashboard loads. No blocking JS errors after fix.",
+  "rca of the issue": "Root cause: Teams.jsx was refactored to use the new shared KpiTile component but the ES module import was omitted. Reproduction: navigate to /teams as any logged-in user → Uncaught ReferenceError: KpiTile is not defined at Teams (bundle.js). Fix applied: added 'import KpiTile from \"@/components/KpiTile\";' after ExcelToolbar import. Mitigation: enable ESLint no-undef rule in CI and re-run smoke tests on all pages touched by a refactor."
+}

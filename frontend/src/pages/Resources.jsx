@@ -5,6 +5,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import { resourcesAPI, allocationsAPI, teamsAPI } from "@/api";
 import ResourceModal from "@/components/ResourceModal";
+import KpiTile from "@/components/KpiTile";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import CapacityHeatmap from "@/components/CapacityHeatmap";
 import ExcelToolbar from "@/components/ExcelToolbar";
@@ -116,19 +117,11 @@ export default function Resources() {
 
       {activeTab === "resources" && (
         <>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-            {[
-              { label: "Total ressources", value: resources.length, sub: "actives" },
-              { label: "Capacité mensuelle", value: `${resources.reduce((s, r) => s + (r.capacity_jh_month || 0), 0).toLocaleString("fr-FR")} JH`, sub: "total équipes" },
-              { label: "Équipes", value: new Set(resources.map((r) => r.team).filter(Boolean)).size, sub: "distinctes" },
-              { label: "Allocations actives", value: allocations.length, sub: "entrées" },
-            ].map((card) => (
-              <div key={card.label} className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4 border-l-4 border-l-[#2563eb]">
-                <div className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">{card.label}</div>
-                <div className="font-heading text-2xl font-bold text-zinc-950 mt-2">{card.value}</div>
-                <div className="text-xs text-zinc-400 mt-0.5">{card.sub}</div>
-              </div>
-            ))}
+          <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6" data-testid="resources-kpi-tiles">
+            <KpiTile testId="resources-kpi-total" label="Total ressources" value={resources.length} sub="actives" />
+            <KpiTile testId="resources-kpi-capacity" label="Capacité mensuelle" value={`${resources.reduce((s, r) => s + (r.capacity_jh_month || 0), 0).toLocaleString("fr-FR")} JH`} sub="total équipes" />
+            <KpiTile testId="resources-kpi-teams" label="Équipes" value={new Set(resources.map((r) => r.team).filter(Boolean)).size} sub="distinctes" />
+            <KpiTile testId="resources-kpi-allocations" label="Allocations actives" value={allocations.length} sub="entrées" />
           </div>
 
           <div className="relative mb-4 max-w-xs">
@@ -164,7 +157,7 @@ export default function Resources() {
             ))}
           </div>
 
-          <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-x-auto">
+          <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto">
             <table className="w-full text-sm" data-testid="resources-table">
               <thead>
                 <tr className="bg-zinc-50 border-b border-zinc-200 text-left">
@@ -263,7 +256,7 @@ export default function Resources() {
       )}
 
       {activeTab === "referentiel" && (
-        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-x-auto" data-testid="referentiel-section">
+        <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto" data-testid="referentiel-section">
           <table className="w-full text-sm" data-testid="referentiel-table">
             <thead>
               <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
@@ -325,7 +318,7 @@ export default function Resources() {
       )}
 
       {activeTab === "heatmap" && (
-        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-5" data-testid="heatmap-section">
+        <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-5" data-testid="heatmap-section">
           <div className="mb-4">
             <h2 className="font-heading text-base font-bold text-zinc-950 tracking-tight">Heatmap capacité × période</h2>
             <p className="text-xs text-zinc-500 mt-0.5">Taux d'utilisation par équipe (allocations mensuelle / capacité effective)</p>

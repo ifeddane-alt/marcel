@@ -4,17 +4,7 @@ import {
   ChevronDown, ChevronRight, Package, Handshake
 } from "lucide-react";
 import { vendorsAPI } from "@/api";
-
-function StatCard({ label, value, sub, accent, alert }) {
-  return (
-    <div className={`bg-white border rounded-lg shadow-sm p-4 border-l-4 ${alert ? "border-l-rose-500" : `border-l-[${accent || "#2563eb"}]`}`}
-      style={!alert ? { borderLeftColor: accent || "#2563eb" } : {}}>
-      <div className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">{label}</div>
-      <div className={`font-heading text-2xl font-bold mt-2 ${alert ? "text-rose-600" : "text-zinc-950"}`}>{value}</div>
-      {sub && <div className="text-xs text-zinc-400 mt-0.5">{sub}</div>}
-    </div>
-  );
-}
+import KpiTile from "@/components/KpiTile";
 
 function AlertBadge({ level, message }) {
   const isC = level === "critical";
@@ -47,7 +37,7 @@ function VendorCard({ vendor }) {
   const totalAlerts = vendor.alerts.length;
 
   return (
-    <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-hidden" data-testid={`vendor-card-${vendor.vendor.replace(/\s/g, "-").toLowerCase()}`}>
+    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-hidden" data-testid={`vendor-card-${vendor.vendor.replace(/\s/g, "-").toLowerCase()}`}>
       {/* En-tête fournisseur */}
       <div
         className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-zinc-50/70 transition-colors"
@@ -119,12 +109,12 @@ function VendorCard({ vendor }) {
               </div>
               <table className="w-full text-sm" data-testid={`regie-table-${vendor.vendor}`}>
                 <thead>
-                  <tr className="text-[10px] uppercase text-zinc-400 text-left">
-                    <th className="pb-2 font-semibold">Consultant</th>
-                    <th className="pb-2 font-semibold text-right">TJM Contrat</th>
-                    <th className="pb-2 font-semibold text-right">TJM Facturé</th>
-                    <th className="pb-2 font-semibold text-right">Variance</th>
-                    <th className="pb-2 font-semibold text-right">Fin contrat</th>
+                  <tr className="text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] text-left">
+                    <th className="pb-2">Consultant</th>
+                    <th className="pb-2 text-right">TJM Contrat</th>
+                    <th className="pb-2 text-right">TJM Facturé</th>
+                    <th className="pb-2 text-right">Variance</th>
+                    <th className="pb-2 text-right">Fin contrat</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -297,30 +287,35 @@ export default function Vendors() {
       </div>
 
       {/* KPI Cards */}
-      <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <StatCard
+      <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6" data-testid="vendors-kpi-tiles">
+        <KpiTile
+          testId="vendors-kpi-total"
           label="Fournisseurs"
           value={summary.total_vendors}
           sub={`${summary.total_regie_resources} régie · ${summary.total_forfait_resources} forfait`}
-          accent="#2563eb"
         />
-        <StatCard
+        <KpiTile
+          testId="vendors-kpi-tjm"
           label="Enveloppe TJM régie"
           value={`${summary.total_tjm_envelope?.toLocaleString("fr-FR") || 0} €/j`}
           sub="TJM contractuels cumulés"
-          accent="#f97316"
         />
-        <StatCard
+        <KpiTile
+          testId="vendors-kpi-forfait"
           label="Forfait total engagé"
           value={`${((summary.total_forfait_envelope || 0) / 1000).toFixed(0)} K€`}
           sub={`${totalForfaitPct}% consommé`}
-          accent="#7c3aed"
+          pct={totalForfaitPct}
+          ringColor={totalForfaitPct > 95 ? "#cc4f45" : totalForfaitPct > 85 ? "#e0a800" : "#6d28d9"}
+          ringLabel="Forfait"
+          ringCaption="conso"
         />
-        <StatCard
+        <KpiTile
+          testId="vendors-kpi-alerts"
           label="Alertes actives"
           value={summary.total_alerts || 0}
           sub={`${summary.total_expiring_soon || 0} contrat${(summary.total_expiring_soon || 0) !== 1 ? "s" : ""} expirant < 90j`}
-          alert={(summary.total_alerts || 0) > 0}
+          valueClass={(summary.total_alerts || 0) > 0 ? "text-[#cc4f45]" : "text-[#26243a]"}
         />
       </div>
 
@@ -337,7 +332,7 @@ export default function Vendors() {
 
       {/* Liste des fournisseurs */}
       {vendors.length === 0 ? (
-        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-12 text-center">
+        <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-12 text-center">
           <Package size={32} className="text-zinc-300 mx-auto mb-3" />
           <div className="text-zinc-500 text-sm font-medium">Aucune ressource externe configurée</div>
           <div className="text-zinc-400 text-xs mt-1">

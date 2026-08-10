@@ -30,7 +30,7 @@ function Kpi({ label, value, sub, donut }) {
       {donut}
       <div className="min-w-0">
         <div className="text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wide truncate">{label}</div>
-        <div className="font-heading text-[24px] font-extrabold text-[#26243a] leading-tight truncate">{value}</div>
+        <div className="font-mono-data text-[22px] font-bold text-[#26243a] leading-tight truncate">{value}</div>
         {sub && <div className="text-[11px] text-[#8a87a0] truncate">{sub}</div>}
       </div>
     </div>

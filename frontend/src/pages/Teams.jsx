@@ -8,6 +8,7 @@ import TeamModal from "@/components/TeamModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import CapacityAlertBanner from "@/components/CapacityAlertBanner";
 import ExcelToolbar from "@/components/ExcelToolbar";
+import KpiTile from "@/components/KpiTile";
 
 const LOAD_STYLES = {
   red:    { head: "bg-[#fbe1de]", badge: "bg-[#cc4f45]", fill: "#cc4f45", label: "Surcharge" },
@@ -22,26 +23,6 @@ const cellCls = (pct) =>
   pct > 100 ? "bg-rose-100 text-rose-700 border-rose-200"
   : pct >= 85 ? "bg-amber-100 text-amber-700 border-amber-200"
   : "bg-emerald-50 text-emerald-700 border-emerald-200";
-
-function KpiTile({ label, value, sub, pct, ringColor, ringLabel, ringCaption, valueClass = "text-[#26243a]", testId }) {
-  return (
-    <div
-      className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 flex items-center justify-between gap-3"
-      data-testid={testId}
-    >
-      <div className="min-w-0">
-        <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">{label}</div>
-        <div className={`font-mono-data text-[22px] font-bold mt-1 ${valueClass}`}>{value}</div>
-        {sub && <div className="text-[10.5px] text-[#8a87a0] mt-0.5 truncate">{sub}</div>}
-      </div>
-      {pct != null && (
-        <div className="flex-shrink-0">
-          <Ring pct={pct} color={ringColor} label={ringLabel} caption={ringCaption} />
-        </div>
-      )}
-    </div>
-  );
-}
 
 function TeamTile({ team, memberCount, load, canEdit, canDelete, onEdit, onDelete }) {
   const cur = load?.cur;
@@ -110,13 +91,15 @@ function TeamTile({ team, memberCount, load, canEdit, canDelete, onEdit, onDelet
             <div className="text-[8.5px] font-bold uppercase tracking-widest text-[#a39fb8] mb-1">Charge à 3 mois</div>
             <div className="flex items-center gap-1.5">
               {load.next.map((p) => (
-                <span
+                <Link
                   key={p.period}
-                  className={`text-[9.5px] font-bold px-1.5 py-0.5 rounded-md border tabular-nums ${cellCls(p.utilization_pct)}`}
-                  title={`${p.period} : ${p.allocated_jh}/${p.capacity_jh} JH`}
+                  to={`/teams/${team.team_id}?month=${p.period}`}
+                  data-testid={`team-tile-month-${team.team_id}-${p.period}`}
+                  className={`text-[9.5px] font-bold px-1.5 py-0.5 rounded-md border tabular-nums transition-shadow hover:shadow-md hover:underline ${cellCls(p.utilization_pct)}`}
+                  title={`${p.period} : ${p.allocated_jh}/${p.capacity_jh} JH — voir le détail de la charge`}
                 >
                   {monthLabel(p.period)} · {Math.round(p.utilization_pct)}%
-                </span>
+                </Link>
               ))}
             </div>
           </div>
