@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { Outlet, NavLink, useNavigate, useLocation } from "react-router-dom";
+import { Outlet, NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
   Briefcase,
@@ -219,10 +219,10 @@ export default function Layout() {
     <>
       {isDrawer && (
         <div className="px-4 py-4 border-b border-[#f0eff6] flex items-center justify-between flex-shrink-0">
-          <div className="flex items-center gap-2.5">
+          <Link to="/dashboard" onClick={() => setMobileDrawerOpen(false)} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity" data-testid="drawer-brand-link" aria-label="Retour à l'accueil">
             <div className="w-8 h-8 rounded-lg bg-[#352c6e] flex items-center justify-center text-white font-heading font-extrabold text-base">M</div>
             <span className="font-heading text-[#352c6e] text-base font-extrabold tracking-tight">MARCEL</span>
-          </div>
+          </Link>
           <button
             onClick={() => setMobileDrawerOpen(false)}
             className="text-[#a39fb8] hover:text-[#26243a] ml-2 flex-shrink-0"
@@ -295,10 +295,10 @@ export default function Layout() {
           </svg>
         </button>
 
-        <div className="flex items-center gap-2.5 flex-shrink-0 mr-4">
+        <Link to="/dashboard" className="flex items-center gap-2.5 flex-shrink-0 mr-4 hover:opacity-80 transition-opacity" data-testid="topbar-brand-link" aria-label="Retour à l'accueil">
           <div className="w-[30px] h-[30px] rounded-lg bg-[#352c6e] flex items-center justify-center text-white font-heading font-extrabold text-[15px]">M</div>
           <span className="font-heading text-[#352c6e] text-[17px] font-extrabold tracking-tight hidden sm:block">MARCEL</span>
-        </div>
+        </Link>
 
         <div className="hidden lg:flex items-center gap-1.5 text-xs text-[#8a87a0] min-w-0 border-l border-[#e8e6f0] pl-4">
           <Building2 size={13} className="flex-shrink-0" />
