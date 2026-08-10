@@ -133,3 +133,7 @@
 - nginx.conf : 14 locations ajoutées ; teasers MP4 dé-gitignorés et servis en prod ; posters ffmpeg
 - Déployé : build frontend VPS OK, 20/20 URLs 200, contact 201, health 200, disque 79%
 - À FAIRE plus tard : remplacer les témoignages/chiffres PLACEHOLDER par de vraies références clients
+
+## 2026-06 — Logo MARCEL cliquable dans l'app (déployé prod)
+- Le logo « M MARCEL » de la topbar et du drawer mobile (Layout.jsx) est désormais un Link vers /dashboard (homepage app ; DashboardGuard redirige vers /timesheets si pas de permission)
+- Testé E2E preview (login → /portfolio → clic logo → /dashboard) puis déployé prod (bundle vérifié, health 200)
