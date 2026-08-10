@@ -79,6 +79,7 @@ from modules.msproject.router import router as msproject_router
 from modules.sso.router import router as sso_router
 from modules.excel_io.router import router as excel_io_router
 from modules.search.router import router as search_router
+from modules.public_site.router import router as public_site_router
 from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI(title="MARCEL API")
@@ -153,6 +154,7 @@ for _router in [
     sso_router,
     excel_io_router,
     search_router,
+    public_site_router,
 ]:
     app.include_router(_router, prefix="/api")
 

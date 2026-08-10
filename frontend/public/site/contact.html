@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact &amp; démo — MARCEL, plateforme PPM pour PMO et DSI</title>
+  <meta name="description" content="Demandez une démo personnalisée de MARCEL, la plateforme PPM : portefeuille projets, budgets CAPEX/OPEX, capacité et gouvernance COMEX. Réponse sous 24 h ouvrées.">
+  <link rel="canonical" href="https://marcel-ppm.com/contact">
+  <link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/contact">
+  <link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/contact">
+  <link rel="alternate" hreflang="x-default" href="https://marcel-ppm.com/contact">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MARCEL">
+  <meta property="og:title" content="Demander une démo MARCEL">
+  <meta property="og:description" content="Démo personnalisée de 30 minutes de la plateforme PPM MARCEL. Réponse sous 24 h ouvrées.">
+  <meta property="og:url" content="https://marcel-ppm.com/contact">
+  <meta property="og:image" content="https://marcel-ppm.com/site/assets/og-marcel.png">
+  <meta property="og:locale" content="fr_FR">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/site/site.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": "Contact & démo — MARCEL",
+    "url": "https://marcel-ppm.com/contact",
+    "about": { "@type": "SoftwareApplication", "name": "MARCEL", "applicationCategory": "BusinessApplication" }
+  }
+  </script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="/" data-testid="site-brand"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
+    <nav class="nav-links" aria-label="Navigation principale">
+      <a href="/" data-testid="site-nav-home">Accueil</a>
+      <a href="/fonctionnalites" data-testid="site-nav-features">Fonctionnalités</a>
+      <a href="/contact" class="active" data-testid="site-nav-contact">Contact</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="lang-switch" href="/en/contact" data-testid="site-lang-switch" aria-label="Switch to English">EN</a>
+      <a class="btn btn-ghost" href="/login" data-testid="site-login-btn">Se connecter</a>
+      <a class="btn btn-primary" href="/contact" data-testid="site-demo-btn">Demander une démo</a>
+    </div>
+    <button class="burger" id="burger" aria-label="Menu" data-testid="site-burger"><span></span><span></span><span></span></button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="/">Accueil</a>
+    <a href="/fonctionnalites">Fonctionnalités</a>
+    <a href="/contact">Contact</a>
+    <a href="/login">Se connecter</a>
+    <a href="/en/contact">English version</a>
+  </div>
+</header>
+
+<main>
+  <div class="container page-head" style="padding-bottom:8px">
+    <p class="kicker">Contact</p>
+    <h1 style="font-size:clamp(2rem,4.2vw,3rem)">Parlons de votre <span class="accent">portefeuille projets</span>.</h1>
+  </div>
+
+  <div class="container contact-grid">
+    <div>
+      <p class="lead" style="margin-top:6px">Décrivez votre contexte en deux lignes — nous revenons vers vous sous 24&nbsp;h ouvrées avec un créneau de démo.</p>
+      <ul class="contact-points">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span><b>Démo personnalisée de 30 minutes</b><br>sur vos cas d'usage : portefeuille, budget, capacité ou gouvernance.</span>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span><b>Apportez un export Excel</b><br>et repartez avec votre portefeuille réel chargé dans MARCEL.</span>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span><b>Vos contraintes d'hébergement respectées</b><br>SaaS multi-tenant ou installation on-premise sur vos serveurs.</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="form-card">
+      <div class="form-msg ok" id="formOk" data-testid="contact-success-msg">Merci ! Votre demande a bien été envoyée — nous revenons vers vous sous 24&nbsp;h ouvrées.</div>
+      <div class="form-msg err" id="formErr" data-testid="contact-error-msg">Une erreur est survenue. Merci de réessayer dans quelques instants.</div>
+      <form id="contactForm" novalidate>
+        <div class="form-row">
+          <div class="field">
+            <label for="cf-name">Nom complet *</label>
+            <input id="cf-name" name="name" type="text" required autocomplete="name" placeholder="Marie Dupont" data-testid="contact-name-input">
+          </div>
+          <div class="field">
+            <label for="cf-company">Société *</label>
+            <input id="cf-company" name="company" type="text" required autocomplete="organization" placeholder="Groupe Altair" data-testid="contact-company-input">
+          </div>
+        </div>
+        <div class="field">
+          <label for="cf-email">Email professionnel *</label>
+          <input id="cf-email" name="email" type="email" required autocomplete="email" placeholder="marie.dupont@entreprise.fr" data-testid="contact-email-input">
+        </div>
+        <div class="field">
+          <label for="cf-message">Votre contexte</label>
+          <textarea id="cf-message" name="message" placeholder="Ex. : 40 projets, 3 programmes, pilotage budgétaire sous Excel aujourd'hui…" data-testid="contact-message-input"></textarea>
+        </div>
+        <div class="hp" aria-hidden="true">
+          <label for="cf-website">Site web</label>
+          <input id="cf-website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+        <button class="btn btn-primary" type="submit" id="submitBtn" style="width:100%;justify-content:center" data-testid="contact-submit-btn">Envoyer ma demande de démo</button>
+        <p style="font-size:11.5px;color:var(--faint);margin-top:14px">Vos coordonnées ne servent qu'à traiter votre demande. Aucune inscription à une newsletter.</p>
+      </form>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <a class="brand" href="/"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
+      <nav class="foot-links" aria-label="Pied de page">
+        <a href="/fonctionnalites">Fonctionnalités</a>
+        <a href="/contact">Contact &amp; démo</a>
+        <a href="/login">Connexion client</a>
+        <a href="/en/contact">English</a>
+      </nav>
+    </div>
+    <p class="foot-note">© 2026 MARCEL — Plateforme PPM pour PMO, DSI et directions de programmes.</p>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('burger').addEventListener('click', function () {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  });
+  document.getElementById('contactForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var ok = document.getElementById('formOk'), err = document.getElementById('formErr'), btn = document.getElementById('submitBtn');
+    ok.classList.remove('ok'); err.classList.remove('err');
+    var name = document.getElementById('cf-name').value.trim();
+    var company = document.getElementById('cf-company').value.trim();
+    var email = document.getElementById('cf-email').value.trim();
+    if (!name || !company || !email || email.indexOf('@') < 1) { err.classList.add('err'); err.textContent = 'Merci de renseigner votre nom, votre société et un email valide.'; return; }
+    btn.disabled = true; btn.textContent = 'Envoi en cours…';
+    try {
+      var res = await fetch('/api/public/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, company: company, email: email, message: document.getElementById('cf-message').value.trim(), website: document.getElementById('cf-website').value, locale: 'fr' })
+      });
+      if (!res.ok) throw new Error();
+      ok.classList.add('ok');
+      document.getElementById('contactForm').reset();
+    } catch (_) {
+      err.classList.add('err'); err.textContent = 'Une erreur est survenue. Merci de réessayer dans quelques instants.';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Envoyer ma demande de démo';
+    }
+  });
+</script>
+</body>
+</html>

@@ -1,130 +1,97 @@
 {
-  "project_context": "Refonte UI/UX de MARCEL PPM SaaS. Style cible : SaaS moderne, dynamique et lisible (type Monday.com, ClickUp). Haute densité de données mais aspect aéré. Ne pas casser le fonctionnel.",
+  "project_context": {
+    "name": "MARCEL",
+    "type": "marketing_site",
+    "theme": "Light theme (Lavender/Indigo) based on existing brand, tailored for premium B2B enterprise software.",
+    "technical_constraints": "CRITICAL: Pure static HTML5/CSS3. NO JS frameworks (No React, No Next.js, No Vue). NO Shadcn. One shared CSS file (or Tailwind via CDN). Vanilla JS only for mobile menu and contact form submission. Must be highly optimized for SEO and AI Crawlers (GPTBot, ClaudeBot).",
+    "language": "Bilingual FR/EN. Implement via separate static HTML files (e.g. index.html for FR, en/index.html for EN) for optimal SEO and indexing."
+  },
   "typography": {
-    "heading_font": {
-      "name": "Outfit",
-      "import_url": "https://fonts.googleapis.com/css2?family=Outfit:wght@400;500;600;700&display=swap",
-      "usage": "font-heading"
+    "headings": {
+      "family": "'Outfit', sans-serif",
+      "weight": "600, 700",
+      "strategy": "Tracking-tight for H1/H2, generous line-height. H1 up to text-5xl or text-6xl. Use strong contrast. Never center-align hero headings."
     },
-    "body_font": {
-      "name": "Plus Jakarta Sans",
-      "import_url": "https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@400;500;600;700&display=swap",
-      "usage": "font-sans"
+    "body": {
+      "family": "'Plus Jakarta Sans', sans-serif",
+      "weight": "400, 500",
+      "strategy": "Clean, highly legible for enterprise buyers. text-base or text-lg for marketing copy. Left-aligned for optimal reading rhythm."
     },
-    "mono_font": {
-      "name": "JetBrains Mono",
-      "import_url": "https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@400;500&display=swap",
-      "usage": "font-mono"
-    },
-    "scale": {
-      "h1": "text-3xl font-bold tracking-tight text-zinc-950 font-heading",
-      "h2": "text-2xl font-semibold tracking-tight text-zinc-900 font-heading",
-      "h3": "text-xl font-medium tracking-tight text-zinc-900 font-heading",
-      "body": "text-sm text-zinc-600 font-sans leading-relaxed",
-      "project_code": "text-xs font-mono bg-zinc-100 text-zinc-800 px-1.5 py-0.5 rounded-md border border-zinc-200 uppercase"
+    "data_metrics": {
+      "family": "'JetBrains Mono', monospace",
+      "weight": "400, 600",
+      "strategy": "Use exclusively for financial figures (CAPEX/OPEX), capacity numbers, dates, and AI bot outputs to reinforce the technical/precise nature of the platform."
     }
   },
   "colors": {
-    "brand_evolution": {
-      "description": "Remplacement du bleu corporatif #0052CC par un bleu plus électrique et moderne (#2563EB) en s'inspirant de Monday.com.",
-      "brand_50": "#eff6ff",
-      "brand_100": "#dbeafe",
-      "brand_500": "#3b82f6",
-      "brand_600": "#2563eb",
-      "brand_700": "#1d4ed8"
+    "primary": "#352c6e",
+    "background_light": "#fbfaff",
+    "surface": "#ffffff",
+    "border": "#e8e6f0",
+    "text": {
+      "main": "#15122b",
+      "muted": "#524d73"
     },
-    "neutrals": {
-      "app_bg": "#fafafa (zinc-50)",
-      "surface_bg": "#ffffff (white)",
-      "border": "#e4e4e7 (zinc-200)",
-      "text_primary": "#09090b (zinc-950)",
-      "text_secondary": "#71717a (zinc-500)",
-      "text_tertiary": "#a1a1aa (zinc-400)"
-    },
-    "semantic_rag": {
-      "red": {
-        "classes": "bg-red-100 text-red-700 border-red-200",
-        "hex": "#fee2e2, #b91c1c"
-      },
-      "amber": {
-        "classes": "bg-amber-100 text-amber-700 border-amber-200",
-        "hex": "#fef3c7, #b45309"
-      },
-      "green": {
-        "classes": "bg-emerald-100 text-emerald-700 border-emerald-200",
-        "hex": "#d1fae5, #047857"
-      }
+    "status": {
+      "success": "#3f8a34",
+      "warning": "#a3891a",
+      "danger": "#cc4f45"
     }
   },
-  "color_migration_mapping": {
-    "instructions": "Rechercher et remplacer les classes Tailwind arbitraires par les nouvelles classes sémantiques.",
-    "replacements": {
-      "bg-[#0052CC]": "bg-blue-600",
-      "text-[#0052CC]": "text-blue-600",
-      "border-[#0052CC]": "border-blue-600",
-      "hover:bg-[#003D99]": "hover:bg-blue-700",
-      "bg-[#F8FAFC]": "bg-zinc-50",
-      "text-[#0F172A]": "text-zinc-950",
-      "text-[#475569]": "text-zinc-500",
-      "text-[#64748B]": "text-zinc-500"
-    }
-  },
-  "grids_and_layouts": {
-    "app_shell": "flex h-screen w-full bg-zinc-50 overflow-hidden",
-    "sidebar": "w-64 bg-white border-r border-zinc-200 flex-shrink-0 z-20 flex flex-col",
-    "main_content": "flex-1 flex flex-col min-w-0 overflow-hidden",
-    "topbar": "h-14 bg-white border-b border-zinc-200 flex items-center justify-between px-4 sm:px-6 z-10 flex-shrink-0",
-    "page_container": "flex-1 overflow-auto p-4 sm:p-6 md:p-8 space-y-6",
-    "dashboard_grid": "grid grid-cols-1 md:grid-cols-2 xl:grid-cols-3 gap-6 auto-rows-min",
-    "dashboard_bento_rules": "Varier les col-span et row-span. Cartes KPI en tête (col-span-1), tableaux larges et Gantt en dessous (col-span-full ou md:col-span-2)."
-  },
-  "component_styling": {
-    "cards_and_widgets": "bg-white rounded-xl border border-zinc-200 shadow-[0_2px_10px_-3px_rgba(6,81,237,0.05)] p-5 transition-shadow duration-200 hover:shadow-[0_8px_30px_rgb(0,0,0,0.04)]",
-    "buttons": {
-      "primary": "inline-flex items-center justify-center rounded-lg bg-blue-600 px-4 py-2 text-sm font-medium text-white shadow-sm hover:bg-blue-700 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-blue-600 focus-visible:ring-offset-2",
-      "secondary": "inline-flex items-center justify-center rounded-lg bg-white px-4 py-2 text-sm font-medium text-zinc-700 border border-zinc-200 shadow-sm hover:bg-zinc-50 transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-zinc-950 focus-visible:ring-offset-2",
-      "ghost": "inline-flex items-center justify-center rounded-lg px-4 py-2 text-sm font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-900 transition-colors"
-    },
-    "tables": "w-full text-sm text-left text-zinc-600. Header: bg-zinc-50/80 text-xs font-semibold uppercase tracking-wider text-zinc-500 py-3 px-4 border-y border-zinc-200. Cellules: py-3 px-4 border-b border-zinc-100. Lignes au survol: hover:bg-zinc-50/50.",
-    "rag_badges": "inline-flex items-center rounded-md px-2.5 py-0.5 text-xs font-semibold border",
-    "inputs": "flex h-10 w-full rounded-lg border border-zinc-300 bg-white px-3 py-2 text-sm placeholder:text-zinc-400 focus:outline-none focus:ring-2 focus:ring-blue-600 focus:border-transparent transition-all",
-    "modals": "fixed inset-0 z-50 flex items-center justify-center bg-zinc-950/40 backdrop-blur-sm. Contenu: bg-white rounded-2xl shadow-2xl border border-zinc-100 overflow-hidden w-full max-w-lg",
-    "sidebar_links": "flex items-center px-3 py-2 rounded-lg text-sm font-medium text-zinc-600 hover:bg-zinc-100 hover:text-zinc-950 transition-colors group. État actif: bg-blue-50 text-blue-700 font-semibold"
-  },
-  "motion_and_interactions": {
-    "hover_states": "Appliquer des états hover explicites sur tous les éléments cliquables (changement de fond ou -translate-y-px pour les cartes).",
-    "transitions": "Utiliser `transition-colors duration-200` (exclure 'all' pour ne pas casser les animations complexes).",
-    "toast": "Sonner (Toasts) : position bottom-right, bordures arrondies (rounded-xl), fond blanc, ombre douce."
+  "layouts_and_grids": {
+    "strategy": "Bento Grid (Tetris Mode) for Feature representations. Asymmetrical, architectural layouts that break standard SaaS boredom.",
+    "spacing": "Generous spacing system. Use Tailwind p-8, p-12, py-24. High negative space to evoke premium enterprise authority.",
+    "container": "Max-width 1280px. Maintain strong vertical rhythm.",
+    "hero": "Asymmetrical split. Left: Crisp outcome-driven messaging and primary CTA. Right: Floating UI cards/tiles built with HTML/CSS representing the software's capability.",
+    "features_overview": "CSS Grid layout. 3-column or asymmetrical bento box displaying 'Modules'. Prioritize text-rich context for SEO."
   },
   "visual_enhancers": {
-    "icons": "lucide-react : taille 18px (w-4.5 h-4.5) pour la sidebar afin de coller au style net de ClickUp.",
-    "empty_states": "Centrer le contenu, icône Lucide grisée (taille 48px, text-zinc-300), texte d'explication net, bouton CTA primaire juste en dessous.",
-    "avatars": "rounded-full, text-xs font-medium bg-blue-100 text-blue-700 border border-white shadow-sm flex items-center justify-center"
+    "ui_mockups": "CRITICAL: Do not use generic images for the product. Build 'mock' UI elements (tiles, progress rings, status chips) using pure CSS border-radius, box-shadows, and the JetBrains Mono font to simulate the real application.",
+    "borders_and_shadows": "Subtle ambient shadows (e.g. shadow-sm or custom box-shadow: 0 4px 24px rgba(53, 44, 110, 0.05)). 1px solid border (#e8e6f0) around tiles and bento boxes.",
+    "glassmorphism": "Use sparingly for sticky navigation (backdrop-filter: blur(12px); background: rgba(251,250,255,0.85)). Always maintain minimum 1px bottom border (#e8e6f0) on nav.",
+    "interactive": "Subtle hover states: Buttons should darken in background color; cards should lift slightly (-translate-y-1) with increased shadow."
   },
-  "accessibility": {
-    "contrast": "Le bleu #2563EB garantit un contraste de 4.5:1 sur du texte blanc. Privilégier les textes zinc-950/zinc-600 sur fond clair.",
-    "focus": "Tous les inputs/boutons doivent posséder focus-visible:ring-2.",
-    "data_testid": "MANDATORY: Tous les éléments interactifs doivent inclure un attribut data-testid (ex: data-testid='login-submit-button')."
+  "pages_structure": {
+    "index.html": "Hero with H1 + CTA 'Demander une démo'. Overview of modules (Portfolio, Programs, Budgets). AI PMO Agent highlight. Footer.",
+    "features.html": "Deep dive into each module: Portfolio, CAPEX/OPEX, Capacity, Timesheets, COMEX exports, Import MS Project. High semantic text density for SEO.",
+    "contact.html": "Demo request form (Name, Company, Email, Message) styled with pure CSS, utilizing vanilla JS for submit handling."
   },
-  "instructions_to_main_agent": {
-    "step_1": "Mettre à jour l'import Google Fonts dans le fichier CSS principal pour charger Outfit, Plus Jakarta Sans et JetBrains Mono.",
-    "step_2": "Mettre à jour tailwind.config.js pour configurer les variables font-heading, font-sans, et font-mono.",
-    "step_3": "Exécuter un remplacement global (Search/Replace) des couleurs codées en dur (#0052CC, #0F172A, #F8FAFC) en s'appuyant sur color_migration_mapping.",
-    "step_4": "Refactoriser l'App Shell (Sidebar, Topbar) pour implémenter la nouvelle esthétique aérée et les fonds clairs, interdisant le transparent si du contenu défile dessous.",
-    "step_5": "Mettre à jour les Dashboard Widgets (Cards) et les styles RAG (Red/Amber/Green) pour utiliser les nouvelles palettes pastel claires avec textes contrastés.",
-    "step_6": "Appliquer la nouvelle densité aux Tableaux et Listes avec des paddings nets et la police Mono pour les codes projets (P01-001).",
-    "step_7": "Assurer que tous les composants interactifs (boutons, inputs) reçoivent data-testid et utilisent les composants shadcn/ui."
+  "media": {
+    "strategy": "Use architectural and high-end corporate imagery to set an authoritative tone, alongside CSS-built abstract product representations.",
+    "image_urls": [
+      {
+        "url": "https://images.unsplash.com/photo-1623051786552-e46ef84e6c07?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA3MDB8MHwxfHNlYXJjaHw0fHxtb2Rlcm4lMjBjb3Jwb3JhdGUlMjBvZmZpY2UlMjBhcmNoaXRlY3R1cmV8ZW58MHx8fHwxNzg2MzY5MDI1fDA&ixlib=rb-4.1.0&q=85",
+        "category": "hero_background",
+        "description": "Modern corporate architecture. Use strategically as a muted section background or with a heavy color overlay."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1551288049-bebda4e38f71?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjA1NzR8MHwxfHNlYXJjaHwxfHxleGVjdXRpdmUlMjB1c2luZyUyMGRhc2hib2FyZCUyMGRhc2hib2FyZCUyMGRhdGF8ZW58MHx8fHwxNzg2MzY5MDI2fDA&ixlib=rb-4.1.0&q=85",
+        "category": "context_image",
+        "description": "Dashboard analytics. Perfect for the 'Gouvernance COMEX' or 'Portefeuille' module sections."
+      },
+      {
+        "url": "https://images.unsplash.com/photo-1632516643720-e7f5d7d6ecc9?crop=entropy&cs=srgb&fm=jpg&ixid=M3w4NjAzNzl8MHwxfHNlYXJjaHwzfHxhYnN0cmFjdCUyMGdyYWRpZW50JTIwZGF0YSUyMHZpc3VhbGl6YXRpb258ZW58MHx8fHwxNzg2MzY5MDI1fDA&ixlib=rb-4.1.0&q=85",
+        "category": "abstract_data",
+        "description": "Abstract visualization. Use for the 'Agent IA PMO' section to convey advanced AI technology."
+      }
+    ]
   },
-  "UNIVERSAL GUIDELINES FOR MAIN AGENT": [
-    "Les fichiers à modifier utilisent l'extension .js/.jsx. Les composants UI sont en HTML/Tailwind classique via React.",
-    "Vous transformez MARCEL d'un outil corporatif classique en un espace PMO vivant, moderne et fluide.",
-    "Ne PAS utiliser `<select>` natif ou `input type='date'`. Privilégiez TOUJOURS les composants Shadcn (DropdownMenu, Calendar, Select).",
-    "Remplacez TOUTES les couleurs legacy hardcodées (`bg-[#0052CC]`) par des classes Tailwind sémantiques (`bg-blue-600`).",
-    "Ne JAMAIS utiliser de fonds transparents pour la Topbar ou les menus modaux (z-index + fond plein obligatoire).",
-    "Utilisez des bordures douces (`rounded-lg`, `rounded-xl`) et des ombres légères pour recréer l'esthétique 'Monday.com'.",
-    "Ne jamais appliquer `transition: all` de façon globale, cela casse les animations de transformation.",
-    "Ne pas centrer les gros blocs de texte ou les tableaux. L'alignement à gauche est primordial pour la densité et la lisibilité des données (Dashboards/Tables).",
-    "Rendre les statuts RAG extrêmement visibles. Ne vous contentez pas de petits points ; utilisez des badges colorés (fond teinté + texte foncé).",
-    "Insérez `data-testid` sur tous les boutons, liens et formulaires pour les tests automatisés."
+  "instructions_to_main_agent": [
+    "CRITICAL RESTRICTION: Do NOT initialize a React, Next.js, or Vite-React project. You MUST create standard static HTML files (.html).",
+    "Use Tailwind CSS via the Play CDN (<script src='https://cdn.tailwindcss.com'></script>) to style the static HTML rapidly. Include font imports for Outfit, Plus Jakarta Sans, and JetBrains Mono in the <head>.",
+    "Create the HTML structure for multi-page routing: /index.html, /features.html, and /contact.html. For the English version, create an 'en' subdirectory (/en/index.html, etc.).",
+    "Build the 'Product Screenshots' purely in HTML/CSS using Tailwind. Create UI dashboard tiles, progress rings (use CSS conic-gradient), and status chips using the exact brand colors.",
+    "Focus heavily on HTML5 semantics (<main>, <article>, <section>, <nav>) and include robust <meta> tags to satisfy the strict SEO and AI crawler (GPTBot, ClaudeBot) requirement.",
+    "For interactivity (Mobile Menu toggle, Form Submission), include a small <script> tag at the end of the <body> with vanilla JavaScript. NO React states.",
+    "Do not use React icon libraries. Use inline SVGs (e.g., from Phosphor Icons or Heroicons) directly in the HTML."
+  ],
+  "UNIVERSAL_GUIDELINES_FOR_MAIN_AGENT": [
+    "You tend to converge toward generic, 'on distribution' outputs. Avoid this: make creative, distinctive frontends that surprise and delight.",
+    "Do not make generic centered layouts, simplistic gradients, and uniform styling.",
+    "Create depth through layered design elements with z-index hierarchy and subtle shadows.",
+    "You MUST NOT apply universal transition (transition: all). Use specific transitions on hover states.",
+    "All interactive and key informational elements MUST include a `data-testid` attribute (e.g., data-testid='contact-submit-btn').",
+    "NEVER use AI assistant Emoji characters like 🤖🧠💭💡🔮🎯 for icons. Use professional SVG icons.",
+    "Use 2-3x more spacing than feels comfortable. Cramped designs look cheap."
   ]
 }

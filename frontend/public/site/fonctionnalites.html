@@ -1,0 +1,223 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Fonctionnalités MARCEL — Portefeuille, budgets CAPEX/OPEX, capacité, gouvernance COMEX</title>
+  <meta name="description" content="Toutes les fonctionnalités de MARCEL : portefeuille projets consolidé, budgets CAPEX/OPEX/EAC/RAF, vue croisée équipes × mois, timesheets, gouvernance COMEX, import Excel et Microsoft Project, agent IA PMO, SSO et multi-tenant.">
+  <link rel="canonical" href="https://marcel-ppm.com/fonctionnalites">
+  <link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites">
+  <link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features">
+  <link rel="alternate" hreflang="x-default" href="https://marcel-ppm.com/fonctionnalites">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MARCEL">
+  <meta property="og:title" content="Fonctionnalités MARCEL — Plateforme PPM complète">
+  <meta property="og:description" content="Portefeuille, budgets CAPEX/OPEX/EAC, capacité équipes × mois, timesheets, COMEX, import MS Project, agent IA PMO.">
+  <meta property="og:url" content="https://marcel-ppm.com/fonctionnalites">
+  <meta property="og:image" content="https://marcel-ppm.com/site/assets/og-marcel.png">
+  <meta property="og:locale" content="fr_FR">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/site/site.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://marcel-ppm.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Fonctionnalités", "item": "https://marcel-ppm.com/fonctionnalites" }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="/" data-testid="site-brand"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
+    <nav class="nav-links" aria-label="Navigation principale">
+      <a href="/" data-testid="site-nav-home">Accueil</a>
+      <a href="/fonctionnalites" class="active" data-testid="site-nav-features">Fonctionnalités</a>
+      <a href="/contact" data-testid="site-nav-contact">Contact</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="lang-switch" href="/en/features" data-testid="site-lang-switch" aria-label="Switch to English">EN</a>
+      <a class="btn btn-ghost" href="/login" data-testid="site-login-btn">Se connecter</a>
+      <a class="btn btn-primary" href="/contact" data-testid="site-demo-btn">Demander une démo</a>
+    </div>
+    <button class="burger" id="burger" aria-label="Menu" data-testid="site-burger"><span></span><span></span><span></span></button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="/">Accueil</a>
+    <a href="/fonctionnalites">Fonctionnalités</a>
+    <a href="/contact">Contact</a>
+    <a href="/login">Se connecter</a>
+    <a href="/en/features">English version</a>
+  </div>
+</header>
+
+<main>
+  <div class="container page-head">
+    <p class="kicker">Fonctionnalités</p>
+    <h1 style="font-size:clamp(2rem,4.2vw,3rem)">Tout ce qu'une PMO attend d'un PPM. <span class="accent">Rien de superflu.</span></h1>
+    <p class="lead">Huit modules qui partagent le même langage visuel et les mêmes données : ce que vous voyez en comité est exactement ce que voient les équipes.</p>
+  </div>
+
+  <div class="container">
+    <!-- 1. Portefeuille -->
+    <article class="module" id="portefeuille">
+      <div>
+        <span class="num">01</span>
+        <h3>Portefeuille &amp; programmes</h3>
+        <p>La vue consolidée de tous vos projets, en tuiles riches et lisibles : chaque tuile affiche l'avancement, la consommation budgétaire, les jalons clés et la météo RAG. Les programmes agrègent automatiquement leurs projets.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Tuiles projets consolidées</b> <span class="d">— avancement, budget, EAC, jalons et risques sur une seule carte.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Statuts RAG automatiques</b> <span class="d">— vert / ambre / rouge calculés sur le budget, le planning et les risques.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Codification automatique</b> <span class="d">— codes projets P01-001 par programme, non modifiables, présents dans tous les exports.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Roadmap consolidée</b> <span class="d">— frise transverse des projets du portefeuille avec jalons et dépendances.</span></span></li>
+      </ul>
+    </article>
+
+    <!-- 2. Budget -->
+    <article class="module" id="budget">
+      <div>
+        <span class="num">02</span>
+        <h3>Budgets CAPEX / OPEX / EAC</h3>
+        <p>Le pilotage financier en continu : enveloppes, consommé, atterrissage et reste à faire par projet, programme et portefeuille. Les écarts ressortent avant de devenir des sujets de crise.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>CAPEX / OPEX séparés</b> <span class="d">— avec agrégation automatique aux niveaux programme et portefeuille.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>EAC &amp; RAF</b> <span class="d">— atterrissage estimé et reste à faire, alertes en cas de dérive au-delà du seuil configuré.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Coûts externes &amp; fournisseurs</b> <span class="d">— contrats régie et forfait, TJM contractuel vs facturé, alertes de variance.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Alertes contrats</b> <span class="d">— email automatique à J-90 / 60 / 30 / 7 avant expiration d'un contrat ressource ou fournisseur.</span></span></li>
+      </ul>
+    </article>
+
+    <!-- 3. Capacité -->
+    <article class="module" id="capacite">
+      <div>
+        <span class="num">03</span>
+        <h3>Ressources &amp; capacité</h3>
+        <p>Qui fait quoi, et qui sera en surcharge dans trois mois ? Le référentiel ressources et la vue croisée équipes × mois répondent en un coup d'œil.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Vue croisée équipes × mois</b> <span class="d">— matrice de charge sur 3 à 12 mois, code couleur d'utilisation, export Excel pour vos comités.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Alertes de surcharge</b> <span class="d">— seuils configurables (orange / rouge), détail des ressources concernées.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Référentiel complet</b> <span class="d">— rôles, TJM, capacité, date d'entrée, contrats et échéances par ressource.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Allocations par projet</b> <span class="d">— plan de charge mensuel, comparaison alloué vs consommé.</span></span></li>
+      </ul>
+    </article>
+
+    <!-- 4. Timesheets -->
+    <article class="module" id="timesheets">
+      <div>
+        <span class="num">04</span>
+        <h3>Timesheets &amp; demandes</h3>
+        <p>La saisie des temps alimente directement les budgets et la capacité. Les demandes projet suivent un circuit de qualification jusqu'à leur conversion en projet.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Saisie hebdomadaire par projet</b> <span class="d">— avec validation à 2 ou 3 niveaux et délais de validation configurables.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Congés &amp; disponibilité</b> <span class="d">— les absences réduisent automatiquement la capacité planifiée.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Workflow de demandes</b> <span class="d">— qualification, priorisation, acceptation, conversion en projet tracées de bout en bout.</span></span></li>
+      </ul>
+    </article>
+
+    <!-- 5. Gouvernance -->
+    <article class="module" id="gouvernance">
+      <div>
+        <span class="num">05</span>
+        <h3>Gouvernance &amp; COMEX</h3>
+        <p>Décisions, arbitrages et conformité réglementaire centralisés — et le dossier de comité qui se génère en un clic, à votre charte graphique.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Export COMEX PowerPoint</b> <span class="d">— synthèse portefeuille, budgets et jalons, aux couleurs et logo de votre organisation.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Registre des décisions</b> <span class="d">— qui a décidé quoi, quand, sur quel projet — avec suivi des actions.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Risques &amp; dépendances</b> <span class="d">— cartographie probabilité × impact, dépendances inter-projets, jalons réglementaires.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Trains SAFe</b> <span class="d">— PI, sprints et capabilities pour les organisations agiles à l'échelle.</span></span></li>
+      </ul>
+    </article>
+
+    <!-- 6. Import -->
+    <article class="module" id="import">
+      <div>
+        <span class="num">06</span>
+        <h3>Import Excel &amp; Microsoft Project</h3>
+        <p>Vos données existantes ne sont pas un obstacle : MARCEL importe vos fichiers Excel et vos plannings Microsoft Project en quelques secondes.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Import .mpp natif</b> <span class="d">— tâches, jalons et dépendances de Microsoft Project récupérés directement.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Import / export Excel généralisé</b> <span class="d">— projets, ressources, équipes, allocations : prévisualisation et contrôle avant validation.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Kit Power BI</b> <span class="d">— connectez vos rapports décisionnels aux données MARCEL.</span></span></li>
+      </ul>
+    </article>
+
+    <!-- 7. IA -->
+    <article class="module" id="ia">
+      <div>
+        <span class="num">07</span>
+        <h3>Agent IA PMO</h3>
+        <p>Un copilote intégré qui connaît vos données et parle votre langue : posez vos questions de pilotage, il croise budgets, jalons, risques et capacité pour y répondre.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Questions en langage naturel</b> <span class="d">— « quels projets risquent de dépasser leur budget ce trimestre ? »</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Détection d'anomalies</b> <span class="d">— dérives EAC, jalons en retard, surcharges d'équipes signalées automatiquement.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Recommandations d'arbitrage</b> <span class="d">— des synthèses prêtes à inscrire à l'ordre du jour du COPIL.</span></span></li>
+      </ul>
+    </article>
+
+    <!-- 8. Entreprise -->
+    <article class="module" id="entreprise">
+      <div>
+        <span class="num">08</span>
+        <h3>Sécurité, SSO &amp; déploiement</h3>
+        <p>Pensé pour passer les revues sécurité de votre DSI : authentification d'entreprise, permissions fines, isolation des données et choix du mode d'hébergement.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>SSO Google, Microsoft Entra ID, SAML 2.0</b> <span class="d">— avec provisionnement automatique et domaines autorisés.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Profils &amp; permissions</b> <span class="d">— rôles PMO, chef de projet, direction, finance — chaque écran respecte les droits.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Multi-tenant ou on-premise</b> <span class="d">— SaaS avec isolation stricte par tenant, ou installation sur vos serveurs avec licence dédiée.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Alertes email &amp; webhooks</b> <span class="d">— événements projet, seuils budgétaires et contrats poussés vers vos outils.</span></span></li>
+      </ul>
+    </article>
+  </div>
+
+  <section class="section" style="padding-top:40px">
+    <div class="container">
+      <div class="cta-band">
+        <div>
+          <h2>Envie de voir ces modules sur vos propres données ?</h2>
+          <p>Démo personnalisée de 30 minutes — apportez un export Excel, repartez avec votre portefeuille dans MARCEL.</p>
+        </div>
+        <a class="btn btn-light" href="/contact" data-testid="cta-demo-btn">Demander une démo</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <a class="brand" href="/"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
+      <nav class="foot-links" aria-label="Pied de page">
+        <a href="/fonctionnalites">Fonctionnalités</a>
+        <a href="/contact">Contact &amp; démo</a>
+        <a href="/login">Connexion client</a>
+        <a href="/en/features">English</a>
+      </nav>
+    </div>
+    <p class="foot-note">© 2026 MARCEL — Plateforme PPM pour PMO, DSI et directions de programmes.</p>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('burger').addEventListener('click', function () {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  });
+</script>
+</body>
+</html>

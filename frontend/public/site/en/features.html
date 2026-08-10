@@ -1,0 +1,215 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>MARCEL Features — Portfolio, CAPEX/OPEX budgets, capacity, executive governance</title>
+  <meta name="description" content="All MARCEL features: consolidated project portfolio, CAPEX/OPEX/EAC/ETC budgets, teams × months capacity cross-view, timesheets, executive governance, Excel and Microsoft Project import, AI PMO agent, SSO and multi-tenant.">
+  <link rel="canonical" href="https://marcel-ppm.com/en/features">
+  <link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites">
+  <link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features">
+  <link rel="alternate" hreflang="x-default" href="https://marcel-ppm.com/fonctionnalites">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MARCEL">
+  <meta property="og:title" content="MARCEL Features — Complete PPM platform">
+  <meta property="og:description" content="Portfolio, CAPEX/OPEX/EAC budgets, teams × months capacity, timesheets, executive exports, MS Project import, AI PMO agent.">
+  <meta property="og:url" content="https://marcel-ppm.com/en/features">
+  <meta property="og:image" content="https://marcel-ppm.com/site/assets/og-marcel.png">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/site/site.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://marcel-ppm.com/en/" },
+      { "@type": "ListItem", "position": 2, "name": "Features", "item": "https://marcel-ppm.com/en/features" }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="/en/" data-testid="site-brand"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="/en/" data-testid="site-nav-home">Home</a>
+      <a href="/en/features" class="active" data-testid="site-nav-features">Features</a>
+      <a href="/en/contact" data-testid="site-nav-contact">Contact</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="lang-switch" href="/fonctionnalites" data-testid="site-lang-switch" aria-label="Passer en français">FR</a>
+      <a class="btn btn-ghost" href="/login" data-testid="site-login-btn">Sign in</a>
+      <a class="btn btn-primary" href="/en/contact" data-testid="site-demo-btn">Request a demo</a>
+    </div>
+    <button class="burger" id="burger" aria-label="Menu" data-testid="site-burger"><span></span><span></span><span></span></button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="/en/">Home</a>
+    <a href="/en/features">Features</a>
+    <a href="/en/contact">Contact</a>
+    <a href="/login">Sign in</a>
+    <a href="/fonctionnalites">Version française</a>
+  </div>
+</header>
+
+<main>
+  <div class="container page-head">
+    <p class="kicker">Features</p>
+    <h1 style="font-size:clamp(2rem,4.2vw,3rem)">Everything a PMO expects from a PPM. <span class="accent">Nothing superfluous.</span></h1>
+    <p class="lead">Eight modules that share the same visual language and the same data: what you see in committee is exactly what teams see.</p>
+  </div>
+
+  <div class="container">
+    <article class="module" id="portfolio">
+      <div>
+        <span class="num">01</span>
+        <h3>Portfolio &amp; programs</h3>
+        <p>The consolidated view of all your projects, as rich, readable tiles: each tile shows progress, budget consumption, key milestones and RAG status. Programs automatically aggregate their projects.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Consolidated project tiles</b> <span class="d">— progress, budget, EAC, milestones and risks on a single card.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Automatic RAG statuses</b> <span class="d">— green / amber / red computed from budget, schedule and risks.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Automatic project coding</b> <span class="d">— P01-001 codes per program, non-editable, present in every export.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Consolidated roadmap</b> <span class="d">— cross-portfolio timeline with milestones and dependencies.</span></span></li>
+      </ul>
+    </article>
+
+    <article class="module" id="budget">
+      <div>
+        <span class="num">02</span>
+        <h3>CAPEX / OPEX / EAC budgets</h3>
+        <p>Continuous financial steering: envelopes, consumed, estimate at completion and estimate to complete by project, program and portfolio. Variances surface before they become crises.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Separate CAPEX / OPEX</b> <span class="d">— with automatic aggregation at program and portfolio levels.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>EAC &amp; ETC</b> <span class="d">— estimated landing and remaining work, alerts when drift exceeds your configured threshold.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>External costs &amp; vendors</b> <span class="d">— time-and-materials and fixed-price contracts, contractual vs invoiced day rates, variance alerts.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Contract alerts</b> <span class="d">— automatic email at D-90 / 60 / 30 / 7 before a resource or vendor contract expires.</span></span></li>
+      </ul>
+    </article>
+
+    <article class="module" id="capacity">
+      <div>
+        <span class="num">03</span>
+        <h3>Resources &amp; capacity</h3>
+        <p>Who does what, and who will be overloaded in three months? The resource repository and the teams × months cross-view answer at a glance.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Teams × months cross-view</b> <span class="d">— load matrix over 3 to 12 months, utilisation colour-coding, Excel export for your committees.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Overload alerts</b> <span class="d">— configurable thresholds (amber / red), with the affected resources detailed.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Complete repository</b> <span class="d">— roles, day rates, capacity, start date, contracts and expiry dates per resource.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Per-project allocations</b> <span class="d">— monthly load plan, allocated vs consumed comparison.</span></span></li>
+      </ul>
+    </article>
+
+    <article class="module" id="timesheets">
+      <div>
+        <span class="num">04</span>
+        <h3>Timesheets &amp; demands</h3>
+        <p>Time entries feed budgets and capacity directly. Project demands follow a qualification workflow until they are converted into projects.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Weekly entry by project</b> <span class="d">— with 2- or 3-level validation and configurable validation deadlines.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Leaves &amp; availability</b> <span class="d">— absences automatically reduce planned capacity.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Demand workflow</b> <span class="d">— qualification, prioritisation, acceptance, conversion to project, traced end to end.</span></span></li>
+      </ul>
+    </article>
+
+    <article class="module" id="governance">
+      <div>
+        <span class="num">05</span>
+        <h3>Governance &amp; executive</h3>
+        <p>Decisions, trade-offs and regulatory compliance in one place — and the committee deck that generates itself in one click, in your corporate branding.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Executive PowerPoint export</b> <span class="d">— portfolio, budget and milestone summary, in your organisation's colours and logo.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Decision log</b> <span class="d">— who decided what, when, on which project — with action follow-up.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Risks &amp; dependencies</b> <span class="d">— probability × impact map, cross-project dependencies, regulatory milestones.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>SAFe trains</b> <span class="d">— PIs, sprints and capabilities for organisations running agile at scale.</span></span></li>
+      </ul>
+    </article>
+
+    <article class="module" id="import">
+      <div>
+        <span class="num">06</span>
+        <h3>Excel &amp; Microsoft Project import</h3>
+        <p>Your existing data is not an obstacle: MARCEL imports your Excel files and Microsoft Project schedules in seconds.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Native .mpp import</b> <span class="d">— tasks, milestones and dependencies pulled straight from Microsoft Project.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Excel import / export everywhere</b> <span class="d">— projects, resources, teams, allocations: preview and control before committing.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Power BI kit</b> <span class="d">— connect your BI reports to MARCEL data.</span></span></li>
+      </ul>
+    </article>
+
+    <article class="module" id="ai">
+      <div>
+        <span class="num">07</span>
+        <h3>AI PMO agent</h3>
+        <p>A built-in copilot that knows your data and speaks your language: ask your steering questions, it cross-references budgets, milestones, risks and capacity to answer.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Natural language questions</b> <span class="d">— "which projects are at risk of overrunning their budget this quarter?"</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Anomaly detection</b> <span class="d">— EAC drifts, late milestones, team overloads flagged automatically.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Trade-off recommendations</b> <span class="d">— summaries ready for your steering committee agenda.</span></span></li>
+      </ul>
+    </article>
+
+    <article class="module" id="enterprise">
+      <div>
+        <span class="num">08</span>
+        <h3>Security, SSO &amp; deployment</h3>
+        <p>Built to pass your IT department's security reviews: enterprise authentication, fine-grained permissions, data isolation and your choice of hosting model.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>SSO Google, Microsoft Entra ID, SAML 2.0</b> <span class="d">— with auto-provisioning and allowed domains.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Profiles &amp; permissions</b> <span class="d">— PMO, project manager, executive, finance roles — every screen enforces rights.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Multi-tenant or on-premise</b> <span class="d">— SaaS with strict tenant isolation, or installed on your servers with a dedicated licence.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Email alerts &amp; webhooks</b> <span class="d">— project events, budget thresholds and contracts pushed to your tools.</span></span></li>
+      </ul>
+    </article>
+  </div>
+
+  <section class="section" style="padding-top:40px">
+    <div class="container">
+      <div class="cta-band">
+        <div>
+          <h2>Want to see these modules on your own data?</h2>
+          <p>Personalised 30-minute demo — bring an Excel export, leave with your portfolio in MARCEL.</p>
+        </div>
+        <a class="btn btn-light" href="/en/contact" data-testid="cta-demo-btn">Request a demo</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <a class="brand" href="/en/"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
+      <nav class="foot-links" aria-label="Footer">
+        <a href="/en/features">Features</a>
+        <a href="/en/contact">Contact &amp; demo</a>
+        <a href="/login">Customer sign-in</a>
+        <a href="/fonctionnalites">Français</a>
+      </nav>
+    </div>
+    <p class="foot-note">© 2026 MARCEL — PPM platform for PMOs, CIOs and program directors.</p>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('burger').addEventListener('click', function () {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  });
+</script>
+</body>
+</html>

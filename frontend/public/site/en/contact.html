@@ -1,0 +1,165 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Contact &amp; demo — MARCEL, PPM platform for PMOs and CIOs</title>
+  <meta name="description" content="Request a personalised demo of MARCEL, the PPM platform: project portfolio, CAPEX/OPEX budgets, capacity and executive governance. Reply within 24 business hours.">
+  <link rel="canonical" href="https://marcel-ppm.com/en/contact">
+  <link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/contact">
+  <link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/contact">
+  <link rel="alternate" hreflang="x-default" href="https://marcel-ppm.com/contact">
+  <meta name="robots" content="index, follow">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MARCEL">
+  <meta property="og:title" content="Request a MARCEL demo">
+  <meta property="og:description" content="Personalised 30-minute demo of the MARCEL PPM platform. Reply within 24 business hours.">
+  <meta property="og:url" content="https://marcel-ppm.com/en/contact">
+  <meta property="og:image" content="https://marcel-ppm.com/site/assets/og-marcel.png">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/site/site.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "ContactPage",
+    "name": "Contact & demo — MARCEL",
+    "url": "https://marcel-ppm.com/en/contact",
+    "about": { "@type": "SoftwareApplication", "name": "MARCEL", "applicationCategory": "BusinessApplication" }
+  }
+  </script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="/en/" data-testid="site-brand"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="/en/" data-testid="site-nav-home">Home</a>
+      <a href="/en/features" data-testid="site-nav-features">Features</a>
+      <a href="/en/contact" class="active" data-testid="site-nav-contact">Contact</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="lang-switch" href="/contact" data-testid="site-lang-switch" aria-label="Passer en français">FR</a>
+      <a class="btn btn-ghost" href="/login" data-testid="site-login-btn">Sign in</a>
+      <a class="btn btn-primary" href="/en/contact" data-testid="site-demo-btn">Request a demo</a>
+    </div>
+    <button class="burger" id="burger" aria-label="Menu" data-testid="site-burger"><span></span><span></span><span></span></button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="/en/">Home</a>
+    <a href="/en/features">Features</a>
+    <a href="/en/contact">Contact</a>
+    <a href="/login">Sign in</a>
+    <a href="/contact">Version française</a>
+  </div>
+</header>
+
+<main>
+  <div class="container page-head" style="padding-bottom:8px">
+    <p class="kicker">Contact</p>
+    <h1 style="font-size:clamp(2rem,4.2vw,3rem)">Let's talk about your <span class="accent">project portfolio</span>.</h1>
+  </div>
+
+  <div class="container contact-grid">
+    <div>
+      <p class="lead" style="margin-top:6px">Describe your context in two lines — we'll get back to you within 24 business hours with a demo slot.</p>
+      <ul class="contact-points">
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg>
+          <span><b>Personalised 30-minute demo</b><br>on your use cases: portfolio, budget, capacity or governance.</span>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>
+          <span><b>Bring an Excel export</b><br>and leave with your real portfolio loaded into MARCEL.</span>
+        </li>
+        <li>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="11" width="18" height="11" rx="2"/><path d="M7 11V7a5 5 0 0 1 10 0v4"/></svg>
+          <span><b>Your hosting constraints respected</b><br>multi-tenant SaaS or on-premise installation on your servers.</span>
+        </li>
+      </ul>
+    </div>
+
+    <div class="form-card">
+      <div class="form-msg ok" id="formOk" data-testid="contact-success-msg">Thank you! Your request has been sent — we'll get back to you within 24 business hours.</div>
+      <div class="form-msg err" id="formErr" data-testid="contact-error-msg">Something went wrong. Please try again in a few moments.</div>
+      <form id="contactForm" novalidate>
+        <div class="form-row">
+          <div class="field">
+            <label for="cf-name">Full name *</label>
+            <input id="cf-name" name="name" type="text" required autocomplete="name" placeholder="Jane Smith" data-testid="contact-name-input">
+          </div>
+          <div class="field">
+            <label for="cf-company">Company *</label>
+            <input id="cf-company" name="company" type="text" required autocomplete="organization" placeholder="Altair Group" data-testid="contact-company-input">
+          </div>
+        </div>
+        <div class="field">
+          <label for="cf-email">Work email *</label>
+          <input id="cf-email" name="email" type="email" required autocomplete="email" placeholder="jane.smith@company.com" data-testid="contact-email-input">
+        </div>
+        <div class="field">
+          <label for="cf-message">Your context</label>
+          <textarea id="cf-message" name="message" placeholder="E.g.: 40 projects, 3 programs, budget steering currently in Excel…" data-testid="contact-message-input"></textarea>
+        </div>
+        <div class="hp" aria-hidden="true">
+          <label for="cf-website">Website</label>
+          <input id="cf-website" name="website" type="text" tabindex="-1" autocomplete="off">
+        </div>
+        <button class="btn btn-primary" type="submit" id="submitBtn" style="width:100%;justify-content:center" data-testid="contact-submit-btn">Send my demo request</button>
+        <p style="font-size:11.5px;color:var(--faint);margin-top:14px">Your details are only used to process your request. No newsletter sign-up.</p>
+      </form>
+    </div>
+  </div>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="foot-grid">
+      <a class="brand" href="/en/"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
+      <nav class="foot-links" aria-label="Footer">
+        <a href="/en/features">Features</a>
+        <a href="/en/contact">Contact &amp; demo</a>
+        <a href="/login">Customer sign-in</a>
+        <a href="/contact">Français</a>
+      </nav>
+    </div>
+    <p class="foot-note">© 2026 MARCEL — PPM platform for PMOs, CIOs and program directors.</p>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('burger').addEventListener('click', function () {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  });
+  document.getElementById('contactForm').addEventListener('submit', async function (e) {
+    e.preventDefault();
+    var ok = document.getElementById('formOk'), err = document.getElementById('formErr'), btn = document.getElementById('submitBtn');
+    ok.classList.remove('ok'); err.classList.remove('err');
+    var name = document.getElementById('cf-name').value.trim();
+    var company = document.getElementById('cf-company').value.trim();
+    var email = document.getElementById('cf-email').value.trim();
+    if (!name || !company || !email || email.indexOf('@') < 1) { err.classList.add('err'); err.textContent = 'Please fill in your name, company and a valid email.'; return; }
+    btn.disabled = true; btn.textContent = 'Sending…';
+    try {
+      var res = await fetch('/api/public/contact', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ name: name, company: company, email: email, message: document.getElementById('cf-message').value.trim(), website: document.getElementById('cf-website').value, locale: 'en' })
+      });
+      if (!res.ok) throw new Error();
+      ok.classList.add('ok');
+      document.getElementById('contactForm').reset();
+    } catch (_) {
+      err.classList.add('err'); err.textContent = 'Something went wrong. Please try again in a few moments.';
+    } finally {
+      btn.disabled = false; btn.textContent = 'Send my demo request';
+    }
+  });
+</script>
+</body>
+</html>

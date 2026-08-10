@@ -1,0 +1,31 @@
+# MARCEL — Plateforme PPM (Project Portfolio Management)
+
+> MARCEL est une plateforme PPM multi-tenant pour PMO, DSI et directions de programmes. Elle réunit portefeuille projets, programmes, budgets CAPEX/OPEX/EAC, ressources et capacité, timesheets, gouvernance COMEX et un agent IA PMO dans un cockpit unique. Déploiement SaaS ou on-premise. Interface bilingue français / anglais.
+
+## Ce que fait MARCEL
+
+- **Portefeuille & programmes** : vue consolidée en tuiles avec avancement, budget, jalons clés et statuts RAG (vert/ambre/rouge) calculés automatiquement. Codification projets automatique (P01-001). Roadmap consolidée.
+- **Budgets CAPEX / OPEX / EAC / RAF** : enveloppes, consommé, atterrissage et reste à faire par projet, programme et portefeuille. Alertes de dérive. Coûts externes, contrats régie/forfait, TJM contractuel vs facturé.
+- **Ressources & capacité** : référentiel ressources (rôles, TJM, contrats, échéances), vue croisée équipes × mois sur 3 à 12 mois avec alertes de surcharge et export Excel. Alertes email automatiques avant expiration des contrats (J-90/60/30/7).
+- **Timesheets & demandes** : saisie hebdomadaire par projet, validation à 2 ou 3 niveaux, congés, workflow de qualification des demandes projet.
+- **Gouvernance & COMEX** : registre des décisions, arbitrages, risques (probabilité × impact), dépendances, jalons réglementaires, trains SAFe, export PowerPoint à la charte de l'organisation.
+- **Import / export** : Excel généralisé (prévisualisation avant validation), Microsoft Project (.mpp) natif, kit Power BI.
+- **Agent IA PMO** : questions en langage naturel sur les données du portefeuille, détection d'anomalies (dérives EAC, jalons en retard, surcharges), recommandations d'arbitrage.
+- **Entreprise** : SSO Google Workspace / Microsoft Entra ID / SAML 2.0, profils et permissions par rôle, multi-tenant avec isolation stricte, ou installation on-premise avec licence dédiée. Alertes email et webhooks.
+
+## Public cible
+
+DSI, responsables PMO, directions de programmes et directions financières en ETI et grands comptes, francophones et anglophones.
+
+## Pages
+
+- [Accueil (FR)](https://marcel-ppm.com/) : positionnement et vue d'ensemble des modules
+- [Fonctionnalités (FR)](https://marcel-ppm.com/fonctionnalites) : détail des 8 modules
+- [Contact & démo (FR)](https://marcel-ppm.com/contact) : demande de démo personnalisée de 30 minutes
+- [Home (EN)](https://marcel-ppm.com/en/) : English version
+- [Features (EN)](https://marcel-ppm.com/en/features)
+- [Contact & demo (EN)](https://marcel-ppm.com/en/contact)
+
+## Modèle
+
+Pas de tarification publique : démonstration personnalisée sur demande via la page contact. Réponse sous 24 h ouvrées.
