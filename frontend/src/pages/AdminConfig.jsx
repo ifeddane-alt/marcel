@@ -929,7 +929,25 @@ function EmailAlertsSubSection({ config, onSave }) {
     { value: "project.updated", label: "Projet modifié" },
     { value: "threshold.budget_overrun", label: "Dépassement budget (EAC > seuil)" },
     { value: "threshold.milestone_late", label: "Jalon en retard (forecast > baseline)" },
+    { value: "contract.expiring", label: "Contrat proche de l'expiration (ressource / fournisseur) — vérification quotidienne à 06h00" },
   ];
+
+  const [checking, setChecking] = useState(false);
+  const [checkMsg, setCheckMsg] = useState(null);
+  const runContractCheck = async () => {
+    setChecking(true); setCheckMsg(null);
+    try {
+      const res = await adminConfigAPI.runContractCheck();
+      const n = res.data?.alerts_sent || 0;
+      setCheckMsg(n > 0
+        ? `${n} contrat(s) signalé(s) par email.`
+        : "Aucun email envoyé (rien à signaler, déjà signalé, événement désactivé ou clé Resend absente).");
+    } catch {
+      setCheckMsg("Erreur lors de la vérification.");
+    } finally {
+      setChecking(false);
+    }
+  };
 
   const toggleEvent = (ev) => {
     setForm(f => ({
@@ -1027,6 +1045,19 @@ function EmailAlertsSubSection({ config, onSave }) {
             </label>
           ))}
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-3 pt-1">
+        <button
+          data-testid="contract-check-run-btn"
+          onClick={runContractCheck}
+          disabled={checking}
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border border-zinc-200 rounded-lg text-zinc-600 hover:bg-zinc-50 transition-colors disabled:opacity-50"
+        >
+          <RefreshCw size={12} className={checking ? "animate-spin" : ""} />
+          Vérifier les contrats maintenant
+        </button>
+        {checkMsg && <span className="text-xs text-zinc-500" data-testid="contract-check-result">{checkMsg}</span>}
       </div>
     </div>
   );

@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Pencil, Trash2, Users, ArrowUpRight, UserRound, LayoutGrid, Table2 } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, ArrowUpRight, UserRound, LayoutGrid, Table2, FileDown } from "lucide-react";
+import { toast } from "sonner";
 import { usePermissions } from "@/hooks/usePermissions";
 import { teamsAPI, resourcesAPI } from "@/api";
 import { Ring } from "@/components/ProjectTile";
@@ -169,6 +170,26 @@ export default function Teams() {
   const [selectedTeam, setSelectedTeam] = useState(null);
   const [confirmDelete, setConfirmDelete] = useState(null);
   const [deleting, setDeleting] = useState(false);
+  const [exporting, setExporting] = useState(false);
+
+  const exportMatrix = async () => {
+    setExporting(true);
+    try {
+      const res = await teamsAPI.exportCapacityHeatmap(months);
+      const url = window.URL.createObjectURL(new Blob([res.data]));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `MARCEL_charge_equipes_${new Date().toISOString().slice(0, 10)}.xlsx`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+    } catch {
+      toast.error("Échec de l'export Excel");
+    } finally {
+      setExporting(false);
+    }
+  };
 
   const fetchAll = () => {
     Promise.all([teamsAPI.list(), resourcesAPI.list(), teamsAPI.capacityAlerts(), teamsAPI.capacityHeatmap(months)])
@@ -313,7 +334,17 @@ export default function Teams() {
 
       {view === "matrix" ? (
         <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 md:p-5" data-testid="teams-matrix-section">
-          <div className="font-heading text-[13px] font-bold text-[#26243a] mb-3">Charge croisée équipes × mois</div>
+          <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
+            <div className="font-heading text-[13px] font-bold text-[#26243a]">Charge croisée équipes × mois</div>
+            <button
+              onClick={exportMatrix}
+              disabled={exporting}
+              data-testid="matrix-export-btn"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border border-[#e8e6f0] rounded-lg text-[#3d3564] hover:bg-[#f6f5fb] transition-colors disabled:opacity-50"
+            >
+              <FileDown size={13} /> {exporting ? "Export en cours…" : "Exporter Excel"}
+            </button>
+          </div>
           <CapacityHeatmap data={heatmap} months={months} onMonthsChange={setMonths} />
         </div>
       ) : (

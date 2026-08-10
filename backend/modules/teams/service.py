@@ -118,6 +118,86 @@ async def get_capacity_heatmap(months: int, current_user: TokenPayload) -> list:
     return result
 
 
+def _util_fill_hex(pct: float) -> str:
+    if pct > 100:
+        return "FCE4E1"
+    if pct > 90:
+        return "FDEBD3"
+    if pct > 70:
+        return "FDF6D8"
+    if pct >= 50:
+        return "E3F4E0"
+    return "F6F6F8"
+
+
+async def export_capacity_heatmap(months: int, current_user: TokenPayload) -> tuple:
+    """Export .xlsx de la matrice charge équipes × mois (vue croisée)."""
+    from io import BytesIO
+    from openpyxl import Workbook
+    from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
+    from openpyxl.utils import get_column_letter
+
+    data = await get_capacity_heatmap(months, current_user)
+    periods = data[0]["periods"] if data else []
+
+    wb = Workbook()
+    ws = wb.active
+    ws.title = "Charge équipes"
+    thin = Side(style="thin", color="D9D6E4")
+    border = Border(left=thin, right=thin, top=thin, bottom=thin)
+    center = Alignment(horizontal="center", vertical="center")
+    hdr_fill = PatternFill("solid", fgColor="352C6E")
+    hdr_font = Font(bold=True, color="FFFFFF", size=11)
+
+    ws.cell(row=1, column=1, value=f"MARCEL — Charge croisée équipes × mois ({months} mois)").font = Font(bold=True, size=14, color="26243A")
+    ws.cell(row=2, column=1, value=f"Généré le {datetime.now(timezone.utc).strftime('%d/%m/%Y %H:%M')} UTC").font = Font(size=9, color="8A87A0")
+
+    headers = ["Équipe", "Capacité JH/mois"] + [p["period"] for p in periods]
+    hr = 4
+    for c, h in enumerate(headers, 1):
+        cell = ws.cell(row=hr, column=c, value=h)
+        cell.fill, cell.font, cell.border, cell.alignment = hdr_fill, hdr_font, border, center
+
+    r = hr + 1
+    for row in data:
+        name_cell = ws.cell(row=r, column=1, value=row["team_name"])
+        name_cell.font, name_cell.border = Font(bold=True), border
+        cap_cell = ws.cell(row=r, column=2, value=row.get("capacity_jh_month", 0))
+        cap_cell.border, cap_cell.alignment = border, center
+        for i, p in enumerate(row["periods"]):
+            cell = ws.cell(row=r, column=3 + i, value=f"{p['utilization_pct']}% ({p['allocated_jh']}/{p['capacity_jh']} JH)")
+            cell.border, cell.alignment = border, center
+            cell.fill = PatternFill("solid", fgColor=_util_fill_hex(p["utilization_pct"]))
+            if p["utilization_pct"] > 100:
+                cell.font = Font(bold=True, color="CC4F45")
+        r += 1
+
+    tot_cell = ws.cell(row=r, column=1, value="Total portefeuille")
+    tot_cell.font, tot_cell.border = Font(bold=True), border
+    tot_cap = round(sum(x.get("capacity_jh_month", 0) for x in data), 1)
+    tc = ws.cell(row=r, column=2, value=tot_cap)
+    tc.font, tc.border, tc.alignment = Font(bold=True), border, center
+    for i in range(len(periods)):
+        cap = round(sum(x["periods"][i]["capacity_jh"] for x in data), 1)
+        alloc = round(sum(x["periods"][i]["allocated_jh"] for x in data), 1)
+        pct = round(alloc / cap * 100) if cap else 0
+        cell = ws.cell(row=r, column=3 + i, value=f"{pct}% ({alloc}/{cap} JH)")
+        cell.border, cell.alignment = border, center
+        cell.font = Font(bold=True, color="CC4F45" if pct > 100 else "26243A")
+        cell.fill = PatternFill("solid", fgColor=_util_fill_hex(pct))
+
+    ws.column_dimensions["A"].width = 26
+    ws.column_dimensions["B"].width = 16
+    for i in range(len(periods)):
+        ws.column_dimensions[get_column_letter(3 + i)].width = 18
+    ws.freeze_panes = "C5"
+
+    buf = BytesIO()
+    wb.save(buf)
+    filename = f"MARCEL_charge_equipes_{date.today().isoformat()}.xlsx"
+    return filename, buf.getvalue()
+
+
 async def get_capacity_alerts(current_user: TokenPayload) -> list:
     """Alertes capacité : équipes > seuil d'utilisation sur mois courant + mois suivant."""
     from core.tenant_config import get_thresholds

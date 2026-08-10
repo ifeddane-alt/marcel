@@ -10,6 +10,7 @@ EVENT_LABELS = {
     "project.updated": "Projet modifié",
     "threshold.budget_overrun": "Dépassement budgétaire",
     "threshold.milestone_late": "Jalon en retard",
+    "contract.expiring": "Contrats arrivant à expiration",
 }
 
 
@@ -39,16 +40,16 @@ def _build_html(label: str, rows: list) -> str:
     )
 
 
-async def send_alert_email(tenant_id: str, event: str, subject_detail: str, rows: list) -> None:
-    """Envoi générique non-bloquant si l'événement est activé pour le tenant."""
+async def send_alert_email(tenant_id: str, event: str, subject_detail: str, rows: list) -> bool:
+    """Envoi générique non-bloquant si l'événement est activé pour le tenant. Retourne True si envoyé."""
     cfg = await get_tenant_email_alerts_config(tenant_id)
     if not cfg or event not in (cfg.get("events") or []):
-        return
+        return False
     api_key = os.environ.get("RESEND_API_KEY", "").strip()
     label = EVENT_LABELS.get(event, event)
     if not api_key:
         logger.info("[EmailAlert] %s déclenché (%s) mais RESEND_API_KEY absente — envoi ignoré", event, subject_detail)
-        return
+        return False
     import resend
     resend.api_key = api_key
     sender = os.environ.get("SENDER_EMAIL", "onboarding@resend.dev")
@@ -61,8 +62,10 @@ async def send_alert_email(tenant_id: str, event: str, subject_detail: str, rows
     try:
         email = await asyncio.to_thread(resend.Emails.send, params)
         logger.info("[EmailAlert] %s envoyé → %s (id=%s)", event, cfg["recipients"], email.get("id"))
+        return True
     except Exception as exc:
         logger.warning("[EmailAlert] Échec %s : %s", event, exc)
+        return False
 
 
 async def send_project_event_email(tenant_id: str, event: str, project: dict) -> None:

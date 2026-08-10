@@ -239,6 +239,9 @@ async def startup_event():
 
     scheduler.start()
     await _schedule_connectors()
+    from core.contract_alerts import run_contract_alerts_all_tenants
+    scheduler.add_job(run_contract_alerts_all_tenants, CronTrigger(hour=6, minute=0), id="contract_alerts", replace_existing=True)
+    logger.info("[Scheduler] Alertes contrats expirants planifiées chaque jour à 06h00 UTC")
     logger.info("[Scheduler] APScheduler démarré")
     # Synchroniser les permissions de profils pour tous les tenants existants
     try:

@@ -50,6 +50,7 @@ export const teamsAPI = {
   update: (id, data) => api.put(`/teams/${id}`, data),
   delete: (id) => api.delete(`/teams/${id}`),
   capacityHeatmap: (months = 6) => api.get(`/teams/capacity-heatmap?months=${months}`),
+  exportCapacityHeatmap: (months = 6) => api.get(`/teams/capacity-heatmap/export?months=${months}`, { responseType: "blob" }),
   capacityAlerts: () => api.get("/teams/capacity-alerts"),
 };
 
@@ -255,6 +256,7 @@ export const adminConfigAPI = {
   updateProjectCodes: (d) => api.put("/admin/config/project-codes", d),
   backfillProjectCodes: () => api.post("/admin/config/project-codes/backfill"),
   updateEmailAlerts: (d) => api.put("/admin/config/email-alerts", d),
+  runContractCheck: () => api.post("/admin/config/email-alerts/contracts/run"),
   updateSSO:       (d)   => api.put("/admin/config/sso", d),
 };
 

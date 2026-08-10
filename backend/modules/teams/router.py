@@ -1,4 +1,6 @@
 from fastapi import APIRouter, Depends, Query
+from fastapi.responses import Response
+from urllib.parse import quote
 from core.auth import TokenPayload, get_current_user, permission_required
 from .schemas import TeamCreate, TeamUpdate
 from . import service
@@ -17,6 +19,19 @@ async def get_capacity_heatmap(
     current_user: TokenPayload = Depends(get_current_user),
 ):
     return await service.get_capacity_heatmap(months, current_user)
+
+
+@router.get("/teams/capacity-heatmap/export")
+async def export_capacity_heatmap(
+    months: int = Query(default=6, ge=1, le=24),
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    filename, data = await service.export_capacity_heatmap(months, current_user)
+    return Response(
+        content=data,
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": f"attachment; filename*=UTF-8''{quote(filename)}"},
+    )
 
 
 @router.get("/teams/capacity-alerts")

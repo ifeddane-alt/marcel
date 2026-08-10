@@ -63,6 +63,13 @@ async def update_email_alerts(data: EmailAlertsUpdate, current_user: TokenPayloa
     return await service.update_email_alerts(data, current_user)
 
 
+@router.post("/admin/config/email-alerts/contracts/run")
+async def run_contract_alerts_now(current_user: TokenPayload = Depends(_perm)):
+    from core.contract_alerts import check_expiring_contracts_for_tenant
+    count = await check_expiring_contracts_for_tenant(current_user.tenant_id)
+    return {"alerts_sent": count}
+
+
 @router.put("/admin/config/sso")
 async def update_sso(data: SSOUpdate, current_user: TokenPayload = Depends(_perm)):
     return await service.update_sso(data, current_user)
