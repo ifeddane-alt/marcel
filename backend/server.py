@@ -42,6 +42,7 @@ if _sentry_dsn:
 
 from core.database import client, db
 from modules.auth.router import router as auth_router
+from modules.home.router import router as home_router
 from modules.programs.router import router as programs_router
 from modules.projects.router import router as projects_router
 from modules.resources.router import router as resources_router
@@ -134,7 +135,7 @@ app.add_middleware(
 )
 
 for _router in [
-    auth_router, programs_router, projects_router, resources_router,
+    auth_router, home_router, programs_router, projects_router, resources_router,
     allocations_router, milestones_router, tasks_router, tenant_router,
     governance_router, dashboard_router, risks_router, decisions_router,
     export_router, csv_import_router, teams_router, work_allocations_router,

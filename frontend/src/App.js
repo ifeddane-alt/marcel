@@ -5,6 +5,7 @@ import { TenantConfigProvider } from "@/contexts/TenantConfigContext";
 import Layout from "@/components/Layout";
 import Login from "@/pages/Login";
 import Dashboard from "@/pages/Dashboard";
+import Home from "@/pages/Home";
 import Programs from "@/pages/Programs";
 import ProgramDetail from "@/pages/ProgramDetail";
 import Portfolio from "@/pages/Portfolio";
@@ -76,6 +77,7 @@ function AppRoutes() {
         }
       >
         <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route path="home" element={<Home />} />
         <Route path="dashboard" element={<DashboardGuard />} />
         <Route path="cxo" element={<Navigate to="/dashboard" replace />} />
         <Route path="programmes" element={<Programs />} />

@@ -34,6 +34,10 @@ export const authAPI = {
   ssoExchange: (code) => api.post("/auth/sso/exchange", { code }),
 };
 
+export const homeAPI = {
+  summary: () => api.get("/home/summary"),
+};
+
 export const projectsAPI = {
   list: () => api.get("/projects"),
   get: (id) => api.get(`/projects/${id}`),
