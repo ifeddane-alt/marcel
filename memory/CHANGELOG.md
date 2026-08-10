@@ -137,3 +137,10 @@
 ## 2026-06 — Logo MARCEL cliquable dans l'app (déployé prod)
 - Le logo « M MARCEL » de la topbar et du drawer mobile (Layout.jsx) est désormais un Link vers /dashboard (homepage app ; DashboardGuard redirige vers /timesheets si pas de permission)
 - Testé E2E preview (login → /portfolio → clic logo → /dashboard) puis déployé prod (bundle vérifié, health 200)
+
+## 2026-06 — Homepage in-app (déployé prod)
+- Clarification utilisateur (après 2 mauvaises interprétations dashboard puis site web) : il voulait une VRAIE page d'accueil DANS l'application — option (a) validée : page personnalisée
+- Backend : nouveau module `modules/home/` — GET /api/home/summary (prénom, contexte portefeuille actif/alerte/programmes, timesheet semaine courante si resource_id, validations en attente via timesheets_service.get_pending_count, jalons en retard + à venir 21j enrichis projet)
+- Frontend : `pages/Home.jsx` (route /home) — Bonjour [prénom] + date, 12 tuiles accès rapides filtrées par permissions (canAccessNav), « Mes actions en attente » (feuille de temps avec badge À saisir, timesheets à valider, jalons en retard/à venir cliquables), « Derniers projets consultés » (réutilise getRecentProjects du localStorage déjà alimenté par ProjectDetail)
+- Logo MARCEL (topbar + drawer) → Link /home
+- Testé E2E preview (login → fiches projets → clic logo → /home avec greeting, actions, 2 projets récents) ; déployé prod (bundle + 403 sans auth sur /api/home/summary, health 200, disque 79%)
