@@ -1,5 +1,15 @@
 # PRD — MARCEL
 
+## 2026-06 — Site vitrine MARCEL (déployé prod, commits 732d9e1 + 9d6537b)
+- **6 pages HTML statiques pur** (design_agent consulté, CSS partagé `frontend/public/site/site.css`, zéro framework JS — lisible par GPTBot/ClaudeBot qui n'exécutent pas le JS) : FR `site/index.html`, `fonctionnalites.html`, `contact.html` + EN `site/en/index.html`, `features.html`, `contact.html`.
+- **URLs propres via nginx.conf** (frontend Docker) : `/` → site FR, `/fonctionnalites`, `/contact`, `/en/`, `/en/features`, `/en/contact` (locations exactes avant fallback SPA). **L'app React reste intacte** sur /login, /dashboard, etc. En preview (pas de nginx) : accès via /site/*.html. CSP étendu : fonts.googleapis.com (style-src) + fonts.gstatic.com (font-src).
+- **SEO/IA** : meta title/description par page, canonical, hreflang fr/en/x-default, Open Graph + Twitter (og-marcel.png 1200×630 généré PIL), JSON-LD (SoftwareApplication+featureList, BreadcrumbList, ContactPage), `robots.txt` (GPTBot, OAI-SearchBot, ChatGPT-User, ClaudeBot, Claude-Web, anthropic-ai, PerplexityBot, Google-Extended, CCBot explicitement autorisés ; routes app disallow), `sitemap.xml` avec alternates hreflang, `llms.txt` (fiche produit markdown pour crawlers IA).
+- **Design** : hero asymétrique avec mockup produit 100% CSS (tuiles, anneaux conic-gradient, chips RAG, valeurs JetBrains Mono), bande chiffres, bento 8 modules, section IA fond indigo avec faux terminal, section entreprise (SSO/multi-tenant/on-premise), CTA bande indigo. Carte flottante hero repositionnée (bottom -54px) pour ne pas masquer les tuiles.
+- **Formulaire démo** : POST `/api/public/contact` (nouveau module `backend/modules/public_site/`, sans auth) — validation email regex, honeypot `website` (bots ignorés silencieusement 201 sans stockage), stockage `db.demo_requests` (request_id, status new), notification email si RESEND_API_KEY + CONTACT_NOTIFY_EMAIL configurés (pas encore le cas). Testé e2e : 201+stocké, honeypot ok, 422 email invalide, soumission UI avec message succès.
+- **Prod vérifiée** : 13 URLs en 200, racine = site vitrine (title FR ok), /login = app React, form contact prod 201, navigation FR + EN screenshotée. Données de test nettoyées.
+- Positionnement rédigé : « Reprenez le contrôle de votre portefeuille projets » / cible PMO-DSI-directions de programme.
+- ⏳ Suggestion utilisateur : soumettre le sitemap à Google Search Console + Bing Webmaster pour accélérer l'indexation (action côté utilisateur, nécessite son compte).
+
 ## 2026-06 — Favicon MARCEL (déployé prod, commit ee899bf)
 - favicon.svg (vectoriel), favicon.ico (16/32/48), favicon-32.png, icon-192.png, icon-512.png dans frontend/public — carré arrondi indigo #352c6e + « M » blanc géométrique identique au logo de l'app ; manifest.json PWA (short_name MARCEL, theme #352c6e) ; index.html : links icon/apple-touch-icon/manifest + theme-color #352c6e. Note : le dev server CRA cache index.html → restart frontend nécessaire après modif. Vérifié en prod : svg/ico servis avec bons content-types, link rel=icon dans le HTML.
 
