@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="fr">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Reporting &amp; intégrations — MARCEL PPM | Dashboard, PDF COMEX, Power BI, agent IA</title>
+  <meta name="description" content="Le module Reporting de MARCEL : dashboard personnalisable par glisser-déposer, rapport PDF COMEX hebdomadaire, exports Excel généralisés, kit Power BI, webhooks, alertes email et agent IA PMO.">
+  <link rel="canonical" href="https://marcel-ppm.com/fonctionnalites/reporting">
+  <link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites/reporting">
+  <link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features/reporting">
+  <link rel="alternate" hreflang="x-default" href="https://marcel-ppm.com/fonctionnalites/reporting">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MARCEL">
+  <meta property="og:title" content="Reporting &amp; intégrations — MARCEL PPM">
+  <meta property="og:description" content="Dashboard personnalisable, PDF COMEX, Excel, Power BI, webhooks et agent IA PMO.">
+  <meta property="og:url" content="https://marcel-ppm.com/fonctionnalites/reporting">
+  <meta property="og:image" content="https://marcel-ppm.com/site/assets/og-marcel.png">
+  <meta property="og:locale" content="fr_FR">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/site/site.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Accueil", "item": "https://marcel-ppm.com/" },
+      { "@type": "ListItem", "position": 2, "name": "Fonctionnalités", "item": "https://marcel-ppm.com/fonctionnalites" },
+      { "@type": "ListItem", "position": 3, "name": "Reporting & intégrations", "item": "https://marcel-ppm.com/fonctionnalites/reporting" }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="/" data-testid="site-brand"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
+    <nav class="nav-links" aria-label="Navigation principale">
+      <a href="/" data-testid="site-nav-home">Accueil</a>
+      <a href="/fonctionnalites" class="active" data-testid="site-nav-features">Fonctionnalités</a>
+      <a href="/cas-usage" data-testid="site-nav-usecases">Pour qui ?</a>
+      <a href="/contact" data-testid="site-nav-contact">Contact</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="lang-switch" href="/en/features/reporting" data-testid="site-lang-switch" aria-label="Switch to English">EN</a>
+      <a class="btn btn-ghost" href="/login" data-testid="site-login-btn">Se connecter</a>
+      <a class="btn btn-primary" href="/contact" data-testid="site-demo-btn">Demander une démo</a>
+    </div>
+    <button class="burger" id="burger" aria-label="Menu" data-testid="site-burger"><span></span><span></span><span></span></button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="/">Accueil</a>
+    <a href="/fonctionnalites">Fonctionnalités</a>
+    <a href="/cas-usage">Pour qui ?</a>
+    <a href="/contact">Contact</a>
+    <a href="/login">Se connecter</a>
+    <a href="/en/features/reporting">English version</a>
+  </div>
+</header>
+
+<main>
+  <div class="container page-head">
+    <p class="crumbs"><a href="/">Accueil</a><span class="sep">/</span><a href="/fonctionnalites">Fonctionnalités</a><span class="sep">/</span><span class="cur">Reporting &amp; intégrations</span></p>
+    <p class="kicker">Module 06 · Reporting &amp; intégrations</p>
+    <h1 style="font-size:clamp(2rem,4.2vw,3rem)">Chaque audience a <span class="accent">son reporting</span>. Sans ressaisie.</h1>
+    <p class="lead">Dashboard personnalisable pour le quotidien, PDF hebdo pour le COMEX, PowerPoint pour les comités, Power BI pour les analystes — tout sort des mêmes données, en un clic.</p>
+  </div>
+
+  <section class="section section-tint" style="padding:44px 0">
+    <div class="container strip">
+      <div class="strip-item"><div class="v">22 blocs</div><div class="l">de dashboard, déplaçables et redimensionnables</div></div>
+      <div class="strip-item"><div class="v">PDF COMEX</div><div class="l">le rapport hebdo portefeuille généré en un clic</div></div>
+      <div class="strip-item"><div class="v">Power BI</div><div class="l">kit prêt à l'emploi : 6 flux + template téléchargeable</div></div>
+      <div class="strip-item"><div class="v">Agent IA</div><div class="l">réponses en langage naturel sur vos données</div></div>
+    </div>
+  </section>
+
+  <div class="container">
+    <article class="module">
+      <div>
+        <span class="num">06.1</span>
+        <h3>Un dashboard qui vous ressemble</h3>
+        <p>KPIs, budget, jalons, charge des équipes, risques, contrats à renouveler : 22 blocs à activer, déplacer et redimensionner en glisser-déposer. Chaque utilisateur compose son cockpit — le PMO ne voit pas la même chose que le DAF, et c'est voulu.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Grille drag &amp; drop</b> <span class="d">— composez votre écran, il est mémorisé par utilisateur.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Blocs métier prêts à l'emploi</b> <span class="d">— jauge jalons, top projets, décisions récentes, timesheets en attente, contrats à 60 jours…</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>PDF COMEX hebdo</b> <span class="d">— la synthèse portefeuille prête à envoyer, générée depuis le dashboard.</span></span></li>
+      </ul>
+    </article>
+
+    <article class="module">
+      <div>
+        <span class="num">06.2</span>
+        <h3>Ouvert sur votre SI décisionnel</h3>
+        <p>MARCEL ne remplace pas vos outils d'analyse : il les alimente. Kit Power BI avec template pré-configuré, exports Excel généralisés sur 9 sections, webhooks et alertes email vers vos canaux.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Kit Power BI</b> <span class="d">— 6 flux (projets, ressources, timesheets, budget, risques, jalons), clé API dédiée, template .zip.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Excel dans les deux sens</b> <span class="d">— export lisible (formats €, dates, onglet d'aide) et import avec prévisualisation.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Webhooks &amp; alertes email</b> <span class="d">— événements projet, seuils budgétaires, contrats : poussés vers vos outils, signés HMAC.</span></span></li>
+      </ul>
+    </article>
+
+    <article class="module">
+      <div>
+        <span class="num">06.3</span>
+        <h3>L'agent IA PMO, votre analyste de portefeuille</h3>
+        <p>Posez vos questions en français ou en anglais : l'agent croise budgets, jalons, risques et capacité pour répondre — avec ses sources. Il détecte aussi les anomalies de lui-même : dérives EAC, jalons qui glissent, équipes en surcharge.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Questions en langage naturel</b> <span class="d">— « quels projets risquent de dépasser leur budget ce trimestre ? »</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Recommandations exportables</b> <span class="d">— synthèses d'anomalies en PDF ou Excel, prêtes pour l'ordre du jour du COPIL.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Analytics d'usage</b> <span class="d">— suivi des questions, coûts et performance de l'IA pour l'administrateur.</span></span></li>
+      </ul>
+    </article>
+  </div>
+
+  <!-- PLACEHOLDER : témoignage à remplacer par un client réel -->
+  <section class="section section-tint" style="padding:56px 0">
+    <div class="container">
+      <div class="quote-grid" style="grid-template-columns:1fr;max-width:860px;margin-top:0">
+        <figure class="quote-card">
+          <blockquote>« Exemple de témoignage — nos analystes ont branché Power BI en une matinée avec le template fourni. Le reporting direction n'a plus jamais attendu la fin du mois. »</blockquote>
+          <figcaption><b>Prénom Nom</b><span>Responsable data · secteur public — témoignage client à venir</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding:64px 0 24px">
+    <div class="container">
+      <p class="kicker">Ils travaillent ensemble</p>
+      <h2>Le reporting agrège toute la plateforme.</h2>
+      <div class="related-grid">
+        <a class="related-card" href="/fonctionnalites/portefeuille" data-testid="related-portefeuille">
+          <span class="k">Module 01</span>
+          <h3>Portefeuille &amp; programmes</h3>
+          <p>La vue consolidée alimente dashboard, PDF et Power BI.</p>
+        </a>
+        <a class="related-card" href="/fonctionnalites/budgets" data-testid="related-budgets">
+          <span class="k">Module 04</span>
+          <h3>Budgets &amp; finances</h3>
+          <p>KPIs financiers et courbes de consommation, sans extraction.</p>
+        </a>
+        <a class="related-card" href="/fonctionnalites/gouvernance" data-testid="related-gouvernance">
+          <span class="k">Module 05</span>
+          <h3>Gouvernance &amp; décisions</h3>
+          <p>L'export COMEX PowerPoint sort des mêmes données vivantes.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:40px">
+    <div class="container">
+      <div class="cta-band">
+        <div>
+          <h2>Un reporting qui suit le rythme de vos comités.</h2>
+          <p>Démo personnalisée de 30 minutes — dashboard, PDF COMEX et kit Power BI inclus.</p>
+        </div>
+        <a class="btn btn-light" href="/contact" data-testid="cta-demo-btn">Demander une démo</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="foot-cols">
+      <div class="foot-brand">
+        <a class="brand" href="/"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
+        <p>La plateforme PPM qui réunit portefeuille, budgets, capacité et gouvernance dans un cockpit unique.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Modules</h4>
+        <a href="/fonctionnalites/portefeuille">Portefeuille &amp; programmes</a>
+        <a href="/fonctionnalites/projets">Projets &amp; roadmap</a>
+        <a href="/fonctionnalites/ressources">Ressources &amp; capacité</a>
+        <a href="/fonctionnalites/budgets">Budgets &amp; finances</a>
+        <a href="/fonctionnalites/gouvernance">Gouvernance &amp; décisions</a>
+        <a href="/fonctionnalites/reporting">Reporting &amp; intégrations</a>
+      </div>
+      <div class="foot-col">
+        <h4>MARCEL</h4>
+        <a href="/fonctionnalites">Toutes les fonctionnalités</a>
+        <a href="/cas-usage">Pour qui ?</a>
+        <a href="/contact">Contact &amp; démo</a>
+        <a href="/login">Connexion client</a>
+        <a href="/en/features/reporting">English version</a>
+      </div>
+    </div>
+    <p class="foot-note">© 2026 MARCEL — Plateforme PPM pour PMO, DSI et directions de programmes.</p>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('burger').addEventListener('click', function () {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  });
+</script>
+</body>
+</html>

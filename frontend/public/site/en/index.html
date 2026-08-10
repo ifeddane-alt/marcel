@@ -61,6 +61,7 @@
     <nav class="nav-links" aria-label="Main navigation">
       <a href="/en/" class="active" data-testid="site-nav-home">Home</a>
       <a href="/en/features" data-testid="site-nav-features">Features</a>
+      <a href="/en/use-cases" data-testid="site-nav-usecases">Who is it for?</a>
       <a href="/en/contact" data-testid="site-nav-contact">Contact</a>
     </nav>
     <div class="nav-cta">
@@ -73,6 +74,7 @@
   <div class="mobile-menu" id="mobileMenu">
     <a href="/en/">Home</a>
     <a href="/en/features">Features</a>
+    <a href="/en/use-cases">Who is it for?</a>
     <a href="/en/contact">Contact</a>
     <a href="/login">Sign in</a>
     <a href="/">Version française</a>
@@ -139,6 +141,21 @@
     </div>
   </section>
 
+  <!-- VIDEO -->
+  <section class="section" style="padding:64px 0 28px" id="video">
+    <div class="container">
+      <p class="kicker">Discover</p>
+      <h2>MARCEL in 30 seconds.</h2>
+      <p class="section-lead">Portfolio, budgets, team workload and dashboard: the essentials of the platform, in half a minute.</p>
+      <div class="video-frame">
+        <video controls preload="metadata" poster="/site/assets/teaser-poster-en.jpg" data-testid="home-teaser-video">
+          <source src="/teaser/marcel_teaser_en_female.mp4" type="video/mp4">
+          Your browser does not support HTML5 video.
+        </video>
+      </div>
+    </div>
+  </section>
+
   <!-- STRIP -->
   <section class="section section-tint" style="padding:44px 0">
     <div class="container strip">
@@ -161,41 +178,63 @@
           <h3>Portfolio &amp; programs</h3>
           <p>A consolidated view of all your projects as rich tiles: progress, budget, key milestones, risks and RAG status. Programs automatically aggregate their projects, with upcoming milestones right on each tile.</p>
           <span class="tag">Project tiles</span><span class="tag">RAG</span><span class="tag">Milestones</span><span class="tag">P01-001 coding</span>
+          <div><a class="bento-link" href="/en/features/portfolio" data-testid="bento-link-portfolio">Explore the module →</a></div>
         </article>
         <article class="bento-card wide" data-testid="module-budget">
           <div class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 1v22M17 5H9.5a3.5 3.5 0 0 0 0 7h5a3.5 3.5 0 0 1 0 7H6"/></svg></div>
           <h3>CAPEX / OPEX / EAC budgets</h3>
           <p>Envelopes, consumed, estimate at completion (EAC) and estimate to complete (ETC) tracked continuously by project, program and portfolio. Overruns turn red before they become boardroom topics.</p>
           <span class="tag">EAC / ETC</span><span class="tag">External costs</span><span class="tag">Vendor day rates</span>
+          <div><a class="bento-link" href="/en/features/budgets" data-testid="bento-link-budgets">Explore the module →</a></div>
         </article>
         <article class="bento-card" data-testid="module-capacity">
           <div class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87M16 3.13a4 4 0 0 1 0 7.75"/></svg></div>
           <h3>Resources &amp; capacity</h3>
           <p>Teams × months cross-view over 3 to 12 months, overload alerts, contracts and expiry dates. Excel export of the matrix for your committees.</p>
+          <div><a class="bento-link" href="/en/features/resources" data-testid="bento-link-resources">Explore the module →</a></div>
         </article>
         <article class="bento-card" data-testid="module-governance">
           <div class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg></div>
           <h3>Governance &amp; executive</h3>
           <p>Decisions, trade-offs, regulatory compliance and branded PowerPoint exports: your committee deck prepares itself.</p>
+          <div><a class="bento-link" href="/en/features/governance" data-testid="bento-link-governance">Explore the module →</a></div>
         </article>
         <article class="bento-card" data-testid="module-import">
           <div class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg></div>
           <h3>Excel &amp; MS Project import</h3>
           <p>Your .mpp schedules and Excel repositories import in seconds, with preview and control before committing.</p>
+          <div><a class="bento-link" href="/en/features/projects" data-testid="bento-link-projects">Explore the module →</a></div>
         </article>
         <article class="bento-card wide" data-testid="module-timesheets">
           <div class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/></svg></div>
           <h3>Timesheets &amp; workflows</h3>
           <p>Time entry by project, 2- or 3-level validation workflows, reminders and automatic consolidation into budgets. Project demands follow a qualification workflow all the way to project conversion.</p>
           <span class="tag">PM validation</span><span class="tag">Leaves</span><span class="tag">Demands</span>
+          <div><a class="bento-link" href="/en/features/resources" data-testid="bento-link-timesheets">Explore the module →</a></div>
         </article>
         <article class="bento-card wide" data-testid="module-ai">
           <div class="bento-icon"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 8V4H8"/><rect x="4" y="8" width="16" height="12" rx="2"/><path d="M2 14h2M20 14h2M15 13v2M9 13v2"/></svg></div>
           <h3>AI PMO agent</h3>
           <p>A copilot that answers in natural language on your data: drifting budgets, late milestones, critical risks. Your portfolio analyses, without queries or pivot tables.</p>
           <span class="tag">Budget analysis</span><span class="tag">Anomaly detection</span>
+          <div><a class="bento-link" href="/en/features/reporting" data-testid="bento-link-ai">Explore the module →</a></div>
         </article>
       </div>
+    </div>
+  </section>
+
+  <!-- RESULTS (indicative figures / placeholders) -->
+  <section class="section section-tint">
+    <div class="container">
+      <p class="kicker">What it changes</p>
+      <h2>Less time consolidating. More time deciding.</h2>
+      <div class="benefit-grid">
+        <div class="benefit-card" data-testid="benefit-committees"><div class="v">−50%*</div><div class="t">committee preparation time</div><p>The steering / executive deck is generated from the portfolio's living data: no more manual collection.</p></div>
+        <div class="benefit-card" data-testid="benefit-truth"><div class="v">1 single</div><div class="t">source of truth</div><p>Budgets, milestones, workload: project managers, PMO and executives read the same numbers at the same time.</p></div>
+        <div class="benefit-card" data-testid="benefit-contracts"><div class="v">D-90</div><div class="t">of contract anticipation</div><p>Resource and vendor contract expiries detected and notified automatically at D-90/60/30/7.</p></div>
+        <div class="benefit-card" data-testid="benefit-capacity"><div class="v">3-12 months</div><div class="t">of capacity visibility</div><p>The teams × months cross-view reveals overloads before they block your milestones.</p></div>
+      </div>
+      <p class="benefit-note">* Indicative order of magnitude observed on portfolios previously steered in Excel — your results depend on your context.</p>
     </div>
   </section>
 
@@ -222,6 +261,59 @@
     </div>
   </section>
 
+  <!-- WHO IS IT FOR -->
+  <section class="section">
+    <div class="container">
+      <p class="kicker">Who is it for?</p>
+      <h2>Every role gets its cockpit.</h2>
+      <p class="section-lead">MARCEL serves four different readings of the same data — no re-entry, no crossed exports.</p>
+      <div class="persona-grid">
+        <a class="persona-card" href="/en/use-cases#pmo" data-testid="persona-pmo">
+          <span class="role">PMO</span>
+          <h3>Head of PMO</h3>
+          <p>Permanent portfolio consolidation, committees prepared in one click, tooled methodologies.</p>
+          <span class="more">See the use case →</span>
+        </a>
+        <a class="persona-card" href="/en/use-cases#cio" data-testid="persona-cio">
+          <span class="role">CIO</span>
+          <h3>CIO</h3>
+          <p>Team capacity projected over 12 months, demands prioritised on criteria, SSO and hosting under control.</p>
+          <span class="more">See the use case →</span>
+        </a>
+        <a class="persona-card" href="/en/use-cases#finance" data-testid="persona-finance">
+          <span class="role">Finance</span>
+          <h3>Finance department</h3>
+          <p>Separate CAPEX/OPEX, continuous EAC and ETC, alerts on threshold crossings.</p>
+          <span class="more">See the use case →</span>
+        </a>
+        <a class="persona-card" href="/en/use-cases#program" data-testid="persona-program">
+          <span class="role">Program</span>
+          <h3>Program director</h3>
+          <p>Programs consolidated automatically, declared dependencies, transversal risks.</p>
+          <span class="more">See the use case →</span>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <!-- TESTIMONIALS (PLACEHOLDERS — to be replaced with real customer quotes) -->
+  <section class="section section-tint">
+    <div class="container">
+      <p class="kicker">They steer with MARCEL</p>
+      <h2>What teams say about it.</h2>
+      <div class="quote-grid">
+        <figure class="quote-card" data-testid="quote-1">
+          <blockquote>“Sample testimonial — we replaced four Excel files and two tools with one cockpit. The steering committee now takes twenty minutes to prepare.”</blockquote>
+          <figcaption><b>First Last</b><span>Head of PMO · mid-cap manufacturer — customer testimonial coming soon</span></figcaption>
+        </figure>
+        <figure class="quote-card" data-testid="quote-2">
+          <blockquote>“Sample testimonial — finance and the PMO finally look at the same numbers. Committee debates are about decisions, no longer about data.”</blockquote>
+          <figcaption><b>First Last</b><span>CIO · services — customer testimonial coming soon</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
   <!-- ENTERPRISE -->
   <section class="section">
     <div class="container">
@@ -244,6 +336,40 @@
     </div>
   </section>
 
+  <!-- FAQ -->
+  <section class="section" id="faq">
+    <div class="container">
+      <p class="kicker">Frequently asked questions</p>
+      <h2>What we get asked before the demo.</h2>
+      <div class="faq" data-testid="home-faq">
+        <details>
+          <summary>SaaS or on-premise: how does MARCEL deploy?</summary>
+          <p class="a">Both. As multi-tenant SaaS, your data is strictly isolated per tenant. On-premise, MARCEL installs on your own servers (Docker) with a dedicated licence — your data never leaves your infrastructure.</p>
+        </details>
+        <details>
+          <summary>How long does it take to start with our existing portfolio?</summary>
+          <p class="a">Hours, not months. Your Excel repositories (projects, resources, teams, budgets) import with a preview before commit, and your Microsoft Project schedules (.mpp) load natively. Most teams work on their real data within the first week.</p>
+        </details>
+        <details>
+          <summary>Does MARCEL integrate with our tools (Power BI, Excel, SSO)?</summary>
+          <p class="a">Yes. Ready-to-use Power BI kit (6 feeds + template), generalised Excel import/export, Microsoft Project import, signed webhooks and email alerts. For authentication: SSO with Google Workspace, Microsoft Entra ID or SAML 2.0, with fine-grained role permissions.</p>
+        </details>
+        <details>
+          <summary>How does the AI agent work? Is our data used to train models?</summary>
+          <p class="a">The AI agent answers your questions by cross-referencing only your tenant's data (budgets, milestones, risks, capacity) and cites its sources. Your data is not used to train models and does not leave your perimeter.</p>
+        </details>
+        <details>
+          <summary>What is the pricing?</summary>
+          <p class="a">Pricing depends on your scope (number of users, SaaS or on-premise). We do not publish a public price list: request a 30-minute demo and leave with a proposal tailored to your context.</p>
+        </details>
+        <details>
+          <summary>In which languages is MARCEL available?</summary>
+          <p class="a">The interface is fully bilingual French / English, at each user's choice. Exports (PowerPoint, PDF, Excel) respect your organisation's language and branding.</p>
+        </details>
+      </div>
+    </div>
+  </section>
+
   <!-- CTA -->
   <section class="section" style="padding-top:20px">
     <div class="container">
@@ -260,19 +386,60 @@
 
 <footer>
   <div class="container">
-    <div class="foot-grid">
-      <a class="brand" href="/en/"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
-      <nav class="foot-links" aria-label="Footer">
-        <a href="/en/features">Features</a>
+    <div class="foot-cols">
+      <div class="foot-brand">
+        <a class="brand" href="/en/"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
+        <p>The PPM platform that unites portfolio, budgets, capacity and governance in one cockpit.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Modules</h4>
+        <a href="/en/features/portfolio">Portfolio &amp; programs</a>
+        <a href="/en/features/projects">Projects &amp; roadmap</a>
+        <a href="/en/features/resources">Resources &amp; capacity</a>
+        <a href="/en/features/budgets">Budgets &amp; finance</a>
+        <a href="/en/features/governance">Governance &amp; decisions</a>
+        <a href="/en/features/reporting">Reporting &amp; integrations</a>
+      </div>
+      <div class="foot-col">
+        <h4>MARCEL</h4>
+        <a href="/en/features">All features</a>
+        <a href="/en/use-cases">Who is it for?</a>
         <a href="/en/contact">Contact &amp; demo</a>
         <a href="/login">Customer sign-in</a>
-        <a href="/">Français</a>
-      </nav>
+        <a href="/">Version française</a>
+      </div>
     </div>
     <p class="foot-note">© 2026 MARCEL — PPM platform for PMOs, CIOs and program directors. Project portfolio management, CAPEX/OPEX budgets, capacity and governance.</p>
   </div>
 </footer>
 
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  "mainEntity": [
+    { "@type": "Question", "name": "SaaS or on-premise: how does MARCEL deploy?", "acceptedAnswer": { "@type": "Answer", "text": "Both. As multi-tenant SaaS, data is strictly isolated per tenant. On-premise, MARCEL installs on your own servers (Docker) with a dedicated licence." } },
+    { "@type": "Question", "name": "How long does it take to start with an existing portfolio?", "acceptedAnswer": { "@type": "Answer", "text": "Hours: Excel repositories import with preview, and Microsoft Project (.mpp) schedules load natively." } },
+    { "@type": "Question", "name": "Does MARCEL integrate with Power BI, Excel and SSO?", "acceptedAnswer": { "@type": "Answer", "text": "Yes: Power BI kit (6 feeds + template), generalised Excel import/export, Microsoft Project import, webhooks, email alerts, SSO with Google Workspace, Microsoft Entra ID or SAML 2.0." } },
+    { "@type": "Question", "name": "How does MARCEL's AI agent work?", "acceptedAnswer": { "@type": "Answer", "text": "The agent answers in natural language by cross-referencing only the tenant's data (budgets, milestones, risks, capacity) and cites its sources. Data is not used to train models." } },
+    { "@type": "Question", "name": "What is MARCEL's pricing?", "acceptedAnswer": { "@type": "Answer", "text": "No public price list: pricing depends on scope (users, SaaS or on-premise). A 30-minute demo leads to a tailored proposal." } },
+    { "@type": "Question", "name": "In which languages is MARCEL available?", "acceptedAnswer": { "@type": "Answer", "text": "Fully bilingual French / English interface, at each user's choice." } }
+  ]
+}
+</script>
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@type": "VideoObject",
+  "name": "MARCEL in 30 seconds",
+  "description": "Video introduction to the MARCEL PPM platform: project portfolio, budgets, team workload and dashboard.",
+  "thumbnailUrl": "https://marcel-ppm.com/site/assets/teaser-poster-en.jpg",
+  "contentUrl": "https://marcel-ppm.com/teaser/marcel_teaser_en_female.mp4",
+  "uploadDate": "2026-06-01",
+  "duration": "PT29S",
+  "inLanguage": "en"
+}
+</script>
 <script>
   document.getElementById('burger').addEventListener('click', function () {
     document.getElementById('mobileMenu').classList.toggle('open');

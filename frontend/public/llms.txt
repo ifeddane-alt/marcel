@@ -19,11 +19,25 @@ DSI, responsables PMO, directions de programmes et directions financières en ET
 
 ## Pages
 
-- [Accueil (FR)](https://marcel-ppm.com/) : positionnement et vue d'ensemble des modules
-- [Fonctionnalités (FR)](https://marcel-ppm.com/fonctionnalites) : détail des 8 modules
+- [Accueil (FR)](https://marcel-ppm.com/) : positionnement, vidéo de présentation, vue d'ensemble des modules, FAQ
+- [Fonctionnalités (FR)](https://marcel-ppm.com/fonctionnalites) : vue d'ensemble des 8 modules
+- [Portefeuille & programmes (FR)](https://marcel-ppm.com/fonctionnalites/portefeuille) : tuiles consolidées, RAG automatique, programmes, roadmap, codification
+- [Projets & roadmap (FR)](https://marcel-ppm.com/fonctionnalites/projets) : fiche projet, templates méthodologiques, jalons, scope, import MS Project
+- [Ressources & capacité (FR)](https://marcel-ppm.com/fonctionnalites/ressources) : référentiel, vue croisée équipes × mois, timesheets, contrats
+- [Budgets & finances (FR)](https://marcel-ppm.com/fonctionnalites/budgets) : CAPEX/OPEX, EAC/RAF, coûts externes, alertes de dérive
+- [Gouvernance & décisions (FR)](https://marcel-ppm.com/fonctionnalites/gouvernance) : décisions, arbitrage, risques, COMEX, conformité
+- [Reporting & intégrations (FR)](https://marcel-ppm.com/fonctionnalites/reporting) : dashboard, PDF COMEX, Excel, Power BI, webhooks, agent IA
+- [Pour qui ? Cas d'usage (FR)](https://marcel-ppm.com/cas-usage) : PMO, DSI, direction financière, direction de programme
 - [Contact & démo (FR)](https://marcel-ppm.com/contact) : demande de démo personnalisée de 30 minutes
 - [Home (EN)](https://marcel-ppm.com/en/) : English version
 - [Features (EN)](https://marcel-ppm.com/en/features)
+- [Portfolio & programs (EN)](https://marcel-ppm.com/en/features/portfolio)
+- [Projects & roadmap (EN)](https://marcel-ppm.com/en/features/projects)
+- [Resources & capacity (EN)](https://marcel-ppm.com/en/features/resources)
+- [Budgets & finance (EN)](https://marcel-ppm.com/en/features/budgets)
+- [Governance & decisions (EN)](https://marcel-ppm.com/en/features/governance)
+- [Reporting & integrations (EN)](https://marcel-ppm.com/en/features/reporting)
+- [Who is it for? Use cases (EN)](https://marcel-ppm.com/en/use-cases)
 - [Contact & demo (EN)](https://marcel-ppm.com/en/contact)
 
 ## Modèle

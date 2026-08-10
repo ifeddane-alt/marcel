@@ -1,0 +1,208 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Budgets &amp; finance — MARCEL PPM | CAPEX, OPEX, EAC, ETC and external costs</title>
+  <meta name="description" content="MARCEL's Budgets module: separate CAPEX/OPEX, continuous EAC (estimate at completion) and ETC (estimate to complete), traced budget revisions, T&amp;M and fixed-price external costs, contractual vs invoiced day rates, drift alerts.">
+  <link rel="canonical" href="https://marcel-ppm.com/en/features/budgets">
+  <link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites/budgets">
+  <link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features/budgets">
+  <link rel="alternate" hreflang="x-default" href="https://marcel-ppm.com/fonctionnalites/budgets">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MARCEL">
+  <meta property="og:title" content="Budgets &amp; finance — MARCEL PPM">
+  <meta property="og:description" content="CAPEX/OPEX, continuous EAC/ETC, external costs and budget drift alerts.">
+  <meta property="og:url" content="https://marcel-ppm.com/en/features/budgets">
+  <meta property="og:image" content="https://marcel-ppm.com/site/assets/og-marcel.png">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/site/site.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://marcel-ppm.com/en/" },
+      { "@type": "ListItem", "position": 2, "name": "Features", "item": "https://marcel-ppm.com/en/features" },
+      { "@type": "ListItem", "position": 3, "name": "Budgets & finance", "item": "https://marcel-ppm.com/en/features/budgets" }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="/en/" data-testid="site-brand"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="/en/" data-testid="site-nav-home">Home</a>
+      <a href="/en/features" class="active" data-testid="site-nav-features">Features</a>
+      <a href="/en/use-cases" data-testid="site-nav-usecases">Who is it for?</a>
+      <a href="/en/contact" data-testid="site-nav-contact">Contact</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="lang-switch" href="/fonctionnalites/budgets" data-testid="site-lang-switch" aria-label="Passer en français">FR</a>
+      <a class="btn btn-ghost" href="/login" data-testid="site-login-btn">Sign in</a>
+      <a class="btn btn-primary" href="/en/contact" data-testid="site-demo-btn">Request a demo</a>
+    </div>
+    <button class="burger" id="burger" aria-label="Menu" data-testid="site-burger"><span></span><span></span><span></span></button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="/en/">Home</a>
+    <a href="/en/features">Features</a>
+    <a href="/en/use-cases">Who is it for?</a>
+    <a href="/en/contact">Contact</a>
+    <a href="/login">Sign in</a>
+    <a href="/fonctionnalites/budgets">Version française</a>
+  </div>
+</header>
+
+<main>
+  <div class="container page-head">
+    <p class="crumbs"><a href="/en/">Home</a><span class="sep">/</span><a href="/en/features">Features</a><span class="sep">/</span><span class="cur">Budgets &amp; finance</span></p>
+    <p class="kicker">Module 04 · Budgets &amp; finance</p>
+    <h1 style="font-size:clamp(2rem,4.2vw,3rem)">The budget landing, <span class="accent">before the landing</span>.</h1>
+    <p class="lead">CAPEX, OPEX, consumed, EAC, ETC: MARCEL tracks financial steering continuously, from project to portfolio — and surfaces drifts before they become crisis topics.</p>
+  </div>
+
+  <section class="section section-tint" style="padding:44px 0">
+    <div class="container strip">
+      <div class="strip-item"><div class="v">CAPEX / OPEX</div><div class="l">separate and aggregated at every level</div></div>
+      <div class="strip-item"><div class="v">EAC &amp; ETC</div><div class="l">landing and remaining work recomputed continuously</div></div>
+      <div class="strip-item"><div class="v">Alert thresholds</div><div class="l">automatic email when an EAC crosses the envelope</div></div>
+      <div class="strip-item"><div class="v">Traced revisions</div><div class="l">every envelope change is dated and justified</div></div>
+    </div>
+  </section>
+
+  <div class="container">
+    <article class="module">
+      <div>
+        <span class="num">04.1</span>
+        <h3>From project to portfolio, the same numbers</h3>
+        <p>Each project carries its CAPEX/OPEX envelope, consumed, EAC and ETC. Programs and the portfolio aggregate automatically — the finance department and project managers read the same reality.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Budget dashboard</b> <span class="d">— CAPEX consumed, OPEX consumed, EAC vs planned, ETC vs EAC KPIs with progress rings.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Automatic aggregation</b> <span class="d">— per program and portfolio, without manual consolidation.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Consumption fed by actuals</b> <span class="d">— validated timesheets × day rates + external costs: no double entry.</span></span></li>
+      </ul>
+    </article>
+
+    <article class="module">
+      <div>
+        <span class="num">04.2</span>
+        <h3>Drifts surface on their own</h3>
+        <p>When a project's EAC crosses its envelope, MARCEL flags it: in red across the views, by email if configured, and in the AI agent's recommendations. You arbitrate while it is still a choice.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>EAC overrun alert</b> <span class="d">— configurable tolerance threshold, notification on crossing, built-in anti-spam.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Traced budget revisions</b> <span class="d">— every envelope change is historised: who, when, why.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Variances visible at every level</b> <span class="d">— project tile, budget page, dashboard, executive export: the red is the same everywhere.</span></span></li>
+      </ul>
+    </article>
+
+    <article class="module">
+      <div>
+        <span class="num">04.3</span>
+        <h3>External costs under control</h3>
+        <p>Time-and-materials or fixed-price engagements, contractual day rates, invoices: MARCEL reconciles what was signed with what is invoiced, vendor by vendor.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>T&amp;M &amp; fixed price</b> <span class="d">— consumption tracked per contract, alerts on fixed-price contracts nearing exhaustion.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Contractual vs invoiced rates</b> <span class="d">— variance surfaces automatically, line by line.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Contract expiries</b> <span class="d">— D-90/60/30/7 alerts on vendor contracts, same as for resources.</span></span></li>
+      </ul>
+    </article>
+  </div>
+
+  <!-- PLACEHOLDER: testimonial to be replaced with a real customer quote -->
+  <section class="section section-tint" style="padding:56px 0">
+    <div class="container">
+      <div class="quote-grid" style="grid-template-columns:1fr;max-width:860px;margin-top:0">
+        <figure class="quote-card">
+          <blockquote>“Sample testimonial — the CFO stopped asking us for extractions: he opens MARCEL, the portfolio EAC is up to date. Budget reviews went from three hours to forty minutes.”</blockquote>
+          <figcaption><b>First Last</b><span>Finance PMO · retail — customer testimonial coming soon</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding:64px 0 24px">
+    <div class="container">
+      <p class="kicker">They work together</p>
+      <h2>The budget feeds on the field.</h2>
+      <div class="related-grid">
+        <a class="related-card" href="/en/features/resources" data-testid="related-resources">
+          <span class="k">Module 03</span>
+          <h3>Resources &amp; capacity</h3>
+          <p>Validated timesheets and day rates feed consumption continuously.</p>
+        </a>
+        <a class="related-card" href="/en/features/governance" data-testid="related-governance">
+          <span class="k">Module 05</span>
+          <h3>Governance &amp; decisions</h3>
+          <p>Budget drifts become documented trade-offs.</p>
+        </a>
+        <a class="related-card" href="/en/features/reporting" data-testid="related-reporting">
+          <span class="k">Module 06</span>
+          <h3>Reporting &amp; integrations</h3>
+          <p>Budget consolidated in the dashboard, executive PDF and Power BI.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:40px">
+    <div class="container">
+      <div class="cta-band">
+        <div>
+          <h2>Your budgets deserve better than a shared workbook.</h2>
+          <p>Personalised 30-minute demo, focused on your financial steering if that is your priority.</p>
+        </div>
+        <a class="btn btn-light" href="/en/contact" data-testid="cta-demo-btn">Request a demo</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="foot-cols">
+      <div class="foot-brand">
+        <a class="brand" href="/en/"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
+        <p>The PPM platform that unites portfolio, budgets, capacity and governance in one cockpit.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Modules</h4>
+        <a href="/en/features/portfolio">Portfolio &amp; programs</a>
+        <a href="/en/features/projects">Projects &amp; roadmap</a>
+        <a href="/en/features/resources">Resources &amp; capacity</a>
+        <a href="/en/features/budgets">Budgets &amp; finance</a>
+        <a href="/en/features/governance">Governance &amp; decisions</a>
+        <a href="/en/features/reporting">Reporting &amp; integrations</a>
+      </div>
+      <div class="foot-col">
+        <h4>MARCEL</h4>
+        <a href="/en/features">All features</a>
+        <a href="/en/use-cases">Who is it for?</a>
+        <a href="/en/contact">Contact &amp; demo</a>
+        <a href="/login">Customer sign-in</a>
+        <a href="/fonctionnalites/budgets">Version française</a>
+      </div>
+    </div>
+    <p class="foot-note">© 2026 MARCEL — PPM platform for PMOs, CIOs and program directors.</p>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('burger').addEventListener('click', function () {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  });
+</script>
+</body>
+</html>

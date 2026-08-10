@@ -1,0 +1,209 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Projects &amp; roadmap — MARCEL PPM | Project record, templates, milestones, MS Project import</title>
+  <meta name="description" content="MARCEL's Projects module: tabbed project record, methodology templates (Waterfall, Agile, SAFe), baseline vs forecast milestones, scope Kanban with snapshots, native Microsoft Project (.mpp) import.">
+  <link rel="canonical" href="https://marcel-ppm.com/en/features/projects">
+  <link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites/projets">
+  <link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features/projects">
+  <link rel="alternate" hreflang="x-default" href="https://marcel-ppm.com/fonctionnalites/projets">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MARCEL">
+  <meta property="og:title" content="Projects &amp; roadmap — MARCEL PPM">
+  <meta property="og:description" content="Tabbed project record, methodology templates, baseline vs forecast milestones, native .mpp import.">
+  <meta property="og:url" content="https://marcel-ppm.com/en/features/projects">
+  <meta property="og:image" content="https://marcel-ppm.com/site/assets/og-marcel.png">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/site/site.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://marcel-ppm.com/en/" },
+      { "@type": "ListItem", "position": 2, "name": "Features", "item": "https://marcel-ppm.com/en/features" },
+      { "@type": "ListItem", "position": 3, "name": "Projects & roadmap", "item": "https://marcel-ppm.com/en/features/projects" }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="/en/" data-testid="site-brand"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="/en/" data-testid="site-nav-home">Home</a>
+      <a href="/en/features" class="active" data-testid="site-nav-features">Features</a>
+      <a href="/en/use-cases" data-testid="site-nav-usecases">Who is it for?</a>
+      <a href="/en/contact" data-testid="site-nav-contact">Contact</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="lang-switch" href="/fonctionnalites/projets" data-testid="site-lang-switch" aria-label="Passer en français">FR</a>
+      <a class="btn btn-ghost" href="/login" data-testid="site-login-btn">Sign in</a>
+      <a class="btn btn-primary" href="/en/contact" data-testid="site-demo-btn">Request a demo</a>
+    </div>
+    <button class="burger" id="burger" aria-label="Menu" data-testid="site-burger"><span></span><span></span><span></span></button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="/en/">Home</a>
+    <a href="/en/features">Features</a>
+    <a href="/en/use-cases">Who is it for?</a>
+    <a href="/en/contact">Contact</a>
+    <a href="/login">Sign in</a>
+    <a href="/fonctionnalites/projets">Version française</a>
+  </div>
+</header>
+
+<main>
+  <div class="container page-head">
+    <p class="crumbs"><a href="/en/">Home</a><span class="sep">/</span><a href="/en/features">Features</a><span class="sep">/</span><span class="cur">Projects &amp; roadmap</span></p>
+    <p class="kicker">Module 02 · Projects &amp; roadmap</p>
+    <h1 style="font-size:clamp(2rem,4.2vw,3rem)">The project record that replaces <span class="accent">five files</span>.</h1>
+    <p class="lead">Schedule, milestones, risks, decisions, team and scope: the whole project lives in one tabbed record — powered by your methodology templates and your Microsoft Project imports.</p>
+  </div>
+
+  <section class="section section-tint" style="padding:44px 0">
+    <div class="container strip">
+      <div class="strip-item"><div class="v">7 tabs</div><div class="l">Overview, tasks, milestones, risks, decisions, team, scope</div></div>
+      <div class="strip-item"><div class="v">3 methodologies</div><div class="l">Waterfall, Agile, SAFe — customisable templates</div></div>
+      <div class="strip-item"><div class="v">Native .mpp</div><div class="l">binary Microsoft Project import, no conversion</div></div>
+      <div class="strip-item"><div class="v">Baseline vs actual</div><div class="l">every milestone compares commitment to forecast</div></div>
+    </div>
+  </section>
+
+  <div class="container">
+    <article class="module">
+      <div>
+        <span class="num">02.1</span>
+        <h3>Start from a template, not a blank page</h3>
+        <p>Each methodology ships with its skeleton: phases, typical tasks and pre-positioned milestones. Build your own templates (e.g. your internal validation cycle) and every new project starts structured.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Waterfall / Agile / SAFe templates</b> <span class="d">— 6 phases, 18 tasks and 12 milestones ready to use in V-cycle; sprints and PIs in agile.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Custom templates</b> <span class="d">— duplicate, adapt, and enforce your methodology standard across the organisation.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Typed milestones</b> <span class="d">— configurable families, types and attributes, including regulatory milestones.</span></span></li>
+      </ul>
+    </article>
+
+    <article class="module">
+      <div>
+        <span class="num">02.2</span>
+        <h3>Milestones: the commitment on one side, reality on the other</h3>
+        <p>Every milestone keeps its baseline date (the commitment) and its forecast date (the reality on the ground). The gap is visible everywhere: project record, roadmap, program tiles and executive exports.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Delays in red, everywhere</b> <span class="d">— a slipping milestone shows on the roadmap, the program tile and the dashboard.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Slippage alerts</b> <span class="d">— automatic email when a milestone newly falls behind its baseline.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Cross-project dependencies</b> <span class="d">— declare that one milestone waits on another; propagation risk becomes visible.</span></span></li>
+      </ul>
+    </article>
+
+    <article class="module">
+      <div>
+        <span class="num">02.3</span>
+        <h3>Scope under control, imports without friction</h3>
+        <p>Scope is managed as a Kanban with dated snapshots: what was committed vs what is requested today. And your existing schedules import as they are — binary Microsoft Project .mpp or XML, Excel with preview.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Scope Kanban</b> <span class="d">— candidates, retained, out of scope: drag &amp; drop, frozen snapshots for history.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Frozen scope vs actual</b> <span class="d">— compared bars on the roadmap: scope creep is measured, not guessed.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>.mpp &amp; Excel import</b> <span class="d">— tasks, milestones and dependencies from Microsoft Project; preview before commit.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Per-project allocations</b> <span class="d">— monthly workload plan per resource, allocated vs consumed on every record.</span></span></li>
+      </ul>
+    </article>
+  </div>
+
+  <!-- PLACEHOLDER: testimonial to be replaced with a real customer quote -->
+  <section class="section section-tint" style="padding:56px 0">
+    <div class="container">
+      <div class="quote-grid" style="grid-template-columns:1fr;max-width:860px;margin-top:0">
+        <figure class="quote-card">
+          <blockquote>“Sample testimonial — our project managers imported their .mpp files on day one. A week later, nobody was keeping a separate schedule anymore.”</blockquote>
+          <figcaption><b>First Last</b><span>Program director · banking — customer testimonial coming soon</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding:64px 0 24px">
+    <div class="container">
+      <p class="kicker">They work together</p>
+      <h2>The project feeds the whole platform.</h2>
+      <div class="related-grid">
+        <a class="related-card" href="/en/features/portfolio" data-testid="related-portfolio">
+          <span class="k">Module 01</span>
+          <h3>Portfolio &amp; programs</h3>
+          <p>Every project record rolls up automatically into portfolio tiles.</p>
+        </a>
+        <a class="related-card" href="/en/features/resources" data-testid="related-resources">
+          <span class="k">Module 03</span>
+          <h3>Resources &amp; capacity</h3>
+          <p>Project allocations feed the teams × months cross-view.</p>
+        </a>
+        <a class="related-card" href="/en/features/reporting" data-testid="related-reporting">
+          <span class="k">Module 06</span>
+          <h3>Reporting &amp; integrations</h3>
+          <p>Milestones and progress feed dashboard, executive PDF and Power BI.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:40px">
+    <div class="container">
+      <div class="cta-band">
+        <div>
+          <h2>Bring a .mpp schedule to the demo.</h2>
+          <p>We import it live — you leave with your real project structured in MARCEL.</p>
+        </div>
+        <a class="btn btn-light" href="/en/contact" data-testid="cta-demo-btn">Request a demo</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="foot-cols">
+      <div class="foot-brand">
+        <a class="brand" href="/en/"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
+        <p>The PPM platform that unites portfolio, budgets, capacity and governance in one cockpit.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Modules</h4>
+        <a href="/en/features/portfolio">Portfolio &amp; programs</a>
+        <a href="/en/features/projects">Projects &amp; roadmap</a>
+        <a href="/en/features/resources">Resources &amp; capacity</a>
+        <a href="/en/features/budgets">Budgets &amp; finance</a>
+        <a href="/en/features/governance">Governance &amp; decisions</a>
+        <a href="/en/features/reporting">Reporting &amp; integrations</a>
+      </div>
+      <div class="foot-col">
+        <h4>MARCEL</h4>
+        <a href="/en/features">All features</a>
+        <a href="/en/use-cases">Who is it for?</a>
+        <a href="/en/contact">Contact &amp; demo</a>
+        <a href="/login">Customer sign-in</a>
+        <a href="/fonctionnalites/projets">Version française</a>
+      </div>
+    </div>
+    <p class="foot-note">© 2026 MARCEL — PPM platform for PMOs, CIOs and program directors.</p>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('burger').addEventListener('click', function () {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  });
+</script>
+</body>
+</html>

@@ -1,0 +1,210 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Portfolio &amp; programs — MARCEL PPM | Consolidated view, RAG statuses, roadmap</title>
+  <meta name="description" content="MARCEL's Portfolio module: consolidated project tiles, automatic RAG statuses, aggregated programs, cross-portfolio roadmap and unique P01-001 project coding. The overview your executive committee expects.">
+  <link rel="canonical" href="https://marcel-ppm.com/en/features/portfolio">
+  <link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites/portefeuille">
+  <link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features/portfolio">
+  <link rel="alternate" hreflang="x-default" href="https://marcel-ppm.com/fonctionnalites/portefeuille">
+  <meta name="robots" content="index, follow, max-snippet:-1, max-image-preview:large">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="MARCEL">
+  <meta property="og:title" content="Portfolio &amp; programs — MARCEL PPM">
+  <meta property="og:description" content="Consolidated project tiles, automatic RAG, aggregated programs, cross-portfolio roadmap.">
+  <meta property="og:url" content="https://marcel-ppm.com/en/features/portfolio">
+  <meta property="og:image" content="https://marcel-ppm.com/site/assets/og-marcel.png">
+  <meta property="og:locale" content="en_US">
+  <meta name="twitter:card" content="summary_large_image">
+  <link rel="icon" href="/favicon.svg" type="image/svg+xml">
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@600;700;800&family=Plus+Jakarta+Sans:wght@400;500;600;700&family=JetBrains+Mono:wght@400;600;700&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="/site/site.css">
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "BreadcrumbList",
+    "itemListElement": [
+      { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://marcel-ppm.com/en/" },
+      { "@type": "ListItem", "position": 2, "name": "Features", "item": "https://marcel-ppm.com/en/features" },
+      { "@type": "ListItem", "position": 3, "name": "Portfolio & programs", "item": "https://marcel-ppm.com/en/features/portfolio" }
+    ]
+  }
+  </script>
+</head>
+<body>
+
+<header class="nav">
+  <div class="container nav-inner">
+    <a class="brand" href="/en/" data-testid="site-brand"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
+    <nav class="nav-links" aria-label="Main navigation">
+      <a href="/en/" data-testid="site-nav-home">Home</a>
+      <a href="/en/features" class="active" data-testid="site-nav-features">Features</a>
+      <a href="/en/use-cases" data-testid="site-nav-usecases">Who is it for?</a>
+      <a href="/en/contact" data-testid="site-nav-contact">Contact</a>
+    </nav>
+    <div class="nav-cta">
+      <a class="lang-switch" href="/fonctionnalites/portefeuille" data-testid="site-lang-switch" aria-label="Passer en français">FR</a>
+      <a class="btn btn-ghost" href="/login" data-testid="site-login-btn">Sign in</a>
+      <a class="btn btn-primary" href="/en/contact" data-testid="site-demo-btn">Request a demo</a>
+    </div>
+    <button class="burger" id="burger" aria-label="Menu" data-testid="site-burger"><span></span><span></span><span></span></button>
+  </div>
+  <div class="mobile-menu" id="mobileMenu">
+    <a href="/en/">Home</a>
+    <a href="/en/features">Features</a>
+    <a href="/en/use-cases">Who is it for?</a>
+    <a href="/en/contact">Contact</a>
+    <a href="/login">Sign in</a>
+    <a href="/fonctionnalites/portefeuille">Version française</a>
+  </div>
+</header>
+
+<main>
+  <div class="container page-head">
+    <p class="crumbs"><a href="/en/">Home</a><span class="sep">/</span><a href="/en/features">Features</a><span class="sep">/</span><span class="cur">Portfolio &amp; programs</span></p>
+    <p class="kicker">Module 01 · Portfolio &amp; programs</p>
+    <h1 style="font-size:clamp(2rem,4.2vw,3rem)">Your entire portfolio, <span class="accent">readable in one second</span>.</h1>
+    <p class="lead">No more Friday-night manual consolidations: every project lives in a rich tile, every program aggregates its projects automatically, and the cross-portfolio roadmap draws itself.</p>
+  </div>
+
+  <section class="section section-tint" style="padding:44px 0">
+    <div class="container strip">
+      <div class="strip-item"><div class="v">1 screen</div><div class="l">for all projects, programs and budgets</div></div>
+      <div class="strip-item"><div class="v">Auto RAG</div><div class="l">green / amber / red computed on budget, schedule and risks</div></div>
+      <div class="strip-item"><div class="v">P01-001</div><div class="l">unique project coding, present in every export</div></div>
+      <div class="strip-item"><div class="v">Ctrl + K</div><div class="l">global search: project, milestone, risk or decision</div></div>
+    </div>
+  </section>
+
+  <div class="container">
+    <article class="module">
+      <div>
+        <span class="num">01.1</span>
+        <h3>Project tiles that tell the whole story</h3>
+        <p>Each tile concentrates the essentials: time progress, budget consumption, upcoming milestones, open risks and RAG status. Switch to a dense list view whenever you prefer a table — your choice is remembered.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Progress rings</b> <span class="d">— schedule progress and budget consumption side by side, without opening the record.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Automatic RAG status</b> <span class="d">— computed on budget, schedule and risks; the tile header turns green, amber or red.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Filters &amp; search</b> <span class="d">— by program, status, RAG, project manager; tiles / list toggle remembered per user.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Direct actions</b> <span class="d">— open, edit, export from the tile, no intermediate navigation.</span></span></li>
+      </ul>
+    </article>
+
+    <article class="module">
+      <div>
+        <span class="num">01.2</span>
+        <h3>Programs that aggregate themselves</h3>
+        <p>A program in MARCEL is not a folder: it is a living view that consolidates budgets, progress, risks and milestones from its projects. The program's next two milestones show directly on its tile.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Consolidated RAG</b> <span class="d">— the program's status reflects the worst of its projects, with the detailed breakdown.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Program budget</b> <span class="d">— envelopes, consumed and EAC aggregated automatically from projects.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Upcoming milestones on the tile</b> <span class="d">— the program's next 2 milestones, in red when late.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Tabbed program record</b> <span class="d">— Overview, Projects and all aggregated milestones in a single record.</span></span></li>
+      </ul>
+    </article>
+
+    <article class="module">
+      <div>
+        <span class="num">01.3</span>
+        <h3>Cross-portfolio roadmap &amp; unique coding</h3>
+        <p>The consolidated roadmap aligns all projects on a single timeline — milestones, dependencies and delays visible at a glance. And each project carries a unique, locked code (P01-001), generated per program, that follows it into every export.</p>
+      </div>
+      <ul class="feature-list">
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Multi-project timeline</b> <span class="d">— frozen scope vs actual: schedule drifts stand out in red.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Automatic coding</b> <span class="d">— configurable prefixes per program, locked codes, server-side duplicate prevention.</span></span></li>
+        <li><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5"><path d="M20 6 9 17l-5-5"/></svg><span><b>Global search Ctrl + K</b> <span class="d">— type a code or a name: projects, milestones, risks and decisions grouped by type.</span></span></li>
+      </ul>
+    </article>
+  </div>
+
+  <!-- PLACEHOLDER: testimonial to be replaced with a real customer quote -->
+  <section class="section section-tint" style="padding:56px 0">
+    <div class="container">
+      <div class="quote-grid" style="grid-template-columns:1fr;max-width:860px;margin-top:0">
+        <figure class="quote-card">
+          <blockquote>“Sample testimonial — before MARCEL, the portfolio snapshot took three days of Excel consolidation every month. Now it is permanently up to date, and the board knows it.”</blockquote>
+          <figcaption><b>First Last</b><span>Head of PMO · manufacturing — customer testimonial coming soon</span></figcaption>
+        </figure>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding:64px 0 24px">
+    <div class="container">
+      <p class="kicker">They work together</p>
+      <h2>The portfolio builds on the other modules.</h2>
+      <div class="related-grid">
+        <a class="related-card" href="/en/features/budgets" data-testid="related-budgets">
+          <span class="k">Module 04</span>
+          <h3>Budgets &amp; finance</h3>
+          <p>CAPEX/OPEX, EAC and ETC feed the budget rings on every tile.</p>
+        </a>
+        <a class="related-card" href="/en/features/resources" data-testid="related-resources">
+          <span class="k">Module 03</span>
+          <h3>Resources &amp; capacity</h3>
+          <p>Team workload informs portfolio prioritisation trade-offs.</p>
+        </a>
+        <a class="related-card" href="/en/features/governance" data-testid="related-governance">
+          <span class="k">Module 05</span>
+          <h3>Governance &amp; decisions</h3>
+          <p>Executive trade-offs and decisions are made on the consolidated view.</p>
+        </a>
+      </div>
+    </div>
+  </section>
+
+  <section class="section" style="padding-top:40px">
+    <div class="container">
+      <div class="cta-band">
+        <div>
+          <h2>See your own portfolio as tiles.</h2>
+          <p>Personalised 30-minute demo — bring an Excel export, leave with your portfolio inside MARCEL.</p>
+        </div>
+        <a class="btn btn-light" href="/en/contact" data-testid="cta-demo-btn">Request a demo</a>
+      </div>
+    </div>
+  </section>
+</main>
+
+<footer>
+  <div class="container">
+    <div class="foot-cols">
+      <div class="foot-brand">
+        <a class="brand" href="/en/"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
+        <p>The PPM platform that unites portfolio, budgets, capacity and governance in one cockpit.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Modules</h4>
+        <a href="/en/features/portfolio">Portfolio &amp; programs</a>
+        <a href="/en/features/projects">Projects &amp; roadmap</a>
+        <a href="/en/features/resources">Resources &amp; capacity</a>
+        <a href="/en/features/budgets">Budgets &amp; finance</a>
+        <a href="/en/features/governance">Governance &amp; decisions</a>
+        <a href="/en/features/reporting">Reporting &amp; integrations</a>
+      </div>
+      <div class="foot-col">
+        <h4>MARCEL</h4>
+        <a href="/en/features">All features</a>
+        <a href="/en/use-cases">Who is it for?</a>
+        <a href="/en/contact">Contact &amp; demo</a>
+        <a href="/login">Customer sign-in</a>
+        <a href="/fonctionnalites/portefeuille">Version française</a>
+      </div>
+    </div>
+    <p class="foot-note">© 2026 MARCEL — PPM platform for PMOs, CIOs and program directors.</p>
+  </div>
+</footer>
+
+<script>
+  document.getElementById('burger').addEventListener('click', function () {
+    document.getElementById('mobileMenu').classList.toggle('open');
+  });
+</script>
+</body>
+</html>

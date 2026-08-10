@@ -41,6 +41,7 @@
     <nav class="nav-links" aria-label="Navigation principale">
       <a href="/" data-testid="site-nav-home">Accueil</a>
       <a href="/fonctionnalites" data-testid="site-nav-features">Fonctionnalités</a>
+      <a href="/cas-usage" data-testid="site-nav-usecases">Pour qui ?</a>
       <a href="/contact" class="active" data-testid="site-nav-contact">Contact</a>
     </nav>
     <div class="nav-cta">
@@ -53,6 +54,7 @@
   <div class="mobile-menu" id="mobileMenu">
     <a href="/">Accueil</a>
     <a href="/fonctionnalites">Fonctionnalités</a>
+    <a href="/cas-usage">Pour qui ?</a>
     <a href="/contact">Contact</a>
     <a href="/login">Se connecter</a>
     <a href="/en/contact">English version</a>
@@ -119,14 +121,28 @@
 
 <footer>
   <div class="container">
-    <div class="foot-grid">
-      <a class="brand" href="/"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
-      <nav class="foot-links" aria-label="Pied de page">
-        <a href="/fonctionnalites">Fonctionnalités</a>
+    <div class="foot-cols">
+      <div class="foot-brand">
+        <a class="brand" href="/"><span class="brand-mark">M</span><span class="brand-name">MARCEL</span></a>
+        <p>La plateforme PPM qui réunit portefeuille, budgets, capacité et gouvernance dans un cockpit unique.</p>
+      </div>
+      <div class="foot-col">
+        <h4>Modules</h4>
+        <a href="/fonctionnalites/portefeuille">Portefeuille &amp; programmes</a>
+        <a href="/fonctionnalites/projets">Projets &amp; roadmap</a>
+        <a href="/fonctionnalites/ressources">Ressources &amp; capacité</a>
+        <a href="/fonctionnalites/budgets">Budgets &amp; finances</a>
+        <a href="/fonctionnalites/gouvernance">Gouvernance &amp; décisions</a>
+        <a href="/fonctionnalites/reporting">Reporting &amp; intégrations</a>
+      </div>
+      <div class="foot-col">
+        <h4>MARCEL</h4>
+        <a href="/fonctionnalites">Toutes les fonctionnalités</a>
+        <a href="/cas-usage">Pour qui ?</a>
         <a href="/contact">Contact &amp; démo</a>
         <a href="/login">Connexion client</a>
-        <a href="/en/contact">English</a>
-      </nav>
+        <a href="/en/contact">English version</a>
+      </div>
     </div>
     <p class="foot-note">© 2026 MARCEL — Plateforme PPM pour PMO, DSI et directions de programmes.</p>
   </div>

@@ -16,6 +16,55 @@
     <priority>0.9</priority>
   </url>
   <url>
+    <loc>https://marcel-ppm.com/fonctionnalites/portefeuille</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites/portefeuille"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features/portfolio"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://marcel-ppm.com/fonctionnalites/projets</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites/projets"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features/projects"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://marcel-ppm.com/fonctionnalites/ressources</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites/ressources"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features/resources"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://marcel-ppm.com/fonctionnalites/budgets</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites/budgets"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features/budgets"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://marcel-ppm.com/fonctionnalites/gouvernance</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites/gouvernance"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features/governance"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://marcel-ppm.com/fonctionnalites/reporting</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites/reporting"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features/reporting"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://marcel-ppm.com/cas-usage</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/cas-usage"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/use-cases"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.9</priority>
+  </url>
+  <url>
     <loc>https://marcel-ppm.com/contact</loc>
     <xhtml:link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/contact"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/contact"/>
@@ -33,6 +82,55 @@
     <loc>https://marcel-ppm.com/en/features</loc>
     <xhtml:link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites"/>
     <xhtml:link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.8</priority>
+  </url>
+  <url>
+    <loc>https://marcel-ppm.com/en/features/portfolio</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites/portefeuille"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features/portfolio"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://marcel-ppm.com/en/features/projects</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites/projets"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features/projects"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://marcel-ppm.com/en/features/resources</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites/ressources"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features/resources"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://marcel-ppm.com/en/features/budgets</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites/budgets"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features/budgets"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://marcel-ppm.com/en/features/governance</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites/gouvernance"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features/governance"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://marcel-ppm.com/en/features/reporting</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/fonctionnalites/reporting"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/features/reporting"/>
+    <changefreq>monthly</changefreq>
+    <priority>0.7</priority>
+  </url>
+  <url>
+    <loc>https://marcel-ppm.com/en/use-cases</loc>
+    <xhtml:link rel="alternate" hreflang="fr" href="https://marcel-ppm.com/cas-usage"/>
+    <xhtml:link rel="alternate" hreflang="en" href="https://marcel-ppm.com/en/use-cases"/>
     <changefreq>monthly</changefreq>
     <priority>0.8</priority>
   </url>
