@@ -1,12 +1,13 @@
 import React, { useState } from "react";
+import { Link } from "react-router-dom";
 import { ChevronDown } from "lucide-react";
 
 const UTIL_COLORS = [
-  { max: 50,  bg: "bg-zinc-50",  text: "text-zinc-400", label: "< 50%",    border: "border-zinc-100" },
-  { max: 70,  bg: "bg-emerald-50",text: "text-emerald-600",label: "50–70%",   border: "border-emerald-100" },
-  { max: 90,  bg: "bg-amber-50",  text: "text-amber-600", label: "70–90%",   border: "border-amber-100" },
-  { max: 100, bg: "bg-orange-50", text: "text-orange-600",label: "90–100%",  border: "border-orange-100" },
-  { max: Infinity, bg: "bg-rose-50", text: "text-rose-600", label: "> 100%", border: "border-rose-100" },
+  { max: 50,  bg: "bg-zinc-50",   text: "text-zinc-400",    label: "< 50%",   border: "border-zinc-100" },
+  { max: 70,  bg: "bg-emerald-50",text: "text-emerald-600", label: "50–70%",  border: "border-emerald-100" },
+  { max: 90,  bg: "bg-amber-50",  text: "text-amber-600",   label: "70–90%",  border: "border-amber-100" },
+  { max: 100, bg: "bg-orange-50", text: "text-orange-600",  label: "90–100%", border: "border-orange-100" },
+  { max: Infinity, bg: "bg-rose-50", text: "text-rose-600", label: "> 100%",  border: "border-rose-100" },
 ];
 
 function getCellStyle(pct) {
@@ -32,6 +33,18 @@ export default function CapacityHeatmap({ data, months, onMonthsChange }) {
 
   const periods = data[0]?.periods || [];
 
+  const totals = periods.map((_, i) => {
+    const cap = data.reduce((s, r) => s + (r.periods?.[i]?.capacity_jh || 0), 0);
+    const alloc = data.reduce((s, r) => s + (r.periods?.[i]?.allocated_jh || 0), 0);
+    return {
+      period: periods[i].period,
+      capacity_jh: Math.round(cap * 10) / 10,
+      allocated_jh: Math.round(alloc * 10) / 10,
+      utilization_pct: cap > 0 ? Math.round((alloc / cap) * 100) : 0,
+    };
+  });
+  const totalCapMonth = Math.round(data.reduce((s, r) => s + (r.capacity_jh_month || 0), 0) * 10) / 10;
+
   return (
     <div data-testid="capacity-heatmap">
       {/* Controls */}
@@ -48,7 +61,7 @@ export default function CapacityHeatmap({ data, months, onMonthsChange }) {
           <select
             value={months}
             onChange={(e) => onMonthsChange(Number(e.target.value))}
-            className="appearance-none text-xs border border-zinc-200 rounded-lg px-3 py-1.5 pr-7 bg-white focus:outline-none focus:border-blue-600 text-zinc-600"
+            className="appearance-none text-xs border border-[#e8e6f0] rounded-lg px-3 py-1.5 pr-7 bg-white focus:outline-none focus:border-blue-600 text-zinc-600"
             data-testid="heatmap-months-select"
           >
             {[3, 6, 9, 12].map((v) => (
@@ -64,14 +77,14 @@ export default function CapacityHeatmap({ data, months, onMonthsChange }) {
         <table className="w-full text-xs border-collapse" data-testid="heatmap-table">
           <thead>
             <tr>
-              <th className="text-left px-3 py-2 text-xs text-zinc-500 font-semibold bg-zinc-50 border border-zinc-200 min-w-[120px]">
+              <th className="text-left px-3 py-2 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] bg-[#fbfaff] border border-[#e8e6f0] min-w-[120px]">
                 Équipe
               </th>
-              <th className="px-2 py-2 text-xs text-zinc-500 font-semibold bg-zinc-50 border border-zinc-200 text-center min-w-[60px]">
+              <th className="px-2 py-2 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] bg-[#fbfaff] border border-[#e8e6f0] text-center min-w-[60px]">
                 Capa/mois
               </th>
               {periods.map((p) => (
-                <th key={p.period} className="px-2 py-2 text-xs font-semibold bg-zinc-50 border border-zinc-200 text-center min-w-[72px] text-zinc-500">
+                <th key={p.period} className="px-2 py-2 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] bg-[#fbfaff] border border-[#e8e6f0] text-center min-w-[72px]">
                   {fmtPeriod(p.period)}
                 </th>
               ))}
@@ -80,40 +93,58 @@ export default function CapacityHeatmap({ data, months, onMonthsChange }) {
           <tbody>
             {data.map((row) => (
               <tr key={row.team_name} data-testid={`heatmap-row-${row.team_name}`}>
-                <td className="px-3 py-2 font-semibold text-zinc-700 border border-zinc-200 bg-white">
+                <td className="px-3 py-2 font-semibold text-zinc-700 border border-[#e8e6f0] bg-white">
                   <div className="flex items-center gap-2">
                     <div className="w-5 h-5 rounded-lg bg-blue-600/10 flex items-center justify-center flex-shrink-0">
                       <span className="text-[9px] font-bold text-blue-600">
                         {row.team_name.slice(0, 2).toUpperCase()}
                       </span>
                     </div>
-                    {row.team_name}
+                    {row.team_id ? (
+                      <Link to={`/teams/${row.team_id}`} className="hover:underline hover:text-blue-600 transition-colors">
+                        {row.team_name}
+                      </Link>
+                    ) : (
+                      row.team_name
+                    )}
                   </div>
                 </td>
-                <td className="px-2 py-2 text-center border border-zinc-200 font-mono text-zinc-600 bg-zinc-50">
+                <td className="px-2 py-2 text-center border border-[#e8e6f0] font-mono-data text-zinc-600 bg-[#fbfaff]">
                   {row.capacity_jh_month} JH
                 </td>
                 {row.periods.map((p) => {
                   const style = getCellStyle(p.utilization_pct);
+                  const content = p.capacity_jh === 0 ? (
+                    <span className="text-zinc-200">—</span>
+                  ) : (
+                    <div className="font-semibold font-mono-data">
+                      {p.utilization_pct}%
+                      {p.allocated_jh > 0 && (
+                        <div className="text-[9px] font-normal mt-0.5 opacity-70">
+                          {p.allocated_jh}/{p.capacity_jh} JH
+                        </div>
+                      )}
+                    </div>
+                  );
                   return (
                     <td
                       key={p.period}
-                      className={`px-2 py-2 text-center border border-zinc-200 cursor-default relative transition-all ${style.bg} ${style.text}`}
+                      className={`text-center border border-[#e8e6f0] relative transition-all ${style.bg} ${style.text}`}
                       data-testid={`heatmap-cell-${row.team_name}-${p.period}`}
                       onMouseEnter={() => setTooltip({ team: row.team_name, period: p.period, ...p })}
                       onMouseLeave={() => setTooltip(null)}
                     >
-                      {p.capacity_jh === 0 ? (
-                        <span className="text-zinc-200">—</span>
+                      {row.team_id ? (
+                        <Link
+                          to={`/teams/${row.team_id}?month=${p.period}`}
+                          className="block px-2 py-2 hover:ring-2 hover:ring-inset hover:ring-blue-400 rounded-none"
+                          title={`${row.team_name} · ${fmtPeriod(p.period)} — voir le détail de la charge`}
+                          data-testid={`heatmap-link-${row.team_id}-${p.period}`}
+                        >
+                          {content}
+                        </Link>
                       ) : (
-                        <div className="font-semibold">
-                          {p.utilization_pct}%
-                          {p.allocated_jh > 0 && (
-                            <div className="text-[9px] font-normal mt-0.5 opacity-70">
-                              {p.allocated_jh}/{p.capacity_jh} JH
-                            </div>
-                          )}
-                        </div>
+                        <div className="px-2 py-2 cursor-default">{content}</div>
                       )}
                     </td>
                   );
@@ -121,6 +152,33 @@ export default function CapacityHeatmap({ data, months, onMonthsChange }) {
               </tr>
             ))}
           </tbody>
+          <tfoot>
+            <tr data-testid="heatmap-total-row">
+              <td className="px-3 py-2 font-heading text-[11px] font-bold text-[#26243a] border border-[#e8e6f0] bg-[#fbfaff]">
+                Total portefeuille
+              </td>
+              <td className="px-2 py-2 text-center border border-[#e8e6f0] font-mono-data font-bold text-[#26243a] bg-[#fbfaff]">
+                {totalCapMonth} JH
+              </td>
+              {totals.map((t) => {
+                const style = getCellStyle(t.utilization_pct);
+                return (
+                  <td
+                    key={t.period}
+                    className={`px-2 py-2 text-center border border-[#e8e6f0] font-mono-data font-bold ${style.bg} ${style.text}`}
+                    data-testid={`heatmap-total-${t.period}`}
+                  >
+                    {t.capacity_jh === 0 ? <span className="text-zinc-200">—</span> : (
+                      <>
+                        {t.utilization_pct}%
+                        <div className="text-[9px] font-normal mt-0.5 opacity-70">{t.allocated_jh}/{t.capacity_jh} JH</div>
+                      </>
+                    )}
+                  </td>
+                );
+              })}
+            </tr>
+          </tfoot>
         </table>
       </div>
 
@@ -131,7 +189,7 @@ export default function CapacityHeatmap({ data, months, onMonthsChange }) {
           <div className="space-y-0.5 text-zinc-300">
             <div>Capacité : <span className="text-white font-semibold">{tooltip.capacity_jh} JH</span></div>
             <div>Alloués : <span className="text-white font-semibold">{tooltip.allocated_jh} JH</span></div>
-            <div>Utilisation : <span className={`font-bold ${getCellStyle(tooltip.utilization_pct).text.replace("text-", "text-")}`}>{tooltip.utilization_pct}%</span></div>
+            <div>Utilisation : <span className="font-bold">{tooltip.utilization_pct}%</span></div>
           </div>
         </div>
       )}

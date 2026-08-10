@@ -1,5 +1,11 @@
 # PRD — MARCEL
 
+## 2026-06 — Vue Charge Portefeuille (équipes × mois) — livrée en Preview, auto-testée, NON déployée
+- **Page /teams** : bascule segmentée Tuiles / Vue croisée (teams-view-toggle, teams-view-tiles, teams-view-matrix) ; état months (défaut 6, sélecteur 3/6/9/12) recharge la heatmap ; badge résumé surcharges (matrix-overload-badge : rouge « X mois-équipe en surcharge sur N mois » ou vert « Aucune surcharge »).
+- **CapacityHeatmap.jsx harmonisé** (partagé avec l'onglet heatmap de Ressources) : thead lilas, bordures #e8e6f0, valeurs mono ; noms d'équipes cliquables → fiche ; **cellules cliquables** → /teams/:id?month=YYYY-MM (heatmap-link-*) réutilisant le focus mois de TeamDetail ; **ligne Total portefeuille** en tfoot (heatmap-total-row, capacité/alloué/% par mois, 261.2 JH/mois sur données démo).
+- Auto-testé par screenshot+navigation : bascule OK, 35 cellules cliquables, clic → fiche équipe avec « Mois sélectionné », total row OK. Note : l'API renvoie mois courant + N périodes (7 colonnes pour 6 mois) — comportement existant.
+- ⚠️ NON déployée en prod — en attente de validation utilisateur du Preview.
+
 ## 2026-06 — Lot 2 harmonisation : Fiche Équipe / Ressources / Fournisseurs + charge cliquable + PROD (testé 100% iteration_58)
 - **Fiche Équipe (TeamDetail.jsx)** : grand bandeau indigo supprimé → en-tête standard (avatar carré indigo + h1 + manager/train) ; 4 tuiles KPI (membres, capacité, projets actifs, utilisation avec anneau — team-kpi-*) ; sections Membres/Affectations/Charge mensuelle en shell tuile + titres font-heading ; palette barres alignée (#3f8a34/#e0a800/#cc4f45) ; liens membres → /resources/:id (member-link-*, avant ça pointait vers /resources sans id).
 - **Charge cliquable** : mini-cellules 3 mois des tuiles équipes = liens vers /teams/:id?month=YYYY-MM (team-tile-month-*) ; TeamDetail lit ?month via useSearchParams et met en évidence le mois ("Mois sélectionné", data-testid month-focus-*), sinon "Mois en cours".

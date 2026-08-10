@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from "react";
 import { Link } from "react-router-dom";
-import { Plus, Pencil, Trash2, Users, ArrowUpRight, UserRound } from "lucide-react";
+import { Plus, Pencil, Trash2, Users, ArrowUpRight, UserRound, LayoutGrid, Table2 } from "lucide-react";
 import { usePermissions } from "@/hooks/usePermissions";
 import { teamsAPI, resourcesAPI } from "@/api";
 import { Ring } from "@/components/ProjectTile";
 import TeamModal from "@/components/TeamModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import CapacityAlertBanner from "@/components/CapacityAlertBanner";
+import CapacityHeatmap from "@/components/CapacityHeatmap";
 import ExcelToolbar from "@/components/ExcelToolbar";
 import KpiTile from "@/components/KpiTile";
 
@@ -161,6 +162,8 @@ export default function Teams() {
   const [resources, setResources] = useState([]);
   const [alerts, setAlerts] = useState([]);
   const [heatmap, setHeatmap] = useState([]);
+  const [months, setMonths] = useState(6);
+  const [view, setView] = useState("tiles");
   const [loading, setLoading] = useState(true);
   const [modalOpen, setModalOpen] = useState(false);
   const [selectedTeam, setSelectedTeam] = useState(null);
@@ -168,7 +171,7 @@ export default function Teams() {
   const [deleting, setDeleting] = useState(false);
 
   const fetchAll = () => {
-    Promise.all([teamsAPI.list(), resourcesAPI.list(), teamsAPI.capacityAlerts(), teamsAPI.capacityHeatmap(3)])
+    Promise.all([teamsAPI.list(), resourcesAPI.list(), teamsAPI.capacityAlerts(), teamsAPI.capacityHeatmap(months)])
       .then(([tRes, rRes, aRes, hRes]) => {
         setTeams(tRes.data);
         setResources(rRes.data);
@@ -179,7 +182,7 @@ export default function Teams() {
       .catch(() => setLoading(false));
   };
 
-  useEffect(() => { fetchAll(); }, []);
+  useEffect(() => { fetchAll(); }, [months]); // eslint-disable-line react-hooks/exhaustive-deps
 
   const handleDelete = async () => {
     setDeleting(true);
@@ -209,6 +212,7 @@ export default function Teams() {
   const totalCapacity = Math.round(teams.reduce((s, t) => s + (loadByTeam[t.team_id]?.cur?.capacity_jh || 0), 0));
   const totalAllocated = Math.round(teams.reduce((s, t) => s + (loadByTeam[t.team_id]?.cur?.allocated_jh || 0), 0));
   const globalPct = totalCapacity ? Math.round((totalAllocated / totalCapacity) * 100) : 0;
+  const overCellsCount = heatmap.flatMap((t) => (t.periods || []).filter((p) => p.utilization_pct > 100)).length;
 
   if (loading) return <div className="p-8 text-zinc-400 text-sm">Chargement des équipes...</div>;
 
@@ -276,7 +280,43 @@ export default function Teams() {
         />
       </div>
 
-      {/* Tuiles équipes */}
+      {/* Bascule de vue */}
+      <div className="flex flex-wrap items-center justify-between gap-3 mb-4">
+        <div className="inline-flex items-center bg-[#eeecf6] rounded-lg p-0.5" data-testid="teams-view-toggle">
+          <button
+            onClick={() => setView("tiles")}
+            data-testid="teams-view-tiles"
+            className={`flex items-center gap-1.5 text-[11.5px] font-bold px-3 py-1.5 rounded-md transition-colors ${view === "tiles" ? "bg-white text-[#26243a] shadow-sm" : "text-[#8a87a0] hover:text-[#26243a]"}`}
+          >
+            <LayoutGrid size={12} /> Tuiles
+          </button>
+          <button
+            onClick={() => setView("matrix")}
+            data-testid="teams-view-matrix"
+            className={`flex items-center gap-1.5 text-[11.5px] font-bold px-3 py-1.5 rounded-md transition-colors ${view === "matrix" ? "bg-white text-[#26243a] shadow-sm" : "text-[#8a87a0] hover:text-[#26243a]"}`}
+          >
+            <Table2 size={12} /> Vue croisée
+          </button>
+        </div>
+        {view === "matrix" && (
+          overCellsCount > 0 ? (
+            <span className="text-[11px] font-bold text-[#cc4f45] bg-[#fbe1de] px-2.5 py-1 rounded-md" data-testid="matrix-overload-badge">
+              {overCellsCount} mois-équipe en surcharge sur {months} mois
+            </span>
+          ) : (
+            <span className="text-[11px] font-bold text-[#3f8a34] bg-[#ddf0d8] px-2.5 py-1 rounded-md" data-testid="matrix-overload-badge">
+              Aucune surcharge détectée sur {months} mois
+            </span>
+          )
+        )}
+      </div>
+
+      {view === "matrix" ? (
+        <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 md:p-5" data-testid="teams-matrix-section">
+          <div className="font-heading text-[13px] font-bold text-[#26243a] mb-3">Charge croisée équipes × mois</div>
+          <CapacityHeatmap data={heatmap} months={months} onMonthsChange={setMonths} />
+        </div>
+      ) : (
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4" data-testid="teams-tiles">
         {teams.map((team) => (
           <TeamTile
@@ -298,6 +338,7 @@ export default function Teams() {
           </div>
         )}
       </div>
+      )}
 
       <TeamModal
         isOpen={modalOpen}
