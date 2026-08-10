@@ -340,3 +340,13 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 ## 2026-06 — SSO Entra/Okta REPORTÉ (décision utilisateur)
 - L'utilisateur n'a pas de compte Azure ; Okta idem. À reprendre plus tard.
 - Tout est prêt côté MARCEL : code SSO déployé en prod, procédure complète documentée dans la conversation (App registration Azure → Redirect URI https://marcel-ppm.com/api/auth/sso/callback/entra → config Admin > Configuration > SSO)
+
+## 2026-06 — Site vitrine V2 « type Clarity » (livré, DÉPLOYÉ PROD, agent-testé)
+- Demande : « pour le site il faut faire la même chose » que https://clarity.itdesign.de/fr/ — validé via ask_human : sitemap complet (b), look actuel conservé (pas de design_agent), placeholders témoignages/chiffres (b), teaser FR dans le hero (a), déploiement direct prod (« balance en prod »).
+- 14 nouvelles pages statiques : FR /fonctionnalites/{portefeuille,projets,ressources,budgets,gouvernance,reporting} + /cas-usage ; EN /en/features/{portfolio,projects,resources,budgets,governance,reporting} + /en/use-cases. Chaque page module : breadcrumb, strip 4 chiffres, 3 articles détaillés, témoignage PLACEHOLDER, 3 modules liés, CTA démo, footer 3 colonnes.
+- Pages existantes enrichies : accueil FR/EN (section vidéo teaser + poster, 4 bénéfices avec chiffres PLACEHOLDER « −50%* », 4 personas → cas d'usage, 2 témoignages PLACEHOLDER, FAQ 6 questions + JSON-LD FAQPage + VideoObject, liens bento vers pages modules, footer 3 colonnes) ; hub fonctionnalités FR/EN (8 liens « Explorer le module → ») ; contact FR/EN (nav + footer).
+- Nav globale : Accueil / Fonctionnalités / Pour qui ? / Contact. SEO : canonical + hreflang fr/en/x-default sur les 20 pages, BreadcrumbList JSON-LD, sitemap.xml réécrit (20 URLs + xhtml:link hreflang), llms.txt mis à jour.
+- nginx.conf : 14 nouvelles locations exactes pour les URLs propres. Teasers MP4 dé-gitignorés (4 fichiers ~12 Mo commités) + posters extraits par ffmpeg (site/assets/teaser-poster-{fr,en}.jpg).
+- IMPORTANT PLACEHOLDERS : témoignages et chiffres de résultats sont des EXEMPLES marqués « témoignage client à venir » — à remplacer par de vraies références.
+- Vérifié prod : 20/20 URLs HTTP 200 avec bons titres, MP4 + posters 200, sitemap 20 URLs, /api/health 200, formulaire contact 201, disque VPS 79% après prune. Screenshots preview + prod OK.
+- Leçon : 2 search_replace « fantômes » détectés par grep de contrôle (bento-link-ai FR, bento-link-projects EN) et corrigés — toujours vérifier par grep après un gros lot.

@@ -126,3 +126,10 @@
   3. nginx-http conteneur 502 après recréation des conteneurs → docker compose restart nginx-http
 - Vérifié : https://marcel-ppm.com HTTP 200, /api/health ok, nouvelles routes présentes (403 sans auth), page login avec boutons SSO
 - RAPPEL : RESEND_API_KEY et SENTRY_DSN toujours absents de la prod ; codes projets à générer via Admin → Codes Projets en prod
+
+## 2026-06 — Site vitrine V2 déployé en prod
+- 14 nouvelles pages (6 modules FR + 6 EN + cas d'usage FR/EN), accueils enrichis (vidéo teaser, bénéfices, personas, témoignages placeholders, FAQ), hub avec liens modules, footer 3 colonnes, nav « Pour qui ? »
+- SEO : sitemap 20 URLs + hreflang, llms.txt, JSON-LD (FAQPage, VideoObject, BreadcrumbList), canonical partout
+- nginx.conf : 14 locations ajoutées ; teasers MP4 dé-gitignorés et servis en prod ; posters ffmpeg
+- Déployé : build frontend VPS OK, 20/20 URLs 200, contact 201, health 200, disque 79%
+- À FAIRE plus tard : remplacer les témoignages/chiffres PLACEHOLDER par de vraies références clients
