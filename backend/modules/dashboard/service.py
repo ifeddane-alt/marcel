@@ -146,7 +146,9 @@ async def get_dashboard_preferences(current_user: TokenPayload) -> dict:
     doc = await db.user_preferences.find_one(
         {"user_id": current_user.user_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
     )
-    widgets = (doc or {}).get("dashboard_widgets") or DASHBOARD_DEFAULT_WIDGETS
+    widgets = (doc or {}).get("dashboard_widgets")
+    if widgets is None:
+        widgets = DASHBOARD_DEFAULT_WIDGETS
     layouts = (doc or {}).get("dashboard_layouts") or None
     return {"widgets": widgets, "layouts": layouts, "available": DASHBOARD_DEFAULT_WIDGETS}
 

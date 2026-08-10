@@ -1,0 +1,26 @@
+{
+  "summary": "Full pass on the harmonisation 'langage tuiles' + Dashboard reset. Login admin@altair.fr OK. (1) Fiche Projet (Phoenix, id=21fa6d43…): onglet Aperçu affiche les 4 tuiles KPI (data-testid project-kpi-tiles, project-kpi-avancement, project-kpi-budget, project-kpi-eac, project-kpi-jh) — tous présents (count=1 chacun). Onglet Équipe: table Allocations (8 lignes) avec noms — Thomas Dubois / Sophie Martin / Alexandre Moreau / Isabelle Bernard / Aurore Chaumont — plus AUCUN ID tronqué. Table Allocations de travail: 5 lignes avec noms de ressources aussi (wa-resource-* count=5). (2) /teams: 4 KPIs OK (teams-kpi-total/assigned/load/overloaded, count=1 chacun), 5 tuiles riches (team-card-*, team-tile-status-*, team-tile-months-* count=5), header teinté, badge OK flottant, anneau utilisation 0% (attendu — pas d'allocations sur mois courant), capacité mono (82 JH / 58 JH / 20 JH / 28.2 JH / 15 JH), mini-cellules 3 mois août/sept/oct. Boutons btn-edit-team-* ouvrent bien la modale 'Modifier l'équipe' (vérifié visuellement, la modale n'a pas role=dialog d'où le count=0 initial), btn-delete-team-* + team-link-* naviguent vers /teams/:id OK. (3) Dashboard widgets harmonisés: milestones-gauge-widget, chart-budget-widget, chart-rag-widget tous présents. (4) BOUTON RÉINITIALISER: dashboard-customize-btn → dashboard-reset-layout-btn → grille vide (0 react-grid-item), dashboard-empty-dropzone-hint visible (count=1), 23 toggles disponibles dans la barre → confirmé RESET = sélection vide. Ajout de 2 widgets via toggles, Enregistrer, reload → GET /api/dashboard/preferences retourne widgets=['metric_projects','metric_green'] (len=2) — persistance de sélection partielle OK, ne retombe pas sur 22 par défaut. (5) Backend: PUT /api/dashboard/preferences avec widgets:[] → GET retourne widgets:[] ✓. GET /api/teams/capacity-heatmap?months=3 retourne bien 5 équipes avec 4 périodes {period,capacity_jh,allocated_jh,utilization_pct} ✓. (6) Régression: /portfolio (H1 'Portefeuille'), /programmes (H1 'Programmes'), /budget (H1 'Budget Portefeuille') se chargent sans erreur JS. (7) Préférences admin RESTAURÉES à la fin via PUT avec la liste 'available' complète (22 widgets) — GET final confirme widgets len=22.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Hydration warning React: '<span> option ...' — un élément <option> semble être enveloppé dans un <span> quelque part (loggué au chargement de /teams). Non bloquant mais à corriger. Provient probablement du header/language selector (LanguageSelector).",
+    "Warnings Recharts width(-1) height(-1) toujours présents sur Dashboard (non bloquants, connus depuis iteration_55/56).",
+    "WebSocket /api/ws warning au login (connu, non bloquant).",
+    "Modale d'édition Team n'utilise pas role='dialog' — accessibilité mineure à améliorer.",
+    "GET /api/dashboard/preferences après PUT layouts:null régénère 'layouts.lg' à partir des widgets stockés — comportement OK mais le champ 'layouts' n'est jamais réellement mis à null si on repost widgets non vides."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "100% (3/3: preferences GET/PUT persist [], heatmap, allocations)", "frontend": "100% (fiche projet, teams, dashboard reset + persistance, régression /portfolio /programmes /budget)"},
+  "test_credentials": "admin@altair.fr / Admin2026! — OK",
+  "seed_data_creation": "Aucune donnée créée. Préférences admin: intermédiairement mises à widgets=[] puis widgets=[metric_projects,metric_green], puis RESTAURÉES via PUT à la liste 'available' complète (22 widgets). État final GET verified widgets len=22.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Harmonisation tuiles + reset dashboard: TOUT OK. Projects avec allocations : 21fa6d43-0ce8-4ee7-8e06-114ef3199006 (Phoenix, 8 allocs) et c4b43099-… (4 allocs). Modale Team edit fonctionne mais n'a pas role=dialog — utiliser selector textuel 'Modifier l'équipe' ou vérifier visuellement.",
+  "rca of the issue": "N/A — aucun bug détecté."
+}

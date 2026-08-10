@@ -162,7 +162,7 @@ export default function Dashboard() {
       setCxo(cxoRes.data);
       setExtras(exRes.data);
       setTeamLoad(tlRes.data || []);
-      const migrated = migrateWidgets(prefRes.data.widgets?.length ? prefRes.data.widgets : ALL_WIDGETS);
+      const migrated = migrateWidgets(Array.isArray(prefRes.data.widgets) ? prefRes.data.widgets : ALL_WIDGETS);
       setWidgets(migrated);
       setLayouts(migrateLayouts(prefRes.data.layouts, migrated));
       setLoading(false);
@@ -183,8 +183,8 @@ export default function Dashboard() {
   const hideWidget = (w) => setWidgets((cur) => cur.filter((x) => x !== w));
   const showWidget = (w) => setWidgets((cur) => [...cur, w]);
   const resetLayout = () => {
-    setWidgets(ALL_WIDGETS);
-    setLayouts({ lg: buildDefaultLayout(ALL_WIDGETS) });
+    setWidgets([]);
+    setLayouts({ lg: [] });
   };
 
   const savePrefs = async () => {
@@ -312,7 +312,7 @@ export default function Dashboard() {
                 data-testid="dashboard-reset-layout-btn"
                 onClick={resetLayout}
                 className="flex items-center gap-1.5 px-3 py-2 border border-zinc-200 bg-white rounded-lg text-sm text-zinc-500 hover:bg-zinc-50 transition-colors"
-                title="Réinitialiser la disposition"
+                title="Tout désélectionner — retire tous les blocs du tableau de bord"
               >
                 <RotateCcw size={13} /> <span className="hidden sm:inline">Réinitialiser</span>
               </button>
@@ -374,6 +374,18 @@ export default function Dashboard() {
           <Move size={11} className="text-blue-600" />
           Glissez-déposez chaque bloc pour le repositionner, tirez le coin bas-droit pour le redimensionner, croix pour masquer un bloc.
         </p>
+      )}
+
+      {!customizing && gridWidgets.length === 0 && (
+        <div className="bg-white border border-dashed border-[#e8e6f0] rounded-xl p-10 text-center" data-testid="dashboard-empty-state">
+          <p className="text-sm text-zinc-500 font-medium">Aucun bloc affiché sur le tableau de bord.</p>
+          <p className="text-xs text-zinc-400 mt-1">Cliquez sur « Personnaliser » puis sélectionnez les blocs à afficher.</p>
+        </div>
+      )}
+      {customizing && gridWidgets.length === 0 && (
+        <div className="mb-4 border-2 border-dashed border-blue-300 bg-blue-50/40 rounded-xl p-8 text-center text-sm text-blue-500" data-testid="dashboard-empty-dropzone-hint">
+          Grille vide — cliquez sur un bloc dans la barre ci-dessus ou glissez-le dans la grille.
+        </div>
       )}
 
       {/* Grille matricielle */}

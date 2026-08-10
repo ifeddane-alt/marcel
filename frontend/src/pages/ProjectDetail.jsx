@@ -4,7 +4,7 @@ import {
   ArrowLeft, Calendar, ChevronRight, Flag, AlertTriangle, Clock, TrendingUp,
   Pencil, Trash2, Plus, History, ShieldAlert, ClipboardList, Presentation, Users,
   GitBranch, BarChart2, Diamond, GitFork, Lock, Send, CheckCircle, BotMessageSquare,
-  FileDown, FileUp,
+  FileDown, FileUp, ChevronDown, X,
 } from "lucide-react";
 import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI, decisionsAPI, workAllocationsAPI, projectDependenciesAPI, vendorsAPI, scopeAPI, msprojectAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -25,6 +25,7 @@ import ExportCopilModal from "@/components/ExportCopilModal";
 import StatusReportModal from "@/components/StatusReportModal";
 import WorkAllocationModal from "@/components/WorkAllocationModal";
 import ProjectGantt from "@/components/ProjectGantt";
+import { Ring, elapsedPct, clamp } from "@/components/ProjectTile";
 import { formatEuro, formatDate, formatJH } from "@/utils/format";
 
 // Expose un événement global pour ouvrir l'AgentDrawer avec une question pré-chargée
@@ -226,6 +227,16 @@ export default function ProjectDetail() {
   const budgetDeviation = project.budget_forecast - project.budget_total;
   const scheduleDelayed = project.end_date_forecast > project.end_date_baseline;
 
+  // KPI tuiles (langage Portefeuille/Programmes)
+  const RAG_RING = { green: "#3f8a34", orange: "#a3891a", red: "#cc4f45" };
+  const ringColor = RAG_RING[project.status_rag] || "#3f8a34";
+  const progressPct = elapsedPct(project.start_date, project.end_date_forecast);
+  const budgetPct = project.budget_total > 0 ? clamp(Math.round(((project.budget_consumed || 0) / project.budget_total) * 100)) : 0;
+  const eacVal = project.eac || project.budget_forecast || 0;
+  const eacPct = project.budget_total > 0 ? clamp(Math.round((eacVal / project.budget_total) * 100)) : 0;
+  const eacOver = eacVal > project.budget_total;
+  const jhPct = project.jh_planned > 0 ? clamp(Math.round(((project.jh_consumed || 0) / project.jh_planned) * 100)) : 0;
+
   // Task totals for coherence check
   const taskTotals = tasks.reduce(
     (acc, t) => ({
@@ -403,13 +414,51 @@ export default function ProjectDetail() {
         ))}
       </div>
 
+      {/* KPI tuiles — Aperçu */}
+      <div className={`grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4 ${activeTab === "apercu" ? "" : "hidden"}`} data-testid="project-kpi-tiles">
+        <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 flex items-center justify-between gap-3" data-testid="project-kpi-avancement">
+          <div className="min-w-0">
+            <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Avancement</div>
+            <div className="font-mono-data text-[22px] font-bold text-[#26243a] mt-1">{progressPct}%</div>
+            <div className="text-[10.5px] text-[#8a87a0] mt-0.5 truncate">fin prévue {formatDate(project.end_date_forecast)}</div>
+          </div>
+          <div className="flex-shrink-0"><Ring pct={progressPct} color={ringColor} label="Temps" caption="écoulé" /></div>
+        </div>
+        <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 flex items-center justify-between gap-3" data-testid="project-kpi-budget">
+          <div className="min-w-0">
+            <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Budget consommé</div>
+            <div className="font-mono-data text-[22px] font-bold text-[#26243a] mt-1">{Math.round((project.budget_consumed || 0) / 1000).toLocaleString("fr-FR")} K€</div>
+            <div className="text-[10.5px] text-[#8a87a0] mt-0.5 truncate">sur {Math.round((project.budget_total || 0) / 1000).toLocaleString("fr-FR")} K€</div>
+          </div>
+          <div className="flex-shrink-0"><Ring pct={budgetPct} color="#2e5fe8" label="Budget" caption="conso" /></div>
+        </div>
+        <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 flex items-center justify-between gap-3" data-testid="project-kpi-eac">
+          <div className="min-w-0">
+            <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">EAC</div>
+            <div className={`font-mono-data text-[22px] font-bold mt-1 ${eacOver ? "text-[#cc4f45]" : "text-[#26243a]"}`}>{Math.round(eacVal / 1000).toLocaleString("fr-FR")} K€</div>
+            <div className={`text-[10.5px] mt-0.5 truncate font-mono-data ${eacOver ? "text-[#cc4f45]" : "text-[#3f8a34]"}`}>
+              {eacVal - (project.budget_total || 0) > 0 ? "+" : ""}{Math.round((eacVal - (project.budget_total || 0)) / 1000).toLocaleString("fr-FR")} K€ vs budget
+            </div>
+          </div>
+          <div className="flex-shrink-0"><Ring pct={eacPct} color={eacOver ? "#cc4f45" : "#3f8a34"} label="EAC" caption="vs budget" /></div>
+        </div>
+        <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 flex items-center justify-between gap-3" data-testid="project-kpi-jh">
+          <div className="min-w-0">
+            <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">JH consommés</div>
+            <div className="font-mono-data text-[22px] font-bold text-[#26243a] mt-1">{(project.jh_consumed || 0).toLocaleString("fr-FR")}</div>
+            <div className="text-[10.5px] text-[#8a87a0] mt-0.5 truncate">sur {(project.jh_planned || 0).toLocaleString("fr-FR")} JH prévus</div>
+          </div>
+          <div className="flex-shrink-0"><Ring pct={jhPct} color="#6d28d9" label="JH" caption="conso" /></div>
+        </div>
+      </div>
+
       <div className="grid grid-cols-1 lg:grid-cols-12 gap-4">
         {/* Left column */}
         <div className={`col-span-1 space-y-4 ${activeTab === "apercu" ? "lg:col-span-8" : "lg:col-span-12"}`}>
           {/* Budget CAPEX / OPEX + EAC */}
-          <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm p-4 md:p-5 ${activeTab === "apercu" ? "" : "hidden"}`} data-testid="budget-section">
+          <div className={`bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 md:p-5 ${activeTab === "apercu" ? "" : "hidden"}`} data-testid="budget-section">
             <div className="flex items-center justify-between mb-4">
-              <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold">
+              <div className="font-heading text-[13px] font-bold text-[#26243a]">
                 Budget CAPEX / OPEX & EAC
               </div>
               {canWrite && (
@@ -563,8 +612,8 @@ export default function ProjectDetail() {
 
           {/* Coûts Externes (Régie + Forfait) */}
           {externalCosts && externalCosts.resources && externalCosts.resources.length > 0 && (
-            <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm p-5 ${activeTab === "apercu" ? "" : "hidden"}`} data-testid="external-costs-section">
-              <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold mb-4 flex items-center gap-2">
+            <div className={`bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-5 ${activeTab === "apercu" ? "" : "hidden"}`} data-testid="external-costs-section">
+              <div className="font-heading text-[13px] font-bold text-[#26243a] mb-4 flex items-center gap-2">
                 <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" className="text-blue-600">
                   <path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/>
                   <path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/>
@@ -633,11 +682,11 @@ export default function ProjectDetail() {
           )}
 
           {/* Tasks — Décomposition du projet */}
-          <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "taches" ? "" : "hidden"}`} data-testid="tasks-section">
+          <div className={`bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] ${activeTab === "taches" ? "" : "hidden"}`} data-testid="tasks-section">
             <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
               <div className="flex-1">
                 <div className="flex items-center gap-3">
-                  <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold">
+                  <div className="font-heading text-[13px] font-bold text-[#26243a]">
                     Décomposition du Projet ({tasks.length} tâches / features)
                   </div>
                   {/* View toggle */}
@@ -760,18 +809,18 @@ export default function ProjectDetail() {
               <div className="overflow-x-auto">
                 <table className="w-full text-xs" data-testid="tasks-table">
                   <thead>
-                    <tr className="bg-zinc-50 border-b border-zinc-200 text-left">
-                      <th className="px-3 py-2.5 font-semibold text-zinc-600 text-center w-12">RAG</th>
-                      <th className="px-3 py-2.5 font-semibold text-zinc-600 min-w-[180px]">Nom</th>
-                      <th className="px-3 py-2.5 font-semibold text-zinc-600">Type</th>
-                      <th className="px-3 py-2.5 font-semibold text-zinc-600">Statut</th>
-                      <th className="px-3 py-2.5 font-semibold text-zinc-600">Fin prévue</th>
-                      <th className="px-3 py-2.5 font-semibold text-zinc-600">Fin réelle</th>
-                      <th className="px-3 py-2.5 font-semibold text-zinc-600 text-right">Budget prévu</th>
-                      <th className="px-3 py-2.5 font-semibold text-zinc-600 text-right">Budget landing</th>
-                      <th className="px-3 py-2.5 font-semibold text-zinc-600 text-right">JH prévus</th>
-                      <th className="px-3 py-2.5 font-semibold text-zinc-600 text-right">JH landing</th>
-                      <th className="px-3 py-2.5 font-semibold text-zinc-600">Responsable</th>
+                    <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+                      <th className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] text-center w-12">RAG</th>
+                      <th className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] min-w-[180px]">Nom</th>
+                      <th className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">Type</th>
+                      <th className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">Statut</th>
+                      <th className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">Fin prévue</th>
+                      <th className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">Fin réelle</th>
+                      <th className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] text-right">Budget prévu</th>
+                      <th className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] text-right">Budget landing</th>
+                      <th className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] text-right">JH prévus</th>
+                      <th className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] text-right">JH landing</th>
+                      <th className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">Responsable</th>
                       {canWrite && <th className="px-3 py-2.5 w-16"></th>}
                     </tr>
                   </thead>
@@ -1037,9 +1086,9 @@ export default function ProjectDetail() {
           </div>
 
           {/* Milestones — enrichis 3 familles */}
-          <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "jalons" ? "" : "hidden"}`} data-testid="milestones-section">
+          <div className={`bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] ${activeTab === "jalons" ? "" : "hidden"}`} data-testid="milestones-section">
             <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold">
+              <div className="flex items-center gap-2 font-heading text-[13px] font-bold text-[#26243a]">
                 <Diamond size={13} className="text-yellow-500" />
                 Jalons ({milestones.length})
               </div>
@@ -1061,7 +1110,7 @@ export default function ProjectDetail() {
                   <thead>
                     <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
                       {["Famille / Type", "Jalon", "Baseline", "Forecast", "Réelle", "Statut", "Attribut", ""].map((h) => (
-                        <th key={h} className="px-3 py-2.5 text-xs font-semibold text-zinc-600 whitespace-nowrap">{h}</th>
+                        <th key={h} className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -1149,9 +1198,9 @@ export default function ProjectDetail() {
           </div>
 
           {/* Dépendances inter-projets */}
-          <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "jalons" ? "" : "hidden"}`} data-testid="dependencies-section">
+          <div className={`bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] ${activeTab === "jalons" ? "" : "hidden"}`} data-testid="dependencies-section">
             <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold">
+              <div className="flex items-center gap-2 font-heading text-[13px] font-bold text-[#26243a]">
                 <GitFork size={13} className="text-violet-500" />
                 Dépendances inter-projets ({dependencies.length})
               </div>
@@ -1173,7 +1222,7 @@ export default function ProjectDetail() {
                   <thead>
                     <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
                       {["Direction", "Projet lié", "Nature", "Impact", "Échéance", "Statut", ""].map((h) => (
-                        <th key={h} className="px-3 py-2.5 text-xs font-semibold text-zinc-600 whitespace-nowrap">{h}</th>
+                        <th key={h} className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] whitespace-nowrap">{h}</th>
                       ))}
                     </tr>
                   </thead>
@@ -1233,9 +1282,9 @@ export default function ProjectDetail() {
           </div>
 
           {/* Registre des risques */}
-          <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "risques" ? "" : "hidden"}`} data-testid="risks-section">
+          <div className={`bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] ${activeTab === "risques" ? "" : "hidden"}`} data-testid="risks-section">
             <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold">
+              <div className="flex items-center gap-2 font-heading text-[13px] font-bold text-[#26243a]">
                 <ShieldAlert size={13} className="text-rose-400" />
                 Registre des risques ({risks.length})
               </div>
@@ -1353,9 +1402,9 @@ export default function ProjectDetail() {
               conformité: "text-teal-700", gouvernance: "text-zinc-600",
             };
             return (
-              <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "decisions" ? "" : "hidden"}`} data-testid="decisions-section">
+              <div className={`bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] ${activeTab === "decisions" ? "" : "hidden"}`} data-testid="decisions-section">
                 <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
-                  <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold">
+                  <div className="flex items-center gap-2 font-heading text-[13px] font-bold text-[#26243a]">
                     <ClipboardList size={13} className="text-blue-600" />
                     Registre des décisions ({decisions.length})
                   </div>
@@ -1436,9 +1485,9 @@ export default function ProjectDetail() {
 
           {/* Allocations */}
           {allocations.length > 0 && (
-            <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "equipe" ? "" : "hidden"}`} data-testid="allocations-section">
+            <div className={`bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] ${activeTab === "equipe" ? "" : "hidden"}`} data-testid="allocations-section">
               <div className="px-5 py-3 border-b border-zinc-100">
-                <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold">
+                <div className="font-heading text-[13px] font-bold text-[#26243a]">
                   Allocations ({allocations.length})
                 </div>
               </div>
@@ -1453,7 +1502,7 @@ export default function ProjectDetail() {
                 <tbody>
                   {allocations.map((a) => (
                     <tr key={a.allocation_id} className="border-b border-zinc-100 hover:bg-zinc-50/50" data-testid={`allocation-row-${a.allocation_id}`}>
-                      <td className="px-4 py-2.5 text-zinc-700 font-medium">{a.resource_id.slice(-6)}</td>
+                      <td className="px-4 py-2.5 text-zinc-700 font-medium" data-testid={`allocation-resource-${a.allocation_id}`}>{getResourceName(a.resource_id)}</td>
                       <td className="px-4 py-2.5 font-mono-data text-xs text-zinc-600">
                         {new Date(a.period_month).toLocaleDateString("fr-FR", { month: "short", year: "numeric" })}
                       </td>
@@ -1479,9 +1528,9 @@ export default function ProjectDetail() {
         </div>
 
         {/* Work Allocations — S1-05 */}
-        <div className={`col-span-12 bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "equipe" ? "" : "hidden"}`} data-testid="work-allocations-section">
+        <div className={`col-span-12 bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] ${activeTab === "equipe" ? "" : "hidden"}`} data-testid="work-allocations-section">
           <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
-            <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold">
+            <div className="flex items-center gap-2 font-heading text-[13px] font-bold text-[#26243a]">
               <Clock size={13} className="text-blue-600" />
               Allocations de travail ({workAllocations.length})
             </div>
@@ -1515,7 +1564,7 @@ export default function ProjectDetail() {
                     const raf_cost = Math.round((raf_wa * (wa.tjm_eur || 0)) * 100) / 100;
                     return (
                       <tr key={wa.work_allocation_id} className="border-b border-zinc-50 hover:bg-zinc-50/50" data-testid={`wa-row-${wa.work_allocation_id}`}>
-                        <td className="px-3 py-2.5 text-xs font-medium text-zinc-700">{wa.resource_name || wa.resource_id}</td>
+                        <td className="px-3 py-2.5 text-xs font-medium text-zinc-700" data-testid={`wa-resource-${wa.work_allocation_id}`}>{wa.resource_name || getResourceName(wa.resource_id)}</td>
                         <td className="px-3 py-2.5">
                           <span className="text-[10px] font-semibold uppercase tracking-wide bg-zinc-100 text-zinc-600 px-1.5 py-0.5 rounded-lg">
                             {wa.phase}
@@ -1551,9 +1600,9 @@ export default function ProjectDetail() {
 
         {/* Team Consumption — S1-06 */}
         {teamConsumption.length > 0 && (
-          <div className={`col-span-12 bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "equipe" ? "" : "hidden"}`} data-testid="team-consumption-section">
+          <div className={`col-span-12 bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] ${activeTab === "equipe" ? "" : "hidden"}`} data-testid="team-consumption-section">
             <div className="px-5 py-3 border-b border-zinc-100">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold">
+              <div className="flex items-center gap-2 font-heading text-[13px] font-bold text-[#26243a]">
                 <Users size={13} className="text-blue-600" />
                 Consommation par équipe
               </div>
@@ -1594,9 +1643,9 @@ export default function ProjectDetail() {
 
         {/* ── Section Scope reçu ─────────────────────────────────── */}
         {scopeSnapshots.length > 0 && (
-          <div className={`col-span-12 bg-white border border-zinc-200 rounded-lg shadow-sm ${activeTab === "scope" ? "" : "hidden"}`} data-testid="scope-received-section">
+          <div className={`col-span-12 bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] ${activeTab === "scope" ? "" : "hidden"}`} data-testid="scope-received-section">
             <div className="px-5 py-3 border-b border-zinc-100 flex items-center justify-between">
-              <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold">
+              <div className="flex items-center gap-2 font-heading text-[13px] font-bold text-[#26243a]">
                 <Lock size={13} className="text-blue-600" />
                 Scope {scopeSnapshots.some(s => s.status === "transmitted") ? "reçu" : "figé"}
               </div>
@@ -1673,8 +1722,8 @@ export default function ProjectDetail() {
         )}
 
         <div className={`col-span-1 lg:col-span-4 space-y-4 ${activeTab === "apercu" ? "" : "hidden"}`}>
-          <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-5">
-            <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold mb-4">
+          <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-5">
+            <div className="font-heading text-[13px] font-bold text-[#26243a] mb-4">
               Informations projet
             </div>
             <dl className="space-y-3 text-sm">
@@ -1706,8 +1755,8 @@ export default function ProjectDetail() {
 
           {/* RAF valorisé — S1-07 */}
           {raf && (
-            <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-5" data-testid="raf-section">
-              <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold mb-3">
+            <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-5" data-testid="raf-section">
+              <div className="font-heading text-[13px] font-bold text-[#26243a] mb-3">
                 RAF &amp; Atterrissage valorisé
               </div>
               <div className="space-y-2.5">
@@ -1728,8 +1777,8 @@ export default function ProjectDetail() {
           )}
 
           {/* Milestone summary */}
-          <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-5">
-            <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold mb-3">
+          <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-5">
+            <div className="font-heading text-[13px] font-bold text-[#26243a] mb-3">
               Résumé jalons
             </div>
             {["achieved", "planned", "at_risk", "delayed"].map((s) => {
@@ -1978,3 +2027,4 @@ function ScopeFeatureModal({ feature: f, onClose }) {
     </div>
   );
 }
+

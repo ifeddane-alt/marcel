@@ -1,11 +1,19 @@
 # PRD — MARCEL
 
+## 2026-06 — Lot harmonisation Fiche Projet / Équipes / Dashboard + fix Réinitialiser (livré, testé 100% iteration_57)
+- **Fiche Projet (ProjectDetail.jsx)** : 4 tuiles KPI avec anneaux Ring sur l'onglet Aperçu (Avancement temps couleur RAG, Budget conso, EAC vs budget rouge si dépassement, JH conso — data-testid project-kpi-*) ; toutes les sections passées au shell tuile (border #e8e6f0, rounded-xl, ombre lavande) ; titres de sections en font-heading ; theads harmonisés lilas #fbfaff + libellés uppercase #8a87a0 (tâches, jalons, dépendances) ; **IDs bruts de ressources remplacés par les noms** dans Allocations (getResourceName, testid allocation-resource-*) et Allocations de travail (wa-resource-*) ; fix bug latent : ChevronDown/X non importés (ScopeFeatureList aurait crashé).
+- **Équipes (Teams.jsx réécrit)** : tuiles riches style Programmes — en-tête teinté par charge (vert OK / ambre Tendu ≥85% / rouge Surcharge >100%), badge flottant, anneau utilisation mois courant, capacité/charge allouée en mono, mini-cellules charge à 3 mois (via /api/teams/capacity-heatmap?months=3), membres + manager en chips, footer actions ; 4 tuiles KPI (total, ressources affectées avec anneau, charge du mois, surcharges). data-testids conservés (team-card-*, team-link-*, btn-edit/delete-team-*) + nouveaux (team-tile-status-*, team-tile-months-*, teams-kpi-*).
+- **Dashboard widgets (DashboardWidgets.jsx)** : MetricCard valeurs → font-mono-data ; MilestonesGaugeWidget → donut + valeurs mono ; ChartBudget/ChartRag/Heatmap → wrappers tuile + header font-heading. Drag & drop et barre de blocs intacts.
+- **Réinitialiser (Dashboard.jsx + backend dashboard/service.py)** : le bouton désélectionne maintenant TOUT (widgets=[], layouts vides) au lieu de tout sélectionner ; états vides ajoutés (dashboard-empty-state hors édition, dashboard-empty-dropzone-hint en édition) ; **backend** : get_dashboard_preferences distingue None (→ défauts) de [] (sélection vide respectée) ; frontend charge via Array.isArray — une sélection vide ou partielle persiste après reload.
+- iteration_57 : backend 100%, frontend 100%, zéro bug. Préférences admin restaurées après test. Notes non bloquantes connues : warnings Recharts width(-1), WebSocket /api/ws, hydration warning LanguageSelector, modale Team sans role=dialog.
+- ⚠️ NON déployé en prod — validation visuelle utilisateur du Preview attendue avant redéploiement.
+
 ## 2026-06 — Harmonisation "langage tuiles" : page Budget (livrée, auto-testée screenshots)
 - Réclamation utilisateur : design pas en phase avec les dernières évolutions (tuiles Portefeuille/Programmes = référence). Plan validé : harmonisation profonde page par page, en commençant par Budget (choix utilisateur).
 - **Budget.jsx refondu** : 4 cartes KPI style tuile avec anneaux Ring (CAPEX conso %, OPEX conso %, EAC vs prévu %, RAF vs EAC %) + valeurs font-mono-data ; carte enveloppe restylée (micro-label uppercase, barres #3f8a34/#a3891a/#cc4f45) ; filtres en ligne simple ; onglets Clarity avec pastilles de compte ; table dense (thead #fbfaff, colonnes numériques mono, ligne Total #f7f6fb) ; blocs Par programme (titres font-heading, valeurs mono, micro-labels) ; drawer restylé.
 - **Fix global** : `Layout.jsx` main → `pb-28` pour que le bouton flottant Agent IA PMO ne masque plus les dernières lignes des tableaux en fin de scroll.
 - ⚠️ LEÇON : un search_replace d'un batch parallèle a signalé "successful" sans s'appliquer (composant KpiCard) → toujours vérifier par grep après un gros batch.
-- ⏳ Harmonisation restante (backlog utilisateur validé) : fiche Projet (tous onglets + noms de ressources au lieu des IDs bruts dans Allocations — bug vu en prod), Équipes (cartes → tuiles riches), Fiche Équipe (header unifié), Ressources/fiche, Fournisseurs, Dashboard. Prod à redéployer après validation utilisateur.
+- ⏳ Harmonisation restante (backlog utilisateur validé) : ~~fiche Projet~~ ✅, ~~Équipes~~ ✅, ~~Dashboard~~ ✅ (iteration_57). Restant : Fiche Équipe (header unifié), Ressources/fiche, Fournisseurs. Prod à redéployer après validation utilisateur.
  (PPM SaaS Multi-Tenant)
 
 ## Énoncé du problème original

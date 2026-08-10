@@ -42,7 +42,7 @@ function MetricCard({ label, value, sub, icon: Icon, accent = "#2e5fe8", pct, te
       )}
       <div className="min-w-0">
         <div className="text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wide truncate">{label}</div>
-        <div className="font-heading text-[25px] font-extrabold text-[#26243a] leading-tight truncate">{value}</div>
+        <div className="font-mono-data text-[22px] font-bold text-[#26243a] leading-tight truncate">{value}</div>
         {sub && <div className="text-[11px] text-[#8a87a0] truncate">{sub}</div>}
       </div>
     </div>
@@ -295,8 +295,8 @@ export function ChartBudgetWidget({ summary }) {
     Total: p.budget_total, Consommé: p.budget_consumed, Forecast: p.budget_forecast,
   }));
   return (
-    <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4 md:p-5 h-full flex flex-col" data-testid="chart-budget-widget">
-      <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold mb-4">Budget par projet (€)</div>
+    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 md:p-5 h-full flex flex-col" data-testid="chart-budget-widget">
+      <div className="font-heading text-[13px] font-bold text-[#26243a] mb-4">Budget par projet (€)</div>
       <div className="flex-1 min-h-[140px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={budgetData} margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
@@ -323,8 +323,8 @@ export function ChartRagWidget({ summary }) {
   ];
   const methodData = Object.entries(summary.methodology_counts).map(([k, v]) => ({ name: k.charAt(0).toUpperCase() + k.slice(1), value: v }));
   return (
-    <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4 md:p-5 h-full" data-testid="chart-rag-widget">
-      <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold mb-4">Distribution RAG</div>
+    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 md:p-5 h-full" data-testid="chart-rag-widget">
+      <div className="font-heading text-[13px] font-bold text-[#26243a] mb-4">Distribution RAG</div>
       <div className="h-28 sm:h-36">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -433,22 +433,14 @@ export function ChartsWidget({ summary }) {
 export function MilestonesGaugeWidget({ cxo }) {
   if (!cxo) return null;
   const m = cxo.milestones;
-  const color = m.on_time_rate >= 80 ? "#10b981" : m.on_time_rate >= 60 ? "#f59e0b" : "#f43f5e";
+  const color = m.on_time_rate >= 80 ? "#3f8a34" : m.on_time_rate >= 60 ? "#a3891a" : "#cc4f45";
   return (
-    <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-5 mb-5" data-testid="milestones-gauge-widget">
-      <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold mb-4">Jalons — taux à l'heure</div>
-      <div className="flex items-center gap-5">
-        <div className="relative w-20 h-20 flex-shrink-0">
-          <svg viewBox="0 0 36 36" className="w-20 h-20 -rotate-90">
-            <circle cx="18" cy="18" r="15.9" fill="none" stroke="#e2e8f0" strokeWidth="3.5" />
-            <circle cx="18" cy="18" r="15.9" fill="none" stroke={color} strokeWidth="3.5" strokeLinecap="round" strokeDasharray={`${m.on_time_rate} 100`} />
-          </svg>
-          <span className="absolute inset-0 flex items-center justify-center font-mono-data text-sm font-bold text-zinc-800">{m.on_time_rate}%</span>
-        </div>
-        <div className="text-sm text-zinc-600">
-          <p><strong>{m.on_time}</strong> jalons à l'heure sur <strong>{m.total}</strong></p>
-          <p className="text-xs text-zinc-400 mt-1">Forecast ≤ Baseline ou jalon atteint</p>
-        </div>
+    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 h-full flex items-center gap-4" data-testid="milestones-gauge-widget">
+      <Donut pct={m.on_time_rate} color={color}>{m.on_time_rate}%</Donut>
+      <div className="min-w-0">
+        <div className="text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wide">Jalons — taux à l'heure</div>
+        <div className="font-mono-data text-lg font-bold text-[#26243a]"><span style={{ color }}>{m.on_time}</span> / {m.total}</div>
+        <div className="text-[11px] text-[#8a87a0]">Forecast ≤ Baseline ou jalon atteint</div>
       </div>
     </div>
   );
@@ -763,9 +755,9 @@ export function HeatmapWidget({ heatmapRisks, programs, allProjects }) {
   const moderate = filtered.filter((r) => r.criticality >= 7 && r.criticality < 16);
   const low = filtered.filter((r) => r.criticality < 7);
   return (
-    <div className="bg-white border border-zinc-200 rounded-lg shadow-sm mb-5" data-testid="dashboard-heatmap-section">
-      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 border-b border-zinc-100">
-        <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold">
+    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] mb-5" data-testid="dashboard-heatmap-section">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 border-b border-[#f0eff6]">
+        <div className="flex items-center gap-2 font-heading text-[13px] font-bold text-[#26243a]">
           <MapPin size={13} className="text-rose-400" />
           Cartographie des risques P × I
         </div>
