@@ -95,6 +95,38 @@ async def home_summary(current_user: TokenPayload = Depends(get_current_user)):
         m["project_name"] = p.get("name", "")
         m["project_code"] = p.get("code", "")
 
+    # ── Comités à venir (planifiés) ──
+    perms = current_user.permissions or []
+    committees = None
+    if "governance.view" in perms or "*" in perms:
+        committees = []
+        docs = await db.governance.find(
+            {"tenant_id": tenant, "status": "planifie"},
+            {"_id": 0, "governance_id": 1, "name": 1, "type": 1, "date_scheduled": 1},
+        ).sort("date_scheduled", 1).to_list(200)
+        for g in docs:
+            d = (g.get("date_scheduled") or "")[:10]
+            if d >= today_iso:
+                committees.append(g)
+        committees = committees[:5]
+
+    # ── Alertes dépassement plan pluriannuel vs enveloppes ──
+    overruns = None
+    if "budget.view" in perms or "*" in perms:
+        overruns = []
+        from modules.budget.service import get_multiyear
+        my = await get_multiyear(current_user)
+        for y in my["years"]:
+            env = my["envelopes"].get(str(y))
+            planned = my["totals"].get(str(y), 0)
+            if env and (env.get("total_envelope") or 0) and planned > env["total_envelope"]:
+                overruns.append({
+                    "year": y,
+                    "planned": planned,
+                    "envelope": env["total_envelope"],
+                    "overrun": planned - env["total_envelope"],
+                })
+
     return {
         "first_name": (current_user.name or "").split(" ")[0],
         "context": {
@@ -110,4 +142,6 @@ async def home_summary(current_user: TokenPayload = Depends(get_current_user)):
             "upcoming": upcoming,
             "upcoming_count": upcoming_count,
         },
+        "committees": committees,
+        "envelope_overruns": overruns,
     }

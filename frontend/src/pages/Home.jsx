@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import {
   LayoutDashboard, FolderKanban, Briefcase, DollarSign, UsersRound, Users,
   ShieldCheck, Map, TrendingUp, ShieldAlert, Inbox, Clock,
-  CalendarClock, AlertTriangle, ClipboardCheck, ArrowRight, History,
+  CalendarClock, AlertTriangle, ClipboardCheck, ArrowRight, History, CalendarDays,
 } from "lucide-react";
 import { homeAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -26,6 +26,18 @@ const QUICK_NAV = [
 ];
 
 const RAG_DOT = { green: "#16a34a", orange: "#f59e0b", red: "#dc2626" };
+
+const COMMITTEE_LABELS = { copil: "COPIL", coproj: "COPROJ", comex: "COMEX", codir: "CODIR", steering: "Steering", autre: "Autre" };
+const COMMITTEE_COLORS = {
+  copil: "bg-blue-50 text-blue-700 border-blue-200",
+  coproj: "bg-violet-50 text-violet-700 border-violet-200",
+  comex: "bg-rose-50 text-rose-700 border-rose-200",
+  codir: "bg-amber-50 text-amber-700 border-amber-200",
+  steering: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  autre: "bg-zinc-50 text-zinc-600 border-zinc-200",
+};
+
+const fmtEuro = (v) => `${Math.round(v).toLocaleString("fr-FR")} €`;
 
 const fmtDate = (iso) => {
   try {
@@ -124,6 +136,34 @@ export default function Home() {
         <div className="bg-white border border-[#e8e6f0] rounded-xl p-5" data-testid="home-actions">
           <h2 className="font-heading text-[15px] font-extrabold text-[#26243a] mb-4">Mes actions en attente</h2>
           <div className="space-y-3">
+            {(summary?.envelope_overruns || []).length > 0 && (
+              <div className="border border-[#fecaca] bg-[#fef2f2] rounded-lg p-3" data-testid="home-overrun-alerts">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <AlertTriangle size={13} className="text-[#dc2626]" />
+                  <span className="text-[12px] font-bold text-[#dc2626]">
+                    Dépassement d'enveloppe — plan pluriannuel
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  {summary.envelope_overruns.map((o) => (
+                    <Link key={o.year} to="/budget"
+                      className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/70 transition-colors"
+                      data-testid={`home-overrun-${o.year}`}>
+                      <div className="min-w-0">
+                        <div className="text-[13px] font-semibold text-[#26243a]">Exercice {o.year}</div>
+                        <div className="text-[11px] text-[#8a87a0]">
+                          {fmtEuro(o.planned)} planifiés / enveloppe {fmtEuro(o.envelope)}
+                        </div>
+                      </div>
+                      <span className="font-mono text-[11.5px] font-bold text-[#dc2626] flex-shrink-0">
+                        +{fmtEuro(o.overrun)}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {summary?.timesheet && canSubmitTs && (
               <Link
                 to="/timesheets"
@@ -193,14 +233,54 @@ export default function Home() {
               </div>
             )}
 
-            {summary && !summary.timesheet && summary.pending_validations === 0 && ms?.late_count === 0 && ms?.upcoming_count === 0 && (
+            {summary && !summary.timesheet && summary.pending_validations === 0 && ms?.late_count === 0 && ms?.upcoming_count === 0 && (summary.envelope_overruns || []).length === 0 && (
               <p className="text-[13px] text-[#8a87a0]" data-testid="home-actions-empty">Rien en attente — tout est à jour.</p>
             )}
           </div>
         </div>
 
-        {/* Derniers projets consultés */}
-        <div className="bg-white border border-[#e8e6f0] rounded-xl p-5" data-testid="home-recent-projects">
+        <div className="space-y-5">
+          {/* Comités à venir */}
+          {summary?.committees !== null && summary?.committees !== undefined && (
+            <div className="bg-white border border-[#e8e6f0] rounded-xl p-5" data-testid="home-committees">
+              <div className="flex items-center justify-between mb-4">
+                <div className="flex items-center gap-2">
+                  <CalendarDays size={15} className="text-[#8a87a0]" />
+                  <h2 className="font-heading text-[15px] font-extrabold text-[#26243a]">Comités à venir</h2>
+                </div>
+                <Link to="/governance" className="text-[11.5px] font-semibold text-[#352c6e] hover:underline flex-shrink-0" data-testid="home-committees-link">
+                  Gouvernance →
+                </Link>
+              </div>
+              {summary.committees.length === 0 ? (
+                <div className="text-[13px] text-[#8a87a0]" data-testid="home-committees-empty">
+                  Aucun comité planifié.{" "}
+                  <Link to="/governance" className="text-[#352c6e] font-semibold hover:underline">Planifier une instance →</Link>
+                </div>
+              ) : (
+                <div className="space-y-1">
+                  {summary.committees.map((c) => (
+                    <Link key={c.governance_id} to="/governance"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#f7f6fb] transition-colors"
+                      data-testid={`home-committee-${c.governance_id}`}>
+                      <span className={`text-[9.5px] font-bold uppercase px-1.5 py-0.5 rounded-full border flex-shrink-0 ${COMMITTEE_COLORS[c.type] || COMMITTEE_COLORS.autre}`}>
+                        {COMMITTEE_LABELS[c.type] || c.type}
+                      </span>
+                      <div className="min-w-0 flex-1">
+                        <div className="text-[13px] font-semibold text-[#26243a] truncate">{c.name}</div>
+                      </div>
+                      <span className="font-mono text-[11.5px] font-semibold text-[#5d5a75] flex-shrink-0">
+                        {fmtDate((c.date_scheduled || "").slice(0, 10))}
+                      </span>
+                    </Link>
+                  ))}
+                </div>
+              )}
+            </div>
+          )}
+
+          {/* Derniers projets consultés */}
+          <div className="bg-white border border-[#e8e6f0] rounded-xl p-5" data-testid="home-recent-projects">
           <div className="flex items-center gap-2 mb-4">
             <History size={15} className="text-[#8a87a0]" />
             <h2 className="font-heading text-[15px] font-extrabold text-[#26243a]">Derniers projets consultés</h2>
@@ -232,6 +312,7 @@ export default function Home() {
               ))}
             </div>
           )}
+          </div>
         </div>
       </div>
     </div>

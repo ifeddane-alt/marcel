@@ -182,3 +182,7 @@
 
 ## 2026-08-11 (7) — Icône Accueil dans la navigation
 - Entrée « Accueil » (icône maison, data-testid nav-accueil) ajoutée en tête de la section Pilotage du rail (desktop + drawer mobile), visible pour tous les rôles (perm null), renvoie vers /home. Testé E2E (clic → /home, état actif). Preview uniquement.
+
+## 2026-08-11 (8) — Accueil personnalisé (cockpit)
+- Homepage /home enrichie : bloc rouge « Dépassement d'enveloppe — plan pluriannuel » dans Mes actions en attente (exercices en dépassement, montants, lien /budget, visible si budget.view) + carte « Comités à venir » (instances planifiées à venir, badge type coloré, date, lien Gouvernance, visible si governance.view, état vide géré). Backend home/summary : champs committees + envelope_overruns.
+- Testé : curl (admin + viewer) + screenshot E2E avec dépassement simulé puis nettoyé. Preview uniquement.
