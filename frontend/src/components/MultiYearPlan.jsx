@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { CalendarRange, Pencil, X, RotateCcw, AlertTriangle } from "lucide-react";
+import { CalendarRange, Pencil, X, RotateCcw, AlertTriangle, Download } from "lucide-react";
 import { budgetAPI } from "@/api";
 import { toast } from "sonner";
 import { formatEuro, formatDate } from "@/utils/format";
@@ -156,6 +156,21 @@ export default function MultiYearPlan({ canEdit }) {
             Schéma directeur — répartition des budgets par exercice
           </span>
           <span className="text-[11px] text-zinc-400 ml-2">Pro-rata temporis par défaut, ajustable projet par projet</span>
+          <button
+            onClick={() => {
+              budgetAPI.multiyearExcel().then((res) => {
+                const url = window.URL.createObjectURL(new Blob([res.data]));
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `MARCEL_plan_pluriannuel_${new Date().toISOString().slice(0, 10)}.xlsx`;
+                a.click();
+                window.URL.revokeObjectURL(url);
+              }).catch(() => toast.error("Échec de l'export Excel"));
+            }}
+            data-testid="btn-export-multiyear-excel"
+            className="ml-auto flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border border-zinc-200 bg-white rounded-lg hover:bg-zinc-50 text-zinc-600 transition-colors">
+            <Download size={12} /> Export Excel
+          </button>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full text-sm">

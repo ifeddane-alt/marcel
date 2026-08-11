@@ -31,6 +31,18 @@ async def get_multiyear(
     return await service.get_multiyear(current_user)
 
 
+@router.get("/budget/multiyear/export/excel")
+async def export_multiyear_excel(
+    current_user: TokenPayload = Depends(permission_required("budget.view")),
+):
+    data = await service.export_multiyear_excel(current_user)
+    return StreamingResponse(
+        io.BytesIO(data),
+        media_type="application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        headers={"Content-Disposition": "attachment; filename=plan_pluriannuel.xlsx"},
+    )
+
+
 @router.put("/budget/project/{project_id}/multiyear")
 async def set_project_multiyear(
     project_id: str,

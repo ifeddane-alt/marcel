@@ -353,6 +353,7 @@ export const budgetAPI = {
   consolidated: (params = {}) => api.get("/budget/consolidated", { params }),
   byProgram:    ()             => api.get("/budget/by-program"),
   multiyear:    ()             => api.get("/budget/multiyear"),
+  multiyearExcel: ()           => api.get("/budget/multiyear/export/excel", { responseType: "blob" }),
   setMultiyear: (id, data)     => api.put(`/budget/project/${id}/multiyear`, data),
   projectRevisions: (id)       => api.get(`/budget/project/${id}/revisions`),
   revise:       (id, data)     => api.post(`/budget/project/${id}/revise`, data),

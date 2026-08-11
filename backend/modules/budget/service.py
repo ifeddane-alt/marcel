@@ -598,3 +598,94 @@ async def set_project_multiyear(project_id: str, data: dict, current_user: Token
         {"field": "plan pluriannuel", "old": old_mode, "new": new_desc},
     ])
     return {"project_id": project_id, "budget_by_year": cleaned}
+
+
+async def export_multiyear_excel(current_user: TokenPayload) -> bytes:
+    import io
+    import xlsxwriter
+
+    data = await get_multiyear(current_user)
+    years = data["years"]
+    rows = data["projects"]
+    totals = data["totals"]
+    envelopes = data["envelopes"]
+
+    buf = io.BytesIO()
+    wb = xlsxwriter.Workbook(buf, {"in_memory": True})
+
+    hdr = wb.add_format({"bold": True, "bg_color": "#0052CC", "font_color": "white",
+                          "border": 1, "align": "center"})
+    money = wb.add_format({"num_format": "#,##0 €", "border": 1})
+    money_b = wb.add_format({"num_format": "#,##0 €", "border": 1, "bold": True, "bg_color": "#EFF6FF"})
+    cell = wb.add_format({"border": 1})
+    center = wb.add_format({"border": 1, "align": "center"})
+    title = wb.add_format({"bold": True, "font_size": 14})
+    green_fmt = wb.add_format({"num_format": "#,##0 €", "border": 1, "bg_color": "#D1FAE5"})
+    red_fmt = wb.add_format({"num_format": "#,##0 €", "border": 1, "bg_color": "#FEE2E2"})
+
+    ws = wb.add_worksheet("Plan pluriannuel")
+    ws.write(0, 0, f"Plan pluriannuel {years[0]}–{years[-1]} — Schéma directeur", title)
+    ws.write(1, 0, f"Export du {datetime.now().strftime('%d/%m/%Y')} · Pro-rata temporis par défaut, ajustements manuels par projet", cell)
+
+    labels = ["Exercice"] + [f"{y} ({'N' if i == 0 else f'N+{i}'})" for i, y in enumerate(years)] + ["Total"]
+    for ci, c in enumerate(labels):
+        ws.write(3, ci, c, hdr)
+    ws.write(4, 0, "Budget projets", hdr)
+    grand = 0
+    for i, y in enumerate(years):
+        v = totals.get(str(y), 0)
+        grand += v
+        ws.write(4, 1 + i, v, money)
+    ws.write(4, 1 + len(years), grand, money_b)
+    ws.write(5, 0, "Enveloppe", hdr)
+    ws.write(6, 0, "Marge / Dépassement", hdr)
+    env_total = 0
+    for i, y in enumerate(years):
+        env = envelopes.get(str(y))
+        if env:
+            env_total += env["total_envelope"]
+            gap = env["total_envelope"] - totals.get(str(y), 0)
+            ws.write(5, 1 + i, env["total_envelope"], money)
+            ws.write(6, 1 + i, gap, green_fmt if gap >= 0 else red_fmt)
+        else:
+            ws.write(5, 1 + i, "—", center)
+            ws.write(6, 1 + i, "—", center)
+    ws.write(5, 1 + len(years), env_total if env_total else "—", money_b if env_total else center)
+    ws.write(6, 1 + len(years), "", cell)
+
+    cols = ["Projet", "Code", "RAG", "Début", "Fin"] + [str(y) for y in years] + \
+           [f"Total {years[0]}→{years[-1]}", "Hors fenêtre", "EAC", "Source"]
+    hr = 8
+    for ci, c in enumerate(cols):
+        ws.write(hr, ci, c, hdr)
+    ws.set_column(0, 0, 42)
+    ws.set_column(1, 1, 12)
+    ws.set_column(3, 4, 12)
+    ws.set_column(5, 5 + len(years) + 2, 14)
+
+    for ri, r in enumerate(rows):
+        row = hr + 1 + ri
+        ws.write(row, 0, r["name"], cell)
+        ws.write(row, 1, r.get("code") or "—", center)
+        ws.write(row, 2, r.get("status_rag") or "—", center)
+        ws.write(row, 3, (r.get("start_date") or "—")[:10], center)
+        ws.write(row, 4, (r.get("end_date_forecast") or "—")[:10], center)
+        for i, y in enumerate(years):
+            ws.write(row, 5 + i, r["by_year"].get(str(y), 0), money)
+        ws.write(row, 5 + len(years), r["total_window"], money_b)
+        ws.write(row, 6 + len(years), r["out_of_window"], money)
+        ws.write(row, 7 + len(years), r["eac"], money)
+        ws.write(row, 8 + len(years), "Manuel" if r["source"] == "manual" else "Pro-rata", center)
+
+    tr = hr + 1 + len(rows)
+    ws.write(tr, 0, "TOTAL PORTEFEUILLE", hdr)
+    for i, y in enumerate(years):
+        ws.write(tr, 5 + i, totals.get(str(y), 0), money_b)
+    ws.write(tr, 5 + len(years), grand, money_b)
+    ws.write(tr, 6 + len(years), sum(r["out_of_window"] for r in rows), money)
+    ws.write(tr, 7 + len(years), sum(r["eac"] for r in rows), money)
+
+    ws.freeze_panes(hr + 1, 1)
+    wb.close()
+    buf.seek(0)
+    return buf.read()
