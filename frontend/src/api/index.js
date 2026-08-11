@@ -115,6 +115,9 @@ export const programsAPI = {
 
 export const governanceAPI = {
   list: () => api.get("/governance"),
+  create: (data) => api.post("/governance", data),
+  update: (id, data) => api.put(`/governance/${id}`, data),
+  delete: (id) => api.delete(`/governance/${id}`),
 };
 
 export const risksAPI = {

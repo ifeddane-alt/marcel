@@ -17,7 +17,7 @@ const ACTION_CONFIG = {
   "user.password_reset": { label: "Mot de passe réinitialisé", cls: "bg-indigo-50 text-indigo-700 border-indigo-200" },
 };
 
-const ENTITY_LABELS = { project: "Projet", decision: "Décision", user: "Utilisateur" };
+const ENTITY_LABELS = { project: "Projet", decision: "Décision", user: "Utilisateur", governance: "Instance" };
 
 function fmtVal(v) {
   if (v === null || v === undefined || v === "") return "—";
@@ -90,6 +90,7 @@ export default function AdminAudit() {
             <option value="project">Projet</option>
             <option value="decision">Décision</option>
             <option value="user">Utilisateur</option>
+            <option value="governance">Instance</option>
           </select>
           <select data-testid="audit-filter-action"
             className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 bg-white"

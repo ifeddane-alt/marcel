@@ -3,6 +3,7 @@ import { Link } from "react-router-dom";
 import {
   Shield, Calendar, AlertTriangle, CheckCircle, Clock, XCircle,
   ClipboardList, Plus, Trash2, ChevronDown, ChevronUp, Presentation,
+  Pencil, CalendarDays, List, ListOrdered,
 } from "lucide-react";
 import { governanceAPI, projectsAPI, decisionsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -11,8 +12,26 @@ import { GovernanceTypeBadge, SanityBadge } from "@/components/RAGBadge";
 import DecisionModal from "@/components/DecisionModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import ExportCopilModal from "@/components/ExportCopilModal";
+import GovernanceModal from "@/components/GovernanceModal";
+import GovernanceCalendar from "@/components/GovernanceCalendar";
+import { toast } from "sonner";
 import { formatDate } from "@/utils/format";
 import ExcelToolbar from "@/components/ExcelToolbar";
+
+const INSTANCE_STATUS = {
+  planifie: { label: "Planifié", cls: "bg-blue-50 text-blue-700 border-blue-200" },
+  tenu: { label: "Tenu", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
+  annule: { label: "Annulé", cls: "bg-rose-50 text-rose-600 border-rose-200" },
+};
+
+function InstanceStatusBadge({ status, testId }) {
+  const c = INSTANCE_STATUS[status] || INSTANCE_STATUS.planifie;
+  return (
+    <span data-testid={testId} className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-semibold border flex-shrink-0 ${c.cls}`}>
+      {c.label}
+    </span>
+  );
+}
 
 const DECISION_STATUS_COLORS = {
   proposée:  "bg-sky-100 text-sky-700 border-sky-200",
@@ -76,6 +95,13 @@ export default function Governance() {
   const [exportProjectNames, setExportProjectNames] = useState([]);
   const [exportGovId, setExportGovId] = useState(null);
 
+  // Instance CRUD state
+  const [instanceModalOpen, setInstanceModalOpen] = useState(false);
+  const [editingInstance, setEditingInstance] = useState(null);
+  const [confirmDeleteInstance, setConfirmDeleteInstance] = useState(null);
+  const [deletingInstance, setDeletingInstance] = useState(false);
+  const [instView, setInstView] = useState("list");
+
   // Global decisions filters
   const [filterStatus, setFilterStatus] = useState("");
   const [filterCategory, setFilterCategory] = useState("");
@@ -123,6 +149,23 @@ export default function Governance() {
     setDecisionModalOpen(true);
   };
 
+  const handleDeleteInstance = async () => {
+    if (!confirmDeleteInstance) return;
+    setDeletingInstance(true);
+    try {
+      await governanceAPI.delete(confirmDeleteInstance.governance_id);
+      toast.success("Instance supprimée");
+      setConfirmDeleteInstance(null);
+      fetchAll();
+    } catch { toast.error("Erreur lors de la suppression"); }
+    finally { setDeletingInstance(false); }
+  };
+
+  const openCalendarInstance = (g) => {
+    setInstView("list");
+    setExpanded(g.governance_id);
+  };
+
   if (loading) {
     return (
       <div className="p-8 flex items-center justify-center h-64 text-zinc-400 text-sm">
@@ -143,6 +186,17 @@ export default function Governance() {
     if (filterCategory && d.category !== filterCategory) return false;
     if (filterProject && d.project_id !== filterProject) return false;
     return true;
+  });
+
+  // Instances triées : à venir (asc) puis passées (desc)
+  const nowTs = Date.now();
+  const sortedInstances = [...instances].sort((a, b) => {
+    const ta = new Date(a.date_scheduled).getTime();
+    const tb = new Date(b.date_scheduled).getTime();
+    const fa = ta >= nowTs ? 0 : 1;
+    const fb = tb >= nowTs ? 0 : 1;
+    if (fa !== fb) return fa - fb;
+    return fa === 0 ? ta - tb : tb - ta;
   });
 
   return (
@@ -314,14 +368,36 @@ export default function Governance() {
       </div>
 
       {/* ===== INSTANCES DE GOUVERNANCE ===== */}
-      <div className="mb-3">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3">
         <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold">
-          Instances de gouvernance ({instances.length})
+          Comités &amp; instances de gouvernance ({instances.length})
+        </div>
+        <div className="flex items-center gap-2">
+          <div className="flex items-center border border-zinc-200 rounded-lg overflow-hidden bg-white">
+            <button onClick={() => setInstView("list")} data-testid="gov-view-list"
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${instView === "list" ? "bg-blue-600 text-white" : "text-zinc-500 hover:bg-zinc-50"}`}>
+              <List size={12} /> Liste
+            </button>
+            <button onClick={() => setInstView("calendar")} data-testid="gov-view-calendar"
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${instView === "calendar" ? "bg-blue-600 text-white" : "text-zinc-500 hover:bg-zinc-50"}`}>
+              <CalendarDays size={12} /> Calendrier
+            </button>
+          </div>
+          {canWrite && (
+            <button onClick={() => { setEditingInstance(null); setInstanceModalOpen(true); }} data-testid="btn-new-instance"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+              <Plus size={12} /> Nouvelle instance
+            </button>
+          )}
         </div>
       </div>
 
-      <div className="space-y-3">
-        {instances.map((g) => {
+      {instView === "calendar" && (
+        <GovernanceCalendar instances={instances} onOpen={openCalendarInstance} />
+      )}
+
+      <div className={`space-y-3 ${instView === "list" ? "" : "hidden"}`}>
+        {sortedInstances.map((g) => {
           const isExpanded = expanded === g.governance_id;
           const date = new Date(g.date_scheduled);
           const isPast = date < new Date();
@@ -361,7 +437,28 @@ export default function Governance() {
                     <span className="font-mono-data font-bold">{instanceDecisions.length}</span>
                   </div>
                 )}
+                <InstanceStatusBadge status={g.status} testId={`instance-status-${g.governance_id}`} />
                 <SanityBadge status={g.sanity_check_status} />
+                {canWrite && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setEditingInstance(g); setInstanceModalOpen(true); }}
+                    data-testid={`btn-edit-instance-${g.governance_id}`}
+                    className="text-zinc-300 hover:text-blue-600 transition-colors flex-shrink-0"
+                    title="Modifier l'instance"
+                  >
+                    <Pencil size={13} />
+                  </button>
+                )}
+                {canDelete && (
+                  <button
+                    onClick={(e) => { e.stopPropagation(); setConfirmDeleteInstance(g); }}
+                    data-testid={`btn-delete-instance-${g.governance_id}`}
+                    className="text-zinc-300 hover:text-rose-500 transition-colors flex-shrink-0"
+                    title="Supprimer l'instance"
+                  >
+                    <Trash2 size={13} />
+                  </button>
+                )}
                 <span className="text-zinc-400 text-sm ml-2">
                   {isExpanded ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
                 </span>
@@ -413,6 +510,51 @@ export default function Governance() {
                         Rapport Sanity Check
                       </div>
                       <SanityReport report={g.sanity_check_report} />
+                    </div>
+                  </div>
+
+                  {/* Ordre du jour + participants + compte-rendu */}
+                  <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4 border-t border-zinc-200 pt-4" data-testid={`agenda-block-${g.governance_id}`}>
+                    <div>
+                      <div className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold mb-2 flex items-center gap-1.5">
+                        <ListOrdered size={11} className="text-blue-600" /> Ordre du jour ({(g.agenda || []).length})
+                      </div>
+                      {(g.agenda || []).length === 0 ? (
+                        <p className="text-xs text-zinc-400 italic">Aucun point à l'ordre du jour.</p>
+                      ) : (
+                        <ol className="space-y-1.5">
+                          {(g.agenda || []).map((item, idx) => (
+                            <li key={item.item_id || idx} className="flex items-start gap-2 text-xs" data-testid={`agenda-item-${g.governance_id}-${idx}`}>
+                              <span className="font-mono-data font-bold text-blue-600 flex-shrink-0">{idx + 1}.</span>
+                              <span className="text-zinc-700 flex-1">{item.title}</span>
+                              {item.presenter && <span className="text-zinc-400 flex-shrink-0">{item.presenter}</span>}
+                              {item.duration_min > 0 && <span className="font-mono-data text-zinc-400 flex-shrink-0">{item.duration_min} min</span>}
+                            </li>
+                          ))}
+                        </ol>
+                      )}
+                    </div>
+                    <div className="space-y-3">
+                      <div>
+                        <div className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold mb-2">
+                          Participants ({(g.attendees || []).length})
+                        </div>
+                        {(g.attendees || []).length === 0 ? (
+                          <p className="text-xs text-zinc-400 italic">Aucun participant renseigné.</p>
+                        ) : (
+                          <div className="flex flex-wrap gap-1.5">
+                            {(g.attendees || []).map((a, i) => (
+                              <span key={i} className="px-2 py-0.5 bg-white border border-zinc-200 rounded-full text-[10.5px] text-zinc-600">{a}</span>
+                            ))}
+                          </div>
+                        )}
+                      </div>
+                      {g.minutes_notes && (
+                        <div>
+                          <div className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold mb-2">Compte-rendu</div>
+                          <p className="text-xs text-zinc-600 whitespace-pre-wrap bg-white border border-zinc-100 rounded-lg p-2.5" data-testid={`instance-notes-${g.governance_id}`}>{g.minutes_notes}</p>
+                        </div>
+                      )}
                     </div>
                   </div>
 
@@ -499,6 +641,23 @@ export default function Governance() {
         selectedProjectNames={exportProjectNames}
         preGovernanceId={exportGovId}
       />
+      {instanceModalOpen && (
+        <GovernanceModal
+          instance={editingInstance}
+          projects={projects}
+          onClose={() => { setInstanceModalOpen(false); setEditingInstance(null); }}
+          onSaved={() => { setInstanceModalOpen(false); setEditingInstance(null); fetchAll(); }}
+        />
+      )}
+      <ConfirmDialog
+        isOpen={!!confirmDeleteInstance}
+        onClose={() => setConfirmDeleteInstance(null)}
+        onConfirm={handleDeleteInstance}
+        loading={deletingInstance}
+        title="Supprimer l'instance"
+        message={`Supprimer l'instance "${confirmDeleteInstance?.name}" ? Les décisions liées seront conservées mais détachées de l'instance.`}
+      />
+
       {/* Decision Modal */}
       <DecisionModal
         isOpen={decisionModalOpen}

@@ -1,0 +1,23 @@
+{
+  "summary": "Frontend E2E testing of new /governance feature 'Instances COPIL' (calendar + agenda + participants + minutes + attached decisions). All 11 scenarios pass: list toggle, calendar toggle, sort order (COPIL Sept 2026 first as upcoming), expand with agenda-block (5 items) + participants (4) + notes on Juillet, empty-name validation blocks create (HTML5 required kicks in — inst-error is only shown for backend errors), full CRUD (create COPROJ with DateField popover + 2 projects + 2 attendees + 2 agenda items → visible in list; edit prefill + status→Tenu + minutes; delete via ConfirmDialog), calendar navigation Août/Septembre/Juillet 2026 with chips on the correct days, chip-click switches to list and expands, decision attach via btn-new-decision-instance-{id} (decision-form-* testids) works both under instance and in global registry, audit /admin/audit displays entity 'Instance' with governance filter option (10 events including our test lifecycle), viewer read-only (btn-new-instance/edit/delete absent, calendar toggle visible). Regressions OK: decisions global filters (status=appliquée 32→17, reset OK), Export COPIL modal opens on btn-export-copil-instance-{id}, 4 KPI cards present (Total instances/Validées/En échec/Décisions enregistrées).",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "GovernanceModal validation UX: inst-error n'apparaît QUE pour les erreurs backend. La validation nom vide s'appuie sur l'attribut HTML5 `required` (le formulaire ne submit pas et le browser affiche un tooltip natif). Le prompt suggère 'message d'erreur (inst-error)' — considérer afficher explicitement dans inst-error 'Le nom est obligatoire' avant submit pour une UX cohérente/localisée.",
+    "GovernanceModal.jsx : le champ Date envoie `${date}T${time}:00Z` — le suffixe 'Z' force UTC alors que l'heure saisie est locale, ce qui peut décaler l'instance d'1-2h dans le calendrier selon le fuseau. À revoir si les utilisateurs saisissent l'heure locale française.",
+    "ConfirmDialog partagé : le data-testid 'confirm-delete-btn' reste utilisé pour tous les cas de confirmation (feedback déjà remonté à l'iteration 59, non résolu)."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (skipped, déjà validé curl)", "frontend": "100% (11/11 scénarios OK)"},
+  "test_credentials": "admin@altair.fr / Admin2026! ; viewer@altair.fr / View1234!",
+  "seed_data_creation": "Aucune donnée résiduelle : l'instance TEST_AUTO_COPROJ_1786456666 a bien été créée puis supprimée pendant le test 7 (7 instances au départ, 7 à la fin). Décision de test attachée à Juillet également créée et supprimée (32 décisions dans le registre avant/après).",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Fonctionnalité 'Instances COPIL' entièrement validée UI et intégration API. Testids fiables : gov-view-list/calendar, btn-new-instance, instance-modal, inst-name-input/type-select/date-input (DateField popover shadcn — cliquer le bouton puis clic sur un jour dans .rdp-day), inst-time-input, inst-status-select, inst-scope-{pid}, inst-attendees-input, inst-agenda-add + inst-agenda-{title/presenter/duration}-{i}, inst-notes-input, inst-save-btn, inst-error (backend only). Vue liste: governance-instance-{id}, governance-expand-btn-{id}, governance-name-{id}, instance-status-{id}, btn-edit/delete-instance-{id}, agenda-block-{id}, agenda-item-{id}-{idx}, instance-notes-{id}. Calendar: gov-calendar, gov-cal-prev/next/today/month, gov-cal-chip-{id}. Decisions: decision-form-* pour le modal, btn-new-decision-instance-{id}, decision-instance-row-{id}, btn-delete-decision-instance-{id}. Audit: audit-filter-entity a l'option 'governance', type affiché 'Instance'."
+}
