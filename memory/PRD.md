@@ -374,7 +374,7 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - L'utilisateur n'a pas de compte Azure ; Okta idem. À reprendre plus tard.
 - Tout est prêt côté MARCEL : code SSO déployé en prod, procédure complète documentée dans la conversation (App registration Azure → Redirect URI https://marcel-ppm.com/api/auth/sso/callback/entra → config Admin > Configuration > SSO)
 
-## 2026-08 — Trajectoire objectifs + Enveloppes N+1/N+2 + Alertes dépassement (livré Preview, agent-testé iteration_63 100 %)
+## 2026-08 — Trajectoire objectifs + Enveloppes N+1/N+2 + Alertes dépassement (livré, DÉPLOYÉ PROD commit ecfdd98, agent-testé iteration_63 100 %)
 - Objectifs : bloc Trajectoire par objectif (avancement consolidé pondéré budget, jalons atteints/total, conso, barre RAG, % par projet).
 - Arbitrage : boutons rapides enveloppes N/N+1/N+2 + comparaison « Plan pluriannuel {année} » vs enveloppe sur chaque carte.
 - Alerte « Dépassement d'enveloppe » (notification cloche, admins+PMO) déclenchée par ajustement pluriannuel/révision budget/modification d'enveloppe, avec anti-spam (flag overrun_alerted).

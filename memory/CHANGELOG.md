@@ -175,3 +175,7 @@
 - Alertes : check_envelope_overruns (budget/service.py) appelé après PUT multiyear, révision budgétaire et upsert enveloppe — notification 'Dépassement d'enveloppe' (type envelope_overrun) aux TENANT_ADMIN + PMO_USER via la cloche (WebSocket + REST), anti-spam par flag overrun_alerted sur l'enveloppe (reseté au retour sous enveloppe).
 - Bug corrigé : statut jalon « done » inexistant → 'achieved'.
 - Tests : curl backend 100 % + testing_agent iteration_63 = 100 % backend + 100 % frontend (6/6 pytest + UI), zéro bug, nettoyage des données de test vérifié. Preview uniquement, PAS déployé en prod.
+
+## 2026-08-11 (6) — DÉPLOIEMENT PROD trajectoire + enveloppes N+1/N+2 + alertes
+- PROD marcel-ppm.com déployée (commit ecfdd98) : push GitHub + update.sh VPS (backup, pull, rebuild, sync permissions) + prune 1,97 Go (disque 80 %). Timeout SSH 120 s pendant le build mais update terminée avec succès (vérifié).
+- Vérifié : health 200, login 200, bundle main.dbc0b9b9.js avec tous les marqueurs (objective-trajectory, btn-envelope-year, envelope-plan, envelope_overrun), /api/objectives 200, /api/notifications 200. En prod aucun objectif stratégique créé pour l'instant — la trajectoire apparaîtra dès le premier objectif rattaché.
