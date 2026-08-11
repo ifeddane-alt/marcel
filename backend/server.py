@@ -81,6 +81,7 @@ from modules.sso.router import router as sso_router
 from modules.excel_io.router import router as excel_io_router
 from modules.search.router import router as search_router
 from modules.public_site.router import router as public_site_router
+from modules.audit.router import router as audit_router
 from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI(title="MARCEL API")
@@ -156,6 +157,7 @@ for _router in [
     excel_io_router,
     search_router,
     public_site_router,
+    audit_router,
 ]:
     app.include_router(_router, prefix="/api")
 

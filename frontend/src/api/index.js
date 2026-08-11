@@ -45,6 +45,8 @@ export const projectsAPI = {
   update: (id, data) => api.put(`/projects/${id}`, data),
   delete: (id) => api.delete(`/projects/${id}`),
   nextCode: (programId) => api.get("/projects/next-code", { params: programId ? { program_id: programId } : {} }),
+  getBenefits: (id) => api.get(`/projects/${id}/benefits`),
+  setBenefits: (id, data) => api.put(`/projects/${id}/benefits`, data),
 };
 
 export const teamsAPI = {
@@ -209,7 +211,13 @@ export const profilesAPI = {
 
 export const usersAPI = {
   list:              (params)     => api.get("/admin/users", { params }),
+  create:            (data)       => api.post("/admin/users", data),
   updateProfile:     (id, data)   => api.patch(`/admin/users/${id}`, data),
+  resetPassword:     (id, data)   => api.post(`/admin/users/${id}/reset-password`, data),
+};
+
+export const auditAPI = {
+  list: (params) => api.get("/admin/audit-logs", { params }),
 };
 
 export const safeAPI = {

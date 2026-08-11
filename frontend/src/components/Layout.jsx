@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Outlet, NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import {
   LayoutDashboard,
+  History,
   Briefcase,
   Users,
   ShieldCheck,
@@ -146,6 +147,7 @@ export default function Layout() {
     if (hasPermission("admin.config") || hasPermission("*")) adminItems.push({ to: "/admin/powerbi", icon: Database, label: "Power BI", tid: "nav-admin-powerbi" });
     if (hasPermission("admin.templates") || hasPermission("*")) adminItems.push({ to: "/admin/templates", icon: Layers, label: "Templates", tid: "nav-admin-templates" });
     if (hasPermission("admin.config") || hasPermission("*")) adminItems.push({ to: "/admin/monitoring", icon: Activity, label: "Monitoring", tid: "nav-admin-monitoring" });
+    if (hasPermission("admin.config") || hasPermission("*")) adminItems.push({ to: "/admin/audit", icon: History, label: "Journal d'audit", tid: "nav-admin-audit" });
   }
 
   const sections = [

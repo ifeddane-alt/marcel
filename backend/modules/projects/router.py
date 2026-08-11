@@ -69,3 +69,20 @@ async def get_raf(
     current_user: TokenPayload = Depends(permission_required("raf.view")),
 ):
     return await service.get_raf(project_id, current_user)
+
+
+@router.get("/projects/{project_id}/benefits")
+async def get_benefits(
+    project_id: str,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    return await service.get_benefits(project_id, current_user)
+
+
+@router.put("/projects/{project_id}/benefits")
+async def set_benefits(
+    project_id: str,
+    data: dict,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    return await service.set_benefits(project_id, data.get("benefits") or [], current_user)

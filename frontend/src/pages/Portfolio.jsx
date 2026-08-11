@@ -14,6 +14,14 @@ import ProjectTile from "@/components/ProjectTile";
 
 const RAG_LABELS = { green: "Vert", orange: "Orange", red: "Rouge" };
 
+function benefitsPct(p) {
+  const eur = (p.benefits || []).filter((b) => b.unit === "EUR");
+  const exp = eur.reduce((s, b) => s + (b.expected_value || 0), 0);
+  if (!exp) return null;
+  const real = eur.reduce((s, b) => s + (b.realized_value || 0), 0);
+  return { exp, real, pct: Math.round((real / exp) * 100) };
+}
+
 export default function Portfolio() {
   const { user } = useAuth();
   const { hasPermission } = usePermissions();
@@ -285,6 +293,7 @@ export default function Portfolio() {
                   {label}{sortKey === key ? (sortDir === "asc" ? " ↑" : " ↓") : ""}
                 </th>
               ))}
+              <th className="px-4 py-3 text-xs font-semibold text-zinc-600 whitespace-nowrap">Bénéfices</th>
               {(canEdit || canDelete) && <th className="px-4 py-3 text-xs font-semibold text-zinc-600 text-right">Actions</th>}
             </tr>
           </thead>
@@ -322,6 +331,17 @@ export default function Portfolio() {
                     <span className={overBudget ? "text-rose-600 font-semibold" : "text-zinc-700"}>{formatEuro(p.budget_forecast)}</span>
                   </td>
                   <td className="px-4 py-3 font-mono-data text-xs text-zinc-600">{formatDate(p.end_date_forecast)}</td>
+                  <td className="px-4 py-3 text-xs" data-testid={`project-benefits-${p.project_id}`}>
+                    {(() => {
+                      const b = benefitsPct(p);
+                      if (!b) return <span className="text-zinc-300">—</span>;
+                      return (
+                        <span className={`font-mono-data font-semibold ${b.pct >= 100 ? "text-emerald-600" : b.pct >= 50 ? "text-amber-600" : "text-zinc-600"}`}>
+                          {b.pct}% <span className="text-zinc-400 font-normal">de {Math.round(b.exp / 1000).toLocaleString("fr-FR")} K€</span>
+                        </span>
+                      );
+                    })()}
+                  </td>
                   {(canEdit || canDelete) && (
                     <td className="px-4 py-3">
                       <div className="flex items-center justify-end gap-1">
@@ -344,7 +364,7 @@ export default function Portfolio() {
               );
             })}
             {filtered.length === 0 && (
-              <tr><td colSpan={(canEdit || canDelete) ? 8 : 7} className="text-center py-12 text-zinc-400 text-sm">Aucun projet correspondant aux filtres</td></tr>
+              <tr><td colSpan={(canEdit || canDelete) ? 9 : 8} className="text-center py-12 text-zinc-400 text-sm">Aucun projet correspondant aux filtres</td></tr>
             )}
           </tbody>
         </table>

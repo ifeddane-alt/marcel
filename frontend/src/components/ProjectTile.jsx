@@ -137,6 +137,19 @@ export default function ProjectTile({
           <span>Budget <b className="font-mono-data text-[#26243a]">{formatEuro(p.budget_total)}</b></span>
           <span>Forecast <b className={`font-mono-data ${overBudget ? "text-[#cc4f45]" : "text-[#26243a]"}`}>{formatEuro(p.budget_forecast)}</b></span>
         </div>
+        {(() => {
+          const eur = (p.benefits || []).filter((b) => b.unit === "EUR");
+          const exp = eur.reduce((s, b) => s + (b.expected_value || 0), 0);
+          if (!exp) return null;
+          const real = eur.reduce((s, b) => s + (b.realized_value || 0), 0);
+          const pct = Math.round((real / exp) * 100);
+          return (
+            <div className="flex justify-between mt-1.5 text-[10.5px] text-[#8a87a0]" data-testid={`tile-benefits-${p.project_id}`}>
+              <span>Bénéfices attendus <b className="font-mono-data text-[#26243a]">{formatEuro(exp)}</b></span>
+              <span>réalisés <b className={`font-mono-data ${pct >= 100 ? "text-[#3f8a34]" : "text-[#26243a]"}`}>{pct}%</b></span>
+            </div>
+          );
+        })()}
       </div>
 
       {/* Pied : sélection + actions */}

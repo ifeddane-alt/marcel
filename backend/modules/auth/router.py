@@ -46,6 +46,9 @@ async def login(req: LoginRequest, request: Request):
     if not user:
         logger.warning("[auth] Tentative échouée (email inconnu): %s depuis %s", req.email, client_ip)
         raise HTTPException(status_code=401, detail="Identifiants invalides")
+    if user.get("is_active") is False:
+        logger.warning("[auth] Tentative sur compte désactivé: %s depuis %s", req.email, client_ip)
+        raise HTTPException(status_code=403, detail="Compte désactivé — contactez votre administrateur")
     if not user.get("password_hash"):
         # Compte SSO sans mot de passe local
         logger.warning("[auth] Tentative mdp sur compte SSO: %s depuis %s", req.email, client_ip)

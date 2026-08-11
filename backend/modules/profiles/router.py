@@ -75,8 +75,22 @@ async def seed_full(current_user: TokenPayload = Depends(get_current_user)):
 
 # ─── Admin : gestion utilisateurs ────────────────────────────────────────────
 
-class UserProfileUpdate(BaseModel):
+class UserCreate(BaseModel):
+    email: str
+    name: str
+    password: str
     profile_id: Optional[str] = None
+    role: str = "READ_ONLY"
+
+
+class UserUpdate(BaseModel):
+    profile_id: Optional[str] = None
+    name: Optional[str] = None
+    is_active: Optional[bool] = None
+
+
+class PasswordReset(BaseModel):
+    password: str
 
 
 @router.get("/admin/users")
@@ -87,11 +101,28 @@ async def list_users(
     return await service.list_users(current_user, profile_id=profile_id)
 
 
-@router.patch("/admin/users/{user_id}")
-async def update_user_profile(
-    user_id: str,
-    data: UserProfileUpdate,
+@router.post("/admin/users", status_code=201)
+async def create_user(
+    data: UserCreate,
     current_user: TokenPayload = Depends(get_current_user),
 ):
-    return await service.update_user_profile(user_id, data.profile_id, current_user)
+    return await service.create_user(data.model_dump(), current_user)
+
+
+@router.patch("/admin/users/{user_id}")
+async def update_user(
+    user_id: str,
+    data: UserUpdate,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    return await service.update_user(user_id, data.model_dump(exclude_unset=True), current_user)
+
+
+@router.post("/admin/users/{user_id}/reset-password")
+async def reset_user_password(
+    user_id: str,
+    data: PasswordReset,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    return await service.reset_user_password(user_id, data.password, current_user)
 

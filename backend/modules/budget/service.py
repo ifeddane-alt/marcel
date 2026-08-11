@@ -229,6 +229,11 @@ async def revise_budget(project_id: str, data: dict, current_user: TokenPayload)
         {"project_id": project_id},
         {"$set": set_fields, "$push": {"budget_revision_history": revision_entry}},
     )
+    from core.audit import log_audit
+    await log_audit(current_user, "budget_revised", "project", project_id, project.get("name", ""), [
+        {"field": "eac", "old": old_eac, "new": eac},
+        {"field": "motif", "old": "", "new": reason},
+    ])
     return await get_project_revisions(project_id, current_user)
 
 

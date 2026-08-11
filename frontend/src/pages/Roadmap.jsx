@@ -1,7 +1,11 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Map, Filter, ZoomIn, ZoomOut, X, ExternalLink, Diamond, GitCompare, Layers, RefreshCw } from "lucide-react";
+import { Map, Filter, ZoomIn, ZoomOut, X, ExternalLink, Diamond, GitCompare, Layers, RefreshCw, GitFork, Plus, Pencil, Trash2 } from "lucide-react";
 import { projectsAPI, programsAPI, milestonesAPI, projectDependenciesAPI, scopeAPI } from "@/api";
+import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
+import ConfirmDialog from "@/components/ConfirmDialog";
+import DateField from "@/components/ui/DateField";
 import RAGBadge from "@/components/RAGBadge";
 import { FAMILY_CONFIG } from "@/components/MilestoneModal";
 import { formatDate } from "@/utils/format";
@@ -284,6 +288,301 @@ function ScopeVsReelView({ projects, snapshots, selectedSnapshotId, setSelectedS
 }
 
 // ─────────────────────────────────────────────────────────────────────────────
+// DependenciesRegister — registre des dépendances inter-projets du portefeuille
+// ─────────────────────────────────────────────────────────────────────────────
+
+const DEP_NATURES = [
+  { value: "deliverable", label: "Livrable" },
+  { value: "resource", label: "Ressource" },
+  { value: "technical", label: "Technique" },
+  { value: "regulatory", label: "Réglementaire" },
+  { value: "budget", label: "Budget" },
+  { value: "data", label: "Données" },
+];
+const DEP_STATUSES = [
+  { value: "identified", label: "Identifiée" },
+  { value: "in_progress", label: "En cours" },
+  { value: "resolved", label: "Résolue" },
+  { value: "blocked", label: "Bloquée" },
+];
+const DEP_IMPACTS = [
+  { value: "low", label: "Faible" },
+  { value: "medium", label: "Moyen" },
+  { value: "high", label: "Élevé" },
+  { value: "critical", label: "Critique" },
+];
+const DEP_IMPACT_CLS = {
+  low: "bg-emerald-50 text-emerald-700 border-emerald-200",
+  medium: "bg-amber-50 text-amber-700 border-amber-200",
+  high: "bg-orange-50 text-orange-700 border-orange-200",
+  critical: "bg-rose-50 text-rose-700 border-rose-200",
+};
+
+function DepFormModal({ dependency, projects, onClose, onSaved }) {
+  const isEdit = !!dependency;
+  const [sourcePid, setSourcePid] = useState(dependency?.source_project_id || "");
+  const [targetPid, setTargetPid] = useState(dependency?.target_project_id || "");
+  const [nature, setNature] = useState(dependency?.nature || "technical");
+  const [impact, setImpact] = useState(dependency?.impact || "medium");
+  const [description, setDescription] = useState(dependency?.description || "");
+  const [targetDate, setTargetDate] = useState(dependency?.target_date || "");
+  const [status, setStatus] = useState(dependency?.status || "identified");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+
+  const submit = async (e) => {
+    e.preventDefault();
+    if (!isEdit && (!sourcePid || !targetPid)) { setError("Projets source et cible requis"); return; }
+    if (!isEdit && sourcePid === targetPid) { setError("Un projet ne peut pas dépendre de lui-même"); return; }
+    if (!description.trim()) { setError("La description est requise"); return; }
+    setSaving(true);
+    setError("");
+    try {
+      const payload = {
+        nature, impact, status,
+        description: description.trim(),
+        target_date: targetDate || null,
+      };
+      if (isEdit) {
+        await projectDependenciesAPI.update(dependency.dependency_id, payload);
+        toast.success("Dépendance mise à jour");
+      } else {
+        await projectDependenciesAPI.create({
+          ...payload,
+          source_project_id: sourcePid,
+          target_project_id: targetPid,
+          direction: "outbound",
+        });
+        toast.success("Dépendance créée");
+      }
+      onSaved();
+    } catch (err) {
+      setError(err?.response?.data?.detail || "Erreur lors de la sauvegarde");
+      setSaving(false);
+    }
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" data-testid="roadmap-dep-modal">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
+        <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
+          <div className="flex items-center gap-2">
+            <GitFork size={16} className="text-violet-500" />
+            <h2 className="font-heading text-lg font-bold text-zinc-950">
+              {isEdit ? "Modifier la dépendance" : "Nouvelle dépendance inter-projets"}
+            </h2>
+          </div>
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600"><X size={18} /></button>
+        </div>
+        <form onSubmit={submit} className="p-6 space-y-4">
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Projet dépendant *</label>
+              <select value={sourcePid} onChange={(e) => setSourcePid(e.target.value)} disabled={isEdit}
+                data-testid="dep-src-select"
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 bg-white disabled:opacity-60">
+                <option value="">— Sélectionner —</option>
+                {projects.map((p) => <option key={p.project_id} value={p.project_id}>{p.code ? `${p.code} · ` : ""}{p.name}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Dépend du projet *</label>
+              <select value={targetPid} onChange={(e) => setTargetPid(e.target.value)} disabled={isEdit}
+                data-testid="dep-tgt-select"
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 bg-white disabled:opacity-60">
+                <option value="">— Sélectionner —</option>
+                {projects.filter((p) => p.project_id !== sourcePid).map((p) => (
+                  <option key={p.project_id} value={p.project_id}>{p.code ? `${p.code} · ` : ""}{p.name}</option>
+                ))}
+              </select>
+            </div>
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Nature</label>
+              <select value={nature} onChange={(e) => setNature(e.target.value)} data-testid="dep-reg-nature"
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 bg-white">
+                {DEP_NATURES.map((n) => <option key={n.value} value={n.value}>{n.label}</option>)}
+              </select>
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Impact</label>
+              <select value={impact} onChange={(e) => setImpact(e.target.value)} data-testid="dep-reg-impact"
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 bg-white">
+                {DEP_IMPACTS.map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
+              </select>
+            </div>
+          </div>
+          <div>
+            <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Description *</label>
+            <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} required
+              data-testid="dep-desc-input" placeholder="Décrivez la nature de cette dépendance..."
+              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 resize-none" />
+          </div>
+          <div className="grid grid-cols-2 gap-3">
+            <div>
+              <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Échéance</label>
+              <DateField value={targetDate} onChange={(v) => setTargetDate(v)} testId="dep-reg-date" />
+            </div>
+            <div>
+              <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Statut</label>
+              <select value={status} onChange={(e) => setStatus(e.target.value)} data-testid="dep-reg-status"
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 bg-white">
+                {DEP_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
+              </select>
+            </div>
+          </div>
+          {error && <p className="text-sm text-rose-600 font-medium">{error}</p>}
+          <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100">
+            <button type="button" onClick={onClose}
+              className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">Annuler</button>
+            <button type="submit" disabled={saving} data-testid="dep-reg-save"
+              className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60">
+              {saving ? "Sauvegarde..." : isEdit ? "Enregistrer" : "Créer la dépendance"}
+            </button>
+          </div>
+        </form>
+      </div>
+    </div>
+  );
+}
+
+function DependenciesRegister({ deps, projects, canManage, onChanged }) {
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editing, setEditing] = useState(null);
+  const [confirmDelete, setConfirmDelete] = useState(null);
+  const [deleting, setDeleting] = useState(false);
+
+  const critical = deps.filter((d) => d.impact === "critical" && d.status !== "resolved").length;
+  const blocked = deps.filter((d) => d.status === "blocked").length;
+  const resolved = deps.filter((d) => d.status === "resolved").length;
+
+  const natureLabel = (v) => DEP_NATURES.find((n) => n.value === v)?.label || v;
+  const statusLabel = (v) => DEP_STATUSES.find((s) => s.value === v)?.label || v;
+  const impactLabel = (v) => DEP_IMPACTS.find((i) => i.value === v)?.label || v;
+
+  const handleDelete = async () => {
+    if (!confirmDelete) return;
+    setDeleting(true);
+    try {
+      await projectDependenciesAPI.delete(confirmDelete.dependency_id);
+      toast.success("Dépendance supprimée");
+      setConfirmDelete(null);
+      onChanged();
+    } catch (e) { toast.error(e?.response?.data?.detail || "Erreur"); }
+    finally { setDeleting(false); }
+  };
+
+  return (
+    <div data-testid="deps-register">
+      {/* KPIs */}
+      <div className="grid grid-cols-2 sm:grid-cols-4 gap-3 mb-5">
+        {[
+          { label: "Dépendances", value: deps.length, cls: "text-zinc-950", tid: "deps-kpi-total" },
+          { label: "Critiques ouvertes", value: critical, cls: critical > 0 ? "text-rose-600" : "text-zinc-950", tid: "deps-kpi-critical" },
+          { label: "Bloquées", value: blocked, cls: blocked > 0 ? "text-orange-600" : "text-zinc-950", tid: "deps-kpi-blocked" },
+          { label: "Résolues", value: resolved, cls: "text-emerald-600", tid: "deps-kpi-resolved" },
+        ].map((k) => (
+          <div key={k.tid} className="bg-white border border-[#e8e6f0] rounded-xl shadow-sm p-4" data-testid={k.tid}>
+            <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mb-1">{k.label}</div>
+            <div className={`font-mono-data font-bold text-xl ${k.cls}`}>{k.value}</div>
+          </div>
+        ))}
+      </div>
+
+      {/* Table */}
+      <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-hidden">
+        <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
+          <div className="flex items-center gap-2 font-heading text-[13px] font-bold text-[#26243a]">
+            <GitFork size={13} className="text-violet-500" />
+            Registre des dépendances inter-projets
+          </div>
+          {canManage && (
+            <button onClick={() => { setEditing(null); setModalOpen(true); }} data-testid="btn-roadmap-new-dep"
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+              <Plus size={12} /> Nouvelle dépendance
+            </button>
+          )}
+        </div>
+        {deps.length === 0 ? (
+          <div className="px-5 py-12 text-sm text-zinc-400 text-center" data-testid="deps-empty">
+            Aucune dépendance inter-projets — créez-en pour visualiser les flèches sur la timeline.
+          </div>
+        ) : (
+          <div className="overflow-x-auto">
+            <table className="w-full text-sm">
+              <thead>
+                <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+                  {["Projet dépendant", "", "Dépend de", "Nature", "Impact", "Échéance", "Statut", "Description", ""].map((h, i) => (
+                    <th key={i} className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] whitespace-nowrap">{h}</th>
+                  ))}
+                </tr>
+              </thead>
+              <tbody>
+                {deps.map((dep) => {
+                  const overdue = dep.target_date && dep.status !== "resolved" && new Date(dep.target_date) < new Date();
+                  return (
+                    <tr key={dep.dependency_id} className="border-b border-zinc-100 hover:bg-zinc-50/50 transition-colors"
+                      data-testid={`dep-reg-row-${dep.dependency_id}`}>
+                      <td className="px-3 py-2.5 text-xs">
+                        <Link to={`/projects/${dep.source_project_id}`} className="text-blue-600 hover:underline font-medium">
+                          {dep.source_project_name}
+                        </Link>
+                      </td>
+                      <td className="px-1 py-2.5 text-violet-400 text-xs font-bold">→</td>
+                      <td className="px-3 py-2.5 text-xs">
+                        <Link to={`/projects/${dep.target_project_id}`} className="text-blue-600 hover:underline font-medium">
+                          {dep.target_project_name}
+                        </Link>
+                      </td>
+                      <td className="px-3 py-2.5 text-xs text-zinc-600">{natureLabel(dep.nature)}</td>
+                      <td className="px-3 py-2.5">
+                        <span className={`inline-block px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-lg border ${DEP_IMPACT_CLS[dep.impact] || ""}`}>
+                          {impactLabel(dep.impact)}
+                        </span>
+                      </td>
+                      <td className={`px-3 py-2.5 text-xs font-mono-data whitespace-nowrap ${overdue ? "text-rose-600 font-semibold" : "text-zinc-600"}`}>
+                        {dep.target_date ? formatDate(dep.target_date) : "—"}
+                      </td>
+                      <td className="px-3 py-2.5 text-xs text-zinc-500">{statusLabel(dep.status)}</td>
+                      <td className="px-3 py-2.5 text-xs text-zinc-500 max-w-[260px] truncate" title={dep.description}>{dep.description || "—"}</td>
+                      <td className="px-3 py-2.5">
+                        {canManage && (
+                          <div className="flex items-center gap-1">
+                            <button onClick={() => { setEditing(dep); setModalOpen(true); }} data-testid={`btn-edit-dep-reg-${dep.dependency_id}`}
+                              className="p-1 text-zinc-400 hover:text-blue-600 rounded-lg transition-colors"><Pencil size={12} /></button>
+                            <button onClick={() => setConfirmDelete(dep)} data-testid={`btn-delete-dep-reg-${dep.dependency_id}`}
+                              className="p-1 text-zinc-400 hover:text-rose-500 rounded-lg transition-colors"><Trash2 size={12} /></button>
+                          </div>
+                        )}
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
+      </div>
+
+      {modalOpen && (
+        <DepFormModal dependency={editing} projects={projects}
+          onClose={() => { setModalOpen(false); setEditing(null); }}
+          onSaved={() => { setModalOpen(false); setEditing(null); onChanged(); }} />
+      )}
+      <ConfirmDialog
+        isOpen={!!confirmDelete}
+        onClose={() => setConfirmDelete(null)}
+        onConfirm={handleDelete}
+        loading={deleting}
+        title="Supprimer la dépendance"
+        message={`Supprimer la dépendance "${confirmDelete?.source_project_name} → ${confirmDelete?.target_project_name}" ?`}
+      />
+    </div>
+  );
+}
+
+// ─────────────────────────────────────────────────────────────────────────────
 // Main Roadmap component
 // ─────────────────────────────────────────────────────────────────────────────
 
@@ -319,6 +618,8 @@ export default function Roadmap() {
   const [isQuarter, setIsQuarter] = useState(false);
   const [tooltip, setTooltip] = useState(null);
   const scrollRef = useRef(null);
+  const { user } = useAuth();
+  const canManageDeps = ["TENANT_ADMIN", "PMO_USER"].includes(user?.role);
 
   const loadAll = () => {
     Promise.all([
@@ -556,6 +857,7 @@ export default function Roadmap() {
         {[
           { key: "timeline",      icon: Map,        label: "Timeline Projets" },
           { key: "scope_vs_reel", icon: GitCompare, label: "Scope vs Réel" },
+          { key: "dependances",   icon: GitFork,    label: `Dépendances (${allDeps.length})` },
         ].map(({ key, icon: Icon, label }) => (
           <button
             key={key}
@@ -906,6 +1208,18 @@ export default function Roadmap() {
           snapshotData={snapshotData}
           scopeDates={scopeDates}
           loading={loadingScope}
+        />
+      )}
+
+      {/* ══════════════════════════════════════════════════
+          TAB 3 — REGISTRE DES DÉPENDANCES
+      ══════════════════════════════════════════════════ */}
+      {activeRoadmapTab === "dependances" && (
+        <DependenciesRegister
+          deps={allDeps}
+          projects={projects}
+          canManage={canManageDeps}
+          onChanged={loadAll}
         />
       )}
     </div>

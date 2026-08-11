@@ -23,6 +23,7 @@ import RiskHeatmap from "@/components/RiskHeatmap";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import ExportCopilModal from "@/components/ExportCopilModal";
 import StatusReportModal from "@/components/StatusReportModal";
+import BenefitsSection from "@/components/BenefitsSection";
 import WorkAllocationModal from "@/components/WorkAllocationModal";
 import ProjectGantt from "@/components/ProjectGantt";
 import { Ring, elapsedPct, clamp } from "@/components/ProjectTile";
@@ -394,6 +395,7 @@ export default function ProjectDetail() {
           { id: "risques", label: "Risques", count: risks.length },
           { id: "decisions", label: "Décisions", count: decisions.length },
           { id: "equipe", label: "Équipe", count: workAllocations.length + allocations.length },
+          { id: "benefices", label: "Business case" },
           ...(scopeSnapshots.length > 0 ? [{ id: "scope", label: "Scope", count: scopeSnapshots.length }] : []),
         ].map((t) => (
           <button
@@ -1718,6 +1720,12 @@ export default function ProjectDetail() {
                 );
               })}
             </div>
+          </div>
+        )}
+
+        {activeTab === "benefices" && (
+          <div className="col-span-12">
+            <BenefitsSection projectId={id} budgetTotal={project.budget_total} canWrite={canWrite} />
           </div>
         )}
 

@@ -574,27 +574,96 @@ async def list_users(user: TokenPayload, profile_id: str | None = None) -> list:
     return users
 
 
-async def update_user_profile(
-    user_id: str, profile_id: str | None, user: TokenPayload
-) -> dict:
+async def update_user(user_id: str, updates: dict, user: TokenPayload) -> dict:
     _require_admin(user)
     target = await db.users.find_one(
         {"user_id": user_id, "tenant_id": user.tenant_id}, {"_id": 0}
     )
     if not target:
         raise HTTPException(404, "Utilisateur introuvable")
-    if profile_id:
+    if updates.get("profile_id"):
         p = await db.profiles.find_one(
-            {"profile_id": profile_id, "tenant_id": user.tenant_id}
+            {"profile_id": updates["profile_id"], "tenant_id": user.tenant_id}
         )
         if not p:
             raise HTTPException(400, "Profil introuvable")
+    if updates.get("is_active") is False and user_id == user.user_id:
+        raise HTTPException(400, "Impossible de désactiver votre propre compte")
+    changes = [
+        {"field": k, "old": target.get(k), "new": v}
+        for k, v in updates.items() if target.get(k) != v
+    ]
+    updates["updated_at"] = _now()
     await db.users.update_one(
         {"user_id": user_id, "tenant_id": user.tenant_id},
-        {"$set": {"profile_id": profile_id, "updated_at": _now()}}
+        {"$set": updates}
     )
     updated = await db.users.find_one(
         {"user_id": user_id, "tenant_id": user.tenant_id},
         {"_id": 0, "password_hash": 0}
     )
+    if changes:
+        from core.audit import log_audit
+        await log_audit(user, "user.updated", "user", user_id, target.get("email", ""), changes)
     return updated
+
+
+async def create_user(data: dict, user: TokenPayload) -> dict:
+    import re
+    import bcrypt
+    _require_admin(user)
+    email = (data.get("email") or "").lower().strip()
+    if not re.match(r"^[^@\s]+@[^@\s]+\.[^@\s]+$", email):
+        raise HTTPException(422, "Email invalide")
+    name = (data.get("name") or "").strip()
+    if not name:
+        raise HTTPException(422, "Le nom est obligatoire")
+    password = data.get("password") or ""
+    if len(password) < 8:
+        raise HTTPException(422, "Le mot de passe doit contenir au moins 8 caractères")
+    if await db.users.find_one({"email": email}):
+        raise HTTPException(409, "Un compte existe déjà avec cet email")
+    profile_id = data.get("profile_id") or None
+    if profile_id:
+        p = await db.profiles.find_one({"profile_id": profile_id, "tenant_id": user.tenant_id})
+        if not p:
+            raise HTTPException(400, "Profil introuvable")
+    doc = {
+        "user_id": str(uuid.uuid4()),
+        "tenant_id": user.tenant_id,
+        "email": email,
+        "name": name,
+        "role": data.get("role") or "READ_ONLY",
+        "profile_id": profile_id,
+        "is_active": True,
+        "password_hash": bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode(),
+        "created_at": _now(),
+    }
+    await db.users.insert_one(doc)
+    doc.pop("_id", None)
+    doc.pop("password_hash", None)
+    from core.audit import log_audit
+    await log_audit(user, "user.created", "user", doc["user_id"], email)
+    return doc
+
+
+async def reset_user_password(user_id: str, password: str, user: TokenPayload) -> dict:
+    import bcrypt
+    _require_admin(user)
+    if len(password or "") < 8:
+        raise HTTPException(422, "Le mot de passe doit contenir au moins 8 caractères")
+    target = await db.users.find_one(
+        {"user_id": user_id, "tenant_id": user.tenant_id}, {"_id": 0}
+    )
+    if not target:
+        raise HTTPException(404, "Utilisateur introuvable")
+    await db.users.update_one(
+        {"user_id": user_id, "tenant_id": user.tenant_id},
+        {"$set": {
+            "password_hash": bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode(),
+            "password_changed_at": _now(),
+        }},
+    )
+    from core.audit import log_audit
+    await log_audit(user, "user.password_reset", "user", user_id, target.get("email", ""))
+    return {"reset": True, "user_id": user_id}

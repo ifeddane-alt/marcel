@@ -1,0 +1,32 @@
+{
+  "summary": "Frontend E2E testing for MARCEL new features: Gestion Utilisateurs (create/toggle-active/reset-password), Business case bénéfices, Portefeuille visibility, Roadmap Dépendances registry, Journal d'audit and permissions. Overall the features work end-to-end. Two minor UX issues found: (1) login page does not display a visible error message when a deactivated account tries to log in (backend correctly returns 403 and login is blocked, but no toast/error is shown to the user), (2) Business Case KPIs (attendus / réalisés / %) are not re-computed in the UI immediately after adding a new bénéfice — the row appears in the table but the 4 KPI tiles keep the previous totals until the page is reloaded.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "LoginPage", "issue": "Aucun message d'erreur affiché lorsqu'un compte désactivé tente de se connecter. L'utilisateur reste sur /login sans feedback (le backend renvoie bien 403 'Compte désactivé').", "selector": "form login submit", "priority": "MEDIUM"},
+      {"component": "BenefitsSection (Business case)", "issue": "Après création d'un nouveau bénéfice (POST OK, ligne ajoutée au tableau benefit-row-*), les 4 KPIs benefits-kpi-expected/realized/pct/roi ne sont pas rafraîchis — les totaux affichés restent ceux d'avant la création tant que la page n'est pas rechargée.", "selector": "[data-testid='benefits-kpi-expected']", "priority": "MEDIUM"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Login: afficher un toast/message d'erreur explicite (403 → 'Compte désactivé, contactez un administrateur') au lieu de rester silencieusement sur /login.",
+    "BenefitsSection: recalculer localement les KPIs (ou refetch summary) après create/update/delete d'un bénéfice pour éviter les totaux périmés."
+  ],
+  "critical_code_review_comments": [
+    "ConfirmDialog exposé via data-testid='confirm-delete-btn' pour TOUS les cas (désactivation, réactivation, suppression bénéfice, suppression dépendance). Le testid et le libellé 'Supprimer' sont trompeurs pour les cas non-destructifs (désactiver/réactiver un utilisateur). Suggestion : introduire un data-testid générique 'confirm-dialog-confirm' + libellés contextuels.",
+    "user-profile-select est un <select> HTML natif (pas d'options [role=option]) alors que le prompt semble supposer un Select shadcn : cohérence à revoir avec les autres modals."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "n/a (skipped, déjà validé curl)", "frontend": "~92% (2 issues UX mineures)"},
+  "test_credentials": "admin@altair.fr / Admin2026! ; viewer@altair.fr / View1234! ; test.audit@altair.fr / NouveauMdp2026! (mdp remis à cette valeur pendant le test comme convenu)",
+  "seed_data_creation": "Création puis nettoyage effectués : 1 utilisateur testuser+1786454034@altair.fr (LAISSÉ en état 'Actif' après cycle deactivate→reactivate, non supprimable via UI), 1 bénéfice TEST_Benefit_Auto sur Projet Phoenix (SUPPRIMÉ), 1 dépendance TEST_AUTO_DEP (SUPPRIMÉE — retour à 7 dépendances). Le mot de passe de admin@altair.fr n'a PAS été modifié.",
+  "retest_needed": false,
+  "should_main_agent_self_test": true,
+  "context_for_next_testing_agent": "Toutes les fonctionnalités demandées sont fonctionnelles (création utilisateur, désactivation/réactivation via ConfirmDialog dont le bouton confirm porte data-testid='confirm-delete-btn', reset password modal, business case KPIs+CRUD bénéfices, tuiles/liste portefeuille bénéfices, roadmap dépendances registre CRUD, journal d'audit + filtres + expansion des changements, restrictions viewer OK). Il reste 1 utilisateur test 'testuser+1786454034@altair.fr' actif dans /admin/users (pas de bouton supprimer côté UI, à nettoyer via API si nécessaire).",
+  "rca of the issue": {
+    "login_error_missing": "Le formulaire de login attrape la réponse 403 mais ne route pas le message vers un state d'erreur visible (probablement error state mis à jour mais pas rendu). À vérifier dans /app/frontend/src/pages/Login.jsx ou équivalent.",
+    "kpi_stale": "BenefitsSection.jsx recalcule les KPIs depuis un état/props qui n'est pas invalidé après le POST /api/projects/{id}/benefits (pas de refetch de summary ni de recompute local). Reproduction : ouvrir Projet Phoenix > Business case > + Nouveau bénéfice (10 000 € attendus / 3 000 € réalisés / unité €) > Ajouter → la ligne apparaît mais les KPIs restent à 250 000 / 80 000 / 32% / 6% (attendu : 260 000 / 83 000)."
+  }
+}

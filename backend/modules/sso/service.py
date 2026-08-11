@@ -90,6 +90,8 @@ async def _login_user(tenant_id: str, email: str, name: str, sso_cfg: dict) -> s
         raise HTTPException(401, "Email absent de la réponse du fournisseur d'identité")
 
     user = await db.users.find_one({"email": email, "tenant_id": tenant_id}, {"_id": 0})
+    if user and user.get("is_active") is False:
+        raise HTTPException(403, "Compte désactivé — contactez votre administrateur")
     if not user:
         if not sso_cfg.get("auto_provision"):
             raise HTTPException(403, f"Aucun utilisateur {email} dans ce tenant (auto-provisioning désactivé)")

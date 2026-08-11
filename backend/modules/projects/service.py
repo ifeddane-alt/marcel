@@ -115,6 +115,8 @@ async def create_project(data: ProjectCreate, current_user: TokenPayload) -> dic
     project.pop("_id", None)
     # Fire webhook (non-bloquant)
     asyncio.create_task(_fire_project_webhook(current_user.tenant_id, "project.created", project))
+    from core.audit import log_audit
+    await log_audit(current_user, "created", "project", project["project_id"], project.get("name", ""))
     return project
 
 
@@ -135,6 +137,10 @@ async def update_project(project_id: str, data: ProjectUpdate, current_user: Tok
     # Fire webhook + alertes seuils (non-bloquant)
     asyncio.create_task(_fire_project_webhook(current_user.tenant_id, "project.updated", updated))
     asyncio.create_task(_check_budget_threshold(current_user.tenant_id, old, updated))
+    from core.audit import log_audit, diff_changes
+    changes = diff_changes(old, update_data)
+    if changes:
+        await log_audit(current_user, "updated", "project", project_id, updated.get("name", ""), changes)
     return updated
 
 
@@ -226,12 +232,20 @@ async def add_budget_revision(
     )
     updated = await db.projects.find_one({"project_id": project_id}, {"_id": 0})
     asyncio.create_task(_check_budget_threshold(current_user.tenant_id, project, updated))
+    from core.audit import log_audit
+    await log_audit(current_user, "budget_revised", "project", project_id, project.get("name", ""), [
+        {"field": "eac", "old": old_eac, "new": data.eac},
+        {"field": "motif", "old": "", "new": data.reason},
+    ])
     return updated
 
 
 async def delete_project(project_id: str, current_user: TokenPayload) -> None:
     if current_user.role != "TENANT_ADMIN":
         raise HTTPException(status_code=403, detail="Réservé au TENANT_ADMIN")
+    project = await db.projects.find_one(
+        {"project_id": project_id, "tenant_id": current_user.tenant_id}, {"_id": 0, "name": 1}
+    )
     await db.tasks.delete_many({"project_id": project_id, "tenant_id": current_user.tenant_id})
     await db.milestones.delete_many({"project_id": project_id})
     await db.allocations.delete_many({"project_id": project_id})
@@ -240,6 +254,79 @@ async def delete_project(project_id: str, current_user: TokenPayload) -> None:
     )
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Projet introuvable")
+    from core.audit import log_audit
+    await log_audit(current_user, "deleted", "project", project_id, (project or {}).get("name", ""))
+
+
+# ─── Bénéfices / business case ───────────────────────────────────────────────
+
+VALID_BENEFIT_CATEGORIES = ["financier", "productivite", "qualite", "conformite", "autre"]
+VALID_BENEFIT_UNITS = ["EUR", "JH", "%", "autre"]
+
+
+def _benefits_summary(benefits: list) -> dict:
+    eur = [b for b in benefits if b.get("unit") == "EUR"]
+    expected = sum(float(b.get("expected_value") or 0) for b in eur)
+    realized = sum(float(b.get("realized_value") or 0) for b in eur)
+    pct = round(realized / expected * 100) if expected > 0 else 0
+    return {"count": len(benefits), "expected_eur": expected, "realized_eur": realized, "realization_pct": pct}
+
+
+async def get_benefits(project_id: str, current_user: TokenPayload) -> dict:
+    project = await db.projects.find_one(
+        {"project_id": project_id, "tenant_id": current_user.tenant_id},
+        {"_id": 0, "benefits": 1, "name": 1, "budget_total": 1},
+    )
+    if not project:
+        raise HTTPException(status_code=404, detail="Projet introuvable")
+    benefits = project.get("benefits") or []
+    return {"benefits": benefits, "summary": _benefits_summary(benefits)}
+
+
+async def set_benefits(project_id: str, benefits: list, current_user: TokenPayload) -> dict:
+    require_write(current_user)
+    project = await db.projects.find_one(
+        {"project_id": project_id, "tenant_id": current_user.tenant_id},
+        {"_id": 0, "name": 1, "benefits": 1},
+    )
+    if not project:
+        raise HTTPException(status_code=404, detail="Projet introuvable")
+    cleaned = []
+    for b in benefits or []:
+        label = (b.get("label") or "").strip()
+        if not label:
+            raise HTTPException(status_code=422, detail="Chaque bénéfice doit avoir un libellé")
+        category = b.get("category") or "financier"
+        if category not in VALID_BENEFIT_CATEGORIES:
+            raise HTTPException(status_code=422, detail=f"Catégorie invalide: {category}")
+        unit = b.get("unit") or "EUR"
+        if unit not in VALID_BENEFIT_UNITS:
+            raise HTTPException(status_code=422, detail=f"Unité invalide: {unit}")
+        try:
+            expected_value = float(b.get("expected_value") or 0)
+            realized_value = float(b.get("realized_value") or 0)
+        except (TypeError, ValueError):
+            raise HTTPException(status_code=422, detail="Valeurs de bénéfice invalides")
+        cleaned.append({
+            "benefit_id": b.get("benefit_id") or str(uuid.uuid4()),
+            "label": label,
+            "category": category,
+            "unit": unit,
+            "expected_value": expected_value,
+            "realized_value": realized_value,
+            "horizon": b.get("horizon") or "",
+            "comment": b.get("comment") or "",
+        })
+    await db.projects.update_one(
+        {"project_id": project_id, "tenant_id": current_user.tenant_id},
+        {"$set": {"benefits": cleaned}},
+    )
+    from core.audit import log_audit
+    old_count = len(project.get("benefits") or [])
+    await log_audit(current_user, "benefits_updated", "project", project_id, project.get("name", ""), [
+        {"field": "bénéfices", "old": f"{old_count} élément(s)", "new": f"{len(cleaned)} élément(s)"},
+    ])
+    return {"benefits": cleaned, "summary": _benefits_summary(cleaned)}
 
 
 async def get_team_consumption(project_id: str, current_user: TokenPayload) -> list:
