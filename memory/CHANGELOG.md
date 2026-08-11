@@ -148,3 +148,7 @@
 ## 2026-06 — Atterrissage login → /home (déployé prod)
 - Login classique + SSO exchange naviguent vers /home ; route index "/", catch-all "*", /login connecté et fallback AdminGuard → /home (alias legacy /cxo → /dashboard conservé)
 - Testé E2E preview (login → /home direct) ; bundle prod vérifié (m("/home") présent, health/site 200)
+
+## 2026-08-11 — Instances COPIL + déploiement prod
+- Gouvernance : CRUD instances (COPIL/COPROJ/COMEX/CODIR/Steering/Autre), ordre du jour, participants, compte-rendu, statut, vue calendrier mensuelle, audit. Testé 11/11 (iteration_60).
+- Déploiement production marcel-ppm.com (commit 8ef316b) des 5 chantiers : gestion utilisateurs, business case bénéfices, registre dépendances roadmap, journal d'audit, instances COPIL. Health + bundle + login + migration statuts vérifiés. Prune Docker 1,97 Go, disque 80 %.
