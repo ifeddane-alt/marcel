@@ -3,7 +3,7 @@ import { Link } from "react-router-dom";
 import {
   Shield, Calendar, AlertTriangle, CheckCircle, Clock, XCircle,
   ClipboardList, Plus, Trash2, ChevronDown, ChevronUp, Presentation,
-  Pencil, CalendarDays, List, ListOrdered,
+  Pencil, CalendarDays, List, ListOrdered, FileDown, Mail,
 } from "lucide-react";
 import { governanceAPI, projectsAPI, decisionsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -164,6 +164,44 @@ export default function Governance() {
   const openCalendarInstance = (g) => {
     setInstView("list");
     setExpanded(g.governance_id);
+  };
+
+  const downloadInvitation = async (g) => {
+    try {
+      const res = await governanceAPI.invitationPdf(g.governance_id);
+      const url = window.URL.createObjectURL(new Blob([res.data], { type: "application/pdf" }));
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `Invitation_${(g.name || "comite").replace(/[^a-zA-Z0-9]/g, "_").slice(0, 60)}.pdf`;
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      window.URL.revokeObjectURL(url);
+      toast.success("Invitation PDF téléchargée");
+    } catch { toast.error("Erreur lors de la génération du PDF"); }
+  };
+
+  const buildInvitationMailto = (g) => {
+    const ds = g.date_scheduled || "";
+    const dateStr = ds ? `${ds.slice(8, 10)}/${ds.slice(5, 7)}/${ds.slice(0, 4)} à ${ds.slice(11, 16)}` : "";
+    const typeLabel = (g.type || "comité").toUpperCase();
+    const lines = [
+      "Bonjour,",
+      "",
+      "Vous êtes convié(e) au comité suivant :",
+      "",
+      `${g.name}`,
+      `Date : ${dateStr}`,
+      "",
+      "Ordre du jour :",
+      ...(g.agenda || []).map((a, i) =>
+        `  ${i + 1}. ${a.title}${a.presenter ? ` — ${a.presenter}` : ""}${a.duration_min ? ` (${a.duration_min} min)` : ""}`),
+      "",
+      (g.attendees || []).length ? `Participants : ${(g.attendees || []).join(", ")}` : "",
+      "",
+      "Cordialement",
+    ];
+    return `mailto:?subject=${encodeURIComponent(`[${typeLabel}] ${g.name} — ${dateStr}`)}&body=${encodeURIComponent(lines.join("\n"))}`;
   };
 
   if (loading) {
@@ -466,8 +504,23 @@ export default function Governance() {
 
               {isExpanded && (
                 <div className="border-t border-zinc-100 px-5 py-4 bg-zinc-50/50">
-                  {/* Export COPIL shortcut */}
-                  <div className="flex justify-end mb-3">
+                  {/* Export COPIL + Invitation */}
+                  <div className="flex justify-end gap-2 mb-3">
+                    <button
+                      onClick={() => downloadInvitation(g)}
+                      data-testid={`btn-invitation-pdf-${g.governance_id}`}
+                      className="flex items-center gap-1.5 px-3 py-1.5 border border-zinc-300 text-zinc-600 text-xs font-semibold rounded-lg hover:bg-zinc-100 transition-colors"
+                    >
+                      <FileDown size={12} /> Invitation PDF
+                    </button>
+                    <a
+                      href={buildInvitationMailto(g)}
+                      data-testid={`btn-invitation-email-${g.governance_id}`}
+                      onClick={(e) => e.stopPropagation()}
+                      className="flex items-center gap-1.5 px-3 py-1.5 border border-zinc-300 text-zinc-600 text-xs font-semibold rounded-lg hover:bg-zinc-100 transition-colors"
+                    >
+                      <Mail size={12} /> Envoyer par email
+                    </a>
                     <button
                       onClick={() => {
                         const pids = g.projects_scope || [];

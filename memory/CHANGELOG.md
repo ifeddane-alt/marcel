@@ -152,3 +152,9 @@
 ## 2026-08-11 — Instances COPIL + déploiement prod
 - Gouvernance : CRUD instances (COPIL/COPROJ/COMEX/CODIR/Steering/Autre), ordre du jour, participants, compte-rendu, statut, vue calendrier mensuelle, audit. Testé 11/11 (iteration_60).
 - Déploiement production marcel-ppm.com (commit 8ef316b) des 5 chantiers : gestion utilisateurs, business case bénéfices, registre dépendances roadmap, journal d'audit, instances COPIL. Health + bundle + login + migration statuts vérifiés. Prune Docker 1,97 Go, disque 80 %.
+
+## 2026-08-11 (2) — Mon Compte + Objectifs Stratégiques + Invitation ODJ
+- /account : profil + changement de son propre mot de passe (bcrypt, audit). Footer rail → lien Mon compte.
+- /objectifs : référentiel d'objectifs DSI, rattachement projets, KPIs d'alignement portefeuille (projets + budget), non-alignés. Nav « Objectifs ».
+- Gouvernance : Invitation PDF (reportlab) + mailto prérempli avec l'ODJ sur chaque instance.
+- Tests : curl backend 100 %, testing_agent iteration_61 = 100 % (0 bug). Preview uniquement, pas déployé.

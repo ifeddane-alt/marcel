@@ -1,0 +1,24 @@
+{
+  "summary": "Frontend E2E testing of iteration 61 features: Mon Compte, Objectifs Stratégiques (page + CRUD + link + delete), Invitation COPIL (PDF + mailto), Audit filter Objectif/Mot de passe, Viewer permissions, Regressions. All 8 test blocks passed successfully.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/account & /objectifs (viewer)", "issues": ["Toast success on change-password and PDF download disappears quickly, but underlying action succeeds (verified via re-login and downloaded 3054-byte valid %PDF file). Not blocking."]}
+    ]
+  },
+  "test_report_links": [],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "nav-account is rendered twice (mobile sidebar + desktop rail). Playwright default selectors resolve to the hidden mobile one first. Not a functional bug, but consider distinct data-testids (nav-account-mobile / nav-account-desktop) to reduce ambiguity in automated tests."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped per request)", "frontend": "100%"},
+  "test_credentials": "admin@altair.fr/Admin2026!, viewer@altair.fr/View1234!, test.audit@altair.fr/MonCompte2026! (restored to MonCompte2026! at the end of test — verified via re-login).",
+  "seed_data_creation": "Created and deleted 1 test objectif ('TEST Objectif E2E MODIFIED'). Final KPIs restored to initial state (Objectifs actifs=3, alignés=4/10). Linked 2 projects (already-aligned projects, so alignment KPI unchanged) then cascade-cleaned via delete.",
+  "retest_needed": false,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "All iteration-61 features validated end-to-end. Detailed results: (1) Mon Compte admin: /account loads with account-name=Sophie Martin, account-email=admin@altair.fr, account-profile=Administrateur, account-role=Administrateur, account-tenant=Groupe Altair Industries. nav-account link exists in both mobile sidebar (hidden) and desktop rail — must use .last for reliable clicking. (2) Password change (test.audit only): (a) wrong current pw → 'Mot de passe actuel incorrect' via change-password-error testid; (b) mismatch confirm → 'La confirmation ne correspond pas au nouveau mot de passe' client-side; (c) MonCompte2026!→TestCompte2026! success, re-login OK; restored to MonCompte2026! and re-login OK. (3) /objectifs: KPIs = Actifs 3, Alignés 4/10 (40%), Budget 66% (11 802 000/17 952 000 €), Non alignés 6. 3 cards with correct titles, projects, chips. unaligned-section (6) visible. (4) CRUD: create modal (obj-title/pillar/horizon/owner-input, obj-status-select, obj-save-btn) → active KPI went 3→4, edit renamed OK, link-projects-modal shows 10 checkboxes, save persisted (chips visible), delete via ConfirmDialog restored KPIs to 3/4/10. (5) Governance /governance: expand COPIL Sept 2026 via governance-expand-btn-{id} — btn-invitation-pdf-{id} downloads Invitation_COPIL_Mensuel_Septembre_2026___Portefeuille_Projets.pdf (3054 bytes, valid %PDF header); btn-invitation-email-{id} href is 'mailto:?subject=%5BCOPIL%5D%20COPIL%20Mensuel%20Septembre%202026...&body=...Ordre%20du%20jour...%201.%20...' — subject contains [COPIL], body has numbered ordre du jour; Export COPIL button still present (regression OK). Tabs Liste/Calendrier present (gov-view-list, gov-view-calendar). (6) /admin/audit: audit-filter-entity contains 'Objectif' option; entries visible for Création/Modification/Suppression/Projets rattachés on Objectif entity + 'Mot de passe modifié' on test.audit@altair.fr Utilisateur. (7) Viewer permissions: /objectifs KPIs+cards visible, btn-new-objective NOT present, 0 edit/link/delete buttons, /account form (current-password-input, new-password-input, confirm-password-input) visible. (8) Regressions: nav shows Objectifs between Portefeuille and Budget (icon = target/crosshair icon, different from Scope's map icon), Déconnexion works (logout-btn), governance Liste/Calendrier tabs present. Only console noise: expected 403s on some feature APIs for viewer/test.audit (RLS), no blockers.",
+  "rca of the issue": "N/A — no issues found."
+}

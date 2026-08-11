@@ -2,8 +2,10 @@ from fastapi import APIRouter, HTTPException, Depends, Request
 import bcrypt
 import time
 import logging
+from datetime import datetime, timezone
 from collections import defaultdict
 from threading import Lock
+from pydantic import BaseModel
 from core.auth import TokenPayload, get_current_user, create_token
 from core.database import db
 from .schemas import LoginRequest
@@ -110,3 +112,56 @@ async def _load_profile_data(user: dict) -> tuple[list[str], str]:
 @router.get("/auth/me")
 async def get_me(current_user: TokenPayload = Depends(get_current_user)):
     return current_user.model_dump()
+
+
+class ChangePasswordRequest(BaseModel):
+    current_password: str
+    new_password: str
+
+
+@router.get("/auth/account")
+async def get_account(current_user: TokenPayload = Depends(get_current_user)):
+    user = await db.users.find_one(
+        {"user_id": current_user.user_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
+    )
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur introuvable")
+    has_password = bool(user.pop("password_hash", None))
+    tenant = await db.tenants.find_one({"tenant_id": current_user.tenant_id}, {"_id": 0, "name": 1})
+    _, profile_name = await _load_profile_data(user)
+    user["has_password"] = has_password
+    user["tenant_name"] = (tenant or {}).get("name", "")
+    user["profile_name"] = profile_name
+    user["permissions_count"] = len(current_user.permissions or [])
+    return user
+
+
+@router.post("/auth/change-password")
+async def change_password(
+    req: ChangePasswordRequest,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    user = await db.users.find_one(
+        {"user_id": current_user.user_id, "tenant_id": current_user.tenant_id}
+    )
+    if not user:
+        raise HTTPException(status_code=404, detail="Utilisateur introuvable")
+    if not user.get("password_hash"):
+        raise HTTPException(status_code=400, detail="Compte SSO — le mot de passe est géré par votre fournisseur d'identité")
+    if not bcrypt.checkpw(req.current_password.encode(), user["password_hash"].encode()):
+        logger.warning("[auth] Changement mdp refusé (mdp actuel incorrect): %s", current_user.email)
+        raise HTTPException(status_code=401, detail="Mot de passe actuel incorrect")
+    if len(req.new_password) < 8:
+        raise HTTPException(status_code=422, detail="Le nouveau mot de passe doit contenir au moins 8 caractères")
+    if req.new_password == req.current_password:
+        raise HTTPException(status_code=422, detail="Le nouveau mot de passe doit être différent de l'actuel")
+    await db.users.update_one(
+        {"user_id": current_user.user_id, "tenant_id": current_user.tenant_id},
+        {"$set": {
+            "password_hash": bcrypt.hashpw(req.new_password.encode(), bcrypt.gensalt()).decode(),
+            "password_changed_at": datetime.now(timezone.utc).isoformat(),
+        }},
+    )
+    from core.audit import log_audit
+    await log_audit(current_user, "user.password_changed", "user", current_user.user_id, current_user.email)
+    return {"changed": True}

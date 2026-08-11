@@ -33,6 +33,15 @@ async def list_governance(current_user: TokenPayload) -> list:
     ).sort("date_scheduled", -1).to_list(None)
 
 
+async def get_governance(governance_id: str, current_user: TokenPayload) -> dict:
+    instance = await db.governance.find_one(
+        {"governance_id": governance_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
+    )
+    if not instance:
+        raise HTTPException(404, "Instance introuvable")
+    return instance
+
+
 async def create_governance(data: dict, current_user: TokenPayload) -> dict:
     name = (data.get("name") or "").strip()
     if not name:

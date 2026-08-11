@@ -30,6 +30,8 @@ api.interceptors.response.use(
 export const authAPI = {
   login: (email, password) => api.post("/auth/login", { email, password }),
   me: () => api.get("/auth/me"),
+  account: () => api.get("/auth/account"),
+  changePassword: (data) => api.post("/auth/change-password", data),
   ssoProviders: (email) => api.get(`/auth/sso/providers?email=${encodeURIComponent(email)}`),
   ssoExchange: (code) => api.post("/auth/sso/exchange", { code }),
 };
@@ -118,6 +120,16 @@ export const governanceAPI = {
   create: (data) => api.post("/governance", data),
   update: (id, data) => api.put(`/governance/${id}`, data),
   delete: (id) => api.delete(`/governance/${id}`),
+  invitationPdf: (id) => api.get(`/governance/${id}/invitation-pdf`, { responseType: "blob" }),
+};
+
+export const objectivesAPI = {
+  list: () => api.get("/objectives"),
+  alignment: () => api.get("/objectives/alignment"),
+  create: (data) => api.post("/objectives", data),
+  update: (id, data) => api.put(`/objectives/${id}`, data),
+  delete: (id) => api.delete(`/objectives/${id}`),
+  setProjects: (id, projectIds) => api.put(`/objectives/${id}/projects`, { project_ids: projectIds }),
 };
 
 export const risksAPI = {

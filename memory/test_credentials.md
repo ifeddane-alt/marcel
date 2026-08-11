@@ -8,7 +8,7 @@
 - viewer@altair.fr / View1234!        → READ_ONLY
 - user@altair.fr / Altair2026!        → READ_ONLY (contributeur)
 - achats@altair.fr / Altair2026!      → READ_ONLY (profil Achats)
-- test.audit@altair.fr / NouveauMdp2026! → READ_ONLY (créé via POST /api/admin/users pour tests gestion utilisateurs)
+- test.audit@altair.fr / MonCompte2026! → READ_ONLY (créé via POST /api/admin/users pour tests gestion utilisateurs ; mdp modifié via /api/auth/change-password)
 
 ## Tenant Beta Corp (second tenant, isolation)
 - admin@betacorp.fr / Beta2026!

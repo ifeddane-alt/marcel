@@ -1,4 +1,4 @@
-from fastapi import APIRouter, Depends
+from fastapi import APIRouter, Depends, Response
 from core.auth import TokenPayload, get_current_user, permission_required
 from . import service
 
@@ -8,6 +8,22 @@ router = APIRouter(tags=["governance"])
 @router.get("/governance")
 async def list_governance(current_user: TokenPayload = Depends(get_current_user)):
     return await service.list_governance(current_user)
+
+
+@router.get("/governance/{governance_id}/invitation-pdf")
+async def invitation_pdf(
+    governance_id: str,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    instance = await service.get_governance(governance_id, current_user)
+    from .pdf_invitation import build_invitation_pdf
+    data = await build_invitation_pdf(instance, current_user.tenant_id)
+    safe_name = "".join(c if c.isalnum() else "_" for c in (instance.get("name") or "comite"))[:60]
+    return Response(
+        content=data,
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="Invitation_{safe_name}.pdf"'},
+    )
 
 
 @router.post("/governance", status_code=201)

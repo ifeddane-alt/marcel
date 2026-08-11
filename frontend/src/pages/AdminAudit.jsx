@@ -15,9 +15,11 @@ const ACTION_CONFIG = {
   "user.created": { label: "Utilisateur créé", cls: "bg-indigo-50 text-indigo-700 border-indigo-200" },
   "user.updated": { label: "Utilisateur modifié", cls: "bg-indigo-50 text-indigo-700 border-indigo-200" },
   "user.password_reset": { label: "Mot de passe réinitialisé", cls: "bg-indigo-50 text-indigo-700 border-indigo-200" },
+  "user.password_changed": { label: "Mot de passe modifié", cls: "bg-indigo-50 text-indigo-700 border-indigo-200" },
+  projects_linked: { label: "Projets rattachés", cls: "bg-teal-50 text-teal-700 border-teal-200" },
 };
 
-const ENTITY_LABELS = { project: "Projet", decision: "Décision", user: "Utilisateur", governance: "Instance" };
+const ENTITY_LABELS = { project: "Projet", decision: "Décision", user: "Utilisateur", governance: "Instance", objective: "Objectif" };
 
 function fmtVal(v) {
   if (v === null || v === undefined || v === "") return "—";
@@ -91,6 +93,7 @@ export default function AdminAudit() {
             <option value="decision">Décision</option>
             <option value="user">Utilisateur</option>
             <option value="governance">Instance</option>
+            <option value="objective">Objectif</option>
           </select>
           <select data-testid="audit-filter-action"
             className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 bg-white"

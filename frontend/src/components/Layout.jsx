@@ -21,6 +21,7 @@ import {
   Train,
   Wrench,
   Target,
+  Goal,
   TrendingUp,
   Plug,
   Bell,
@@ -62,6 +63,7 @@ const MAIN_NAV = [
   { to: "/dashboard",  icon: LayoutDashboard, label: "Tableau de bord", perm: "dashboard.view" },
   { to: "/programmes", icon: FolderKanban,     label: "Programmes",     perm: "portfolio.view" },
   { to: "/portfolio",  icon: Briefcase,        label: "Portefeuille",   perm: "portfolio.view" },
+  { to: "/objectifs",  icon: Goal,             label: "Objectifs",      perm: "portfolio.view" },
   { to: "/budget",     icon: DollarSign,       label: "Budget",         perm: "budget.view" },
   { to: "/teams",      icon: UsersRound,       label: "Équipes",        perm: "teams.view" },
   {
@@ -252,7 +254,8 @@ export default function Layout() {
 
       {/* Footer utilisateur */}
       <div className="pb-2.5 border-t border-[#f0eff6] pt-2 flex-shrink-0">
-        <div className={`flex items-center gap-2.5 mx-1.5 px-[7px] py-1.5 ${isDrawer ? "" : ""}`}>
+        <Link to="/account" data-testid="nav-account" title="Mon compte"
+          className={`flex items-center gap-2.5 mx-1.5 px-[7px] py-1.5 rounded-lg hover:bg-[#f7f6fb] transition-colors ${isDrawer ? "" : ""}`}>
           <div className="w-[26px] h-[26px] rounded-full bg-[#352c6e] flex items-center justify-center flex-shrink-0">
             <span className="text-[10px] font-bold text-white">
               {user?.name?.slice(0, 2).toUpperCase() || "?"}
@@ -264,7 +267,7 @@ export default function Layout() {
               {profileLabel}
             </div>
           </div>
-        </div>
+        </Link>
         <button
           onClick={handleLogout}
           data-testid="logout-btn"

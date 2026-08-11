@@ -13,6 +13,8 @@ import ProjectDetail from "@/pages/ProjectDetail";
 import Resources from "@/pages/Resources";
 import ResourceDetail from "@/pages/ResourceDetail";
 import Governance from "@/pages/Governance";
+import Objectives from "@/pages/Objectives";
+import Account from "@/pages/Account";
 import Conformite from "@/pages/Conformite";
 import Import from "@/pages/Import";
 import Teams from "@/pages/Teams";
@@ -99,6 +101,8 @@ function AppRoutes() {
         <Route path="admin/agent-analytics" element={<AdminRoute><AgentAnalytics /></AdminRoute>} />
         <Route path="timesheets" element={<Timesheets />} />
         <Route path="governance" element={<Governance />} />
+        <Route path="objectifs" element={<Objectives />} />
+        <Route path="account" element={<Account />} />
         <Route path="conformite" element={<Conformite />} />
         <Route path="demands" element={<Demands />} />
         <Route path="admin/profiles" element={<AdminRoute><AdminProfiles /></AdminRoute>} />
