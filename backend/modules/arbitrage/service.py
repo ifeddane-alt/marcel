@@ -223,6 +223,8 @@ async def upsert_envelope(data: EnvelopeUpsert, user: TokenPayload) -> dict:
     result = await db.portfolio_envelopes.find_one(
         {"tenant_id": user.tenant_id, "year": data.year}, {"_id": 0}
     )
+    from modules.budget.service import check_envelope_overruns
+    await check_envelope_overruns(user)
     return result or doc
 
 

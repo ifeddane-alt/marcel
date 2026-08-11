@@ -1,0 +1,40 @@
+{
+  "summary": "Chantier 63 (trajectoire objectifs + enveloppes N/N+1/N+2 + alertes dépassement) : 6/6 tests backend pytest passés + validation UI complète (objectifs, arbitrage, notification bell). Nettoyage effectué (enveloppe 2027 supprimée, multiyear reset, 4 notifs envelope_overrun purgées).",
+  "backend_issues": { "critical": [], "minor": [] },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_chantier63_trajectory_envelopes.py",
+    "/app/test_reports/pytest/chantier63.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Arbitrage.jsx: 1441 lignes — envisage de scinder (envelopes tab, scoring matrix, what-if) en composants séparés (>700 lignes = seuil).",
+    "GET /api/arbitrage/envelopes retourne 'envelope_id' au lieu du champ 'id' conventionnel — clients doivent connaître cette convention (mineur, cohérence)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_chantier63_trajectory_envelopes.py"
+  ],
+  "success_rate": { "backend": "100%", "frontend": "100%" },
+  "test_credentials": "admin@altair.fr / Admin2026!, pmo@altair.fr / Pmo1234!, viewer@altair.fr / View1234!",
+  "seed_data_creation": "Aucune donnée seed créée. Tests créent puis nettoient : enveloppe 2027, plans pluriannuels, notifications envelope_overrun.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend fully green. UI validé : /objectifs affiche 'objective-trajectory-{id}' avec avancement/jalons/conso, /arbitrage onglet 'Enveloppes Budget' affiche btn-envelope-year-{2026,2027,2028} + envelope-plan-{year} + link /budget, modal envelope-modal avec env-year-input/env-capex-input/env-opex-input préremplis, création enveloppe sous plan déclenche notification 'Dépassement d'enveloppe' visible dans NotificationBell. Backend attribut correct pour delete enveloppe : 'envelope_id' (pas 'id').",
+  "backend_test_details": {
+    "TestObjectivesTrajectory::test_objectives_have_trajectory_fields": "PASS",
+    "TestObjectivesTrajectory::test_expected_demo_data": "PASS - 'coût de run' 2 projets jalons 3/43 conso 3 570 000, 'accélérer transformation' 3 projets jalons 4/46, objectif vide 0/0",
+    "TestEnvelopeOverrun::test_create_envelope_below_plan_triggers_notif": "PASS - admin+pmo reçoivent, viewer non",
+    "TestEnvelopeOverrun::test_antispam_no_duplicate": "PASS - flag overrun_alerted respecté",
+    "TestEnvelopeOverrun::test_envelope_above_plan_resets_flag": "PASS - pas de notif quand enveloppe > plan",
+    "TestEnvelopeOverrun::test_multiyear_adjustment_triggers_notif": "PASS - PUT multiyear crée notif"
+  },
+  "ui_test_details": {
+    "objectifs_page": "2 blocs objective-trajectory rendus (objectif vide n'a pas de bloc, comportement OK)",
+    "arbitrage_envelopes_tab": "3 boutons année (N/N+1/N+2), envelope-plan-2026 avec link /budget OK, modal ouvre préremplie",
+    "notification_bell": "Notification 'Dépassement d'enveloppe' affichée avec message 'Plan pluriannuel 2027 : 66 667 € planifiés dépassent l'enveloppe de 50 000 €' — rendu OK"
+  }
+}

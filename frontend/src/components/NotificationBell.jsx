@@ -14,6 +14,7 @@ const TYPE_CONFIG = {
   alert_triggered:       { icon: AlertTriangle,  color: "text-rose-600",    bg: "bg-rose-50" },
   decision_created:      { icon: Info,           color: "text-blue-600",    bg: "bg-blue-50" },
   demand_status_changed: { icon: Info,           color: "text-zinc-600",   bg: "bg-zinc-50" },
+  envelope_overrun:      { icon: AlertTriangle,  color: "text-rose-600",   bg: "bg-rose-50" },
 };
 
 function timeAgo(iso) {

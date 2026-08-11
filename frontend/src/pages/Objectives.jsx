@@ -290,6 +290,23 @@ export default function Objectives() {
                       </span>
                     )}
                   </div>
+                  {o.project_count > 0 && (
+                    <div className="mt-3 pt-3 border-t border-zinc-100 space-y-1.5" data-testid={`objective-trajectory-${o.objective_id}`}>
+                      <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-500">
+                        <span className="uppercase tracking-widest text-[9.5px] font-bold text-zinc-400">Trajectoire</span>
+                        <span>
+                          Avancement consolidé <b className="font-mono-data text-zinc-800">{o.progress_avg}%</b>
+                          {o.milestones_total > 0 && <> · Jalons <b className="font-mono-data text-zinc-800">{o.milestones_done}/{o.milestones_total}</b></>}
+                          {" · Conso "}<b className="font-mono-data text-zinc-800">{formatEuro(o.budget_consumed || 0)}</b>
+                        </span>
+                      </div>
+                      <div className="h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+                        <div className="h-full rounded-full transition-all"
+                          style={{ width: `${Math.min(o.progress_avg || 0, 100)}%`,
+                                   background: o.rag.red > 0 ? "#cc4f45" : o.rag.orange > 0 ? "#d98c1f" : "#3f8a34" }} />
+                      </div>
+                    </div>
+                  )}
                   {(o.projects || []).length > 0 && (
                     <div className="flex flex-wrap gap-1.5 mt-3">
                       {o.projects.map((p) => (
@@ -297,6 +314,7 @@ export default function Objectives() {
                           className="flex items-center gap-1.5 px-2 py-0.5 bg-zinc-50 border border-zinc-200 rounded-full text-[10.5px] text-zinc-600 hover:border-blue-400 hover:text-blue-600 transition-colors">
                           <span className={`w-1.5 h-1.5 rounded-full ${RAG_DOT[p.status_rag] || "bg-zinc-300"}`} />
                           {(p.code ? `${p.code} · ` : "") + p.name.split("—")[0].trim().slice(0, 35)}
+                          <span className="font-mono-data text-[9.5px] text-zinc-400">{p.progress}%</span>
                         </Link>
                       ))}
                     </div>

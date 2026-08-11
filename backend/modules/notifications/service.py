@@ -53,6 +53,7 @@ NOTIF_LABELS = {
     "alert_triggered":       "Alerte seuil déclenchée",
     "decision_created":      "Nouvelle décision",
     "demand_status_changed": "Demande mise à jour",
+    "envelope_overrun":      "Dépassement d'enveloppe",
 }
 
 

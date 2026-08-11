@@ -234,6 +234,7 @@ async def revise_budget(project_id: str, data: dict, current_user: TokenPayload)
         {"field": "eac", "old": old_eac, "new": eac},
         {"field": "motif", "old": "", "new": reason},
     ])
+    await check_envelope_overruns(current_user)
     return await get_project_revisions(project_id, current_user)
 
 
@@ -597,6 +598,7 @@ async def set_project_multiyear(project_id: str, data: dict, current_user: Token
     await log_audit(current_user, "updated", "project", project_id, project.get("name", ""), [
         {"field": "plan pluriannuel", "old": old_mode, "new": new_desc},
     ])
+    await check_envelope_overruns(current_user)
     return {"project_id": project_id, "budget_by_year": cleaned}
 
 
@@ -689,3 +691,46 @@ async def export_multiyear_excel(current_user: TokenPayload) -> bytes:
     wb.close()
     buf.seek(0)
     return buf.read()
+
+
+def _fmt_eur(v: float) -> str:
+    return f"{v:,.0f} €".replace(",", " ")
+
+
+async def check_envelope_overruns(current_user: TokenPayload) -> None:
+    """Alerte les admins/PMO quand un exercice du plan pluriannuel dépasse son enveloppe."""
+    from modules.notifications.service import create_notification
+    data = await get_multiyear(current_user)
+    recipients = None
+    for y in data["years"]:
+        env_doc = await db.portfolio_envelopes.find_one(
+            {"tenant_id": current_user.tenant_id, "year": y}
+        )
+        if not env_doc or not (env_doc.get("total_envelope") or 0):
+            continue
+        planned = data["totals"].get(str(y), 0)
+        envelope = env_doc["total_envelope"]
+        over = planned > envelope
+        alerted = bool(env_doc.get("overrun_alerted"))
+        if over and not alerted:
+            if recipients is None:
+                recipients = await db.users.find(
+                    {"tenant_id": current_user.tenant_id,
+                     "role": {"$in": ["TENANT_ADMIN", "PMO_USER"]},
+                     "is_active": {"$ne": False}},
+                    {"_id": 0, "user_id": 1},
+                ).to_list(None)
+            msg = (f"Plan pluriannuel {y} : {_fmt_eur(planned)} planifiés dépassent "
+                   f"l'enveloppe de {_fmt_eur(envelope)} (dépassement {_fmt_eur(planned - envelope)})")
+            for u in recipients:
+                await create_notification(
+                    current_user.tenant_id, u["user_id"], "envelope_overrun", msg,
+                    metadata={"year": y, "planned": planned, "envelope": envelope, "link": "/budget"},
+                )
+            await db.portfolio_envelopes.update_one(
+                {"_id": env_doc["_id"]}, {"$set": {"overrun_alerted": True}}
+            )
+        elif not over and alerted:
+            await db.portfolio_envelopes.update_one(
+                {"_id": env_doc["_id"]}, {"$set": {"overrun_alerted": False}}
+            )

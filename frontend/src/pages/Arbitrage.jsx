@@ -9,7 +9,7 @@ import {
   PlayCircle, CheckCircle, AlertTriangle, Info, ChevronDown, ChevronUp,
   Plus, Trash2, Edit3, X, Check, FileDown, GitCompare, Eye, ArrowRight, Goal,
 } from "lucide-react";
-import { arbitrageAPI } from "@/api";
+import { arbitrageAPI, budgetAPI } from "@/api";
 import { usePermissions } from "@/hooks/usePermissions";
 import { formatEuro } from "@/utils/format";
 import { toast } from "sonner";
@@ -111,6 +111,7 @@ export default function Arbitrage() {
   // Envelope modal
   const [envModal, setEnvModal]         = useState(false);
   const [envForm, setEnvForm]           = useState({ year: 2026, capex_envelope: 0, opex_envelope: 0 });
+  const [multiyear, setMultiyear]       = useState(null);
 
   const load = useCallback(async () => {
     setLoading(true);
@@ -127,6 +128,7 @@ export default function Arbitrage() {
       setScenarios(scRes.data);
       // Init sandbox avec les projets réels
       setSandbox(sumRes.data.projects.map(p => ({ ...p })));
+      budgetAPI.multiyear().then(r => setMultiyear(r.data)).catch(() => {});
     } catch {
       toast.error("Erreur lors du chargement des données d'arbitrage");
     } finally {
@@ -627,14 +629,33 @@ export default function Arbitrage() {
       {activeTab === "envelopes" && (
         <div className="space-y-4">
           {canEdit && (
-            <div className="flex justify-end">
-              <button
-                onClick={() => { setEnvForm({ year: 2026, capex_envelope: 0, opex_envelope: 0 }); setEnvModal(true); }}
-                data-testid="btn-add-envelope"
-                className="flex items-center gap-2 px-3 py-2 bg-blue-600 text-white text-sm rounded-lg hover:bg-blue-700 transition-colors"
-              >
-                <Plus size={14} /> Ajouter / Modifier enveloppe
-              </button>
+            <div className="flex flex-wrap items-center justify-end gap-2">
+              {(() => {
+                const currentYear = new Date().getFullYear();
+                return [0, 1, 2].map(i => {
+                  const y = currentYear + i;
+                  const existing = envelopes.find(e => e.year === y);
+                  return (
+                    <button key={y}
+                      onClick={() => {
+                        setEnvForm(existing
+                          ? { year: y, capex_envelope: existing.capex_envelope, opex_envelope: existing.opex_envelope }
+                          : { year: y, capex_envelope: 0, opex_envelope: 0 });
+                        setEnvModal(true);
+                      }}
+                      data-testid={`btn-envelope-year-${y}`}
+                      className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg transition-colors ${
+                        existing
+                          ? "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
+                          : "bg-blue-600 text-white hover:bg-blue-700"
+                      }`}
+                    >
+                      {existing ? <Edit3 size={13} /> : <Plus size={14} />}
+                      {y} ({i === 0 ? "N" : `N+${i}`})
+                    </button>
+                  );
+                });
+              })()}
             </div>
           )}
 
@@ -642,7 +663,7 @@ export default function Arbitrage() {
             <div className="bg-white border border-dashed border-zinc-300 rounded-lg p-10 text-center text-zinc-400">
               <BarChart2 size={32} className="mx-auto mb-2 opacity-30" />
               <p className="text-sm">Aucune enveloppe définie.</p>
-              {canEdit && <p className="text-xs mt-1">Cliquez "Ajouter / Modifier enveloppe" pour créer une enveloppe 2026.</p>}
+              {canEdit && <p className="text-xs mt-1">Créez les enveloppes N, N+1 et N+2 pour cadrer le plan pluriannuel.</p>}
             </div>
           ) : (
             envelopes.map(env => {
@@ -743,6 +764,47 @@ export default function Arbitrage() {
                         </p>
                       )}
                     </div>
+
+                    {/* Plan pluriannuel vs enveloppe */}
+                    {multiyear && multiyear.totals[String(env.year)] !== undefined && (() => {
+                      const planned = multiyear.totals[String(env.year)] || 0;
+                      const planPct = env.total_envelope > 0 ? (planned / env.total_envelope) * 100 : 0;
+                      const planOver = planned > env.total_envelope;
+                      return (
+                        <div data-testid={`envelope-plan-${env.year}`}>
+                          <div className="flex items-center justify-between mb-1.5">
+                            <div className="flex items-center gap-2">
+                              <span className="text-sm font-semibold text-zinc-700">Plan pluriannuel {env.year}</span>
+                              {planOver && (
+                                <span className="flex items-center gap-1 text-xs font-medium text-red-600 bg-red-50 border border-red-200 px-2 py-0.5 rounded-full">
+                                  <AlertTriangle size={10} /> Dépassement
+                                </span>
+                              )}
+                            </div>
+                            <div className="text-right text-xs text-zinc-500">
+                              <span className={`font-semibold text-sm ${planOver ? "text-red-600" : "text-zinc-700"}`}>
+                                {formatEuro(planned)}
+                              </span>
+                              <span className="text-zinc-400"> / {formatEuro(env.total_envelope)}</span>
+                              <span className={`ml-2 font-bold ${planOver ? "text-red-600" : "text-emerald-600"}`}>
+                                ({Math.round(planPct)}%)
+                              </span>
+                            </div>
+                          </div>
+                          <div className="h-3 bg-zinc-100 rounded-full overflow-hidden">
+                            <div
+                              className={`h-full rounded-full transition-all ${planOver ? "bg-red-500" : planPct > 80 ? "bg-amber-400" : "bg-indigo-500"}`}
+                              style={{ width: `${Math.min(planPct, 100)}%` }}
+                            />
+                          </div>
+                          <p className={`text-xs mt-1 ${planOver ? "text-red-500" : "text-zinc-400"}`}>
+                            {planOver
+                              ? <>Dépassement de {formatEuro(planned - env.total_envelope)} — <Link to="/budget" className="underline hover:text-red-700">voir le plan pluriannuel</Link></>
+                              : <>Marge de {formatEuro(env.total_envelope - planned)} sur l'exercice {env.year} — <Link to="/budget" className="underline hover:text-zinc-600">plan pluriannuel</Link></>}
+                          </p>
+                        </div>
+                      );
+                    })()}
 
                     {/* Détail par projet */}
                     <div>

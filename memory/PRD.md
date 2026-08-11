@@ -374,6 +374,12 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - L'utilisateur n'a pas de compte Azure ; Okta idem. À reprendre plus tard.
 - Tout est prêt côté MARCEL : code SSO déployé en prod, procédure complète documentée dans la conversation (App registration Azure → Redirect URI https://marcel-ppm.com/api/auth/sso/callback/entra → config Admin > Configuration > SSO)
 
+## 2026-08 — Trajectoire objectifs + Enveloppes N+1/N+2 + Alertes dépassement (livré Preview, agent-testé iteration_63 100 %)
+- Objectifs : bloc Trajectoire par objectif (avancement consolidé pondéré budget, jalons atteints/total, conso, barre RAG, % par projet).
+- Arbitrage : boutons rapides enveloppes N/N+1/N+2 + comparaison « Plan pluriannuel {année} » vs enveloppe sur chaque carte.
+- Alerte « Dépassement d'enveloppe » (notification cloche, admins+PMO) déclenchée par ajustement pluriannuel/révision budget/modification d'enveloppe, avec anti-spam (flag overrun_alerted).
+- Preview uniquement, non déployé en prod.
+
 ## 2026-08 — Score Alignement auto + Plan pluriannuel + Export Excel (livré, DÉPLOYÉ PROD commit a254910, agent-testé iteration_62 100 %)
 - Arbitrage : critère ALI dérivé automatiquement des objectifs stratégiques actifs rattachés (0→1, 1→3, 2→4, 3+→5) quand le tenant a ≥1 objectif actif ; saisie manuelle bloquée (400 + UI badge indigo non éditable, lien vers /objectifs).
 - Budget : onglet Plan pluriannuel — répartition N/N+1/N+2 pro-rata temporis de l'EAC, ajustable projet par projet (budget_by_year, permission budget.edit, tracé audit), comparaison enveloppes (marge/dépassement), colonne hors fenêtre. GET /api/budget/multiyear + PUT /api/budget/project/{id}/multiyear.

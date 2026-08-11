@@ -6,7 +6,22 @@ from core.auth import TokenPayload
 
 VALID_STATUSES = ["actif", "atteint", "abandonne"]
 
-_PROJECT_FIELDS = {"_id": 0, "project_id": 1, "name": 1, "code": 1, "budget_total": 1, "status_rag": 1, "objective_ids": 1}
+_PROJECT_FIELDS = {"_id": 0, "project_id": 1, "name": 1, "code": 1, "budget_total": 1,
+                   "budget_consumed": 1, "status_rag": 1, "objective_ids": 1,
+                   "start_date": 1, "end_date_forecast": 1, "end_date_initial": 1}
+
+
+def _elapsed_pct(start, end) -> int:
+    from datetime import date
+    try:
+        sd = datetime.strptime(str(start)[:10], "%Y-%m-%d").date()
+        ed = datetime.strptime(str(end)[:10], "%Y-%m-%d").date()
+    except (ValueError, TypeError):
+        return 0
+    if ed <= sd:
+        return 100
+    pct = (date.today() - sd).days / (ed - sd).days * 100
+    return max(0, min(100, round(pct)))
 
 
 def _now() -> str:
@@ -23,6 +38,16 @@ async def list_objectives(user: TokenPayload) -> list:
         {"tenant_id": user.tenant_id}, {"_id": 0}
     ).sort("created_at", 1).to_list(None)
     projects = await db.projects.find({"tenant_id": user.tenant_id}, _PROJECT_FIELDS).to_list(None)
+    pids = [p["project_id"] for p in projects]
+    ms_stats = {}
+    async for row in db.milestones.aggregate([
+        {"$match": {"project_id": {"$in": pids}}},
+        {"$group": {"_id": "$project_id", "total": {"$sum": 1},
+                    "done": {"$sum": {"$cond": [{"$in": ["$status", ["achieved", "done"]]}, 1, 0]}}}},
+    ]):
+        ms_stats[row["_id"]] = {"done": row["done"], "total": row["total"]}
+    for p in projects:
+        p["progress"] = _elapsed_pct(p.get("start_date"), p.get("end_date_forecast") or p.get("end_date_initial"))
     for o in objectives:
         linked = [p for p in projects if o["objective_id"] in (p.get("objective_ids") or [])]
         rag = {"green": 0, "orange": 0, "red": 0}
@@ -31,11 +56,24 @@ async def list_objectives(user: TokenPayload) -> list:
                 rag[p["status_rag"]] += 1
         o["projects"] = [
             {"project_id": p["project_id"], "name": p["name"], "code": p.get("code"),
-             "status_rag": p.get("status_rag"), "budget_total": p.get("budget_total") or 0}
+             "status_rag": p.get("status_rag"), "budget_total": p.get("budget_total") or 0,
+             "progress": p["progress"],
+             "milestones_done": ms_stats.get(p["project_id"], {}).get("done", 0),
+             "milestones_total": ms_stats.get(p["project_id"], {}).get("total", 0)}
             for p in linked
         ]
         o["project_count"] = len(linked)
         o["budget_total"] = sum(p.get("budget_total") or 0 for p in linked)
+        o["budget_consumed"] = sum(p.get("budget_consumed") or 0 for p in linked)
+        weight_sum = sum(p.get("budget_total") or 0 for p in linked)
+        if weight_sum:
+            o["progress_avg"] = round(sum(p["progress"] * (p.get("budget_total") or 0) for p in linked) / weight_sum)
+        elif linked:
+            o["progress_avg"] = round(sum(p["progress"] for p in linked) / len(linked))
+        else:
+            o["progress_avg"] = 0
+        o["milestones_done"] = sum(ms_stats.get(p["project_id"], {}).get("done", 0) for p in linked)
+        o["milestones_total"] = sum(ms_stats.get(p["project_id"], {}).get("total", 0) for p in linked)
         o["rag"] = rag
     return objectives
 
