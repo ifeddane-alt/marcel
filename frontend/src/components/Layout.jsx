@@ -32,6 +32,7 @@ import {
   Database,
   Layers,
   Activity,
+  Home as HomeIcon,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -60,6 +61,7 @@ function LanguageToggle() {
 
 // ── Entrées principales ─────────────────────────────────────────────
 const MAIN_NAV = [
+  { to: "/home",       icon: HomeIcon,         label: "Accueil",        perm: null },
   { to: "/dashboard",  icon: LayoutDashboard, label: "Tableau de bord", perm: "dashboard.view" },
   { to: "/programmes", icon: FolderKanban,     label: "Programmes",     perm: "portfolio.view" },
   { to: "/portfolio",  icon: Briefcase,        label: "Portefeuille",   perm: "portfolio.view" },
@@ -119,7 +121,7 @@ export default function Layout() {
   };
 
   const visibleMain = MAIN_NAV.filter(({ perm }) =>
-    Array.isArray(perm) ? hasAnyPermission(...perm) : hasPermission(perm)
+    perm === null ? true : Array.isArray(perm) ? hasAnyPermission(...perm) : hasPermission(perm)
   );
   const visibleModules = MODULE_NAV.filter(({ perm, mod }) =>
     canAccessNav(perm, mod)

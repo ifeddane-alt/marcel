@@ -179,3 +179,6 @@
 ## 2026-08-11 (6) — DÉPLOIEMENT PROD trajectoire + enveloppes N+1/N+2 + alertes
 - PROD marcel-ppm.com déployée (commit ecfdd98) : push GitHub + update.sh VPS (backup, pull, rebuild, sync permissions) + prune 1,97 Go (disque 80 %). Timeout SSH 120 s pendant le build mais update terminée avec succès (vérifié).
 - Vérifié : health 200, login 200, bundle main.dbc0b9b9.js avec tous les marqueurs (objective-trajectory, btn-envelope-year, envelope-plan, envelope_overrun), /api/objectives 200, /api/notifications 200. En prod aucun objectif stratégique créé pour l'instant — la trajectoire apparaîtra dès le premier objectif rattaché.
+
+## 2026-08-11 (7) — Icône Accueil dans la navigation
+- Entrée « Accueil » (icône maison, data-testid nav-accueil) ajoutée en tête de la section Pilotage du rail (desktop + drawer mobile), visible pour tous les rôles (perm null), renvoie vers /home. Testé E2E (clic → /home, état actif). Preview uniquement.
