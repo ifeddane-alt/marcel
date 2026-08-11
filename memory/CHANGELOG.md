@@ -186,3 +186,7 @@
 ## 2026-08-11 (8) — Accueil personnalisé (cockpit)
 - Homepage /home enrichie : bloc rouge « Dépassement d'enveloppe — plan pluriannuel » dans Mes actions en attente (exercices en dépassement, montants, lien /budget, visible si budget.view) + carte « Comités à venir » (instances planifiées à venir, badge type coloré, date, lien Gouvernance, visible si governance.view, état vide géré). Backend home/summary : champs committees + envelope_overruns.
 - Testé : curl (admin + viewer) + screenshot E2E avec dépassement simulé puis nettoyé. Preview uniquement.
+
+## 2026-08-11 (9) — DÉPLOIEMENT PROD accueil cockpit + icône Accueil
+- PROD marcel-ppm.com déployée (commit d5742ef) via update.sh (lancé avec setsid pour éviter le timeout SSH), prune 1,97 Go, disque 80 %.
+- Vérifié : health 200, bundle main.8f62d13d.js (home-committees, home-overrun-alerts, entrée nav Accueil → /home), API home/summary retourne committees + envelope_overruns (vides en prod : aucun comité futur planifié, pas de dépassement — normal).
