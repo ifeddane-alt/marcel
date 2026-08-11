@@ -144,3 +144,7 @@
 - Frontend : `pages/Home.jsx` (route /home) — Bonjour [prénom] + date, 12 tuiles accès rapides filtrées par permissions (canAccessNav), « Mes actions en attente » (feuille de temps avec badge À saisir, timesheets à valider, jalons en retard/à venir cliquables), « Derniers projets consultés » (réutilise getRecentProjects du localStorage déjà alimenté par ProjectDetail)
 - Logo MARCEL (topbar + drawer) → Link /home
 - Testé E2E preview (login → fiches projets → clic logo → /home avec greeting, actions, 2 projets récents) ; déployé prod (bundle + 403 sans auth sur /api/home/summary, health 200, disque 79%)
+
+## 2026-06 — Atterrissage login → /home (déployé prod)
+- Login classique + SSO exchange naviguent vers /home ; route index "/", catch-all "*", /login connecté et fallback AdminGuard → /home (alias legacy /cxo → /dashboard conservé)
+- Testé E2E preview (login → /home direct) ; bundle prod vérifié (m("/home") présent, health/site 200)
