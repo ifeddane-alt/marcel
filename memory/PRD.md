@@ -1,5 +1,13 @@
 # PRD — MARCEL
 
+## 2026-06 — Audit de complétude fonctionnelle de l'APPLICATION (livré, rapport remis)
+- Demande utilisateur : audit des fonctionnalités de l'app (complet ou pas), posture directeur du pilotage stratégique DSI. NE PLUS PARLER DU SITE.
+- Rapport complet : `/app/memory/AUDIT_COMPLETUDE_2026-06.md`. Verdict ~85 % de couverture PPM entreprise.
+- P0 identifiés : (1) cycle de vie utilisateur inexistant (pas de création/désactivation user, pas de reset/changement mot de passe, pas de « Mon compte »), (2) aucun audit trail, (3) emails réels inactifs (Resend) + pas de relances timesheets.
+- P1 : bénéfices/business case, planification pluriannuelle, objectifs stratégiques hors silo SAFe, instances COPIL, **UI dépendances inter-projets (backend déjà complet, zéro frontend — quick win)**.
+- P2 : documents/commentaires, 2FA, skills, diffusion planifiée, connecteurs réels.
+- ⏳ EN ATTENTE : choix utilisateur de la priorité à traiter.
+
 ## 2026-06 — Teasers vidéo YouTube 30 s (livrés en téléchargement preview)
 - 4 MP4 1080p/30fps H.264+AAC ~28,5 s : `marcel_teaser_{fr,en}_{femme/homme|female/male}.mp4` — pipeline : voix off OpenAI TTS tts-1-hd via emergentintegrations (nova=féminine, onyx=masculine, speed 1.05, scripts FR/EN ~23 s rédigés), screencast Playwright 1920×1080 de l'app réelle (auth par injection localStorage projetenne_token + user complet de /api/auth/me — la réponse login N'A PAS les permissions, ce qui faisait rediriger /dashboard vers timesheets), plans : portfolio → budget → teams vue croisée → dashboard (route SPA « / » en preview), cartes intro/outro PIL (Liberation Sans — DejaVu ABSENT du pod), assemblage ffmpeg (xfade, fades, adelay 2.2 s, faststart).
 - Scripts et sorties dans `/app/video_teaser/` (gitignoré) ; MP4 servis via `frontend/public/teaser/` (gitignoré, non déployé). Chromium playwright : executable_path /root/.cache/ms-playwright/chromium-1208 requis (pip playwright cherche une autre version).
