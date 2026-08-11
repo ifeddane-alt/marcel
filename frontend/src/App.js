@@ -47,7 +47,7 @@ function AdminRoute({ children }) {
   if (!token) return <Navigate to="/login" replace />;
   const perms = user?.permissions || [];
   const hasAdmin = perms.includes("*") || perms.some((p) => p.startsWith("admin."));
-  if (!hasAdmin) return <Navigate to="/dashboard" replace />;
+  if (!hasAdmin) return <Navigate to="/home" replace />;
   return children;
 }
 
@@ -67,7 +67,7 @@ function AppRoutes() {
   const { token } = useAuth();
   return (
     <Routes>
-      <Route path="/login" element={token ? <Navigate to="/dashboard" replace /> : <Login />} />
+      <Route path="/login" element={token ? <Navigate to="/home" replace /> : <Login />} />
       <Route
         path="/"
         element={
@@ -76,7 +76,7 @@ function AppRoutes() {
           </ProtectedRoute>
         }
       >
-        <Route index element={<Navigate to="/dashboard" replace />} />
+        <Route index element={<Navigate to="/home" replace />} />
         <Route path="home" element={<Home />} />
         <Route path="dashboard" element={<DashboardGuard />} />
         <Route path="cxo" element={<Navigate to="/dashboard" replace />} />
@@ -111,7 +111,7 @@ function AppRoutes() {
         <Route path="safe/trains/:trainId" element={<TrainsSafe />} />
         <Route path="import" element={<Import />} />
       </Route>
-      <Route path="*" element={<Navigate to="/dashboard" replace />} />
+      <Route path="*" element={<Navigate to="/home" replace />} />
     </Routes>
   );
 }

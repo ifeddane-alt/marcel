@@ -49,7 +49,7 @@ export default function Login() {
       authAPI.ssoExchange(ssoCode)
         .then((res) => {
           login(res.data.access_token, { ...res.data.user, permissions: res.data.permissions || [] });
-          navigate("/dashboard");
+          navigate("/home");
         })
         .catch((err) => {
           setError(err.response?.data?.detail || "Échec de la connexion SSO");
@@ -84,7 +84,7 @@ export default function Login() {
         try {
           const res = await authAPI.login(email, password);
           login(res.data.access_token, { ...res.data.user, permissions: res.data.permissions || [] });
-          navigate("/dashboard");
+          navigate("/home");
           return;
         } catch (err) {
           if (isWakingError(err) && attempt < MAX_TRIES) {
