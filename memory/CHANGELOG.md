@@ -158,3 +158,9 @@
 - /objectifs : référentiel d'objectifs DSI, rattachement projets, KPIs d'alignement portefeuille (projets + budget), non-alignés. Nav « Objectifs ».
 - Gouvernance : Invitation PDF (reportlab) + mailto prérempli avec l'ODJ sur chaque instance.
 - Tests : curl backend 100 %, testing_agent iteration_61 = 100 % (0 bug). Preview uniquement, pas déployé.
+
+## 2026-08-11 (3) — Score Alignement auto + Plan Pluriannuel N/N+1/N+2
+- Arbitrage : le critère ALI (strategic_alignment) est calculé automatiquement depuis les objectifs stratégiques ACTIFS rattachés au projet (0→1, 1→3, 2→4, 3+→5) dès qu'au moins un objectif actif existe sur le tenant (alignment_auto=true dans /api/arbitrage/summary). PATCH du critère refusé (400) en mode auto ; cellule ALI en badge indigo non éditable avec tooltip + badge lien vers /objectifs. Export PDF hérite du calcul (via get_portfolio_summary).
+- Budget : onglet « Plan pluriannuel » (tab-pluriannuel) — GET /api/budget/multiyear : répartition pro-rata temporis de l'EAC par exercice N/N+1/N+2, colonne « Hors fenêtre » (passé/futur), totaux portefeuille, comparaison aux enveloppes (marge/dépassement). Ajustement manuel par projet (PUT /api/budget/project/{id}/multiyear, champ budget_by_year, permission budget.edit, audit « plan pluriannuel », reset:true → retour pro-rata). Composant frontend/src/components/MultiYearPlan.jsx.
+- Bug corrigé pendant vérification : import Link manquant dans Arbitrage.jsx (aurait cassé la page).
+- Tests : curl backend 100 % (mapping ALI, blocage 400, multiyear manual/reset, 422, 403 viewer, 404 cross-tenant) + testing_agent iteration_62 = 100 % backend + 100 % frontend, 0 bug. Preview uniquement, PAS déployé en prod.

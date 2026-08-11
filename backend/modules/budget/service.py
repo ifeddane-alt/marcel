@@ -458,3 +458,143 @@ async def export_pdf(current_user: TokenPayload) -> bytes:
     doc.build(story)
     buf.seek(0)
     return buf.read()
+
+
+# ─── Plan pluriannuel N / N+1 / N+2 ──────────────────────────────────────────
+
+def _prorata_by_year(start, end, amount: float, fallback_year: int) -> dict:
+    from datetime import datetime as _dt, date as _date
+
+    def _parse(v):
+        try:
+            return _dt.strptime(str(v)[:10], "%Y-%m-%d").date()
+        except (ValueError, TypeError):
+            return None
+
+    sd, ed = _parse(start), _parse(end)
+    if not sd and not ed:
+        return {fallback_year: amount}
+    if not sd:
+        sd = _date(ed.year, 1, 1)
+    if not ed:
+        ed = _date(sd.year, 12, 31)
+    if ed < sd:
+        ed = sd
+    total_months = (ed.year - sd.year) * 12 + (ed.month - sd.month) + 1
+    result = {}
+    for y in range(sd.year, ed.year + 1):
+        m_start = sd.month if y == sd.year else 1
+        m_end = ed.month if y == ed.year else 12
+        result[y] = amount * (m_end - m_start + 1) / total_months
+    return result
+
+
+async def get_multiyear(current_user: TokenPayload) -> dict:
+    from datetime import datetime as _dt, timezone as _tz
+    current_year = _dt.now(_tz.utc).year
+    years = [current_year, current_year + 1, current_year + 2]
+    projects = await db.projects.find(
+        {"tenant_id": current_user.tenant_id},
+        {"_id": 0, "project_id": 1, "name": 1, "code": 1, "status": 1, "status_rag": 1,
+         "start_date": 1, "end_date_forecast": 1, "end_date_initial": 1,
+         "budget_total": 1, "budget_forecast": 1, "budget_by_year": 1},
+    ).to_list(None)
+    rows = []
+    totals = {y: 0.0 for y in years}
+    for p in projects:
+        eac = p.get("budget_forecast") or p.get("budget_total") or 0
+        manual = p.get("budget_by_year") or {}
+        if manual:
+            by_year_full = {}
+            for k, v in manual.items():
+                try:
+                    by_year_full[int(k)] = float(v or 0)
+                except (ValueError, TypeError):
+                    continue
+            source = "manual"
+        else:
+            by_year_full = _prorata_by_year(
+                p.get("start_date"),
+                p.get("end_date_forecast") or p.get("end_date_initial"),
+                eac, current_year,
+            )
+            source = "prorata"
+        window = {y: round(by_year_full.get(y, 0)) for y in years}
+        out_of_window = round(sum(v for y, v in by_year_full.items() if y not in years))
+        for y in years:
+            totals[y] += window[y]
+        rows.append({
+            "project_id": p["project_id"],
+            "name": p.get("name"),
+            "code": p.get("code"),
+            "status": p.get("status"),
+            "status_rag": p.get("status_rag"),
+            "start_date": p.get("start_date"),
+            "end_date_forecast": p.get("end_date_forecast") or p.get("end_date_initial"),
+            "eac": eac,
+            "by_year": {str(y): window[y] for y in years},
+            "total_window": sum(window.values()),
+            "out_of_window": out_of_window,
+            "source": source,
+        })
+    rows.sort(key=lambda r: r["total_window"], reverse=True)
+    envelopes = {}
+    for env in await db.portfolio_envelopes.find(
+        {"tenant_id": current_user.tenant_id}, {"_id": 0}
+    ).to_list(None):
+        if env.get("year") in years:
+            envelopes[str(env["year"])] = {
+                "label": env.get("label"),
+                "total_envelope": env.get("total_envelope") or 0,
+                "capex_envelope": env.get("capex_envelope") or 0,
+                "opex_envelope": env.get("opex_envelope") or 0,
+            }
+    return {
+        "years": years,
+        "projects": rows,
+        "totals": {str(y): round(totals[y]) for y in years},
+        "envelopes": envelopes,
+    }
+
+
+async def set_project_multiyear(project_id: str, data: dict, current_user: TokenPayload) -> dict:
+    project = await db.projects.find_one(
+        {"project_id": project_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
+    )
+    if not project:
+        raise HTTPException(status_code=404, detail="Projet introuvable")
+    perms = current_user.permissions or []
+    if not ("budget.edit" in perms or "*" in perms):
+        raise HTTPException(status_code=403, detail="Permission budget.edit requise")
+    old_mode = "manuel" if project.get("budget_by_year") else "pro-rata"
+    if data.get("reset"):
+        await db.projects.update_one(
+            {"project_id": project_id, "tenant_id": current_user.tenant_id},
+            {"$unset": {"budget_by_year": ""}},
+        )
+        cleaned = None
+        new_desc = "pro-rata automatique"
+    else:
+        by_year = data.get("by_year") or {}
+        cleaned = {}
+        for k, v in by_year.items():
+            try:
+                year = int(k)
+                val = float(v or 0)
+            except (ValueError, TypeError):
+                raise HTTPException(status_code=422, detail=f"Valeur invalide pour l'exercice {k}")
+            if val < 0:
+                raise HTTPException(status_code=422, detail="Les montants doivent être positifs")
+            cleaned[str(year)] = val
+        if not cleaned:
+            raise HTTPException(status_code=422, detail="Aucun montant fourni")
+        await db.projects.update_one(
+            {"project_id": project_id, "tenant_id": current_user.tenant_id},
+            {"$set": {"budget_by_year": cleaned}},
+        )
+        new_desc = " · ".join(f"{y}: {int(v)} €" for y, v in sorted(cleaned.items()))
+    from core.audit import log_audit
+    await log_audit(current_user, "updated", "project", project_id, project.get("name", ""), [
+        {"field": "plan pluriannuel", "old": old_mode, "new": new_desc},
+    ])
+    return {"project_id": project_id, "budget_by_year": cleaned}

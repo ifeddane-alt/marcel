@@ -27,6 +27,20 @@ def _now() -> str:
 
 # ─── Calcul du score normalisé 0–100 ─────────────────────────────────────────
 
+ALIGNMENT_SCALE = {0: 1, 1: 3, 2: 4}  # 3+ objectifs actifs → 5
+
+
+def alignment_from_objectives(count: int) -> int:
+    return ALIGNMENT_SCALE.get(count, 5)
+
+
+async def _get_active_objective_ids(tenant_id: str) -> set:
+    docs = await db.strategic_objectives.find(
+        {"tenant_id": tenant_id, "status": "actif"}, {"_id": 0, "objective_id": 1}
+    ).to_list(None)
+    return {d["objective_id"] for d in docs}
+
+
 def compute_score(project: dict, weights: dict) -> float:
     """
     Score = W1×align + W2×bv + W3×roi + W4×urg − W5×risk − W6×complexity
@@ -94,9 +108,14 @@ async def get_portfolio_summary(user: TokenPayload) -> dict:
 
     projects = await db.projects.find(query, {"_id": 0}).to_list(None)
     weights = await _get_weights(user.tenant_id)
+    active_obj_ids = await _get_active_objective_ids(user.tenant_id)
+    alignment_auto = len(active_obj_ids) > 0
 
     scored = []
     for p in projects:
+        aligned_count = len(active_obj_ids & set(p.get("objective_ids") or []))
+        if alignment_auto:
+            p["strategic_alignment"] = alignment_from_objectives(aligned_count)
         scored.append({
             "project_id":            p.get("project_id"),
             "name":                  p.get("name"),
@@ -106,6 +125,7 @@ async def get_portfolio_summary(user: TokenPayload) -> dict:
             "opex_planned":          p.get("opex_planned", 0) or 0,
             "budget_total":          p.get("budget_total", 0) or 0,
             "strategic_alignment":   p.get("strategic_alignment"),
+            "aligned_objectives_count": aligned_count,
             "business_value":        p.get("business_value"),
             "roi_estimated":         p.get("roi_estimated"),
             "urgency":               p.get("urgency"),
@@ -123,6 +143,7 @@ async def get_portfolio_summary(user: TokenPayload) -> dict:
     return {
         "projects": scored,
         "weights":  weights,
+        "alignment_auto": alignment_auto,
         "totals": {
             "capex_planned": total_capex,
             "opex_planned":  total_opex,
@@ -137,6 +158,9 @@ async def patch_project_scoring(project_id: str, data: ScoringPatch, user: Token
     updates = {k: v for k, v in data.model_dump().items() if v is not None}
     if not updates:
         raise HTTPException(400, "Aucun champ à mettre à jour")
+
+    if "strategic_alignment" in updates and await _get_active_objective_ids(user.tenant_id):
+        raise HTTPException(400, "L'alignement stratégique est calculé automatiquement depuis les objectifs rattachés au projet (page Objectifs)")
 
     # Vérifier que le projet appartient bien au tenant
     proj = await db.projects.find_one(
@@ -154,6 +178,11 @@ async def patch_project_scoring(project_id: str, data: ScoringPatch, user: Token
         {"$set": updates},
     )
     proj.update(updates)
+    active_obj_ids = await _get_active_objective_ids(user.tenant_id)
+    if active_obj_ids:
+        proj["strategic_alignment"] = alignment_from_objectives(
+            len(active_obj_ids & set(proj.get("objective_ids") or []))
+        )
     weights = await _get_weights(user.tenant_id)
     return {"project_id": project_id, **updates, "score": compute_score(proj, weights)}
 

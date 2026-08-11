@@ -9,6 +9,7 @@ import {
 } from "lucide-react";
 import { budgetAPI } from "@/api";
 import ExcelToolbar from "@/components/ExcelToolbar";
+import MultiYearPlan from "@/components/MultiYearPlan";
 import { Ring } from "@/components/ProjectTile";
 import { usePermissions } from "@/hooks/usePermissions";
 
@@ -541,6 +542,7 @@ export default function BudgetPage() {
               { id: "projets", label: "Projets", count: sortedProjects.length },
               { id: "programmes", label: "Par programme", count: byProgram.length },
               { id: "graphiques", label: "Graphiques" },
+              { id: "pluriannuel", label: "Plan pluriannuel" },
             ].map((t) => (
               <button key={t.id} onClick={() => setActiveTab(t.id)}
                 data-testid={`tab-${t.id}`}
@@ -626,6 +628,11 @@ export default function BudgetPage() {
           )}
 
           {/* ── TAB : Par programme ──────────────────────────────────────── */}
+          {activeTab === "pluriannuel" && (
+            <MultiYearPlan canEdit={canEdit} />
+          )}
+
+          {/* ── TAB : Programmes ─────────────────────────────────────────── */}
           {activeTab === "programmes" && (
             <div className="space-y-3">
               {byProgram.map((pg) => (

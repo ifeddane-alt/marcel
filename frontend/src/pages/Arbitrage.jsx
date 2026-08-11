@@ -1,4 +1,5 @@
 import React, { useState, useEffect, useCallback, useMemo } from "react";
+import { Link } from "react-router-dom";
 import {
   ScatterChart, Scatter, XAxis, YAxis, ZAxis, CartesianGrid,
   Tooltip, ResponsiveContainer, Cell, ReferenceLine,
@@ -6,7 +7,7 @@ import {
 import {
   Target, TrendingUp, BarChart2, Sliders, Save, RotateCcw,
   PlayCircle, CheckCircle, AlertTriangle, Info, ChevronDown, ChevronUp,
-  Plus, Trash2, Edit3, X, Check, FileDown, GitCompare, Eye, ArrowRight,
+  Plus, Trash2, Edit3, X, Check, FileDown, GitCompare, Eye, ArrowRight, Goal,
 } from "lucide-react";
 import { arbitrageAPI } from "@/api";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -139,6 +140,10 @@ export default function Arbitrage() {
 
   const handleCellEdit = (projectId, field, currentValue) => {
     if (!canEdit) return;
+    if (field === "strategic_alignment" && summary?.alignment_auto) {
+      toast.info("Alignement calculé automatiquement depuis les objectifs stratégiques rattachés au projet");
+      return;
+    }
     setEditingCell({ projectId, field });
     setEditingValue(String(currentValue || 3));
   };
@@ -432,11 +437,16 @@ export default function Arbitrage() {
           {/* Table Scoring */}
           <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden">
             <div className="px-4 py-3 border-b border-zinc-100 bg-zinc-50">
-              <div className="flex items-center gap-2">
+              <div className="flex items-center gap-2 flex-wrap">
                 <Target size={14} className="text-zinc-500" />
                 <span className="text-sm font-semibold text-zinc-700">Matrice de scoring — cliquer une cellule pour éditer</span>
                 {canEdit && (
                   <span className="ml-2 text-xs text-zinc-400">(Scale 1–5 · cliquer pour éditer)</span>
+                )}
+                {summary?.alignment_auto && (
+                  <span className="flex items-center gap-1 text-[10.5px] font-semibold text-indigo-600 bg-indigo-50 border border-indigo-200 px-2 py-0.5 rounded-full" data-testid="alignment-auto-badge">
+                    <Goal size={10} /> ALI calculé depuis les <Link to="/objectifs" className="underline hover:text-indigo-800">Objectifs stratégiques</Link>
+                  </span>
                 )}
               </div>
             </div>
@@ -470,6 +480,20 @@ export default function Arbitrage() {
                       </td>
                       {CRITERIA_LABELS.map(c => {
                         const isEditing = editingCell?.projectId === proj.project_id && editingCell?.field === c.key;
+                        if (c.key === "strategic_alignment" && summary?.alignment_auto) {
+                          return (
+                            <td key={c.key} className="px-2 py-2.5 text-center">
+                              <span
+                                title={`Calculé automatiquement : ${proj.aligned_objectives_count || 0} objectif(s) stratégique(s) actif(s) rattaché(s)`}
+                                className="inline-flex items-center justify-center gap-0.5 min-w-[2.5rem] h-7 px-1 rounded-lg text-xs font-semibold bg-indigo-50 text-indigo-700 border border-indigo-200 cursor-help"
+                                data-testid={`score-cell-${proj.project_id}-${c.key}`}
+                              >
+                                {proj[c.key] || "—"}
+                                <Goal size={9} className="opacity-60" />
+                              </span>
+                            </td>
+                          );
+                        }
                         return (
                           <td key={c.key} className="px-2 py-2.5 text-center">
                             {isEditing ? (

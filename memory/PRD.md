@@ -374,6 +374,11 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - L'utilisateur n'a pas de compte Azure ; Okta idem. À reprendre plus tard.
 - Tout est prêt côté MARCEL : code SSO déployé en prod, procédure complète documentée dans la conversation (App registration Azure → Redirect URI https://marcel-ppm.com/api/auth/sso/callback/entra → config Admin > Configuration > SSO)
 
+## 2026-08 — Score Alignement auto + Plan pluriannuel (livré Preview, agent-testé iteration_62 100 %)
+- Arbitrage : critère ALI dérivé automatiquement des objectifs stratégiques actifs rattachés (0→1, 1→3, 2→4, 3+→5) quand le tenant a ≥1 objectif actif ; saisie manuelle bloquée (400 + UI badge indigo non éditable, lien vers /objectifs).
+- Budget : onglet Plan pluriannuel — répartition N/N+1/N+2 pro-rata temporis de l'EAC, ajustable projet par projet (budget_by_year, permission budget.edit, tracé audit), comparaison enveloppes (marge/dépassement), colonne hors fenêtre. GET /api/budget/multiyear + PUT /api/budget/project/{id}/multiyear.
+- Preview uniquement, non déployé en prod.
+
 ## 2026-06 — Site vitrine V2 « type Clarity » (livré, DÉPLOYÉ PROD, agent-testé)
 - Demande : « pour le site il faut faire la même chose » que https://clarity.itdesign.de/fr/ — validé via ask_human : sitemap complet (b), look actuel conservé (pas de design_agent), placeholders témoignages/chiffres (b), teaser FR dans le hero (a), déploiement direct prod (« balance en prod »).
 - 14 nouvelles pages statiques : FR /fonctionnalites/{portefeuille,projets,ressources,budgets,gouvernance,reporting} + /cas-usage ; EN /en/features/{portfolio,projects,resources,budgets,governance,reporting} + /en/use-cases. Chaque page module : breadcrumb, strip 4 chiffres, 3 articles détaillés, témoignage PLACEHOLDER, 3 modules liés, CTA démo, footer 3 colonnes.

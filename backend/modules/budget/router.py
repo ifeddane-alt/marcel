@@ -24,6 +24,22 @@ async def get_by_program(
     return await service.get_by_program(current_user)
 
 
+@router.get("/budget/multiyear")
+async def get_multiyear(
+    current_user: TokenPayload = Depends(permission_required("budget.view")),
+):
+    return await service.get_multiyear(current_user)
+
+
+@router.put("/budget/project/{project_id}/multiyear")
+async def set_project_multiyear(
+    project_id: str,
+    data: dict,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    return await service.set_project_multiyear(project_id, data, current_user)
+
+
 @router.get("/budget/project/{project_id}/revisions")
 async def get_project_revisions(
     project_id: str,
