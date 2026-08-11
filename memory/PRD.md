@@ -374,10 +374,11 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - L'utilisateur n'a pas de compte Azure ; Okta idem. À reprendre plus tard.
 - Tout est prêt côté MARCEL : code SSO déployé en prod, procédure complète documentée dans la conversation (App registration Azure → Redirect URI https://marcel-ppm.com/api/auth/sso/callback/entra → config Admin > Configuration > SSO)
 
-## 2026-08 — Score Alignement auto + Plan pluriannuel (livré Preview, agent-testé iteration_62 100 %)
+## 2026-08 — Score Alignement auto + Plan pluriannuel + Export Excel (livré, DÉPLOYÉ PROD commit a254910, agent-testé iteration_62 100 %)
 - Arbitrage : critère ALI dérivé automatiquement des objectifs stratégiques actifs rattachés (0→1, 1→3, 2→4, 3+→5) quand le tenant a ≥1 objectif actif ; saisie manuelle bloquée (400 + UI badge indigo non éditable, lien vers /objectifs).
 - Budget : onglet Plan pluriannuel — répartition N/N+1/N+2 pro-rata temporis de l'EAC, ajustable projet par projet (budget_by_year, permission budget.edit, tracé audit), comparaison enveloppes (marge/dépassement), colonne hors fenêtre. GET /api/budget/multiyear + PUT /api/budget/project/{id}/multiyear.
-- Preview uniquement, non déployé en prod.
+- Export Excel COMEX : GET /api/budget/multiyear/export/excel (xlsxwriter, synthèse exercices + enveloppes/marges + schéma directeur détaillé), bouton btn-export-multiyear-excel sur l'onglet. Testé curl + download E2E.
+- DÉPLOYÉ PROD marcel-ppm.com 2026-08-11 (inclut aussi Mon Compte + Objectifs + Invitation ODJ du commit 3899508, prérequis du score auto). Vérifié : health 200, login 200, bundle main.81ee37c5.js avec tous les marqueurs, /api/budget/multiyear + export xlsx 200 valides, /api/objectives 200, /api/auth/account 200. alignment_auto=false en prod tant qu'aucun objectif actif n'y est créé (comportement attendu). Disque VPS 80 % après prune 1,97 Go.
 
 ## 2026-06 — Site vitrine V2 « type Clarity » (livré, DÉPLOYÉ PROD, agent-testé)
 - Demande : « pour le site il faut faire la même chose » que https://clarity.itdesign.de/fr/ — validé via ask_human : sitemap complet (b), look actuel conservé (pas de design_agent), placeholders témoignages/chiffres (b), teaser FR dans le hero (a), déploiement direct prod (« balance en prod »).
