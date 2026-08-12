@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { Link } from "react-router-dom";
-import { Target, Plus, Pencil, Trash2, X, Link2, AlertTriangle } from "lucide-react";
+import { Target, Plus, Pencil, Trash2, X, Link2, AlertTriangle, Gauge, Check } from "lucide-react";
 import { objectivesAPI, projectsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
@@ -14,6 +14,87 @@ const STATUSES = [
 ];
 const RAG_DOT = { green: "bg-emerald-500", orange: "bg-amber-500", red: "bg-rose-500" };
 
+const fmtNum = (v) => Number(v).toLocaleString("fr-FR", { maximumFractionDigits: 2 });
+
+function TargetBlock({ o, canWrite, onSaved }) {
+  const [editing, setEditing] = useState(false);
+  const [value, setValue] = useState("");
+  const [saving, setSaving] = useState(false);
+
+  const save = async () => {
+    if (value === "") return;
+    setSaving(true);
+    try {
+      await objectivesAPI.updateTarget(o.objective_id, value);
+      toast.success("Réalisé mis à jour");
+      setEditing(false);
+      setValue("");
+      onSaved();
+    } catch (err) {
+      toast.error(err?.response?.data?.detail || "Erreur");
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const unit = o.target_unit || "";
+  const p = o.target_progress;
+  const barColor = p === null ? "#a1a1aa" : p >= 100 ? "#3f8a34" : p >= 60 ? "#2563eb" : p >= 30 ? "#d98c1f" : "#cc4f45";
+  const lastUpdate = (o.target_history || []).length > 0 ? o.target_history[o.target_history.length - 1].date : null;
+
+  return (
+    <div className="mt-3 pt-3 border-t border-zinc-100 space-y-1.5" data-testid={`objective-target-${o.objective_id}`}>
+      <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-500">
+        <span className="flex items-center gap-1 uppercase tracking-widest text-[9.5px] font-bold text-zinc-400">
+          <Gauge size={11} /> Cible mesurable
+        </span>
+        <span className="flex items-center gap-1.5">
+          Réalisé <b className="font-mono-data text-zinc-800" data-testid={`target-current-${o.objective_id}`}>
+            {o.target_current !== null && o.target_current !== undefined ? `${fmtNum(o.target_current)} ${unit}` : "—"}
+          </b>
+          {" / Cible "}<b className="font-mono-data text-zinc-800">{fmtNum(o.target_value)} {unit}</b>
+          {o.target_baseline !== null && o.target_baseline !== undefined && (
+            <span className="text-zinc-400">(départ {fmtNum(o.target_baseline)} {unit})</span>
+          )}
+          {p !== null && (
+            <b className="font-mono-data" style={{ color: barColor }} data-testid={`target-progress-${o.objective_id}`}>
+              · {p}% de la cible
+            </b>
+          )}
+          {canWrite && !editing && (
+            <button onClick={() => { setEditing(true); setValue(o.target_current ?? ""); }}
+              data-testid={`btn-update-target-${o.objective_id}`}
+              title="Mettre à jour le réalisé"
+              className="p-1 rounded hover:bg-zinc-100 text-zinc-400 hover:text-blue-600 transition-colors">
+              <Pencil size={11} />
+            </button>
+          )}
+        </span>
+      </div>
+      <div className="h-1.5 bg-zinc-100 rounded-full overflow-hidden">
+        <div className="h-full rounded-full transition-all"
+          style={{ width: `${Math.min(Math.max(p || 0, 0), 100)}%`, background: barColor }} />
+      </div>
+      {editing ? (
+        <div className="flex items-center gap-2 pt-1">
+          <input type="number" step="any" value={value} onChange={(e) => setValue(e.target.value)}
+            autoFocus data-testid={`target-value-input-${o.objective_id}`}
+            placeholder={`Réalisé actuel${unit ? ` (${unit})` : ""}`}
+            className="w-36 text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600" />
+          <button onClick={save} disabled={saving || value === ""} data-testid={`target-save-${o.objective_id}`}
+            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+            <Check size={11} /> Enregistrer
+          </button>
+          <button onClick={() => setEditing(false)}
+            className="px-2 py-1.5 text-[11px] text-zinc-500 hover:text-zinc-700">Annuler</button>
+        </div>
+      ) : lastUpdate && (
+        <p className="text-[10px] text-zinc-400">Dernière mise à jour du réalisé : {lastUpdate}</p>
+      )}
+    </div>
+  );
+}
+
 function ObjectiveModal({ objective, onClose, onSaved }) {
   const isEdit = !!objective;
   const [title, setTitle] = useState(objective?.title || "");
@@ -22,6 +103,10 @@ function ObjectiveModal({ objective, onClose, onSaved }) {
   const [horizon, setHorizon] = useState(objective?.horizon || "");
   const [owner, setOwner] = useState(objective?.owner || "");
   const [status, setStatus] = useState(objective?.status || "actif");
+  const [targetUnit, setTargetUnit] = useState(objective?.target_unit || "");
+  const [targetBaseline, setTargetBaseline] = useState(objective?.target_baseline ?? "");
+  const [targetValue, setTargetValue] = useState(objective?.target_value ?? "");
+  const [targetCurrent, setTargetCurrent] = useState(objective?.target_current ?? "");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
 
@@ -29,7 +114,13 @@ function ObjectiveModal({ objective, onClose, onSaved }) {
     e.preventDefault();
     setSaving(true);
     setError("");
-    const payload = { title: title.trim(), description, pillar, horizon, owner, status };
+    const payload = {
+      title: title.trim(), description, pillar, horizon, owner, status,
+      target_unit: targetUnit,
+      target_baseline: targetBaseline === "" ? null : targetBaseline,
+      target_value: targetValue === "" ? null : targetValue,
+      target_current: targetCurrent === "" ? null : targetCurrent,
+    };
     try {
       if (isEdit) {
         await objectivesAPI.update(objective.objective_id, payload);
@@ -97,6 +188,38 @@ function ObjectiveModal({ objective, onClose, onSaved }) {
                 {STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
             </div>
+          </div>
+          <div className="border border-zinc-100 rounded-lg p-3 bg-zinc-50/50">
+            <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-2">
+              <Gauge size={12} className="text-blue-600" /> Cible mesurable <span className="text-zinc-400 normal-case font-normal tracking-normal">(optionnel)</span>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div>
+                <label className="block text-[10.5px] font-semibold text-zinc-500 mb-1">Unité</label>
+                <input value={targetUnit} onChange={(e) => setTargetUnit(e.target.value)} data-testid="obj-target-unit-input"
+                  placeholder="Ex : %, M€, jours"
+                  className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600" />
+              </div>
+              <div>
+                <label className="block text-[10.5px] font-semibold text-zinc-500 mb-1">Valeur de départ</label>
+                <input type="number" step="any" value={targetBaseline} onChange={(e) => setTargetBaseline(e.target.value)} data-testid="obj-target-baseline-input"
+                  placeholder="Ex : 0"
+                  className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600" />
+              </div>
+              <div>
+                <label className="block text-[10.5px] font-semibold text-zinc-500 mb-1">Cible à atteindre</label>
+                <input type="number" step="any" value={targetValue} onChange={(e) => setTargetValue(e.target.value)} data-testid="obj-target-value-input"
+                  placeholder="Ex : 15"
+                  className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600" />
+              </div>
+              <div>
+                <label className="block text-[10.5px] font-semibold text-zinc-500 mb-1">Réalisé actuel</label>
+                <input type="number" step="any" value={targetCurrent} onChange={(e) => setTargetCurrent(e.target.value)} data-testid="obj-target-current-input"
+                  placeholder="Ex : 4"
+                  className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600" />
+              </div>
+            </div>
+            <p className="text-[10.5px] text-zinc-400 mt-2">Ex : « Réduire le coût de run de 15 % » → unité %, départ 0, cible 15, réalisé mis à jour au fil de l'eau.</p>
           </div>
           {error && <p className="text-sm text-rose-600 font-medium">{error}</p>}
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100">
@@ -290,6 +413,9 @@ export default function Objectives() {
                       </span>
                     )}
                   </div>
+                  {o.target_value !== null && o.target_value !== undefined && (
+                    <TargetBlock o={o} canWrite={canWrite} onSaved={load} />
+                  )}
                   {o.project_count > 0 && (
                     <div className="mt-3 pt-3 border-t border-zinc-100 space-y-1.5" data-testid={`objective-trajectory-${o.objective_id}`}>
                       <div className="flex flex-wrap items-center justify-between gap-2 text-[11px] text-zinc-500">

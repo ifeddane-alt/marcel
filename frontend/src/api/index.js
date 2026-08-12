@@ -130,6 +130,7 @@ export const objectivesAPI = {
   update: (id, data) => api.put(`/objectives/${id}`, data),
   delete: (id) => api.delete(`/objectives/${id}`),
   setProjects: (id, projectIds) => api.put(`/objectives/${id}/projects`, { project_ids: projectIds }),
+  updateTarget: (id, value) => api.post(`/objectives/${id}/target-value`, { value }),
 };
 
 export const risksAPI = {

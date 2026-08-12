@@ -75,6 +75,12 @@ async def list_objectives(user: TokenPayload) -> list:
         o["milestones_done"] = sum(ms_stats.get(p["project_id"], {}).get("done", 0) for p in linked)
         o["milestones_total"] = sum(ms_stats.get(p["project_id"], {}).get("total", 0) for p in linked)
         o["rag"] = rag
+        t, c = o.get("target_value"), o.get("target_current")
+        b = o.get("target_baseline") if o.get("target_baseline") is not None else 0
+        if t is not None and c is not None and t != b:
+            o["target_progress"] = round((c - b) / (t - b) * 100)
+        else:
+            o["target_progress"] = None
     return objectives
 
 
@@ -100,6 +106,15 @@ async def get_alignment(user: TokenPayload) -> dict:
     }
 
 
+def _num(v):
+    if v is None or v == "":
+        return None
+    try:
+        return float(v)
+    except (TypeError, ValueError):
+        raise HTTPException(422, "Valeur numérique invalide")
+
+
 async def create_objective(data: dict, user: TokenPayload) -> dict:
     _require_write(user)
     title = (data.get("title") or "").strip()
@@ -108,6 +123,7 @@ async def create_objective(data: dict, user: TokenPayload) -> dict:
     status = data.get("status") or "actif"
     if status not in VALID_STATUSES:
         raise HTTPException(422, f"Statut invalide: {status}")
+    target_current = _num(data.get("target_current"))
     doc = {
         "objective_id": str(uuid.uuid4()),
         "tenant_id": user.tenant_id,
@@ -117,6 +133,11 @@ async def create_objective(data: dict, user: TokenPayload) -> dict:
         "horizon": data.get("horizon") or "",
         "owner": data.get("owner") or "",
         "status": status,
+        "target_unit": (data.get("target_unit") or "").strip(),
+        "target_baseline": _num(data.get("target_baseline")),
+        "target_value": _num(data.get("target_value")),
+        "target_current": target_current,
+        "target_history": [{"date": _now()[:10], "value": target_current}] if target_current is not None else [],
         "created_at": _now(),
         "updated_at": _now(),
     }
@@ -138,19 +159,51 @@ async def update_objective(objective_id: str, data: dict, user: TokenPayload) ->
     for field in ["title", "description", "pillar", "horizon", "owner", "status"]:
         if field in data and data[field] is not None:
             updates[field] = data[field]
+    if "target_unit" in data:
+        updates["target_unit"] = (data.get("target_unit") or "").strip()
+    for field in ["target_baseline", "target_value", "target_current"]:
+        if field in data:
+            updates[field] = _num(data[field])
     if "title" in updates and not (updates["title"] or "").strip():
         raise HTTPException(422, "Le titre de l'objectif est obligatoire")
     if "status" in updates and updates["status"] not in VALID_STATUSES:
         raise HTTPException(422, "Statut invalide")
     updates["updated_at"] = _now()
+    op = {"$set": updates}
+    if updates.get("target_current") is not None and updates["target_current"] != old.get("target_current"):
+        op["$push"] = {"target_history": {"date": _now()[:10], "value": updates["target_current"]}}
     await db.strategic_objectives.update_one(
-        {"objective_id": objective_id, "tenant_id": user.tenant_id}, {"$set": updates}
+        {"objective_id": objective_id, "tenant_id": user.tenant_id}, op
     )
     updated = await db.strategic_objectives.find_one({"objective_id": objective_id}, {"_id": 0})
     from core.audit import log_audit, diff_changes
     changes = diff_changes(old, updates)
     if changes:
         await log_audit(user, "updated", "objective", objective_id, updated.get("title", ""), changes)
+    return updated
+
+
+async def update_target_value(objective_id: str, value, user: TokenPayload) -> dict:
+    """Met à jour le réalisé de la cible mesurable (avec historique)."""
+    _require_write(user)
+    v = _num(value)
+    if v is None:
+        raise HTTPException(422, "Valeur requise")
+    old = await db.strategic_objectives.find_one(
+        {"objective_id": objective_id, "tenant_id": user.tenant_id}, {"_id": 0}
+    )
+    if not old:
+        raise HTTPException(404, "Objectif introuvable")
+    await db.strategic_objectives.update_one(
+        {"objective_id": objective_id, "tenant_id": user.tenant_id},
+        {"$set": {"target_current": v, "updated_at": _now()},
+         "$push": {"target_history": {"date": _now()[:10], "value": v}}},
+    )
+    updated = await db.strategic_objectives.find_one({"objective_id": objective_id}, {"_id": 0})
+    from core.audit import log_audit
+    await log_audit(user, "updated", "objective", objective_id, old.get("title", ""), [
+        {"field": "réalisé cible", "old": old.get("target_current"), "new": v},
+    ])
     return updated
 
 

@@ -202,3 +202,11 @@
 ## 2026-08-12 — DÉPLOIEMENT PROD import MS Project intelligent
 - PROD marcel-ppm.com déployée (commit cc99bb9) via update.sh (setsid), prune 1,97 Go, disque 80 %.
 - Vérifié : health 200, bundle main.ac85a188.js (msproject-mode-create, msproject-diff, apply, import-new), login 200, POST /api/msproject/analyze testé en réel sur un projet prod (lecture seule, 5 new détectés, rien modifié).
+
+## 2026-08-12 (2) — Cibles mesurables sur les objectifs stratégiques
+- Chaque objectif peut porter un indicateur mesurable : unité (%, M€…), valeur de départ, cible, réalisé actuel + historique des mises à jour (target_history) et % de progression vers la cible (target_progress, gère cibles croissantes ET décroissantes via baseline).
+- Backend : champs target_* dans create/update objectives, POST /api/objectives/{id}/target-value (mise à jour rapide du réalisé avec historique + audit), 422 valeur invalide, 403 viewer.
+- Frontend Objectives.jsx : section « Cible mesurable » dans la modale (4 champs), bloc TargetBlock sur chaque carte (Réalisé/Cible/départ, % de la cible coloré, barre, mise à jour inline du réalisé au crayon, date de dernière màj).
+- Édition fantôme détectée et corrigée sur update_objective (search_replace annoncé OK mais non appliqué — re-vérifié par grep + retest).
+- Données démo : cible 15 % (réalisé 8 %) posée sur l'objectif « Réduire le coût de run IT de 15 % ».
+- Tests : curl backend complet (création, progress, historique, cible décroissante, 422, 403, nettoyage) + E2E playwright du parcours UI (modale + inline update 27 %→53 %). Preview uniquement, PAS déployé en prod.

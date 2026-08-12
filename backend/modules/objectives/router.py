@@ -25,6 +25,11 @@ async def update_objective(objective_id: str, data: dict, current_user: TokenPay
     return await service.update_objective(objective_id, data, current_user)
 
 
+@router.post("/objectives/{objective_id}/target-value")
+async def update_target_value(objective_id: str, data: dict, current_user: TokenPayload = Depends(get_current_user)):
+    return await service.update_target_value(objective_id, data.get("value"), current_user)
+
+
 @router.delete("/objectives/{objective_id}", status_code=204)
 async def delete_objective(objective_id: str, current_user: TokenPayload = Depends(get_current_user)):
     await service.delete_objective(objective_id, current_user)
