@@ -16,6 +16,31 @@ const RAG_DOT = { green: "bg-emerald-500", orange: "bg-amber-500", red: "bg-rose
 
 const fmtNum = (v) => Number(v).toLocaleString("fr-FR", { maximumFractionDigits: 2 });
 
+function Sparkline({ history, baseline, target, color, unit }) {
+  const W = 150, H = 40, PAD = 4;
+  const values = history.map((h) => h.value);
+  const all = [...values, target, ...(baseline !== null && baseline !== undefined ? [baseline] : [])];
+  let min = Math.min(...all), max = Math.max(...all);
+  if (min === max) { min -= 1; max += 1; }
+  const y = (v) => H - PAD - ((v - min) / (max - min)) * (H - 2 * PAD);
+  const x = (i) => PAD + (i / Math.max(values.length - 1, 1)) * (W - 2 * PAD);
+  const path = values.map((v, i) => `${i === 0 ? "M" : "L"}${x(i).toFixed(1)},${y(v).toFixed(1)}`).join(" ");
+  return (
+    <svg width={W} height={H} className="flex-shrink-0" data-testid="target-sparkline" role="img"
+      aria-label="Évolution du réalisé">
+      <line x1={PAD} x2={W - PAD} y1={y(target)} y2={y(target)}
+        stroke="#3f8a34" strokeWidth="1" strokeDasharray="3 3" opacity="0.7" />
+      <path d={path} fill="none" stroke={color} strokeWidth="1.5" strokeLinejoin="round" strokeLinecap="round" />
+      {values.map((v, i) => (
+        <circle key={i} cx={x(i)} cy={y(v)} r={i === values.length - 1 ? 3 : 1.8}
+          fill={i === values.length - 1 ? color : "#fff"} stroke={color} strokeWidth="1.2">
+          <title>{`${history[i].date} : ${fmtNum(v)} ${unit || ""}`}</title>
+        </circle>
+      ))}
+    </svg>
+  );
+}
+
 function TargetBlock({ o, canWrite, onSaved }) {
   const [editing, setEditing] = useState(false);
   const [value, setValue] = useState("");
@@ -75,6 +100,15 @@ function TargetBlock({ o, canWrite, onSaved }) {
         <div className="h-full rounded-full transition-all"
           style={{ width: `${Math.min(Math.max(p || 0, 0), 100)}%`, background: barColor }} />
       </div>
+      {(o.target_history || []).length >= 2 && !editing && (
+        <div className="flex items-center gap-3 pt-1" data-testid={`target-trend-${o.objective_id}`}>
+          <Sparkline history={o.target_history} baseline={o.target_baseline} target={o.target_value}
+            color={barColor} unit={unit} />
+          <span className="text-[10px] text-zinc-400">
+            Tendance du réalisé ({o.target_history.length} relevés) — pointillés : cible {fmtNum(o.target_value)} {unit}
+          </span>
+        </div>
+      )}
       {editing ? (
         <div className="flex items-center gap-2 pt-1">
           <input type="number" step="any" value={value} onChange={(e) => setValue(e.target.value)}

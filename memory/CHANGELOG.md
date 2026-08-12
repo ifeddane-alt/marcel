@@ -210,3 +210,7 @@
 - Édition fantôme détectée et corrigée sur update_objective (search_replace annoncé OK mais non appliqué — re-vérifié par grep + retest).
 - Données démo : cible 15 % (réalisé 8 %) posée sur l'objectif « Réduire le coût de run IT de 15 % ».
 - Tests : curl backend complet (création, progress, historique, cible décroissante, 422, 403, nettoyage) + E2E playwright du parcours UI (modale + inline update 27 %→53 %). Preview uniquement, PAS déployé en prod.
+
+## 2026-08-12 (3) — Sparkline de tendance sur les cibles d'objectifs
+- Composant Sparkline SVG (Objectives.jsx) : courbe d'évolution du réalisé (target_history, ≥2 relevés) avec points datés (tooltip valeur), dernier point accentué, ligne pointillée verte au niveau de la cible, échelle incluant départ/cible, couleur alignée au % de progression. Libellé « Tendance du réalisé (N relevés) ».
+- Testé E2E : ajout d'un 3e relevé (11 %) → sparkline affichée, données démo cohérentes (4→8→11, cible 15 %). Preview uniquement.
