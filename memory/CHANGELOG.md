@@ -214,3 +214,7 @@
 ## 2026-08-12 (3) — Sparkline de tendance sur les cibles d'objectifs
 - Composant Sparkline SVG (Objectives.jsx) : courbe d'évolution du réalisé (target_history, ≥2 relevés) avec points datés (tooltip valeur), dernier point accentué, ligne pointillée verte au niveau de la cible, échelle incluant départ/cible, couleur alignée au % de progression. Libellé « Tendance du réalisé (N relevés) ».
 - Testé E2E : ajout d'un 3e relevé (11 %) → sparkline affichée, données démo cohérentes (4→8→11, cible 15 %). Preview uniquement.
+
+## 2026-08-12 (4) — DÉPLOIEMENT PROD cibles mesurables + sparkline
+- PROD marcel-ppm.com déployée (commit bbe326b) via update.sh, prune 1,97 Go, disque 80 %.
+- Vérifié : health 200, bundle main.176a3ddc.js (target-sparkline, champs cible modale, btn-update-target), cycle complet testé en réel en prod (création objectif avec cible → target-value 3→6 → historique 2 → progress 60 % → suppression du test).
