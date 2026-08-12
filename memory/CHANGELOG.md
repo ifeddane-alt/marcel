@@ -198,3 +198,7 @@
 - Frontend : MsProjectImport.jsx réécrit en wizard 2 étapes (modes update/create, écran de comparaison avec badges + détail avant application) sur /roadmap ; ProjectDetail : flux analyze → confirm → apply, accept .mpp+.xml (bug .xml only corrigé).
 - Parsing unifié XML MSPDI + .mpp binaire (MPXJ) dans _parse_any ; service msproject réécrit.
 - Tests : curl backend 100 % (création, idempotence, diff, upsert, baseline, nettoyage) + testing_agent iteration_64 = 100 % backend + 100 % frontend, 0 bug. Preview uniquement, PAS déployé en prod.
+
+## 2026-08-12 — DÉPLOIEMENT PROD import MS Project intelligent
+- PROD marcel-ppm.com déployée (commit cc99bb9) via update.sh (setsid), prune 1,97 Go, disque 80 %.
+- Vérifié : health 200, bundle main.ac85a188.js (msproject-mode-create, msproject-diff, apply, import-new), login 200, POST /api/msproject/analyze testé en réel sur un projet prod (lecture seule, 5 new détectés, rien modifié).
