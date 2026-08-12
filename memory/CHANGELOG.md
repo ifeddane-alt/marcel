@@ -225,3 +225,8 @@
 - CIBLES EN DÉRIVE : home/summary retourne objectives_drift (2 derniers relevés s'éloignant de la cible) ; bloc ambre « Objectifs qui s'éloignent de leur cible » sur /home, cliquable vers /objectifs.
 - Bug corrigé : useState links manquant dans ConnectorModal (édition fantôme détectée par testing_agent, réappliquée + vérifiée par grep).
 - Tests : curl complet + testing_agent iteration_65 (11/15 backend — 4 « échecs » = modèle de permissions existant, pas des bugs ; frontend 80 % → 100 % après le fix links retesté E2E). Preview uniquement, PAS déployé en prod.
+
+## 2026-08-12 (6) — DÉPLOIEMENT PROD rapport IA + connecteur Jira + dérives objectifs
+- EMERGENT_LLM_KEY ajoutée à /opt/marcel/.env (env_file du backend prod) — sans exposition.
+- PROD marcel-ppm.com déployée (commit 71c046c) via update.sh, prune 1,97 Go, disque 80 %.
+- Vérifié : health 200, bundle main.1b1eede3.js (btn-ai-report, ai-report-modal, tile-jira, jira-links-tab, home-objectives-drift), génération IA RÉELLE en prod sur Phoenix (tendance degradation, PDF valide), home objectives_drift présent, jira/status répond (connecteur désactivé par défaut — chaque tenant configure sa propre instance).
