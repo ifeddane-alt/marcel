@@ -81,9 +81,14 @@ export default function ProjectGantt({ tasks = [], milestones = [], onTaskClick 
     const container = containerRef.current;
     // Nettoyer l'instance précédente
     container.innerHTML = "";
+    const today = new Date().toISOString().slice(0, 10);
+    const starts = ganttTasks.map((t) => t.start).sort();
+    const ends = ganttTasks.map((t) => t.end || t.start).sort();
+    const inRange = starts[0] <= today && today <= ends[ends.length - 1];
     ganttRef.current = new Gantt(container, ganttTasks, {
       view_mode: viewMode,
       date_format: "YYYY-MM-DD",
+      scroll_to: inRange ? "today" : starts[0],
       on_click: (task) => onTaskClick?.(task.id),
       language: "fr",
     });

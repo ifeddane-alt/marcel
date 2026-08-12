@@ -249,7 +249,13 @@ export default function BenefitsSection({ projectId, budgetTotal, canWrite }) {
                   return (
                     <tr key={b.benefit_id} className="border-b border-zinc-100 hover:bg-zinc-50/50 transition-colors"
                       data-testid={`benefit-row-${b.benefit_id}`}>
-                      <td className="px-3 py-2.5 font-medium text-zinc-800 text-xs">{b.label}</td>
+                      <td className="px-3 py-2.5 font-medium text-zinc-800 text-xs">
+                        {b.label}
+                        <span className="ml-1.5 inline-block px-1 py-px text-[8.5px] font-bold rounded border border-zinc-200 bg-zinc-50 text-zinc-500 align-middle"
+                          data-testid={`benefit-unit-${b.benefit_id}`}>
+                          {b.unit === "EUR" ? "€" : b.unit}
+                        </span>
+                      </td>
                       <td className="px-3 py-2.5">
                         <span className={`inline-block px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-lg border ${CAT_COLORS[b.category] || CAT_COLORS.autre}`}>
                           {CATEGORIES.find((c) => c.value === b.category)?.label || b.category}

@@ -628,6 +628,11 @@ async def create_user(data: dict, user: TokenPayload) -> dict:
         p = await db.profiles.find_one({"profile_id": profile_id, "tenant_id": user.tenant_id})
         if not p:
             raise HTTPException(400, "Profil introuvable")
+    else:
+        role_map = {"TENANT_ADMIN": "Administrateur", "PMO_USER": "PMO Portefeuille", "READ_ONLY": "Direction SI"}
+        default_name = role_map.get(data.get("role") or "READ_ONLY", "Direction SI")
+        p = await db.profiles.find_one({"tenant_id": user.tenant_id, "name": default_name})
+        profile_id = p["profile_id"] if p else None
     doc = {
         "user_id": str(uuid.uuid4()),
         "tenant_id": user.tenant_id,

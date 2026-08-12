@@ -230,3 +230,12 @@
 - EMERGENT_LLM_KEY ajoutée à /opt/marcel/.env (env_file du backend prod) — sans exposition.
 - PROD marcel-ppm.com déployée (commit 71c046c) via update.sh, prune 1,97 Go, disque 80 %.
 - Vérifié : health 200, bundle main.1b1eede3.js (btn-ai-report, ai-report-modal, tile-jira, jira-links-tab, home-objectives-drift), génération IA RÉELLE en prod sur Phoenix (tendance degradation, PDF valide), home objectives_drift présent, jira/status répond (connecteur désactivé par défaut — chaque tenant configure sa propre instance).
+
+## 2026-08-12 (7) — Pack fiabilisation (suite audit externe fait sur la prod)
+- Agent IA PMO réparé : modèle claude-sonnet-4-20250514 obsolète (NotFoundError) → openai gpt-5.4 (env AGENT_MODEL). Testé : répond correctement.
+- Sélecteur FR/EN retiré (i18n non traduite — fonctionnalité trompeuse). Infra i18n conservée.
+- Gantt projet : scroll_to today si dans la plage, sinon 1re tâche (frappe-gantt 1.2.2) — plus d'ouverture sur 2021.
+- Création utilisateur : profil par défaut assigné selon rôle (TENANT_ADMIN→Administrateur, PMO_USER→PMO Portefeuille, READ_ONLY→Direction SI) si aucun choisi.
+- Business case : badge d'unité (€/%/JH) à côté du libellé pour lever l'ambiguïté des colonnes.
+- Données préview : allocations étendues 2026-07→12 (66 lignes, modèle avril), user test.audit backfillé. Heatmap/équipes affichent une utilisation réelle (61 %, 59 %…).
+- Données prod (script /tmp/fix_prod_data.js) : dédup profil Administrateur, backfill profile_id des 7 users, allocations étendues, 3 objectifs démo avec cible 15 % (active aussi l'ALI auto en prod).

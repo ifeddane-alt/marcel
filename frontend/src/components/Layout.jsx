@@ -43,21 +43,7 @@ import NotificationBell from "@/components/NotificationBell";
 import GlobalSearch from "@/components/GlobalSearch";
 import { useTranslation } from "react-i18next";
 
-function LanguageToggle() {
-  const { i18n } = useTranslation();
-  const isEN = i18n.language?.startsWith("en");
-  return (
-    <button
-      onClick={() => i18n.changeLanguage(isEN ? "fr" : "en")}
-      data-testid="lang-toggle"
-      className="flex items-center gap-1 text-[11px] font-semibold px-2 py-1 rounded-lg border border-[#e8e6f0] text-[#5d5a75] hover:bg-[#f7f6fb] transition-colors"
-      title={isEN ? "Passer en français" : "Switch to English"}
-    >
-      <span className="text-sm leading-none">{isEN ? "🇬🇧" : "🇫🇷"}</span>
-      <span>{isEN ? "EN" : "FR"}</span>
-    </button>
-  );
-}
+// (Sélecteur de langue retiré — l'interface est uniquement en français tant que la traduction n'est pas complète)
 
 // ── Entrées principales ─────────────────────────────────────────────
 const MAIN_NAV = [
@@ -315,7 +301,7 @@ export default function Layout() {
         <GlobalSearch />
 
         <div className="ml-auto flex items-center gap-2 flex-shrink-0">
-          <LanguageToggle />
+          {/* sélecteur de langue retiré */}
           <NotificationBell />
           <span
             className="text-[11px] font-mono-data text-[#5d5a75] bg-[#f0eefc] px-2 py-0.5 rounded-lg hidden md:block"
