@@ -1,4 +1,4 @@
-"""Connecteur MS Project — export/import XML MSPDI + import binaire .mpp (MPXJ)."""
+"""Connecteur MS Project — export XML MSPDI + import intelligent (.mpp / .xml) avec diff et upsert."""
 import asyncio
 import json
 import os
@@ -92,100 +92,35 @@ async def export_project_xml(project_id: str, user: TokenPayload) -> tuple[str, 
     return f"{safe_name}_msproject.xml", xml_str
 
 
-async def import_project_xml(project_id: str, content: bytes, user: TokenPayload) -> dict:
-    """Parse un XML MS Project (MSPDI) et crée les tâches/jalons dans le projet."""
-    require_write(user)
-    project = await db.projects.find_one(
-        {"project_id": project_id, "tenant_id": user.tenant_id}, {"_id": 0}
-    )
-    if not project:
-        raise HTTPException(404, "Projet introuvable")
+# ─── Parsing unifié (.xml MSPDI / .mpp binaire) ─────────────────────────────
 
+def _parse_xml_items(content: bytes) -> dict:
     try:
         root = ET.fromstring(content)
     except ET.ParseError as e:
         raise HTTPException(400, f"XML invalide : {e}")
-
     ns = ""
     if root.tag.startswith("{"):
         ns = root.tag.split("}")[0] + "}"
-
-    tasks_created = 0
-    milestones_created = 0
-    current_phase = None
-
+    items = []
     for t in root.iter(f"{ns}Task"):
         name = (t.findtext(f"{ns}Name") or "").strip()
         if not name:
             continue
-        uid_txt = t.findtext(f"{ns}UID") or "1"
-        if uid_txt == "0":
+        if (t.findtext(f"{ns}UID") or "1") == "0":
             continue  # tâche récapitulative projet
-        is_summary = (t.findtext(f"{ns}Summary") or "0") == "1"
-        is_milestone = (t.findtext(f"{ns}Milestone") or "0") == "1"
-        start = (t.findtext(f"{ns}Start") or "")[:10] or None
-        finish = (t.findtext(f"{ns}Finish") or "")[:10] or None
-
-        if is_summary:
-            current_phase = name
-            continue
-
-        if is_milestone:
-            d = start or finish or datetime.now(timezone.utc).strftime("%Y-%m-%d")
-            await db.milestones.insert_one({
-                "milestone_id": str(uuid.uuid4()),
-                "project_id": project_id,
-                "tenant_id": user.tenant_id,
-                "name": name,
-                "family": "delivery",
-                "date_baseline": d,
-                "date_forecast": d,
-                "status": "not_done",
-                "phase": current_phase,
-                "source": "msproject",
-                "created_at": _now(),
-            })
-            milestones_created += 1
-        else:
-            await db.tasks.insert_one({
-                "task_id": str(uuid.uuid4()),
-                "project_id": project_id,
-                "tenant_id": user.tenant_id,
-                "name": name,
-                "phase": current_phase,
-                "scope_status": "SEC",
-                "status": "todo",
-                "date_debut": start,
-                "date_fin": finish,
-                "source": "msproject",
-                "created_at": _now(),
-            })
-            tasks_created += 1
-
-    return {
-        "project_id": project_id,
-        "tasks_created": tasks_created,
-        "milestones_created": milestones_created,
-    }
+        items.append({
+            "name": name,
+            "summary": (t.findtext(f"{ns}Summary") or "0") == "1",
+            "milestone": (t.findtext(f"{ns}Milestone") or "0") == "1",
+            "start": (t.findtext(f"{ns}Start") or "")[:10] or None,
+            "finish": (t.findtext(f"{ns}Finish") or "")[:10] or None,
+        })
+    proj_name = (root.findtext(f"{ns}Name") or root.findtext(f"{ns}Title") or "").strip()
+    return {"name": proj_name, "items": items}
 
 
-async def import_project_file(project_id: str, filename: str, content: bytes, user: TokenPayload) -> dict:
-    """Route l'import selon le format : XML MSPDI ou binaire .mpp."""
-    head = content.lstrip()[:5]
-    if (filename or "").lower().endswith(".xml") or head.startswith(b"<?xml") or head.startswith(b"<"):
-        return await import_project_xml(project_id, content, user)
-    return await import_project_mpp(project_id, content, user)
-
-
-async def import_project_mpp(project_id: str, content: bytes, user: TokenPayload) -> dict:
-    """Parse un fichier binaire Microsoft Project (.mpp) via MPXJ et crée tâches/jalons."""
-    require_write(user)
-    project = await db.projects.find_one(
-        {"project_id": project_id, "tenant_id": user.tenant_id}, {"_id": 0}
-    )
-    if not project:
-        raise HTTPException(404, "Projet introuvable")
-
+async def _parse_mpp_items(content: bytes) -> dict:
     with tempfile.NamedTemporaryFile(suffix=".mpp", delete=False) as f:
         f.write(content)
         tmp_path = f.name
@@ -209,51 +144,244 @@ async def import_project_mpp(project_id: str, content: bytes, user: TokenPayload
         os.unlink(tmp_path)
         if os.path.exists(out_path):
             os.unlink(out_path)
-
     if parsed.get("error"):
         raise HTTPException(400, f"Fichier .mpp illisible : {parsed['error']}")
+    return {"name": (parsed.get("name") or "").strip(), "items": parsed.get("tasks", [])}
 
-    tasks_created = 0
-    milestones_created = 0
+
+async def _parse_any(filename: str, content: bytes) -> dict:
+    """Retourne {"name": nom du projet dans le fichier, "items": [{name, start, finish, milestone, summary}]}."""
+    head = content.lstrip()[:5]
+    if (filename or "").lower().endswith(".xml") or head.startswith(b"<?xml") or head.startswith(b"<"):
+        return _parse_xml_items(content)
+    return await _parse_mpp_items(content)
+
+
+# ─── Diff & upsert ───────────────────────────────────────────────────────────
+
+def _norm(name: str) -> str:
+    return " ".join((name or "").strip().lower().split())
+
+
+async def _build_plan(project_id: str, items: list, tenant_id: str) -> dict:
+    """Compare les éléments du fichier aux tâches/jalons existants du projet."""
+    ex_tasks = await db.tasks.find(
+        {"project_id": project_id, "tenant_id": tenant_id}, {"_id": 0}
+    ).to_list(None)
+    ex_ms = await db.milestones.find({"project_id": project_id}, {"_id": 0}).to_list(None)
+
+    task_map: dict[str, list] = {}
+    for t in ex_tasks:
+        task_map.setdefault(_norm(t.get("name")), []).append(t)
+    ms_map: dict[str, list] = {}
+    for m in ex_ms:
+        ms_map.setdefault(_norm(m.get("name")), []).append(m)
+
+    to_create, to_update, unchanged = [], [], []
     current_phase = None
-    for t in parsed.get("tasks", []):
-        if t.get("summary"):
-            current_phase = t["name"]
-            continue
-        if t.get("milestone"):
-            d = t.get("start") or t.get("finish") or datetime.now(timezone.utc).strftime("%Y-%m-%d")
-            await db.milestones.insert_one({
-                "milestone_id": str(uuid.uuid4()),
-                "project_id": project_id,
-                "tenant_id": user.tenant_id,
-                "name": t["name"],
-                "family": "delivery",
-                "date_baseline": d,
-                "date_forecast": d,
-                "status": "not_done",
-                "phase": current_phase,
-                "source": "msproject_mpp",
-                "created_at": _now(),
-            })
-            milestones_created += 1
-        else:
-            await db.tasks.insert_one({
-                "task_id": str(uuid.uuid4()),
-                "project_id": project_id,
-                "tenant_id": user.tenant_id,
-                "name": t["name"],
-                "phase": current_phase,
-                "scope_status": "SEC",
-                "status": "todo",
-                "date_debut": t.get("start"),
-                "date_fin": t.get("finish"),
-                "source": "msproject_mpp",
-                "created_at": _now(),
-            })
-            tasks_created += 1
+    matched_ids = set()
 
+    for it in items:
+        if it.get("summary"):
+            current_phase = it["name"]
+            continue
+        key = _norm(it["name"])
+        entry = {**it, "phase": current_phase}
+        pool = ms_map.get(key) if it.get("milestone") else task_map.get(key)
+        existing = pool.pop(0) if pool else None
+        if not existing:
+            to_create.append(entry)
+            continue
+        changes = []
+        if it.get("milestone"):
+            matched_ids.add(existing["milestone_id"])
+            new_d = it.get("start") or it.get("finish")
+            if new_d and (existing.get("date_forecast") or "")[:10] != new_d:
+                changes.append({"field": "date prévue", "old": (existing.get("date_forecast") or "—")[:10], "new": new_d})
+        else:
+            matched_ids.add(existing["task_id"])
+            if it.get("start") and (existing.get("date_debut") or "")[:10] != it["start"]:
+                changes.append({"field": "début", "old": (existing.get("date_debut") or "—")[:10], "new": it["start"]})
+            if it.get("finish") and (existing.get("date_fin") or "")[:10] != it["finish"]:
+                changes.append({"field": "fin", "old": (existing.get("date_fin") or "—")[:10], "new": it["finish"]})
+        if current_phase and (existing.get("phase") or None) != current_phase:
+            changes.append({"field": "phase", "old": existing.get("phase") or "—", "new": current_phase})
+        if changes:
+            to_update.append({"existing": existing, "item": entry, "changes": changes})
+        else:
+            unchanged.append(entry)
+
+    absent = [
+        {"name": x.get("name"), "type": "milestone" if "milestone_id" in x else "task"}
+        for x in ex_tasks + ex_ms
+        if str(x.get("source", "")).startswith("msproject")
+        and x.get("task_id", x.get("milestone_id")) not in matched_ids
+    ]
+    return {"to_create": to_create, "to_update": to_update, "unchanged": unchanged, "absent": absent}
+
+
+async def analyze_import(project_id: str, filename: str, content: bytes, user: TokenPayload) -> dict:
+    """Analyse un fichier MS Project et retourne le diff sans rien modifier."""
+    require_write(user)
+    project = await db.projects.find_one(
+        {"project_id": project_id, "tenant_id": user.tenant_id}, {"_id": 0, "name": 1}
+    )
+    if not project:
+        raise HTTPException(404, "Projet introuvable")
+    parsed = await _parse_any(filename, content)
+    plan = await _build_plan(project_id, parsed["items"], user.tenant_id)
     return {
         "project_id": project_id,
-        "tasks_created": tasks_created,
-        "milestones_created": milestones_created,
+        "project_name": project.get("name"),
+        "file_project_name": parsed["name"],
+        "new": [
+            {"name": e["name"], "type": "milestone" if e.get("milestone") else "task",
+             "start": e.get("start"), "finish": e.get("finish"), "phase": e.get("phase")}
+            for e in plan["to_create"]
+        ],
+        "updated": [
+            {"name": u["item"]["name"],
+             "type": "milestone" if u["item"].get("milestone") else "task",
+             "changes": u["changes"]}
+            for u in plan["to_update"]
+        ],
+        "unchanged_count": len(plan["unchanged"]),
+        "absent": plan["absent"],
+    }
+
+
+async def _insert_item(project_id: str, entry: dict, tenant_id: str) -> str:
+    """Insère une tâche ou un jalon depuis un élément parsé. Retourne 'milestone' ou 'task'."""
+    if entry.get("milestone"):
+        d = entry.get("start") or entry.get("finish") or datetime.now(timezone.utc).strftime("%Y-%m-%d")
+        await db.milestones.insert_one({
+            "milestone_id": str(uuid.uuid4()),
+            "project_id": project_id,
+            "tenant_id": tenant_id,
+            "name": entry["name"],
+            "family": "delivery",
+            "date_baseline": d,
+            "date_forecast": d,
+            "status": "not_done",
+            "phase": entry.get("phase"),
+            "source": "msproject",
+            "created_at": _now(),
+        })
+        return "milestone"
+    await db.tasks.insert_one({
+        "task_id": str(uuid.uuid4()),
+        "project_id": project_id,
+        "tenant_id": tenant_id,
+        "name": entry["name"],
+        "phase": entry.get("phase"),
+        "scope_status": "SEC",
+        "status": "todo",
+        "date_debut": entry.get("start"),
+        "date_fin": entry.get("finish"),
+        "source": "msproject",
+        "created_at": _now(),
+    })
+    return "task"
+
+
+async def apply_import(project_id: str, filename: str, content: bytes, user: TokenPayload) -> dict:
+    """Applique le fichier au projet : met à jour les éléments existants, crée les nouveaux."""
+    require_write(user)
+    project = await db.projects.find_one(
+        {"project_id": project_id, "tenant_id": user.tenant_id}, {"_id": 0}
+    )
+    if not project:
+        raise HTTPException(404, "Projet introuvable")
+    parsed = await _parse_any(filename, content)
+    plan = await _build_plan(project_id, parsed["items"], user.tenant_id)
+
+    created = {"task": 0, "milestone": 0}
+    updated = {"task": 0, "milestone": 0}
+
+    for entry in plan["to_create"]:
+        kind = await _insert_item(project_id, entry, user.tenant_id)
+        created[kind] += 1
+
+    for u in plan["to_update"]:
+        it, existing = u["item"], u["existing"]
+        if it.get("milestone"):
+            new_d = it.get("start") or it.get("finish")
+            fields = {"phase": it.get("phase") or existing.get("phase")}
+            if new_d:
+                fields["date_forecast"] = new_d
+            await db.milestones.update_one({"milestone_id": existing["milestone_id"]}, {"$set": fields})
+            updated["milestone"] += 1
+        else:
+            fields = {"phase": it.get("phase") or existing.get("phase")}
+            if it.get("start"):
+                fields["date_debut"] = it["start"]
+            if it.get("finish"):
+                fields["date_fin"] = it["finish"]
+            await db.tasks.update_one({"task_id": existing["task_id"]}, {"$set": fields})
+            updated["task"] += 1
+
+    from core.audit import log_audit
+    await log_audit(user, "updated", "project", project_id, project.get("name", ""), [
+        {"field": "import MS Project",
+         "old": filename or "fichier",
+         "new": f"{created['task'] + created['milestone']} créé(s), {updated['task'] + updated['milestone']} mis à jour"},
+    ])
+    return {
+        "project_id": project_id,
+        "tasks_created": created["task"],
+        "milestones_created": created["milestone"],
+        "tasks_updated": updated["task"],
+        "milestones_updated": updated["milestone"],
+        "unchanged": len(plan["unchanged"]),
+    }
+
+
+async def import_project_file(project_id: str, filename: str, content: bytes, user: TokenPayload) -> dict:
+    """Import (upsert) — conservé pour compatibilité avec la route historique."""
+    return await apply_import(project_id, filename, content, user)
+
+
+async def import_new_project(filename: str, content: bytes, user: TokenPayload) -> dict:
+    """Crée un nouveau projet MARCEL directement depuis un fichier MS Project."""
+    require_write(user)
+    parsed = await _parse_any(filename, content)
+    items = parsed["items"]
+    if not items:
+        raise HTTPException(400, "Aucune tâche ni jalon trouvé dans le fichier")
+
+    stem = os.path.splitext(os.path.basename(filename or "projet"))[0]
+    name = parsed["name"] or stem or "Projet MS Project"
+    starts = [i["start"] for i in items if i.get("start")]
+    ends = [i["finish"] for i in items if i.get("finish")]
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    start_date = min(starts) if starts else today
+    end_date = max(ends) if ends else start_date
+
+    from modules.projects.schemas import ProjectCreate
+    from modules.projects.service import create_project
+    project = await create_project(ProjectCreate(
+        name=name,
+        methodology="waterfall",
+        status_rag="green",
+        jh_planned=0,
+        start_date=start_date,
+        end_date_baseline=end_date,
+        end_date_forecast=end_date,
+        description=f"Projet créé depuis Microsoft Project ({filename or 'fichier'})",
+        source_tool="msproject",
+    ), user)
+
+    created = {"task": 0, "milestone": 0}
+    current_phase = None
+    for it in items:
+        if it.get("summary"):
+            current_phase = it["name"]
+            continue
+        kind = await _insert_item(project["project_id"], {**it, "phase": current_phase}, user.tenant_id)
+        created[kind] += 1
+
+    return {
+        "project": project,
+        "tasks_created": created["task"],
+        "milestones_created": created["milestone"],
     }

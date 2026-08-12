@@ -16,6 +16,25 @@ async def export_msproject(project_id: str, current_user: TokenPayload = Depends
     )
 
 
+@router.post("/msproject/analyze/{project_id}")
+async def analyze_msproject(
+    project_id: str,
+    file: UploadFile = File(...),
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    content = await file.read()
+    return await service.analyze_import(project_id, file.filename or "", content, current_user)
+
+
+@router.post("/msproject/import-new")
+async def import_new_msproject(
+    file: UploadFile = File(...),
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    content = await file.read()
+    return await service.import_new_project(file.filename or "", content, current_user)
+
+
 @router.post("/msproject/import/{project_id}")
 async def import_msproject(
     project_id: str,

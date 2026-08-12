@@ -182,6 +182,8 @@ export const excelAPI = {
 export const msprojectAPI = {
   exportXml: (projectId) => api.get(`/msproject/export/${projectId}`, { responseType: "blob" }),
   importXml: (projectId, formData) => api.post(`/msproject/import/${projectId}`, formData, { headers: { "Content-Type": "multipart/form-data" } }),
+  analyze: (projectId, formData) => api.post(`/msproject/analyze/${projectId}`, formData, { headers: { "Content-Type": "multipart/form-data" } }),
+  importNew: (formData) => api.post("/msproject/import-new", formData, { headers: { "Content-Type": "multipart/form-data" } }),
 };
 
 export const timesheetsAPI = {

@@ -172,8 +172,29 @@ export default function ProjectDetail() {
     const fd = new FormData();
     fd.append("file", file);
     try {
-      const res = await msprojectAPI.importXml(id, fd);
-      alert(`Import réussi : ${res.data.tasks_created} tâche(s), ${res.data.milestones_created} jalon(s).`);
+      const analysis = await msprojectAPI.analyze(id, fd);
+      const { new: news, updated, unchanged_count } = analysis.data;
+      if (news.length === 0 && updated.length === 0) {
+        alert("Aucun changement : le projet est déjà à jour avec ce fichier.");
+        return;
+      }
+      const detail = updated.slice(0, 8).map((u) =>
+        `  • ${u.name} (${u.changes.map((c) => `${c.field} ${c.old} → ${c.new}`).join(", ")})`
+      ).join("\n");
+      const ok = window.confirm(
+        `Comparaison avec le plan actuel :\n\n` +
+        `${news.length} nouvel(aux) élément(s) à créer\n` +
+        `${updated.length} élément(s) à mettre à jour\n` +
+        `${unchanged_count} inchangé(s)\n` +
+        (detail ? `\nMises à jour :\n${detail}${updated.length > 8 ? "\n  …" : ""}\n` : "") +
+        `\nAppliquer ces changements ?`
+      );
+      if (!ok) return;
+      const fd2 = new FormData();
+      fd2.append("file", file);
+      const res = await msprojectAPI.importXml(id, fd2);
+      const d = res.data;
+      alert(`Plan appliqué : ${d.tasks_created + d.milestones_created} créé(s), ${d.tasks_updated + d.milestones_updated} mis à jour, ${d.unchanged} inchangé(s).`);
       fetchAll();
     } catch (err) {
       alert(err.response?.data?.detail || "Erreur lors de l'import MS Project.");
@@ -338,7 +359,7 @@ export default function ProjectDetail() {
               <input
                 ref={msImportRef}
                 type="file"
-                accept=".xml"
+                accept=".mpp,.xml"
                 className="hidden"
                 data-testid="msproject-import-input"
                 onChange={handleMsProjectImport}

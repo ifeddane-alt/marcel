@@ -190,3 +190,11 @@
 ## 2026-08-11 (9) — DÉPLOIEMENT PROD accueil cockpit + icône Accueil
 - PROD marcel-ppm.com déployée (commit d5742ef) via update.sh (lancé avec setsid pour éviter le timeout SSH), prune 1,97 Go, disque 80 %.
 - Vérifié : health 200, bundle main.8f62d13d.js (home-committees, home-overrun-alerts, entrée nav Accueil → /home), API home/summary retourne committees + envelope_overruns (vides en prod : aucun comité futur planifié, pas de dépassement — normal).
+
+## 2026-08-11 (10) — Import MS Project intelligent (chantier b du comparatif PPM Express)
+- Ré-import upsert : POST /api/msproject/import/{id} met à jour tâches/jalons existants (matching par nom normalisé) au lieu de dupliquer ; date_baseline des jalons préservée (seul date_forecast bouge) ; audit tracé.
+- Analyse préalable : POST /api/msproject/analyze/{id} → diff sans modification (new/updated avec détail des changements/unchanged/absent).
+- Création portefeuille : POST /api/msproject/import-new → crée un projet MARCEL complet depuis un .mpp/.xml (nom, dates min/max, phases, tâches, jalons, code auto).
+- Frontend : MsProjectImport.jsx réécrit en wizard 2 étapes (modes update/create, écran de comparaison avec badges + détail avant application) sur /roadmap ; ProjectDetail : flux analyze → confirm → apply, accept .mpp+.xml (bug .xml only corrigé).
+- Parsing unifié XML MSPDI + .mpp binaire (MPXJ) dans _parse_any ; service msproject réécrit.
+- Tests : curl backend 100 % (création, idempotence, diff, upsert, baseline, nettoyage) + testing_agent iteration_64 = 100 % backend + 100 % frontend, 0 bug. Preview uniquement, PAS déployé en prod.
