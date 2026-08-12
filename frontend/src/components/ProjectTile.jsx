@@ -137,6 +137,18 @@ export default function ProjectTile({
           <span>Budget <b className="font-mono-data text-[#26243a]">{formatEuro(p.budget_total)}</b></span>
           <span>Forecast <b className={`font-mono-data ${overBudget ? "text-[#cc4f45]" : "text-[#26243a]"}`}>{formatEuro(p.budget_forecast)}</b></span>
         </div>
+        {p.jira_sync && (
+          <div className="flex items-center justify-between mt-1.5 text-[10.5px]" data-testid={`tile-jira-${p.project_id}`}>
+            <span className="flex items-center gap-1 font-semibold text-[#2e5fe8]">
+              <span className="w-3.5 h-3.5 rounded-[3px] bg-[#2e5fe8] text-white text-[8px] font-extrabold flex items-center justify-center">J</span>
+              Jira {p.jira_sync.jira_key}
+            </span>
+            <span className="text-[#8a87a0]">
+              {p.jira_sync.issues_done}/{p.jira_sync.issues_total} issues ·{" "}
+              <b className="font-mono-data text-[#26243a]">{p.jira_sync.progress_pct}%</b>
+            </span>
+          </div>
+        )}
         {(() => {
           const eur = (p.benefits || []).filter((b) => b.unit === "EUR");
           const exp = eur.reduce((s, b) => s + (b.expected_value || 0), 0);

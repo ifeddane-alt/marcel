@@ -78,6 +78,17 @@ async def trigger_sync(
     return await service.trigger_sync(connector_type, current_user)
 
 
+# ── Projets distants (Jira, lecture seule) ───────────────────────────────────
+
+@router.get("/connectors/{connector_type}/remote-projects")
+async def list_remote_projects(
+    connector_type: str,
+    current_user: TokenPayload = Depends(get_current_user),
+):
+    _check_type(connector_type)
+    return await service.list_remote_projects(connector_type, current_user)
+
+
 # ── Statut ────────────────────────────────────────────────────────────────────
 
 @router.get("/connectors/{connector_type}/status")

@@ -325,6 +325,24 @@ async def trigger_sync(connector_type: str, user: TokenPayload) -> dict:
     return {**log_update, "log_id": log_id, "detail": result.get("detail")}
 
 
+async def list_remote_projects(connector_type: str, user: TokenPayload) -> list:
+    """Liste les projets distants du connecteur (lecture seule) — Jira uniquement."""
+    _require_admin_config(user)
+    if connector_type != "jira":
+        raise HTTPException(400, "Liste des projets distants disponible uniquement pour Jira")
+    cfg = await db.connector_configs.find_one(
+        {"tenant_id": user.tenant_id, "type": connector_type}
+    )
+    if not cfg:
+        raise HTTPException(400, "Connecteur non configuré")
+    cfg_enriched = dict(cfg)
+    cfg_enriched["_decrypted_creds"] = decrypt_credentials(cfg.get("auth_credentials_enc", ""))
+    try:
+        return await jira_mod.list_projects(cfg_enriched)
+    except Exception as e:
+        raise HTTPException(502, f"Impossible de lister les projets Jira : {str(e)[:150]}")
+
+
 # ─── Statut et logs ───────────────────────────────────────────────────────────
 
 async def get_status(connector_type: str, user: TokenPayload) -> dict:

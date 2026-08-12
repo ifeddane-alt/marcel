@@ -5,9 +5,72 @@ import {
   Database, GitBranch, LifeBuoy, ArrowRight, History, Toggle,
   Zap, Activity,
 } from "lucide-react";
-import { connectorsAPI } from "@/api";
+import { connectorsAPI, projectsAPI } from "@/api";
 import { usePermissions } from "@/hooks/usePermissions";
 import { toast } from "sonner";
+
+/* ─── Onglet Projets liés (Jira, lecture seule) ─────────────────────────────── */
+function JiraLinksTab({ links, setLinks }) {
+  const [projects, setProjects] = useState([]);
+  const [remote, setRemote] = useState(null);
+
+  useEffect(() => {
+    projectsAPI.list().then((r) => setProjects(r.data)).catch(() => {});
+    connectorsAPI.remoteProjects("jira").then((r) => setRemote(r.data)).catch(() => setRemote(null));
+  }, []);
+
+  const byId = Object.fromEntries(projects.map((p) => [p.project_id, p]));
+
+  return (
+    <div className="space-y-4" data-testid="jira-links-tab">
+      <div className="p-3 bg-blue-50 border border-blue-100 rounded-lg text-xs text-blue-800">
+        <b>Lecture seule</b> — MARCEL remonte l'avancement des projets Jira liés (issues terminées / total,
+        epics) sans jamais écrire dans Jira. L'avancement s'affiche sur les tuiles du portefeuille après chaque synchronisation.
+      </div>
+
+      {links.map((link, i) => {
+        const proj = byId[link.project_id];
+        const sync = proj?.jira_sync;
+        return (
+          <div key={i} className="flex flex-wrap items-center gap-2 p-3 border border-zinc-200 rounded-lg" data-testid={`jira-link-row-${i}`}>
+            <select value={link.project_id || ""} data-testid={`jira-link-project-${i}`}
+              onChange={(e) => { const l = [...links]; l[i] = { ...l[i], project_id: e.target.value }; setLinks(l); }}
+              className="flex-1 min-w-[180px] text-sm border border-zinc-200 rounded-lg px-2.5 py-2 bg-white focus:outline-none focus:border-blue-600">
+              <option value="">— Projet MARCEL —</option>
+              {projects.map((p) => <option key={p.project_id} value={p.project_id}>{p.name}</option>)}
+            </select>
+            <ArrowRight size={14} className="text-zinc-300 flex-shrink-0" />
+            {remote ? (
+              <select value={link.jira_key || ""} data-testid={`jira-link-key-${i}`}
+                onChange={(e) => { const l = [...links]; l[i] = { ...l[i], jira_key: e.target.value }; setLinks(l); }}
+                className="flex-1 min-w-[150px] text-sm border border-zinc-200 rounded-lg px-2.5 py-2 bg-white focus:outline-none focus:border-blue-600">
+                <option value="">— Projet Jira —</option>
+                {remote.map((r) => <option key={r.key} value={r.key}>{r.key} — {r.name}</option>)}
+              </select>
+            ) : (
+              <input value={link.jira_key || ""} placeholder="Clé Jira (ex : WEB)" data-testid={`jira-link-key-${i}`}
+                onChange={(e) => { const l = [...links]; l[i] = { ...l[i], jira_key: e.target.value.toUpperCase() }; setLinks(l); }}
+                className="flex-1 min-w-[130px] text-sm border border-zinc-200 rounded-lg px-2.5 py-2 focus:outline-none focus:border-blue-600" />
+            )}
+            {sync && sync.jira_key === link.jira_key && (
+              <span className="text-[10.5px] text-zinc-500 whitespace-nowrap" data-testid={`jira-link-sync-${i}`}>
+                {sync.issues_done}/{sync.issues_total} · <b className="text-zinc-700">{sync.progress_pct}%</b>
+              </span>
+            )}
+            <button onClick={() => setLinks(links.filter((_, j) => j !== i))} data-testid={`jira-link-remove-${i}`}
+              className="p-1.5 rounded-lg text-zinc-400 hover:text-rose-600 hover:bg-rose-50"><X size={14} /></button>
+          </div>
+        );
+      })}
+
+      <button onClick={() => setLinks([...links, { project_id: "", jira_key: "" }])} data-testid="jira-link-add"
+        className="flex items-center gap-1.5 px-3 py-2 text-sm border border-dashed border-zinc-300 rounded-lg text-zinc-500 hover:border-blue-600 hover:text-blue-600 transition-colors">
+        + Lier un projet Jira
+      </button>
+      <p className="text-[11px] text-zinc-400">Enregistrez puis lancez « Synchroniser » pour remonter l'avancement.</p>
+    </div>
+  );
+}
 
 /* ─── Meta connecteurs ───────────────────────────────────────────────────────── */
 const CONNECTOR_META = {
@@ -171,6 +234,9 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
   const [mapping, setMapping] = useState(
     (connector.field_mapping?.fields || []).map(f => ({ ...f }))
   );
+  const [links, setLinks] = useState(
+    (connector.field_mapping?.project_links || []).map(l => ({ ...l }))
+  );
   const [logs, setLogs] = useState([]);
   const [logsLoading, setLogsLoading] = useState(false);
   const [testing, setTesting] = useState(false);
@@ -220,6 +286,7 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
         field_mapping:    {
           ...(connector.field_mapping || {}),
           fields: mapping,
+          project_links: links.filter(l => l.project_id && l.jira_key),
         },
       });
       if (!silent) {
@@ -282,6 +349,7 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
         <div className="flex gap-0 border-b border-[#e7e3f2] px-6">
           {[
             { key: "config",  label: "Configuration" },
+            ...(connector.type === "jira" ? [{ key: "links", label: "Projets liés" }] : []),
             { key: "mapping", label: "Mapping champs" },
             { key: "logs",    label: "Historique" },
           ].map(t => (
@@ -299,6 +367,11 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
 
         {/* Content */}
         <div className="flex-1 overflow-y-auto p-6">
+          {/* ── Links Tab (Jira) ── */}
+          {activeTab === "links" && connector.type === "jira" && (
+            <JiraLinksTab links={links} setLinks={setLinks} />
+          )}
+
           {/* ── Config Tab ── */}
           {activeTab === "config" && (
             <div className="space-y-5">

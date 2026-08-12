@@ -1,0 +1,40 @@
+{
+  "summary": "Iteration 65 — full E2E test of 3 new features (AI Status Report, Jira read-only connector, Home objectives-drift). Backend: 11/15 pytest passed. Frontend: AI Report modal renders correctly with all content sections + PDF/Email/Regenerate buttons, portfolio Jira badge (WEB 34/50 68%) OK, /home drift block works end-to-end (set 9 → drift shown 'Réalisé 11 → 9 % · cible 15 % · 60% de la cible', click navigates to /objectifs, restore 11 → drift disappears). CRITICAL FRONTEND BUG: ConnectorModal crashes with 'ReferenceError: links is not defined' as soon as the Jira 'Projets liés' tab is opened — the entire project-links UI is unusable.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "GET /api/projects/{id}/ai-reports (viewer)", "issue": "Returns 200 for viewer@altair.fr, but review expected 403. Viewer role currently has permission 'export.status_report' → router allows access. Either strengthen the required permission (e.g. 'ai_report.generate') or revoke 'export.status_report' from READ_ONLY. Mismatch between spec expectation and permission model."},
+      {"endpoint": "POST /api/projects/{id}/ai-report (viewer)", "issue": "Same as above — viewer can generate AI report (200) because they hold 'export.status_report'. Generating a report is a write/costly operation; recommend a stronger permission."},
+      {"endpoint": "GET /api/projects/{id}/ai-report/{report_id}/pdf (viewer)", "issue": "Same permission issue — viewer can download the PDF."},
+      {"endpoint": "GET /api/connectors/jira/config (viewer)", "issue": "Returns 200 for viewer instead of expected 403 (spec says permission admin.config). Router does not call _require_admin_config on GET config; only masked payload is returned. Response IS properly masked (api_token = '••••••••'), so risk is low, but does not match spec."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "ConnectorModal (pages/Connectors.jsx)", "issue": "Uncaught ReferenceError: 'links is not defined' when clicking Jira tab 'Projets liés' (connector-tab-links). Variables `links` and `setLinks` are used at line 286 (handleSave payload) and line 369 (<JiraLinksTab links={links} setLinks={setLinks} />) but never declared with useState in ConnectorModal. Must add: `const [links, setLinks] = useState((connector.field_mapping?.project_links || []).map(l => ({...l})));`. Breaks the entire Jira project-linking feature in the UI.", "selector": "[data-testid=\"connector-tab-links\"]", "priority": "CRITICAL"}
+    ],
+    "integration_issues": [
+      {"flow": "Jira admin → Projets liés tab", "issue": "Tab click crashes the app (React error overlay). Consequently, data-testids jira-links-tab / jira-link-project-0 / jira-link-key-0 / jira-link-add / jira-link-remove-* cannot be reached from the UI.", "affected_selectors": ["jira-links-tab", "jira-link-project-0", "jira-link-key-0", "jira-link-add", "jira-link-remove-*"]}
+    ],
+    "design_issues": []
+  },
+  "test_report_links": ["/app/backend/tests/test_iter65_features.py", "/app/test_reports/pytest/iter65_results.xml"],
+  "action_items": [
+    "URGENT: In /app/frontend/src/pages/Connectors.jsx ConnectorModal, declare `const [links, setLinks] = useState((connector.field_mapping?.project_links || []).map(l => ({...l})));` alongside other state declarations (~line 237). Without this the Jira project-links tab is completely broken.",
+    "Decide the intended permission model for AI Status Report endpoints — either introduce a dedicated permission (e.g. ai_report.generate / ai_report.view) or remove export.status_report from READ_ONLY role. Currently viewer can list/generate/download PDF.",
+    "Optionally add admin.config check on GET /connectors/{type}/config to match spec (token is masked so low risk)."
+  ],
+  "critical_code_review_comments": [
+    "ConnectorModal missing state — pure oversight (build didn't catch since ESLint no-undef rule is disabled and JiraLinksTab tab is opt-in). Consider enabling no-undef in ESLint config to catch these at build time.",
+    "Connectors.jsx is 824 lines — split ConnectorModal, JiraLinksTab, LogsTab into separate files.",
+    "Permission strings hard-coded in router (`export.status_report`) — no central constant/enum. A typo could silently allow/deny access."
+  ],
+  "updated_files": ["/app/backend/tests/test_iter65_features.py", "/app/test_reports/iteration_65.json"],
+  "success_rate": {"backend": "73% (11/15) — the 4 failures are permission-model mismatches, all core happy-path endpoints pass", "frontend": "80% — AI Report modal, portfolio Jira badge, home drift all fully working; only Jira 'Projets liés' tab is broken"},
+  "test_credentials": "admin@altair.fr / Admin2026! and viewer@altair.fr / View1234! (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "None permanent. Objective 63284d2c... target-value set to 9 during test then restored to 11 (verified drift block disappeared on /home). Jira config and Phoenix→WEB link were not modified. One AI report generation was performed (well within the 2-generation budget).",
+  "retest_needed": true,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "AI Report feature is fully functional end-to-end (backend + UI). Home drift block works perfectly. Portfolio Jira badge works. The blocker is a missing useState in ConnectorModal — a 1-line fix. After main agent adds the useState declaration, re-run only the frontend Jira admin/connectors test: open Jira card → click 'Projets liés' tab → verify jira-links-tab / jira-link-project-0 / jira-link-key-0 / jira-link-add / jira-link-remove-0 selectors + add/remove line behavior. Backend permission questions (viewer 403 vs 200 on ai-report endpoints and jira config GET) require product decision, not a fix.",
+  "rca of the issue": "ConnectorModal (Connectors.jsx) uses `links` and `setLinks` at two locations (handleSave line ~286, JiraLinksTab render line ~369) without declaring them with useState. When the user clicks the 'Projets liés' tab, React tries to render JiraLinksTab({ links, setLinks }) → ReferenceError: links is not defined → React error overlay. Reproduction: login admin → /admin/connectors → click 'Configurer' on Jira card → click 'Projets liés' tab → error overlay appears. Fix: add `const [links, setLinks] = useState((connector.field_mapping?.project_links || []).map(l => ({...l})));` near the other useState calls (~line 237)."
+}

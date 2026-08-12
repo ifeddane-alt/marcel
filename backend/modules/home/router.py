@@ -127,6 +127,33 @@ async def home_summary(current_user: TokenPayload = Depends(get_current_user)):
                     "overrun": planned - env["total_envelope"],
                 })
 
+    # ── Objectifs en dérive (le réalisé s'éloigne de la cible) ──
+    objectives_drift = []
+    obj_docs = await db.strategic_objectives.find(
+        {"tenant_id": tenant, "status": "actif", "target_value": {"$ne": None}},
+        {"_id": 0, "objective_id": 1, "title": 1, "target_unit": 1, "target_value": 1,
+         "target_baseline": 1, "target_history": 1},
+    ).to_list(100)
+    for ob in obj_docs:
+        hist = ob.get("target_history") or []
+        if len(hist) < 2 or ob.get("target_value") is None:
+            continue
+        t = ob["target_value"]
+        last, prev = hist[-1]["value"], hist[-2]["value"]
+        if abs(t - last) > abs(t - prev):
+            b = ob.get("target_baseline") if ob.get("target_baseline") is not None else 0
+            progress = round((last - b) / (t - b) * 100) if t != b else None
+            objectives_drift.append({
+                "objective_id": ob["objective_id"],
+                "title": ob["title"],
+                "unit": ob.get("target_unit") or "",
+                "target": t,
+                "current": last,
+                "previous": prev,
+                "progress": progress,
+            })
+    objectives_drift = objectives_drift[:5]
+
     return {
         "first_name": (current_user.name or "").split(" ")[0],
         "context": {
@@ -144,4 +171,5 @@ async def home_summary(current_user: TokenPayload = Depends(get_current_user)):
         },
         "committees": committees,
         "envelope_overruns": overruns,
+        "objectives_drift": objectives_drift,
     }

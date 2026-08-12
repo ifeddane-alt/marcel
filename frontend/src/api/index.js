@@ -336,6 +336,13 @@ export const connectorsAPI = {
   triggerSync:     (type)       => api.post(`/connectors/${type}/sync`),
   getStatus:       (type)       => api.get(`/connectors/${type}/status`),
   getLogs:         (type, limit) => api.get(`/connectors/${type}/logs`, { params: limit ? { limit } : {} }),
+  remoteProjects:  (type)        => api.get(`/connectors/${type}/remote-projects`),
+};
+
+export const aiReportAPI = {
+  generate: (projectId)           => api.post(`/projects/${projectId}/ai-report`),
+  list:     (projectId)           => api.get(`/projects/${projectId}/ai-reports`),
+  pdf:      (projectId, reportId) => api.get(`/projects/${projectId}/ai-report/${reportId}/pdf`, { responseType: "blob" }),
 };
 
 export const agentAPI = {

@@ -23,6 +23,7 @@ import RiskHeatmap from "@/components/RiskHeatmap";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import ExportCopilModal from "@/components/ExportCopilModal";
 import StatusReportModal from "@/components/StatusReportModal";
+import AiStatusReport from "@/components/AiStatusReport";
 import BenefitsSection from "@/components/BenefitsSection";
 import WorkAllocationModal from "@/components/WorkAllocationModal";
 import ProjectGantt from "@/components/ProjectGantt";
@@ -337,6 +338,9 @@ export default function ProjectDetail() {
             >
               <ClipboardList size={13} /> <span className="hidden sm:inline">Status Report</span><span className="sm:hidden">Report</span>
             </button>
+          )}
+          {can("export.status_report") && (
+            <AiStatusReport projectId={id} projectName={project?.name} />
           )}
           <button
             onClick={handleMsProjectExport}

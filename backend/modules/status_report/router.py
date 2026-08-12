@@ -43,3 +43,36 @@ async def list_reports(project_id: str, current_user: TokenPayload = Depends(get
     if not has_perm(current_user, "export.status_report"):
         raise HTTPException(403, "Permission export.status_report requise")
     return await service.list_reports(project_id, current_user)
+
+
+# ─── Rapport de statut IA ─────────────────────────────────────────────────────
+
+from . import ai_report as ai_mod
+
+
+@router.post("/projects/{project_id}/ai-report")
+async def generate_ai_report(project_id: str, current_user: TokenPayload = Depends(get_current_user)):
+    """Génère un rapport de statut hebdomadaire rédigé par IA."""
+    if not has_perm(current_user, "export.status_report"):
+        raise HTTPException(403, "Permission export.status_report requise")
+    return await ai_mod.generate_ai_report(project_id, current_user)
+
+
+@router.get("/projects/{project_id}/ai-reports")
+async def list_ai_reports(project_id: str, current_user: TokenPayload = Depends(get_current_user)):
+    if not has_perm(current_user, "export.status_report"):
+        raise HTTPException(403, "Permission export.status_report requise")
+    return await ai_mod.list_ai_reports(project_id, current_user)
+
+
+@router.get("/projects/{project_id}/ai-report/{report_id}/pdf")
+async def ai_report_pdf(project_id: str, report_id: str, current_user: TokenPayload = Depends(get_current_user)):
+    if not has_perm(current_user, "export.status_report"):
+        raise HTTPException(403, "Permission export.status_report requise")
+    report = await ai_mod.get_ai_report(project_id, report_id, current_user)
+    pdf = ai_mod.build_ai_report_pdf(report)
+    return StreamingResponse(
+        io.BytesIO(pdf),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="rapport_statut_{report_id[:8]}.pdf"'},
+    )

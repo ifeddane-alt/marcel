@@ -164,6 +164,36 @@ export default function Home() {
               </div>
             )}
 
+            {(summary?.objectives_drift || []).length > 0 && (
+              <div className="border border-[#fde68a] bg-[#fffbeb] rounded-lg p-3" data-testid="home-objectives-drift">
+                <div className="flex items-center gap-2 mb-1.5">
+                  <AlertTriangle size={13} className="text-[#d97706]" />
+                  <span className="text-[12px] font-bold text-[#b45309]">
+                    Objectifs qui s'éloignent de leur cible
+                  </span>
+                </div>
+                <div className="space-y-1">
+                  {summary.objectives_drift.map((o) => (
+                    <Link key={o.objective_id} to="/objectifs"
+                      className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/70 transition-colors"
+                      data-testid={`home-drift-${o.objective_id}`}>
+                      <div className="min-w-0">
+                        <div className="text-[13px] font-semibold text-[#26243a] truncate">{o.title}</div>
+                        <div className="text-[11px] text-[#8a87a0]">
+                          Réalisé {o.previous} → {o.current} {o.unit} · cible {o.target} {o.unit}
+                        </div>
+                      </div>
+                      {o.progress !== null && (
+                        <span className="font-mono text-[11.5px] font-bold text-[#b45309] flex-shrink-0">
+                          {o.progress}% de la cible
+                        </span>
+                      )}
+                    </Link>
+                  ))}
+                </div>
+              </div>
+            )}
+
             {summary?.timesheet && canSubmitTs && (
               <Link
                 to="/timesheets"
@@ -233,7 +263,7 @@ export default function Home() {
               </div>
             )}
 
-            {summary && !summary.timesheet && summary.pending_validations === 0 && ms?.late_count === 0 && ms?.upcoming_count === 0 && (summary.envelope_overruns || []).length === 0 && (
+            {summary && !summary.timesheet && summary.pending_validations === 0 && ms?.late_count === 0 && ms?.upcoming_count === 0 && (summary.envelope_overruns || []).length === 0 && (summary.objectives_drift || []).length === 0 && (
               <p className="text-[13px] text-[#8a87a0]" data-testid="home-actions-empty">Rien en attente — tout est à jour.</p>
             )}
           </div>
