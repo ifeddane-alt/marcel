@@ -66,6 +66,15 @@ class ProjectUpdate(BaseModel):
     risk_score:          Optional[int] = None
     complexity:          Optional[int] = None
     custom_fields:       Optional[dict] = None
+    # Fiche d'informations (onglet Informations)
+    direction: Optional[str] = None
+    leading_indicators: Optional[str] = None
+    outcome: Optional[str] = None
+    income: Optional[float] = None
+    expected_result: Optional[str] = None
+    impacted_application_ids: Optional[list] = None
+    art_train_id: Optional[str] = None
+    epic_owner_id: Optional[str] = None
 
 
 class BudgetRevisionCreate(BaseModel):

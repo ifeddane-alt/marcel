@@ -29,6 +29,7 @@ import WorkAllocationModal from "@/components/WorkAllocationModal";
 import ProjectGantt from "@/components/ProjectGantt";
 import ProjectIndicators from "@/components/ProjectIndicators";
 import { LifecycleTab } from "@/components/LifecycleTab";
+import { ProjectInfoTab } from "@/components/ProjectInfoTab";
 import { CustomFieldsPanel } from "@/components/CustomFieldsPanel";
 import { Ring, elapsedPct, clamp } from "@/components/ProjectTile";
 import { formatEuro, formatDate, formatJH } from "@/utils/format";
@@ -417,6 +418,7 @@ export default function ProjectDetail() {
       {/* Onglets façon Clarity */}
       <div className="flex gap-1 border-b border-[#e7e3f2] mb-5 overflow-x-auto" data-testid="project-tabs">
         {[
+          { id: "infos", label: "Informations" },
           { id: "apercu", label: "Aperçu" },
           { id: "taches", label: "Tâches", count: tasks.length },
           { id: "jalons", label: "Jalons", count: milestones.length },
@@ -1756,6 +1758,12 @@ export default function ProjectDetail() {
         {activeTab === "pilotage" && (
           <div className="col-span-12">
             <ProjectIndicators projectId={id} canWrite={canWrite} />
+          </div>
+        )}
+
+        {activeTab === "infos" && (
+          <div className="col-span-12">
+            <ProjectInfoTab project={project} canWrite={canWrite} onSaved={fetchAll} />
           </div>
         )}
 
