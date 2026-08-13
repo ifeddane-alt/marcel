@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { Responsive, WidthProvider } from "react-grid-layout/legacy";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
@@ -100,6 +101,7 @@ function migrateLayouts(layouts, widgets) {
 
 export default function Dashboard() {
   const { hasPermission } = usePermissions();
+  const navigate = useNavigate();
   const canSeeEnvelope = hasPermission("arbitrage.view") || hasPermission("*");
 
   const [summary, setSummary] = useState(null);
