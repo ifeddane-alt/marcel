@@ -239,3 +239,10 @@
 - Business case : badge d'unité (€/%/JH) à côté du libellé pour lever l'ambiguïté des colonnes.
 - Données préview : allocations étendues 2026-07→12 (66 lignes, modèle avril), user test.audit backfillé. Heatmap/équipes affichent une utilisation réelle (61 %, 59 %…).
 - Données prod (script /tmp/fix_prod_data.js) : dédup profil Administrateur, backfill profile_id des 7 users, allocations étendues, 3 objectifs démo avec cible 15 % (active aussi l'ALI auto en prod).
+
+## 2026-06 (fork) — Clôture pack fiabilisation : vérifications finales
+- Gantt vérifié visuellement (projet SAP S/4HANA) : ouverture sur aujourd'hui/2026 avec bouton Today, plus de 2021.
+- Doublons profils Preview dédupliqués : betacorp Administrateur ×2 et Chef de Projet ×2 → conservé le profil système avec code (ADMIN, CHEF_DE_PROJET), users remappés, légacy sans code supprimés. 0 doublon restant, 0 user sans profile_id. Logins betacorp OK post-remap (admin: perms *, pm: 32 perms).
+- Régression : heatmap 30/42 cellules non nulles (max 100 %) ; agent IA PMO répond en 1,7 s (10 projets actifs).
+- Business case : formatage par unité (fmtValue €/%/JH) confirmé dans BenefitsSection.jsx (colonnes Attendu/Réalisé + badge unité).
+- Preview uniquement — PAS déployé en prod (dédup prod déjà faite via fix_prod_data.js le 2026-08-12).
