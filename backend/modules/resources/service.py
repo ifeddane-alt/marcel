@@ -328,3 +328,25 @@ async def export_vendors_csv(current_user: TokenPayload) -> bytes:
                 res.get("contract_start", ""), contract_end,
             ])
     return buf.getvalue().encode("utf-8-sig")  # BOM pour Excel FR
+
+
+async def skills_referential(user: TokenPayload) -> list:
+    resources = await db.resources.find(
+        {"tenant_id": user.tenant_id}, {"_id": 0, "resource_id": 1, "name": 1, "role": 1, "skills": 1}
+    ).to_list(None)
+    agg = {}
+    for r in resources:
+        for s in r.get("skills") or []:
+            name = (s.get("name") or "").strip()
+            if not name:
+                continue
+            e = agg.setdefault(name.lower(), {"name": name, "resources": []})
+            e["resources"].append({
+                "resource_id": r["resource_id"], "resource_name": r["name"],
+                "role": r.get("role") or "", "level": s.get("level") or 1,
+            })
+    out = [{**v, "count": len(v["resources"]),
+            "avg_level": round(sum(x["level"] for x in v["resources"]) / len(v["resources"]), 1)}
+           for v in agg.values()]
+    out.sort(key=lambda x: -x["count"])
+    return out

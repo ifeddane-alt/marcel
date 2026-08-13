@@ -39,12 +39,16 @@ import {
   Network,
   Gauge,
   HandCoins,
+  ClipboardCheck,
+  Moon,
+  Sun,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { useTenantConfig } from "@/contexts/TenantConfigContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import AgentDrawer from "@/components/AgentDrawer";
+import { OnboardingTour } from "@/components/OnboardingTour";
 import NotificationBell from "@/components/NotificationBell";
 import GlobalSearch from "@/components/GlobalSearch";
 import { useTranslation } from "react-i18next";
@@ -53,32 +57,41 @@ import { useTranslation } from "react-i18next";
 
 // ── Entrées principales ─────────────────────────────────────────────
 const MAIN_NAV = [
-  { to: "/home",       icon: HomeIcon,         label: "Accueil",        perm: null },
-  { to: "/dashboard",  icon: LayoutDashboard, label: "Tableau de bord", perm: "dashboard.view" },
-  { to: "/programmes", icon: FolderKanban,     label: "Programmes",     perm: "portfolio.view" },
-  { to: "/portfolio",  icon: Briefcase,        label: "Portefeuille",   perm: "portfolio.view" },
-  { to: "/pilotage",   icon: Gauge,            label: "Pilotage",       perm: "portfolio.view" },
-  { to: "/objectifs",  icon: Goal,             label: "Objectifs",      perm: "portfolio.view" },
-  { to: "/budget",     icon: DollarSign,       label: "Budget",         perm: "budget.view" },
-  { to: "/teams",      icon: UsersRound,       label: "Équipes",        perm: "teams.view" },
+  { to: "/home",       icon: HomeIcon,         label: "Accueil",        tKey: "nav.home",       perm: null },
+  { to: "/dashboard",  icon: LayoutDashboard, label: "Tableau de bord", tKey: "nav.dashboard",  perm: "dashboard.view" },
+  { to: "/programmes", icon: FolderKanban,     label: "Programmes",     tKey: "nav.programs",   perm: "portfolio.view" },
+  { to: "/portfolio",  icon: Briefcase,        label: "Portefeuille",   tKey: "nav.portfolio",  perm: "portfolio.view" },
+  { to: "/pilotage",   icon: Gauge,            label: "Pilotage",       tKey: "nav.pilotage",   perm: "portfolio.view" },
+  { to: "/objectifs",  icon: Goal,             label: "Objectifs",      tKey: "nav.objectives", perm: "portfolio.view" },
+  { to: "/budget",     icon: DollarSign,       label: "Budget",         tKey: "nav.budget",     perm: "budget.view" },
+  { to: "/teams",      icon: UsersRound,       label: "Équipes",        tKey: "nav.teams",      perm: "teams.view" },
   {
     to: "/resources",
     icon: Users,
     label: "Ressources",
+    tKey: "nav.resources",
     perm: ["resources.view", "resources.edit", "resources.create"],
   },
-  { to: "/governance", icon: ShieldCheck,  label: "Gouvernance",  perm: "governance.view" },
+  { to: "/governance", icon: ShieldCheck,  label: "Gouvernance",  tKey: "nav.governance", perm: "governance.view" },
+  {
+    to: "/validations",
+    icon: ClipboardCheck,
+    label: "Validations",
+    tKey: "nav.validations",
+    perm: ["lifecycle.request", "lifecycle.review_architecture", "lifecycle.review_security", "lifecycle.review_pmo", "lifecycle.decide"],
+  },
 ];
 
 const MODULE_NAV = [
-  { to: "/roadmap",    icon: Map,         label: "Roadmap",    perm: "roadmap.view",    mod: "roadmap" },
-  { to: "/scope",      icon: Target,      label: "Scope",      perm: ["scope.arbitrate", "scope.freeze", "scope.receive"], mod: null },
-  { to: "/arbitrage",  icon: TrendingUp,  label: "Arbitrage",  perm: ["arbitrage.view", "arbitrage.edit", "arbitrage.simulate"], mod: null },
-  { to: "/conformite", icon: ShieldAlert, label: "Conformité", perm: "compliance.view", mod: "compliance" },
+  { to: "/roadmap",    icon: Map,         label: "Roadmap",    tKey: "nav.roadmap",    perm: "roadmap.view",    mod: "roadmap" },
+  { to: "/scope",      icon: Target,      label: "Scope",      tKey: "nav.scope",      perm: ["scope.arbitrate", "scope.freeze", "scope.receive"], mod: null },
+  { to: "/arbitrage",  icon: TrendingUp,  label: "Arbitrage",  tKey: "nav.arbitrage",  perm: ["arbitrage.view", "arbitrage.edit", "arbitrage.simulate"], mod: null },
+  { to: "/conformite", icon: ShieldAlert, label: "Conformité", tKey: "nav.compliance", perm: "compliance.view", mod: "compliance" },
   {
     to: "/demands",
     icon: Inbox,
     label: "Demandes",
+    tKey: "nav.demands",
     perm: ["demands.view_own", "demands.submit", "demands.qualify"],
     mod: "demands",
   },
@@ -86,6 +99,7 @@ const MODULE_NAV = [
     to: "/timesheets",
     icon: Clock,
     label: "Timesheets",
+    tKey: "nav.timesheets",
     perm: ["timesheets.submit", "timesheets.validate_step2", "timesheets.validate_step3", "timesheets.view_all"],
     mod: "timesheets",
   },
@@ -95,9 +109,18 @@ export default function Layout() {
   const { user, logout } = useAuth();
   const { isModuleEnabled } = useTenantConfig();
   const { hasPermission, hasAnyPermission, canAccessNav } = usePermissions();
+  const { t, i18n } = useTranslation();
   const navigate = useNavigate();
   const [alertCount, setAlertCount]     = useState(0);
   const [pendingCount, setPendingCount] = useState(0);
+  const [theme, setTheme] = useState(() => localStorage.getItem("marcel_theme") || "light");
+
+  useEffect(() => {
+    document.documentElement.classList.toggle("dark", theme === "dark");
+    localStorage.setItem("marcel_theme", theme);
+  }, [theme]);
+
+  const toggleLang = () => i18n.changeLanguage(i18n.language?.startsWith("en") ? "fr" : "en");
 
   useEffect(() => {
     teamsAPI.capacityAlerts().then((r) => {
@@ -124,48 +147,48 @@ export default function Layout() {
   const agentItems = [];
   if (hasPermission("agent.chat") || hasPermission("agent.recommend") || hasPermission("*")) {
     if (hasPermission("agent.recommend") || hasPermission("*"))
-      agentItems.push({ to: "/agent/recommandations", icon: Lightbulb, label: "Recommandations" });
+      agentItems.push({ to: "/agent/recommandations", icon: Lightbulb, label: "Recommandations", tKey: "nav.recommendations" });
     if (hasPermission("agent.alerts") || hasPermission("agent.chat") || hasPermission("*"))
-      agentItems.push({ to: "/agent/alertes", icon: Bell, label: "Mes alertes" });
+      agentItems.push({ to: "/agent/alertes", icon: Bell, label: "Mes alertes", tKey: "nav.my_alerts" });
   }
   const dsiItems = (hasPermission("portfolio.view") || hasPermission("*"))
     ? [
-        { to: "/applications", icon: AppWindow, label: "Applications" },
-        { to: "/run", icon: ServerCog, label: "Run & Exploitation" },
-        { to: "/securite", icon: ShieldHalf, label: "Sécurité" },
-        { to: "/architecture", icon: Network, label: "Architecture" },
+        { to: "/applications", icon: AppWindow, label: "Applications", tKey: "nav.applications" },
+        { to: "/run", icon: ServerCog, label: "Run & Exploitation", tKey: "nav.run" },
+        { to: "/securite", icon: ShieldHalf, label: "Sécurité", tKey: "nav.security" },
+        { to: "/architecture", icon: Network, label: "Architecture", tKey: "nav.architecture" },
       ] : [];
   const safeItems = canAccessNav("trains.view", "safe")
     ? [
-        { to: "/safe/trains", icon: Train, label: "Trains SAFe" },
-        { to: "/pb", icon: HandCoins, label: "Budget participatif" },
+        { to: "/safe/trains", icon: Train, label: "Trains SAFe", tKey: "nav.safe_trains" },
+        { to: "/pb", icon: HandCoins, label: "Budget participatif", tKey: "nav.pb" },
       ] : [];
   const vendorItems = canAccessNav("vendors.view", "vendors")
-    ? [{ to: "/vendors", icon: Handshake, label: "Suivi Fournisseurs" }] : [];
+    ? [{ to: "/vendors", icon: Handshake, label: "Suivi Fournisseurs", tKey: "nav.vendors" }] : [];
   const toolItems = hasPermission("import.csv")
-    ? [{ to: "/import", icon: Upload, label: "Import CSV" }] : [];
+    ? [{ to: "/import", icon: Upload, label: "Import CSV", tKey: "nav.import_csv" }] : [];
   const adminItems = [];
   if (hasAnyPermission("admin.profiles", "admin.users", "admin.config", "*")) {
-    if (hasPermission("admin.profiles")) adminItems.push({ to: "/admin/profiles", icon: Shield, label: "Profils", tid: "nav-admin-profils" });
-    if (hasPermission("admin.users")) adminItems.push({ to: "/admin/users", icon: Settings, label: "Utilisateurs", tid: "nav-admin-utilisateurs" });
-    if (hasPermission("admin.config")) adminItems.push({ to: "/admin/config", icon: Wrench, label: "Configuration", tid: "nav-admin-configuration" });
-    if (hasPermission("admin.config")) adminItems.push({ to: "/admin/connectors", icon: Plug, label: "Connecteurs", tid: "nav-admin-connectors" });
-    if (hasPermission("admin.config") || hasPermission("*")) adminItems.push({ to: "/admin/agent-analytics", icon: BarChart2, label: "Analytics IA", tid: "nav-admin-agent-analytics" });
-    if (hasPermission("admin.config") || hasPermission("*")) adminItems.push({ to: "/admin/powerbi", icon: Database, label: "Power BI", tid: "nav-admin-powerbi" });
-    if (hasPermission("admin.templates") || hasPermission("*")) adminItems.push({ to: "/admin/templates", icon: Layers, label: "Templates", tid: "nav-admin-templates" });
-    if (hasPermission("admin.config") || hasPermission("*")) adminItems.push({ to: "/admin/monitoring", icon: Activity, label: "Monitoring", tid: "nav-admin-monitoring" });
-    if (hasPermission("admin.config") || hasPermission("*")) adminItems.push({ to: "/admin/audit", icon: History, label: "Journal d'audit", tid: "nav-admin-audit" });
+    if (hasPermission("admin.profiles")) adminItems.push({ to: "/admin/profiles", icon: Shield, label: "Profils", tKey: "nav.profiles", tid: "nav-admin-profils" });
+    if (hasPermission("admin.users")) adminItems.push({ to: "/admin/users", icon: Settings, label: "Utilisateurs", tKey: "nav.users", tid: "nav-admin-utilisateurs" });
+    if (hasPermission("admin.config")) adminItems.push({ to: "/admin/config", icon: Wrench, label: "Configuration", tKey: "nav.configuration", tid: "nav-admin-configuration" });
+    if (hasPermission("admin.config")) adminItems.push({ to: "/admin/connectors", icon: Plug, label: "Connecteurs", tKey: "nav.connectors", tid: "nav-admin-connectors" });
+    if (hasPermission("admin.config") || hasPermission("*")) adminItems.push({ to: "/admin/agent-analytics", icon: BarChart2, label: "Analytics IA", tKey: "nav.agent_analytics", tid: "nav-admin-agent-analytics" });
+    if (hasPermission("admin.config") || hasPermission("*")) adminItems.push({ to: "/admin/powerbi", icon: Database, label: "Power BI", tKey: "nav.powerbi", tid: "nav-admin-powerbi" });
+    if (hasPermission("admin.templates") || hasPermission("*")) adminItems.push({ to: "/admin/templates", icon: Layers, label: "Templates", tKey: "nav.templates", tid: "nav-admin-templates" });
+    if (hasPermission("admin.config") || hasPermission("*")) adminItems.push({ to: "/admin/monitoring", icon: Activity, label: "Monitoring", tKey: "nav.monitoring", tid: "nav-admin-monitoring" });
+    if (hasPermission("admin.config") || hasPermission("*")) adminItems.push({ to: "/admin/audit", icon: History, label: "Journal d'audit", tKey: "nav.audit_log", tid: "nav-admin-audit" });
   }
 
   const sections = [
-    { title: "Pilotage", items: visibleMain },
-    { title: "Modules", items: visibleModules },
-    { title: "DSI", items: dsiItems },
-    { title: "Agent IA", items: agentItems },
-    { title: "SAFe", items: safeItems },
-    { title: "Achats / Finances", items: vendorItems },
-    { title: "Outils", items: toolItems },
-    { title: "Administration", items: adminItems },
+    { title: t("sections.pilotage"), items: visibleMain },
+    { title: t("sections.modules"), items: visibleModules },
+    { title: t("sections.dsi"), items: dsiItems },
+    { title: t("sections.agent"), items: agentItems },
+    { title: t("sections.safe"), items: safeItems },
+    { title: t("sections.finance"), items: vendorItems },
+    { title: t("sections.tools"), items: toolItems },
+    { title: t("sections.admin"), items: adminItems },
   ].filter((s) => s.items.length > 0);
 
   const profileLabel = user?.profile_name || user?.role || "";
@@ -193,8 +216,9 @@ export default function Layout() {
   };
 
   // ── Item du rail (icône + libellé visible à l'expansion) ──
-  const RailItem = ({ to, icon: Icon, label, tid, isDrawer }) => {
+  const RailItem = ({ to, icon: Icon, label, tKey, tid, isDrawer }) => {
     const badge = badgeFor(label);
+    const display = tKey ? t(tKey, label) : label;
     return (
       <NavLink
         key={to}
@@ -203,7 +227,7 @@ export default function Layout() {
         className={({ isActive }) =>
           `rail-item ${isActive ? "rail-item-active" : ""} ${isDrawer ? "px-3 py-2" : "px-[9px] py-2"}`
         }
-        title={label}
+        title={display}
       >
         <span className="relative flex-shrink-0 flex items-center justify-center w-[22px]">
           <Icon size={17} strokeWidth={1.75} />
@@ -211,7 +235,7 @@ export default function Layout() {
             <span className={`absolute -top-1.5 -right-1.5 w-2 h-2 rounded-full ${badge.cls} ${isDrawer ? "hidden" : "group-hover:hidden"}`} />
           )}
         </span>
-        <span className={`flex-1 whitespace-nowrap overflow-hidden ${isDrawer ? "block" : "hidden group-hover:block"}`}>{label}</span>
+        <span className={`flex-1 whitespace-nowrap overflow-hidden ${isDrawer ? "block" : "hidden group-hover:block"}`}>{display}</span>
         {badge && (
           <span
             className={`ml-auto flex-shrink-0 min-w-[18px] h-[18px] items-center justify-center rounded-full ${badge.cls} text-white text-[10px] font-bold px-1 ${isDrawer ? "flex" : "hidden group-hover:flex"}`}
@@ -281,7 +305,7 @@ export default function Layout() {
           title="Déconnexion"
         >
           <span className="flex-shrink-0 flex items-center justify-center w-[22px]"><LogOut size={16} strokeWidth={1.75} /></span>
-          <span className={`whitespace-nowrap overflow-hidden ${isDrawer ? "block" : "hidden group-hover:block"}`}>Déconnexion</span>
+          <span className={`whitespace-nowrap overflow-hidden ${isDrawer ? "block" : "hidden group-hover:block"}`}>{t("auth.logout", "Déconnexion")}</span>
         </button>
       </div>
     </>
@@ -319,7 +343,22 @@ export default function Layout() {
         <GlobalSearch />
 
         <div className="ml-auto flex items-center gap-2 flex-shrink-0">
-          {/* sélecteur de langue retiré */}
+          <button
+            onClick={toggleLang}
+            data-testid="lang-toggle-btn"
+            title={i18n.language?.startsWith("en") ? "Passer en français" : "Switch to English"}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold text-[#5d5a75] hover:bg-[#f0eefc] transition-colors"
+          >
+            {i18n.language?.startsWith("en") ? "EN" : "FR"}
+          </button>
+          <button
+            onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+            data-testid="theme-toggle-btn"
+            title={theme === "dark" ? t("theme.light", "Mode clair") : t("theme.dark", "Mode sombre")}
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#5d5a75] hover:bg-[#f0eefc] transition-colors"
+          >
+            {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
+          </button>
           <NotificationBell />
           <span
             className="text-[11px] font-mono-data text-[#5d5a75] bg-[#f0eefc] px-2 py-0.5 rounded-lg hidden md:block"
@@ -377,6 +416,7 @@ export default function Layout() {
 
       {/* Agent IA PMO — Drawer flottant */}
       <AgentDrawer />
+      <OnboardingTour />
     </div>
   );
 }

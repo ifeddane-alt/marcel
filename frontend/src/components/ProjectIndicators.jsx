@@ -4,7 +4,9 @@ import { indicatorsAPI } from "@/api";
 import { toast } from "sonner";
 import { formatEuro } from "@/utils/format";
 
-export const cpiColor = (v) => (v == null ? "text-zinc-300" : v >= 0.95 ? "text-emerald-600" : v >= 0.85 ? "text-amber-600" : "text-rose-600");
+export const makeCpiColor = (amber = 0.95, red = 0.85) => (v) =>
+  v == null ? "text-zinc-300" : v >= amber ? "text-emerald-600" : v >= red ? "text-amber-600" : "text-rose-600";
+export const cpiColor = makeCpiColor();
 const pctColor = (v) => (v == null ? "text-zinc-300" : v >= 90 ? "text-emerald-600" : v >= 70 ? "text-amber-600" : "text-rose-600");
 
 function Stat({ label, value, sub, accent, testId }) {
@@ -118,10 +120,16 @@ function SprintsTable({ projectId, canWrite, onChanged }) {
 
 export default function ProjectIndicators({ projectId, canWrite }) {
   const [data, setData] = useState(null);
+  const [th, setTh] = useState({ cpi_amber: 0.95, cpi_red: 0.85, spi_amber: 0.95, spi_red: 0.85 });
   const load = useCallback(() => {
     indicatorsAPI.project(projectId).then((r) => setData(r.data)).catch(() => setData(false));
   }, [projectId]);
   useEffect(() => { load(); }, [load]);
+  useEffect(() => {
+    import("@/api").then(({ thresholdsAPI }) => thresholdsAPI.get().then((r) => setTh(r.data)).catch(() => {}));
+  }, []);
+  const cpiC = makeCpiColor(th.cpi_amber, th.cpi_red);
+  const spiC = makeCpiColor(th.spi_amber, th.spi_red);
 
   if (data === null) return <div className="p-6 text-sm text-zinc-400">Calcul des indicateurs…</div>;
   if (data === false) return <div className="p-6 text-sm text-zinc-400">Indicateurs indisponibles.</div>;
@@ -154,10 +162,10 @@ export default function ProjectIndicators({ projectId, canWrite }) {
       {evm && (
         <Block title="Earned Value Management (EVM)" badge="Waterfall" testId="indicators-evm">
           <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
-            <Stat label="CPI (efficience coût)" value={evm.cpi ?? "—"} accent={cpiColor(evm.cpi)}
-              sub="≥ 0,95 sain · < 0,85 alerte" testId="ind-cpi" />
-            <Stat label="SPI (efficience délai)" value={evm.spi ?? "—"} accent={cpiColor(evm.spi)}
-              sub="≥ 0,95 sain · < 0,85 alerte" testId="ind-spi" />
+            <Stat label="CPI (efficience coût)" value={evm.cpi ?? "—"} accent={cpiC(evm.cpi)}
+              sub={`≥ ${th.cpi_amber} sain · < ${th.cpi_red} alerte`} testId="ind-cpi" />
+            <Stat label="SPI (efficience délai)" value={evm.spi ?? "—"} accent={spiC(evm.spi)}
+              sub={`≥ ${th.spi_amber} sain · < ${th.spi_red} alerte`} testId="ind-spi" />
             <Stat label="EAC (EVM)" value={evm.eac_evm != null ? formatEuro(evm.eac_evm) : "—"}
               sub={`BAC : ${formatEuro(evm.bac)}`}
               accent={evm.eac_evm > evm.bac ? "text-rose-600" : "text-zinc-950"} testId="ind-eac" />

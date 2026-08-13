@@ -9,6 +9,7 @@ import KpiTile from "@/components/KpiTile";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import CapacityHeatmap from "@/components/CapacityHeatmap";
 import ExcelToolbar from "@/components/ExcelToolbar";
+import { skillsAPI } from "@/api";
 
 const TYPE_CONFIG = {
   interne:         { label: "INTERNE",  Icon: User,      bg: "bg-blue-50",   text: "text-blue-700",   border: "border-blue-200" },
@@ -97,6 +98,7 @@ export default function Resources() {
         {[
           { id: "resources", label: "Annuaire ressources" },
           { id: "referentiel", label: "Référentiel", icon: FileText },
+          { id: "competences", label: "Compétences", icon: User },
           { id: "heatmap", label: "Heatmap capacités", icon: BarChart3 },
         ].map(({ id, label, icon: Icon }) => (
           <button
@@ -317,6 +319,8 @@ export default function Resources() {
         </div>
       )}
 
+      {activeTab === "competences" && <SkillsTab />}
+
       {activeTab === "heatmap" && (
         <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-5" data-testid="heatmap-section">
           <div className="mb-4">
@@ -338,6 +342,57 @@ export default function Resources() {
         title="Supprimer la ressource"
         message={`Supprimer "${confirmDelete?.name}" ? Cette action est irréversible.`}
       />
+    </div>
+  );
+}
+
+function SkillsTab() {
+  const navigate = useNavigate();
+  const [skills, setSkills] = React.useState(null);
+  React.useEffect(() => {
+    skillsAPI.referential().then((r) => setSkills(r.data)).catch(() => setSkills([]));
+  }, []);
+  if (skills === null) return <div className="p-6 text-sm text-zinc-400">Chargement des compétences…</div>;
+  if (skills.length === 0)
+    return (
+      <div className="bg-white border border-[#e8e6f0] rounded-xl p-10 text-center text-sm text-zinc-400" data-testid="skills-empty">
+        Aucune compétence saisie — ajoutez des compétences aux ressources depuis leur fiche (bouton Modifier).
+      </div>
+    );
+  return (
+    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto" data-testid="skills-table">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+            {["Compétence", "Ressources", "Niveau moyen", "Qui ?"].map((h) => (
+              <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {skills.map((s) => (
+            <tr key={s.name} className="border-b border-zinc-100" data-testid={`skill-row-${s.name}`}>
+              <td className="px-4 py-2.5 font-semibold text-zinc-800">{s.name}</td>
+              <td className="px-4 py-2.5 font-mono-data font-bold">{s.count}</td>
+              <td className="px-4 py-2.5">
+                <span className="font-mono-data text-xs font-bold text-[#352c6e]">{s.avg_level}</span>
+                <span className="text-[10px] text-zinc-400"> / 5</span>
+              </td>
+              <td className="px-4 py-2.5">
+                <div className="flex flex-wrap gap-1.5">
+                  {s.resources.map((r) => (
+                    <button key={r.resource_id} onClick={() => navigate(`/resources/${r.resource_id}`)}
+                      data-testid={`skill-resource-${r.resource_id}`}
+                      className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#f0eefc] text-[#352c6e] hover:bg-[#e0dcf5]">
+                      {r.resource_name} · niv. {r.level}
+                    </button>
+                  ))}
+                </div>
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

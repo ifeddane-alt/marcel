@@ -28,6 +28,8 @@ import BenefitsSection from "@/components/BenefitsSection";
 import WorkAllocationModal from "@/components/WorkAllocationModal";
 import ProjectGantt from "@/components/ProjectGantt";
 import ProjectIndicators from "@/components/ProjectIndicators";
+import { LifecycleTab } from "@/components/LifecycleTab";
+import { CustomFieldsPanel } from "@/components/CustomFieldsPanel";
 import { Ring, elapsedPct, clamp } from "@/components/ProjectTile";
 import { formatEuro, formatDate, formatJH } from "@/utils/format";
 
@@ -422,6 +424,7 @@ export default function ProjectDetail() {
           { id: "decisions", label: "Décisions", count: decisions.length },
           { id: "equipe", label: "Équipe", count: workAllocations.length + allocations.length },
           { id: "pilotage", label: "Pilotage" },
+          { id: "cycle", label: "Cycle de vie" },
           { id: "benefices", label: "Business case" },
           ...(scopeSnapshots.length > 0 ? [{ id: "scope", label: "Scope", count: scopeSnapshots.length }] : []),
         ].map((t) => (
@@ -1756,6 +1759,12 @@ export default function ProjectDetail() {
           </div>
         )}
 
+        {activeTab === "cycle" && (
+          <div className="col-span-12">
+            <LifecycleTab projectId={id} />
+          </div>
+        )}
+
         {activeTab === "benefices" && (
           <div className="col-span-12">
             <BenefitsSection projectId={id} budgetTotal={project.budget_total} canWrite={canWrite} />
@@ -1763,6 +1772,7 @@ export default function ProjectDetail() {
         )}
 
         <div className={`col-span-1 lg:col-span-4 space-y-4 ${activeTab === "apercu" ? "" : "hidden"}`}>
+          <CustomFieldsPanel project={project} canWrite={canWrite} />
           <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-5">
             <div className="font-heading text-[13px] font-bold text-[#26243a] mb-4">
               Informations projet

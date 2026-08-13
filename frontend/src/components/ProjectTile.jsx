@@ -71,6 +71,8 @@ export default function ProjectTile({
   canEdit,
   canDelete,
   selectable = true,
+  favorite = false,
+  onToggleFavorite,
 }) {
   const style = p.status === "en_preparation" ? PREP_STYLE : (RAG_STYLES[p.status_rag] || RAG_STYLES.green);
   const progress = elapsedPct(p.start_date, p.end_date_forecast);
@@ -89,6 +91,20 @@ export default function ProjectTile({
       >
         {style.label}
       </span>
+      {onToggleFavorite && (
+        <button
+          onClick={() => onToggleFavorite(p.project_id)}
+          data-testid={`tile-favorite-${p.project_id}`}
+          title={favorite ? "Retirer des favoris" : "Ajouter aux favoris"}
+          className={`absolute -top-2.5 left-3 z-10 w-6 h-6 rounded-full flex items-center justify-center border shadow-sm transition-colors ${
+            favorite ? "bg-amber-400 border-amber-400 text-white" : "bg-white border-[#e0dcf0] text-[#c5c1d8] hover:text-amber-400"
+          }`}
+        >
+          <svg width="12" height="12" viewBox="0 0 24 24" fill={favorite ? "currentColor" : "none"} stroke="currentColor" strokeWidth="2">
+            <polygon points="12 2 15.09 8.26 22 9.27 17 14.14 18.18 21.02 12 17.77 5.82 21.02 7 14.14 2 9.27 8.91 8.26 12 2" />
+          </svg>
+        </button>
+      )}
 
       {/* En-tête teinté */}
       <div className={`${style.head} rounded-t-xl px-4 pt-3 pb-2.5`}>

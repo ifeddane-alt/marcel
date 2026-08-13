@@ -38,6 +38,7 @@ function Field({ label, required, error, hint, children }) {
 
 export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
   const [form, setForm] = useState(EMPTY);
+  const [skills, setSkills] = useState([]);
   const [teams, setTeams] = useState([]);
   const [allResources, setAllResources] = useState([]);
   const [errors, setErrors] = useState({});
@@ -72,6 +73,7 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
     } else {
       setForm(EMPTY);
     }
+    setSkills(resource?.skills || []);
     setErrors({}); setApiError("");
   }, [isOpen, resource]);
 
@@ -128,6 +130,8 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
         contract_end:          form.contract_end || null,
         entry_date:            form.entry_date || null,
         contract_ref:          form.contract_ref || null,
+        skills:                skills.filter((s) => (s.name || "").trim())
+                                     .map((s) => ({ name: s.name.trim(), level: Number(s.level) || 1 })),
       };
       if (resource) {
         await resourcesAPI.update(resource.resource_id, payload);
@@ -329,6 +333,31 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
             </div>
           </div>
         )}
+
+        <div className="border border-zinc-100 rounded-lg p-3">
+          <div className="flex items-center justify-between mb-2">
+            <span className="text-xs font-semibold text-zinc-600">Compétences</span>
+            <button type="button" onClick={() => setSkills((s) => [...s, { name: "", level: 3 }])}
+              data-testid="resource-skill-add-btn"
+              className="text-[11px] font-semibold text-blue-600 hover:underline">+ Ajouter</button>
+          </div>
+          {skills.length === 0 && <p className="text-[11px] text-zinc-400">Aucune compétence renseignée.</p>}
+          <div className="space-y-2">
+            {skills.map((s, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <input value={s.name} onChange={(e) => setSkills((arr) => arr.map((x, j) => j === i ? { ...x, name: e.target.value } : x))}
+                  placeholder="Ex : React, SAP FI, Cybersécurité…" data-testid={`resource-skill-name-${i}`}
+                  className={`${INPUT_CLS} flex-1`} />
+                <select value={s.level} onChange={(e) => setSkills((arr) => arr.map((x, j) => j === i ? { ...x, level: e.target.value } : x))}
+                  data-testid={`resource-skill-level-${i}`} className={`${INPUT_CLS} w-32`}>
+                  {[1, 2, 3, 4, 5].map((l) => <option key={l} value={l}>Niveau {l}</option>)}
+                </select>
+                <button type="button" onClick={() => setSkills((arr) => arr.filter((_, j) => j !== i))}
+                  className="p-1 text-zinc-300 hover:text-rose-500" data-testid={`resource-skill-remove-${i}`}>✕</button>
+              </div>
+            ))}
+          </div>
+        </div>
 
         <div className="flex justify-end gap-3 pt-2 border-t border-zinc-100">
           <button type="button" onClick={onClose}

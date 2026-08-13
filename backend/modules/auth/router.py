@@ -59,6 +59,13 @@ async def login(req: LoginRequest, request: Request):
         logger.warning("[auth] Tentative échouée (mauvais mdp): %s depuis %s", req.email, client_ip)
         raise HTTPException(status_code=401, detail="Identifiants invalides")
 
+    if user.get("mfa_enabled"):
+        ticket = create_token({
+            "tenant_id": user["tenant_id"], "user_id": user["user_id"],
+            "email": user["email"], "type": "mfa",
+        })
+        return {"mfa_required": True, "mfa_ticket": ticket}
+
     # Charger les permissions et le nom du profil
     permissions, profile_name = await _load_profile_data(user)
 

@@ -72,6 +72,12 @@ ALL_PERMISSIONS = [
     # Gouvernance
     {"key": "governance.view",             "label": "Voir la gouvernance",            "module": "Gouvernance"},
     {"key": "governance.edit",             "label": "Modifier la gouvernance",        "module": "Gouvernance"},
+    # Cycle de vie
+    {"key": "lifecycle.request",             "label": "Demander un passage de phase",       "module": "Cycle de vie"},
+    {"key": "lifecycle.review_architecture", "label": "Valider les livrables Architecture", "module": "Cycle de vie"},
+    {"key": "lifecycle.review_security",     "label": "Valider les livrables Sécurité",     "module": "Cycle de vie"},
+    {"key": "lifecycle.review_pmo",          "label": "Valider les livrables PMO / métier", "module": "Cycle de vie"},
+    {"key": "lifecycle.decide",              "label": "Prononcer le Go / No-Go de passage", "module": "Cycle de vie"},
     # Conformité
     {"key": "compliance.view",             "label": "Voir la conformité",             "module": "Conformité"},
     # Demandes
@@ -130,7 +136,7 @@ DEFAULT_PROFILES = [
             "risks.view", "decisions.view", "governance.view", "compliance.view",
             "demands.view_own", "trains.view", "scope.receive", "scope.simulate",
             "vendors.view", "vendors.view_contracts",
-            "arbitrage.view",
+            "arbitrage.view", "lifecycle.decide",
             "agent.chat", "agent.recommend", "agent.alerts",
             "export.powerbi",
         ],
@@ -156,6 +162,7 @@ DEFAULT_PROFILES = [
             "scope.freeze", "scope.transmit", "scope.receive", "scope.simulate", "vendors.view",
             "vendors.view_contracts", "import.csv",
             "arbitrage.view", "arbitrage.edit", "arbitrage.simulate",
+            "lifecycle.request", "lifecycle.review_pmo", "lifecycle.decide",
             "agent.chat", "agent.recommend", "agent.alerts",
             "export.powerbi",
         ],
@@ -175,7 +182,7 @@ DEFAULT_PROFILES = [
             "risks.create", "risks.view", "decisions.create", "decisions.view",
             "governance.view", "compliance.view", "demands.submit", "demands.view_own",
             "capabilities.create", "scope.receive", "vendors.view",
-            "arbitrage.view",
+            "arbitrage.view", "lifecycle.request",
         ],
     },
     {
@@ -203,6 +210,7 @@ DEFAULT_PROFILES = [
             "risks.create", "risks.view", "decisions.create", "decisions.view",
             "compliance.view", "demands.submit", "demands.view_own", "trains.create",
             "trains.edit", "trains.view", "capabilities.create", "scope.receive",
+            "lifecycle.request",
         ],
     },
     {
@@ -215,6 +223,7 @@ DEFAULT_PROFILES = [
             "teams.view", "budget.view", "raf.view", "timesheets.submit",
             "leaves.submit", "risks.create", "risks.view", "compliance.view",
             "demands.submit", "demands.view_own", "trains.view", "scope.receive",
+            "lifecycle.review_architecture",
         ],
     },
     {
@@ -225,7 +234,7 @@ DEFAULT_PROFILES = [
         "permissions": [
             "dashboard.view", "portfolio.view", "roadmap.view", "compliance.view",
             "risks.create", "risks.view", "governance.view", "demands.submit",
-            "demands.view_own",
+            "demands.view_own", "lifecycle.review_security",
         ],
     },
     {

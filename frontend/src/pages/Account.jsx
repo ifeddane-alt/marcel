@@ -1,8 +1,7 @@
 import React, { useState, useEffect } from "react";
 import { UserCircle, KeyRound, ShieldCheck, Building2, Mail, Calendar } from "lucide-react";
 import { authAPI } from "@/api";
-import { toast } from "sonner";
-import { formatDate } from "@/utils/format";
+import { toast } from "sonner";import { formatDate } from "@/utils/format";
 
 const ROLE_LABELS = {
   TENANT_ADMIN: "Administrateur",
@@ -126,6 +125,120 @@ export default function Account() {
           )}
         </div>
       </div>
+
+      <div className="mt-5">
+        <MfaSection />
+      </div>
+    </div>
+  );
+}
+
+function MfaSection() {
+  const [status, setStatus] = useState(null);
+  const [setup, setSetup] = useState(null);
+  const [code, setCode] = useState("");
+  const [backupCodes, setBackupCodes] = useState(null);
+  const [disableMode, setDisableMode] = useState(false);
+  const [err, setErr] = useState("");
+
+  const loadStatus = () => authAPI.mfaStatus().then((r) => setStatus(r.data)).catch(() => setStatus({ enabled: false, available: false }));
+  useEffect(() => { loadStatus(); }, []);
+
+  if (!status) return null;
+
+  const startSetup = async () => {
+    setErr("");
+    try { const r = await authAPI.mfaSetup(); setSetup(r.data); }
+    catch (e) { setErr(e.response?.data?.detail || "Erreur"); }
+  };
+  const confirmEnable = async (e) => {
+    e.preventDefault();
+    setErr("");
+    try {
+      const r = await authAPI.mfaEnable(code);
+      setBackupCodes(r.data.backup_codes);
+      setSetup(null); setCode("");
+      toast.success("Double authentification activée");
+      loadStatus();
+    } catch (e2) { setErr(e2.response?.data?.detail || "Code invalide"); }
+  };
+  const disable = async (e) => {
+    e.preventDefault();
+    setErr("");
+    try {
+      await authAPI.mfaDisable(code);
+      setDisableMode(false); setCode(""); setBackupCodes(null);
+      toast.success("Double authentification désactivée");
+      loadStatus();
+    } catch (e2) { setErr(e2.response?.data?.detail || "Code invalide"); }
+  };
+
+  const inputCls = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 font-mono-data tracking-widest focus:outline-none focus:border-blue-600";
+
+  return (
+    <div className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-6 max-w-2xl" data-testid="mfa-section">
+      <div className="flex items-center gap-2 mb-1">
+        <ShieldCheck size={15} className="text-blue-600" />
+        <h2 className="font-heading text-base font-bold text-zinc-950">Double authentification (MFA)</h2>
+        {status.enabled ? (
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" data-testid="mfa-status-badge">ACTIVÉE</span>
+        ) : (
+          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-zinc-100 text-zinc-500 border border-zinc-200" data-testid="mfa-status-badge">DÉSACTIVÉE</span>
+        )}
+      </div>
+      <p className="text-xs text-zinc-400 mb-4">Un code à 6 chiffres (Google Authenticator, Authy…) sera demandé à chaque connexion.</p>
+
+      {!status.available && <p className="text-sm text-zinc-500 bg-zinc-50 rounded-lg p-3">Non disponible pour les comptes SSO.</p>}
+
+      {status.available && !status.enabled && !setup && (
+        <button onClick={startSetup} data-testid="mfa-enable-btn"
+          className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">Activer le MFA</button>
+      )}
+
+      {setup && (
+        <form onSubmit={confirmEnable} className="space-y-3" data-testid="mfa-setup-form">
+          <p className="text-sm text-zinc-600">1. Scannez ce QR code avec votre application d'authentification :</p>
+          <img src={setup.qr} alt="QR code MFA" className="w-40 h-40 border border-zinc-100 rounded-lg" data-testid="mfa-qr" />
+          <p className="text-[11px] text-zinc-400 font-mono-data break-all">Clé manuelle : <span data-testid="mfa-secret">{setup.secret}</span></p>
+          <p className="text-sm text-zinc-600">2. Saisissez le code affiché pour confirmer :</p>
+          <div className="flex gap-2 max-w-xs">
+            <input value={code} onChange={(e) => setCode(e.target.value)} required placeholder="123456"
+              data-testid="mfa-confirm-code-input" className={inputCls} />
+            <button type="submit" data-testid="mfa-confirm-btn"
+              className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">Confirmer</button>
+            <button type="button" onClick={() => { setSetup(null); setCode(""); setErr(""); }} data-testid="mfa-cancel-btn"
+              className="px-3 py-2 text-sm font-semibold text-zinc-500 border border-zinc-200 rounded-lg hover:bg-zinc-50">Annuler</button>
+          </div>
+          {err && <p className="text-sm text-rose-600">{err}</p>}
+        </form>
+      )}
+
+      {backupCodes && (
+        <div className="mt-4 bg-amber-50 border border-amber-200 rounded-lg p-4" data-testid="mfa-backup-codes">
+          <p className="text-xs font-bold text-amber-800 mb-2">⚠️ Codes de secours — conservez-les précieusement, ils ne seront plus affichés :</p>
+          <div className="grid grid-cols-4 gap-1.5">
+            {backupCodes.map((c) => <span key={c} className="font-mono-data text-xs bg-white rounded px-2 py-1 text-center border border-amber-100">{c}</span>)}
+          </div>
+        </div>
+      )}
+
+      {status.enabled && (
+        <div className="space-y-3">
+          <p className="text-xs text-zinc-500">Codes de secours restants : <b className="font-mono-data">{status.backup_codes_left}</b></p>
+          {!disableMode ? (
+            <button onClick={() => setDisableMode(true)} data-testid="mfa-disable-btn"
+              className="px-4 py-2 text-sm font-semibold text-rose-600 border border-rose-200 rounded-lg hover:bg-rose-50">Désactiver le MFA</button>
+          ) : (
+            <form onSubmit={disable} className="flex gap-2 max-w-xs" data-testid="mfa-disable-form">
+              <input value={code} onChange={(e) => setCode(e.target.value)} required placeholder="Code TOTP ou secours"
+                data-testid="mfa-disable-code-input" className={inputCls} />
+              <button type="submit" data-testid="mfa-disable-confirm-btn"
+                className="px-3 py-2 text-sm font-semibold bg-rose-600 text-white rounded-lg hover:bg-rose-700">Désactiver</button>
+            </form>
+          )}
+          {err && <p className="text-sm text-rose-600">{err}</p>}
+        </div>
+      )}
     </div>
   );
 }

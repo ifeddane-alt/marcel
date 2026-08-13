@@ -16,6 +16,19 @@ async def next_project_code(program_id: str = None, current_user: TokenPayload =
     return {"code": await service.generate_project_code(current_user.tenant_id, program_id)}
 
 
+@router.get("/projects/custom-fields")
+async def get_custom_fields(current_user: TokenPayload = Depends(get_current_user)):
+    return await service.get_custom_field_defs(current_user.tenant_id)
+
+
+@router.put("/projects/custom-fields")
+async def set_custom_fields(
+    data: dict,
+    current_user: TokenPayload = Depends(permission_required("admin.config")),
+):
+    return await service.set_custom_field_defs(data.get("fields") or [], current_user)
+
+
 @router.get("/projects/{project_id}")
 async def get_project(project_id: str, current_user: TokenPayload = Depends(get_current_user)):
     return await service.get_project(project_id, current_user)

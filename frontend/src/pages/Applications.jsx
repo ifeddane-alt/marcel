@@ -95,6 +95,10 @@ export default function Applications() {
             className={`flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold rounded-lg transition-colors ${view === "time" ? "bg-blue-600 text-white" : "text-zinc-500 border border-zinc-200 hover:bg-zinc-50"}`}>
             <Grid3X3 size={11} /> Matrice TIME
           </button>
+          <button onClick={() => setView("capacites")} data-testid="apm-view-capacites-btn"
+            className={`flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold rounded-lg transition-colors ${view === "capacites" ? "bg-blue-600 text-white" : "text-zinc-500 border border-zinc-200 hover:bg-zinc-50"}`}>
+            <AppWindow size={11} /> Capacités métiers
+          </button>
         </div>
         <div className="relative ml-auto">
           <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400" />
@@ -108,7 +112,7 @@ export default function Applications() {
         </select>
       </div>
 
-      {view === "liste" ? (
+      {view === "capacites" ? <CapacitiesView apps={apps} navigate={navigate} /> : view === "liste" ? (
         <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto">
           {filtered.length === 0 ? (
             <div className="px-5 py-12 text-sm text-zinc-400 text-center" data-testid="apm-empty">
@@ -214,6 +218,68 @@ export default function Applications() {
       )}
 
       {modalOpen && <ApplicationModal onClose={() => setModalOpen(false)} onSave={handleCreate} />}
+    </div>
+  );
+}
+
+function CapacitiesView({ apps, navigate }) {
+  const agg = {};
+  apps.forEach((a) => {
+    (a.business_capabilities || []).forEach((c) => {
+      const name = (c || "").trim();
+      if (!name) return;
+      const k = name.toLowerCase();
+      if (!agg[k]) agg[k] = { name, apps: [], tco: 0 };
+      agg[k].apps.push(a);
+      agg[k].tco += a.tco_annual || 0;
+    });
+  });
+  const caps = Object.values(agg).sort((a, b) => b.apps.length - a.apps.length);
+  if (caps.length === 0)
+    return (
+      <div className="bg-white border border-[#e8e6f0] rounded-xl p-10 text-center text-sm text-zinc-400" data-testid="capacities-empty">
+        Aucune capacité métier renseignée — ajoutez-les sur les fiches applications (champ « Capacités métiers »).
+      </div>
+    );
+  return (
+    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto" data-testid="capacities-table">
+      <table className="w-full text-sm">
+        <thead>
+          <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+            {["Capacité métier", "Applications", "TCO annuel cumulé", "Redondance"].map((h) => (
+              <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">{h}</th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          {caps.map((c) => (
+            <tr key={c.name} className="border-b border-zinc-100" data-testid={`capacity-row-${c.name}`}>
+              <td className="px-4 py-2.5 font-semibold text-zinc-800">{c.name}</td>
+              <td className="px-4 py-2.5">
+                <div className="flex flex-wrap gap-1.5">
+                  {c.apps.map((a) => (
+                    <button key={a.application_id} onClick={() => navigate(`/applications/${a.application_id}`)}
+                      data-testid={`capacity-app-${a.application_id}`}
+                      className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#e9effe] text-[#2e5fe8] hover:bg-[#d5e2fc]">
+                      {a.name}
+                    </button>
+                  ))}
+                </div>
+              </td>
+              <td className="px-4 py-2.5 font-mono-data text-xs font-bold">{formatEuro(c.tco)}</td>
+              <td className="px-4 py-2.5">
+                {c.apps.length > 1 ? (
+                  <span className="px-2 py-0.5 rounded-full text-[11px] font-semibold bg-amber-50 text-amber-700 border border-amber-200">
+                    {c.apps.length} apps — rationalisation possible
+                  </span>
+                ) : (
+                  <span className="text-[11px] text-zinc-400">—</span>
+                )}
+              </td>
+            </tr>
+          ))}
+        </tbody>
+      </table>
     </div>
   );
 }

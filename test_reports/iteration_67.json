@@ -1,0 +1,54 @@
+{
+  "summary": "Iteration 67 — E2E testing of Lot A (Cycle de vie/gates, Compétences, Champs personnalisés, Vues sauvegardées, Snapshots, Seuils, Capacités métiers, PB pondéré). Backend: 18/18 pytest passed (login all 5 profils, lifecycle referential/portfolio/my-reviews/project, viewer 403 on gate creation, skills seed, custom-fields def list + route ordering, saved views CRUD, snapshots, thresholds + viewer 403, applications business_capabilities seed, PB list). Frontend: all expected data-testids present and functional on the 5 profils (admin/pmo/archi/rssi/viewer). Gate request modal opens, portfolio des passages affiche 2 gates + 6 phase-counts, skills tab affiche 2 lignes, custom fields panel avec 3 inputs et save conditionnel, snapshots table + run-btn, capacities table (11 capacités, TCO cumulé, redondance badges), PB weighted toggle présent dans le modal 'Nouvelle session'. Saved views: create via window.prompt + apparition dans le select + suppression fonctionnent. Aucun bug bloquant.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [
+      {
+        "flow": "Modal 'Demander le passage' (LifecycleTab.jsx)",
+        "issue": "La spec mentionne des checkboxes deliverable-provided-* / deliverable-ref-* à cocher DANS le modal de création de gate, mais l'implémentation actuelle n'affiche dans le modal QUE la date cible et le comité (existant/nouveau). Les livrables/checkboxes/références apparaissent APRES création, sur la carte de gate. Cela reste fonctionnel mais diffère de la spec — à confirmer avec le PO si l'UX voulue est bien 'saisie des livrables post-création'.",
+        "affected_selectors": ["gate-request-modal", "deliverable-provided-*", "deliverable-ref-*"]
+      },
+      {
+        "flow": "/validations pour archi@altair.fr et rssi@altair.fr",
+        "issue": "Les deux comptes voient 'À valider (0)' — le gate historique 'Conception → Réalisation' de PRJ-001 a bien un livrable 'Dossier sécurité' en attente d'avis (Pentest manquant), mais rssi@altair.fr n'apparaît pas comme reviewer désigné (le seed pointe probablement vers 'Sam RSSI' via resource_id). Fonctionnellement OK (le endpoint /lifecycle/my-reviews répond 200 vide) mais empêche de tester le scénario 'archi ne peut PAS valider un livrable Sécurité (403)' via l'UI. À vérifier : soit rebrancher les livrables seed sur les emails archi@ / rssi@, soit créer une nouvelle demande de passage assignée à ces reviewers pour tester le 403.",
+        "affected_selectors": ["review-item-*", "review-valide-*", "review-refuse-*"]
+      }
+    ],
+    "design_issues": [
+      {
+        "screen": "Modal 'Demander le passage'",
+        "issues": ["Console React warning: 'In HTML, <span> cannot be a child of <option>' — le select gate-gov-select contient un enfant span (probablement une puce de statut). Non bloquant mais génère un warning d'hydration."]
+      },
+      {
+        "screen": "/pilotage tab Évolution",
+        "issues": ["Le testid pilotage-thresholds-note mentionné dans la spec est absent du DOM (0 occurrences) — soit non implémenté, soit rendu conditionnel. À vérifier."]
+      }
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iter67_lot_a.py",
+    "/app/test_reports/pytest/iter67_results.xml"
+  ],
+  "action_items": [
+    "Confirmer l'UX du modal de demande de passage : les livrables/references doivent-ils être saisis DANS le modal (comme dans la spec) ou APRES création sur la carte de gate (comme actuellement) ?",
+    "Rattacher les livrables Architecture / Sécurité du seed aux comptes archi@altair.fr et rssi@altair.fr (via resource_id) pour permettre le test E2E de la matrice de permissions cross-reviewer (archi tentant de valider un livrable Sécurité → 403).",
+    "Corriger le warning React 'span child of option' dans le select gate-gov-select (LifecycleTab.jsx) — retirer les puces/badges à l'intérieur des <option>.",
+    "Vérifier / implémenter le testid pilotage-thresholds-note sur /pilotage → onglet Évolution mensuelle (affichage des seuils courants)."
+  ],
+  "critical_code_review_comments": [
+    "LifecycleTab.jsx : le modal de création de gate ne permet pas de renseigner les livrables ni leurs références, alors que la spec (et le README fonctionnel) mentionne 'cocher les livrables fournis (deliverable-provided-*) avec référence (deliverable-ref-*)' dans ce modal. À aligner UX + spec.",
+    "Endpoint /api/views : renvoie 'view_id' (pas 'id') dans le POST — non conforme au style REST habituel du projet. Le front utilise déjà view_id donc c'est cohérent en interne mais mérite un alias 'id' pour homogénéité.",
+    "Le champ business_capabilities des applications est agrégé côté client (Applications.jsx L228) — pour un tenant à ~1000 applications ce ne passera plus à l'échelle. Prévoir un endpoint backend /api/applications/capacities agrégé."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iter67_lot_a.py"
+  ],
+  "success_rate": {"backend": "100% (18/18)", "frontend": "100% pour les data-testids critiques ; 2 discordances mineures spec vs implémentation (deliverables in modal, pilotage-thresholds-note)"},
+  "test_credentials": "admin@altair.fr / Admin2026! · pmo@altair.fr / Pmo1234! · archi@altair.fr / Archi2026! · rssi@altair.fr / Rssi2026! · viewer@altair.fr / View1234!",
+  "seed_data_creation": "Vue sauvegardée 'TEST_view_iter67' (pytest) et 'TEST_view_iter67_UI' (Playwright) créées puis SUPPRIMÉES via API DELETE. Un champ custom 'Sponsor métier' rempli avec 'Test sponsor iter67' sur PRJ-001 (à nettoyer manuellement si nécessaire — non impactant fonctionnellement).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Lot A entièrement fonctionnel côté API + UI. Les seuls points à valider avec le PO sont : (a) UX du modal de demande de gate (livrables dans le modal ou après), (b) rattachement des livrables archi/sécurité aux emails de test archi@ / rssi@ pour tester la matrice de permissions dans l'UI. Le test backend /app/backend/tests/test_iter67_lot_a.py couvre régression login + permissions viewer/lifecycle/thresholds + seed integrity et peut être ré-exécuté à chaque itération.",
+  "rca of the issue": "N/A — aucun bug bloquant. Deux discordances mineures spec ↔ implémentation à confirmer avec le PO (voir action_items)."
+}

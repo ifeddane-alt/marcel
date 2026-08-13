@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Search, Plus, Pencil, Trash2, Presentation, LayoutGrid, List } from "lucide-react";
-import { projectsAPI, programsAPI, resourcesAPI } from "@/api";
+import { projectsAPI, programsAPI, resourcesAPI, favoritesAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import RAGBadge, { MethodologyBadge, ProjectStatusBadge } from "@/components/RAGBadge";
@@ -11,6 +11,7 @@ import ConfirmDialog from "@/components/ConfirmDialog";
 import { formatEuro, formatDate } from "@/utils/format";
 import ExcelToolbar from "@/components/ExcelToolbar";
 import ProjectTile from "@/components/ProjectTile";
+import { SavedViews } from "@/components/SavedViews";
 
 const RAG_LABELS = { green: "Vert", orange: "Orange", red: "Rouge" };
 
@@ -46,6 +47,12 @@ export default function Portfolio() {
 
   // Selection state
   const [selectedProjects, setSelectedProjects] = useState(new Set());
+  const [favorites, setFavorites] = useState(new Set());
+  const [favoritesOnly, setFavoritesOnly] = useState(false);
+
+  useEffect(() => {
+    favoritesAPI.list().then((r) => setFavorites(new Set(r.data.favorites || []))).catch(() => {});
+  }, []);
   const [preGovernanceId, setPreGovernanceId] = useState(null);
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const selectAllRef = useRef(null);
@@ -101,15 +108,30 @@ export default function Portfolio() {
         (!filterRag || p.status_rag === filterRag) &&
         (!filterMethod || p.methodology === filterMethod) &&
         (!filterProgram || p.program_id === filterProgram) &&
-        (!filterStatus || p.status === filterStatus)
+        (!filterStatus || p.status === filterStatus) &&
+        (!favoritesOnly || favorites.has(p.project_id))
       );
     })
     .sort((a, b) => {
+      const fa = favorites.has(a.project_id) ? 0 : 1;
+      const fb = favorites.has(b.project_id) ? 0 : 1;
+      if (fa !== fb) return fa - fb;
       let av = a[sortKey] ?? ""; let bv = b[sortKey] ?? "";
       if (typeof av === "string") av = av.toLowerCase();
       if (typeof bv === "string") bv = bv.toLowerCase();
       return sortDir === "asc" ? (av < bv ? -1 : av > bv ? 1 : 0) : (av > bv ? -1 : av < bv ? 1 : 0);
     });
+
+  const toggleFavorite = async (pid) => {
+    try {
+      const r = await favoritesAPI.toggle(pid);
+      setFavorites((prev) => {
+        const next = new Set(prev);
+        if (r.data.favorite) next.add(pid); else next.delete(pid);
+        return next;
+      });
+    } catch { /* silencieux */ }
+  };
 
   const toggleSort = (key) => {
     if (sortKey === key) setSortDir((d) => (d === "asc" ? "desc" : "asc"));
@@ -229,6 +251,29 @@ export default function Portfolio() {
           <option value="cloture">Clôturé</option>
           <option value="archive">Archivé</option>
         </select>
+        <SavedViews
+          page="portfolio"
+          getFilters={() => ({ search, filterRag, filterMethod, filterProgram, filterStatus, sortKey, sortDir })}
+          onApply={(f) => {
+            setSearch(f.search || "");
+            setFilterRag(f.filterRag || "");
+            setFilterMethod(f.filterMethod || "");
+            setFilterProgram(f.filterProgram || "");
+            setFilterStatus(f.filterStatus || "");
+            if (f.sortKey) setSortKey(f.sortKey);
+            if (f.sortDir) setSortDir(f.sortDir);
+          }}
+        />
+        <button
+          onClick={() => setFavoritesOnly((v) => !v)}
+          data-testid="portfolio-filter-favorites"
+          title="Afficher uniquement mes favoris"
+          className={`flex items-center gap-1 px-3 py-2 text-sm rounded-lg border transition-colors ${
+            favoritesOnly ? "bg-amber-50 border-amber-300 text-amber-700 font-semibold" : "bg-white border-zinc-200 text-zinc-500 hover:bg-zinc-50"
+          }`}
+        >
+          ★ Favoris{favorites.size > 0 ? ` (${favorites.size})` : ""}
+        </button>
         {/* Bascule tuiles / liste */}
         <div className="ml-auto flex border border-[#dcd9ea] rounded-lg overflow-hidden bg-white">
           <button
@@ -264,6 +309,8 @@ export default function Portfolio() {
               onDelete={openDelete}
               canEdit={canEdit}
               canDelete={canDelete}
+              favorite={favorites.has(p.project_id)}
+              onToggleFavorite={toggleFavorite}
             />
           ))}
           {filtered.length === 0 && (

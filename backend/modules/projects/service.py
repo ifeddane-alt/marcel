@@ -447,3 +447,32 @@ async def get_raf(project_id: str, current_user: TokenPayload) -> dict:
         "consumed_cost_eur": round(consumed_cost, 2),
         "atterrissage_eur": atterrissage,
     }
+
+
+# ─── Champs personnalisés ────────────────────────────────────────────────────
+
+_CUSTOM_FIELD_TYPES = ("text", "number", "date", "select")
+
+
+async def get_custom_field_defs(tenant_id: str) -> list:
+    t = await db.tenants.find_one({"tenant_id": tenant_id}, {"_id": 0, "settings.custom_fields": 1})
+    return ((t or {}).get("settings") or {}).get("custom_fields") or []
+
+
+async def set_custom_field_defs(fields: list, user: TokenPayload) -> list:
+    clean = []
+    for f in fields or []:
+        label = (f.get("label") or "").strip()
+        if not label:
+            continue
+        ftype = f.get("type") if f.get("type") in _CUSTOM_FIELD_TYPES else "text"
+        clean.append({
+            "key": f.get("key") or str(uuid.uuid4())[:8],
+            "label": label,
+            "type": ftype,
+            "options": [o for o in (f.get("options") or []) if o] if ftype == "select" else [],
+        })
+    await db.tenants.update_one({"tenant_id": user.tenant_id}, {"$set": {"settings.custom_fields": clean}})
+    from core.audit import log_audit
+    await log_audit(user, "updated", "custom_fields", user.tenant_id, "Champs personnalisés projets")
+    return clean

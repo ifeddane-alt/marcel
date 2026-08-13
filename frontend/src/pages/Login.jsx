@@ -70,6 +70,8 @@ export default function Login() {
   };
 
   const [waking, setWaking] = useState(null);
+  const [mfaTicket, setMfaTicket] = useState(null);
+  const [mfaCode, setMfaCode] = useState("");
 
   const isWakingError = (err) =>
     !err.response || [502, 503, 504].includes(err.response.status);
@@ -83,6 +85,10 @@ export default function Login() {
       for (let attempt = 1; attempt <= MAX_TRIES; attempt++) {
         try {
           const res = await authAPI.login(email, password);
+          if (res.data.mfa_required) {
+            setMfaTicket(res.data.mfa_ticket);
+            return;
+          }
           login(res.data.access_token, { ...res.data.user, permissions: res.data.permissions || [] });
           navigate("/home");
           return;
@@ -102,6 +108,21 @@ export default function Login() {
       }
     } finally {
       setWaking(null);
+      setLoading(false);
+    }
+  };
+
+  const handleMfaSubmit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const res = await authAPI.mfaVerify(mfaTicket, mfaCode);
+      login(res.data.access_token, { ...res.data.user, permissions: res.data.permissions || [] });
+      navigate("/home");
+    } catch (err) {
+      setError(err.response?.data?.detail || "Code invalide");
+    } finally {
       setLoading(false);
     }
   };
@@ -151,6 +172,32 @@ export default function Login() {
           </div>
 
           <div className="bg-white rounded-2xl shadow-[0_24px_60px_-22px_rgba(53,44,110,0.35)] p-8 sm:p-9">
+            {mfaTicket ? (
+              <>
+                <h2 className="font-heading text-[#26243a] text-2xl font-bold mb-1">Vérification en deux étapes</h2>
+                <p className="text-[#75708c] text-sm mb-7">Saisissez le code de votre application d'authentification (ou un code de secours).</p>
+                <form onSubmit={handleMfaSubmit} className="space-y-4" data-testid="mfa-form">
+                  <input
+                    autoFocus
+                    value={mfaCode}
+                    onChange={(e) => setMfaCode(e.target.value)}
+                    required
+                    data-testid="mfa-code-input"
+                    placeholder="123 456"
+                    className="w-full h-11 bg-[#fbfaff] border-[1.5px] border-[#dcd7ea] rounded-[10px] px-3.5 text-lg font-mono-data tracking-widest text-center text-[#26243a] focus:outline-none focus:border-[#2e5fe8] focus:ring-2 focus:ring-[#2e5fe8]/20"
+                  />
+                  {error && <p className="text-sm text-rose-600 font-medium" data-testid="mfa-error">{error}</p>}
+                  <button type="submit" disabled={loading} data-testid="mfa-submit-btn"
+                    className="w-full h-11 bg-[#2e5fe8] text-white text-sm font-bold rounded-[10px] hover:bg-[#2450c8] transition-colors disabled:opacity-60">
+                    {loading ? "Vérification…" : "Valider"}
+                  </button>
+                  <button type="button" onClick={() => { setMfaTicket(null); setMfaCode(""); setError(""); }}
+                    data-testid="mfa-back-btn"
+                    className="w-full text-xs text-[#75708c] hover:text-[#26243a]">← Retour à la connexion</button>
+                </form>
+              </>
+            ) : (
+            <>
             <h2 className="font-heading text-[#26243a] text-2xl font-bold mb-1">Connexion</h2>
             <p className="text-[#75708c] text-sm mb-7">Accédez à votre espace de pilotage.</p>
 
@@ -257,6 +304,8 @@ export default function Login() {
                 </button>
               </div>
             </div>
+            </>
+            )}
           </div>
 
           {/* Comptes de démonstration */}

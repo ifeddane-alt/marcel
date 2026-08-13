@@ -34,6 +34,16 @@ export const authAPI = {
   changePassword: (data) => api.post("/auth/change-password", data),
   ssoProviders: (email) => api.get(`/auth/sso/providers?email=${encodeURIComponent(email)}`),
   ssoExchange: (code) => api.post("/auth/sso/exchange", { code }),
+  mfaStatus: () => api.get("/auth/mfa/status"),
+  mfaSetup: () => api.post("/auth/mfa/setup"),
+  mfaEnable: (code) => api.post("/auth/mfa/enable", { code }),
+  mfaDisable: (code) => api.post("/auth/mfa/disable", { code }),
+  mfaVerify: (ticket, code) => api.post("/auth/mfa/verify", { ticket, code }),
+};
+
+export const favoritesAPI = {
+  list: () => api.get("/favorites"),
+  toggle: (projectId) => api.post("/favorites/toggle", { project_id: projectId }),
 };
 
 export const homeAPI = {
@@ -121,6 +131,19 @@ export const governanceAPI = {
   update: (id, data) => api.put(`/governance/${id}`, data),
   delete: (id) => api.delete(`/governance/${id}`),
   invitationPdf: (id) => api.get(`/governance/${id}/invitation-pdf`, { responseType: "blob" }),
+};
+
+export const lifecycleAPI = {
+  referential: () => api.get("/lifecycle/referential"),
+  portfolio: () => api.get("/lifecycle/portfolio"),
+  myReviews: () => api.get("/lifecycle/my-reviews"),
+  project: (id) => api.get(`/projects/${id}/lifecycle`),
+  setPhase: (id, phase) => api.put(`/projects/${id}/lifecycle/phase`, { phase }),
+  requestGate: (id, data) => api.post(`/projects/${id}/lifecycle/gates`, data),
+  cancelGate: (gateId) => api.delete(`/lifecycle/gates/${gateId}`),
+  updateDeliverable: (gateId, key, data) => api.put(`/lifecycle/gates/${gateId}/deliverables/${key}`, data),
+  reviewDeliverable: (gateId, key, data) => api.post(`/lifecycle/gates/${gateId}/deliverables/${key}/review`, data),
+  decide: (gateId, data) => api.post(`/lifecycle/gates/${gateId}/decision`, data),
 };
 
 export const objectivesAPI = {
@@ -497,6 +520,31 @@ export const architectureAPI = {
   reviews:    archCrud("reviews"),
   radar:      archCrud("radar"),
   debt:       archCrud("debt"),
+};
+
+export const skillsAPI = {
+  referential: () => api.get("/resources/skills"),
+};
+
+export const customFieldsAPI = {
+  defs: () => api.get("/projects/custom-fields"),
+  saveDefs: (fields) => api.put("/projects/custom-fields", { fields }),
+};
+
+export const viewsAPI = {
+  list: (page) => api.get(`/views?page=${page}`),
+  save: (data) => api.post("/views", data),
+  remove: (id) => api.delete(`/views/${id}`),
+};
+
+export const snapshotsAPI = {
+  list: () => api.get("/portfolio/snapshots"),
+  run: () => api.post("/portfolio/snapshots/run"),
+};
+
+export const thresholdsAPI = {
+  get: () => api.get("/indicators/thresholds"),
+  save: (data) => api.put("/indicators/thresholds", data),
 };
 
 export default api;

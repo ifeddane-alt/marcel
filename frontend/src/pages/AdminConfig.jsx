@@ -6,7 +6,8 @@ import {
   ChevronUp, ChevronDown, CheckCircle2, AlertCircle, Info,
   Upload, Webhook, KeyRound, Hash, Wand2,
 } from "lucide-react";
-import { adminConfigAPI, profilesAPI, programsAPI } from "@/api";
+import { adminConfigAPI, profilesAPI, programsAPI, thresholdsAPI, customFieldsAPI } from "@/api";
+import { Gauge as GaugeIcon, ListPlus } from "lucide-react";
 import { useTenantConfig } from "@/contexts/TenantConfigContext";
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
@@ -1389,6 +1390,8 @@ const TABS = [
   { id: "codes",      label: "Codes Projets",    icon: Hash },
   { id: "holidays",   label: "Jours Fériés",     icon: Calendar },
   { id: "alerts",     label: "Alertes",          icon: Bell },
+  { id: "indicators", label: "Indicateurs",      icon: GaugeIcon },
+  { id: "customfields", label: "Champs perso",   icon: ListPlus },
   { id: "branding",   label: "Export PPT",       icon: Palette },
   { id: "webhooks",   label: "Webhooks",         icon: Webhook },
   { id: "sso",        label: "SSO",              icon: KeyRound },
@@ -1481,9 +1484,105 @@ export default function AdminConfig() {
       {activeTab === "codes"     && <ProjectCodesSection config={config} onSave={handleSave} />}
       {activeTab === "holidays"  && <HolidaysSection  config={config} onSave={handleSave} />}
       {activeTab === "alerts"    && <AlertsSection    config={config} onSave={handleSave} />}
+      {activeTab === "indicators" && <IndicatorThresholdsSection />}
+      {activeTab === "customfields" && <CustomFieldsDefsSection />}
       {activeTab === "branding"  && <BrandingSection  config={config} onSave={handleSave} />}
       {activeTab === "webhooks"  && <WebhooksSection  config={config} onSave={handleSave} />}
       {activeTab === "sso"       && <SSOSection       config={config} onSave={handleSave} />}
+    </div>
+  );
+}
+
+// ─── Seuils indicateurs (cockpit méthodologie) ────────────────────────────────
+function IndicatorThresholdsSection() {
+  const [th, setTh] = useState(null);
+  const [saved, setSaved] = useState(false);
+  useEffect(() => { thresholdsAPI.get().then((r) => setTh(r.data)).catch(() => setTh({})); }, []);
+  if (!th) return <div className="text-sm text-zinc-400 p-4">Chargement…</div>;
+  const save = async () => {
+    const r = await thresholdsAPI.save(th);
+    setTh(r.data); setSaved(true); setTimeout(() => setSaved(false), 2500);
+  };
+  const F = ({ k, label }) => (
+    <div>
+      <label className="block text-xs font-semibold text-zinc-600 mb-1">{label}</label>
+      <input type="number" step="0.01" min="0" max="2" value={th[k] ?? ""} data-testid={`threshold-${k}`}
+        onChange={(e) => setTh((t) => ({ ...t, [k]: e.target.value }))}
+        className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 font-mono-data focus:outline-none focus:border-blue-600" />
+    </div>
+  );
+  return (
+    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-sm p-6 max-w-2xl" data-testid="indicators-thresholds-section">
+      <h3 className="font-heading text-sm font-bold text-[#26243a] mb-1">Seuils RAG des indicateurs EVM</h3>
+      <p className="text-xs text-zinc-400 mb-4">CPI/SPI ≥ seuil ambre = vert · entre rouge et ambre = ambre · &lt; seuil rouge = rouge. Appliqué au cockpit Pilotage et à l'onglet Pilotage des projets.</p>
+      <div className="grid grid-cols-2 gap-4">
+        <F k="cpi_amber" label="CPI — seuil vert (≥)" />
+        <F k="cpi_red" label="CPI — seuil rouge (<)" />
+        <F k="spi_amber" label="SPI — seuil vert (≥)" />
+        <F k="spi_red" label="SPI — seuil rouge (<)" />
+      </div>
+      <div className="flex items-center gap-3 mt-5">
+        <button onClick={save} data-testid="thresholds-save-btn"
+          className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">Enregistrer</button>
+        {saved && <span className="text-xs text-emerald-600 font-semibold">✓ Seuils enregistrés</span>}
+      </div>
+    </div>
+  );
+}
+
+// ─── Champs personnalisés projets ─────────────────────────────────────────────
+function CustomFieldsDefsSection() {
+  const [fields, setFields] = useState(null);
+  const [saved, setSaved] = useState(false);
+  useEffect(() => { customFieldsAPI.defs().then((r) => setFields(r.data)).catch(() => setFields([])); }, []);
+  if (!fields) return <div className="text-sm text-zinc-400 p-4">Chargement…</div>;
+  const set = (i, k, v) => setFields((arr) => arr.map((f, j) => (j === i ? { ...f, [k]: v } : f)));
+  const save = async () => {
+    const payload = fields.map((f) => ({
+      ...f,
+      options: typeof f.options === "string" ? f.options.split(",").map((s) => s.trim()).filter(Boolean) : (f.options || []),
+    }));
+    const r = await customFieldsAPI.saveDefs(payload);
+    setFields(r.data); setSaved(true); setTimeout(() => setSaved(false), 2500);
+  };
+  return (
+    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-sm p-6 max-w-3xl" data-testid="custom-fields-section">
+      <h3 className="font-heading text-sm font-bold text-[#26243a] mb-1">Champs personnalisés des projets</h3>
+      <p className="text-xs text-zinc-400 mb-4">Ces champs apparaissent sur la fiche projet (onglet Aperçu) et sont saisissables par les utilisateurs habilités.</p>
+      <div className="space-y-2">
+        {fields.map((f, i) => (
+          <div key={f.key || i} className="flex items-center gap-2" data-testid={`cf-row-${i}`}>
+            <input value={f.label} onChange={(e) => set(i, "label", e.target.value)} placeholder="Libellé (ex : Sponsor métier)"
+              data-testid={`cf-label-${i}`}
+              className="flex-1 text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+            <select value={f.type || "text"} onChange={(e) => set(i, "type", e.target.value)} data-testid={`cf-type-${i}`}
+              className="text-sm border border-zinc-200 rounded-lg px-2 py-2 bg-white">
+              <option value="text">Texte</option>
+              <option value="number">Nombre</option>
+              <option value="date">Date</option>
+              <option value="select">Liste</option>
+            </select>
+            {f.type === "select" && (
+              <input value={Array.isArray(f.options) ? f.options.join(", ") : (f.options || "")}
+                onChange={(e) => set(i, "options", e.target.value)} placeholder="Options (virgules)"
+                data-testid={`cf-options-${i}`}
+                className="w-48 text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+            )}
+            <button onClick={() => setFields((arr) => arr.filter((_, j) => j !== i))}
+              className="p-1.5 text-zinc-300 hover:text-rose-500" data-testid={`cf-remove-${i}`}><Trash2 size={14} /></button>
+          </div>
+        ))}
+      </div>
+      <button onClick={() => setFields((arr) => [...arr, { label: "", type: "text", options: [] }])}
+        data-testid="cf-add-btn"
+        className="flex items-center gap-1 mt-3 px-2.5 py-1.5 text-[11px] font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50">
+        <Plus size={11} /> Ajouter un champ
+      </button>
+      <div className="flex items-center gap-3 mt-5 pt-4 border-t border-zinc-100">
+        <button onClick={save} data-testid="cf-save-btn"
+          className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">Enregistrer</button>
+        {saved && <span className="text-xs text-emerald-600 font-semibold">✓ Champs enregistrés</span>}
+      </div>
     </div>
   );
 }

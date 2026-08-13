@@ -231,3 +231,74 @@ async def delete_sprint(sprint_id: str, user: TokenPayload) -> None:
     res = await db.project_sprints.delete_one({"sprint_id": sprint_id, "tenant_id": user.tenant_id})
     if res.deleted_count == 0:
         raise HTTPException(404, "Sprint introuvable")
+
+
+# ─── Seuils configurables ────────────────────────────────────────────────────
+
+DEFAULT_THRESHOLDS = {"cpi_amber": 0.95, "cpi_red": 0.85, "spi_amber": 0.95, "spi_red": 0.85}
+
+
+async def get_thresholds(tenant_id: str) -> dict:
+    t = await db.tenants.find_one({"tenant_id": tenant_id}, {"_id": 0, "settings.indicator_thresholds": 1})
+    saved = ((t or {}).get("settings") or {}).get("indicator_thresholds") or {}
+    return {**DEFAULT_THRESHOLDS, **{k: v for k, v in saved.items() if k in DEFAULT_THRESHOLDS}}
+
+
+async def set_thresholds(data: dict, user: TokenPayload) -> dict:
+    clean = {}
+    for k in DEFAULT_THRESHOLDS:
+        if k in data:
+            try:
+                clean[k] = round(float(data[k]), 2)
+            except (TypeError, ValueError):
+                pass
+    await db.tenants.update_one(
+        {"tenant_id": user.tenant_id}, {"$set": {"settings.indicator_thresholds": clean}}
+    )
+    return await get_thresholds(user.tenant_id)
+
+
+# ─── Snapshots mensuels portefeuille ─────────────────────────────────────────
+
+async def run_snapshot(tenant_id: str) -> dict:
+    projects = await db.projects.find({"tenant_id": tenant_id}, {"_id": 0}).to_list(None)
+    active = [p for p in projects if p.get("status") not in ("cloture", "archive", "annule")]
+    rag = {"green": 0, "orange": 0, "red": 0}
+    phases = {}
+    for p in active:
+        if p.get("status_rag") in rag:
+            rag[p["status_rag"]] += 1
+        ph = p.get("lifecycle_phase") or "cadrage"
+        phases[ph] = phases.get(ph, 0) + 1
+    month = datetime.now(timezone.utc).strftime("%Y-%m")
+    doc = {
+        "tenant_id": tenant_id,
+        "month": month,
+        "n_projects": len(active),
+        "budget_total": round(sum(p.get("budget_total") or 0 for p in active)),
+        "budget_consumed": round(sum(p.get("budget_consumed") or 0 for p in active)),
+        "eac_total": round(sum(p.get("eac") or p.get("budget_forecast") or p.get("budget_total") or 0 for p in active)),
+        "rag": rag,
+        "phases": phases,
+        "created_at": _now(),
+    }
+    await db.portfolio_snapshots.update_one(
+        {"tenant_id": tenant_id, "month": month},
+        {"$set": doc, "$setOnInsert": {"snapshot_id": str(uuid.uuid4())}},
+        upsert=True,
+    )
+    return doc
+
+
+async def run_snapshot_all_tenants() -> None:
+    for tid in await db.tenants.distinct("tenant_id"):
+        try:
+            await run_snapshot(tid)
+        except Exception:
+            pass
+
+
+async def list_snapshots(user: TokenPayload) -> list:
+    return await db.portfolio_snapshots.find(
+        {"tenant_id": user.tenant_id}, {"_id": 0}
+    ).sort("month", 1).to_list(24)

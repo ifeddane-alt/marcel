@@ -45,6 +45,8 @@ import Security from "@/pages/Security";
 import Architecture from "@/pages/Architecture";
 import Pilotage from "@/pages/Pilotage";
 import ParticipatoryBudgeting from "@/pages/ParticipatoryBudgeting";
+import MyValidations from "@/pages/MyValidations";
+import Presentation from "@/pages/Presentation";
 import "@/App.css";
 
 function ProtectedRoute({ children }) {
@@ -126,6 +128,8 @@ function AppRoutes() {
         <Route path="architecture" element={<Architecture />} />
         <Route path="pilotage" element={<Pilotage />} />
         <Route path="pb" element={<ParticipatoryBudgeting />} />
+        <Route path="validations" element={<MyValidations />} />
+        <Route path="presentation" element={<Presentation />} />
         <Route path="vendors" element={<Vendors />} />
         <Route path="safe/trains" element={<TrainsSafe />} />
         <Route path="safe/trains/:trainId" element={<TrainsSafe />} />

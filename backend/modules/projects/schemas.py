@@ -65,6 +65,7 @@ class ProjectUpdate(BaseModel):
     urgency:             Optional[int] = None
     risk_score:          Optional[int] = None
     complexity:          Optional[int] = None
+    custom_fields:       Optional[dict] = None
 
 
 class BudgetRevisionCreate(BaseModel):

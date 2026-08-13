@@ -54,6 +54,9 @@ NOTIF_LABELS = {
     "decision_created":      "Nouvelle décision",
     "demand_status_changed": "Demande mise à jour",
     "envelope_overrun":      "Dépassement d'enveloppe",
+    "gate_review_requested":     "Livrable à valider",
+    "gate_deliverable_reviewed": "Avis rendu sur un livrable",
+    "gate_decision":             "Décision de passage de phase",
 }
 
 

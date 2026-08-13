@@ -25,7 +25,24 @@
     "admin": "Administration",
     "users": "Users",
     "profiles": "Profiles",
-    "settings": "Settings"
+    "settings": "Settings",
+    "home": "Home",
+    "pilotage": "Steering",
+    "objectives": "Objectives",
+    "budget": "Budget",
+    "validations": "Approvals",
+    "applications": "Applications",
+    "run": "Run & Operations",
+    "security": "Security",
+    "architecture": "Architecture",
+    "safe_trains": "SAFe Trains",
+    "pb": "Participatory budgeting",
+    "import_csv": "CSV Import",
+    "configuration": "Settings",
+    "templates": "Templates",
+    "monitoring": "Monitoring",
+    "audit_log": "Audit log",
+    "powerbi": "Power BI"
   },
   "common": {
     "save": "Save",
@@ -196,5 +213,19 @@
     "fr": "Français",
     "en": "English",
     "select": "Language"
+  },
+  "sections": {
+    "pilotage": "Steering",
+    "modules": "Modules",
+    "dsi": "IT Dept",
+    "agent": "AI Agent",
+    "safe": "SAFe",
+    "finance": "Procurement / Finance",
+    "tools": "Tools",
+    "admin": "Administration"
+  },
+  "theme": {
+    "light": "Light mode",
+    "dark": "Dark mode"
   }
 }

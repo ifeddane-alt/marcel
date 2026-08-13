@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import { Responsive, WidthProvider } from "react-grid-layout/legacy";
 import "react-grid-layout/css/styles.css";
 import "react-resizable/css/styles.css";
-import { Settings2, RefreshCw, Check, X, Move, RotateCcw, Plus, GripVertical, FileDown } from "lucide-react";
+import { Settings2, RefreshCw, Check, X, Move, RotateCcw, Plus, GripVertical, FileDown, MonitorPlay } from "lucide-react";
 import { dashboardAPI, programsAPI, projectsAPI, teamsAPI, milestonesAPI, arbitrageAPI, agentAPI, resourcesAPI } from "@/api";
 import { usePermissions } from "@/hooks/usePermissions";
 import PortfolioAiReport from "@/components/PortfolioAiReport";
@@ -305,6 +305,17 @@ export default function Dashboard() {
             >
               <span className="text-[13px]">✦</span>
               <span className="hidden sm:inline">Rapport IA</span>
+            </button>
+          )}
+          {!customizing && (
+            <button
+              data-testid="dashboard-presentation-btn"
+              onClick={() => navigate("/presentation")}
+              className="flex items-center gap-1.5 px-3 py-2 border border-zinc-200 bg-white rounded-lg text-sm text-zinc-600 hover:bg-zinc-50 transition-colors"
+              title="Mode présentation COMEX plein écran"
+            >
+              <MonitorPlay size={13} />
+              <span className="hidden sm:inline">Présentation</span>
             </button>
           )}
           {!customizing && (

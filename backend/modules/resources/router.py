@@ -15,6 +15,11 @@ async def list_resources(current_user: TokenPayload = Depends(get_current_user))
     return await service.list_resources(current_user)
 
 
+@router.get("/resources/skills")
+async def skills_referential(current_user: TokenPayload = Depends(get_current_user)):
+    return await service.skills_referential(current_user)
+
+
 @router.post("/resources", status_code=201)
 async def create_resource(
     data: ResourceCreate,

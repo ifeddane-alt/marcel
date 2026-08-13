@@ -81,3 +81,52 @@
     @apply bg-[#e9effe] text-[#2e5fe8] font-semibold hover:bg-[#e9effe] hover:text-[#2e5fe8];
   }
 }
+
+/* ── Mode sombre ───────────────────────────────────────────── */
+.dark {
+  --background: 249 27% 10%;
+  --foreground: 250 25% 92%;
+  --card: 248 24% 14%;
+  --card-foreground: 250 25% 92%;
+  --popover: 248 24% 14%;
+  --popover-foreground: 250 25% 92%;
+  --secondary: 248 20% 18%;
+  --secondary-foreground: 250 25% 92%;
+  --muted: 248 20% 18%;
+  --muted-foreground: 250 12% 65%;
+  --border: 248 18% 24%;
+  --input: 248 18% 26%;
+}
+.dark body { background-color: #131220; color: #e6e4f2; }
+.dark .bg-white { background-color: #1c1a2b !important; }
+.dark .bg-zinc-50, .dark .bg-zinc-100, .dark .bg-slate-50, .dark .bg-gray-50 { background-color: #262340 !important; }
+.dark [class~="bg-[#f7f6fb]"], .dark [class~="bg-[#efeaf8]"] { background-color: #131220 !important; }
+.dark [class~="bg-[#fbfaff]"] { background-color: #211f33 !important; }
+.dark [class~="bg-[#f0eefc]"], .dark [class~="bg-[#ece9f4]"] { background-color: #262340 !important; }
+.dark [class~="bg-[#e9effe]"] { background-color: #1d2a4d !important; }
+.dark [class~="bg-[#fdf6e3]"] { background-color: #33301a !important; }
+.dark [class~="bg-[#fbe1de]"] { background-color: #3a201c !important; }
+.dark [class~="bg-[#ddf0d8]"] { background-color: #1d3318 !important; }
+.dark [class~="text-[#26243a]"] { color: #eceaf6 !important; }
+.dark [class~="text-[#352c6e]"] { color: #b7aef7 !important; }
+.dark [class~="text-[#3d3564]"] { color: #c5bdf0 !important; }
+.dark [class~="text-[#5d5a75]"] { color: #b3b0c9 !important; }
+.dark [class~="text-[#8a87a0]"] { color: #9895b0 !important; }
+.dark [class~="text-[#a39fb8]"] { color: #8c89a6 !important; }
+.dark [class~="text-[#2e5fe8]"] { color: #7d9bff !important; }
+.dark [class~="text-[#75708c]"] { color: #a5a2bd !important; }
+.dark .text-zinc-950, .dark .text-zinc-900, .dark .text-zinc-800, .dark .text-zinc-700 { color: #eceaf6 !important; }
+.dark .text-zinc-600, .dark .text-zinc-500 { color: #a5a2bd !important; }
+.dark .text-zinc-400 { color: #8c89a6 !important; }
+.dark [class~="border-[#e8e6f0]"], .dark [class~="border-[#f0eff6]"], .dark [class~="border-[#e7e3f2]"],
+.dark [class~="border-[#dcd9ea]"], .dark [class~="border-[#dcd7ea]"], .dark [class~="border-[#dcd7ea]"],
+.dark .border-zinc-100, .dark .border-zinc-200, .dark .border-slate-200, .dark .border-gray-200 { border-color: #2c2942 !important; }
+.dark [class*="hover:bg-[#f0eefc]"]:hover, .dark [class*="hover:bg-[#f7f6fb]"]:hover,
+.dark .hover\:bg-zinc-50:hover, .dark .hover\:bg-zinc-100:hover { background-color: #262340 !important; }
+.dark .card-surface { background-color: #1c1a2b; border-color: #2c2942; }
+.dark .rail-item { color: #b3b0c9; }
+.dark .rail-item:hover { color: #eceaf6; background-color: #262340; }
+.dark .rail-item-active, .dark .rail-item-active:hover { background-color: #1d2a4d; color: #7d9bff; }
+.dark .sidebar-item { color: #b3b0c9; }
+.dark .sidebar-item:hover { color: #eceaf6; background-color: #262340; }
+.dark ::selection { background-color: #1d2a4d; color: #7d9bff; }

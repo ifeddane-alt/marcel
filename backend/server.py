@@ -89,6 +89,8 @@ from modules.security.router import router as security_router
 from modules.architecture.router import router as architecture_router
 from modules.indicators.router import router as indicators_router
 from modules.pb.router import router as pb_router
+from modules.lifecycle.router import router as lifecycle_router
+from modules.auth.mfa import router as mfa_router
 from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI(title="MARCEL API")
@@ -172,6 +174,8 @@ for _router in [
     architecture_router,
     indicators_router,
     pb_router,
+    lifecycle_router,
+    mfa_router,
 ]:
     app.include_router(_router, prefix="/api")
 
@@ -270,6 +274,9 @@ async def startup_event():
     logger.info("[Scheduler] Rapport IA portefeuille hebdo planifié le lundi à 07h00 UTC")
     from modules.timesheets.reminders import run_timesheet_reminders
     scheduler.add_job(run_timesheet_reminders, CronTrigger(day_of_week="mon", hour=9, minute=0), id="ts_reminders", replace_existing=True)
+    from modules.indicators.service import run_snapshot_all_tenants
+    scheduler.add_job(run_snapshot_all_tenants, CronTrigger(day="1", hour=5, minute=30), id="portfolio_snapshots", replace_existing=True)
+    logger.info("[Scheduler] Snapshot mensuel portefeuille planifié le 1er du mois à 05h30 UTC")
     logger.info("[Scheduler] Relances timesheets planifiées le lundi à 09h00 UTC")
     logger.info("[Scheduler] APScheduler démarré")
     # Synchroniser les permissions de profils pour tous les tenants existants

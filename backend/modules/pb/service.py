@@ -69,6 +69,8 @@ async def create_session(data: dict, user: TokenPayload) -> dict:
         "deadline": data.get("deadline"),
         "status": "open",
         "items": items,
+        "weighted": bool(data.get("weighted")),
+        "direction_weight": float(data.get("direction_weight") or 2),
         "created_by": user.user_id,
         "created_by_name": user.name,
         "created_at": _now(),
@@ -127,11 +129,14 @@ async def submit_vote(session_id: str, allocations: dict, user: TokenPayload) ->
     total = sum(clean.values())
     if total > s["envelope"] * 1.001:
         raise HTTPException(400, f"Total réparti ({total:,.0f} €) supérieur à l'enveloppe ({s['envelope']:,.0f} €)")
+    u = await db.users.find_one({"user_id": user.user_id}, {"_id": 0, "profile_id": 1})
+    prof = await db.profiles.find_one({"profile_id": (u or {}).get("profile_id")}, {"_id": 0, "code": 1})
     await db.pb_votes.update_one(
         {"session_id": session_id, "user_id": user.user_id},
         {"$set": {
             "session_id": session_id, "tenant_id": user.tenant_id,
             "user_id": user.user_id, "user_name": user.name,
+            "profile_code": (prof or {}).get("code"),
             "allocations": clean, "submitted_at": _now(),
         }, "$setOnInsert": {"vote_id": str(uuid.uuid4())}},
         upsert=True,
@@ -147,10 +152,17 @@ async def get_results(session_id: str, user: TokenPayload) -> dict:
         raise HTTPException(404, "Session introuvable")
     votes = await db.pb_votes.find({"session_id": session_id}, {"_id": 0}).to_list(None)
     n = len(votes)
+    weighted = bool(s.get("weighted"))
+    dw = float(s.get("direction_weight") or 2)
+    weights = [dw if v.get("profile_code") in ("ADMIN", "CIO") else 1.0 for v in votes]
+    wsum = sum(weights)
     items = []
     for it in s.get("items", []):
         amounts = [(v.get("allocations") or {}).get(it["item_id"], 0) for v in votes]
-        avg = sum(amounts) / n if n > 0 else 0
+        if weighted and wsum > 0:
+            avg = sum(a * w for a, w in zip(amounts, weights)) / wsum
+        else:
+            avg = sum(amounts) / n if n > 0 else 0
         stdev = statistics.pstdev(amounts) if n > 1 else 0
         consensus = None
         if n > 1 and avg > 0:
@@ -166,7 +178,8 @@ async def get_results(session_id: str, user: TokenPayload) -> dict:
         })
     items.sort(key=lambda x: -x["avg_allocation"])
     return {
-        "session": {k: s[k] for k in ("session_id", "name", "envelope", "status", "deadline")},
+        "session": {**{k: s[k] for k in ("session_id", "name", "envelope", "status", "deadline")},
+                    "weighted": weighted, "direction_weight": dw},
         "participation": n,
         "total_avg_allocated": round(sum(i["avg_allocation"] for i in items)),
         "items": items,

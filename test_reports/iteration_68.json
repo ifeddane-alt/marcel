@@ -1,0 +1,41 @@
+{
+  "summary": "Lot B MARCEL frontend E2E validated via Playwright with test.audit@altair.fr. All 6 features work: MFA UI (inspect-only, left DISABLED), dark mode, i18n FR/EN nav, onboarding tour (4 steps + localStorage persistence), Présentation COMEX, favoris projets (persist across reload). Regression on /portfolio /pilotage /governance /applications passes (0 error elements, page content present). Minor testid gaps documented below.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {"component": "Account/MfaSection", "issue": "Missing data-testid mfa-cancel-btn on MFA setup panel — user cannot cancel setup with a testid-driven click; only escape is navigating away. Also missing data-testid mfa-secret on the manual secret text (\"Clé manuelle : …\") — currently only mfa-qr is tagged.", "selector": "[data-testid='mfa-cancel-btn'], [data-testid='mfa-secret']", "priority": "LOW"},
+      {"component": "Presentation slides", "issue": "Slide navigation arrows (chevron left/right) have no data-testid (e.g. presentation-next-btn / presentation-prev-btn / presentation-close-btn). Makes automated navigation between slides fragile.", "selector": "presentation-next-btn (absent)", "priority": "LOW"},
+      {"component": "Portfolio favorites", "issue": "Actual per-project favorite testid is `tile-favorite-{projectId}`; the spec/request mentioned `project-favorite-*`. This is a naming inconsistency between spec and implementation (not a bug, but confusing).", "selector": "[data-testid^='tile-favorite-']", "priority": "INFO"}
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "detailed_results": {
+    "onboarding": "PASS - 4 steps (Suivant×3 + 'C'est parti !'), does NOT reappear after page reload (localStorage marcel_onboarded_<user_id>).",
+    "dark_mode": "PASS - theme-toggle-btn adds/removes 'dark' class on <html>; persists across /portfolio and /pilotage; screenshots show readable text on dark bg; toggle-back restores light.",
+    "i18n": "PASS - lang-toggle-btn switches document.documentElement.lang between fr/en; 10 nav items translated (Home↔Accueil, Dashboard↔Tableau de bord, Programs↔Programmes, Portfolio↔Portefeuille, Steering↔Pilotage, Objectives↔Objectifs, Governance↔Gouvernance, Approvals↔Validations). data-testid remain canonical French (nav-accueil, nav-tableau-de-bord…).",
+    "presentation": "PASS - dashboard-presentation-btn present on /dashboard (NOT on /home which is 'Accueil'). Click opens presentation overlay (URL stays /dashboard but body renders presentation content 8k chars). Direct /presentation route also loads (heading 'Portefeuille projets DSI', 5 slide pagination dots visible, chevron nav present but untagged).",
+    "favorites": "PASS - tile-favorite-{uuid} toggles class from bg-white/border-[#e0dcf0] (empty) to bg-amber-400 border-amber-400 text-white (active); SVG fill changes to 'currentColor'. State persists after full page reload. Cleanup toggle restores original empty state (test.audit@altair.fr left with no favorites).",
+    "mfa": "PASS - Section shows 'DÉSACTIVÉE' status. mfa-enable-btn triggers setup: QR displayed with mfa-qr testid, manual secret 'H2UM7ER7YLQWEUTD6GOET4PCKCSY7CWS' shown (no testid). Setup abandoned by navigation (no cancel button). Post-navigation status still DÉSACTIVÉE — MFA NOT activated, account left clean as required.",
+    "regression": "PASS - /portfolio (2729 chars), /pilotage (1605), /governance (8943), /applications (1267); 0 elements matching .error selector on any of them."
+  },
+  "test_report_links": [],
+  "action_items": [
+    "Add data-testid=\"mfa-cancel-btn\" to the MFA setup cancel/back action (currently missing).",
+    "Add data-testid=\"mfa-secret\" to the manual secret span (currently only mfa-qr is tagged).",
+    "Add data-testid=\"presentation-next-btn\" / presentation-prev-btn / presentation-close-btn to the slide navigation controls.",
+    "Reconcile spec wording (\"project-favorite\") with actual implementation (\"tile-favorite-{id}\") — either rename or update the spec."
+  ],
+  "critical_code_review_comments": [
+    "MFA cancel path relies on browser navigation because setup panel exposes no explicit cancel control with a testid — consider adding an explicit \"Annuler\" button so users don't have to leave /account to abandon setup.",
+    "Presentation route uses same URL as /dashboard when triggered via button (overlay), yet direct /presentation is also supported — behaviour is dual and could confuse deep-linking; consider aligning to a single canonical route."
+  ],
+  "updated_files": [],
+  "success_rate": {"backend": "N/A (skipped per request)", "frontend": "100% functional (6/6 features work), 3 minor testid gaps"},
+  "test_credentials": "test.audit@altair.fr / MonCompte2026! (used for all destructive-capable tests; MFA left DISABLED at end).",
+  "seed_data_creation": "None. One favorite was toggled on then off on portfolio tile b38a623c-… so account state is unchanged.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Frontend Lot B fully passes E2E. If retesting MFA: use only test.audit@altair.fr, and remember there is NO mfa-cancel-btn — you must navigate away to abandon setup without entering a code. Favorites live under selector [data-testid^='tile-favorite-'] not project-favorite-*. Presentation button lives on /dashboard, not /home. Onboarding key is marcel_onboarded_<user_id> in localStorage.",
+  "rca of the issue": "N/A — no blocking bug found. The three items reported are missing data-testid attributes (accessibility of automated tests), not functional defects."
+}

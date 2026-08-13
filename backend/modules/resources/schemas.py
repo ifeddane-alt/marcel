@@ -25,6 +25,7 @@ class ResourceCreate(BaseModel):
     contract_end: Optional[str] = None
     entry_date: Optional[str] = None           # Date d'entrée (référentiel)
     contract_ref: Optional[str] = None         # Référence du contrat
+    skills: Optional[list] = None              # [{name, level 1-5}]
 
 
 class ResourceUpdate(BaseModel):
@@ -47,3 +48,4 @@ class ResourceUpdate(BaseModel):
     contract_end: Optional[str] = None
     entry_date: Optional[str] = None
     contract_ref: Optional[str] = None
+    skills: Optional[list] = None
