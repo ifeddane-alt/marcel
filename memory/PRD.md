@@ -420,3 +420,10 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - IMPORTANT PLACEHOLDERS : témoignages et chiffres de résultats sont des EXEMPLES marqués « témoignage client à venir » — à remplacer par de vraies références.
 - Vérifié prod : 20/20 URLs HTTP 200 avec bons titres, MP4 + posters 200, sitemap 20 URLs, /api/health 200, formulaire contact 201, disque VPS 79% après prune. Screenshots preview + prod OK.
 - Leçon : 2 search_replace « fantômes » détectés par grep de contrôle (bento-link-ai FR, bento-link-projects EN) et corrigés — toujours vérifier par grep après un gros lot.
+
+## 2026-06 (fork) — État après Lot A + Lot B (déployés en PROD, commit 013e6f6)
+- ✅ Lot A : cycle de vie/gates gouvernance (validations Archi/Sécu, décisions, dérogations, ODJ, Mes validations), skills, champs personnalisés, vues sauvegardées, snapshots portefeuille, seuils RAG, capacités↔applications, pondération PB. Testé iteration_67.
+- ✅ Lot B : MFA TOTP (backend 15/15 curl, UI testée), dark mode, i18n FR/EN (nav+sections ; pages internes restent FR), onboarding 4 étapes, mode Présentation COMEX, favoris projets. Testé iteration_68 (6/6 PASS).
+- ✅ PROD marcel-ppm.com à jour (bundle main.3054b24c.js, health 200, routes protégées, permissions synchronisées, disque 81 %).
+- ❌ EXCLUS par l'utilisateur : collaboration/@mentions (2), emails réels Resend (3), connecteurs Jira/SAP nocturnes (4), lot C (gros chantiers).
+- Backlog restant (non prioritaire) : traduction EN des pages internes (seule la nav/shell est traduite), stockage objet pour uploads (via integration_expert), fallback JWT_SECRET codé en dur dans core/auth.py (à traiter avec précaution — prod n'a pas la variable dans compose, retrait cassant les sessions).
