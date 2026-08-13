@@ -5,6 +5,7 @@ import "react-resizable/css/styles.css";
 import { Settings2, RefreshCw, Check, X, Move, RotateCcw, Plus, GripVertical, FileDown } from "lucide-react";
 import { dashboardAPI, programsAPI, projectsAPI, teamsAPI, milestonesAPI, arbitrageAPI, agentAPI, resourcesAPI } from "@/api";
 import { usePermissions } from "@/hooks/usePermissions";
+import PortfolioAiReport from "@/components/PortfolioAiReport";
 import {
   MetricSingleWidget, BudgetSingleWidget, CapacityWidget, RegulatoryWidget,
   EnvelopeWidget, RecommendationsWidget, ChartBudgetWidget, ChartRagWidget,
@@ -122,6 +123,7 @@ export default function Dashboard() {
   const [saving, setSaving] = useState(false);
   const [dragWidget, setDragWidget] = useState(null);
   const [exportingPdf, setExportingPdf] = useState(false);
+  const [aiReportOpen, setAiReportOpen] = useState(false);
 
   const exportPdf = async () => {
     setExportingPdf(true);
@@ -296,6 +298,17 @@ export default function Dashboard() {
         <div className="flex items-center gap-2 shrink-0">
           {!customizing && (
             <button
+              data-testid="dashboard-ai-report-btn"
+              onClick={() => setAiReportOpen(true)}
+              className="flex items-center gap-1.5 px-3 py-2 border border-violet-200 bg-violet-50 rounded-lg text-sm text-violet-700 hover:bg-violet-100 transition-colors"
+              title="Rapport IA consolidé du portefeuille"
+            >
+              <span className="text-[13px]">✦</span>
+              <span className="hidden sm:inline">Rapport IA</span>
+            </button>
+          )}
+          {!customizing && (
+            <button
               data-testid="dashboard-export-pdf-btn"
               onClick={exportPdf}
               disabled={exportingPdf}
@@ -447,6 +460,7 @@ export default function Dashboard() {
         ))}
       </ResponsiveGridLayout>
       </div>
+      {aiReportOpen && <PortfolioAiReport onClose={() => setAiReportOpen(false)} />}
     </div>
   );
 }

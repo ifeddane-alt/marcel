@@ -83,6 +83,12 @@ from modules.search.router import router as search_router
 from modules.public_site.router import router as public_site_router
 from modules.audit.router import router as audit_router
 from modules.objectives.router import router as objectives_router
+from modules.applications.router import router as applications_router
+from modules.run.router import router as run_router
+from modules.security.router import router as security_router
+from modules.architecture.router import router as architecture_router
+from modules.indicators.router import router as indicators_router
+from modules.pb.router import router as pb_router
 from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI(title="MARCEL API")
@@ -160,6 +166,12 @@ for _router in [
     public_site_router,
     audit_router,
     objectives_router,
+    applications_router,
+    run_router,
+    security_router,
+    architecture_router,
+    indicators_router,
+    pb_router,
 ]:
     app.include_router(_router, prefix="/api")
 
@@ -249,6 +261,16 @@ async def startup_event():
     from core.contract_alerts import run_contract_alerts_all_tenants
     scheduler.add_job(run_contract_alerts_all_tenants, CronTrigger(hour=6, minute=0), id="contract_alerts", replace_existing=True)
     logger.info("[Scheduler] Alertes contrats expirants planifiées chaque jour à 06h00 UTC")
+    if os.environ.get("AI_INSIGHTS_ENABLED", "true").lower() == "true":
+        from modules.agent.insights import run_insights_all_tenants
+        scheduler.add_job(run_insights_all_tenants, CronTrigger(hour=6, minute=15), id="ai_insights", replace_existing=True)
+        logger.info("[Scheduler] Analyse IA proactive planifiée chaque jour à 06h15 UTC")
+    from modules.status_report.portfolio_report import run_weekly_portfolio_reports
+    scheduler.add_job(run_weekly_portfolio_reports, CronTrigger(day_of_week="mon", hour=7, minute=0), id="weekly_ai_report", replace_existing=True)
+    logger.info("[Scheduler] Rapport IA portefeuille hebdo planifié le lundi à 07h00 UTC")
+    from modules.timesheets.reminders import run_timesheet_reminders
+    scheduler.add_job(run_timesheet_reminders, CronTrigger(day_of_week="mon", hour=9, minute=0), id="ts_reminders", replace_existing=True)
+    logger.info("[Scheduler] Relances timesheets planifiées le lundi à 09h00 UTC")
     logger.info("[Scheduler] APScheduler démarré")
     # Synchroniser les permissions de profils pour tous les tenants existants
     try:

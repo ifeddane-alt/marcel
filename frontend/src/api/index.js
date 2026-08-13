@@ -399,4 +399,104 @@ export const projectTemplatesAPI = {
   applyTemplate:(projectId, data)           => api.post(`/projects/${projectId}/apply-template`, data),
 };
 
+export const runAPI = {
+  summary:        ()            => api.get("/run/summary"),
+  activities:     ()            => api.get("/run/activities"),
+  createActivity: (data)        => api.post("/run/activities", data),
+  updateActivity: (id, data)    => api.put(`/run/activities/${id}`, data),
+  deleteActivity: (id)          => api.delete(`/run/activities/${id}`),
+  getAllocations: (id)          => api.get(`/run/activities/${id}/allocations`),
+  setAllocations: (id, allocs)  => api.put(`/run/activities/${id}/allocations`, { allocations: allocs }),
+  load:           (months = 6)  => api.get(`/run/load?months=${months}`),
+  incidents:      ()            => api.get("/run/incidents"),
+  createIncident: (data)        => api.post("/run/incidents", data),
+  updateIncident: (id, data)    => api.put(`/run/incidents/${id}`, data),
+  deleteIncident: (id)          => api.delete(`/run/incidents/${id}`),
+  releases:       ()            => api.get("/run/releases"),
+  createRelease:  (data)        => api.post("/run/releases", data),
+  updateRelease:  (id, data)    => api.put(`/run/releases/${id}`, data),
+  deleteRelease:  (id)          => api.delete(`/run/releases/${id}`),
+};
+
+export const applicationsAPI = {
+  list:        (projectId)  => api.get(`/applications${projectId ? `?project_id=${projectId}` : ""}`),
+  summary:     ()           => api.get("/applications/summary"),
+  get:         (id)         => api.get(`/applications/${id}`),
+  create:      (data)       => api.post("/applications", data),
+  update:      (id, data)   => api.put(`/applications/${id}`, data),
+  delete:      (id)         => api.delete(`/applications/${id}`),
+  setProjects: (id, ids)    => api.put(`/applications/${id}/projects`, { project_ids: ids }),
+};
+
+export const indicatorsAPI = {
+  portfolio:    ()               => api.get("/indicators/portfolio"),
+  project:      (projectId)      => api.get(`/projects/${projectId}/indicators`),
+  sprints:      (projectId)      => api.get(`/projects/${projectId}/sprints`),
+  createSprint: (projectId, d)   => api.post(`/projects/${projectId}/sprints`, d),
+  updateSprint: (id, d)          => api.put(`/indicators/sprints/${id}`, d),
+  deleteSprint: (id)             => api.delete(`/indicators/sprints/${id}`),
+};
+
+export const portfolioAiAPI = {
+  generate: ()   => api.post("/portfolio/ai-report"),
+  list:     ()   => api.get("/portfolio/ai-reports"),
+  get:      (id) => api.get(`/portfolio/ai-reports/${id}`),
+  pdf:      (id) => api.get(`/portfolio/ai-reports/${id}/pdf`, { responseType: "blob" }),
+};
+
+export const insightsAPI = {
+  list:    (limit = 10) => api.get(`/agent/insights?limit=${limit}`),
+  analyze: ()           => api.post("/agent/analyze"),
+};
+
+export const pbAPI = {
+  list:    ()          => api.get("/pb/sessions"),
+  get:     (id)        => api.get(`/pb/sessions/${id}`),
+  create:  (data)      => api.post("/pb/sessions", data),
+  update:  (id, data)  => api.put(`/pb/sessions/${id}`, data),
+  remove:  (id)        => api.delete(`/pb/sessions/${id}`),
+  vote:    (id, alloc) => api.post(`/pb/sessions/${id}/vote`, { allocations: alloc }),
+  results: (id)        => api.get(`/pb/sessions/${id}/results`),
+};
+
+export const securityAPI = {
+  summary:  ()          => api.get("/security/summary"),
+  posture:  ()          => api.get("/security/posture"),
+  vulns: {
+    list:   ()          => api.get("/security/vulnerabilities"),
+    create: (data)      => api.post("/security/vulnerabilities", data),
+    update: (id, data)  => api.put(`/security/vulnerabilities/${id}`, data),
+    remove: (id)        => api.delete(`/security/vulnerabilities/${id}`),
+  },
+  requirements: {
+    list:   ()          => api.get("/security/requirements"),
+    create: (data)      => api.post("/security/requirements", data),
+    update: (id, data)  => api.put(`/security/requirements/${id}`, data),
+    remove: (id)        => api.delete(`/security/requirements/${id}`),
+  },
+  reviews: {
+    list:   ()          => api.get("/security/reviews"),
+    create: (data)      => api.post("/security/reviews", data),
+    update: (id, data)  => api.put(`/security/reviews/${id}`, data),
+    remove: (id)        => api.delete(`/security/reviews/${id}`),
+  },
+};
+
+const archCrud = (entity) => ({
+  list:   ()          => api.get(`/architecture/${entity}`),
+  create: (data)      => api.post(`/architecture/${entity}`, data),
+  update: (id, data)  => api.put(`/architecture/${entity}/${id}`, data),
+  remove: (id)        => api.delete(`/architecture/${entity}/${id}`),
+});
+
+export const architectureAPI = {
+  summary:    ()  => api.get("/architecture/summary"),
+  interfaces: archCrud("interfaces"),
+  standards:  archCrud("standards"),
+  exemptions: archCrud("exemptions"),
+  reviews:    archCrud("reviews"),
+  radar:      archCrud("radar"),
+  debt:       archCrud("debt"),
+};
+
 export default api;

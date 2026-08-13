@@ -7,8 +7,9 @@ import {
   MessageSquare, Zap, DollarSign, Clock, Shield, Activity,
   TrendingUp, RefreshCw, BarChart2,
 } from "lucide-react";
-import { agentAPI } from "@/api";
+import { agentAPI, insightsAPI } from "@/api";
 import { usePermissions } from "@/hooks/usePermissions";
+import { toast } from "sonner";
 
 function KpiCard({ icon: Icon, label, value, sub, color = "blue" }) {
   const colorMap = {
@@ -40,6 +41,19 @@ export default function AgentAnalytics() {
 
   const [data, setData] = useState(null);
   const [loading, setLoading] = useState(true);
+  const [insights, setInsights] = useState([]);
+  const [analyzing, setAnalyzing] = useState(false);
+
+  const loadInsights = () => insightsAPI.list(8).then((r) => setInsights(r.data)).catch(() => {});
+  const runAnalysis = async () => {
+    setAnalyzing(true);
+    try {
+      const r = await insightsAPI.analyze();
+      toast.success(`Analyse terminée : ${r.data.anomalies?.length || 0} anomalie(s), ${r.data.new_count} nouvelle(s)`);
+      loadInsights();
+    } catch { toast.error("Échec de l'analyse"); }
+    setAnalyzing(false);
+  };
 
   const load = async () => {
     setLoading(true);
@@ -50,7 +64,7 @@ export default function AgentAnalytics() {
     setLoading(false);
   };
 
-  useEffect(() => { if (canView) load(); }, [canView]);
+  useEffect(() => { if (canView) { load(); loadInsights(); } }, [canView]);
 
   if (!canView) {
     return (
@@ -94,6 +108,43 @@ export default function AgentAnalytics() {
         </div>
       ) : (
         <>
+          {/* Socle IA — analyse proactive */}
+          <div className="bg-white border border-zinc-200 rounded-xl shadow-sm p-5 mb-6" data-testid="insights-section">
+            <div className="flex items-center justify-between mb-3 flex-wrap gap-2">
+              <div className="flex items-center gap-2">
+                <Zap size={16} className="text-amber-500" />
+                <h2 className="font-semibold text-zinc-800 text-sm">Analyse proactive quotidienne (socle IA à coût fixe)</h2>
+              </div>
+              <button onClick={runAnalysis} disabled={analyzing} data-testid="insights-analyze-btn"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-60">
+                <RefreshCw size={12} className={analyzing ? "animate-spin" : ""} />
+                {analyzing ? "Analyse…" : "Analyser maintenant"}
+              </button>
+            </div>
+            <p className="text-[11px] text-zinc-400 mb-3">
+              Règles déterministes exécutées chaque jour à 06h15 (dépassements budgets, risques critiques, jalons en retard, vulnérabilités, incidents P1, budgets run). L'IA ne rédige une synthèse que s'il y a de nouvelles anomalies.
+            </p>
+            {insights.length === 0 ? (
+              <div className="text-xs text-zinc-400 py-3">Aucune analyse exécutée pour l'instant.</div>
+            ) : (
+              <div className="space-y-2" data-testid="insights-list">
+                {insights.map((ins) => (
+                  <div key={ins.insight_id} className="px-3 py-2.5 bg-zinc-50 rounded-lg" data-testid={`insight-${ins.insight_id}`}>
+                    <div className="flex items-center gap-2 flex-wrap">
+                      <span className="font-mono-data text-[10px] text-zinc-400">{new Date(ins.run_at).toLocaleString("fr-FR")}</span>
+                      <span className={`px-1.5 py-0.5 text-[9px] font-bold rounded-lg border ${ins.critical_count > 0 ? "bg-rose-50 text-rose-700 border-rose-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"}`}>
+                        {ins.anomalies?.length || 0} anomalie{(ins.anomalies?.length || 0) > 1 ? "s" : ""}
+                      </span>
+                      {ins.new_count > 0 && <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-lg border bg-amber-50 text-amber-700 border-amber-200">{ins.new_count} nouvelle{ins.new_count > 1 ? "s" : ""}</span>}
+                      {ins.resolved_count > 0 && <span className="px-1.5 py-0.5 text-[9px] font-bold rounded-lg border bg-blue-50 text-blue-700 border-blue-200">{ins.resolved_count} résolue{ins.resolved_count > 1 ? "s" : ""}</span>}
+                      <span className={`ml-auto text-[9px] font-bold ${ins.llm_used ? "text-violet-600" : "text-zinc-400"}`}>{ins.llm_used ? "LLM" : "0 appel LLM"}</span>
+                    </div>
+                    <p className="text-xs text-zinc-600 mt-1">{ins.synthesis}</p>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
           {/* KPI Row */}
           <div className="grid grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4 mb-8">
             <KpiCard icon={MessageSquare} label="Messages" value={data.total_messages?.toLocaleString("fr-FR")} color="blue" />

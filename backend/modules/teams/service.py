@@ -82,6 +82,19 @@ async def get_capacity_heatmap(months: int, current_user: TokenPayload) -> list:
         key = (tid, period)
         alloc_matrix[key] = alloc_matrix.get(key, 0) + (a.get("jh_allocated") or 0)
 
+    # Allocations RUN (activités récurrentes) par (team_id, period)
+    run_matrix: dict = {}
+    run_allocs = await db.run_allocations.find(
+        {"tenant_id": current_user.tenant_id,
+         "month": {"$gte": periods[0], "$lte": periods[-1]}},
+        {"_id": 0, "resource_id": 1, "month": 1, "days_allocated": 1},
+    ).to_list(None)
+    for a in run_allocs:
+        res = res_by_id.get(a.get("resource_id", ""), {})
+        tid = res.get("team_id") or "__unassigned__"
+        period = a.get("month", "")[:7]
+        run_matrix[(tid, period)] = run_matrix.get((tid, period), 0) + (a.get("days_allocated") or 0)
+
     # Construire la matrice de résultat
     result = []
     display_teams = list(teams_list)
@@ -106,11 +119,15 @@ async def get_capacity_heatmap(months: int, current_user: TokenPayload) -> list:
         }
         for period in period_labels:
             allocated = alloc_matrix.get((tid, period), 0)
-            utilization_pct = round((allocated / capa * 100), 1) if capa > 0 else 0
+            run_jh = run_matrix.get((tid, period), 0)
+            total = allocated + run_jh
+            utilization_pct = round((total / capa * 100), 1) if capa > 0 else 0
             row["periods"].append({
                 "period": period,
                 "capacity_jh": round(capa, 1),
-                "allocated_jh": round(allocated, 1),
+                "allocated_jh": round(total, 1),
+                "build_jh": round(allocated, 1),
+                "run_jh": round(run_jh, 1),
                 "utilization_pct": utilization_pct,
             })
         result.append(row)

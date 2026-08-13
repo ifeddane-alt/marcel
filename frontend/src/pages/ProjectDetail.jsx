@@ -27,6 +27,7 @@ import AiStatusReport from "@/components/AiStatusReport";
 import BenefitsSection from "@/components/BenefitsSection";
 import WorkAllocationModal from "@/components/WorkAllocationModal";
 import ProjectGantt from "@/components/ProjectGantt";
+import ProjectIndicators from "@/components/ProjectIndicators";
 import { Ring, elapsedPct, clamp } from "@/components/ProjectTile";
 import { formatEuro, formatDate, formatJH } from "@/utils/format";
 
@@ -420,6 +421,7 @@ export default function ProjectDetail() {
           { id: "risques", label: "Risques", count: risks.length },
           { id: "decisions", label: "Décisions", count: decisions.length },
           { id: "equipe", label: "Équipe", count: workAllocations.length + allocations.length },
+          { id: "pilotage", label: "Pilotage" },
           { id: "benefices", label: "Business case" },
           ...(scopeSnapshots.length > 0 ? [{ id: "scope", label: "Scope", count: scopeSnapshots.length }] : []),
         ].map((t) => (
@@ -1745,6 +1747,12 @@ export default function ProjectDetail() {
                 );
               })}
             </div>
+          </div>
+        )}
+
+        {activeTab === "pilotage" && (
+          <div className="col-span-12">
+            <ProjectIndicators projectId={id} canWrite={canWrite} />
           </div>
         )}
 

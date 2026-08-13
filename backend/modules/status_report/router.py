@@ -76,3 +76,42 @@ async def ai_report_pdf(project_id: str, report_id: str, current_user: TokenPayl
         media_type="application/pdf",
         headers={"Content-Disposition": f'attachment; filename="rapport_statut_{report_id[:8]}.pdf"'},
     )
+
+
+# ─── Rapport IA consolidé du portefeuille ────────────────────────────────────
+
+from . import portfolio_report as ptf_mod
+
+
+@router.post("/portfolio/ai-report")
+async def generate_portfolio_ai_report(current_user: TokenPayload = Depends(get_current_user)):
+    if not has_perm(current_user, "export.status_report"):
+        raise HTTPException(403, "Permission export.status_report requise")
+    return await ptf_mod.generate_portfolio_report(current_user.tenant_id, current_user.name)
+
+
+@router.get("/portfolio/ai-reports")
+async def list_portfolio_ai_reports(current_user: TokenPayload = Depends(get_current_user)):
+    if not has_perm(current_user, "export.status_report"):
+        raise HTTPException(403, "Permission export.status_report requise")
+    return await ptf_mod.list_portfolio_reports(current_user.tenant_id)
+
+
+@router.get("/portfolio/ai-reports/{report_id}")
+async def get_portfolio_ai_report(report_id: str, current_user: TokenPayload = Depends(get_current_user)):
+    if not has_perm(current_user, "export.status_report"):
+        raise HTTPException(403, "Permission export.status_report requise")
+    return await ptf_mod.get_portfolio_report(report_id, current_user.tenant_id)
+
+
+@router.get("/portfolio/ai-reports/{report_id}/pdf")
+async def portfolio_ai_report_pdf(report_id: str, current_user: TokenPayload = Depends(get_current_user)):
+    if not has_perm(current_user, "export.status_report"):
+        raise HTTPException(403, "Permission export.status_report requise")
+    report = await ptf_mod.get_portfolio_report(report_id, current_user.tenant_id)
+    pdf = ptf_mod.build_portfolio_pdf(report)
+    return StreamingResponse(
+        io.BytesIO(pdf),
+        media_type="application/pdf",
+        headers={"Content-Disposition": f'attachment; filename="rapport_portefeuille_{report_id[:8]}.pdf"'},
+    )

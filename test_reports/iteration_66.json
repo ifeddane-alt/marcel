@@ -1,0 +1,42 @@
+{
+  "summary": "Iteration 66 — full E2E testing of Phase 1 (APM Applications, Run & Exploitation, Sécurité, Architecture) + Phase 2 (methodology-based indicators EVM/vélocité/SAFe, Participatory Budgeting SAFe) + heatmap build+run integration. Backend: 34/34 pytest passed (100 %). Frontend: navigation, DSI pages, tabs, CRUD add buttons, Pilotage portfolio, PB vote flow, TIME matrix and Application CRUD all working. ONE CRITICAL FRONTEND BUG found and fixed by tester: the new 'Pilotage' tab was declared in ProjectDetail.jsx conditional (line 1752) but was NOT added to the tabs array (line 416-425) — the whole Phase 2 indicator UI (ind-cpi, ind-spi, ind-velocity, ind-predictability, sprint-add-btn) was unreachable. Added the tab entry; re-test passed.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "ProjectDetail.jsx (tabs array)",
+        "issue": "The 'Pilotage' tab was missing from the tabs definition array (lines 418-425) even though its conditional block exists at line 1752 (`{activeTab === 'pilotage' && ...}`). Consequently ind-cpi/ind-spi (waterfall), ind-velocity/ind-predictability (agile/safe) and sprint-add-btn (sprint entry) were unreachable from the UI. TESTER FIX APPLIED: inserted `{ id: 'pilotage', label: 'Pilotage' }` between 'equipe' and 'benefices'. All Phase 2 indicators now render correctly on both the waterfall project (343282cb…) and the SAFe project (21fa6d43…).",
+        "selector": "[data-testid=\"project-tab-pilotage\"]",
+        "priority": "CRITICAL (fixed)"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iter66_dsi_modules.py",
+    "/app/test_reports/pytest/iter66_results.xml"
+  ],
+  "action_items": [
+    "Main agent: keep the ProjectDetail Pilotage tab entry that the tester added. Verify the tab renders consistently across all methodologies.",
+    "Consider adding an ESLint / test that ensures every `activeTab === X` branch has a matching entry in the tabs array to prevent the same class of bug (dead tab conditionals)."
+  ],
+  "critical_code_review_comments": [
+    "ProjectDetail.jsx is 2071 lines — well beyond the 700-line guideline. Its Pilotage tab conditional was easy to overlook because the tabs array lives ~1300 lines away from the render branch. Recommend extracting each tab pane into its own component (Overview.jsx, Tasks.jsx, PilotageTab.jsx, …).",
+    "Router pattern in DSI modules is duplicated (applications/run/security/architecture all do the same PATTERN of GET/POST/PUT/DELETE + `_require_write`). SimpleCrud handles part of it but Applications and Run duplicate boilerplate. Consider generalising.",
+    "PB submit_vote does not call require_dsi_write — this is intentional (any authenticated user must be able to vote in SAFe LPM), but READ_ONLY viewer can also vote. Confirm this is the intended product decision; if not, gate voting behind a `pb.vote` permission.",
+    "run/service.py `_sla_met` swallows all datetime parsing errors → returns None silently. Fine, but worth logging so seed/import issues surface."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iter66_dsi_modules.py",
+    "/app/frontend/src/pages/ProjectDetail.jsx",
+    "/app/test_reports/iteration_66.json"
+  ],
+  "success_rate": {"backend": "100% (34/34)", "frontend": "100% after 1 tab fix — all DSI pages, tabs, add-buttons, Pilotage tab, PB vote & results, Applications TIME matrix / CRUD, heatmap all verified"},
+  "test_credentials": "admin@altair.fr / Admin2026!, pmo@altair.fr / Pmo1234!, viewer@altair.fr / View1234!, admin@betacorp.fr / Beta2026! (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "Test data created & cleaned during backend tests (all prefixed TEST_). One UI-created activity 'TEST_UI_run_66' was cleaned via API. PB session 'PB PI-4 2026' status was toggled closed→decided→open and admin's vote was upserted (still 2 votes soumis — no impact on seed integrity).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "All DSI modules (APM, Run, Sécurité, Architecture) and Phase 2 indicators are functionally correct end-to-end. The only bug found was the missing Pilotage tab entry in ProjectDetail.jsx tabs array — tester fixed by inserting `{ id: 'pilotage', label: 'Pilotage' }` right after 'equipe'. Re-run of frontend confirms ind-cpi/ind-spi (waterfall), ind-velocity/ind-predictability/sprint-add-btn (SAFe) are all reachable. Backend suite /app/backend/tests/test_iter66_dsi_modules.py can be re-executed with `REACT_APP_BACKEND_URL=<url> pytest tests/test_iter66_dsi_modules.py` for regression.",
+  "rca of the issue": "ProjectDetail.jsx grew to 2071 lines. When Phase 2 added the Pilotage tab, the developer added the conditional render block at line 1752 (`{activeTab === 'pilotage' && <ProjectIndicators .../>}`) but forgot to add the corresponding tab entry in the tabs button array at lines 417-425. As a result the pilotage view was rendered ONLY if activeTab was set to 'pilotage', which was never possible via the UI. Reproduction (before fix): login admin → /projects/343282cb-… → no 'Pilotage' tab visible (only Aperçu/Tâches/Jalons/Risques/Décisions/Équipe/Business case). Fix: add `{ id: 'pilotage', label: 'Pilotage' }` to the tabs list."
+}

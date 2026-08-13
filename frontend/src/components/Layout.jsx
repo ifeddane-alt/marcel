@@ -33,6 +33,12 @@ import {
   Layers,
   Activity,
   Home as HomeIcon,
+  AppWindow,
+  ServerCog,
+  ShieldHalf,
+  Network,
+  Gauge,
+  HandCoins,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -51,6 +57,7 @@ const MAIN_NAV = [
   { to: "/dashboard",  icon: LayoutDashboard, label: "Tableau de bord", perm: "dashboard.view" },
   { to: "/programmes", icon: FolderKanban,     label: "Programmes",     perm: "portfolio.view" },
   { to: "/portfolio",  icon: Briefcase,        label: "Portefeuille",   perm: "portfolio.view" },
+  { to: "/pilotage",   icon: Gauge,            label: "Pilotage",       perm: "portfolio.view" },
   { to: "/objectifs",  icon: Goal,             label: "Objectifs",      perm: "portfolio.view" },
   { to: "/budget",     icon: DollarSign,       label: "Budget",         perm: "budget.view" },
   { to: "/teams",      icon: UsersRound,       label: "Équipes",        perm: "teams.view" },
@@ -121,8 +128,18 @@ export default function Layout() {
     if (hasPermission("agent.alerts") || hasPermission("agent.chat") || hasPermission("*"))
       agentItems.push({ to: "/agent/alertes", icon: Bell, label: "Mes alertes" });
   }
+  const dsiItems = (hasPermission("portfolio.view") || hasPermission("*"))
+    ? [
+        { to: "/applications", icon: AppWindow, label: "Applications" },
+        { to: "/run", icon: ServerCog, label: "Run & Exploitation" },
+        { to: "/securite", icon: ShieldHalf, label: "Sécurité" },
+        { to: "/architecture", icon: Network, label: "Architecture" },
+      ] : [];
   const safeItems = canAccessNav("trains.view", "safe")
-    ? [{ to: "/safe/trains", icon: Train, label: "Trains SAFe" }] : [];
+    ? [
+        { to: "/safe/trains", icon: Train, label: "Trains SAFe" },
+        { to: "/pb", icon: HandCoins, label: "Budget participatif" },
+      ] : [];
   const vendorItems = canAccessNav("vendors.view", "vendors")
     ? [{ to: "/vendors", icon: Handshake, label: "Suivi Fournisseurs" }] : [];
   const toolItems = hasPermission("import.csv")
@@ -143,6 +160,7 @@ export default function Layout() {
   const sections = [
     { title: "Pilotage", items: visibleMain },
     { title: "Modules", items: visibleModules },
+    { title: "DSI", items: dsiItems },
     { title: "Agent IA", items: agentItems },
     { title: "SAFe", items: safeItems },
     { title: "Achats / Finances", items: vendorItems },

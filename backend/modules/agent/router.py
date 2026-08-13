@@ -114,3 +114,21 @@ async def get_agent_analytics(
     current_user: TokenPayload = Depends(get_current_user),
 ):
     return await service.get_agent_analytics(current_user)
+
+
+# ── Socle IA — analyse proactive quotidienne ──────────────────────────────────
+
+from core.auth import require_admin
+from . import insights as insights_mod
+
+
+@router.post("/agent/analyze")
+async def run_analysis(current_user: TokenPayload = Depends(get_current_user)):
+    """Déclenche manuellement l'analyse par règles (admin)."""
+    require_admin(current_user)
+    return await insights_mod.analyze_tenant(current_user.tenant_id, triggered_by=current_user.name)
+
+
+@router.get("/agent/insights")
+async def list_insights(limit: int = Query(10, le=50), current_user: TokenPayload = Depends(get_current_user)):
+    return await insights_mod.list_insights(current_user.tenant_id, limit)

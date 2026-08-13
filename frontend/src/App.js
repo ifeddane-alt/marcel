@@ -38,6 +38,13 @@ import AdminPowerBI from "@/pages/AdminPowerBI";
 import AdminTemplates from "@/pages/AdminTemplates";
 import AdminMonitoring from "@/pages/AdminMonitoring";
 import AdminAudit from "@/pages/AdminAudit";
+import Applications from "@/pages/Applications";
+import ApplicationDetail from "@/pages/ApplicationDetail";
+import Run from "@/pages/Run";
+import Security from "@/pages/Security";
+import Architecture from "@/pages/Architecture";
+import Pilotage from "@/pages/Pilotage";
+import ParticipatoryBudgeting from "@/pages/ParticipatoryBudgeting";
 import "@/App.css";
 
 function ProtectedRoute({ children }) {
@@ -112,6 +119,13 @@ function AppRoutes() {
         <Route path="admin/templates" element={<AdminRoute><AdminTemplates /></AdminRoute>} />
         <Route path="admin/monitoring" element={<AdminRoute><AdminMonitoring /></AdminRoute>} />
         <Route path="admin/audit" element={<AdminRoute><AdminAudit /></AdminRoute>} />
+        <Route path="applications" element={<Applications />} />
+        <Route path="applications/:id" element={<ApplicationDetail />} />
+        <Route path="run" element={<Run />} />
+        <Route path="securite" element={<Security />} />
+        <Route path="architecture" element={<Architecture />} />
+        <Route path="pilotage" element={<Pilotage />} />
+        <Route path="pb" element={<ParticipatoryBudgeting />} />
         <Route path="vendors" element={<Vendors />} />
         <Route path="safe/trains" element={<TrainsSafe />} />
         <Route path="safe/trains/:trainId" element={<TrainsSafe />} />
