@@ -263,3 +263,8 @@
 - Push GitHub 741eb08→013e6f6, update.sh VPS (pull, rebuild, sync permissions 2 tenants), prune 1,97 Go → disque 81 %.
 - Vérifié : /api/health 200, backend healthy sans erreur logs, bundle main.3054b24c.js contient les 7 marqueurs Lot A+B (theme-toggle, lang-toggle, onboarding, mfa, favoris, presentation, lifecycle-tab), routes /api/auth/mfa/* et /api/lifecycle/* présentes et protégées (403 sans auth).
 ### Exclusions confirmées par l'utilisateur : collaboration (2), emails réels (3), connecteurs Jira/SAP (4), lot C.
+
+## 2026-06 (fork) — Suite : correctifs + onglet Informations projet (déployés en prod)
+- Backfill codes projets PROD : les 9 projets prod n'avaient aucun code (backfill jamais exécuté en prod) → PRJ-001 à PRJ-009. Recherche par code (Ctrl+K) désormais opérationnelle en prod. Données uniquement, pas de redéploiement.
+- Fix bouton « Présentation » du Dashboard : useNavigate non initialisé (ReferenceError: navigate is not defined) → clic sans effet en prod. Corrigé, testé Preview (clic → slides → sortie), déployé (commit 2787fe6, bundle main.d237662d.js).
+- Onglet « Informations » sur la fiche projet, en 1re position avant Aperçu (commit 406a9f5) : direction, programme (select), description, leading indicators, outcome, income (€), expected result, produits/apps impactés (multi-sélection référentiel APM), ART (select trains SAFe), Epic Owner (select ressources). Backend : 8 nouveaux champs dans ProjectCreate/ProjectUpdate (model_dump → aucune autre modif service). Testé : curl PUT champs persistés + screenshot (onglet en 1re position, sauvegarde OK). Déployé prod, bundle vérifié (marqueur project-info-tab), health 200, prune, disque 81 %.
