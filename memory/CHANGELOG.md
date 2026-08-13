@@ -246,3 +246,20 @@
 - Régression : heatmap 30/42 cellules non nulles (max 100 %) ; agent IA PMO répond en 1,7 s (10 projets actifs).
 - Business case : formatage par unité (fmtValue €/%/JH) confirmé dans BenefitsSection.jsx (colonnes Attendu/Réalisé + badge unité).
 - Preview uniquement — PAS déployé en prod (dédup prod déjà faite via fix_prod_data.js le 2026-08-12).
+
+## 2026-06 (fork) — Lot A + Lot B livrés et DÉPLOYÉS EN PROD (commit 013e6f6)
+### Lot A (agent-testé, iteration_67 sans bug bloquant)
+- Cycle de vie projets & gates intégrés à la gouvernance : demandes de passage de phase, livrables par gate, validations Architecte/Sécurité (403 croisés testés), décisions Go/No-Go/Go avec réserves, dérogations, ODJ, page « Mes validations », onglet Cycle de vie sur la fiche projet.
+- Skills ressources, champs personnalisés projets, vues/filtres sauvegardés, snapshots mensuels portefeuille, seuils RAG configurables, capacités métiers↔applications, pondération des votes PB par rôle (moyenne pondérée testée : 600k/400k).
+### Lot B (backend MFA : 15/15 assertions curl+pyotp ; frontend : testing_agent iteration_68 — 6/6 features PASS)
+- MFA TOTP : setup QR + clé manuelle, activation avec code, 8 codes de secours (consommation testée), login en 2 étapes (ticket JWT type mfa), désactivation, section MFA dans Mon compte, formulaire MFA sur /login. Comptes SSO exclus.
+- Dark mode : bouton theme-toggle-btn dans le header, classe .dark sur <html>, persistance localStorage marcel_theme, overrides CSS (variables shadcn + sélecteurs [class~=] sur la palette Clarity).
+- i18n FR/EN : sélecteur lang-toggle-btn réintroduit, navigation latérale + titres de sections traduits (tKey, data-testid canoniques français conservés), locales fr/en enrichies (nav/sections/theme).
+- Onboarding : visite guidée 4 étapes à la 1re connexion (localStorage marcel_onboarded_<user_id>), skip/next/prev.
+- Mode Présentation COMEX : page /presentation (5 slides, navigation clavier + boutons), bouton depuis le Dashboard.
+- Favoris projets : étoile tile-favorite-{id} sur les tuiles du portefeuille, persistance API /favorites.
+- Correctifs post-test : mfa-cancel-btn (bouton Annuler du setup MFA) + testid mfa-secret.
+### Déploiement production marcel-ppm.com
+- Push GitHub 741eb08→013e6f6, update.sh VPS (pull, rebuild, sync permissions 2 tenants), prune 1,97 Go → disque 81 %.
+- Vérifié : /api/health 200, backend healthy sans erreur logs, bundle main.3054b24c.js contient les 7 marqueurs Lot A+B (theme-toggle, lang-toggle, onboarding, mfa, favoris, presentation, lifecycle-tab), routes /api/auth/mfa/* et /api/lifecycle/* présentes et protégées (403 sans auth).
+### Exclusions confirmées par l'utilisateur : collaboration (2), emails réels (3), connecteurs Jira/SAP (4), lot C.
