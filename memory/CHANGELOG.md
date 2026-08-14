@@ -268,3 +268,17 @@
 - Backfill codes projets PROD : les 9 projets prod n'avaient aucun code (backfill jamais exécuté en prod) → PRJ-001 à PRJ-009. Recherche par code (Ctrl+K) désormais opérationnelle en prod. Données uniquement, pas de redéploiement.
 - Fix bouton « Présentation » du Dashboard : useNavigate non initialisé (ReferenceError: navigate is not defined) → clic sans effet en prod. Corrigé, testé Preview (clic → slides → sortie), déployé (commit 2787fe6, bundle main.d237662d.js).
 - Onglet « Informations » sur la fiche projet, en 1re position avant Aperçu (commit 406a9f5) : direction, programme (select), description, leading indicators, outcome, income (€), expected result, produits/apps impactés (multi-sélection référentiel APM), ART (select trains SAFe), Epic Owner (select ressources). Backend : 8 nouveaux champs dans ProjectCreate/ProjectUpdate (model_dump → aucune autre modif service). Testé : curl PUT champs persistés + screenshot (onglet en 1re position, sauvegarde OK). Déployé prod, bundle vérifié (marqueur project-info-tab), health 200, prune, disque 81 %.
+
+## 2026-06 (fork) — Lot Événements & Pilotage : 8 features livrées + DÉPLOYÉES EN PROD (commit be07d04)
+### Fonctionnel (backend 28/29 curl PASS + testing_agent iteration_69 : 18/20, 2 faux positifs re-vérifiés OK)
+1. Calendrier des instances (/calendrier) : référentiel de 22 types validés avec l'utilisateur (5 niveaux stratégique→run, avec Portfolio Sync, comité d'investissement rattaché gouvernance), génération idempotente du planning annuel (272 événements 2026), filtres par niveau, statuts tenu/annulé, ajout de types custom.
+2. Reforecast trimestriel (Budget → Reforecast) : scope trimestre valorisé en € (JH alloués × TJM réel, TJM moyen en fallback), validation par cellule avec ajustement, écarts budget/forecast/consommé.
+3. Transferts budgétaires (Budget → Transferts) : X→Y avec motif, contrôles (même projet, budget insuffisant → 400), impact immédiat budget_total, journal.
+4. Console budget cible (Budget → Budget cible) : leviers valorisés (features scope sec/étendu × TJM, pause projet = reste à faire), simulation avec barre de progression, application réelle (scope_status=out, status=pause), historique des coupes.
+5. Console capacitaire (/capacite) : charge vs capacité 3/6 mois, axes équipe/ressource/compétence, heatmap taux (vert<85/ambre/rouge>100).
+6. Enveloppes stratégiques (Budget → Enveloppes) : par programme ou thème stratégique (CRUD thèmes), consommation engagé/consommé vs enveloppe. Champ strategic_theme_id ajouté aux projets.
+7. Trajectoire SI (Architecture → Trajectoire SI) : board TIME (conserver/moderniser/remplacer/décommissionner), jalons de trajectoire datés.
+8. Export PowerPoint COPIL (Portefeuille → bouton COPIL PPTX) : moteur core/pptx.py charte MARCEL (cover indigo, KPI cards, tables zébrées, footer paginé), deck COPIL 7 slides (KPIs RAG, top projets, alertes, décisions, prochaines instances). python-pptx figé dans requirements.
+### Incident déploiement prod (résolu)
+- 1er build échoué : « no space left on device » — cause racine : log json Docker du conteneur mongo JAMAIS rotaté = 6,9 Go. Truncate + rotation ajoutée au compose (x-logging 20m×3, appliquée à mongo/backend/frontend/nginx-http). Disque : 97 % → 57 %.
+- Pendant le rebuild, le VPS a saturé (SSH + site inaccessibles ~5 min) puis a récupéré seul. Déploiement final OK : bundle main.badd53a9.js avec les 8 marqueurs, routes protégées 403, 4 conteneurs healthy.

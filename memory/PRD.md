@@ -427,3 +427,13 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - ✅ PROD marcel-ppm.com à jour (bundle main.3054b24c.js, health 200, routes protégées, permissions synchronisées, disque 81 %).
 - ❌ EXCLUS par l'utilisateur : collaboration/@mentions (2), emails réels Resend (3), connecteurs Jira/SAP nocturnes (4), lot C (gros chantiers).
 - Backlog restant (non prioritaire) : traduction EN des pages internes (seule la nav/shell est traduite), stockage objet pour uploads (via integration_expert), fallback JWT_SECRET codé en dur dans core/auth.py (à traiter avec précaution — prod n'a pas la variable dans compose, retrait cassant les sessions).
+
+## 2026-06 (fork) — Lot Événements & Pilotage (déployé prod, commit be07d04)
+- ✅ Cartographie des instances validée avec l'utilisateur (22 types, 5 niveaux, Portfolio Sync inclus, comité d'investissement = gouvernance, revue portefeuille mensuelle) + calendrier annuel généré (/calendrier).
+- ✅ Volet budgétaire : reforecast trimestriel = scope valorisé € (TJM réel), transferts budgétaires tracés, console budget cible (coupes features/pause projet), enveloppes stratégiques par programme/thème.
+- ✅ Console capacitaire 3/6 mois par équipe/ressource/compétence (/capacite).
+- ✅ Trajectoire SI (TIME) dans Architecture + jalons.
+- ✅ Socle PowerPoint (core/pptx.py, charte MARCEL) + export COPIL PPTX depuis le Portefeuille.
+- ✅ Rotation des logs Docker en prod (incident disque 97 % résolu — log mongo 6,9 Go).
+- Backlog exports PPTX additionnels (~10-15 crédits pièce) : dossier de gate, reforecast, relevé de décisions gouvernance, rapport de PI, capacitaire, trajectoire SI.
+- Exclusions maintenues : collaboration (2), emails réels (3), connecteurs Jira/SAP (4), lot C.
