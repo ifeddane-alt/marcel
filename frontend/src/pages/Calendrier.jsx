@@ -1,7 +1,7 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { CalendarDays, Plus, RefreshCw, Settings2, Trash2, Check, X } from "lucide-react";
+import { CalendarDays, Plus, RefreshCw, Settings2, Trash2, Check, X, FileDown } from "lucide-react";
 import { toast } from "sonner";
-import { eventsAPI } from "@/api";
+import { eventsAPI, exportsAPI } from "@/api";
 import { usePermissions } from "@/hooks/usePermissions";
 
 const LEVELS = [
@@ -44,6 +44,20 @@ export default function Calendrier() {
   const setStatus = async (ev, status) => {
     await eventsAPI.update(ev.event_id, { status });
     load();
+  };
+
+  const downloadReport = async (ev) => {
+    toast.info(`Génération du reporting « ${ev.title} »…`);
+    try {
+      const r = await exportsAPI.eventPptx(ev.event_id);
+      const url = URL.createObjectURL(r.data);
+      const a = document.createElement("a");
+      a.href = url;
+      a.download = `${ev.title.replace(/[^a-zA-Z0-9À-ÿ]/g, "_")}_${ev.date}.pptx`;
+      a.click();
+      URL.revokeObjectURL(url);
+      toast.success("Reporting PowerPoint téléchargé");
+    } catch { toast.error("Erreur lors de la génération du reporting"); }
   };
 
   const filtered = levelFilter ? events.filter((e) => e.level === levelFilter) : events;
@@ -131,8 +145,13 @@ export default function Calendrier() {
                         {ev.title}
                       </span>
                       {done && <Check size={11} className="text-[#3f8a34] flex-shrink-0" />}
+                      <button onClick={() => downloadReport(ev)} title="Télécharger le reporting PowerPoint de cette instance"
+                        data-testid={`event-report-${ev.event_id}`}
+                        className="p-0.5 text-[#8a87a0] hover:text-[#2e5fe8] hover:bg-[#e9effe] rounded flex-shrink-0 transition-colors">
+                        <FileDown size={12} />
+                      </button>
                       {canEdit && !done && !cancelled && (
-                        <span className="hidden group-hover:flex items-center gap-0.5 flex-shrink-0">
+                        <span className="flex items-center gap-0.5 flex-shrink-0 opacity-0 group-hover:opacity-100 transition-opacity">
                           <button onClick={() => setStatus(ev, "tenu")} title="Marquer tenu" data-testid={`event-done-${ev.event_id}`}
                             className="p-0.5 text-[#3f8a34] hover:bg-[#ddf0d8] rounded"><Check size={11} /></button>
                           <button onClick={() => setStatus(ev, "annule")} title="Annuler" data-testid={`event-cancel-${ev.event_id}`}
