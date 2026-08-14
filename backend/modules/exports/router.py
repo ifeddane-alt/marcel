@@ -20,6 +20,14 @@ async def copil_pptx(current_user: TokenPayload = Depends(permission_required("p
                              headers={"Content-Disposition": f'attachment; filename="{filename}"'})
 
 
+@router.get("/exports/roadmap.pptx")
+async def roadmap_pptx(current_user: TokenPayload = Depends(permission_required("portfolio.view"))):
+    data = await service.build_roadmap_pptx(current_user)
+    filename = f"Roadmap_portefeuille_{date.today().isoformat()}.pptx"
+    return StreamingResponse(io.BytesIO(data), media_type=PPTX_MIME,
+                             headers={"Content-Disposition": f'attachment; filename="{filename}"'})
+
+
 @router.get("/exports/event/{event_id}.pptx")
 async def event_pptx(event_id: str, current_user: TokenPayload = Depends(permission_required("portfolio.view"))):
     data, filename = await service.build_event_pptx(event_id, current_user)

@@ -423,6 +423,121 @@ def _resolve_builder(title: str):
     return _copil_slides
 
 
+async def _roadmap_slides(deck, user):
+    from pptx.util import Inches, Pt, Emu
+    from pptx.enum.shapes import MSO_SHAPE
+    from core.pptx import _round_rect, _text, _set_fill, CARD, BG, TEXT, MUTED, BORDER
+    from pptx.dml.color import RGBColor
+    from datetime import timedelta
+
+    today = date.today()
+    win_start = date(today.year, today.month, 1)
+    m = win_start.month - 3
+    y = win_start.year
+    while m < 1:
+        m += 12
+        y -= 1
+    win_start = date(y, m, 1)
+    months = []
+    my, mm = win_start.year, win_start.month
+    for _ in range(12):
+        months.append(date(my, mm, 1))
+        mm += 1
+        if mm > 12:
+            mm, my = 1, my + 1
+    end_y, end_m = months[-1].year, months[-1].month + 1
+    if end_m > 12:
+        end_m, end_y = 1, end_y + 1
+    win_end = date(end_y, end_m, 1)
+    span = (win_end - win_start).days
+
+    projects = await db.projects.find(
+        {"tenant_id": user.tenant_id, "status": {"$nin": ["annule"]}},
+        {"_id": 0, "project_id": 1, "name": 1, "code": 1, "status_rag": 1, "program_id": 1,
+         "start_date": 1, "end_date_forecast": 1, "end_date_baseline": 1}).to_list(None)
+    programs = await db.programs.find({"tenant_id": user.tenant_id}, {"_id": 0, "program_id": 1, "name": 1}).to_list(None)
+    pnames = {p["program_id"]: p["name"] for p in programs}
+    milestones = await db.milestones.find(
+        {"tenant_id": user.tenant_id, "is_governance": True}, {"_id": 0, "project_id": 1, "date_forecast": 1, "date_baseline": 1}).to_list(None)
+    ms_by_p: dict = {}
+    for msn in milestones:
+        ms_by_p.setdefault(msn["project_id"], []).append(msn.get("date_forecast") or msn.get("date_baseline"))
+
+    groups: dict = {}
+    for p in projects:
+        groups.setdefault(p.get("program_id") or "_none", []).append(p)
+    rows = []
+    for gid in sorted(groups, key=lambda g: pnames.get(g, "zzz")):
+        rows.append(("group", pnames.get(gid, "Sans programme")))
+        for p in sorted(groups[gid], key=lambda x: x.get("start_date") or ""):
+            rows.append(("project", p))
+
+    GRID_X, GRID_W = Inches(3.0), Inches(9.7)
+    ROW_H, START_Y = Inches(0.34), Inches(1.85)
+    PER_SLIDE = 14
+
+    def x_of(dstr):
+        try:
+            d = date.fromisoformat(dstr[:10])
+        except (ValueError, TypeError):
+            return None
+        frac = (d - win_start).days / span
+        return max(0.0, min(frac, 1.0))
+
+    for chunk_start in range(0, len(rows), PER_SLIDE):
+        chunk = rows[chunk_start:chunk_start + PER_SLIDE]
+        slide = deck._new()
+        deck._header(slide, "Roadmap Portefeuille",
+                     f"{win_start.strftime('%m/%Y')} → {months[-1].strftime('%m/%Y')} — barres RAG, losanges = jalons de gouvernance")
+        col_w = Emu(int(GRID_W / 12))
+        for i, mo in enumerate(months):
+            _text(slide, Emu(int(GRID_X + col_w * i)), Inches(1.5), col_w, Inches(0.3),
+                  mo.strftime("%m/%y"), size=8, color=MUTED, bold=True)
+            sep = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Emu(int(GRID_X + col_w * i)), START_Y,
+                                         Emu(6350), Emu(int(ROW_H * len(chunk))))
+            _set_fill(sep, BORDER)
+            sep.shadow.inherit = False
+        tx = x_of(today.isoformat())
+        if tx is not None:
+            tl = slide.shapes.add_shape(MSO_SHAPE.RECTANGLE, Emu(int(GRID_X + GRID_W * tx)), Inches(1.5),
+                                        Emu(19050), Emu(int(Inches(0.35) + ROW_H * len(chunk))))
+            _set_fill(tl, RGBColor(0x2E, 0x5F, 0xE8))
+            tl.shadow.inherit = False
+        y = START_Y
+        for kind, item in chunk:
+            if kind == "group":
+                _text(slide, Inches(0.6), y, Inches(2.3), ROW_H, str(item)[:34].upper(), size=9, bold=True, color=INDIGO)
+            else:
+                p = item
+                _text(slide, Inches(0.7), y, Inches(2.25), ROW_H,
+                      f"{p.get('code') or ''} {p.get('name', '')}"[:38], size=8.5, color=TEXT)
+                x1 = x_of(p.get("start_date") or "")
+                x2 = x_of(p.get("end_date_forecast") or p.get("end_date_baseline") or "")
+                if x1 is not None and x2 is not None and x2 > x1:
+                    bar = _round_rect(slide, Emu(int(GRID_X + GRID_W * x1)), Emu(int(y + Inches(0.06))),
+                                      Emu(max(int(GRID_W * (x2 - x1)), 50000)), Inches(0.20),
+                                      RAG_COLOR.get(p.get("status_rag"), GREEN), radius=0.5)
+                for md in ms_by_p.get(p["project_id"], []):
+                    mx = x_of(md or "")
+                    if mx is None:
+                        continue
+                    dia = slide.shapes.add_shape(MSO_SHAPE.DIAMOND,
+                                                 Emu(int(GRID_X + GRID_W * mx - 45000)), Emu(int(y + Inches(0.05))),
+                                                 Emu(90000), Emu(90000))
+                    _set_fill(dia, INDIGO)
+                    dia.shadow.inherit = False
+            y = Emu(int(y + ROW_H))
+        deck._footer(slide)
+
+
+async def build_roadmap_pptx(user) -> bytes:
+    deck = await _deck(user)
+    deck.cover("Roadmap Portefeuille", "Vue consolidée multi-projets — 12 mois glissants")
+    await _roadmap_slides(deck, user)
+    deck.section("Merci", "Généré automatiquement par MARCEL")
+    return deck.to_bytes()
+
+
 async def build_copil_pptx(user) -> bytes:
     deck = await _deck(user)
     deck.cover("COPIL Portefeuille", "Comité de pilotage — synthèse mensuelle")

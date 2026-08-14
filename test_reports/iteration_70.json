@@ -1,0 +1,52 @@
+{
+  "summary": "Full end-to-end validation of the reworked Roadmap page (option B) — backend PPTX export + frontend Timeline features (12 mois window, zoom Mois/Trimestre/Année, recenter Aujourd'hui, groupby, phases, gates, orthogonal dependencies with focus/all/off modes, conflicts, PPTX download, tabs Scope/Dépendances). All tested items PASS.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "tests_performed": {
+    "backend": {
+      "GET /api/exports/roadmap.pptx (no auth)": "PASS (403)",
+      "GET /api/exports/roadmap.pptx (admin Bearer)": "PASS (200, application/vnd.openxmlformats-officedocument.presentationml.presentation, ~35KB, ZIP/PK header valid)",
+      "GET /api/lifecycle/portfolio, /api/projects, /api/programs (admin)": "PASS (200)"
+    },
+    "frontend": {
+      "login admin@altair.fr": "PASS (redirects to /home)",
+      "navigation to /roadmap": "PASS",
+      "all data-testids present": "PASS (roadmap-fullspan-btn, roadmap-recenter-btn, zoom-month/quarter/year-btn, roadmap-groupby, toggle-phases, dep-mode-focus/all/off, btn-export-roadmap-pptx, dep-conflict-count)",
+      "default view = 12 mois window (mai 26 → juin 27, current -3 / +9)": "PASS",
+      "default zoom = Mois (active with bg-blue-600)": "PASS",
+      "zoom-quarter-btn click activates trimestre + bg-blue-600 highlight + column width changes": "PASS",
+      "fullspan toggle 12 mois ↔ Tout": "PASS (label switches between '12 mois' and 'Tout')",
+      "recenter Aujourd'hui": "PASS (no error, scroll adjusts)",
+      "groupby options": "PASS (Programme, Direction, Thème stratégique, ART) — switching regroups projects",
+      "toggle-phases": "PASS (class changes bg→border, phase segments visible when ON)",
+      "phase legend (6 phases: Cadrage, Conception, Réalisation, Recette, Déploiement, Run)": "PASS (visible in screenshot)",
+      "roadmap-gate-* diamonds": "PASS (3 gates rendered with tooltip like 'Gate conception → realisation · GO avec réserves · 01 oct. 2026')",
+      "dep-mode default = focus, 0 arrows visible without hover": "PASS",
+      "dep-mode-all shows all 7 arrows (dep-arrow-*)": "PASS",
+      "dep-mode-off hides all arrows": "PASS",
+      "hover on dep-badge-{project_id} shows only that project's arrows": "PASS (1 arrow shown)",
+      "click dep-badge pins arrows (persist after mouse leave)": "PASS",
+      "conflict counter '⚠ 6 en conflit'": "PASS (matches main agent smoke)",
+      "Scope vs Réel tab": "PASS (loads scope comparison view)",
+      "Dépendances (7) tab": "PASS (loads dependencies registry with 7 rows, 3 critiques, 1 résolue)",
+      "roadmap-project-link-* (10 project links)": "PASS",
+      "PPTX export download": "PASS (Roadmap_2026-08-14.pptx downloaded via browser)"
+    }
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_roadmap_export.py",
+    "/app/test_reports/pytest/roadmap_export.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "Roadmap.jsx is ~1400 lignes — envisager un split en sous-composants (TimelineHeader, ProjectBar, DependencyOverlay, GateMarker) pour maintenabilité; hors périmètre du bugfix mais recommandé.",
+    "Aucune régression détectée; les WebSocket errors observées dans la console sont pré-existantes et sans impact sur la fonctionnalité testée."
+  ],
+  "updated_files": ["/app/backend/tests/test_roadmap_export.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin@altair.fr / Admin2026! (TENANT_ADMIN, tenant Altair)",
+  "seed_data_creation": "none (used existing Altair demo data)",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Roadmap rework fully validated. Fullspan button label = target state ('12 mois' shown when currently in Tout, and vice versa). Default landing: 12-month window (current-3/+9), zoom=Mois, phases ON, dep-mode=focus. 6 conflicts detected in demo data with 7 dependencies total."
+}

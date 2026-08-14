@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef, useMemo } from "react";
 import { Link } from "react-router-dom";
-import { Map, Filter, ZoomIn, ZoomOut, X, ExternalLink, Diamond, GitCompare, Layers, RefreshCw, GitFork, Plus, Pencil, Trash2 } from "lucide-react";
-import { projectsAPI, programsAPI, milestonesAPI, projectDependenciesAPI, scopeAPI } from "@/api";
+import { Map, Filter, ZoomIn, ZoomOut, X, ExternalLink, Diamond, GitCompare, Layers, RefreshCw, GitFork, Plus, Pencil, Trash2, LocateFixed, Presentation as PresentationIcon } from "lucide-react";
+import { projectsAPI, programsAPI, milestonesAPI, projectDependenciesAPI, scopeAPI, lifecycleAPI, budgetOpsAPI, safeAPI, exportsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { toast } from "sonner";
 import ConfirmDialog from "@/components/ConfirmDialog";
@@ -26,6 +26,41 @@ const STATUS_LABELS = {
 const IMPACT_COLORS = {
   critical: "#EF4444", high: "#F97316", medium: "#F59E0B", low: "#10B981",
 };
+
+const PHASE_COLORS = {
+  cadrage: "#7c3aed", conception: "#2e5fe8", realisation: "#0d9488",
+  recette: "#b7791f", deploiement: "#3f8a34", run: "#8a87a0",
+};
+const PHASE_LABELS = {
+  cadrage: "Cadrage", conception: "Conception", realisation: "Réalisation",
+  recette: "Recette", deploiement: "Déploiement", run: "Run",
+};
+const GATE_COLORS = {
+  go: "#3f8a34", no_go: "#cc4f45", go_reserves: "#b7791f",
+  en_validation: "#2e5fe8", pret: "#7c3aed", demande: "#8a87a0",
+};
+const GATE_LABELS = {
+  go: "GO", no_go: "NO-GO", go_reserves: "GO avec réserves",
+  en_validation: "En validation", pret: "Prêt pour décision", demande: "Demandé",
+};
+
+function phaseSegments(p, gates) {
+  const start = dateToMs(p.start_date);
+  const end = dateToMs(p.end_date_forecast || p.end_date_baseline);
+  if (!start || !end || end <= start) return [];
+  const gs = (gates || []).filter((g) => dateToMs(g.target_date))
+    .sort((a, b) => dateToMs(a.target_date) - dateToMs(b.target_date));
+  if (!gs.length) return [{ phase: p.lifecycle_phase || p.phase || "cadrage", start, end }];
+  const segs = [];
+  let cur = start;
+  gs.forEach((g) => {
+    const t = Math.min(Math.max(dateToMs(g.target_date), cur), end);
+    segs.push({ phase: g.from_phase, start: cur, end: t });
+    cur = t;
+  });
+  segs.push({ phase: gs[gs.length - 1].to_phase, start: cur, end });
+  return segs.filter((s) => s.end > s.start);
+}
 
 const COL_WIDTH_MONTH   = 80;
 const COL_WIDTH_QUARTER = 200;
@@ -614,10 +649,21 @@ export default function Roadmap() {
   const [filterMsAttribute, setFilterMsAttribute] = useState("");
   const [filterMsBlocking,  setFilterMsBlocking]  = useState(false);
 
-  const [showDeps, setShowDeps] = useState(true);
+  const [showDeps, setShowDeps] = useState(true); // conservé pour compat — mode réel : depMode
+  const [depMode, setDepMode] = useState("focus"); // focus | all | off
+  const [focusDepId, setFocusDepId] = useState(null);
+  const [hoverDepId, setHoverDepId] = useState(null);
   const [isQuarter, setIsQuarter] = useState(false);
+  const [zoom, setZoom] = useState("month"); // month | quarter | year
+  const [fullSpan, setFullSpan] = useState(false);
+  const [showPhases, setShowPhases] = useState(true);
+  const [groupBy, setGroupBy] = useState("program"); // program | direction | theme | art
+  const [gatesByProject, setGatesByProject] = useState({});
+  const [themes, setThemes] = useState([]);
+  const [trains, setTrains] = useState([]);
   const [tooltip, setTooltip] = useState(null);
   const scrollRef = useRef(null);
+  const bodyRef = useRef(null);
   const { user } = useAuth();
   const canManageDeps = ["TENANT_ADMIN", "PMO_USER"].includes(user?.role);
 
@@ -634,6 +680,16 @@ export default function Roadmap() {
       setAllDeps(dRes.data);
       setLoading(false);
     }).catch(() => setLoading(false));
+    lifecycleAPI.portfolio().then((r) => {
+      const map = {};
+      (r.data.gates || []).forEach((g) => {
+        if (!map[g.project_id]) map[g.project_id] = [];
+        map[g.project_id].push(g);
+      });
+      setGatesByProject(map);
+    }).catch(() => {});
+    budgetOpsAPI.listThemes().then((r) => setThemes(r.data || [])).catch(() => {});
+    safeAPI.listTrains().then((r) => setTrains(r.data || [])).catch(() => {});
   };
 
   // eslint-disable-next-line react-hooks/exhaustive-deps
@@ -656,35 +712,58 @@ export default function Roadmap() {
 
   const filteredProjectIds = useMemo(() => new Set(filtered.map((p) => p.project_id)), [filtered]);
 
-  // Time range
+  // Time range — fenêtre 12 mois glissants par défaut (-3 / +9), ou span complet
   const { timeMin, timeMax } = useMemo(() => {
+    if (!fullSpan) {
+      const now = new Date();
+      const min = new Date(now.getFullYear(), now.getMonth() - 3, 1).getTime();
+      const max = new Date(now.getFullYear(), now.getMonth() + 10, 1).getTime();
+      return { timeMin: min, timeMax: max };
+    }
     if (!filtered.length) return { timeMin: Date.now(), timeMax: Date.now() + 365 * 24 * 3600 * 1000 };
     const starts = filtered.map((p) => dateToMs(p.start_date)).filter(Boolean);
     const ends   = filtered.map((p) => dateToMs(p.end_date_forecast || p.end_date_baseline)).filter(Boolean);
     if (!starts.length) return { timeMin: Date.now(), timeMax: Date.now() + 365 * 24 * 3600 * 1000 };
     const pad = 30.5 * 24 * 3600 * 1000;
     return { timeMin: Math.min(...starts) - pad, timeMax: Math.max(...ends) + pad };
-  }, [filtered]);
+  }, [filtered, fullSpan]);
 
-  const colWidth = isQuarter ? COL_WIDTH_QUARTER : COL_WIDTH_MONTH;
-  const headers  = useMemo(() => buildHeaders(timeMin, timeMax, isQuarter), [timeMin, timeMax, isQuarter]);
+  const colWidth = zoom === "month" ? COL_WIDTH_MONTH : zoom === "quarter" ? COL_WIDTH_QUARTER : 96;
+  const isQuarterView = zoom !== "month";
+  const headers  = useMemo(() => buildHeaders(timeMin, timeMax, isQuarterView), [timeMin, timeMax, isQuarterView]);
   const totalW   = headers.length * colWidth;
 
+  const themeMap = useMemo(() => Object.fromEntries(themes.map((t) => [t.theme_id, t.name])), [themes]);
+  const trainMap = useMemo(() => Object.fromEntries(trains.map((t) => [t.train_id, t.name])), [trains]);
+
   const grouped = useMemo(() => {
+    const keyOf = (p) => {
+      if (groupBy === "direction") return p.direction || "__none__";
+      if (groupBy === "theme") return p.strategic_theme_id || "__none__";
+      if (groupBy === "art") return p.art_train_id || "__none__";
+      return p.program_id || "__none__";
+    };
+    const labelOf = (k) => {
+      if (k === "__none__") return null;
+      if (groupBy === "direction") return k;
+      if (groupBy === "theme") return themeMap[k] || k;
+      if (groupBy === "art") return trainMap[k] || k;
+      return programMap[k] || k;
+    };
     const groups = {};
     filtered.forEach((p) => {
-      const pId = p.program_id || "__none__";
-      if (!groups[pId]) groups[pId] = [];
-      groups[pId].push(p);
+      const k = keyOf(p);
+      if (!groups[k]) groups[k] = [];
+      groups[k].push(p);
     });
     return Object.entries(groups).sort(([a], [b]) => {
       if (a === "__none__") return 1;
       if (b === "__none__") return -1;
-      return (programMap[a] || "").localeCompare(programMap[b] || "");
-    });
-  }, [filtered, programMap]);
+      return (labelOf(a) || "").localeCompare(labelOf(b) || "");
+    }).map(([k, list]) => [labelOf(k) || (groupBy === "direction" ? "Sans direction" : groupBy === "theme" ? "Sans thème" : groupBy === "art" ? "Sans ART" : "Sans programme"), list]);
+  }, [filtered, programMap, groupBy, themeMap, trainMap]);
 
-  const toX = (ms) => msToX(ms, timeMin, colWidth, isQuarter);
+  const toX = (ms) => msToX(ms, timeMin, colWidth, isQuarterView);
   const todayX = toX(Date.now());
 
   // Compute milestone types available for selected family
@@ -715,20 +794,20 @@ export default function Roadmap() {
     return m;
   }, [milestones, filteredMilestones, filterMsFamily, filterMsType, filterMsAttribute, filterMsBlocking]);
 
-  // Project bar X positions (for dependency arrows)
+  // Project bar X positions (clampées à la fenêtre visible)
   const projectBarX = useMemo(() => {
     const map = {};
     filtered.forEach((p) => {
       const startMs = dateToMs(p.start_date);
       const endMs   = dateToMs(p.end_date_forecast || p.end_date_baseline);
-      if (startMs && endMs) {
-        const bl = Math.max(toX(startMs), 0);
-        const br = Math.max(toX(endMs), bl + 6);
-        map[p.project_id] = { left: bl, right: br };
+      if (startMs && endMs && endMs > timeMin && startMs < timeMax) {
+        const bl = Math.max(toX(Math.max(startMs, timeMin)), 0);
+        const br = Math.min(Math.max(toX(Math.min(endMs, timeMax)), bl + 6), totalW);
+        map[p.project_id] = { left: bl, right: br, clippedLeft: startMs < timeMin, clippedRight: endMs > timeMax };
       }
     });
     return map;
-  }, [filtered, toX]); // eslint-disable-line
+  }, [filtered, toX, timeMin, timeMax, totalW]); // eslint-disable-line
 
   // Project Y positions in timeline body (for dependency arrows)
   const projectY = useMemo(() => {
@@ -744,14 +823,42 @@ export default function Roadmap() {
     return map;
   }, [grouped]);
 
-  // Dependencies to render on roadmap (both projects visible)
+  // Dépendances : conflits + comptage par projet + rendu selon mode
+  const projectsById = useMemo(() => Object.fromEntries(projects.map((p) => [p.project_id, p])), [projects]);
+
+  const depConflict = (dep) => {
+    const s = projectsById[dep.source_project_id];
+    const t = projectsById[dep.target_project_id];
+    const sStart = dateToMs(s?.start_date);
+    const tEnd = dateToMs(t?.end_date_forecast || t?.end_date_baseline);
+    return Boolean(sStart && tEnd && tEnd > sStart && dep.status !== "resolved");
+  };
+
+  const depCountByProject = useMemo(() => {
+    const m = {};
+    allDeps.forEach((d) => {
+      m[d.source_project_id] = (m[d.source_project_id] || 0) + 1;
+      m[d.target_project_id] = (m[d.target_project_id] || 0) + 1;
+    });
+    return m;
+  }, [allDeps]);
+
   const visibleDeps = useMemo(() => {
-    if (!showDeps) return [];
+    if (depMode === "off") return [];
     return allDeps.filter((dep) =>
       filteredProjectIds.has(dep.source_project_id) &&
       filteredProjectIds.has(dep.target_project_id)
     );
-  }, [allDeps, filteredProjectIds, showDeps]);
+  }, [allDeps, filteredProjectIds, depMode]);
+
+  const activeDepProject = focusDepId || hoverDepId;
+  const renderedDeps = useMemo(() => {
+    if (depMode === "all") return visibleDeps;
+    if (depMode === "off" || !activeDepProject) return [];
+    return visibleDeps.filter((d) => d.source_project_id === activeDepProject || d.target_project_id === activeDepProject);
+  }, [visibleDeps, depMode, activeDepProject]);
+
+  const conflictCount = useMemo(() => visibleDeps.filter(depConflict).length, [visibleDeps, projectsById]); // eslint-disable-line
 
   const totalTimelineH = useMemo(() => {
     let h = 0;
@@ -836,15 +943,45 @@ export default function Roadmap() {
           <div className="flex flex-wrap items-center gap-2 justify-end">
             <ExcelToolbar entity="milestones" label="Jalons" onImported={loadAll} />
             <MsProjectImport projects={projects} onImported={loadAll} />
+            <button
+              onClick={async () => {
+                toast.info("Génération de la roadmap PowerPoint…");
+                try {
+                  const r = await exportsAPI.roadmapPptx();
+                  const url = URL.createObjectURL(r.data);
+                  const a = document.createElement("a");
+                  a.href = url;
+                  a.download = `Roadmap_${new Date().toISOString().slice(0, 10)}.pptx`;
+                  a.click();
+                  URL.revokeObjectURL(url);
+                  toast.success("Roadmap PowerPoint téléchargée");
+                } catch { toast.error("Erreur lors de l'export"); }
+              }}
+              data-testid="btn-export-roadmap-pptx"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#352c6e] text-white hover:bg-[#2a2358] transition-colors">
+              <PresentationIcon size={12} /> Roadmap PPTX
+            </button>
             {activeRoadmapTab === "timeline" && (
               <div className="flex items-center gap-2" data-testid="roadmap-zoom-controls">
-                <button onClick={() => setIsQuarter(false)} data-testid="zoom-month-btn"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${!isQuarter ? "bg-blue-600 text-white" : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}>
-                  <ZoomIn size={12} /> Mois
+                <div className="flex rounded-lg border border-zinc-200 overflow-hidden">
+                  {[{ id: "month", label: "Mois" }, { id: "quarter", label: "Trimestre" }, { id: "year", label: "Année" }].map((z) => (
+                    <button key={z.id} onClick={() => setZoom(z.id)} data-testid={`zoom-${z.id}-btn`}
+                      className={`px-3 py-1.5 text-xs font-semibold transition-colors ${zoom === z.id ? "bg-blue-600 text-white" : "text-zinc-600 hover:bg-zinc-50 bg-white"}`}>
+                      {z.label}
+                    </button>
+                  ))}
+                </div>
+                <button onClick={() => setFullSpan(!fullSpan)} data-testid="roadmap-fullspan-btn"
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${fullSpan ? "bg-[#352c6e] text-white border-[#352c6e]" : "border-zinc-200 text-zinc-600 hover:bg-zinc-50 bg-white"}`}
+                  title={fullSpan ? "Revenir à la fenêtre 12 mois" : "Afficher toute la période"}>
+                  {fullSpan ? "Tout" : "12 mois"}
                 </button>
-                <button onClick={() => setIsQuarter(true)} data-testid="zoom-quarter-btn"
-                  className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${isQuarter ? "bg-blue-600 text-white" : "border border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}>
-                  <ZoomOut size={12} /> Trimestre
+                <button
+                  onClick={() => bodyRef.current?.scrollTo({ left: Math.max(todayX - 260, 0), behavior: "smooth" })}
+                  data-testid="roadmap-recenter-btn"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors"
+                  title="Recentrer sur aujourd'hui">
+                  <LocateFixed size={12} /> Aujourd'hui
                 </button>
               </div>
             )}
@@ -885,6 +1022,13 @@ export default function Roadmap() {
           <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-500 uppercase tracking-widest">
             <Filter size={11} /> Projets
           </div>
+          <select value={groupBy} onChange={(e) => setGroupBy(e.target.value)} data-testid="roadmap-groupby"
+            className="text-xs border border-[#352c6e]/30 rounded-lg px-2.5 py-1.5 text-[#352c6e] font-semibold focus:outline-none focus:border-blue-600 bg-[#f0eefc]">
+            <option value="program">Grouper : Programme</option>
+            <option value="direction">Grouper : Direction</option>
+            <option value="theme">Grouper : Thème stratégique</option>
+            <option value="art">Grouper : ART</option>
+          </select>
           <select value={filterProgram} onChange={(e) => setFilterProgram(e.target.value)} data-testid="filter-program"
             className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-blue-600 bg-white">
             <option value="">Tous programmes</option>
@@ -933,11 +1077,28 @@ export default function Roadmap() {
             className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${filterMsBlocking ? "bg-rose-50 border-rose-300 text-rose-700" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50"}`}>
             ⚑ Bloquants uniquement
           </button>
-          <button type="button" onClick={() => setShowDeps(!showDeps)}
-            data-testid="toggle-deps"
-            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${showDeps ? "bg-violet-50 border-violet-300 text-violet-700" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50"}`}>
-            ⟶ Dépendances
+          <button type="button" onClick={() => setShowPhases(!showPhases)}
+            data-testid="toggle-phases"
+            className={`flex items-center gap-1.5 px-2.5 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${showPhases ? "bg-teal-50 border-teal-300 text-teal-700" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50"}`}>
+            Phases du cycle
           </button>
+          <div className="flex items-center gap-1 text-xs" data-testid="toggle-deps">
+            <span className="text-zinc-400 font-semibold">Dépendances :</span>
+            <div className="flex rounded-lg border border-zinc-200 overflow-hidden">
+              {[{ id: "focus", label: "Au survol" }, { id: "all", label: "Toutes" }, { id: "off", label: "Masquées" }].map((m) => (
+                <button key={m.id} type="button" onClick={() => { setDepMode(m.id); setFocusDepId(null); }}
+                  data-testid={`dep-mode-${m.id}`}
+                  className={`px-2.5 py-1.5 text-xs font-semibold transition-colors ${depMode === m.id ? "bg-violet-600 text-white" : "bg-white text-zinc-500 hover:bg-zinc-50"}`}>
+                  {m.label}
+                </button>
+              ))}
+            </div>
+            {conflictCount > 0 && (
+              <span className="ml-1 text-[10px] font-bold text-rose-600 bg-rose-50 border border-rose-200 px-2 py-0.5 rounded-full" data-testid="dep-conflict-count">
+                ⚠ {conflictCount} en conflit
+              </span>
+            )}
+          </div>
           {hasFilters && (
             <button onClick={resetFilters} data-testid="filter-reset"
               className="flex items-center gap-1 text-xs text-zinc-400 hover:text-rose-500 border border-zinc-200 px-2 py-1 rounded-lg">
@@ -948,9 +1109,23 @@ export default function Roadmap() {
 
         {/* Legend */}
         <div className="flex items-center gap-4 mt-3 text-[10px] text-zinc-400 flex-wrap">
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block" /> Vert</span>
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-amber-500 inline-block" /> Orange</span>
-          <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-rose-500 inline-block" /> Rouge</span>
+          {showPhases ? (
+            Object.entries(PHASE_LABELS).map(([k, v]) => (
+              <span key={k} className="flex items-center gap-1">
+                <span className="w-3 h-3 rounded-sm inline-block" style={{ backgroundColor: PHASE_COLORS[k] }} /> {v}
+              </span>
+            ))
+          ) : (
+            <>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-emerald-500 inline-block" /> Vert</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-amber-500 inline-block" /> Orange</span>
+              <span className="flex items-center gap-1"><span className="w-3 h-3 rounded-sm bg-rose-500 inline-block" /> Rouge</span>
+            </>
+          )}
+          <span className="flex items-center gap-1">
+            <svg width="10" height="10" viewBox="0 0 10 10"><polygon points="5,1 9,5 5,9 1,5" fill="#fff" stroke="#3f8a34" strokeWidth="2"/></svg>
+            Gate (couleur = décision)
+          </span>
           <span className="flex items-center gap-1">
             <svg width="10" height="10" viewBox="0 0 10 10"><polygon points="5,1 9,5 5,9 1,5" fill="#EAB308"/></svg>
             Epic Lifecycle
@@ -1006,15 +1181,16 @@ export default function Roadmap() {
           </div>
 
           {/* Timeline body */}
-          <div className="overflow-x-auto" data-testid="roadmap-timeline">
+          <div className="overflow-x-auto" data-testid="roadmap-timeline" ref={bodyRef}
+            onScroll={(e) => { if (scrollRef.current) scrollRef.current.scrollLeft = e.currentTarget.scrollLeft; }}>
             <div style={{ minWidth: LEFT_PANEL_W + totalW, position: "relative" }}>
-              {grouped.map(([programId, projList]) => (
-                <div key={programId}>
-                  {/* Program group header */}
+              {grouped.map(([groupLabel, projList]) => (
+                <div key={groupLabel}>
+                  {/* Group header */}
                   <div className="flex items-center bg-zinc-50 border-b border-zinc-100 px-4"
                     style={{ minWidth: LEFT_PANEL_W + totalW, height: GROUP_HEADER_H }}>
                     <div className="text-[10px] font-bold uppercase tracking-widest text-zinc-500" style={{ width: LEFT_PANEL_W - 16 }}>
-                      {programId === "__none__" ? "Sans programme" : (programMap[programId] || programId)}
+                      {groupLabel}
                     </div>
                     <div className="text-[10px] text-zinc-400 ml-4">
                       {projList.length} projet{projList.length > 1 ? "s" : ""}
@@ -1023,16 +1199,23 @@ export default function Roadmap() {
 
                   {/* Project rows */}
                   {projList.map((p) => {
-                    const startMs = dateToMs(p.start_date);
-                    const endMs   = dateToMs(p.end_date_forecast || p.end_date_baseline);
                     const ragCfg  = RAG_BAR_COLORS[p.status_rag] || RAG_BAR_COLORS.green;
                     const pMilestones = milestonesByProject[p.project_id] || [];
                     const barX = projectBarX[p.project_id];
+                    const pGates = gatesByProject[p.project_id] || [];
+                    const segments = showPhases && barX ? phaseSegments(p, pGates) : [];
+                    const startMs = dateToMs(p.start_date);
+                    const endMs = dateToMs(p.end_date_forecast || p.end_date_baseline);
+                    const barSpan = barX ? barX.right - barX.left : 0;
+                    const depCount = depCountByProject[p.project_id] || 0;
+                    const isDepFocused = activeDepProject === p.project_id;
 
                     return (
                       <div key={p.project_id}
-                        className="flex items-center border-b border-zinc-50 hover:bg-blue-50/30 transition-colors"
+                        className={`flex items-center border-b border-zinc-50 transition-colors ${isDepFocused ? "bg-violet-50/60" : "hover:bg-blue-50/30"}`}
                         style={{ height: ROW_HEIGHT }}
+                        onMouseEnter={() => depMode === "focus" && !focusDepId && setHoverDepId(p.project_id)}
+                        onMouseLeave={() => depMode === "focus" && setHoverDepId(null)}
                         data-testid={`roadmap-row-${p.project_id}`}>
                         {/* Left: project name */}
                         <div className="flex-shrink-0 flex items-center gap-2 px-4 border-r border-zinc-100"
@@ -1042,16 +1225,24 @@ export default function Roadmap() {
                             className="text-xs text-zinc-700 font-medium hover:text-blue-600 truncate flex-1"
                             title={p.code ? `${p.code} · ${p.name}` : p.name} data-testid={`roadmap-project-link-${p.project_id}`}>
                             {p.code && <span className="font-mono text-[10px] text-zinc-400 mr-1">{p.code}</span>}
-                            {p.name.split("—")[0].trim().slice(0, 26)}
+                            {p.name.split("—")[0].trim().slice(0, 22)}
                           </Link>
-                          <ExternalLink size={9} className="text-zinc-300 flex-shrink-0" />
+                          {depCount > 0 && depMode !== "off" && (
+                            <button
+                              onClick={() => setFocusDepId(focusDepId === p.project_id ? null : p.project_id)}
+                              title={`${depCount} dépendance${depCount > 1 ? "s" : ""} — cliquer pour épingler`}
+                              data-testid={`dep-badge-${p.project_id}`}
+                              className={`flex items-center gap-0.5 text-[9px] font-bold px-1.5 py-px rounded-full border transition-colors flex-shrink-0 ${focusDepId === p.project_id ? "bg-violet-600 text-white border-violet-600" : "bg-violet-50 text-violet-600 border-violet-200 hover:bg-violet-100"}`}>
+                              <GitFork size={8} /> {depCount}
+                            </button>
+                          )}
                         </div>
 
                         {/* Right: timeline bar */}
                         <div className="relative flex-1" style={{ minWidth: totalW, height: ROW_HEIGHT }}>
                           {/* Today line */}
                           {todayX >= 0 && todayX <= totalW && (
-                            <div className="absolute top-0 bottom-0 w-px bg-blue-600/30 z-10 pointer-events-none"
+                            <div className="absolute top-0 bottom-0 w-[2px] bg-blue-500/40 z-10 pointer-events-none"
                               style={{ left: todayX }} />
                           )}
                           {/* Column separators */}
@@ -1063,8 +1254,8 @@ export default function Roadmap() {
                           {/* Project bar */}
                           {barX && (
                             <div
-                              className={`absolute top-2.5 h-5 rounded-lg ${ragCfg.bg} ${ragCfg.border} border cursor-pointer flex items-center px-1.5 overflow-hidden z-20 transition-opacity hover:opacity-90`}
-                              style={{ left: barX.left, width: Math.max(barX.right - barX.left, 6) }}
+                              className={`absolute top-2.5 h-5 cursor-pointer overflow-hidden z-20 transition-opacity hover:opacity-90 ${barX.clippedLeft ? "" : "rounded-l-lg"} ${barX.clippedRight ? "" : "rounded-r-lg"} ${segments.length ? "" : `${ragCfg.bg} ${ragCfg.border} border`}`}
+                              style={{ left: barX.left, width: Math.max(barSpan, 6) }}
                               title={`${p.code ? `${p.code} · ` : ""}${p.name}\n${formatDate(p.start_date)} → ${formatDate(p.end_date_forecast || p.end_date_baseline)}`}
                               onClick={() => setTooltip(tooltip?.id === p.project_id ? null : {
                                 id: p.project_id, name: p.code ? `${p.code} · ${p.name}` : p.name,
@@ -1073,13 +1264,48 @@ export default function Roadmap() {
                                 rag: p.status_rag, status: STATUS_LABELS[p.status] || p.status, budget: p.budget_total,
                               })}
                               data-testid={`roadmap-bar-${p.project_id}`}>
-                              {(barX.right - barX.left) > 40 && (
-                                <span className={`text-[10px] font-semibold ${ragCfg.text} truncate`}>
+                              {segments.length > 0 && segments.map((seg, si) => {
+                                const visStart = Math.max(seg.start, timeMin);
+                                const visEnd = Math.min(seg.end, timeMax);
+                                if (visEnd <= visStart) return null;
+                                const l = toX(visStart) - barX.left;
+                                const w = toX(visEnd) - toX(visStart);
+                                return (
+                                  <div key={si}
+                                    className="absolute top-0 bottom-0"
+                                    style={{ left: l, width: Math.max(w, 2), backgroundColor: PHASE_COLORS[seg.phase] || "#8a87a0" }}
+                                    title={`${PHASE_LABELS[seg.phase] || seg.phase} : ${new Date(seg.start).toLocaleDateString("fr-FR")} → ${new Date(seg.end).toLocaleDateString("fr-FR")}`} />
+                                );
+                              })}
+                              {segments.length > 0 && (
+                                <div className={`absolute left-0 right-0 bottom-0 h-[3px] ${ragCfg.bg}`} style={{ filter: "brightness(1.35)" }} />
+                              )}
+                              {barSpan > 40 && (
+                                <span className="absolute inset-0 flex items-center px-1.5 text-[10px] font-semibold text-white truncate pointer-events-none" style={{ textShadow: "0 1px 2px rgba(0,0,0,.4)" }}>
                                   {p.name.split("—")[0].trim().slice(0, 20)}
                                 </span>
                               )}
                             </div>
                           )}
+                          {/* Gates (losanges décision) */}
+                          {showPhases && pGates.map((g) => {
+                            const gMs = dateToMs(g.target_date);
+                            if (!gMs || gMs < timeMin || gMs > timeMax) return null;
+                            const gx = toX(gMs);
+                            const gc = GATE_COLORS[g.status] || "#8a87a0";
+                            return (
+                              <div key={g.gate_id || `${g.project_id}-${g.target_date}`}
+                                className="absolute z-30 cursor-pointer"
+                                style={{ left: gx - 6, top: 1, width: 12, height: 12 }}
+                                title={`Gate ${g.from_phase} → ${g.to_phase} · ${GATE_LABELS[g.status] || g.status} · ${formatDate(g.target_date)}`}
+                                data-testid={`roadmap-gate-${g.gate_id || g.project_id}`}>
+                                <svg viewBox="0 0 12 12">
+                                  <polygon points="6,1 11,6 6,11 1,6" fill="#fff" stroke={gc} strokeWidth="2.5"
+                                    style={{ filter: "drop-shadow(0 1px 1px rgba(0,0,0,.2))" }} />
+                                </svg>
+                              </div>
+                            );
+                          })}
                           {/* Milestones */}
                           {pMilestones.map((ms) => {
                             const msMs = dateToMs(ms.date_forecast || ms.date_baseline);
@@ -1123,38 +1349,49 @@ export default function Roadmap() {
                 )}
               </div>
 
-              {/* SVG overlay for dependency arrows */}
-              {visibleDeps.length > 0 && (
+              {/* SVG overlay for dependency arrows (tracé orthogonal) */}
+              {renderedDeps.length > 0 && (
                 <div className="absolute top-0 pointer-events-none overflow-visible z-25"
                   style={{ left: LEFT_PANEL_W, top: 0, width: totalW, height: totalTimelineH }}>
                   <svg width={totalW} height={totalTimelineH} style={{ overflow: "visible" }}>
                     <defs>
-                      {["critical","high","medium","low"].map((imp) => (
+                      {["critical", "high", "medium", "low"].map((imp) => (
                         <marker key={imp} id={`arrow-${imp}`} markerWidth="8" markerHeight="6" refX="8" refY="3" orient="auto">
                           <polygon points="0 0, 8 3, 0 6" fill={IMPACT_COLORS[imp]} />
                         </marker>
                       ))}
+                      <marker id="arrow-conflict" markerWidth="9" markerHeight="7" refX="9" refY="3.5" orient="auto">
+                        <polygon points="0 0, 9 3.5, 0 7" fill="#cc4f45" />
+                      </marker>
                     </defs>
-                    {visibleDeps.map((dep) => {
+                    {renderedDeps.map((dep) => {
                       const sBarX = projectBarX[dep.source_project_id];
                       const tBarX = projectBarX[dep.target_project_id];
                       const sY    = projectY[dep.source_project_id];
                       const tY    = projectY[dep.target_project_id];
                       if (!sBarX || !tBarX || sY === undefined || tY === undefined) return null;
-                      const sX  = sBarX.right + 2;
-                      const tX  = tBarX.left - 2;
-                      const color = IMPACT_COLORS[dep.impact] || "#8B5CF6";
-                      const midX = (sX + tX) / 2;
+                      const conflict = depConflict(dep);
+                      // La flèche va du projet dont on dépend (target) vers le projet dépendant (source)
+                      const fromX = tBarX.right + 2;
+                      const fromY = tY;
+                      const toXp  = sBarX.left - 4;
+                      const toY   = sY;
+                      const elbow = fromX + 12;
+                      const path = toXp >= elbow
+                        ? `M ${fromX} ${fromY} H ${elbow} V ${toY} H ${toXp}`
+                        : `M ${fromX} ${fromY} H ${elbow} V ${toY - (toY >= fromY ? 14 : -14)} H ${toXp - 12} V ${toY} H ${toXp}`;
+                      const color = conflict ? "#cc4f45" : (IMPACT_COLORS[dep.impact] || "#8B5CF6");
                       return (
                         <path key={dep.dependency_id}
-                          d={`M ${sX} ${sY} C ${midX} ${sY}, ${midX} ${tY}, ${tX} ${tY}`}
+                          d={path}
                           fill="none"
                           stroke={color}
-                          strokeWidth="1.5"
-                          strokeDasharray="5 3"
-                          markerEnd={`url(#arrow-${dep.impact})`}
-                          opacity="0.75">
-                          <title>{dep.source_project_name} → {dep.target_project_name}: {dep.description}</title>
+                          strokeWidth={conflict ? 2.5 : 1.75}
+                          strokeDasharray={depMode === "all" && !conflict ? "5 3" : "none"}
+                          markerEnd={conflict ? "url(#arrow-conflict)" : `url(#arrow-${dep.impact})`}
+                          opacity={conflict ? 1 : 0.85}
+                          data-testid={`dep-arrow-${dep.dependency_id}`}>
+                          <title>{`${dep.source_project_name} dépend de ${dep.target_project_name}${conflict ? " — ⚠ CONFLIT DE DATES" : ""} : ${dep.description || ""}`}</title>
                         </path>
                       );
                     })}
