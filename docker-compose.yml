@@ -3,11 +3,18 @@ version: "3.9"
 # MARCEL — Docker Compose On-Premise
 # Usage : cp .env.example .env && docker-compose up -d
 
+x-logging: &default-logging
+  driver: json-file
+  options:
+    max-size: "20m"
+    max-file: "3"
+
 services:
 
   # ── Base de données MongoDB ────────────────────────────────────────────────
   mongo:
     image: mongo:7
+    logging: *default-logging
     restart: unless-stopped
     volumes:
       - mongo_data:/data/db
@@ -20,6 +27,7 @@ services:
 
   # ── API Backend FastAPI ────────────────────────────────────────────────────
   backend:
+    logging: *default-logging
     build:
       context: ./backend
       dockerfile: Dockerfile
@@ -40,6 +48,7 @@ services:
 
   # ── Frontend React servi par Nginx ────────────────────────────────────────
   frontend:
+    logging: *default-logging
     build:
       context: ./frontend
       dockerfile: Dockerfile
@@ -81,6 +90,7 @@ services:
   # ── Profil HTTP (sans Traefik, port direct) ────────────────────────────────
   # Utilisé par défaut quand DOMAIN n'est pas défini
   nginx-http:
+    logging: *default-logging
     image: nginx:alpine
     restart: unless-stopped
     profiles:
