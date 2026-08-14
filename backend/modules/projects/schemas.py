@@ -75,6 +75,7 @@ class ProjectUpdate(BaseModel):
     impacted_application_ids: Optional[list] = None
     art_train_id: Optional[str] = None
     epic_owner_id: Optional[str] = None
+    strategic_theme_id: Optional[str] = None
 
 
 class BudgetRevisionCreate(BaseModel):

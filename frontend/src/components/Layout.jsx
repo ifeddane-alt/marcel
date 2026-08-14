@@ -42,6 +42,8 @@ import {
   ClipboardCheck,
   Moon,
   Sun,
+  CalendarDays,
+  Layers3,
 } from "lucide-react";
 import { teamsAPI, timesheetsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
@@ -73,6 +75,8 @@ const MAIN_NAV = [
     perm: ["resources.view", "resources.edit", "resources.create"],
   },
   { to: "/governance", icon: ShieldCheck,  label: "Gouvernance",  tKey: "nav.governance", perm: "governance.view" },
+  { to: "/calendrier", icon: CalendarDays, label: "Calendrier",   tKey: "nav.calendar",   perm: "portfolio.view" },
+  { to: "/capacite",   icon: Layers3,      label: "Capacité",     tKey: "nav.capacity",   perm: ["resources.view", "resources.edit"] },
   {
     to: "/validations",
     icon: ClipboardCheck,

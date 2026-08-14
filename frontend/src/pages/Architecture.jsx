@@ -3,6 +3,7 @@ import { Network, GitBranch, BookOpenCheck, Radar, Hammer, ClipboardCheck, Arrow
 import { architectureAPI, applicationsAPI, projectsAPI } from "@/api";
 import { usePermissions } from "@/hooks/usePermissions";
 import CrudSection, { Badge } from "@/components/CrudSection";
+import { ArchTrajectoryTab } from "@/components/ArchTrajectoryTab";
 
 const REVIEW_ST = {
   en_attente: { label: "En attente", cls: "bg-blue-50 text-blue-700 border-blue-200" },
@@ -52,6 +53,7 @@ const TABS = [
   { id: "radar", label: "Radar techno" },
   { id: "dette", label: "Dette technique" },
   { id: "avis", label: "Avis projets" },
+  { id: "trajectoire", label: "Trajectoire SI" },
 ];
 
 export default function Architecture() {
@@ -251,6 +253,7 @@ export default function Architecture() {
           ]}
         />
       )}
+      {tab === "trajectoire" && <ArchTrajectoryTab canWrite={canWrite} />}
     </div>
   );
 }

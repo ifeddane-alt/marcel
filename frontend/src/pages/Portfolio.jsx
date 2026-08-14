@@ -1,7 +1,7 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
 import { Search, Plus, Pencil, Trash2, Presentation, LayoutGrid, List } from "lucide-react";
-import { projectsAPI, programsAPI, resourcesAPI, favoritesAPI } from "@/api";
+import { projectsAPI, programsAPI, resourcesAPI, favoritesAPI, exportsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import RAGBadge, { MethodologyBadge, ProjectStatusBadge } from "@/components/RAGBadge";
@@ -175,6 +175,23 @@ export default function Portfolio() {
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <ExcelToolbar entity="projects" onImported={fetchAll} canImport={canCreate} />
+          <button
+            onClick={async () => {
+              try {
+                const r = await exportsAPI.copilPptx();
+                const url = URL.createObjectURL(r.data);
+                const a = document.createElement("a");
+                a.href = url;
+                a.download = `COPIL_portefeuille_${new Date().toISOString().slice(0, 10)}.pptx`;
+                a.click();
+                URL.revokeObjectURL(url);
+              } catch { /* toast silencieux */ }
+            }}
+            data-testid="btn-export-copil-pptx"
+            className="flex items-center gap-2 px-4 py-2.5 bg-[#352c6e] text-white text-sm font-semibold rounded-lg hover:bg-[#2a2358] transition-colors shadow-sm"
+          >
+            <Presentation size={15} /> COPIL PPTX
+          </button>
           {canCreate && (
             <button
               onClick={openCreate}

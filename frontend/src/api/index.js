@@ -548,3 +548,51 @@ export const thresholdsAPI = {
 };
 
 export default api;
+
+export const eventsAPI = {
+  listTypes:    ()          => api.get("/events/types"),
+  seedDefaults: ()          => api.post("/events/types/seed-defaults"),
+  createType:   (data)      => api.post("/events/types", data),
+  updateType:   (id, data)  => api.put(`/events/types/${id}`, data),
+  deleteType:   (id)        => api.delete(`/events/types/${id}`),
+  generatePlan: (year)      => api.post("/events/generate-plan", { year }),
+  list:         (params)    => api.get("/events", { params }),
+  create:       (data)      => api.post("/events", data),
+  update:       (id, data)  => api.put(`/events/${id}`, data),
+  remove:       (id)        => api.delete(`/events/${id}`),
+};
+
+export const forecastAPI = {
+  quarters:  (year)       => api.get("/forecast/quarters", { params: { year } }),
+  validate:  (data)       => api.post("/forecast/validate", data),
+  levers:    (projectId)  => api.get("/forecast/levers", { params: projectId ? { project_id: projectId } : {} }),
+  applyCuts: (data)       => api.post("/forecast/apply-cuts", data),
+  cuts:      ()           => api.get("/forecast/cuts"),
+};
+
+export const capacityAPI = {
+  console: (horizon, axis) => api.get("/capacity/console", { params: { horizon, axis } }),
+};
+
+export const budgetOpsAPI = {
+  createTransfer: (data)      => api.post("/budget/transfers", data),
+  listTransfers:  ()          => api.get("/budget/transfers"),
+  listThemes:     ()          => api.get("/budget/themes"),
+  createTheme:    (data)      => api.post("/budget/themes", data),
+  deleteTheme:    (id)        => api.delete(`/budget/themes/${id}`),
+  listEnvelopes:  (year)      => api.get("/budget/envelopes", { params: { year } }),
+  upsertEnvelope: (data)      => api.post("/budget/envelopes", data),
+  deleteEnvelope: (id)        => api.delete(`/budget/envelopes/${id}`),
+};
+
+export const trajectoryAPI = {
+  get:             ()          => api.get("/architecture/trajectory"),
+  setDisposition:  (id, data)  => api.put(`/architecture/trajectory/${id}`, data),
+  createMilestone: (data)      => api.post("/architecture/trajectory/milestones", data),
+  updateMilestone: (id, data)  => api.put(`/architecture/trajectory/milestones/${id}`, data),
+  deleteMilestone: (id)        => api.delete(`/architecture/trajectory/milestones/${id}`),
+};
+
+export const exportsAPI = {
+  copilPptx: () => api.get("/exports/copil.pptx", { responseType: "blob" }),
+};

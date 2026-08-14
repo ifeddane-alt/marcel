@@ -10,6 +10,10 @@ import {
 import { budgetAPI } from "@/api";
 import ExcelToolbar from "@/components/ExcelToolbar";
 import MultiYearPlan from "@/components/MultiYearPlan";
+import { BudgetReforecastTab } from "@/components/BudgetReforecastTab";
+import { BudgetTransfersTab } from "@/components/BudgetTransfersTab";
+import { BudgetTargetTab } from "@/components/BudgetTargetTab";
+import { BudgetEnvelopesTab } from "@/components/BudgetEnvelopesTab";
 import { Ring } from "@/components/ProjectTile";
 import { usePermissions } from "@/hooks/usePermissions";
 
@@ -543,6 +547,10 @@ export default function BudgetPage() {
               { id: "programmes", label: "Par programme", count: byProgram.length },
               { id: "graphiques", label: "Graphiques" },
               { id: "pluriannuel", label: "Plan pluriannuel" },
+              { id: "reforecast", label: "Reforecast" },
+              { id: "transferts", label: "Transferts" },
+              { id: "cible", label: "Budget cible" },
+              { id: "enveloppes", label: "Enveloppes" },
             ].map((t) => (
               <button key={t.id} onClick={() => setActiveTab(t.id)}
                 data-testid={`tab-${t.id}`}
@@ -631,6 +639,11 @@ export default function BudgetPage() {
           {activeTab === "pluriannuel" && (
             <MultiYearPlan canEdit={canEdit} />
           )}
+
+          {activeTab === "reforecast" && <BudgetReforecastTab />}
+          {activeTab === "transferts" && <BudgetTransfersTab />}
+          {activeTab === "cible" && <BudgetTargetTab />}
+          {activeTab === "enveloppes" && <BudgetEnvelopesTab />}
 
           {/* ── TAB : Programmes ─────────────────────────────────────────── */}
           {activeTab === "programmes" && (

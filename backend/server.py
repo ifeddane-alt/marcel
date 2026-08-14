@@ -91,6 +91,12 @@ from modules.indicators.router import router as indicators_router
 from modules.pb.router import router as pb_router
 from modules.lifecycle.router import router as lifecycle_router
 from modules.auth.mfa import router as mfa_router
+from modules.events.router import router as events_router
+from modules.forecast.router import router as forecast_router
+from modules.capacity.router import router as capacity_router
+from modules.budget_ops.router import router as budget_ops_router
+from modules.exports.router import router as exports_router
+from modules.architecture.trajectory import router as trajectory_router
 from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI(title="MARCEL API")
@@ -176,6 +182,12 @@ for _router in [
     pb_router,
     lifecycle_router,
     mfa_router,
+    events_router,
+    forecast_router,
+    capacity_router,
+    budget_ops_router,
+    exports_router,
+    trajectory_router,
 ]:
     app.include_router(_router, prefix="/api")
 

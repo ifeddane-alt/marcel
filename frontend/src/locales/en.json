@@ -42,7 +42,9 @@
     "templates": "Templates",
     "monitoring": "Monitoring",
     "audit_log": "Audit log",
-    "powerbi": "Power BI"
+    "powerbi": "Power BI",
+    "calendar": "Calendar",
+    "capacity": "Capacity"
   },
   "common": {
     "save": "Save",
