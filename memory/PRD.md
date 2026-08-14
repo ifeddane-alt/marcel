@@ -437,3 +437,8 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - ✅ Rotation des logs Docker en prod (incident disque 97 % résolu — log mongo 6,9 Go).
 - Backlog exports PPTX additionnels (~10-15 crédits pièce) : dossier de gate, reforecast, relevé de décisions gouvernance, rapport de PI, capacitaire, trajectoire SI.
 - Exclusions maintenues : collaboration (2), emails réels (3), connecteurs Jira/SAP (4), lot C.
+
+## 2026-06 (fork) — Rework Roadmap (déployé prod, commit 4b35fcd, bundle main.47d8ef9b.js)
+- ✅ Les 5 volets validés (option B, ~75-95 crédits) : lisibilité (fenêtre 12 mois/zoom 3 niveaux/Aujourd'hui), phases+gates dans les barres, groupements Programme/Direction/Thème/ART, export PPTX Roadmap, dépendances refondues (survol/épinglage, orthogonal, conflits rouges).
+- Testé iteration_70 : 100 % PASS. Prod vérifiée (health, bundle, 403).
+- Backlog restant inchangé : traduction EN pages internes (~40-60 cr), exports PPTX additionnels (gate/reforecast/décisions/PI/capacitaire/trajectoire ~10-15 cr pièce), instances liées gouvernance (clic COPIL calendrier → ODJ), alerte capacité >100 %.

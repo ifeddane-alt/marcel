@@ -289,3 +289,13 @@
 - Testé : 16/16 curl (15 types d'instances → PPTX valides 4-8 slides + 404) + toast de téléchargement vérifié en screenshot.
 - BUGS CORRIGÉS AU PASSAGE : (1) le <Toaster/> sonner n'était monté NULLE PART — tous les toasts de l'app étaient invisibles depuis toujours → monté dans App.js (richColors). (2) Les contrôles hover du calendrier décalaient la mise en page (risque de clic sur Annuler) → espace réservé via opacity.
 - Prod vérifiée : bundle main.adada18c.js, route exports/event protégée (403), disque 43 % après prune.
+
+## 2026-06 (fork) — Rework Roadmap complet (déployé prod, commit 4b35fcd)
+- ✅ Lisibilité/navigation : fenêtre 12 mois glissants par défaut (-3/+9, toggle « 12 mois »/« Tout »), zoom Mois/Trimestre/Année, bouton « Aujourd'hui » (recentrage), barres clippées proprement aux bords de fenêtre (coins non arrondis côté clippé), scroll header/body synchronisé.
+- ✅ Phases & gates : segments colorés par phase lifecycle dans les barres (découpage par gates : from_phase→to_phase sur target_date), liseré RAG en bas de barre, losanges gates blancs cerclés couleur décision (GO vert, NO-GO rouge, réserves ambre…), toggle « Phases du cycle », légende dynamique.
+- ✅ Groupements : Programme / Direction / Thème stratégique / ART (roadmap-groupby), libellés résolus via budgetOpsAPI.listThemes + safeAPI.listTrains.
+- ✅ Dépendances refondues : masquées par défaut (mode « Au survol »), badge compteur par projet (dep-badge-{id}, clic = épinglage), tracés SVG orthogonaux (H/V) orientés cible→source, conflits de dates (source démarre avant fin de la cible, statut≠resolved) en rouge trait plein épais + compteur « ⚠ N en conflit », modes Au survol/Toutes/Masquées.
+- ✅ Export PPTX Roadmap : GET /api/exports/roadmap.pptx (permission portfolio.view) — barres RAG 12 mois, losanges jalons gouvernance, groupes programme, 14 lignes/slide + bouton « Roadmap PPTX » (toast).
+- Testé : iteration_70 = 100 % PASS backend+frontend (zoom, groupby, phases, gates tooltips, 3 modes dépendances, épinglage, conflits, download PPTX, non-régression onglets/filtres/liens). Curl : 200 authentifié / 403 sans auth.
+- Prod vérifiée : bundle main.47d8ef9b.js (tous marqueurs), health ok, route protégée 403, 4 conteneurs healthy, disque 58 %.
+- Leçon : l'URL preview di-360-dash était une ancienne URL d'un job précédent → toujours lire REACT_APP_BACKEND_URL (project-sync-61).
