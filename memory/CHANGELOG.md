@@ -282,3 +282,10 @@
 ### Incident déploiement prod (résolu)
 - 1er build échoué : « no space left on device » — cause racine : log json Docker du conteneur mongo JAMAIS rotaté = 6,9 Go. Truncate + rotation ajoutée au compose (x-logging 20m×3, appliquée à mongo/backend/frontend/nginx-http). Disque : 97 % → 57 %.
 - Pendant le rebuild, le VPS a saturé (SSH + site inaccessibles ~5 min) puis a récupéré seul. Déploiement final OK : bundle main.badd53a9.js avec les 8 marqueurs, routes protégées 403, 4 conteneurs healthy.
+
+## 2026-06 (fork) — Reporting PPTX dédié par instance (déployé prod, commit ee57bcf)
+- Bouton de téléchargement (FileDown) sur chacun des 272 événements du calendrier → GET /api/exports/event/{id}.pptx.
+- 12 builders de slides mappés par mots-clés du type d'instance : COPIL (enrichi d'une slide écart budget/forecast), reforecast (tableau Q1-Q4 + transferts), dossier de gate (demandes, livrables, avis, décisions), stratégique (enveloppes), sécurité (vulnérabilités), CAB/MEP, capacité, fournisseurs (contrats externes), SAFe (trains/PIs/objectifs), trajectoire TIME, demandes, projets/risques/jalons. Fallback = deck COPIL.
+- Testé : 16/16 curl (15 types d'instances → PPTX valides 4-8 slides + 404) + toast de téléchargement vérifié en screenshot.
+- BUGS CORRIGÉS AU PASSAGE : (1) le <Toaster/> sonner n'était monté NULLE PART — tous les toasts de l'app étaient invisibles depuis toujours → monté dans App.js (richColors). (2) Les contrôles hover du calendrier décalaient la mise en page (risque de clic sur Annuler) → espace réservé via opacity.
+- Prod vérifiée : bundle main.adada18c.js, route exports/event protégée (403), disque 43 % après prune.
