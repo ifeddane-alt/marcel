@@ -479,10 +479,6 @@ export default function Dashboard() {
       </ResponsiveGridLayout>
       </div>
 
-      <div className="mt-4">
-        <IndicatorsPanel scope="dashboard" title="Mes indicateurs" />
-      </div>
-
       {aiReportOpen && <PortfolioAiReport onClose={() => setAiReportOpen(false)} />}
     </div>
   );
