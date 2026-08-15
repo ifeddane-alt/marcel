@@ -12,7 +12,7 @@ import { useTenantConfig } from "@/contexts/TenantConfigContext";
 
 // ─── Constantes ───────────────────────────────────────────────────────────────
 
-const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue focus:ring-1 focus:ring-m-blue bg-white";
 
 const TOGGLEABLE_MODULES = [
   { id: "safe",       label: "Trains SAFe",               desc: "Gestion des Trains SAFe, PIs, Sprints, Capabilities, OKRs" },
@@ -77,7 +77,7 @@ function SaveBar({ onSave, saving, dirty, success }) {
         onClick={onSave}
         disabled={saving || !dirty}
         data-testid="admin-config-save-btn"
-        className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50"
+        className="flex items-center gap-2 px-5 py-2 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-50"
       >
         {saving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
         {saving ? "Sauvegarde…" : "Enregistrer"}
@@ -126,16 +126,16 @@ function ModulesSection({ config, onSave }) {
               key={mod.id}
               data-testid={`module-toggle-${mod.id}`}
               className={`flex items-center gap-4 p-4 rounded-lg border transition-all cursor-pointer ${
-                isOn ? "border-blue-600/30 bg-blue-50/40" : "border-zinc-200 bg-zinc-50/50 opacity-60"
+                isOn ? "border-m-blue/30 bg-blue-50/40" : "border-zinc-200 bg-zinc-50/50 opacity-60"
               }`}
               onClick={() => toggle(mod.id)}
             >
               <button
-                className="flex-shrink-0 text-blue-600 transition-colors"
+                className="flex-shrink-0 text-m-blue transition-colors"
                 aria-label={`Toggle ${mod.label}`}
               >
                 {isOn
-                  ? <ToggleRight size={28} className="text-blue-600" />
+                  ? <ToggleRight size={28} className="text-m-blue" />
                   : <ToggleLeft size={28} className="text-zinc-400" />
                 }
               </button>
@@ -201,7 +201,7 @@ function WorkflowsSection({ config, onSave }) {
       {/* Timesheet */}
       <div className="bg-white border border-zinc-200 rounded-lg p-5">
         <div className="font-semibold text-zinc-800 mb-4 flex items-center gap-2">
-          <Workflow size={15} className="text-blue-600" /> Workflow Timesheets
+          <Workflow size={15} className="text-m-blue" /> Workflow Timesheets
         </div>
         <div className="space-y-4">
           <div>
@@ -212,7 +212,7 @@ function WorkflowsSection({ config, onSave }) {
               {[2, 3].map(n => (
                 <label key={n} className="flex items-center gap-2 cursor-pointer">
                   <input type="radio" value={n} checked={steps === n} onChange={() => { setSteps(n); setSuccess(false); }}
-                    className="accent-[#2563eb]" data-testid={`ts-steps-${n}`} />
+                    className="accent-m-blue" data-testid={`ts-steps-${n}`} />
                   <span className="text-sm text-zinc-700">
                     {n === 2 ? "2 étapes (Valideur → Validé)" : "3 étapes (Valideur → CP → Validé)"}
                   </span>
@@ -239,7 +239,7 @@ function WorkflowsSection({ config, onSave }) {
                   onClick={() => { setAutoValidate(a => !a); setSuccess(false); }}
                 >
                   {autoValidate
-                    ? <ToggleRight size={24} className="text-blue-600" />
+                    ? <ToggleRight size={24} className="text-m-blue" />
                     : <ToggleLeft size={24} className="text-zinc-400" />
                   }
                   <span className="text-sm text-zinc-700" data-testid="ts-auto-validate">
@@ -255,7 +255,7 @@ function WorkflowsSection({ config, onSave }) {
       {/* Demandes */}
       <div className="bg-white border border-zinc-200 rounded-lg p-5">
         <div className="font-semibold text-zinc-800 mb-4 flex items-center gap-2">
-          <Workflow size={15} className="text-blue-600" /> Workflow Demandes
+          <Workflow size={15} className="text-m-blue" /> Workflow Demandes
         </div>
         <label className="text-xs font-semibold text-zinc-600 block mb-3">
           Étapes actives du workflow
@@ -266,7 +266,7 @@ function WorkflowsSection({ config, onSave }) {
               className="flex items-center gap-3 p-2 rounded-lg hover:bg-zinc-50 cursor-pointer"
               data-testid={`demand-status-${s.value}`}
             >
-              <input type="checkbox" className="accent-[#2563eb]"
+              <input type="checkbox" className="accent-m-blue"
                 checked={activeStatuses.includes(s.value)}
                 onChange={() => toggleStatus(s.value)} />
               <span className="text-sm text-zinc-700">{s.label}</span>
@@ -336,7 +336,7 @@ function EnumEditor({ items, onChange, allowDelete = true }) {
       ))}
       <button
         onClick={add}
-        className="flex items-center gap-1.5 text-[11px] text-blue-600 hover:text-blue-700 font-semibold mt-2"
+        className="flex items-center gap-1.5 text-[11px] text-m-blue hover:text-m-blue-dark font-semibold mt-2"
         data-testid="enum-add-btn"
       >
         <Plus size={11} /> Ajouter une valeur
@@ -379,7 +379,7 @@ function EnumsSection({ config, onSave }) {
 
   return (
     <div data-testid="section-enums">
-      <div className="flex gap-1 mb-4 border-b border-[#e7e3f2]">
+      <div className="flex gap-1 mb-4 border-b border-m-border-lav">
         {ENUM_SECTIONS.map(s => (
           <button
             key={s.key}
@@ -387,8 +387,8 @@ function EnumsSection({ config, onSave }) {
             data-testid={`enum-tab-${s.key}`}
             className={`px-3 py-2 text-[13px] font-semibold border-b-[3px] -mb-px transition-colors ${
               activeEnum === s.key
-                ? "text-[#2e5fe8] border-[#2e5fe8]"
-                : "text-[#8a87a0] border-transparent hover:text-[#26243a]"
+                ? "text-m-blue border-m-blue"
+                : "text-m-muted border-transparent hover:text-m-ink"
             }`}
           >
             {s.label}
@@ -474,7 +474,7 @@ function HolidaysSection({ config, onSave }) {
         <button
           onClick={addHoliday}
           data-testid="add-holiday-btn"
-          className="flex items-center gap-1.5 px-3 py-1.5 border border-dashed border-zinc-300 rounded-lg text-sm text-zinc-600 hover:border-blue-600 hover:text-blue-600"
+          className="flex items-center gap-1.5 px-3 py-1.5 border border-dashed border-zinc-300 rounded-lg text-sm text-zinc-600 hover:border-m-blue hover:text-m-blue"
         >
           <Plus size={13} /> Ajouter un jour férié
         </button>
@@ -483,10 +483,10 @@ function HolidaysSection({ config, onSave }) {
       <div className="bg-white border border-zinc-200 rounded-lg overflow-hidden">
         <table className="w-full text-sm" data-testid="holidays-table">
           <thead>
-            <tr className="bg-[#fbfaff] border-b border-[#e8e6f0]">
-              <th className="px-4 py-2.5 text-left text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wider">Date</th>
-              <th className="px-4 py-2.5 text-left text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wider">Libellé</th>
-              <th className="px-4 py-2.5 text-left text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wider">Pays</th>
+            <tr className="bg-m-bg border-b border-m-border">
+              <th className="px-4 py-2.5 text-left text-[10.5px] font-bold text-m-muted uppercase tracking-wider">Date</th>
+              <th className="px-4 py-2.5 text-left text-[10.5px] font-bold text-m-muted uppercase tracking-wider">Libellé</th>
+              <th className="px-4 py-2.5 text-left text-[10.5px] font-bold text-m-muted uppercase tracking-wider">Pays</th>
               <th className="w-10" />
             </tr>
           </thead>
@@ -743,7 +743,7 @@ function BrandingSection({ config, onSave }) {
 
           <div>
             <label className="text-xs font-semibold text-zinc-600 block mb-1">Logo (PNG/SVG)</label>
-            <label className="flex items-center gap-2 border border-dashed border-zinc-300 rounded-lg px-3 py-2 cursor-pointer hover:border-blue-600 hover:bg-blue-50/30 transition-colors"
+            <label className="flex items-center gap-2 border border-dashed border-zinc-300 rounded-lg px-3 py-2 cursor-pointer hover:border-m-blue hover:bg-blue-50/30 transition-colors"
               data-testid="branding-logo-upload">
               <Upload size={14} className="text-zinc-400" />
               <span className="text-sm text-zinc-500 truncate">
@@ -812,7 +812,7 @@ function WebhooksSection({ config, onSave }) {
           data-testid="webhooks-save-btn"
           onClick={save}
           disabled={saving}
-          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors disabled:opacity-50"
         >
           {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />}
           Sauvegarder
@@ -838,7 +838,7 @@ function WebhooksSection({ config, onSave }) {
           className="focus:outline-none"
         >
           {form.enabled
-            ? <ToggleRight size={32} className="text-blue-600" />
+            ? <ToggleRight size={32} className="text-m-blue" />
             : <ToggleLeft size={32} className="text-zinc-400" />
           }
         </button>
@@ -868,7 +868,7 @@ function WebhooksSection({ config, onSave }) {
                 type="checkbox"
                 checked={form.events.includes(ev.value)}
                 onChange={() => toggleEvent(ev.value)}
-                className="w-4 h-4 accent-[#2563eb]"
+                className="w-4 h-4 accent-m-blue"
               />
               <span className="text-sm text-zinc-700">{ev.label}</span>
               <code className="text-xs bg-zinc-100 px-1.5 py-0.5 rounded-lg text-zinc-500">{ev.value}</code>
@@ -987,7 +987,7 @@ function EmailAlertsSubSection({ config, onSave }) {
           data-testid="email-alerts-save-btn"
           onClick={save}
           disabled={saving}
-          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors disabled:opacity-50"
         >
           {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />}
           Sauvegarder
@@ -1012,7 +1012,7 @@ function EmailAlertsSubSection({ config, onSave }) {
           className="focus:outline-none"
         >
           {form.enabled
-            ? <ToggleRight size={32} className="text-blue-600" />
+            ? <ToggleRight size={32} className="text-m-blue" />
             : <ToggleLeft size={32} className="text-zinc-400" />
           }
         </button>
@@ -1039,7 +1039,7 @@ function EmailAlertsSubSection({ config, onSave }) {
                 type="checkbox"
                 checked={form.events.includes(ev.value)}
                 onChange={() => toggleEvent(ev.value)}
-                className="w-4 h-4 accent-[#2563eb]"
+                className="w-4 h-4 accent-m-blue"
               />
               <span className="text-sm text-zinc-700">{ev.label}</span>
               <code className="text-xs bg-zinc-100 px-1.5 py-0.5 rounded-lg text-zinc-500">{ev.value}</code>
@@ -1113,7 +1113,7 @@ function SSOSection({ config, onSave }) {
 
   const Toggle = ({ on, onClick, testid }) => (
     <button data-testid={testid} onClick={onClick} className="focus:outline-none flex-shrink-0">
-      {on ? <ToggleRight size={30} className="text-blue-600" /> : <ToggleLeft size={30} className="text-zinc-400" />}
+      {on ? <ToggleRight size={30} className="text-m-blue" /> : <ToggleLeft size={30} className="text-zinc-400" />}
     </button>
   );
 
@@ -1130,7 +1130,7 @@ function SSOSection({ config, onSave }) {
           data-testid="sso-save-btn"
           onClick={save}
           disabled={saving}
-          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors disabled:opacity-50"
         >
           {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />}
           Sauvegarder
@@ -1285,7 +1285,7 @@ function ProjectCodesSection({ config, onSave }) {
           data-testid="project-codes-save-btn"
           onClick={save}
           disabled={saving}
-          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-50"
+          className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors disabled:opacity-50"
         >
           {saving ? <RefreshCw size={13} className="animate-spin" /> : <Save size={13} />}
           Sauvegarder
@@ -1325,10 +1325,10 @@ function ProjectCodesSection({ config, onSave }) {
           <div className="border border-zinc-200 rounded-xl overflow-hidden">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
-                  <th className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">Programme</th>
-                  <th className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] w-40">Préfixe</th>
-                  <th className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">Aperçu</th>
+                <tr className="bg-m-bg border-b border-m-border text-left">
+                  <th className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted">Programme</th>
+                  <th className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted w-40">Préfixe</th>
+                  <th className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted">Aperçu</th>
                 </tr>
               </thead>
               <tbody>
@@ -1448,18 +1448,18 @@ export default function AdminConfig() {
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto" data-testid="admin-config-page">
       <div className="flex items-center gap-3 mb-6">
-        <div className="w-9 h-9 bg-blue-600 rounded-lg flex items-center justify-center flex-shrink-0">
+        <div className="w-9 h-9 bg-m-blue rounded-lg flex items-center justify-center flex-shrink-0">
           <Wrench size={18} className="text-white" />
         </div>
         <div>
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / Administration / <span className="text-[#352c6e] font-semibold">Configuration</span></div>
-          <h1 className="font-heading text-2xl font-extrabold text-[#26243a] tracking-tight">Configuration du Tenant</h1>
+          <div className="text-xs text-m-muted mb-0.5">Accueil / Administration / <span className="text-m-primary font-semibold">Configuration</span></div>
+          <h1 className="font-heading text-2xl font-extrabold text-m-ink tracking-tight">Configuration du Tenant</h1>
           <p className="text-xs text-zinc-400">Paramètres d'administration réservés aux administrateurs</p>
         </div>
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-[#e7e3f2] mb-6 overflow-x-auto">
+      <div className="flex gap-1 border-b border-m-border-lav mb-6 overflow-x-auto">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button
             key={id}
@@ -1467,8 +1467,8 @@ export default function AdminConfig() {
             onClick={() => setActiveTab(id)}
             className={`flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold border-b-[3px] -mb-px transition-colors whitespace-nowrap ${
               activeTab === id
-                ? "text-[#2e5fe8] border-[#2e5fe8]"
-                : "text-[#8a87a0] border-transparent hover:text-[#26243a]"
+                ? "text-m-blue border-m-blue"
+                : "text-m-muted border-transparent hover:text-m-ink"
             }`}
           >
             <Icon size={13} />
@@ -1508,12 +1508,12 @@ function IndicatorThresholdsSection() {
       <label className="block text-xs font-semibold text-zinc-600 mb-1">{label}</label>
       <input type="number" step="0.01" min="0" max="2" value={th[k] ?? ""} data-testid={`threshold-${k}`}
         onChange={(e) => setTh((t) => ({ ...t, [k]: e.target.value }))}
-        className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 font-mono-data focus:outline-none focus:border-blue-600" />
+        className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 font-mono-data focus:outline-none focus:border-m-blue" />
     </div>
   );
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-sm p-6 max-w-2xl" data-testid="indicators-thresholds-section">
-      <h3 className="font-heading text-sm font-bold text-[#26243a] mb-1">Seuils RAG des indicateurs EVM</h3>
+    <div className="bg-white border border-m-border rounded-xl shadow-sm p-6 max-w-2xl" data-testid="indicators-thresholds-section">
+      <h3 className="font-heading text-sm font-bold text-m-ink mb-1">Seuils RAG des indicateurs EVM</h3>
       <p className="text-xs text-zinc-400 mb-4">CPI/SPI ≥ seuil ambre = vert · entre rouge et ambre = ambre · &lt; seuil rouge = rouge. Appliqué au cockpit Pilotage et à l'onglet Pilotage des projets.</p>
       <div className="grid grid-cols-2 gap-4">
         <F k="cpi_amber" label="CPI — seuil vert (≥)" />
@@ -1523,7 +1523,7 @@ function IndicatorThresholdsSection() {
       </div>
       <div className="flex items-center gap-3 mt-5">
         <button onClick={save} data-testid="thresholds-save-btn"
-          className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">Enregistrer</button>
+          className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark">Enregistrer</button>
         {saved && <span className="text-xs text-emerald-600 font-semibold">✓ Seuils enregistrés</span>}
       </div>
     </div>
@@ -1546,15 +1546,15 @@ function CustomFieldsDefsSection() {
     setFields(r.data); setSaved(true); setTimeout(() => setSaved(false), 2500);
   };
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-sm p-6 max-w-3xl" data-testid="custom-fields-section">
-      <h3 className="font-heading text-sm font-bold text-[#26243a] mb-1">Champs personnalisés des projets</h3>
+    <div className="bg-white border border-m-border rounded-xl shadow-sm p-6 max-w-3xl" data-testid="custom-fields-section">
+      <h3 className="font-heading text-sm font-bold text-m-ink mb-1">Champs personnalisés des projets</h3>
       <p className="text-xs text-zinc-400 mb-4">Ces champs apparaissent sur la fiche projet (onglet Aperçu) et sont saisissables par les utilisateurs habilités.</p>
       <div className="space-y-2">
         {fields.map((f, i) => (
           <div key={f.key || i} className="flex items-center gap-2" data-testid={`cf-row-${i}`}>
             <input value={f.label} onChange={(e) => set(i, "label", e.target.value)} placeholder="Libellé (ex : Sponsor métier)"
               data-testid={`cf-label-${i}`}
-              className="flex-1 text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+              className="flex-1 text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue" />
             <select value={f.type || "text"} onChange={(e) => set(i, "type", e.target.value)} data-testid={`cf-type-${i}`}
               className="text-sm border border-zinc-200 rounded-lg px-2 py-2 bg-white">
               <option value="text">Texte</option>
@@ -1566,7 +1566,7 @@ function CustomFieldsDefsSection() {
               <input value={Array.isArray(f.options) ? f.options.join(", ") : (f.options || "")}
                 onChange={(e) => set(i, "options", e.target.value)} placeholder="Options (virgules)"
                 data-testid={`cf-options-${i}`}
-                className="w-48 text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+                className="w-48 text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue" />
             )}
             <button onClick={() => setFields((arr) => arr.filter((_, j) => j !== i))}
               className="p-1.5 text-zinc-300 hover:text-rose-500" data-testid={`cf-remove-${i}`}><Trash2 size={14} /></button>
@@ -1575,12 +1575,12 @@ function CustomFieldsDefsSection() {
       </div>
       <button onClick={() => setFields((arr) => [...arr, { label: "", type: "text", options: [] }])}
         data-testid="cf-add-btn"
-        className="flex items-center gap-1 mt-3 px-2.5 py-1.5 text-[11px] font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50">
+        className="flex items-center gap-1 mt-3 px-2.5 py-1.5 text-[11px] font-semibold text-m-blue border border-blue-200 rounded-lg hover:bg-blue-50">
         <Plus size={11} /> Ajouter un champ
       </button>
       <div className="flex items-center gap-3 mt-5 pt-4 border-t border-zinc-100">
         <button onClick={save} data-testid="cf-save-btn"
-          className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">Enregistrer</button>
+          className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark">Enregistrer</button>
         {saved && <span className="text-xs text-emerald-600 font-semibold">✓ Champs enregistrés</span>}
       </div>
     </div>

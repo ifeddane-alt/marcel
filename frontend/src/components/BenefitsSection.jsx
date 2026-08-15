@@ -83,20 +83,20 @@ function BenefitModal({ benefit, onClose, onSave }) {
             <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Libellé *</label>
             <input value={label} onChange={(e) => setLabel(e.target.value)} required data-testid="benefit-label-input"
               placeholder="Ex : Réduction des coûts de licence"
-              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Catégorie</label>
               <select value={category} onChange={(e) => setCategory(e.target.value)} data-testid="benefit-category-select"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 bg-white">
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue bg-white">
                 {CATEGORIES.map((c) => <option key={c.value} value={c.value}>{c.label}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Unité</label>
               <select value={unit} onChange={(e) => setUnit(e.target.value)} data-testid="benefit-unit-select"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 bg-white">
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue bg-white">
                 {UNITS.map((u) => <option key={u.value} value={u.value}>{u.label}</option>)}
               </select>
             </div>
@@ -106,32 +106,32 @@ function BenefitModal({ benefit, onClose, onSave }) {
               <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Valeur attendue</label>
               <input type="number" step="any" min="0" value={expected} onChange={(e) => setExpected(e.target.value)}
                 data-testid="benefit-expected-input"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 font-mono-data" />
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue font-mono-data" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Valeur réalisée</label>
               <input type="number" step="any" min="0" value={realized} onChange={(e) => setRealized(e.target.value)}
                 data-testid="benefit-realized-input"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 font-mono-data" />
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue font-mono-data" />
             </div>
           </div>
           <div>
             <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Horizon</label>
             <input value={horizon} onChange={(e) => setHorizon(e.target.value)} data-testid="benefit-horizon-input"
               placeholder="Ex : 2027, 12 mois après MEP…"
-              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Commentaire</label>
             <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={2} data-testid="benefit-comment-input"
-              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 resize-none" />
+              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue resize-none" />
           </div>
           {error && <p className="text-sm text-rose-600 font-medium">{error}</p>}
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100">
             <button type="button" onClick={onClose}
               className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">Annuler</button>
             <button type="submit" disabled={saving} data-testid="benefit-save-btn"
-              className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60">
+              className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors disabled:opacity-60">
               {saving ? "Sauvegarde..." : isEdit ? "Enregistrer" : "Ajouter"}
             </button>
           </div>
@@ -143,7 +143,7 @@ function BenefitModal({ benefit, onClose, onSave }) {
 
 function Kpi({ label, value, accent, testId }) {
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4" data-testid={testId}>
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4" data-testid={testId}>
       <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mb-1">{label}</div>
       <div className={`font-mono-data font-bold text-xl ${accent || "text-zinc-950"}`}>{value}</div>
     </div>
@@ -216,15 +216,15 @@ export default function BenefitsSection({ projectId, budgetTotal, canWrite }) {
       </div>
 
       {/* Table */}
-      <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]">
+      <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]">
         <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
-          <div className="flex items-center gap-2 font-heading text-[13px] font-bold text-[#26243a]">
+          <div className="flex items-center gap-2 font-heading text-[13px] font-bold text-m-ink">
             <TrendingUp size={13} className="text-emerald-600" />
             Business case — bénéfices attendus vs réalisés ({benefits.length})
           </div>
           {canWrite && (
             <button onClick={() => { setEditing(null); setModalOpen(true); }} data-testid="btn-new-benefit"
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-m-blue text-white text-xs font-semibold rounded-lg hover:bg-m-blue-dark transition-colors">
               <Plus size={12} /> Nouveau bénéfice
             </button>
           )}
@@ -237,9 +237,9 @@ export default function BenefitsSection({ projectId, budgetTotal, canWrite }) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+                <tr className="bg-m-bg border-b border-m-border text-left">
                   {["Libellé", "Catégorie", "Attendu", "Réalisé", "Réalisation", "Horizon", "Commentaire", ""].map((h) => (
-                    <th key={h} className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] whitespace-nowrap">{h}</th>
+                    <th key={h} className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -265,7 +265,7 @@ export default function BenefitsSection({ projectId, budgetTotal, canWrite }) {
                       <td className="px-3 py-2.5 font-mono-data text-xs text-zinc-700 whitespace-nowrap">{fmtValue(b.realized_value, b.unit)}</td>
                       <td className="px-3 py-2.5 min-w-[110px]">
                         <div className="flex items-center gap-2">
-                          <div className="flex-1 h-1.5 bg-[#ece9f4] rounded-full overflow-hidden">
+                          <div className="flex-1 h-1.5 bg-m-border-soft rounded-full overflow-hidden">
                             <div className="h-full rounded-full"
                               style={{ width: `${Math.min(bp, 100)}%`, background: bp >= 100 ? "#3f8a34" : bp >= 50 ? "#e0a800" : "#2e5fe8" }} />
                           </div>
@@ -278,7 +278,7 @@ export default function BenefitsSection({ projectId, budgetTotal, canWrite }) {
                         {canWrite && (
                           <div className="flex items-center gap-1">
                             <button onClick={() => { setEditing(b); setModalOpen(true); }} data-testid={`btn-edit-benefit-${b.benefit_id}`}
-                              className="p-1 text-zinc-400 hover:text-blue-600 rounded-lg transition-colors"><Pencil size={12} /></button>
+                              className="p-1 text-zinc-400 hover:text-m-blue rounded-lg transition-colors"><Pencil size={12} /></button>
                             <button onClick={() => setConfirmDelete(b)} data-testid={`btn-delete-benefit-${b.benefit_id}`}
                               className="p-1 text-zinc-400 hover:text-rose-500 rounded-lg transition-colors"><Trash2 size={12} /></button>
                           </div>

@@ -162,7 +162,7 @@ function ScopeVsReelView({ projects, snapshots, selectedSnapshotId, setSelectedS
       {/* Controls */}
       <div className="flex items-center gap-4 flex-wrap mb-5">
         <div className="flex items-center gap-2">
-          <Layers size={14} className="text-blue-600" />
+          <Layers size={14} className="text-m-blue" />
           <span className="text-sm font-semibold text-zinc-700">Snapshot de référence</span>
         </div>
         {snapshots.length > 0 ? (
@@ -170,7 +170,7 @@ function ScopeVsReelView({ projects, snapshots, selectedSnapshotId, setSelectedS
             value={selectedSnapshotId}
             onChange={e => setSelectedSnapshotId(e.target.value)}
             data-testid="scope-snapshot-select"
-            className="text-xs border border-zinc-200 rounded-lg px-3 py-1.5 text-zinc-600 focus:outline-none focus:border-blue-600 bg-white"
+            className="text-xs border border-zinc-200 rounded-lg px-3 py-1.5 text-zinc-600 focus:outline-none focus:border-m-blue bg-white"
           >
             {snapshots.map(s => (
               <option key={s.snapshot_id || s._id} value={s.snapshot_id || s._id}>
@@ -212,7 +212,7 @@ function ScopeVsReelView({ projects, snapshots, selectedSnapshotId, setSelectedS
       {/* Legend */}
       <div className="flex items-center gap-4 text-[10px] text-zinc-500 mb-4">
         <span className="flex items-center gap-1">
-          <span className="w-8 h-3 rounded-lg bg-blue-600 inline-block opacity-70" /> Scope figé (snapshot)
+          <span className="w-8 h-3 rounded-lg bg-m-blue inline-block opacity-70" /> Scope figé (snapshot)
         </span>
         <span className="flex items-center gap-1">
           <span className="w-8 h-3 rounded-lg bg-emerald-500 inline-block" /> Réel (dans les délais)
@@ -292,7 +292,7 @@ function ScopeVsReelView({ projects, snapshots, selectedSnapshotId, setSelectedS
                         end={scope.end}
                         timeMin={timeMin}
                         timeMax={timeMax}
-                        color="bg-blue-600 opacity-60"
+                        color="bg-m-blue opacity-60"
                       />
                     )}
                     {!scope?.start && (
@@ -415,7 +415,7 @@ function DepFormModal({ dependency, projects, onClose, onSaved }) {
               <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Projet dépendant *</label>
               <select value={sourcePid} onChange={(e) => setSourcePid(e.target.value)} disabled={isEdit}
                 data-testid="dep-src-select"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 bg-white disabled:opacity-60">
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue bg-white disabled:opacity-60">
                 <option value="">— Sélectionner —</option>
                 {projects.map((p) => <option key={p.project_id} value={p.project_id}>{p.code ? `${p.code} · ` : ""}{p.name}</option>)}
               </select>
@@ -424,7 +424,7 @@ function DepFormModal({ dependency, projects, onClose, onSaved }) {
               <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Dépend du projet *</label>
               <select value={targetPid} onChange={(e) => setTargetPid(e.target.value)} disabled={isEdit}
                 data-testid="dep-tgt-select"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 bg-white disabled:opacity-60">
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue bg-white disabled:opacity-60">
                 <option value="">— Sélectionner —</option>
                 {projects.filter((p) => p.project_id !== sourcePid).map((p) => (
                   <option key={p.project_id} value={p.project_id}>{p.code ? `${p.code} · ` : ""}{p.name}</option>
@@ -436,14 +436,14 @@ function DepFormModal({ dependency, projects, onClose, onSaved }) {
             <div>
               <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Nature</label>
               <select value={nature} onChange={(e) => setNature(e.target.value)} data-testid="dep-reg-nature"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 bg-white">
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue bg-white">
                 {DEP_NATURES.map((n) => <option key={n.value} value={n.value}>{n.label}</option>)}
               </select>
             </div>
             <div>
               <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Impact</label>
               <select value={impact} onChange={(e) => setImpact(e.target.value)} data-testid="dep-reg-impact"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 bg-white">
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue bg-white">
                 {DEP_IMPACTS.map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
               </select>
             </div>
@@ -452,7 +452,7 @@ function DepFormModal({ dependency, projects, onClose, onSaved }) {
             <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Description *</label>
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} required
               data-testid="dep-desc-input" placeholder="Décrivez la nature de cette dépendance..."
-              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 resize-none" />
+              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue resize-none" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
@@ -462,7 +462,7 @@ function DepFormModal({ dependency, projects, onClose, onSaved }) {
             <div>
               <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Statut</label>
               <select value={status} onChange={(e) => setStatus(e.target.value)} data-testid="dep-reg-status"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 bg-white">
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue bg-white">
                 {DEP_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
             </div>
@@ -472,7 +472,7 @@ function DepFormModal({ dependency, projects, onClose, onSaved }) {
             <button type="button" onClick={onClose}
               className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">Annuler</button>
             <button type="submit" disabled={saving} data-testid="dep-reg-save"
-              className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60">
+              className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors disabled:opacity-60">
               {saving ? "Sauvegarde..." : isEdit ? "Enregistrer" : "Créer la dépendance"}
             </button>
           </div>
@@ -518,7 +518,7 @@ function DependenciesRegister({ deps, projects, canManage, onChanged }) {
           { label: "Bloquées", value: blocked, cls: blocked > 0 ? "text-orange-600" : "text-zinc-950", tid: "deps-kpi-blocked" },
           { label: "Résolues", value: resolved, cls: "text-emerald-600", tid: "deps-kpi-resolved" },
         ].map((k) => (
-          <div key={k.tid} className="bg-white border border-[#e8e6f0] rounded-xl shadow-sm p-4" data-testid={k.tid}>
+          <div key={k.tid} className="bg-white border border-m-border rounded-xl shadow-sm p-4" data-testid={k.tid}>
             <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mb-1">{k.label}</div>
             <div className={`font-mono-data font-bold text-xl ${k.cls}`}>{k.value}</div>
           </div>
@@ -528,13 +528,13 @@ function DependenciesRegister({ deps, projects, canManage, onChanged }) {
       {/* Table */}
       <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-hidden">
         <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
-          <div className="flex items-center gap-2 font-heading text-[13px] font-bold text-[#26243a]">
+          <div className="flex items-center gap-2 font-heading text-[13px] font-bold text-m-ink">
             <GitFork size={13} className="text-violet-500" />
             Registre des dépendances inter-projets
           </div>
           {canManage && (
             <button onClick={() => { setEditing(null); setModalOpen(true); }} data-testid="btn-roadmap-new-dep"
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-m-blue text-white text-xs font-semibold rounded-lg hover:bg-m-blue-dark transition-colors">
               <Plus size={12} /> Nouvelle dépendance
             </button>
           )}
@@ -547,9 +547,9 @@ function DependenciesRegister({ deps, projects, canManage, onChanged }) {
           <div className="overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+                <tr className="bg-m-bg border-b border-m-border text-left">
                   {["Projet dépendant", "", "Dépend de", "Nature", "Impact", "Échéance", "Statut", "Description", ""].map((h, i) => (
-                    <th key={i} className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] whitespace-nowrap">{h}</th>
+                    <th key={i} className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -560,13 +560,13 @@ function DependenciesRegister({ deps, projects, canManage, onChanged }) {
                     <tr key={dep.dependency_id} className="border-b border-zinc-100 hover:bg-zinc-50/50 transition-colors"
                       data-testid={`dep-reg-row-${dep.dependency_id}`}>
                       <td className="px-3 py-2.5 text-xs">
-                        <Link to={`/projects/${dep.source_project_id}`} className="text-blue-600 hover:underline font-medium">
+                        <Link to={`/projects/${dep.source_project_id}`} className="text-m-blue hover:underline font-medium">
                           {dep.source_project_name}
                         </Link>
                       </td>
                       <td className="px-1 py-2.5 text-violet-400 text-xs font-bold">→</td>
                       <td className="px-3 py-2.5 text-xs">
-                        <Link to={`/projects/${dep.target_project_id}`} className="text-blue-600 hover:underline font-medium">
+                        <Link to={`/projects/${dep.target_project_id}`} className="text-m-blue hover:underline font-medium">
                           {dep.target_project_name}
                         </Link>
                       </td>
@@ -585,7 +585,7 @@ function DependenciesRegister({ deps, projects, canManage, onChanged }) {
                         {canManage && (
                           <div className="flex items-center gap-1">
                             <button onClick={() => { setEditing(dep); setModalOpen(true); }} data-testid={`btn-edit-dep-reg-${dep.dependency_id}`}
-                              className="p-1 text-zinc-400 hover:text-blue-600 rounded-lg transition-colors"><Pencil size={12} /></button>
+                              className="p-1 text-zinc-400 hover:text-m-blue rounded-lg transition-colors"><Pencil size={12} /></button>
                             <button onClick={() => setConfirmDelete(dep)} data-testid={`btn-delete-dep-reg-${dep.dependency_id}`}
                               className="p-1 text-zinc-400 hover:text-rose-500 rounded-lg transition-colors"><Trash2 size={12} /></button>
                           </div>
@@ -938,10 +938,10 @@ export default function Roadmap() {
       <div className="mb-4">
         <div className="flex items-center justify-between">
           <div>
-            <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Roadmap</span></div>
+            <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Roadmap</span></div>
             <div className="flex items-center gap-2 mb-1">
-              <Map size={18} className="text-[#2e5fe8]" />
-              <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">
+              <Map size={18} className="text-m-blue" />
+              <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">
                 Roadmap Portefeuille
               </h1>
             </div>
@@ -972,7 +972,7 @@ export default function Roadmap() {
                 } catch { toast.error("Erreur lors de l'export"); }
               }}
               data-testid="btn-export-roadmap-pptx"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-[#352c6e] text-white hover:bg-[#2a2358] transition-colors">
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg bg-m-primary text-white hover:bg-m-primary-deep transition-colors">
               <PresentationIcon size={12} /> Roadmap PPTX
             </button>
             {activeRoadmapTab === "timeline" && (
@@ -980,20 +980,20 @@ export default function Roadmap() {
                 <div className="flex rounded-lg border border-zinc-200 overflow-hidden">
                   {[{ id: "month", label: "Mois" }, { id: "quarter", label: "Trimestre" }, { id: "year", label: "Année" }].map((z) => (
                     <button key={z.id} onClick={() => setZoom(z.id)} data-testid={`zoom-${z.id}-btn`}
-                      className={`px-3 py-1.5 text-xs font-semibold transition-colors ${zoom === z.id ? "bg-blue-600 text-white" : "text-zinc-600 hover:bg-zinc-50 bg-white"}`}>
+                      className={`px-3 py-1.5 text-xs font-semibold transition-colors ${zoom === z.id ? "bg-m-blue text-white" : "text-zinc-600 hover:bg-zinc-50 bg-white"}`}>
                       {z.label}
                     </button>
                   ))}
                 </div>
                 <button onClick={() => setFullSpan(!fullSpan)} data-testid="roadmap-fullspan-btn"
-                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${fullSpan ? "bg-[#352c6e] text-white border-[#352c6e]" : "border-zinc-200 text-zinc-600 hover:bg-zinc-50 bg-white"}`}
+                  className={`px-3 py-1.5 text-xs font-semibold rounded-lg border transition-colors ${fullSpan ? "bg-m-primary text-white border-m-primary" : "border-zinc-200 text-zinc-600 hover:bg-zinc-50 bg-white"}`}
                   title={fullSpan ? "Revenir à la fenêtre 12 mois" : "Afficher toute la période"}>
                   {fullSpan ? "Tout" : "12 mois"}
                 </button>
                 <button
                   onClick={() => bodyRef.current?.scrollTo({ left: Math.max(todayX - 260, 0), behavior: "smooth" })}
                   data-testid="roadmap-recenter-btn"
-                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-blue-200 text-blue-600 bg-blue-50 hover:bg-blue-100 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg border border-blue-200 text-m-blue bg-blue-50 hover:bg-blue-100 transition-colors"
                   title="Recentrer sur aujourd'hui">
                   <LocateFixed size={12} /> Aujourd'hui
                 </button>
@@ -1016,7 +1016,7 @@ export default function Roadmap() {
             data-testid={`roadmap-tab-${key}`}
             className={`flex items-center gap-1.5 px-4 py-2.5 text-sm font-medium border-b-2 transition-colors
               ${activeRoadmapTab === key
-                ? "border-blue-600 text-blue-600"
+                ? "border-m-blue text-m-blue"
                 : "border-transparent text-zinc-500 hover:text-zinc-700"}`}
           >
             <Icon size={14} /> {label}
@@ -1037,26 +1037,26 @@ export default function Roadmap() {
             <Filter size={11} /> Projets
           </div>
           <select value={groupBy} onChange={(e) => setGroupBy(e.target.value)} data-testid="roadmap-groupby"
-            className="text-xs border border-[#352c6e]/30 rounded-lg px-2.5 py-1.5 text-[#352c6e] font-semibold focus:outline-none focus:border-blue-600 bg-[#f0eefc]">
+            className="text-xs border border-m-primary/30 rounded-lg px-2.5 py-1.5 text-m-primary font-semibold focus:outline-none focus:border-m-blue bg-m-lilac">
             <option value="program">Grouper : Programme</option>
             <option value="direction">Grouper : Direction</option>
             <option value="theme">Grouper : Thème stratégique</option>
             <option value="art">Grouper : ART</option>
           </select>
           <select value={filterProgram} onChange={(e) => setFilterProgram(e.target.value)} data-testid="filter-program"
-            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-blue-600 bg-white">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-m-blue bg-white">
             <option value="">Tous programmes</option>
             {programs.map((p) => <option key={p.program_id} value={p.program_id}>{p.name}</option>)}
           </select>
           <select value={filterRag} onChange={(e) => setFilterRag(e.target.value)} data-testid="filter-rag"
-            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-blue-600 bg-white">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-m-blue bg-white">
             <option value="">Tous RAG</option>
             <option value="green">Vert</option>
             <option value="orange">Orange</option>
             <option value="red">Rouge</option>
           </select>
           <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} data-testid="filter-status"
-            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-blue-600 bg-white">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-m-blue bg-white">
             <option value="">Tous statuts</option>
             {Object.entries(STATUS_LABELS).map(([k, v]) => <option key={k} value={k}>{v}</option>)}
           </select>
@@ -1236,7 +1236,7 @@ export default function Roadmap() {
                           style={{ width: LEFT_PANEL_W, minWidth: LEFT_PANEL_W }}>
                           <span className={`w-1.5 h-4 rounded-sm flex-shrink-0 ${ragCfg.bg}`} />
                           <Link to={`/projects/${p.project_id}`}
-                            className="text-xs text-zinc-700 font-medium hover:text-blue-600 truncate flex-1"
+                            className="text-xs text-zinc-700 font-medium hover:text-m-blue truncate flex-1"
                             title={p.code ? `${p.code} · ${p.name}` : p.name} data-testid={`roadmap-project-link-${p.project_id}`}>
                             {p.code && <span className="font-mono text-[10px] text-zinc-400 mr-1">{p.code}</span>}
                             {p.name.split("—")[0].trim().slice(0, 22)}
@@ -1356,7 +1356,7 @@ export default function Roadmap() {
               <div className="relative border-t border-zinc-100 bg-zinc-50" style={{ minWidth: LEFT_PANEL_W + totalW, height: 24 }}>
                 {todayX >= 0 && todayX <= totalW && (
                   <div className="absolute top-1" style={{ left: LEFT_PANEL_W + todayX - 20 }}>
-                    <span className="text-[9px] font-bold text-blue-600 bg-blue-50 border border-blue-200 rounded-lg px-1 py-0.5">
+                    <span className="text-[9px] font-bold text-m-blue bg-blue-50 border border-blue-200 rounded-lg px-1 py-0.5">
                       Aujourd'hui
                     </span>
                   </div>
@@ -1440,7 +1440,7 @@ export default function Roadmap() {
             )}
           </div>
           <Link to={`/projects/${tooltip.id}`}
-            className="mt-3 flex items-center gap-1 text-[11px] text-blue-600 hover:underline">
+            className="mt-3 flex items-center gap-1 text-[11px] text-m-blue hover:underline">
             <ExternalLink size={10} /> Voir le projet
           </Link>
         </div>

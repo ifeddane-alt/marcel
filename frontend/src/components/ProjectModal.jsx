@@ -1,5 +1,5 @@
 import React, { useState, useEffect } from "react";
-import { Loader2, ChevronDown, ChevronUp, CheckSquare, Square, Layers } from "lucide-react";
+import { Loader2, ChevronDown, ChevronUp, Layers, Wallet } from "lucide-react";
 import Modal from "@/components/Modal";
 import { projectsAPI, projectTemplatesAPI } from "@/api";
 import { useTenantConfig } from "@/contexts/TenantConfigContext";
@@ -15,7 +15,7 @@ const DEFAULT_STATUS_OPTIONS = [
 
 const EMPTY = {
   name: "", source_id: "", description: "", owner_id: "",
-  program_id: "", methodology: "waterfall", status_rag: "green", status: "actif",
+  program_id: "", methodology: "waterfall", status_rag: "green", status: "en_preparation",
   start_date: "", end_date_baseline: "", end_date_forecast: "", end_date_actual: "",
   capex_planned: "", capex_consumed: "0",
   opex_planned: "", opex_consumed: "0",
@@ -35,17 +35,19 @@ function Field({ label, required, error, hint, children }) {
   );
 }
 
-const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue focus:ring-1 focus:ring-m-blue bg-white";
 
 export default function ProjectModal({ isOpen, onClose, project, resources = [], programs = [], onSaved }) {
   const { config } = useTenantConfig();
   const STATUS_OPTIONS = (config?.enums?.project_statuses?.length > 0)
     ? config.enums.project_statuses
     : DEFAULT_STATUS_OPTIONS;
+  const isEdit = !!project;
   const [form, setForm] = useState(EMPTY);
   const [errors, setErrors] = useState({});
   const [saving, setSaving] = useState(false);
   const [apiError, setApiError] = useState("");
+  const [showBudget, setShowBudget] = useState(false);
   // Template state
   const [templates, setTemplates] = useState([]);
   const [selectedTemplate, setSelectedTemplate] = useState(null);
@@ -88,6 +90,7 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
     }
     setErrors({});
     setApiError("");
+    setShowBudget(false);
     setSelectedTemplate(null);
     setSelectedPhases([]);
     setShowTemplate(false);
@@ -119,17 +122,11 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
     if (!form.name.trim()) errs.name = "Nom requis";
     if (!form.methodology) errs.methodology = "Méthodo requise";
     if (!form.start_date) errs.start_date = "Date de début requise";
-    if (!form.end_date_baseline) errs.end_date_baseline = "Date baseline requise";
-    if (!form.end_date_forecast) errs.end_date_forecast = "Date forecast requise";
-    const capexP = Number(form.capex_planned);
-    const opexP = Number(form.opex_planned);
-    if (!form.capex_planned && !form.opex_planned) {
-      errs.capex_planned = "Au moins CAPEX ou OPEX prévu requis";
-    } else {
-      if (form.capex_planned && isNaN(capexP)) errs.capex_planned = "Valeur numérique requise";
-      if (form.opex_planned && isNaN(opexP)) errs.opex_planned = "Valeur numérique requise";
-    }
-    if (!form.jh_planned || isNaN(Number(form.jh_planned))) errs.jh_planned = "JH prévus requis";
+    if (!form.end_date_forecast) errs.end_date_forecast = "Date de fin prévue requise";
+    if (isEdit && !form.end_date_baseline) errs.end_date_baseline = "Date baseline requise";
+    if (form.capex_planned && isNaN(Number(form.capex_planned))) errs.capex_planned = "Valeur numérique requise";
+    if (form.opex_planned && isNaN(Number(form.opex_planned))) errs.opex_planned = "Valeur numérique requise";
+    if (form.jh_planned && isNaN(Number(form.jh_planned))) errs.jh_planned = "Valeur numérique requise";
     return errs;
   };
 
@@ -153,14 +150,14 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
         status_rag: form.status_rag,
         status: form.status,
         start_date: form.start_date,
-        end_date_baseline: form.end_date_baseline,
+        end_date_baseline: form.end_date_baseline || form.end_date_forecast,
         end_date_forecast: form.end_date_forecast,
         end_date_actual: form.end_date_actual || null,
         capex_planned: capexP,
         capex_consumed: capexC,
         opex_planned: opexP,
         opex_consumed: opexC,
-        jh_planned: Number(form.jh_planned),
+        jh_planned: Number(form.jh_planned || 0),
         jh_consumed: Number(form.jh_consumed || 0),
       };
       if (project) {
@@ -188,6 +185,7 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
   const capexP = Number(form.capex_planned) || 0;
   const opexP  = Number(form.opex_planned)  || 0;
   const totalKEur = capexP + opexP;
+  const budgetSectionOpen = isEdit || showBudget;
 
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={project ? "Modifier le projet" : "Nouveau projet"} size="lg">
@@ -228,8 +226,8 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
           </Field>
         </div>
 
-        {/* Méthodologie + RAG + Statut */}
-        <div className="grid grid-cols-3 gap-3">
+        {/* Méthodologie + Statut (+ RAG en édition uniquement) */}
+        <div className={`grid ${isEdit ? "grid-cols-3" : "grid-cols-2"} gap-3`}>
           <Field label="Méthodologie" required error={errors.methodology}>
             <select data-testid="project-form-methodology" className={INPUT_CLS} value={form.methodology} onChange={set("methodology")}>
               <option value="waterfall">Waterfall</option>
@@ -237,90 +235,125 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
               <option value="safe">SAFe</option>
             </select>
           </Field>
-          <Field label="Statut RAG" required error={errors.status_rag}>
-            <select data-testid="project-form-rag" className={INPUT_CLS} value={form.status_rag} onChange={set("status_rag")}>
-              <option value="green">Vert</option>
-              <option value="orange">Orange</option>
-              <option value="red">Rouge</option>
-            </select>
-          </Field>
+          {isEdit && (
+            <Field label="Statut RAG" required error={errors.status_rag}>
+              <select data-testid="project-form-rag" className={INPUT_CLS} value={form.status_rag} onChange={set("status_rag")}>
+                <option value="green">Vert</option>
+                <option value="orange">Orange</option>
+                <option value="red">Rouge</option>
+              </select>
+            </Field>
+          )}
           <Field label="Statut projet" required>
             <select data-testid="project-form-status" className={INPUT_CLS} value={form.status} onChange={set("status")}>
               {STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           </Field>
         </div>
+        {!isEdit && (
+          <p className="text-[11px] text-zinc-400 -mt-2">Le statut RAG démarre à Vert — il s'ajuste ensuite depuis la fiche projet selon le suivi réel.</p>
+        )}
 
         {/* Dates */}
         <div className="border-t border-zinc-100 pt-3">
           <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mb-2">Calendrier</div>
-          <div className="grid grid-cols-3 gap-3">
-            <Field label="Début prévu" required error={errors.start_date}>
-              <DateField testId="project-form-start" value={form.start_date} onChange={(v) => set("start_date")({ target: { value: v } })} />
-            </Field>
-            <Field label="Fin prévue initiale (baseline)" required error={errors.end_date_baseline}>
-              <DateField testId="project-form-end-baseline" value={form.end_date_baseline} onChange={(v) => set("end_date_baseline")({ target: { value: v } })} />
-            </Field>
-            <Field label="Fin prévue actuelle (forecast)" required error={errors.end_date_forecast}>
-              <DateField testId="project-form-end-forecast" value={form.end_date_forecast} onChange={(v) => set("end_date_forecast")({ target: { value: v } })} />
-            </Field>
-          </div>
-          <div className="mt-3">
-            <Field label="Fin réelle" hint="si projet clôturé">
-              <DateField testId="project-form-end-actual" value={form.end_date_actual} onChange={(v) => set("end_date_actual")({ target: { value: v } })} />
-            </Field>
-          </div>
-        </div>
-
-        {/* Budget CAPEX / OPEX */}
-        <div className="border-t border-zinc-100 pt-3">
-          <div className="flex items-center justify-between mb-2">
-            <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Budget CAPEX / OPEX</div>
-            {totalKEur > 0 && (
-              <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-mono-data">
-                Total budget : <span className="font-bold text-blue-600">{totalKEur.toLocaleString("fr-FR")} K€</span>
-                <span className="relative group cursor-help">
-                  <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-zinc-200 text-zinc-500 text-[10px] font-bold">?</span>
-                  <span className="absolute right-0 bottom-full mb-2 w-64 p-2 bg-zinc-800 text-white text-[11px] rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 leading-relaxed">
-                    L'EAC initial est égal au budget total (CAPEX + OPEX). Utilisez le bouton "Réviser l'EAC" sur le détail du projet pour enregistrer une révision avec historique.
-                  </span>
-                </span>
+          {isEdit ? (
+            <>
+              <div className="grid grid-cols-3 gap-3">
+                <Field label="Début prévu" required error={errors.start_date}>
+                  <DateField testId="project-form-start" value={form.start_date} onChange={(v) => set("start_date")({ target: { value: v } })} />
+                </Field>
+                <Field label="Fin prévue initiale (baseline)" required error={errors.end_date_baseline}>
+                  <DateField testId="project-form-end-baseline" value={form.end_date_baseline} onChange={(v) => set("end_date_baseline")({ target: { value: v } })} />
+                </Field>
+                <Field label="Fin prévue actuelle (forecast)" required error={errors.end_date_forecast}>
+                  <DateField testId="project-form-end-forecast" value={form.end_date_forecast} onChange={(v) => set("end_date_forecast")({ target: { value: v } })} />
+                </Field>
               </div>
-            )}
-          </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="bg-blue-50/40 border border-blue-100 rounded-lg p-3 space-y-2">
-              <div className="text-[10px] font-bold uppercase tracking-wide text-blue-600">CAPEX</div>
-              <Field label="Prévu" required error={errors.capex_planned} hint="K€">
-                <input data-testid="project-form-capex-planned" type="number" className={INPUT_CLS} value={form.capex_planned} onChange={set("capex_planned")} placeholder="Ex : 1260" min="0" />
+              <div className="mt-3">
+                <Field label="Fin réelle" hint="si projet clôturé">
+                  <DateField testId="project-form-end-actual" value={form.end_date_actual} onChange={(v) => set("end_date_actual")({ target: { value: v } })} />
+                </Field>
+              </div>
+            </>
+          ) : (
+            <div className="grid grid-cols-2 gap-3">
+              <Field label="Début prévu" required error={errors.start_date}>
+                <DateField testId="project-form-start" value={form.start_date} onChange={(v) => set("start_date")({ target: { value: v } })} />
               </Field>
-              <Field label="Consommé" hint="K€">
-                <input data-testid="project-form-capex-consumed" type="number" className={INPUT_CLS} value={form.capex_consumed} onChange={set("capex_consumed")} placeholder="0" min="0" />
-              </Field>
-            </div>
-            <div className="bg-amber-50/40 border border-amber-100 rounded-lg p-3 space-y-2">
-              <div className="text-[10px] font-bold uppercase tracking-wide text-amber-600">OPEX</div>
-              <Field label="Prévu" required error={errors.opex_planned} hint="K€">
-                <input data-testid="project-form-opex-planned" type="number" className={INPUT_CLS} value={form.opex_planned} onChange={set("opex_planned")} placeholder="Ex : 2940" min="0" />
-              </Field>
-              <Field label="Consommé" hint="K€">
-                <input data-testid="project-form-opex-consumed" type="number" className={INPUT_CLS} value={form.opex_consumed} onChange={set("opex_consumed")} placeholder="0" min="0" />
+              <Field label="Fin prévue" required error={errors.end_date_forecast} hint="servira de baseline">
+                <DateField testId="project-form-end-forecast" value={form.end_date_forecast} onChange={(v) => set("end_date_forecast")({ target: { value: v } })} />
               </Field>
             </div>
-          </div>
+          )}
         </div>
 
-        {/* JH */}
+        {/* Budget & charges — repliable en création, ouvert en édition */}
         <div className="border-t border-zinc-100 pt-3">
-          <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mb-2">Charges (JH)</div>
-          <div className="grid grid-cols-2 gap-3">
-            <Field label="JH prévus" required error={errors.jh_planned}>
-              <input data-testid="project-form-jh" type="number" className={INPUT_CLS} value={form.jh_planned} onChange={set("jh_planned")} placeholder="Ex : 1000" min="0" />
-            </Field>
-            <Field label="JH consommés">
-              <input data-testid="project-form-jh-consumed" type="number" className={INPUT_CLS} value={form.jh_consumed} onChange={set("jh_consumed")} placeholder="0" min="0" />
-            </Field>
-          </div>
+          {!isEdit && (
+            <button
+              type="button"
+              data-testid="budget-section-toggle"
+              onClick={() => setShowBudget(v => !v)}
+              className="flex items-center gap-2 w-full text-left text-sm font-semibold text-zinc-700 hover:text-m-blue transition-colors"
+            >
+              <Wallet size={15} />
+              <span>Budget & charges <span className="text-zinc-400 font-normal">(optionnel — complétable plus tard)</span></span>
+              {showBudget ? <ChevronUp size={14} className="ml-auto" /> : <ChevronDown size={14} className="ml-auto" />}
+            </button>
+          )}
+          {budgetSectionOpen && (
+            <div className={!isEdit ? "mt-3" : ""}>
+              <div className="flex items-center justify-between mb-2">
+                <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Budget CAPEX / OPEX</div>
+                {totalKEur > 0 && (
+                  <div className="flex items-center gap-1.5 text-xs text-zinc-500 font-mono-data">
+                    Total budget : <span className="font-bold text-m-blue">{totalKEur.toLocaleString("fr-FR")} K€</span>
+                    <span className="relative group cursor-help">
+                      <span className="inline-flex items-center justify-center w-4 h-4 rounded-full bg-zinc-200 text-zinc-500 text-[10px] font-bold">?</span>
+                      <span className="absolute right-0 bottom-full mb-2 w-64 p-2 bg-zinc-800 text-white text-[11px] rounded-lg shadow-lg opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-50 leading-relaxed">
+                        L'EAC initial est égal au budget total (CAPEX + OPEX). Utilisez le bouton "Réviser l'EAC" sur le détail du projet pour enregistrer une révision avec historique.
+                      </span>
+                    </span>
+                  </div>
+                )}
+              </div>
+              <div className="grid grid-cols-2 gap-3">
+                <div className="bg-blue-50/40 border border-blue-100 rounded-lg p-3 space-y-2">
+                  <div className="text-[10px] font-bold uppercase tracking-wide text-m-blue">CAPEX</div>
+                  <Field label="Prévu" error={errors.capex_planned} hint="K€">
+                    <input data-testid="project-form-capex-planned" type="number" className={INPUT_CLS} value={form.capex_planned} onChange={set("capex_planned")} placeholder="Ex : 1260" min="0" />
+                  </Field>
+                  {isEdit && (
+                    <Field label="Consommé" hint="K€">
+                      <input data-testid="project-form-capex-consumed" type="number" className={INPUT_CLS} value={form.capex_consumed} onChange={set("capex_consumed")} placeholder="0" min="0" />
+                    </Field>
+                  )}
+                </div>
+                <div className="bg-amber-50/40 border border-amber-100 rounded-lg p-3 space-y-2">
+                  <div className="text-[10px] font-bold uppercase tracking-wide text-amber-600">OPEX</div>
+                  <Field label="Prévu" error={errors.opex_planned} hint="K€">
+                    <input data-testid="project-form-opex-planned" type="number" className={INPUT_CLS} value={form.opex_planned} onChange={set("opex_planned")} placeholder="Ex : 2940" min="0" />
+                  </Field>
+                  {isEdit && (
+                    <Field label="Consommé" hint="K€">
+                      <input data-testid="project-form-opex-consumed" type="number" className={INPUT_CLS} value={form.opex_consumed} onChange={set("opex_consumed")} placeholder="0" min="0" />
+                    </Field>
+                  )}
+                </div>
+              </div>
+              <div className="grid grid-cols-2 gap-3 mt-3">
+                <Field label="JH prévus" error={errors.jh_planned}>
+                  <input data-testid="project-form-jh" type="number" className={INPUT_CLS} value={form.jh_planned} onChange={set("jh_planned")} placeholder="Ex : 1000" min="0" />
+                </Field>
+                {isEdit && (
+                  <Field label="JH consommés">
+                    <input data-testid="project-form-jh-consumed" type="number" className={INPUT_CLS} value={form.jh_consumed} onChange={set("jh_consumed")} placeholder="0" min="0" />
+                  </Field>
+                )}
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Template (création uniquement) */}
@@ -330,7 +363,7 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
               type="button"
               data-testid="template-toggle"
               onClick={() => setShowTemplate(v => !v)}
-              className="flex items-center gap-2 w-full text-left text-sm font-semibold text-zinc-700 hover:text-blue-600 transition-colors"
+              className="flex items-center gap-2 w-full text-left text-sm font-semibold text-zinc-700 hover:text-m-blue transition-colors"
             >
               <Layers size={15} />
               <span>Pré-charger depuis le template {selectedTemplate.name}</span>
@@ -372,7 +405,7 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
                           setSelectedPhases(prev => prev.filter(n => n !== phase.name));
                         }
                       }}
-                      className="mt-0.5 accent-[#2563eb]"
+                      className="mt-0.5 accent-m-blue"
                     />
                     <div>
                       <span className="text-sm font-medium text-zinc-700">{phase.name}</span>
@@ -395,7 +428,7 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
             type="submit"
             disabled={saving}
             data-testid="project-form-submit"
-            className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 px-5 py-2 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-50 transition-colors"
           >
             {saving && <Loader2 size={14} className="animate-spin" />}
             {project ? "Enregistrer" : (showTemplate && selectedTemplate ? "Créer + Appliquer le template" : "Créer le projet")}

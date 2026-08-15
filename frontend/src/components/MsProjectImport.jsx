@@ -100,12 +100,12 @@ export default function MsProjectImport({ projects = [], onImported }) {
                 <div className="grid grid-cols-2 gap-2">
                   <button onClick={() => setMode("update")} data-testid="msproject-mode-update"
                     className={`flex items-center gap-2 px-3 py-2.5 text-xs font-semibold rounded-lg border transition-colors ${
-                      mode === "update" ? "border-blue-600 bg-blue-50 text-blue-700" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50"}`}>
+                      mode === "update" ? "border-m-blue bg-blue-50 text-blue-700" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50"}`}>
                     <Pencil size={13} /> Mettre à jour un projet
                   </button>
                   <button onClick={() => setMode("create")} data-testid="msproject-mode-create"
                     className={`flex items-center gap-2 px-3 py-2.5 text-xs font-semibold rounded-lg border transition-colors ${
-                      mode === "create" ? "border-blue-600 bg-blue-50 text-blue-700" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50"}`}>
+                      mode === "create" ? "border-m-blue bg-blue-50 text-blue-700" : "border-zinc-200 text-zinc-500 hover:bg-zinc-50"}`}>
                     <Plus size={13} /> Créer un nouveau projet
                   </button>
                 </div>
@@ -117,7 +117,7 @@ export default function MsProjectImport({ projects = [], onImported }) {
                     </label>
                     <select value={projectId} onChange={(e) => setProjectId(e.target.value)}
                       data-testid="msproject-import-project-select"
-                      className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600">
+                      className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-m-blue">
                       <option value="">— Choisir un projet —</option>
                       {projects.map((p) => (
                         <option key={p.project_id} value={p.project_id}>{p.name}</option>
@@ -132,7 +132,7 @@ export default function MsProjectImport({ projects = [], onImported }) {
                   </label>
                   <button onClick={() => fileRef.current?.click()}
                     data-testid="msproject-import-file-btn"
-                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm border border-dashed border-zinc-300 rounded-lg text-zinc-500 hover:border-blue-600 hover:text-blue-600 transition-colors">
+                    className="w-full flex items-center gap-2 px-3 py-2.5 text-sm border border-dashed border-zinc-300 rounded-lg text-zinc-500 hover:border-m-blue hover:text-m-blue transition-colors">
                     <FileUp size={14} />
                     {file ? file.name : "Choisir un fichier…"}
                   </button>
@@ -220,7 +220,7 @@ export default function MsProjectImport({ projects = [], onImported }) {
                   </button>
                   <button onClick={doApply} disabled={busy || (diff.new.length === 0 && diff.updated.length === 0)}
                     data-testid="msproject-apply-btn"
-                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                    className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-50">
                     {busy ? <RefreshCw size={14} className="animate-spin" /> : <CheckCircle2 size={14} />}
                     Appliquer
                   </button>
@@ -234,14 +234,14 @@ export default function MsProjectImport({ projects = [], onImported }) {
                   {mode === "update" ? (
                     <button onClick={doAnalyze} disabled={busy || !projectId || !file}
                       data-testid="msproject-import-confirm-btn"
-                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-50">
                       {busy ? <RefreshCw size={14} className="animate-spin" /> : <ArrowRight size={14} />}
                       Analyser
                     </button>
                   ) : (
                     <button onClick={doCreate} disabled={busy || !file}
                       data-testid="msproject-create-btn"
-                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+                      className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-50">
                       {busy ? <RefreshCw size={14} className="animate-spin" /> : <Plus size={14} />}
                       Créer le projet
                     </button>

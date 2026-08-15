@@ -35,7 +35,7 @@ function JiraLinksTab({ links, setLinks }) {
           <div key={i} className="flex flex-wrap items-center gap-2 p-3 border border-zinc-200 rounded-lg" data-testid={`jira-link-row-${i}`}>
             <select value={link.project_id || ""} data-testid={`jira-link-project-${i}`}
               onChange={(e) => { const l = [...links]; l[i] = { ...l[i], project_id: e.target.value }; setLinks(l); }}
-              className="flex-1 min-w-[180px] text-sm border border-zinc-200 rounded-lg px-2.5 py-2 bg-white focus:outline-none focus:border-blue-600">
+              className="flex-1 min-w-[180px] text-sm border border-zinc-200 rounded-lg px-2.5 py-2 bg-white focus:outline-none focus:border-m-blue">
               <option value="">— Projet MARCEL —</option>
               {projects.map((p) => <option key={p.project_id} value={p.project_id}>{p.name}</option>)}
             </select>
@@ -43,14 +43,14 @@ function JiraLinksTab({ links, setLinks }) {
             {remote ? (
               <select value={link.jira_key || ""} data-testid={`jira-link-key-${i}`}
                 onChange={(e) => { const l = [...links]; l[i] = { ...l[i], jira_key: e.target.value }; setLinks(l); }}
-                className="flex-1 min-w-[150px] text-sm border border-zinc-200 rounded-lg px-2.5 py-2 bg-white focus:outline-none focus:border-blue-600">
+                className="flex-1 min-w-[150px] text-sm border border-zinc-200 rounded-lg px-2.5 py-2 bg-white focus:outline-none focus:border-m-blue">
                 <option value="">— Projet Jira —</option>
                 {remote.map((r) => <option key={r.key} value={r.key}>{r.key} — {r.name}</option>)}
               </select>
             ) : (
               <input value={link.jira_key || ""} placeholder="Clé Jira (ex : WEB)" data-testid={`jira-link-key-${i}`}
                 onChange={(e) => { const l = [...links]; l[i] = { ...l[i], jira_key: e.target.value.toUpperCase() }; setLinks(l); }}
-                className="flex-1 min-w-[130px] text-sm border border-zinc-200 rounded-lg px-2.5 py-2 focus:outline-none focus:border-blue-600" />
+                className="flex-1 min-w-[130px] text-sm border border-zinc-200 rounded-lg px-2.5 py-2 focus:outline-none focus:border-m-blue" />
             )}
             {sync && sync.jira_key === link.jira_key && (
               <span className="text-[10.5px] text-zinc-500 whitespace-nowrap" data-testid={`jira-link-sync-${i}`}>
@@ -64,7 +64,7 @@ function JiraLinksTab({ links, setLinks }) {
       })}
 
       <button onClick={() => setLinks([...links, { project_id: "", jira_key: "" }])} data-testid="jira-link-add"
-        className="flex items-center gap-1.5 px-3 py-2 text-sm border border-dashed border-zinc-300 rounded-lg text-zinc-500 hover:border-blue-600 hover:text-blue-600 transition-colors">
+        className="flex items-center gap-1.5 px-3 py-2 text-sm border border-dashed border-zinc-300 rounded-lg text-zinc-500 hover:border-m-blue hover:text-m-blue transition-colors">
         + Lier un projet Jira
       </button>
       <p className="text-[11px] text-zinc-400">Enregistrez puis lancez « Synchroniser » pour remonter l'avancement.</p>
@@ -202,7 +202,7 @@ function ConnectorCard({ connector, onConfigure, onSync, onLogs, syncing }) {
           onClick={onSync}
           disabled={syncing || !isConfigured}
           data-testid={`btn-sync-${connector.type}`}
-          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+          className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-medium bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-50 transition-colors"
         >
           {syncing ? <Loader size={12} className="animate-spin" /> : <RefreshCw size={12} />}
           {syncing ? "En cours..." : "Synchroniser"}
@@ -348,7 +348,7 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
         </div>
 
         {/* Tabs */}
-        <div className="flex gap-0 border-b border-[#e7e3f2] px-6">
+        <div className="flex gap-0 border-b border-m-border-lav px-6">
           {[
             { key: "config",  label: "Configuration" },
             ...(connector.type === "jira" ? [{ key: "links", label: "Projets liés" }] : []),
@@ -360,7 +360,7 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
               onClick={() => setActiveTab(t.key)}
               data-testid={`connector-tab-${t.key}`}
               className={`px-4 py-2.5 text-[13px] font-semibold border-b-[3px] -mb-px transition-colors
-                ${activeTab === t.key ? "text-[#2e5fe8] border-[#2e5fe8]" : "text-[#8a87a0] border-transparent hover:text-[#26243a]"}`}
+                ${activeTab === t.key ? "text-m-blue border-m-blue" : "text-m-muted border-transparent hover:text-m-ink"}`}
             >
               {t.label}
             </button>
@@ -386,7 +386,7 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
                 <button
                   onClick={() => setConfig(p => ({ ...p, enabled: !p.enabled }))}
                   data-testid={`toggle-enabled-${connector.type}`}
-                  className={`relative w-11 h-6 rounded-full transition-colors ${config.enabled ? "bg-blue-600" : "bg-zinc-300"}`}
+                  className={`relative w-11 h-6 rounded-full transition-colors ${config.enabled ? "bg-m-blue" : "bg-zinc-300"}`}
                 >
                   <span className={`absolute top-0.5 w-5 h-5 bg-white rounded-full shadow transition-transform ${config.enabled ? "translate-x-5" : "translate-x-0.5"}`} />
                 </button>
@@ -505,7 +505,7 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
               <div className="rounded-xl border border-zinc-200 overflow-hidden">
                 <table className="w-full text-sm" data-testid="mapping-table">
                   <thead>
-                    <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-[10.5px] text-[#8a87a0] uppercase tracking-wider font-bold">
+                    <tr className="bg-m-bg border-b border-m-border text-[10.5px] text-m-muted uppercase tracking-wider font-bold">
                       <th className="px-4 py-2.5 text-left">Champ source</th>
                       <th className="px-4 py-2.5 text-left">Champ MARCEL</th>
                       <th className="px-4 py-2.5 text-left hidden md:table-cell">Description</th>
@@ -543,7 +543,7 @@ function ConnectorModal({ connector, onClose, onSave, onSync }) {
                             onClick={() => {
                               const m = [...mapping]; m[i] = { ...m[i], enabled: !m[i].enabled }; setMapping(m);
                             }}
-                            className={`w-9 h-5 rounded-full transition-colors ${row.enabled ? "bg-blue-600" : "bg-zinc-200"}`}
+                            className={`w-9 h-5 rounded-full transition-colors ${row.enabled ? "bg-m-blue" : "bg-zinc-200"}`}
                             data-testid={`mapping-toggle-${i}`}
                           >
                             <span className={`block w-4 h-4 bg-white rounded-full shadow transition-transform mx-0.5 ${row.enabled ? "translate-x-4" : "translate-x-0"}`} />
@@ -641,7 +641,7 @@ function LogRow({ log }) {
           <div className="flex items-center gap-3 text-xs text-zinc-600">
             <span className="font-medium">{formatDate(log.started_at)}</span>
             <span className="text-zinc-400">→</span>
-            <span className={`font-semibold ${log.direction === "import" ? "text-blue-600" : "text-purple-600"}`}>
+            <span className={`font-semibold ${log.direction === "import" ? "text-m-blue" : "text-purple-600"}`}>
               {DIRECTION_LABELS[log.direction] || log.direction}
             </span>
           </div>
@@ -649,7 +649,7 @@ function LogRow({ log }) {
         <div className="flex items-center gap-3 text-xs shrink-0">
           <span className="text-zinc-600">{log.items_processed} traités</span>
           {log.items_created > 0  && <span className="text-emerald-600">+{log.items_created} créés</span>}
-          {log.items_updated > 0  && <span className="text-blue-600">↻{log.items_updated} màj</span>}
+          {log.items_updated > 0  && <span className="text-m-blue">↻{log.items_updated} màj</span>}
           {log.items_failed  > 0  && <span className="text-red-600">✗{log.items_failed} échecs</span>}
           {duration !== null       && <span className="text-zinc-400">{duration}s</span>}
           {expanded ? <ChevronUp size={13} className="text-zinc-400" /> : <ChevronDown size={13} className="text-zinc-400" />}
@@ -730,8 +730,8 @@ export default function Connectors() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / Administration / <span className="text-[#352c6e] font-semibold">Connecteurs</span></div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Connecteurs</h1>
+          <div className="text-xs text-m-muted mb-0.5">Accueil / Administration / <span className="text-m-primary font-semibold">Connecteurs</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">Connecteurs</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             Synchronisation MARCEL avec vos outils DSI · Jira · SAP · ServiceNow
           </p>

@@ -58,24 +58,24 @@ function ProfileFormModal({ onClose, onSaved, duplicateFrom }) {
         <div className="space-y-3">
           <div>
             <label className="block text-xs font-semibold text-zinc-600 mb-1">Nom *</label>
-            <input data-testid="profile-name-input" type="text" className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+            <input data-testid="profile-name-input" type="text" className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30"
               value={form.name} onChange={(e) => setForm(f => ({ ...f, name: e.target.value }))} />
           </div>
           <div>
             <label className="block text-xs font-semibold text-zinc-600 mb-1">Code technique * (ex: CHEF_PROJET)</label>
-            <input data-testid="profile-code-input" type="text" className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 uppercase"
+            <input data-testid="profile-code-input" type="text" className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30 uppercase"
               value={form.code} onChange={(e) => setForm(f => ({ ...f, code: e.target.value.toUpperCase() }))} />
           </div>
           <div>
             <label className="block text-xs font-semibold text-zinc-600 mb-1">Description</label>
-            <textarea className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+            <textarea className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm resize-none focus:outline-none focus:ring-2 focus:ring-m-blue/30"
               rows={2} value={form.description} onChange={(e) => setForm(f => ({ ...f, description: e.target.value }))} />
           </div>
         </div>
         <div className="flex justify-end gap-3">
           <button onClick={onClose} className="px-4 py-2 border border-zinc-200 rounded-lg text-sm text-zinc-600 hover:bg-zinc-50">Annuler</button>
           <button data-testid="profile-form-save" onClick={handleSave} disabled={loading}
-            className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-60">
+            className="px-4 py-2 bg-m-blue text-white rounded-lg text-sm font-semibold hover:bg-m-blue-dark disabled:opacity-60">
             {loading ? "…" : duplicateFrom ? "Dupliquer" : "Créer"}
           </button>
         </div>
@@ -164,7 +164,7 @@ function PermissionsMatrix({ profile, allPermissions, onSave, onClose }) {
             <div className="relative">
               <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
               <input type="text" placeholder="Rechercher une permission…"
-                className="w-full pl-8 pr-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+                className="w-full pl-8 pr-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-m-blue/30"
                 value={search} onChange={(e) => setSearch(e.target.value)} />
             </div>
           </div>
@@ -174,7 +174,7 @@ function PermissionsMatrix({ profile, allPermissions, onSave, onClose }) {
         <div className="flex-1 overflow-y-auto px-6 py-4 space-y-2">
           {isAdmin ? (
             <div className="text-center py-8 text-zinc-500 text-sm">
-              <Shield size={32} className="mx-auto mb-3 text-blue-600" />
+              <Shield size={32} className="mx-auto mb-3 text-m-blue" />
               <p className="font-semibold">Le profil ADMIN dispose de tous les droits.</p>
               <p className="text-xs text-zinc-400 mt-1">Ces permissions ne peuvent pas être modifiées.</p>
             </div>
@@ -197,7 +197,7 @@ function PermissionsMatrix({ profile, allPermissions, onSave, onClose }) {
                     </div>
                     <div className="flex items-center gap-2">
                       <label className="flex items-center gap-1.5 cursor-pointer" onClick={(e) => { e.stopPropagation(); toggleModule(moduleName, moduleKeys); }}>
-                        <div className={`w-4 h-4 rounded-lg flex items-center justify-center border transition-colors ${allOn ? "bg-blue-600 border-blue-600" : "border-zinc-300"}`}>
+                        <div className={`w-4 h-4 rounded-lg flex items-center justify-center border transition-colors ${allOn ? "bg-m-blue border-m-blue" : "border-zinc-300"}`}>
                           {allOn && <Check size={10} className="text-white" />}
                         </div>
                         <span className="text-[10px] text-zinc-500">Tout</span>
@@ -216,7 +216,7 @@ function PermissionsMatrix({ profile, allPermissions, onSave, onClose }) {
                             className="flex items-center gap-3 px-4 py-2.5 hover:bg-zinc-50 cursor-pointer transition-colors"
                             onClick={() => toggle(perm.key)}
                           >
-                            <div className={`w-4 h-4 flex-shrink-0 rounded-lg flex items-center justify-center border transition-colors ${checked ? "bg-blue-600 border-blue-600" : "border-zinc-300"}`}>
+                            <div className={`w-4 h-4 flex-shrink-0 rounded-lg flex items-center justify-center border transition-colors ${checked ? "bg-m-blue border-m-blue" : "border-zinc-300"}`}>
                               {checked && <Check size={10} className="text-white" />}
                             </div>
                             <div className="flex-1">
@@ -239,7 +239,7 @@ function PermissionsMatrix({ profile, allPermissions, onSave, onClose }) {
           <div className="flex justify-end gap-3 px-6 py-4 border-t border-zinc-100">
             <button onClick={onClose} className="px-4 py-2 border border-zinc-200 rounded-lg text-sm text-zinc-600 hover:bg-zinc-50">Fermer</button>
             <button data-testid="save-permissions-btn" onClick={handleSave} disabled={saving}
-              className="px-5 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 disabled:opacity-60">
+              className="px-5 py-2 bg-m-blue text-white rounded-lg text-sm font-semibold hover:bg-m-blue-dark disabled:opacity-60">
               {saving ? "Sauvegarde…" : "Sauvegarder"}
             </button>
           </div>
@@ -296,9 +296,9 @@ export default function AdminProfiles() {
       <div className="bg-white border-b border-zinc-200 px-6 py-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / Administration / <span className="text-[#352c6e] font-semibold">Profils</span></div>
-            <h1 className="font-heading text-2xl font-extrabold text-[#26243a] tracking-tight flex items-center gap-2">
-              <Shield size={20} className="text-blue-600" />
+            <div className="text-xs text-m-muted mb-0.5">Accueil / Administration / <span className="text-m-primary font-semibold">Profils</span></div>
+            <h1 className="font-heading text-2xl font-extrabold text-m-ink tracking-tight flex items-center gap-2">
+              <Shield size={20} className="text-m-blue" />
               Profils
             </h1>
             <p className="text-sm text-zinc-500 mt-0.5">
@@ -306,14 +306,14 @@ export default function AdminProfiles() {
             </p>
           </div>
           <button data-testid="new-profile-btn" onClick={() => setShowCreate(true)}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors">
+            className="flex items-center gap-2 px-4 py-2 bg-m-blue text-white rounded-lg text-sm font-semibold hover:bg-m-blue-dark transition-colors">
             <Plus size={15} /> Nouveau profil
           </button>
         </div>
         <div className="relative w-64">
           <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input type="text" placeholder="Rechercher un profil…"
-            className="pl-8 pr-3 py-1.5 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600/30 w-full"
+            className="pl-8 pr-3 py-1.5 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-m-blue/30 w-full"
             value={search} onChange={(e) => setSearch(e.target.value)} />
         </div>
       </div>
@@ -330,7 +330,7 @@ export default function AdminProfiles() {
                 <div className="flex items-start justify-between mb-3">
                   <div className="flex items-center gap-2">
                     <div className={`w-8 h-8 rounded-lg flex items-center justify-center text-white text-xs font-bold
-                      ${profile.is_system ? "bg-blue-600" : "bg-violet-500"}`}>
+                      ${profile.is_system ? "bg-m-blue" : "bg-violet-500"}`}>
                       {profile.code?.slice(0, 2)}
                     </div>
                     <div>
@@ -339,7 +339,7 @@ export default function AdminProfiles() {
                     </div>
                   </div>
                   {profile.is_system && (
-                    <span className="text-[10px] bg-blue-600/10 text-blue-600 px-2 py-0.5 rounded-full font-semibold">
+                    <span className="text-[10px] bg-m-blue/10 text-m-blue px-2 py-0.5 rounded-full font-semibold">
                       Système
                     </span>
                   )}
@@ -361,7 +361,7 @@ export default function AdminProfiles() {
                 <div className="flex gap-2">
                   <button data-testid={`edit-perms-${profile.code}`}
                     onClick={() => setEditPermissions(profile)}
-                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-50 hover:bg-blue-600 hover:text-white border border-zinc-200 hover:border-transparent text-xs font-medium transition-all">
+                    className="flex-1 flex items-center justify-center gap-1.5 px-3 py-2 rounded-lg bg-zinc-50 hover:bg-m-blue hover:text-white border border-zinc-200 hover:border-transparent text-xs font-medium transition-all">
                     <Pencil size={11} /> Permissions
                   </button>
                   <button onClick={() => setDuplicateFrom(profile)}

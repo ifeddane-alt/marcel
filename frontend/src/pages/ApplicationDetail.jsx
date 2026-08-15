@@ -53,7 +53,7 @@ function ProjectLinkModal({ app, onClose, onSave }) {
         <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-zinc-100">
           <button onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50">Annuler</button>
           <button onClick={submit} disabled={saving} data-testid="project-link-save-btn"
-            className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60">
+            className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-60">
             {saving ? "..." : "Enregistrer"}
           </button>
         </div>
@@ -114,23 +114,23 @@ export default function ApplicationDetail() {
   };
 
   if (loading) return <div className="p-8 text-sm text-zinc-400">Chargement…</div>;
-  if (!app) return <div className="p-8 text-sm text-zinc-400">Application introuvable. <Link to="/applications" className="text-blue-600">Retour</Link></div>;
+  if (!app) return <div className="p-8 text-sm text-zinc-400">Application introuvable. <Link to="/applications" className="text-m-blue">Retour</Link></div>;
 
   return (
     <div className="p-4 md:p-6 space-y-4" data-testid="application-detail-page">
       <div className="flex items-center gap-2 text-xs text-zinc-400">
-        <Link to="/applications" className="flex items-center gap-1 hover:text-blue-600" data-testid="back-to-applications">
+        <Link to="/applications" className="flex items-center gap-1 hover:text-m-blue" data-testid="back-to-applications">
           <ArrowLeft size={13} /> Portefeuille Applicatif
         </Link>
       </div>
 
-      <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-5">
+      <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-5">
         <div className="flex items-start justify-between flex-wrap gap-3">
           <div>
             <div className="flex items-center gap-2 flex-wrap">
-              {app.code && <span className="font-mono-data text-xs font-bold text-[#8a87a0]">{app.code}</span>}
-              <h1 className="font-heading text-xl md:text-2xl font-extrabold text-[#26243a] flex items-center gap-2">
-                <AppWindow size={20} className="text-[#352c6e]" /> {app.name}
+              {app.code && <span className="font-mono-data text-xs font-bold text-m-muted">{app.code}</span>}
+              <h1 className="font-heading text-xl md:text-2xl font-extrabold text-m-ink flex items-center gap-2">
+                <AppWindow size={20} className="text-m-primary" /> {app.name}
               </h1>
             </div>
             <div className="flex items-center gap-1.5 mt-2 flex-wrap">
@@ -168,7 +168,7 @@ export default function ApplicationDetail() {
             <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mb-1.5">Capacités métiers couvertes</div>
             <div className="flex flex-wrap gap-1.5">
               {app.business_capabilities.map((c) => (
-                <span key={c} className="px-2 py-0.5 text-[11px] font-medium text-[#352c6e] bg-[#f0eefc] rounded-lg">{c}</span>
+                <span key={c} className="px-2 py-0.5 text-[11px] font-medium text-m-primary bg-m-lilac rounded-lg">{c}</span>
               ))}
             </div>
           </div>
@@ -176,8 +176,8 @@ export default function ApplicationDetail() {
       </div>
 
       {/* Composants & obsolescence */}
-      <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]" data-testid="components-section">
-        <div className="px-5 py-3 border-b border-zinc-100 font-heading text-[13px] font-bold text-[#26243a]">
+      <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]" data-testid="components-section">
+        <div className="px-5 py-3 border-b border-zinc-100 font-heading text-[13px] font-bold text-m-ink">
           Composants techniques &amp; obsolescence ({(app.components || []).length})
         </div>
         {(app.components || []).length === 0 ? (
@@ -185,9 +185,9 @@ export default function ApplicationDetail() {
         ) : (
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+              <tr className="bg-m-bg border-b border-m-border text-left">
                 {["Composant", "Version", "Fin de support", "Statut", ""].map((h) => (
-                  <th key={h} className="px-4 py-2 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">{h}</th>
+                  <th key={h} className="px-4 py-2 text-[10.5px] uppercase tracking-wider font-bold text-m-muted">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -219,13 +219,13 @@ export default function ApplicationDetail() {
         {canWrite && (
           <form onSubmit={addComponent} className="flex items-center gap-2 px-4 py-3 border-t border-zinc-100 flex-wrap">
             <input value={newComp.name} onChange={(e) => setNewComp({ ...newComp, name: e.target.value })} placeholder="Composant (ex : Oracle DB)"
-              data-testid="component-name-input" className="flex-1 min-w-[140px] text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600" />
+              data-testid="component-name-input" className="flex-1 min-w-[140px] text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-m-blue" />
             <input value={newComp.version} onChange={(e) => setNewComp({ ...newComp, version: e.target.value })} placeholder="Version"
-              data-testid="component-version-input" className="w-24 text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600" />
+              data-testid="component-version-input" className="w-24 text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-m-blue" />
             <input type="date" value={newComp.support_end} onChange={(e) => setNewComp({ ...newComp, support_end: e.target.value })}
-              data-testid="component-support-end-input" className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600" />
+              data-testid="component-support-end-input" className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-m-blue" />
             <button type="submit" data-testid="btn-add-component"
-              className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+              className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors">
               <Plus size={11} /> Ajouter
             </button>
           </form>
@@ -233,12 +233,12 @@ export default function ApplicationDetail() {
       </div>
 
       {/* Projets liés */}
-      <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]" data-testid="linked-projects-section">
+      <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]" data-testid="linked-projects-section">
         <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
-          <div className="font-heading text-[13px] font-bold text-[#26243a]">Projets impactant l'application ({(app.projects || []).length})</div>
+          <div className="font-heading text-[13px] font-bold text-m-ink">Projets impactant l'application ({(app.projects || []).length})</div>
           {canWrite && (
             <button onClick={() => setLinkOpen(true)} data-testid="btn-link-projects"
-              className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+              className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-m-blue border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
               <Link2 size={11} /> Lier des projets
             </button>
           )}

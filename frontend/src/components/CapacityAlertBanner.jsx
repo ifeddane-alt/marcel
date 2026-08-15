@@ -23,7 +23,7 @@ export default function CapacityAlertBanner({ alerts, compact = false }) {
             <AlertTriangle size={13} className="text-rose-400" />
             Alertes capacité équipes
           </div>
-          <Link to="/teams" className="text-[10px] text-blue-600 hover:underline">
+          <Link to="/teams" className="text-[10px] text-m-blue hover:underline">
             Voir heatmap →
           </Link>
         </div>
@@ -67,7 +67,7 @@ export default function CapacityAlertBanner({ alerts, compact = false }) {
           {critiques.length} équipe{critiques.length > 1 ? "s" : ""} en surcharge
           {oranges.length > 0 && `, ${oranges.length} en alerte orange`}
         </span>
-        <Link to="/resources?tab=heatmap" className="ml-auto text-xs text-blue-600 hover:underline font-medium">
+        <Link to="/resources?tab=heatmap" className="ml-auto text-xs text-m-blue hover:underline font-medium">
           Voir heatmap →
         </Link>
       </div>

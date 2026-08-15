@@ -55,7 +55,7 @@ function AttributeBadge({ attribute }) {
 
 function KpiCard({ label, value, icon: Icon, color, testId }) {
   const colors = {
-    blue:    { icon: "bg-blue-50 text-blue-600",       value: "text-zinc-950" },
+    blue:    { icon: "bg-blue-50 text-m-blue",       value: "text-zinc-950" },
     red:     { icon: "bg-rose-50 text-rose-600",       value: "text-rose-600" },
     amber:   { icon: "bg-amber-50 text-amber-600",     value: "text-amber-600" },
     emerald: { icon: "bg-emerald-50 text-emerald-600", value: "text-emerald-600" },
@@ -148,16 +148,16 @@ export default function Conformite() {
   };
 
   const thCls = (col) =>
-    `px-4 py-2.5 text-left text-[10.5px] font-bold uppercase tracking-wider text-[#8a87a0] cursor-pointer hover:text-[#2e5fe8] whitespace-nowrap select-none`;
+    `px-4 py-2.5 text-left text-[10.5px] font-bold uppercase tracking-wider text-m-muted cursor-pointer hover:text-m-blue whitespace-nowrap select-none`;
 
   return (
     <div className="p-4 md:p-6 lg:p-8" data-testid="conformite-page">
       {/* En-tête */}
       <div className="mb-6">
-        <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Conformité</span></div>
+        <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Conformité</span></div>
         <div className="flex items-center gap-2 mb-1">
-          <ShieldAlert size={18} className="text-blue-600" />
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Conformité</h1>
+          <ShieldAlert size={18} className="text-m-blue" />
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">Conformité</h1>
         </div>
         <p className="text-sm text-zinc-500">
           Suivi des jalons réglementaires et de décommissionnement — portefeuille complet
@@ -182,7 +182,7 @@ export default function Conformite() {
           </div>
           <select value={filterProgram} onChange={(e) => { setFilterProgram(e.target.value); setFilterProject(""); }}
             data-testid="filter-programme"
-            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600 bg-white text-zinc-600 min-w-[160px]">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-m-blue bg-white text-zinc-600 min-w-[160px]">
             <option value="">Tous les programmes</option>
             {programs.map((p) => (
               <option key={p.program_id} value={p.program_id}>{p.name?.slice(0, 35)}</option>
@@ -190,7 +190,7 @@ export default function Conformite() {
           </select>
           <select value={filterProject} onChange={(e) => setFilterProject(e.target.value)}
             data-testid="filter-project"
-            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600 bg-white text-zinc-600 min-w-[160px]">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-m-blue bg-white text-zinc-600 min-w-[160px]">
             <option value="">Tous les projets</option>
             {projects
               .filter((p) => !filterProgram || p.program_id === filterProgram)
@@ -200,20 +200,20 @@ export default function Conformite() {
           </select>
           <select value={filterType} onChange={(e) => setFilterType(e.target.value)}
             data-testid="filter-type"
-            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600 bg-white text-zinc-600">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-m-blue bg-white text-zinc-600">
             <option value="">Tous les types</option>
             <option value="regulatory">Réglementaire</option>
             <option value="decomm">Décommissionnement</option>
           </select>
           <select value={filterAttribute} onChange={(e) => setFilterAttribute(e.target.value)}
             data-testid="filter-attribute"
-            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600 bg-white text-zinc-600">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-m-blue bg-white text-zinc-600">
             <option value="">Tous les attributs</option>
             <option value="critical">Critique</option>
             <option value="strategic">Stratégique</option>
           </select>
           <button onClick={loadData} disabled={loading}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50">
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-m-blue text-white text-xs font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-50">
             {loading ? <RefreshCw size={11} className="animate-spin" /> : <Filter size={11} />}
             Actualiser
           </button>
@@ -237,7 +237,7 @@ export default function Conformite() {
         <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-x-auto" data-testid="regulatory-table">
           <table className="w-full text-xs">
             <thead>
-              <tr className="bg-[#fbfaff] border-b border-[#e8e6f0]">
+              <tr className="bg-m-bg border-b border-m-border">
                 <th className={thCls("project_name")} onClick={() => handleSort("project_name")}>
                   Projet <SortIcon col="project_name" />
                 </th>
@@ -259,7 +259,7 @@ export default function Conformite() {
                 <th className={thCls("days_remaining")} onClick={() => handleSort("days_remaining")}>
                   Jours rest. <SortIcon col="days_remaining" />
                 </th>
-                <th className="px-4 py-2.5 text-left text-[10.5px] font-bold uppercase tracking-wider text-[#8a87a0]">Attribut</th>
+                <th className="px-4 py-2.5 text-left text-[10.5px] font-bold uppercase tracking-wider text-m-muted">Attribut</th>
               </tr>
             </thead>
             <tbody>

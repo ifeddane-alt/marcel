@@ -79,8 +79,8 @@ export default function AgentAnalytics() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / Administration / <span className="text-[#352c6e] font-semibold">Analytics IA</span></div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">
+          <div className="text-xs text-m-muted mb-0.5">Accueil / Administration / <span className="text-m-primary font-semibold">Analytics IA</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">
             Analytics Agent IA
           </h1>
           <p className="text-sm text-zinc-500 mt-0.5">
@@ -116,7 +116,7 @@ export default function AgentAnalytics() {
                 <h2 className="font-semibold text-zinc-800 text-sm">Analyse proactive quotidienne (socle IA à coût fixe)</h2>
               </div>
               <button onClick={runAnalysis} disabled={analyzing} data-testid="insights-analyze-btn"
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-60">
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-m-blue text-white text-xs font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-60">
                 <RefreshCw size={12} className={analyzing ? "animate-spin" : ""} />
                 {analyzing ? "Analyse…" : "Analyser maintenant"}
               </button>
@@ -158,7 +158,7 @@ export default function AgentAnalytics() {
           {/* Chart 30 jours */}
           <div className="bg-white border border-zinc-200 rounded-xl shadow-sm p-5 mb-6">
             <div className="flex items-center gap-2 mb-4">
-              <BarChart2 size={16} className="text-blue-600" />
+              <BarChart2 size={16} className="text-m-blue" />
               <h2 className="font-semibold text-zinc-800 text-sm">Activité 30 derniers jours</h2>
             </div>
             {data.daily_usage?.length > 0 ? (
@@ -193,7 +193,7 @@ export default function AgentAnalytics() {
           {/* Top 10 Questions */}
           <div className="bg-white border border-zinc-200 rounded-xl shadow-sm p-5">
             <div className="flex items-center gap-2 mb-4">
-              <TrendingUp size={16} className="text-blue-600" />
+              <TrendingUp size={16} className="text-m-blue" />
               <h2 className="font-semibold text-zinc-800 text-sm">
                 Top {data.top_questions?.length || 0} questions les plus posées
               </h2>
@@ -206,7 +206,7 @@ export default function AgentAnalytics() {
                       {i + 1}
                     </span>
                     <span className="flex-1 text-xs text-zinc-700 truncate">{q.question}</span>
-                    <span className="flex-shrink-0 text-xs font-bold text-blue-600 bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full">
+                    <span className="flex-shrink-0 text-xs font-bold text-m-blue bg-blue-50 border border-blue-100 px-2 py-0.5 rounded-full">
                       ×{q.count}
                     </span>
                   </div>

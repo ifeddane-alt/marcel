@@ -11,7 +11,7 @@ const pctColor = (v) => (v == null ? "text-zinc-300" : v >= 90 ? "text-emerald-6
 
 function Stat({ label, value, sub, accent, testId }) {
   return (
-    <div className="bg-[#fbfaff] border border-[#e8e6f0] rounded-lg p-3" data-testid={testId}>
+    <div className="bg-m-bg border border-m-border rounded-lg p-3" data-testid={testId}>
       <div className="text-[9.5px] uppercase tracking-widest text-zinc-400 font-bold">{label}</div>
       <div className={`font-mono-data font-bold text-lg ${accent || "text-zinc-950"}`}>{value}</div>
       {sub && <div className="text-[10px] text-zinc-400 mt-0.5">{sub}</div>}
@@ -21,10 +21,10 @@ function Stat({ label, value, sub, accent, testId }) {
 
 function Block({ title, badge, children, testId }) {
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]" data-testid={testId}>
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]" data-testid={testId}>
       <div className="flex items-center gap-2 px-5 py-3 border-b border-zinc-100">
-        <span className="font-heading text-[13px] font-bold text-[#26243a]">{title}</span>
-        {badge && <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-lg border bg-[#f0eefc] text-[#352c6e] border-[#e0dcf5]">{badge}</span>}
+        <span className="font-heading text-[13px] font-bold text-m-ink">{title}</span>
+        {badge && <span className="px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-lg border bg-m-lilac text-m-primary border-m-border-strong">{badge}</span>}
       </div>
       <div className="p-4">{children}</div>
     </div>
@@ -66,7 +66,7 @@ function SprintsTable({ projectId, canWrite, onChanged }) {
           <thead>
             <tr className="text-left border-b border-zinc-100">
               {["Sprint", "Période", "Engagé", "Réalisé", "Complétion", "Statut", ""].map((h) => (
-                <th key={h} className="py-1.5 pr-2 text-[9.5px] uppercase tracking-wider font-bold text-[#8a87a0]">{h}</th>
+                <th key={h} className="py-1.5 pr-2 text-[9.5px] uppercase tracking-wider font-bold text-m-muted">{h}</th>
               ))}
             </tr>
           </thead>
@@ -93,7 +93,7 @@ function SprintsTable({ projectId, canWrite, onChanged }) {
       {canWrite && (
         <form onSubmit={add} className="flex items-center gap-1.5 flex-wrap">
           <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} placeholder="Sprint 12"
-            data-testid="sprint-name-input" className="w-24 text-xs border border-zinc-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-blue-600" />
+            data-testid="sprint-name-input" className="w-24 text-xs border border-zinc-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-m-blue" />
           <input type="date" value={form.start_date} onChange={(e) => setForm({ ...form, start_date: e.target.value })}
             className="text-xs border border-zinc-200 rounded-lg px-2 py-1.5 focus:outline-none" />
           <input type="date" value={form.end_date} onChange={(e) => setForm({ ...form, end_date: e.target.value })}
@@ -109,7 +109,7 @@ function SprintsTable({ projectId, canWrite, onChanged }) {
             {Object.entries(SPRINT_ST).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
           </select>
           <button type="submit" data-testid="sprint-add-btn"
-            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark">
             <Plus size={11} /> Ajouter
           </button>
         </form>

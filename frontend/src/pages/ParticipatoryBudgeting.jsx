@@ -6,7 +6,7 @@ import { formatEuro } from "@/utils/format";
 import { usePermissions } from "@/hooks/usePermissions";
 import ConfirmDialog from "@/components/ConfirmDialog";
 
-const inputCls = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600";
+const inputCls = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue";
 const labelCls = "block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5";
 const ST_CFG = {
   open: { label: "Vote ouvert", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
@@ -85,7 +85,7 @@ function CreateModal({ onClose, onSave }) {
           <div className="flex rounded-lg border border-zinc-200 overflow-hidden w-fit" data-testid="pb-mode-toggle">
             {[{ id: "safe", label: "Features d'un PI (SAFe)" }, { id: "manual", label: "Candidats libres" }].map((m) => (
               <button key={m.id} type="button" onClick={() => setMode(m.id)} data-testid={`pb-mode-${m.id}`}
-                className={`px-3.5 py-2 text-xs font-semibold transition-colors ${mode === m.id ? "bg-[#352c6e] text-white" : "bg-white text-zinc-500 hover:bg-zinc-50"}`}>
+                className={`px-3.5 py-2 text-xs font-semibold transition-colors ${mode === m.id ? "bg-m-primary text-white" : "bg-white text-zinc-500 hover:bg-zinc-50"}`}>
                 {m.label}
               </button>
             ))}
@@ -133,10 +133,10 @@ function CreateModal({ onClose, onSave }) {
                   </p>
                 ) : (
                   <div className="border border-zinc-100 rounded-lg overflow-hidden" data-testid="pb-pi-features-preview">
-                    <div className="flex items-center justify-between px-3 py-2 bg-[#f7f6fb] text-[11px] font-semibold text-zinc-600">
+                    <div className="flex items-center justify-between px-3 py-2 bg-m-surface text-[11px] font-semibold text-zinc-600">
                       <span>{piFeatures.length} features valorisées (charge × TJM ou budget saisi)</span>
                       <button type="button" onClick={() => setForm((f) => ({ ...f, envelope: String(totalCost) }))}
-                        data-testid="pb-use-total-btn" className="text-blue-600 hover:underline font-mono-data">
+                        data-testid="pb-use-total-btn" className="text-m-blue hover:underline font-mono-data">
                         Total : {formatEuro(totalCost)}
                       </button>
                     </div>
@@ -145,7 +145,7 @@ function CreateModal({ onClose, onSave }) {
                         <div key={f.task_id} className="flex items-center justify-between px-3 py-1.5 text-xs" data-testid={`pb-preview-feature-${f.task_id}`}>
                           <span className="text-zinc-700 truncate flex-1">
                             {f.name}{f.project_code ? <span className="font-mono-data text-[10px] text-zinc-400 ml-1">{f.project_code}</span> : null}
-                            {f.wsjf != null && <span className="ml-1.5 px-1 py-px text-[9px] font-bold rounded bg-[#f0eefc] text-[#352c6e] font-mono-data">WSJF {f.wsjf}</span>}
+                            {f.wsjf != null && <span className="ml-1.5 px-1 py-px text-[9px] font-bold rounded bg-m-lilac text-m-primary font-mono-data">WSJF {f.wsjf}</span>}
                           </span>
                           <span className="font-mono-data text-zinc-500 ml-2 flex-shrink-0">{f.jh_planned || 0} jh · {formatEuro(f.cost_eur || 0)}</span>
                         </div>
@@ -175,7 +175,7 @@ function CreateModal({ onClose, onSave }) {
             </div>
             <button type="button" onClick={() => setItems((arr) => [...arr, { label: "", cost: "" }])}
               data-testid="pb-add-item-btn"
-              className="flex items-center gap-1 mt-2 px-2.5 py-1.5 text-[11px] font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50">
+              className="flex items-center gap-1 mt-2 px-2.5 py-1.5 text-[11px] font-semibold text-m-blue border border-blue-200 rounded-lg hover:bg-blue-50">
               <Plus size={11} /> Ajouter un candidat
             </button>
           </div>
@@ -199,7 +199,7 @@ function CreateModal({ onClose, onSave }) {
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100">
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50">Annuler</button>
             <button type="submit" disabled={saving} data-testid="pb-create-save-btn"
-              className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60">
+              className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-60">
               {saving ? "..." : "Ouvrir le vote"}
             </button>
           </div>
@@ -254,7 +254,7 @@ function VoteModal({ session, onClose, onVoted }) {
                 <div className="text-xs font-semibold text-zinc-800 truncate flex items-center gap-1.5">
                   <span className="truncate">{it.label}</span>
                   {it.wsjf != null && (
-                    <span className="flex-shrink-0 px-1.5 py-px text-[9px] font-bold rounded bg-[#f0eefc] text-[#352c6e] border border-[#352c6e]/20 font-mono-data" data-testid={`pb-vote-wsjf-${it.item_id}`}>
+                    <span className="flex-shrink-0 px-1.5 py-px text-[9px] font-bold rounded bg-m-lilac text-m-primary border border-m-primary/20 font-mono-data" data-testid={`pb-vote-wsjf-${it.item_id}`}>
                       WSJF {it.wsjf}
                     </span>
                   )}
@@ -264,13 +264,13 @@ function VoteModal({ session, onClose, onVoted }) {
               <input type="number" min="0" step="1000" value={alloc[it.item_id] ?? ""}
                 onChange={(e) => setAlloc((a) => ({ ...a, [it.item_id]: e.target.value }))}
                 placeholder="0" data-testid={`pb-alloc-input-${it.item_id}`}
-                className="w-32 text-sm border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600 font-mono-data text-right" />
+                className="w-32 text-sm border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-m-blue font-mono-data text-right" />
             </div>
           ))}
         </div>
         <div className="px-6 py-4 border-t border-zinc-100 space-y-3">
           <div className="flex items-center gap-3">
-            <div className="flex-1 h-2 bg-[#ece9f4] rounded-full overflow-hidden">
+            <div className="flex-1 h-2 bg-m-border-soft rounded-full overflow-hidden">
               <div className="h-full rounded-full transition-[width]"
                 style={{ width: `${Math.min(total / detail.envelope * 100, 100)}%`, background: remaining < 0 ? "#e11d48" : "#2e5fe8" }} />
             </div>
@@ -282,7 +282,7 @@ function VoteModal({ session, onClose, onVoted }) {
           <div className="flex items-center justify-end gap-2">
             <button onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50">Annuler</button>
             <button onClick={submit} disabled={saving || remaining < 0} data-testid="pb-vote-submit-btn"
-              className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60">
+              className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-60">
               {saving ? "..." : detail.my_vote ? "Mettre à jour mon vote" : "Soumettre mon vote"}
             </button>
           </div>
@@ -311,8 +311,8 @@ function ResultsModal({ session, onClose }) {
         </div>
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
           {res.session.mode === "safe" && res.participation > 0 && (
-            <div className="flex items-center justify-between bg-[#f7f6fb] border border-[#e8e6f0] rounded-lg px-3 py-2 text-xs" data-testid="pb-cutline-summary">
-              <span className="font-semibold text-[#352c6e]">
+            <div className="flex items-center justify-between bg-m-surface border border-m-border rounded-lg px-3 py-2 text-xs" data-testid="pb-cutline-summary">
+              <span className="font-semibold text-m-primary">
                 Ligne de coupe : {res.retained_count} feature{res.retained_count > 1 ? "s" : ""} retenue{res.retained_count > 1 ? "s" : ""}
               </span>
               <span className="font-mono-data text-zinc-500">{formatEuro(res.retained_cost)} / {formatEuro(res.session.envelope)}</span>
@@ -331,7 +331,7 @@ function ResultsModal({ session, onClose }) {
                 <span className="text-xs font-semibold text-zinc-800">
                   <span className="font-mono-data text-zinc-400 mr-1.5">#{rank + 1}</span>{it.label}
                   {it.wsjf != null && (
-                    <span className="ml-1.5 px-1.5 py-px text-[9px] font-bold rounded bg-[#f0eefc] text-[#352c6e] border border-[#352c6e]/20 font-mono-data">WSJF {it.wsjf}</span>
+                    <span className="ml-1.5 px-1.5 py-px text-[9px] font-bold rounded bg-m-lilac text-m-primary border border-m-primary/20 font-mono-data">WSJF {it.wsjf}</span>
                   )}
                 </span>
                 <span className="flex items-center gap-2">
@@ -353,7 +353,7 @@ function ResultsModal({ session, onClose }) {
                 </span>
               </div>
               <div className="flex items-center gap-2">
-                <div className="flex-1 h-2.5 bg-[#ece9f4] rounded-full overflow-hidden relative">
+                <div className="flex-1 h-2.5 bg-m-border-soft rounded-full overflow-hidden relative">
                   <div className="h-full rounded-full"
                     style={{ width: `${Math.min((it.avg_allocation / (res.session.envelope || 1)) * 100, 100)}%`,
                              background: it.funded === "financé" ? "#3f8a34" : it.funded === "partiel" ? "#e0a800" : "#c8c4d8" }} />
@@ -410,14 +410,14 @@ export default function ParticipatoryBudgeting() {
     <div className="p-4 md:p-6 space-y-4" data-testid="pb-page">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-heading text-xl md:text-2xl font-extrabold text-[#26243a] flex items-center gap-2">
-            <HandCoins size={20} className="text-[#352c6e]" /> Budget participatif
+          <h1 className="font-heading text-xl md:text-2xl font-extrabold text-m-ink flex items-center gap-2">
+            <HandCoins size={20} className="text-m-primary" /> Budget participatif
           </h1>
           <p className="text-xs text-zinc-400 mt-0.5">Rituel SAFe LPM — répartition collective du budget entre value streams et epics</p>
         </div>
         {canManage && (
           <button onClick={() => setCreateOpen(true)} data-testid="btn-new-pb-session"
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700">
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-m-blue text-white text-xs font-semibold rounded-lg hover:bg-m-blue-dark">
             <Plus size={13} /> Nouvelle session
           </button>
         )}
@@ -426,7 +426,7 @@ export default function ParticipatoryBudgeting() {
       {sessions === null ? (
         <div className="text-sm text-zinc-400 p-4">Chargement…</div>
       ) : sessions.length === 0 ? (
-        <div className="bg-white border border-[#e8e6f0] rounded-xl p-12 text-center" data-testid="pb-empty">
+        <div className="bg-white border border-m-border rounded-xl p-12 text-center" data-testid="pb-empty">
           <HandCoins size={32} className="mx-auto text-zinc-200 mb-3" />
           <p className="text-sm text-zinc-400">Aucune session — créez la première session de budget participatif pour votre prochain PI.</p>
         </div>
@@ -435,12 +435,12 @@ export default function ParticipatoryBudgeting() {
           {sessions.map((s) => {
             const st = ST_CFG[s.status] || ST_CFG.open;
             return (
-              <div key={s.session_id} className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4" data-testid={`pb-session-${s.session_id}`}>
+              <div key={s.session_id} className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4" data-testid={`pb-session-${s.session_id}`}>
                 <div className="flex items-start justify-between gap-2">
                   <div>
-                    <div className="font-heading text-sm font-bold text-[#26243a]">{s.name}</div>
+                    <div className="font-heading text-sm font-bold text-m-ink">{s.name}</div>
                     {s.mode === "safe" && (
-                      <span className="inline-block mt-0.5 px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-lg bg-[#f0eefc] text-[#352c6e] border border-[#352c6e]/20" data-testid={`pb-pi-badge-${s.session_id}`}>
+                      <span className="inline-block mt-0.5 px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-lg bg-m-lilac text-m-primary border border-m-primary/20" data-testid={`pb-pi-badge-${s.session_id}`}>
                         {s.train_name ? `${s.train_name} · ` : ""}{s.pi_name}
                       </span>
                     )}
@@ -458,7 +458,7 @@ export default function ParticipatoryBudgeting() {
                 <div className="flex items-center gap-1.5 mt-3 flex-wrap">
                   {s.status === "open" && (
                     <button onClick={() => setVoteSession(s)} data-testid={`pb-vote-btn-${s.session_id}`}
-                      className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                      className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark">
                       <Vote size={11} /> {s.my_vote_submitted ? "Modifier mon vote" : "Voter"}
                     </button>
                   )}
@@ -481,7 +481,7 @@ export default function ParticipatoryBudgeting() {
                       } catch { toast.error("Erreur lors de l'export"); }
                     }}
                     data-testid={`pb-pptx-btn-${s.session_id}`}
-                    className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-[#352c6e] border border-[#352c6e]/25 rounded-lg hover:bg-[#f0eefc]">
+                    className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-m-primary border border-m-primary/25 rounded-lg hover:bg-m-lilac">
                     <Presentation size={11} /> PPTX
                   </button>
                   {canManage && s.status === "open" && (
@@ -492,7 +492,7 @@ export default function ParticipatoryBudgeting() {
                   )}
                   {canManage && s.status === "closed" && (
                     <button onClick={() => setStatus(s, "decided")} data-testid={`pb-decide-btn-${s.session_id}`}
-                      className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50">
+                      className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-m-blue border border-blue-200 rounded-lg hover:bg-blue-50">
                       <CheckCircle2 size={11} /> {s.mode === "safe" ? "Appliquer l'arbitrage au scope" : "Valider la répartition"}
                     </button>
                   )}

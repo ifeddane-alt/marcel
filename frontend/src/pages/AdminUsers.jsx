@@ -43,23 +43,23 @@ function UserCreateModal({ profiles, onClose, onSaved }) {
           <div>
             <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Nom complet *</label>
             <input value={name} onChange={(e) => setName(e.target.value)} required data-testid="user-name-input"
-              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Email *</label>
             <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} required data-testid="user-email-input"
-              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Mot de passe * (8 car. min)</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8}
               data-testid="user-password-input"
-              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Profil</label>
             <select value={profileId} onChange={(e) => setProfileId(e.target.value)} data-testid="user-profile-select"
-              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 bg-white">
+              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue bg-white">
               <option value="">— Aucun profil —</option>
               {profiles.map((p) => (
                 <option key={p.profile_id} value={p.profile_id}>{p.name} {p.is_system ? "(système)" : "(custom)"}</option>
@@ -71,7 +71,7 @@ function UserCreateModal({ profiles, onClose, onSaved }) {
             <button type="button" onClick={onClose}
               className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">Annuler</button>
             <button type="submit" disabled={saving} data-testid="user-save-btn"
-              className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60">
+              className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors disabled:opacity-60">
               {saving ? "Création..." : "Créer l'utilisateur"}
             </button>
           </div>
@@ -105,7 +105,7 @@ function ResetPasswordModal({ user, onClose, onSaved }) {
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-md">
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
           <div className="flex items-center gap-2">
-            <KeyRound size={16} className="text-blue-600" />
+            <KeyRound size={16} className="text-m-blue" />
             <h2 className="font-heading text-lg font-bold text-zinc-950">Réinitialiser le mot de passe</h2>
           </div>
           <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600"><X size={18} /></button>
@@ -118,14 +118,14 @@ function ResetPasswordModal({ user, onClose, onSaved }) {
             <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Nouveau mot de passe * (8 car. min)</label>
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} required minLength={8}
               data-testid="reset-password-input" autoFocus
-              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue" />
           </div>
           {error && <p className="text-sm text-rose-600 font-medium">{error}</p>}
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100">
             <button type="button" onClick={onClose}
               className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">Annuler</button>
             <button type="submit" disabled={saving} data-testid="reset-password-save"
-              className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60">
+              className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors disabled:opacity-60">
               {saving ? "Enregistrement..." : "Réinitialiser"}
             </button>
           </div>
@@ -197,9 +197,9 @@ export default function AdminUsers() {
       <div className="bg-white border-b border-zinc-200 px-6 py-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / Administration / <span className="text-[#352c6e] font-semibold">Utilisateurs</span></div>
-            <h1 className="font-heading text-2xl font-extrabold text-[#26243a] tracking-tight flex items-center gap-2">
-              <Users size={20} className="text-blue-600" />
+            <div className="text-xs text-m-muted mb-0.5">Accueil / Administration / <span className="text-m-primary font-semibold">Utilisateurs</span></div>
+            <h1 className="font-heading text-2xl font-extrabold text-m-ink tracking-tight flex items-center gap-2">
+              <Users size={20} className="text-m-blue" />
               Utilisateurs
             </h1>
             <p className="text-sm text-zinc-500 mt-0.5">
@@ -207,7 +207,7 @@ export default function AdminUsers() {
             </p>
           </div>
           <button onClick={() => setCreateOpen(true)} data-testid="btn-new-user"
-            className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+            className="flex items-center gap-2 px-4 py-2.5 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark transition-colors shadow-sm">
             <Plus size={15} /> Nouvel utilisateur
           </button>
         </div>
@@ -215,11 +215,11 @@ export default function AdminUsers() {
           <div className="relative">
             <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input data-testid="search-users" type="text" placeholder="Rechercher…"
-              className="pl-8 pr-3 py-1.5 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600/30 w-56"
+              className="pl-8 pr-3 py-1.5 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-m-blue/30 w-56"
               value={search} onChange={(e) => setSearch(e.target.value)} />
           </div>
           <select data-testid="filter-profile"
-            className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 bg-white"
+            className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30 bg-white"
             value={filterProfile} onChange={(e) => setFilterProfile(e.target.value)}>
             <option value="">Tous les profils</option>
             {profiles.map(p => (
@@ -234,9 +234,9 @@ export default function AdminUsers() {
         <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#fbfaff] border-b border-[#e8e6f0]">
+              <tr className="bg-m-bg border-b border-m-border">
                 {["Utilisateur", "Email", "Statut", "Rôle système", "Profil", "Actions"].map((h) => (
-                  <th key={h} className="text-left px-4 py-3 text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wider">{h}</th>
+                  <th key={h} className="text-left px-4 py-3 text-[10.5px] font-bold text-m-muted uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -252,7 +252,7 @@ export default function AdminUsers() {
                   className={`border-b border-zinc-50 ${i % 2 === 0 ? "" : "bg-zinc-50/40"} ${inactive ? "opacity-60" : ""}`}>
                   <td className="px-4 py-3">
                     <div className="flex items-center gap-3">
-                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${inactive ? "bg-zinc-200 text-zinc-500" : "bg-blue-600/10 text-blue-600"}`}>
+                      <div className={`w-8 h-8 rounded-full flex items-center justify-center font-bold text-sm ${inactive ? "bg-zinc-200 text-zinc-500" : "bg-m-blue/10 text-m-blue"}`}>
                         {u.name?.[0]?.toUpperCase()}
                       </div>
                       <span className="font-medium text-zinc-800">{u.name}</span>
@@ -275,7 +275,7 @@ export default function AdminUsers() {
                     <div className="relative">
                       <select
                         data-testid={`profile-select-${u.user_id}`}
-                        className="appearance-none border border-zinc-200 rounded-lg px-3 py-1.5 text-sm pr-8 focus:outline-none focus:ring-2 focus:ring-blue-600/30 bg-white w-full cursor-pointer"
+                        className="appearance-none border border-zinc-200 rounded-lg px-3 py-1.5 text-sm pr-8 focus:outline-none focus:ring-2 focus:ring-m-blue/30 bg-white w-full cursor-pointer"
                         value={u.profile_id || ""}
                         onChange={(e) => handleProfileChange(u.user_id, e.target.value)}
                       >
@@ -293,7 +293,7 @@ export default function AdminUsers() {
                     <div className="flex items-center gap-1">
                       <button onClick={() => setResetUser(u)} data-testid={`btn-reset-password-${u.user_id}`}
                         title="Réinitialiser le mot de passe"
-                        className="p-1.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+                        className="p-1.5 text-zinc-400 hover:text-m-blue hover:bg-blue-50 rounded-lg transition-colors">
                         <KeyRound size={14} />
                       </button>
                       <button onClick={() => setToggleTarget(u)} data-testid={`btn-toggle-active-${u.user_id}`}

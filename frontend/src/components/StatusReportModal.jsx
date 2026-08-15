@@ -195,7 +195,7 @@ export default function StatusReportModal({ isOpen, onClose, project }) {
             data-testid="generate-status-report-btn"
             onClick={handleGenerate}
             disabled={generating || loading}
-            className="flex items-center gap-2 px-5 py-2 rounded-lg bg-blue-600 text-white hover:bg-blue-700 disabled:opacity-50 text-sm font-semibold"
+            className="flex items-center gap-2 px-5 py-2 rounded-lg bg-m-blue text-white hover:bg-m-blue-dark disabled:opacity-50 text-sm font-semibold"
           >
             {generating ? <RefreshCw size={14} className="animate-spin" /> : <FileDown size={14} />}
             {generating ? "Génération…" : "Générer le PPT"}

@@ -51,19 +51,19 @@ function MilestoneRow({ m, late }) {
   return (
     <Link
       to={m.project_id ? `/projects/${m.project_id}` : "/roadmap"}
-      className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-[#f7f6fb] transition-colors"
+      className="flex items-center gap-3 px-3 py-2 rounded-lg hover:bg-m-surface transition-colors"
       data-testid={`home-milestone-${m.milestone_id}`}
     >
       <span
-        className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${late ? "bg-[#dc2626]" : "bg-[#352c6e]"}`}
+        className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${late ? "bg-m-red" : "bg-m-primary"}`}
       />
       <div className="min-w-0 flex-1">
-        <div className="text-[13px] font-semibold text-[#26243a] truncate">{m.name}</div>
-        <div className="text-[11px] text-[#8a87a0] truncate">
+        <div className="text-[13px] font-semibold text-m-ink truncate">{m.name}</div>
+        <div className="text-[11px] text-m-muted truncate">
           {m.project_code ? `${m.project_code} · ` : ""}{m.project_name}
         </div>
       </div>
-      <span className={`font-mono text-[11.5px] font-semibold flex-shrink-0 ${late ? "text-[#dc2626]" : "text-[#5d5a75]"}`}>
+      <span className={`font-mono text-[11.5px] font-semibold flex-shrink-0 ${late ? "text-m-red" : "text-m-ink-soft"}`}>
         {fmtDate(m.date)}
       </span>
     </Link>
@@ -94,37 +94,37 @@ export default function Home() {
     <div className="space-y-7" data-testid="home-page">
       {/* ── En-tête ── */}
       <div>
-        <div className="text-[12px] text-[#8a87a0] font-semibold capitalize" data-testid="home-date">{dateStr}</div>
-        <h1 className="font-heading text-[26px] font-extrabold text-[#26243a] tracking-tight mt-0.5" data-testid="home-greeting">
+        <div className="text-[12px] text-m-muted font-semibold capitalize" data-testid="home-date">{dateStr}</div>
+        <h1 className="font-heading text-[26px] font-extrabold text-m-ink tracking-tight mt-0.5" data-testid="home-greeting">
           Bonjour {firstName}
         </h1>
         {ctx && (
-          <p className="text-[13.5px] text-[#5d5a75] mt-1" data-testid="home-context">
-            <span className="font-semibold text-[#352c6e]">{ctx.active_projects}</span> projet{ctx.active_projects > 1 ? "s" : ""} actif{ctx.active_projects > 1 ? "s" : ""}
+          <p className="text-[13.5px] text-m-ink-soft mt-1" data-testid="home-context">
+            <span className="font-semibold text-m-primary">{ctx.active_projects}</span> projet{ctx.active_projects > 1 ? "s" : ""} actif{ctx.active_projects > 1 ? "s" : ""}
             {" · "}
-            <span className={`font-semibold ${ctx.red_projects > 0 ? "text-[#dc2626]" : "text-[#16a34a]"}`}>{ctx.red_projects}</span> en alerte
+            <span className={`font-semibold ${ctx.red_projects > 0 ? "text-m-red" : "text-[#16a34a]"}`}>{ctx.red_projects}</span> en alerte
             {" · "}
-            <span className="font-semibold text-[#352c6e]">{ctx.programs}</span> programme{ctx.programs > 1 ? "s" : ""}
+            <span className="font-semibold text-m-primary">{ctx.programs}</span> programme{ctx.programs > 1 ? "s" : ""}
           </p>
         )}
       </div>
 
       {/* ── Accès rapides ── */}
       <div>
-        <h2 className="font-heading text-[13px] font-bold text-[#8a87a0] uppercase tracking-wider mb-3">Accès rapides</h2>
+        <h2 className="font-heading text-[13px] font-bold text-m-muted uppercase tracking-wider mb-3">Accès rapides</h2>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
           {tiles.map(({ to, icon: Icon, label, desc }) => (
             <Link
               key={to}
               to={to}
-              className="group bg-white border border-[#e8e6f0] rounded-xl p-4 hover:border-[#352c6e] hover:shadow-md transition-all"
+              className="group bg-white border border-m-border rounded-xl p-4 hover:border-m-primary hover:shadow-md transition-all"
               data-testid={`home-quicknav-${to.replace("/", "")}`}
             >
-              <div className="w-9 h-9 rounded-lg bg-[#f0eff8] group-hover:bg-[#352c6e] flex items-center justify-center transition-colors">
-                <Icon size={17} className="text-[#352c6e] group-hover:text-white transition-colors" />
+              <div className="w-9 h-9 rounded-lg bg-[#f0eff8] group-hover:bg-m-primary flex items-center justify-center transition-colors">
+                <Icon size={17} className="text-m-primary group-hover:text-white transition-colors" />
               </div>
-              <div className="font-heading text-[13.5px] font-bold text-[#26243a] mt-2.5">{label}</div>
-              <div className="text-[11.5px] text-[#8a87a0] mt-0.5 leading-snug">{desc}</div>
+              <div className="font-heading text-[13.5px] font-bold text-m-ink mt-2.5">{label}</div>
+              <div className="text-[11.5px] text-m-muted mt-0.5 leading-snug">{desc}</div>
             </Link>
           ))}
         </div>
@@ -133,14 +133,14 @@ export default function Home() {
       {/* ── Actions en attente + projets récents ── */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-5">
         {/* Mes actions en attente */}
-        <div className="bg-white border border-[#e8e6f0] rounded-xl p-5" data-testid="home-actions">
-          <h2 className="font-heading text-[15px] font-extrabold text-[#26243a] mb-4">Mes actions en attente</h2>
+        <div className="bg-white border border-m-border rounded-xl p-5" data-testid="home-actions">
+          <h2 className="font-heading text-[15px] font-extrabold text-m-ink mb-4">Mes actions en attente</h2>
           <div className="space-y-3">
             {(summary?.envelope_overruns || []).length > 0 && (
               <div className="border border-[#fecaca] bg-[#fef2f2] rounded-lg p-3" data-testid="home-overrun-alerts">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <AlertTriangle size={13} className="text-[#dc2626]" />
-                  <span className="text-[12px] font-bold text-[#dc2626]">
+                  <AlertTriangle size={13} className="text-m-red" />
+                  <span className="text-[12px] font-bold text-m-red">
                     Dépassement d'enveloppe — plan pluriannuel
                   </span>
                 </div>
@@ -150,12 +150,12 @@ export default function Home() {
                       className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/70 transition-colors"
                       data-testid={`home-overrun-${o.year}`}>
                       <div className="min-w-0">
-                        <div className="text-[13px] font-semibold text-[#26243a]">Exercice {o.year}</div>
-                        <div className="text-[11px] text-[#8a87a0]">
+                        <div className="text-[13px] font-semibold text-m-ink">Exercice {o.year}</div>
+                        <div className="text-[11px] text-m-muted">
                           {fmtEuro(o.planned)} planifiés / enveloppe {fmtEuro(o.envelope)}
                         </div>
                       </div>
-                      <span className="font-mono text-[11.5px] font-bold text-[#dc2626] flex-shrink-0">
+                      <span className="font-mono text-[11.5px] font-bold text-m-red flex-shrink-0">
                         +{fmtEuro(o.overrun)}
                       </span>
                     </Link>
@@ -178,8 +178,8 @@ export default function Home() {
                       className="flex items-center justify-between px-3 py-2 rounded-lg hover:bg-white/70 transition-colors"
                       data-testid={`home-drift-${o.objective_id}`}>
                       <div className="min-w-0">
-                        <div className="text-[13px] font-semibold text-[#26243a] truncate">{o.title}</div>
-                        <div className="text-[11px] text-[#8a87a0]">
+                        <div className="text-[13px] font-semibold text-m-ink truncate">{o.title}</div>
+                        <div className="text-[11px] text-m-muted">
                           Réalisé {o.previous} → {o.current} {o.unit} · cible {o.target} {o.unit}
                         </div>
                       </div>
@@ -197,49 +197,49 @@ export default function Home() {
             {summary?.timesheet && canSubmitTs && (
               <Link
                 to="/timesheets"
-                className="flex items-center gap-3 p-3 rounded-lg border border-[#e8e6f0] hover:border-[#352c6e] transition-colors"
+                className="flex items-center gap-3 p-3 rounded-lg border border-m-border hover:border-m-primary transition-colors"
                 data-testid="home-timesheet-card"
               >
                 <div className="w-8 h-8 rounded-lg bg-[#eef4ff] flex items-center justify-center flex-shrink-0">
-                  <Clock size={15} className="text-[#2563eb]" />
+                  <Clock size={15} className="text-m-blue" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[13px] font-semibold text-[#26243a]">Ma feuille de temps</div>
-                  <div className="text-[11.5px] text-[#8a87a0]">
+                  <div className="text-[13px] font-semibold text-m-ink">Ma feuille de temps</div>
+                  <div className="text-[11.5px] text-m-muted">
                     Semaine du {fmtDate(summary.timesheet.week_start)} — <span className="font-mono font-semibold">{summary.timesheet.jh_entered}</span> JH saisis
                   </div>
                 </div>
                 {summary.timesheet.jh_entered === 0 && (
                   <span className="text-[10.5px] font-bold text-[#b45309] bg-[#fef3c7] rounded-full px-2 py-0.5 flex-shrink-0">À saisir</span>
                 )}
-                <ArrowRight size={14} className="text-[#a39fb8] flex-shrink-0" />
+                <ArrowRight size={14} className="text-m-muted-2 flex-shrink-0" />
               </Link>
             )}
 
             {canValidate && summary?.pending_validations > 0 && (
               <Link
                 to="/timesheets"
-                className="flex items-center gap-3 p-3 rounded-lg border border-[#e8e6f0] hover:border-[#352c6e] transition-colors"
+                className="flex items-center gap-3 p-3 rounded-lg border border-m-border hover:border-m-primary transition-colors"
                 data-testid="home-validations-card"
               >
                 <div className="w-8 h-8 rounded-lg bg-[#fef3c7] flex items-center justify-center flex-shrink-0">
                   <ClipboardCheck size={15} className="text-[#b45309]" />
                 </div>
                 <div className="flex-1 min-w-0">
-                  <div className="text-[13px] font-semibold text-[#26243a]">Timesheets à valider</div>
-                  <div className="text-[11.5px] text-[#8a87a0]">
+                  <div className="text-[13px] font-semibold text-m-ink">Timesheets à valider</div>
+                  <div className="text-[11.5px] text-m-muted">
                     <span className="font-mono font-semibold">{summary.pending_validations}</span> en attente de votre validation
                   </div>
                 </div>
-                <ArrowRight size={14} className="text-[#a39fb8] flex-shrink-0" />
+                <ArrowRight size={14} className="text-m-muted-2 flex-shrink-0" />
               </Link>
             )}
 
             {ms && ms.late_count > 0 && (
               <div className="border border-[#fde3e3] bg-[#fef7f7] rounded-lg p-3" data-testid="home-milestones-late">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <AlertTriangle size={13} className="text-[#dc2626]" />
-                  <span className="text-[12px] font-bold text-[#dc2626]">
+                  <AlertTriangle size={13} className="text-m-red" />
+                  <span className="text-[12px] font-bold text-m-red">
                     {ms.late_count} jalon{ms.late_count > 1 ? "s" : ""} en retard
                   </span>
                 </div>
@@ -250,10 +250,10 @@ export default function Home() {
             )}
 
             {ms && ms.upcoming_count > 0 && (
-              <div className="border border-[#e8e6f0] rounded-lg p-3" data-testid="home-milestones-upcoming">
+              <div className="border border-m-border rounded-lg p-3" data-testid="home-milestones-upcoming">
                 <div className="flex items-center gap-2 mb-1.5">
-                  <CalendarClock size={13} className="text-[#352c6e]" />
-                  <span className="text-[12px] font-bold text-[#352c6e]">
+                  <CalendarClock size={13} className="text-m-primary" />
+                  <span className="text-[12px] font-bold text-m-primary">
                     {ms.upcoming_count} jalon{ms.upcoming_count > 1 ? "s" : ""} dans les 21 jours
                   </span>
                 </div>
@@ -264,7 +264,7 @@ export default function Home() {
             )}
 
             {summary && !summary.timesheet && summary.pending_validations === 0 && ms?.late_count === 0 && ms?.upcoming_count === 0 && (summary.envelope_overruns || []).length === 0 && (summary.objectives_drift || []).length === 0 && (
-              <p className="text-[13px] text-[#8a87a0]" data-testid="home-actions-empty">Rien en attente — tout est à jour.</p>
+              <p className="text-[13px] text-m-muted" data-testid="home-actions-empty">Rien en attente — tout est à jour.</p>
             )}
           </div>
         </div>
@@ -272,34 +272,34 @@ export default function Home() {
         <div className="space-y-5">
           {/* Comités à venir */}
           {summary?.committees !== null && summary?.committees !== undefined && (
-            <div className="bg-white border border-[#e8e6f0] rounded-xl p-5" data-testid="home-committees">
+            <div className="bg-white border border-m-border rounded-xl p-5" data-testid="home-committees">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <CalendarDays size={15} className="text-[#8a87a0]" />
-                  <h2 className="font-heading text-[15px] font-extrabold text-[#26243a]">Comités à venir</h2>
+                  <CalendarDays size={15} className="text-m-muted" />
+                  <h2 className="font-heading text-[15px] font-extrabold text-m-ink">Comités à venir</h2>
                 </div>
-                <Link to="/governance" className="text-[11.5px] font-semibold text-[#352c6e] hover:underline flex-shrink-0" data-testid="home-committees-link">
+                <Link to="/governance" className="text-[11.5px] font-semibold text-m-primary hover:underline flex-shrink-0" data-testid="home-committees-link">
                   Gouvernance →
                 </Link>
               </div>
               {summary.committees.length === 0 ? (
-                <div className="text-[13px] text-[#8a87a0]" data-testid="home-committees-empty">
+                <div className="text-[13px] text-m-muted" data-testid="home-committees-empty">
                   Aucun comité planifié.{" "}
-                  <Link to="/governance" className="text-[#352c6e] font-semibold hover:underline">Planifier une instance →</Link>
+                  <Link to="/governance" className="text-m-primary font-semibold hover:underline">Planifier une instance →</Link>
                 </div>
               ) : (
                 <div className="space-y-1">
                   {summary.committees.map((c) => (
                     <Link key={c.governance_id} to="/governance"
-                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#f7f6fb] transition-colors"
+                      className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-m-surface transition-colors"
                       data-testid={`home-committee-${c.governance_id}`}>
                       <span className={`text-[9.5px] font-bold uppercase px-1.5 py-0.5 rounded-full border flex-shrink-0 ${COMMITTEE_COLORS[c.type] || COMMITTEE_COLORS.autre}`}>
                         {COMMITTEE_LABELS[c.type] || c.type}
                       </span>
                       <div className="min-w-0 flex-1">
-                        <div className="text-[13px] font-semibold text-[#26243a] truncate">{c.name}</div>
+                        <div className="text-[13px] font-semibold text-m-ink truncate">{c.name}</div>
                       </div>
-                      <span className="font-mono text-[11.5px] font-semibold text-[#5d5a75] flex-shrink-0">
+                      <span className="font-mono text-[11.5px] font-semibold text-m-ink-soft flex-shrink-0">
                         {fmtDate((c.date_scheduled || "").slice(0, 10))}
                       </span>
                     </Link>
@@ -310,15 +310,15 @@ export default function Home() {
           )}
 
           {/* Derniers projets consultés */}
-          <div className="bg-white border border-[#e8e6f0] rounded-xl p-5" data-testid="home-recent-projects">
+          <div className="bg-white border border-m-border rounded-xl p-5" data-testid="home-recent-projects">
           <div className="flex items-center gap-2 mb-4">
-            <History size={15} className="text-[#8a87a0]" />
-            <h2 className="font-heading text-[15px] font-extrabold text-[#26243a]">Derniers projets consultés</h2>
+            <History size={15} className="text-m-muted" />
+            <h2 className="font-heading text-[15px] font-extrabold text-m-ink">Derniers projets consultés</h2>
           </div>
           {recent.length === 0 ? (
-            <div className="text-[13px] text-[#8a87a0]" data-testid="home-recent-empty">
+            <div className="text-[13px] text-m-muted" data-testid="home-recent-empty">
               Aucun projet consulté récemment.{" "}
-              <Link to="/portfolio" className="text-[#352c6e] font-semibold hover:underline">Ouvrir le portefeuille →</Link>
+              <Link to="/portfolio" className="text-m-primary font-semibold hover:underline">Ouvrir le portefeuille →</Link>
             </div>
           ) : (
             <div className="space-y-1">
@@ -326,7 +326,7 @@ export default function Home() {
                 <Link
                   key={p.project_id}
                   to={`/projects/${p.project_id}`}
-                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-[#f7f6fb] transition-colors"
+                  className="flex items-center gap-3 px-3 py-2.5 rounded-lg hover:bg-m-surface transition-colors"
                   data-testid={`home-recent-item-${p.project_id}`}
                 >
                   <span
@@ -334,10 +334,10 @@ export default function Home() {
                     style={{ backgroundColor: RAG_DOT[p.status_rag] || "#a39fb8" }}
                   />
                   <div className="min-w-0 flex-1">
-                    <div className="text-[13.5px] font-semibold text-[#26243a] truncate">{p.name}</div>
-                    {p.code && <div className="font-mono text-[10.5px] text-[#8a87a0]">{p.code}</div>}
+                    <div className="text-[13.5px] font-semibold text-m-ink truncate">{p.name}</div>
+                    {p.code && <div className="font-mono text-[10.5px] text-m-muted">{p.code}</div>}
                   </div>
-                  <ArrowRight size={14} className="text-[#a39fb8] flex-shrink-0" />
+                  <ArrowRight size={14} className="text-m-muted-2 flex-shrink-0" />
                 </Link>
               ))}
             </div>

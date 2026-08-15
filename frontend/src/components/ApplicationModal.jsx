@@ -40,7 +40,7 @@ export const CRIT_CFG = {
   critique: "bg-rose-50 text-rose-700 border-rose-200",
 };
 
-const inputCls = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600";
+const inputCls = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue";
 const labelCls = "block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5";
 
 export default function ApplicationModal({ app, onClose, onSave }) {
@@ -89,7 +89,7 @@ export default function ApplicationModal({ app, onClose, onSave }) {
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
           <div className="flex items-center gap-2">
-            <AppWindow size={16} className="text-[#352c6e]" />
+            <AppWindow size={16} className="text-m-primary" />
             <h2 className="font-heading text-lg font-bold text-zinc-950">
               {isEdit ? "Modifier l'application" : "Nouvelle application"}
             </h2>
@@ -192,7 +192,7 @@ export default function ApplicationModal({ app, onClose, onSave }) {
             <button type="button" onClick={onClose}
               className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">Annuler</button>
             <button type="submit" disabled={saving} data-testid="app-save-btn"
-              className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60">
+              className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors disabled:opacity-60">
               {saving ? "Sauvegarde..." : isEdit ? "Enregistrer" : "Créer"}
             </button>
           </div>

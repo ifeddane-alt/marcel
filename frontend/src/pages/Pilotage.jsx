@@ -34,22 +34,22 @@ function SnapshotsTab() {
         <p className="text-xs text-zinc-400">Photo mensuelle automatique du portefeuille (le 1er du mois) — comparez les évolutions d'un mois à l'autre.</p>
         {canRun && (
           <button onClick={run} data-testid="snapshot-run-btn"
-            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50">
+            className="flex items-center gap-1.5 px-3 py-1.5 text-[11px] font-semibold text-m-blue border border-blue-200 rounded-lg hover:bg-blue-50">
             <Camera size={12} /> Snapshot maintenant
           </button>
         )}
       </div>
       {snaps.length === 0 ? (
-        <div className="bg-white border border-[#e8e6f0] rounded-xl p-8 text-center text-sm text-zinc-400" data-testid="snapshots-empty">
+        <div className="bg-white border border-m-border rounded-xl p-8 text-center text-sm text-zinc-400" data-testid="snapshots-empty">
           Aucun snapshot — le premier sera pris automatiquement le 1er du mois prochain.
         </div>
       ) : (
-        <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto">
+        <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+              <tr className="bg-m-bg border-b border-m-border text-left">
                 {["Mois", "Projets", "Budget total", "Consommé", "EAC", "Vert", "Orange", "Rouge"].map((h) => (
-                  <th key={h} className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] whitespace-nowrap">{h}</th>
+                  <th key={h} className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -104,24 +104,24 @@ export default function Pilotage() {
     <div className="p-4 md:p-6 space-y-4" data-testid="pilotage-page">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-heading text-xl md:text-2xl font-extrabold text-[#26243a] flex items-center gap-2">
-            <Gauge size={20} className="text-[#352c6e]" /> Pilotage par indicateurs
+          <h1 className="font-heading text-xl md:text-2xl font-extrabold text-m-ink flex items-center gap-2">
+            <Gauge size={20} className="text-m-primary" /> Pilotage par indicateurs
           </h1>
           <p className="text-xs text-zinc-400 mt-0.5">Chaque projet est piloté avec les indicateurs de sa méthodologie — EVM (waterfall), vélocité (agile), fiabilité (SAFe)</p>
         </div>
         {tab === "indicateurs" && (
           <select value={methodFilter} onChange={(e) => setMethodFilter(e.target.value)} data-testid="pilotage-method-filter"
-            className="text-xs border border-zinc-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-blue-600">
+            className="text-xs border border-zinc-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-m-blue">
             <option value="">Toutes méthodologies</option>
             {Object.entries(METHOD_CFG).map(([v, c]) => <option key={v} value={v}>{c.label}</option>)}
           </select>
         )}
       </div>
 
-      <div className="border-b border-[#e7e3f2] flex gap-5">
+      <div className="border-b border-m-border-lav flex gap-5">
         {[{ id: "indicateurs", label: "Indicateurs" }, { id: "evolution", label: "Évolution mensuelle" }].map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)} data-testid={`pilotage-tab-${t.id}`}
-            className={`pb-2 text-sm font-semibold ${tab === t.id ? "text-[#2e5fe8] border-b-[3px] border-[#2e5fe8] -mb-px" : "text-zinc-400 hover:text-zinc-600"}`}>
+            className={`pb-2 text-sm font-semibold ${tab === t.id ? "text-m-blue border-b-[3px] border-m-blue -mb-px" : "text-zinc-400 hover:text-zinc-600"}`}>
             {t.label}
           </button>
         ))}
@@ -131,12 +131,12 @@ export default function Pilotage() {
 
       {tab === "indicateurs" && (
         <>
-          <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto">
+          <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+                <tr className="bg-m-bg border-b border-m-border text-left">
                   {["Projet", "Méthode", "Avancement", "Budget", "CPI", "SPI", "Vélocité", "Complétion sprint", "WIP", "Risques", "Jalons retard"].map((h) => (
-                    <th key={h} className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] whitespace-nowrap">{h}</th>
+                    <th key={h} className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>

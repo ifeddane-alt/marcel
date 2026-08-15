@@ -20,7 +20,7 @@ export const ACTIVITY_TYPES = [
   { value: "astreinte", label: "Astreinte" },
   { value: "autre", label: "Autre" },
 ];
-const inputCls = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600";
+const inputCls = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue";
 const labelCls = "block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5";
 const tLabel = (v) => ACTIVITY_TYPES.find((t) => t.value === v)?.label || v;
 
@@ -120,7 +120,7 @@ function ActivityModal({ activity, apps, teams, onClose, onSave }) {
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100">
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50">Annuler</button>
             <button type="submit" disabled={saving} data-testid="activity-save-btn"
-              className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60">
+              className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-60">
               {saving ? "..." : "Enregistrer"}
             </button>
           </div>
@@ -169,7 +169,7 @@ function AllocationModal({ activity, resources, onClose, onSaved }) {
           ) : (
             <div className="space-y-1">
               {allocs.map((a, i) => (
-                <div key={i} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-[#fbfaff] border border-[#e8e6f0]" data-testid={`run-alloc-row-${i}`}>
+                <div key={i} className="flex items-center gap-2 px-2.5 py-1.5 rounded-lg bg-m-bg border border-m-border" data-testid={`run-alloc-row-${i}`}>
                   <span className="text-xs font-medium text-zinc-700 flex-1 truncate">{a.resource_name}</span>
                   <span className="font-mono-data text-[11px] text-zinc-500">{String(a.month).slice(0, 7)}</span>
                   <span className="font-mono-data text-xs font-bold text-zinc-700">{a.days_allocated} JH</span>
@@ -182,19 +182,19 @@ function AllocationModal({ activity, resources, onClose, onSaved }) {
           <form onSubmit={addRow} className="flex items-center gap-2 mt-3 flex-wrap">
             <select value={newRow.resource_id} onChange={(e) => setNewRow({ ...newRow, resource_id: e.target.value })}
               data-testid="run-alloc-resource-select"
-              className="flex-1 min-w-[130px] text-xs border border-zinc-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-blue-600">
+              className="flex-1 min-w-[130px] text-xs border border-zinc-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-m-blue">
               <option value="">Ressource…</option>
               {resources.map((r) => <option key={r.resource_id} value={r.resource_id}>{r.name}</option>)}
             </select>
             <input type="month" value={newRow.month} onChange={(e) => setNewRow({ ...newRow, month: e.target.value })}
               data-testid="run-alloc-month-input"
-              className="text-xs border border-zinc-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-blue-600" />
+              className="text-xs border border-zinc-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-m-blue" />
             <input type="number" min="0.5" step="0.5" value={newRow.days_allocated} placeholder="JH"
               onChange={(e) => setNewRow({ ...newRow, days_allocated: e.target.value })}
               data-testid="run-alloc-days-input"
-              className="w-16 text-xs border border-zinc-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-blue-600 font-mono-data" />
+              className="w-16 text-xs border border-zinc-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-m-blue font-mono-data" />
             <button type="submit" data-testid="run-alloc-add-btn"
-              className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50">
+              className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-m-blue border border-blue-200 rounded-lg hover:bg-blue-50">
               <Plus size={11} /> Ajouter
             </button>
           </form>
@@ -202,7 +202,7 @@ function AllocationModal({ activity, resources, onClose, onSaved }) {
         <div className="flex items-center justify-end gap-2 px-5 py-3 border-t border-zinc-100">
           <button onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50">Annuler</button>
           <button onClick={save} disabled={saving || allocs === null} data-testid="run-alloc-save-btn"
-            className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60">
+            className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-60">
             {saving ? "..." : "Enregistrer"}
           </button>
         </div>
@@ -213,8 +213,8 @@ function AllocationModal({ activity, resources, onClose, onSaved }) {
 
 function Kpi({ label, value, sub, icon: Icon, accent, testId }) {
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 flex items-center gap-3" data-testid={testId}>
-      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${accent || "bg-[#f0eefc] text-[#352c6e]"}`}>
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 flex items-center gap-3" data-testid={testId}>
+      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${accent || "bg-m-lilac text-m-primary"}`}>
         <Icon size={16} />
       </div>
       <div className="min-w-0">
@@ -279,14 +279,14 @@ export default function Run() {
     <div className="p-4 md:p-6 space-y-4" data-testid="run-page">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-heading text-xl md:text-2xl font-extrabold text-[#26243a] flex items-center gap-2">
-            <ServerCog size={20} className="text-[#352c6e]" /> Run &amp; Exploitation
+          <h1 className="font-heading text-xl md:text-2xl font-extrabold text-m-ink flex items-center gap-2">
+            <ServerCog size={20} className="text-m-primary" /> Run &amp; Exploitation
           </h1>
           <p className="text-xs text-zinc-400 mt-0.5">Activités récurrentes, budget run, charge consolidée, incidents et MEP</p>
         </div>
         {canWrite && tab === "activites" && (
           <button onClick={() => setActModal({})} data-testid="btn-new-activity"
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700">
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-m-blue text-white text-xs font-semibold rounded-lg hover:bg-m-blue-dark">
             <Plus size={13} /> Nouvelle activité
           </button>
         )}
@@ -305,14 +305,14 @@ export default function Run() {
       <div className="flex items-center gap-1 flex-wrap">
         {TABS.map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)} data-testid={`run-tab-${t.id}`}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${tab === t.id ? "bg-blue-600 text-white" : "text-zinc-500 border border-zinc-200 hover:bg-zinc-50"}`}>
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${tab === t.id ? "bg-m-blue text-white" : "text-zinc-500 border border-zinc-200 hover:bg-zinc-50"}`}>
             {t.label}
           </button>
         ))}
       </div>
 
       {tab === "activites" && (
-        <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto" data-testid="run-activities-tab">
+        <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto" data-testid="run-activities-tab">
           {activities.length === 0 ? (
             <div className="px-5 py-12 text-sm text-zinc-400 text-center" data-testid="activities-empty">
               Aucune activité de run — créez le catalogue des activités récurrentes de la DSI (MCO, support, supervision…).
@@ -320,9 +320,9 @@ export default function Run() {
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+                <tr className="bg-m-bg border-b border-m-border text-left">
                   {["Activité", "Application", "Équipe", "Budget annuel", "Consommé", "JH alloués", ""].map((h) => (
-                    <th key={h} className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] whitespace-nowrap">{h}</th>
+                    <th key={h} className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -333,7 +333,7 @@ export default function Run() {
                     <tr key={a.activity_id} className="border-b border-zinc-100 hover:bg-zinc-50/50" data-testid={`activity-row-${a.activity_id}`}>
                       <td className="px-3 py-2.5">
                         <div className="text-xs font-semibold text-zinc-800">{a.name}</div>
-                        <span className="inline-block mt-0.5 px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-lg border bg-[#f0eefc] text-[#352c6e] border-[#e0dcf5]">
+                        <span className="inline-block mt-0.5 px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-lg border bg-m-lilac text-m-primary border-m-border-strong">
                           {tLabel(a.type)}
                         </span>
                         {a.status === "suspendue" && <span className="ml-1 text-[9px] text-amber-600 font-bold">SUSPENDUE</span>}
@@ -349,7 +349,7 @@ export default function Run() {
                       </td>
                       <td className="px-3 py-2.5">
                         <button onClick={() => canWrite && setAllocModal(a)} data-testid={`btn-allocations-${a.activity_id}`}
-                          className={`inline-flex items-center gap-1 font-mono-data text-xs font-bold text-zinc-700 ${canWrite ? "hover:text-blue-600" : ""}`}>
+                          className={`inline-flex items-center gap-1 font-mono-data text-xs font-bold text-zinc-700 ${canWrite ? "hover:text-m-blue" : ""}`}>
                           <Users size={11} className="text-zinc-400" /> {a.allocated_jh || 0} JH
                         </button>
                       </td>
@@ -357,7 +357,7 @@ export default function Run() {
                         {canWrite && (
                           <div className="flex items-center gap-1">
                             <button onClick={() => setActModal({ activity: a })} data-testid={`btn-edit-activity-${a.activity_id}`}
-                              className="p-1 text-zinc-400 hover:text-blue-600"><Pencil size={12} /></button>
+                              className="p-1 text-zinc-400 hover:text-m-blue"><Pencil size={12} /></button>
                             <button onClick={() => setConfirmDelete(a)} className="p-1 text-zinc-400 hover:text-rose-500"><Trash2 size={12} /></button>
                           </div>
                         )}

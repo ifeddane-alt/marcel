@@ -7,16 +7,16 @@ import { Check, X, AlertTriangle } from "lucide-react";
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("fr-FR") : "—");
 const GATE_BADGES = {
   en_validation: { label: "En validation", cls: "bg-[#fdf6e3] text-[#8a6d1a]" },
-  pret:          { label: "Prêt", cls: "bg-[#e9effe] text-[#2e5fe8]" },
-  go:            { label: "Go", cls: "bg-[#ddf0d8] text-[#3f8a34]" },
+  pret:          { label: "Prêt", cls: "bg-m-blue-soft text-m-blue" },
+  go:            { label: "Go", cls: "bg-m-green-soft text-m-green" },
   go_reserves:   { label: "Go avec réserves", cls: "bg-[#d5efec] text-[#22766c]" },
-  no_go:         { label: "No-Go", cls: "bg-[#fbe1de] text-[#cc4f45]" },
+  no_go:         { label: "No-Go", cls: "bg-m-red-soft text-m-red" },
   annule:        { label: "Annulé", cls: "bg-zinc-100 text-zinc-500" },
 };
 const VALIDATOR_CHIPS = {
   ARCHITECTE: { label: "Architecture", cls: "bg-[#eceafd] text-[#5b4bc4]" },
-  SECURITE:   { label: "Sécurité", cls: "bg-[#fbe1de] text-[#a63c33]" },
-  PMO:        { label: "PMO", cls: "bg-[#e9effe] text-[#2e5fe8]" },
+  SECURITE:   { label: "Sécurité", cls: "bg-m-red-soft text-[#a63c33]" },
+  PMO:        { label: "PMO", cls: "bg-m-blue-soft text-m-blue" },
 };
 
 export default function MyValidations() {
@@ -47,11 +47,11 @@ export default function MyValidations() {
   return (
     <div className="space-y-5" data-testid="validations-page">
       <div>
-        <div className="text-xs text-[#8a87a0]">Accueil / <span className="text-[#352c6e] font-semibold">Validations</span></div>
-        <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight mt-1">Validations & passages de phase</h1>
+        <div className="text-xs text-m-muted">Accueil / <span className="text-m-primary font-semibold">Validations</span></div>
+        <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight mt-1">Validations & passages de phase</h1>
       </div>
 
-      <div className="border-b border-[#e7e3f2] flex gap-5">
+      <div className="border-b border-m-border-lav flex gap-5">
         {[
           { id: "reviews", label: `À valider (${reviews.length})` },
           { id: "portfolio", label: "Passages du portefeuille" },
@@ -60,7 +60,7 @@ export default function MyValidations() {
             key={t.id}
             data-testid={`validations-tab-${t.id}`}
             onClick={() => setTab(t.id)}
-            className={`pb-2 text-sm font-semibold ${tab === t.id ? "text-[#2e5fe8] border-b-[3px] border-[#2e5fe8] -mb-px" : "text-zinc-400 hover:text-zinc-600"}`}
+            className={`pb-2 text-sm font-semibold ${tab === t.id ? "text-m-blue border-b-[3px] border-m-blue -mb-px" : "text-zinc-400 hover:text-zinc-600"}`}
           >
             {t.label}
           </button>
@@ -70,7 +70,7 @@ export default function MyValidations() {
       {tab === "reviews" && (
         <div className="space-y-3">
           {reviews.length === 0 && (
-            <div className="bg-white border border-[#e8e6f0] rounded-xl p-6 text-sm text-zinc-400" data-testid="reviews-empty">
+            <div className="bg-white border border-m-border rounded-xl p-6 text-sm text-zinc-400" data-testid="reviews-empty">
               Aucun livrable en attente de votre validation.
             </div>
           )}
@@ -78,11 +78,11 @@ export default function MyValidations() {
             const chip = VALIDATOR_CHIPS[item.deliverable.validator] || VALIDATOR_CHIPS.PMO;
             const rk = `${item.gate_id}:${item.deliverable.key}`;
             return (
-              <div key={rk} data-testid={`review-item-${item.deliverable.key}`} className="bg-white border border-[#e8e6f0] rounded-xl shadow-sm p-4 flex flex-wrap items-center gap-3">
+              <div key={rk} data-testid={`review-item-${item.deliverable.key}`} className="bg-white border border-m-border rounded-xl shadow-sm p-4 flex flex-wrap items-center gap-3">
                 <div className="flex-1 min-w-[220px]">
-                  <div className="font-semibold text-sm text-[#26243a]">{item.deliverable.label}</div>
+                  <div className="font-semibold text-sm text-m-ink">{item.deliverable.label}</div>
                   <div className="text-xs text-zinc-400 mt-0.5">
-                    <Link to={`/projects/${item.project_id}`} className="text-[#2e5fe8] hover:underline" data-testid={`review-project-link-${item.deliverable.key}`}>
+                    <Link to={`/projects/${item.project_id}`} className="text-m-blue hover:underline" data-testid={`review-project-link-${item.deliverable.key}`}>
                       {item.project_code || item.project_name}
                     </Link>
                     {" · "}{phaseLabel(item.from_phase)} → {phaseLabel(item.to_phase)} · Cible : {fmtDate(item.target_date)}
@@ -95,16 +95,16 @@ export default function MyValidations() {
                 </div>
                 <span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${chip.cls}`}>{chip.label}</span>
                 <input
-                  className="border border-[#e8e6f0] rounded-md px-2 py-1.5 text-xs w-44"
+                  className="border border-m-border rounded-md px-2 py-1.5 text-xs w-44"
                   placeholder="Commentaire"
                   value={comments[rk] || ""}
                   onChange={(e) => setComments((c) => ({ ...c, [rk]: e.target.value }))}
                   data-testid={`review-comment-input-${item.deliverable.key}`}
                 />
                 <div className="flex gap-1.5">
-                  <button data-testid={`review-valide-${item.deliverable.key}`} onClick={() => review(item, "valide")} disabled={!item.deliverable.provided} className="px-2.5 py-1.5 rounded-md bg-[#ddf0d8] text-[#3f8a34] text-xs font-semibold hover:opacity-80 disabled:opacity-40 inline-flex items-center gap-1"><Check size={13} /> Valider</button>
+                  <button data-testid={`review-valide-${item.deliverable.key}`} onClick={() => review(item, "valide")} disabled={!item.deliverable.provided} className="px-2.5 py-1.5 rounded-md bg-m-green-soft text-m-green text-xs font-semibold hover:opacity-80 disabled:opacity-40 inline-flex items-center gap-1"><Check size={13} /> Valider</button>
                   <button data-testid={`review-reserves-${item.deliverable.key}`} onClick={() => review(item, "valide_reserves")} disabled={!item.deliverable.provided} className="px-2.5 py-1.5 rounded-md bg-[#fdf6e3] text-[#8a6d1a] text-xs font-semibold hover:opacity-80 disabled:opacity-40 inline-flex items-center gap-1"><AlertTriangle size={13} /> Réserves</button>
-                  <button data-testid={`review-refuse-${item.deliverable.key}`} onClick={() => review(item, "refuse")} disabled={!item.deliverable.provided} className="px-2.5 py-1.5 rounded-md bg-[#fbe1de] text-[#cc4f45] text-xs font-semibold hover:opacity-80 disabled:opacity-40 inline-flex items-center gap-1"><X size={13} /> Refuser</button>
+                  <button data-testid={`review-refuse-${item.deliverable.key}`} onClick={() => review(item, "refuse")} disabled={!item.deliverable.provided} className="px-2.5 py-1.5 rounded-md bg-m-red-soft text-m-red text-xs font-semibold hover:opacity-80 disabled:opacity-40 inline-flex items-center gap-1"><X size={13} /> Refuser</button>
                 </div>
               </div>
             );
@@ -116,16 +116,16 @@ export default function MyValidations() {
         <div className="space-y-4">
           <div className="flex flex-wrap gap-2" data-testid="phase-counts">
             {portfolio.phases.map((p) => (
-              <div key={p.key} className="bg-white border border-[#e8e6f0] rounded-xl px-4 py-2.5">
+              <div key={p.key} className="bg-white border border-m-border rounded-xl px-4 py-2.5">
                 <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">{p.label}</div>
                 <div className="font-mono-data font-bold text-zinc-950 text-lg" data-testid={`phase-count-${p.key}`}>{portfolio.phase_counts[p.key] ?? 0}</div>
               </div>
             ))}
           </div>
-          <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-sm overflow-x-auto">
+          <div className="bg-white border border-m-border rounded-xl shadow-sm overflow-x-auto">
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">
+                <tr className="bg-m-bg border-b border-m-border text-[10.5px] uppercase tracking-wider font-bold text-m-muted">
                   <th className="text-left px-4 py-2.5">Projet</th>
                   <th className="text-left px-4 py-2.5">Passage</th>
                   <th className="text-left px-4 py-2.5">Statut</th>
@@ -144,7 +144,7 @@ export default function MyValidations() {
                   return (
                     <tr key={g.gate_id} className="border-b border-[#f1eff8]" data-testid={`portfolio-gate-${g.gate_id}`}>
                       <td className="px-4 py-2.5">
-                        <Link to={`/projects/${g.project_id}`} className="text-[#2e5fe8] hover:underline font-medium">{g.project_code || g.project_name}</Link>
+                        <Link to={`/projects/${g.project_id}`} className="text-m-blue hover:underline font-medium">{g.project_code || g.project_name}</Link>
                       </td>
                       <td className="px-4 py-2.5 text-zinc-600">{phaseLabel(g.from_phase)} → {phaseLabel(g.to_phase)}</td>
                       <td className="px-4 py-2.5"><span className={`px-2 py-0.5 rounded-full text-[11px] font-semibold ${b.cls}`}>{b.label}</span></td>

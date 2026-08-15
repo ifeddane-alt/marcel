@@ -33,7 +33,7 @@ const PHASE_LABELS = {
 };
 
 const TH = ({ children, right }) => (
-  <th className={`px-3 py-2.5 text-[10.5px] font-bold uppercase tracking-wider text-[#8a87a0] bg-[#fbfaff] border-b border-[#e8e6f0] whitespace-nowrap ${right ? "text-right" : "text-left"}`}>
+  <th className={`px-3 py-2.5 text-[10.5px] font-bold uppercase tracking-wider text-m-muted bg-m-bg border-b border-m-border whitespace-nowrap ${right ? "text-right" : "text-left"}`}>
     {children}
   </th>
 );
@@ -83,32 +83,32 @@ export default function TeamDetail() {
   return (
     <div className="p-4 md:p-6 lg:p-8" data-testid="team-detail-page">
       {/* Breadcrumb */}
-      <nav className="flex items-center gap-1.5 text-xs text-[#8a87a0] mb-4">
+      <nav className="flex items-center gap-1.5 text-xs text-m-muted mb-4">
         <span>Accueil</span>
         <span>/</span>
-        <Link to="/teams" className="hover:text-[#2e5fe8]">Équipes</Link>
+        <Link to="/teams" className="hover:text-m-blue">Équipes</Link>
         <span>/</span>
-        <span className="text-[#352c6e] font-semibold">{team.name}</span>
+        <span className="text-m-primary font-semibold">{team.name}</span>
       </nav>
 
       {/* ── 1. EN-TÊTE ─────────────────────────────────────── */}
       <div className="flex flex-wrap items-center gap-4 mb-6" data-testid="team-header">
-        <div className="w-14 h-14 rounded-xl bg-[#352c6e] flex items-center justify-center flex-shrink-0">
+        <div className="w-14 h-14 rounded-xl bg-m-primary flex items-center justify-center flex-shrink-0">
           <span className="text-lg font-bold text-white font-heading">
             {team.name.slice(0, 2).toUpperCase()}
           </span>
         </div>
         <div className="min-w-0">
-          <h1 className="font-heading text-2xl sm:text-[28px] font-extrabold text-[#26243a] leading-tight" data-testid="team-name">
+          <h1 className="font-heading text-2xl sm:text-[28px] font-extrabold text-m-ink leading-tight" data-testid="team-name">
             {team.name}
           </h1>
-          <div className="text-sm text-[#5d5a75] mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1">
+          <div className="text-sm text-m-ink-soft mt-0.5 flex flex-wrap items-center gap-x-3 gap-y-1">
             {team.manager_name && (
               <span className="flex items-center gap-1">
                 <UserCircle size={12} /> Manager : <b>{team.manager_name}</b>
               </span>
             )}
-            {team.train_id && <span className="text-xs text-[#8a87a0]">Train SAFe : {team.train_id}</span>}
+            {team.train_id && <span className="text-xs text-m-muted">Train SAFe : {team.train_id}</span>}
           </div>
         </div>
       </div>
@@ -131,7 +131,7 @@ export default function TeamDetail() {
               ringColor={utilColor}
               ringLabel="Utilisation"
               ringCaption="mois"
-              valueClass={curUtil > 85 ? "text-[#cc4f45]" : "text-[#26243a]"}
+              valueClass={curUtil > 85 ? "text-m-red" : "text-m-ink"}
             />
           </div>
         );
@@ -139,13 +139,13 @@ export default function TeamDetail() {
 
       {/* ── 2. MEMBRES ─────────────────────────────────────── */}
       <section className="mb-6" data-testid="members-section">
-        <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]">
+        <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]">
           <div className="px-5 py-3 border-b border-zinc-100 flex items-center gap-2">
-            <Users size={14} className="text-blue-600" />
-            <span className="font-heading text-[13px] font-bold text-[#26243a]">
+            <Users size={14} className="text-m-blue" />
+            <span className="font-heading text-[13px] font-bold text-m-ink">
               Membres de l'équipe
             </span>
-            <span className="ml-1 bg-blue-600/10 text-blue-600 text-[10px] font-bold rounded-full px-2 py-0.5">
+            <span className="ml-1 bg-m-blue/10 text-m-blue text-[10px] font-bold rounded-full px-2 py-0.5">
               {members.length}
             </span>
           </div>
@@ -171,7 +171,7 @@ export default function TeamDetail() {
                       <TD>
                         <Link
                           to={`/resources/${m.resource_id}`}
-                          className="font-semibold text-zinc-800 hover:text-blue-600 transition-colors"
+                          className="font-semibold text-zinc-800 hover:text-m-blue transition-colors"
                           title="Voir fiche ressource"
                           data-testid={`member-link-${m.resource_id}`}
                         >
@@ -202,13 +202,13 @@ export default function TeamDetail() {
 
       {/* ── 3. AFFECTATIONS PAR PROJET ─────────────────────── */}
       <section className="mb-6" data-testid="project-allocations-section">
-        <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]">
+        <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]">
           <div className="px-5 py-3 border-b border-zinc-100 flex items-center gap-2">
-            <Briefcase size={14} className="text-blue-600" />
-            <span className="font-heading text-[13px] font-bold text-[#26243a]">
+            <Briefcase size={14} className="text-m-blue" />
+            <span className="font-heading text-[13px] font-bold text-m-ink">
               Affectations par projet
             </span>
-            <span className="ml-1 bg-blue-600/10 text-blue-600 text-[10px] font-bold rounded-full px-2 py-0.5">
+            <span className="ml-1 bg-m-blue/10 text-m-blue text-[10px] font-bold rounded-full px-2 py-0.5">
               {project_allocations.length}
             </span>
           </div>
@@ -249,7 +249,7 @@ export default function TeamDetail() {
                               <Link
                                 to={`/projects/${p.project_id}`}
                                 onClick={(e) => e.stopPropagation()}
-                                className="hover:text-blue-600 transition-colors font-semibold text-zinc-800 truncate max-w-[260px]"
+                                className="hover:text-m-blue transition-colors font-semibold text-zinc-800 truncate max-w-[260px]"
                               >
                                 {p.project_name}
                               </Link>
@@ -283,14 +283,14 @@ export default function TeamDetail() {
                   })}
 
                   {/* Grand total row */}
-                  <tr className="bg-blue-50 border-t-2 border-blue-600/20" data-testid="grand-total-row">
-                    <TD bold><span className="text-blue-600 font-bold uppercase text-[10px] tracking-widest ml-2">Total équipe</span></TD>
+                  <tr className="bg-blue-50 border-t-2 border-m-blue/20" data-testid="grand-total-row">
+                    <TD bold><span className="text-m-blue font-bold uppercase text-[10px] tracking-widest ml-2">Total équipe</span></TD>
                     <TD>—</TD>
                     <TD right mono bold>{fmtJH(grandTotal.planned_md)}</TD>
                     <TD right mono bold>{fmtJH(grandTotal.consumed_md)}</TD>
                     <TD right mono bold>{fmtJH(grandTotal.raf_md)}</TD>
-                    <TD right mono bold><span className="text-blue-600">{fmtK(grandTotal.consumed_cost_eur)}</span></TD>
-                    <TD right mono bold><span className="text-blue-600">{fmtK(grandTotal.raf_cost_eur)}</span></TD>
+                    <TD right mono bold><span className="text-m-blue">{fmtK(grandTotal.consumed_cost_eur)}</span></TD>
+                    <TD right mono bold><span className="text-m-blue">{fmtK(grandTotal.raf_cost_eur)}</span></TD>
                   </tr>
                 </tbody>
               </table>
@@ -301,10 +301,10 @@ export default function TeamDetail() {
 
       {/* ── 4. CHARGE MENSUELLE ─────────────────────────────── */}
       <section data-testid="monthly-load-section">
-        <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]">
+        <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]">
           <div className="px-5 py-3 border-b border-zinc-100 flex items-center gap-2">
-            <TrendingUp size={14} className="text-blue-600" />
-            <span className="font-heading text-[13px] font-bold text-[#26243a]">
+            <TrendingUp size={14} className="text-m-blue" />
+            <span className="font-heading text-[13px] font-bold text-m-ink">
               Charge mensuelle — 6 mois glissants
             </span>
           </div>
@@ -342,13 +342,13 @@ export default function TeamDetail() {
                       </div>
                       {/* Labels */}
                       <div className="text-center">
-                        <div className={`text-[10px] font-semibold uppercase ${isNow ? "text-blue-600" : "text-zinc-500"}`}>
+                        <div className={`text-[10px] font-semibold uppercase ${isNow ? "text-m-blue" : "text-zinc-500"}`}>
                           {new Date(m.month + "-01").toLocaleDateString("fr-FR", { month: "short" })}
                         </div>
                         <div className="text-[9px] text-zinc-400">{m.allocated_jh > 0 ? `${m.allocated_jh} JH` : "0 JH"}</div>
                       </div>
                       {isNow && (
-                        <div className="text-[9px] text-blue-600 font-bold bg-blue-50 rounded-lg px-1" data-testid={`month-focus-${m.month}`}>
+                        <div className="text-[9px] text-m-blue font-bold bg-blue-50 rounded-lg px-1" data-testid={`month-focus-${m.month}`}>
                           {focusMonth ? "Mois sélectionné" : "Mois en cours"}
                         </div>
                       )}

@@ -5,7 +5,7 @@ from typing import Optional
 class ProjectCreate(BaseModel):
     name: str
     methodology: str
-    status_rag: str
+    status_rag: str = "green"
     capex_planned: float = 0
     capex_consumed: float = 0
     opex_planned: float = 0
@@ -14,7 +14,7 @@ class ProjectCreate(BaseModel):
     budget_total: float = 0
     budget_consumed: float = 0
     budget_forecast: float = 0
-    jh_planned: float
+    jh_planned: float = 0
     jh_consumed: float = 0
     start_date: str
     end_date_baseline: str

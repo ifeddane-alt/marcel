@@ -5,9 +5,9 @@ import { Ring, DateCircle, elapsedPct, clamp } from "@/components/ProjectTile";
 import { formatEuro, formatDate } from "@/utils/format";
 
 const RAG_STYLES = {
-  green:  { head: "bg-[#ddf0d8]", badge: "bg-[#3f8a34]", fill: "#3f8a34", label: "Vert" },
+  green:  { head: "bg-m-green-soft", badge: "bg-m-green", fill: "#3f8a34", label: "Vert" },
   orange: { head: "bg-[#f3edb5]", badge: "bg-[#a3891a]", fill: "#a3891a", label: "Orange" },
-  red:    { head: "bg-[#fbe1de]", badge: "bg-[#cc4f45]", fill: "#cc4f45", label: "Rouge" },
+  red:    { head: "bg-m-red-soft", badge: "bg-m-red", fill: "#cc4f45", label: "Rouge" },
 };
 const STATUS_LABELS = { active: "Actif", on_hold: "En pause", completed: "Terminé", cancelled: "Annulé" };
 const STATUS_COLORS = {
@@ -26,7 +26,7 @@ export default function ProgramTile({ program: prog, onEdit, onDelete, canEdit, 
 
   return (
     <div
-      className="relative bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] hover:shadow-[0_10px_30px_-10px_rgba(53,44,110,0.2)] transition-shadow duration-200 mt-2.5"
+      className="relative bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] hover:shadow-[0_10px_30px_-10px_rgba(53,44,110,0.2)] transition-shadow duration-200 mt-2.5"
       data-testid={`program-tile-${prog.program_id}`}
     >
       {/* Badge RAG flottant */}
@@ -41,7 +41,7 @@ export default function ProgramTile({ program: prog, onEdit, onDelete, canEdit, 
       <div className={`${style.head} rounded-t-xl px-4 pt-3 pb-2.5`}>
         <Link
           to={`/programmes/${prog.program_id}`}
-          className="font-heading text-[13.5px] font-bold text-[#26243a] leading-snug hover:underline block pr-10 truncate"
+          className="font-heading text-[13.5px] font-bold text-m-ink leading-snug hover:underline block pr-10 truncate"
           data-testid={`program-tile-link-${prog.program_id}`}
           title={prog.name}
         >
@@ -51,8 +51,8 @@ export default function ProgramTile({ program: prog, onEdit, onDelete, canEdit, 
           <span className={`text-[10px] font-semibold px-1.5 py-px rounded ${STATUS_COLORS[prog.status] || STATUS_COLORS.active}`}>
             {STATUS_LABELS[prog.status] || prog.status}
           </span>
-          <span className="text-[10px] text-[#5d5a75]">{prog.project_count || 0} projet{(prog.project_count || 0) > 1 ? "s" : ""}</span>
-          {prog.owner && <span className="text-[10px] text-[#5d5a75] truncate">· {prog.owner}</span>}
+          <span className="text-[10px] text-m-ink-soft">{prog.project_count || 0} projet{(prog.project_count || 0) > 1 ? "s" : ""}</span>
+          {prog.owner && <span className="text-[10px] text-m-ink-soft truncate">· {prog.owner}</span>}
         </div>
       </div>
 
@@ -66,7 +66,7 @@ export default function ProgramTile({ program: prog, onEdit, onDelete, canEdit, 
           <span className="absolute top-[6px] w-[9px] h-[9px] rotate-45 rounded-[2px] bg-white" style={{ left: `calc(${progress}% - 4px)`, border: `2px solid ${style.fill}` }} />
           <span className="absolute top-[6px] right-0 w-[9px] h-[9px] rotate-45 rounded-[2px] bg-white border-2 border-[#c9c6da]" />
         </div>
-        <div className="flex justify-between text-[10px] text-[#8a87a0] mb-3">
+        <div className="flex justify-between text-[10px] text-m-muted mb-3">
           <span>{formatDate(prog.start_date)}</span>
           <span>{formatDate(prog.end_date)}</span>
         </div>
@@ -79,20 +79,20 @@ export default function ProgramTile({ program: prog, onEdit, onDelete, canEdit, 
         </div>
 
         {/* Métriques */}
-        <div className="flex justify-between mt-3 text-[10.5px] text-[#8a87a0]">
-          <span>Budget <b className="font-mono-data text-[#26243a]">{formatEuro(prog.budget_total)}</b></span>
-          <span>Consommé <b className={`font-mono-data ${overBudget ? "text-[#cc4f45]" : "text-[#26243a]"}`}>{formatEuro(prog.budget_consumed)}</b></span>
+        <div className="flex justify-between mt-3 text-[10.5px] text-m-muted">
+          <span>Budget <b className="font-mono-data text-m-ink">{formatEuro(prog.budget_total)}</b></span>
+          <span>Consommé <b className={`font-mono-data ${overBudget ? "text-m-red" : "text-m-ink"}`}>{formatEuro(prog.budget_consumed)}</b></span>
         </div>
 
         {/* Prochains jalons */}
         {(prog.next_milestones || []).length > 0 && (
-          <div className="mt-2.5 pt-2 border-t border-[#f0eff6] space-y-1" data-testid={`program-tile-milestones-${prog.program_id}`}>
-            <div className="text-[8.5px] font-bold uppercase tracking-widest text-[#a39fb8]">Prochains jalons</div>
+          <div className="mt-2.5 pt-2 border-t border-m-border-soft space-y-1" data-testid={`program-tile-milestones-${prog.program_id}`}>
+            <div className="text-[8.5px] font-bold uppercase tracking-widest text-m-muted-2">Prochains jalons</div>
             {prog.next_milestones.map((m, i) => (
               <div key={i} className="flex items-center gap-1.5 text-[10.5px]">
                 <span className="w-[7px] h-[7px] rotate-45 rounded-[1.5px] flex-shrink-0" style={{ background: m.overdue ? "#cc4f45" : style.fill }} />
-                <span className={`font-mono-data font-semibold flex-shrink-0 ${m.overdue ? "text-[#cc4f45]" : "text-[#26243a]"}`}>{formatDate(m.date)}</span>
-                <span className="text-[#5d5a75] truncate" title={m.name}>{m.name}</span>
+                <span className={`font-mono-data font-semibold flex-shrink-0 ${m.overdue ? "text-m-red" : "text-m-ink"}`}>{formatDate(m.date)}</span>
+                <span className="text-m-ink-soft truncate" title={m.name}>{m.name}</span>
               </div>
             ))}
           </div>
@@ -100,15 +100,15 @@ export default function ProgramTile({ program: prog, onEdit, onDelete, canEdit, 
       </div>
 
       {/* Pied : répartition RAG + actions */}
-      <div className="flex items-center gap-2.5 px-3.5 py-2 border-t border-[#f0eff6]">
+      <div className="flex items-center gap-2.5 px-3.5 py-2 border-t border-m-border-soft">
         {[
           { key: "green", color: "bg-emerald-500" },
           { key: "orange", color: "bg-amber-500" },
           { key: "red", color: "bg-rose-500" },
         ].map(({ key, color }) => (
-          <span key={key} className="flex items-center gap-1 text-[10.5px] text-[#8a87a0]">
+          <span key={key} className="flex items-center gap-1 text-[10.5px] text-m-muted">
             <span className={`w-2 h-2 rounded-full ${color}`} />
-            <b className="text-[#26243a]">{rc[key] || 0}</b>
+            <b className="text-m-ink">{rc[key] || 0}</b>
           </span>
         ))}
         <div className="ml-auto flex items-center">
@@ -116,7 +116,7 @@ export default function ProgramTile({ program: prog, onEdit, onDelete, canEdit, 
             <button
               onClick={(e) => onEdit(e, prog)}
               data-testid={`program-tile-edit-${prog.program_id}`}
-              className="p-1.5 text-[#a39fb8] hover:text-[#2e5fe8] hover:bg-[#e9effe] rounded-lg transition-colors"
+              className="p-1.5 text-m-muted-2 hover:text-m-blue hover:bg-m-blue-soft rounded-lg transition-colors"
               title="Modifier"
             >
               <Pencil size={13} />
@@ -126,7 +126,7 @@ export default function ProgramTile({ program: prog, onEdit, onDelete, canEdit, 
             <button
               onClick={(e) => onDelete(e, prog)}
               data-testid={`program-tile-delete-${prog.program_id}`}
-              className="p-1.5 text-[#a39fb8] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+              className="p-1.5 text-m-muted-2 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
               title="Supprimer"
             >
               <Trash2 size={13} />
@@ -135,7 +135,7 @@ export default function ProgramTile({ program: prog, onEdit, onDelete, canEdit, 
           <Link
             to={`/programmes/${prog.program_id}`}
             data-testid={`program-tile-open-${prog.program_id}`}
-            className="p-1.5 text-[#a39fb8] hover:text-[#2e5fe8] hover:bg-[#e9effe] rounded-lg transition-colors"
+            className="p-1.5 text-m-muted-2 hover:text-m-blue hover:bg-m-blue-soft rounded-lg transition-colors"
             title="Voir le détail"
           >
             <ArrowUpRight size={14} />

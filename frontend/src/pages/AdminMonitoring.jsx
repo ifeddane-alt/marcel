@@ -58,10 +58,10 @@ export default function AdminMonitoring() {
       {/* Header */}
       <div className="flex items-center justify-between">
         <div className="flex items-center gap-3">
-          <Activity className="w-7 h-7 text-blue-600" />
+          <Activity className="w-7 h-7 text-m-blue" />
           <div>
-            <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / Administration / <span className="text-[#352c6e] font-semibold">Monitoring</span></div>
-            <h1 className="font-heading text-2xl font-extrabold text-[#26243a] tracking-tight">Monitoring Production</h1>
+            <div className="text-xs text-m-muted mb-0.5">Accueil / Administration / <span className="text-m-primary font-semibold">Monitoring</span></div>
+            <h1 className="font-heading text-2xl font-extrabold text-m-ink tracking-tight">Monitoring Production</h1>
             <p className="text-sm text-zinc-500">
               Statut des services MARCEL
               {lastUpdated && (

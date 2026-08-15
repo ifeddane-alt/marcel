@@ -30,7 +30,7 @@ function DemandForm({ form, onChange }) {
         <input
           data-testid="demand-title-input"
           type="text"
-          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30"
           placeholder="Titre de la demande"
           value={form.title}
           onChange={(e) => onChange("title", e.target.value)}
@@ -40,7 +40,7 @@ function DemandForm({ form, onChange }) {
         <label className="block text-xs font-semibold text-zinc-600 mb-1">Description</label>
         <textarea
           data-testid="demand-description-input"
-          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 resize-none"
+          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30 resize-none"
           rows={3}
           placeholder="Contexte et objectifs du projet..."
           value={form.description}
@@ -54,7 +54,7 @@ function DemandForm({ form, onChange }) {
         <input
           data-testid="demand-requester-input"
           type="text"
-          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30"
           placeholder="Nom du demandeur"
           value={form.requester}
           onChange={(e) => onChange("requester", e.target.value)}
@@ -65,7 +65,7 @@ function DemandForm({ form, onChange }) {
         <input
           data-testid="demand-department-input"
           type="text"
-          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30"
           placeholder="Direction Financière, DSI…"
           value={form.requester_department}
           onChange={(e) => onChange("requester_department", e.target.value)}
@@ -75,7 +75,7 @@ function DemandForm({ form, onChange }) {
         <label className="block text-xs font-semibold text-zinc-600 mb-1">Valeur métier</label>
         <textarea
           data-testid="demand-business-value-input"
-          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 resize-none"
+          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30 resize-none"
           rows={2}
           placeholder="Bénéfices attendus, KPIs cibles..."
           value={form.business_value}
@@ -87,7 +87,7 @@ function DemandForm({ form, onChange }) {
         <input
           data-testid="demand-budget-input"
           type="number"
-          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30"
           placeholder="0"
           min="0"
           value={form.estimated_budget}
@@ -98,7 +98,7 @@ function DemandForm({ form, onChange }) {
         <label className="block text-xs font-semibold text-zinc-600 mb-1">Urgence</label>
         <select
           data-testid="demand-urgency-select"
-          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 bg-white"
+          className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30 bg-white"
           value={form.urgency}
           onChange={(e) => onChange("urgency", e.target.value)}
         >
@@ -132,7 +132,7 @@ function WorkflowActions({ demand, canWrite, onTransition, onConvert }) {
           <button
             data-testid="btn-qualify"
             onClick={() => onTransition("qualify")}
-            className="px-4 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors"
+            className="px-4 py-2 rounded-lg bg-m-blue text-white text-sm font-semibold hover:bg-m-blue-dark transition-colors"
           >
             Qualifier
           </button>
@@ -434,7 +434,7 @@ export default function DemandModal({ demand, onClose, onSaved, canWrite, onConv
               data-testid="demand-modal-save"
               onClick={handleSave}
               disabled={loading}
-              className="px-5 py-2 rounded-lg bg-blue-600 text-white text-sm font-semibold hover:bg-blue-700 transition-colors disabled:opacity-60"
+              className="px-5 py-2 rounded-lg bg-m-blue text-white text-sm font-semibold hover:bg-m-blue-dark transition-colors disabled:opacity-60"
             >
               {loading ? "Enregistrement…" : isEdit ? "Mettre à jour" : "Créer la demande"}
             </button>

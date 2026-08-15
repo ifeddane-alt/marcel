@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 
 const TYPE_COLORS = {
-  copil: "bg-blue-600",
+  copil: "bg-m-blue",
   coproj: "bg-sky-500",
   comex: "bg-violet-600",
   codir: "bg-amber-500",
@@ -41,20 +41,20 @@ export default function GovernanceCalendar({ instances, onOpen }) {
         <div className="flex items-center gap-2">
           <button onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() - 1, 1))}
             data-testid="gov-cal-prev"
-            className="p-1.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+            className="p-1.5 text-zinc-400 hover:text-m-blue hover:bg-blue-50 rounded-lg transition-colors">
             <ChevronLeft size={15} />
           </button>
-          <div className="font-heading text-sm font-bold text-[#26243a] capitalize w-40 text-center" data-testid="gov-cal-month">
+          <div className="font-heading text-sm font-bold text-m-ink capitalize w-40 text-center" data-testid="gov-cal-month">
             {MONTHS[month.getMonth()]} {month.getFullYear()}
           </div>
           <button onClick={() => setMonth(new Date(month.getFullYear(), month.getMonth() + 1, 1))}
             data-testid="gov-cal-next"
-            className="p-1.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors">
+            className="p-1.5 text-zinc-400 hover:text-m-blue hover:bg-blue-50 rounded-lg transition-colors">
             <ChevronRight size={15} />
           </button>
           <button onClick={() => { const d = new Date(); setMonth(new Date(d.getFullYear(), d.getMonth(), 1)); }}
             data-testid="gov-cal-today"
-            className="ml-1 px-2.5 py-1 text-[11px] font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+            className="ml-1 px-2.5 py-1 text-[11px] font-semibold text-m-blue border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
             Aujourd'hui
           </button>
         </div>
@@ -71,7 +71,7 @@ export default function GovernanceCalendar({ instances, onOpen }) {
       {/* Grid */}
       <div className="grid grid-cols-7 border-b border-zinc-100">
         {WEEKDAYS.map((w) => (
-          <div key={w} className="px-2 py-2 text-[10px] uppercase tracking-widest font-bold text-[#8a87a0] text-center">{w}</div>
+          <div key={w} className="px-2 py-2 text-[10px] uppercase tracking-widest font-bold text-m-muted text-center">{w}</div>
         ))}
       </div>
       <div className="grid grid-cols-7">
@@ -84,7 +84,7 @@ export default function GovernanceCalendar({ instances, onOpen }) {
             <div key={i}
               className={`min-h-[84px] border-b border-r border-zinc-50 p-1.5 ${inMonth ? "" : "bg-zinc-50/60"}`}>
               <div className={`text-[11px] font-mono-data mb-1 w-5 h-5 flex items-center justify-center rounded-full
-                ${isToday ? "bg-blue-600 text-white font-bold" : inMonth ? "text-zinc-600" : "text-zinc-300"}`}>
+                ${isToday ? "bg-m-blue text-white font-bold" : inMonth ? "text-zinc-600" : "text-zinc-300"}`}>
                 {d.getDate()}
               </div>
               <div className="space-y-1">

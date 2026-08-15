@@ -100,7 +100,7 @@ export default function GlobalSearch() {
         <>
           <span className={`w-1.5 h-1.5 rounded-full flex-shrink-0 ${RAG_DOT[item.status_rag] || "bg-zinc-300"}`} />
           {item.code && (
-            <span className="font-mono text-[10px] font-semibold text-blue-600 bg-blue-50 border border-blue-600/20 rounded-lg px-1.5 py-0.5 flex-shrink-0">
+            <span className="font-mono text-[10px] font-semibold text-m-blue bg-blue-50 border border-m-blue/20 rounded-lg px-1.5 py-0.5 flex-shrink-0">
               {item.code}
             </span>
           )}
@@ -154,7 +154,7 @@ export default function GlobalSearch() {
           onFocus={() => { setRecent(getRecentProjects(user?.user_id)); setOpen(true); setHi(0); }}
           onKeyDown={onKeyDown}
           placeholder="Rechercher : projet, jalon, risque, décision…"
-          className="w-full h-8 pl-8 pr-14 text-xs bg-zinc-50 border border-zinc-200 rounded-lg focus:outline-none focus:border-blue-600 focus:bg-white focus:ring-1 focus:ring-blue-600 transition-colors placeholder:text-zinc-400"
+          className="w-full h-8 pl-8 pr-14 text-xs bg-zinc-50 border border-zinc-200 rounded-lg focus:outline-none focus:border-m-blue focus:bg-white focus:ring-1 focus:ring-m-blue transition-colors placeholder:text-zinc-400"
         />
         <kbd className="absolute right-2 top-1/2 -translate-y-1/2 text-[9px] font-mono text-zinc-400 bg-white border border-zinc-200 rounded-lg px-1 py-0.5 pointer-events-none hidden md:block">
           Ctrl K

@@ -69,7 +69,7 @@ function WorkflowStepper({ currentStatus }) {
         <React.Fragment key={step.key}>
           <div className={`flex items-center gap-1 px-2 py-0.5 rounded-full font-semibold border transition-all ${
             i < idx  ? "bg-emerald-50 text-emerald-600 border-emerald-200" :
-            i === idx ? "bg-blue-600 text-white border-blue-600" :
+            i === idx ? "bg-m-blue text-white border-m-blue" :
                         "bg-zinc-50 text-zinc-400 border-zinc-200"
           }`}>
             {i < idx && <CheckCircle size={9} />}
@@ -197,7 +197,7 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
         <div className="flex items-center gap-3">
           <select value={resourceId || ""} onChange={(e) => onResourceChange(e.target.value)}
             data-testid="resource-picker"
-            className="text-sm border border-zinc-200 rounded-lg px-3 py-2 text-zinc-700 focus:outline-none focus:border-blue-600 bg-white min-w-[200px]">
+            className="text-sm border border-zinc-200 rounded-lg px-3 py-2 text-zinc-700 focus:outline-none focus:border-m-blue bg-white min-w-[200px]">
             <option value="">— Sélectionner une ressource —</option>
             {allResources.map((r) => (
               <option key={r.resource_id} value={r.resource_id}>
@@ -215,12 +215,12 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
               className="p-2 hover:bg-zinc-50 text-zinc-500"><ChevronRight size={14} /></button>
           </div>
           <button onClick={() => setWeekStart(getThisMonday())}
-            className="text-xs text-blue-600 hover:underline px-2">Semaine en cours</button>
+            className="text-xs text-m-blue hover:underline px-2">Semaine en cours</button>
         </div>
         <button onClick={handleSubmit}
           disabled={!grid?.can_submit || submitting || !resourceId}
           data-testid="submit-week-btn"
-          className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-40 transition-colors">
+          className="flex items-center gap-2 px-4 py-2 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-40 transition-colors">
           {submitting ? <RefreshCw size={13} className="animate-spin" /> : <Send size={13} />}
           Soumettre la semaine
         </button>
@@ -346,7 +346,7 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
                             data-testid={`cell-${row.work_allocation_id}-${day}`}
                             className={`w-16 text-center text-xs rounded-lg border py-1 px-1 transition-colors
                               ${editable
-                                ? "border-zinc-200 focus:border-blue-600 focus:outline-none focus:ring-1 focus:ring-blue-600/30"
+                                ? "border-zinc-200 focus:border-m-blue focus:outline-none focus:ring-1 focus:ring-m-blue/30"
                                 : "border-transparent bg-transparent text-zinc-500 cursor-not-allowed"}
                               ${e?.status === "submitted"   ? "text-blue-700" : ""}
                               ${e?.status === "cp_reviewed" ? "text-amber-700 font-semibold" : ""}
@@ -369,19 +369,19 @@ function TimesheetGrid({ resourceId, onResourceChange, allResources, user }) {
                   </td>
                 </tr>
               ))}
-              <tr className="bg-blue-50 border-t-2 border-blue-600/20">
-                <td className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-blue-600">Total / jour</td>
+              <tr className="bg-blue-50 border-t-2 border-m-blue/20">
+                <td className="px-4 py-2 text-[10px] font-bold uppercase tracking-widest text-m-blue">Total / jour</td>
                 {grid.days.map((day) => {
                   const dayCap = grid.day_caps?.[day] ?? grid.daily_cap_jh;
                   const exceeded = dayCap > 0 && grid.day_totals[day] > dayCap;
                   return (
-                    <td key={day} className="px-2 py-2 text-center text-xs font-bold text-blue-600 tabular-nums">
+                    <td key={day} className="px-2 py-2 text-center text-xs font-bold text-m-blue tabular-nums">
                       {grid.day_totals[day] > 0 ? grid.day_totals[day] : "—"}
                       {exceeded && <AlertTriangle size={10} className="inline ml-1 text-rose-500" />}
                     </td>
                   );
                 })}
-                <td className="px-3 py-2 text-right text-xs font-bold text-blue-600 tabular-nums">
+                <td className="px-3 py-2 text-right text-xs font-bold text-m-blue tabular-nums">
                   {grid.week_grand_total || "—"}
                 </td>
               </tr>
@@ -415,7 +415,7 @@ function GroupCard({
         <div className="flex items-center gap-3">
           <input type="checkbox" checked={!!selected}
             onChange={(e) => { e.stopPropagation(); onSelect(e.target.checked); }}
-            className="accent-[#2563eb]" data-testid={`group-check-${g.resource_id}`} />
+            className="accent-m-blue" data-testid={`group-check-${g.resource_id}`} />
           <div>
             <span className="font-semibold text-zinc-800 text-sm">{g.resource_name}</span>
             <span className="text-zinc-400 text-xs ml-2">Semaine du {g.week_start}</span>
@@ -453,7 +453,7 @@ function GroupCard({
       {open && (
         <table className="w-full text-xs">
           <thead>
-            <tr className="bg-[#fbfaff] border-b border-[#e8e6f0]">
+            <tr className="bg-m-bg border-b border-m-border">
               <th className="px-4 py-2 text-left text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Projet</th>
               <th className="px-3 py-2 text-left text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Tâche</th>
               <th className="px-3 py-2 text-left text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Phase</th>
@@ -568,10 +568,10 @@ function ValidationSubView({ view, actionLabel, actionIcon: ActionIcon, actionCl
           <input type="checkbox"
             checked={groups.length > 0 && groups.every((_, i) => selected[i])}
             onChange={(e) => setSelected(Object.fromEntries(groups.map((_, i) => [i, e.target.checked])))}
-            data-testid="bulk-select-all" className="accent-[#2563eb]" />
+            data-testid="bulk-select-all" className="accent-m-blue" />
           Tout sélectionner
           {selectedAll.length > 0 && (
-            <span className="text-blue-600 font-semibold ml-1">({selectedAll.length})</span>
+            <span className="text-m-blue font-semibold ml-1">({selectedAll.length})</span>
           )}
         </label>
         {selectedAll.length > 0 && (
@@ -628,7 +628,7 @@ function ValidationView({ user, refresh }) {
     valideur: {
       actionLabel: "Valider (→ CP)",
       actionIcon: CheckCircle,
-      actionClass: "bg-blue-600 hover:bg-blue-700",
+      actionClass: "bg-m-blue hover:bg-m-blue-dark",
       actionToastFn: (d) => `${d.advanced_to_cp_reviewed ?? 0} timesheet(s) transmis au Chef de Projet`,
       showTimeout: false, showStatus: false,
     },
@@ -660,7 +660,7 @@ function ValidationView({ user, refresh }) {
             title={desc}
             className={`flex items-center gap-1.5 px-4 py-2.5 text-xs font-semibold border-b-2 -mb-px transition-colors ${
               subView === id
-                ? "border-blue-600 text-blue-600"
+                ? "border-m-blue text-m-blue"
                 : "border-transparent text-zinc-500 hover:text-zinc-700"
             }`}>
             <Icon size={13} /> {label}
@@ -728,7 +728,7 @@ function ReportsView() {
             <Filter size={11} /> Filtres
           </div>
           <select value={dim} onChange={(e) => setDim(e.target.value)} data-testid="report-dimension"
-            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600 bg-white text-zinc-600">
+            className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-m-blue bg-white text-zinc-600">
             <option value="resource">Par ressource</option>
             <option value="team">Par équipe</option>
             <option value="project">Par projet</option>
@@ -736,7 +736,7 @@ function ReportsView() {
           <DateField value={start} onChange={(v) => setStart(v)} testId="report-start" />
           <DateField value={end} onChange={(v) => setEnd(v)} testId="report-end" />
           <button onClick={load} disabled={loading} data-testid="report-load-btn"
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50">
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-m-blue text-white text-xs font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-50">
             {loading ? <RefreshCw size={11} className="animate-spin" /> : <Filter size={11} />}
             Actualiser
           </button>
@@ -766,7 +766,7 @@ function ReportsView() {
                     {p}
                   </th>
                 ))}
-                <th className="px-4 py-2.5 text-right text-[10px] uppercase tracking-widest text-blue-600 font-bold">Total JH</th>
+                <th className="px-4 py-2.5 text-right text-[10px] uppercase tracking-widest text-m-blue font-bold">Total JH</th>
               </tr>
             </thead>
             <tbody>
@@ -778,7 +778,7 @@ function ReportsView() {
                       {r.periods[p] || <span className="text-zinc-300">—</span>}
                     </td>
                   ))}
-                  <td className="px-4 py-2.5 text-right font-bold text-blue-600 tabular-nums">{r.total_jh}</td>
+                  <td className="px-4 py-2.5 text-right font-bold text-m-blue tabular-nums">{r.total_jh}</td>
                 </tr>
               ))}
             </tbody>
@@ -879,7 +879,7 @@ function AbsencesCalendar({ allResources, defaultResourceId }) {
         </div>
         <select value={resourceId} onChange={(e) => setResourceId(e.target.value)}
           data-testid="cal-resource-picker"
-          className="text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 bg-white min-w-[200px]">
+          className="text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue bg-white min-w-[200px]">
           <option value="">— Sélectionner une ressource —</option>
           {allResources.map((r) => (
             <option key={r.resource_id} value={r.resource_id}>{r.name}</option>
@@ -957,7 +957,7 @@ function AbsencesCalendar({ allResources, defaultResourceId }) {
                   <div className="h-px bg-zinc-100 my-1" />
                   <div className="flex justify-between items-center">
                     <span className="text-xs font-semibold text-zinc-700">JH disponibles nettes</span>
-                    <span className="text-base font-bold text-blue-600" data-testid="stat-available">{stats.available_jh} j</span>
+                    <span className="text-base font-bold text-m-blue" data-testid="stat-available">{stats.available_jh} j</span>
                   </div>
                 </div>
               </div>
@@ -1024,10 +1024,10 @@ export default function Timesheets() {
     <div className="p-4 md:p-6 lg:p-8" data-testid="timesheets-page">
       <div className="mb-4 md:mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Timesheets</span></div>
+          <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Timesheets</span></div>
           <div className="flex items-center gap-2 mb-1">
-            <Clock size={18} className="text-blue-600" />
-            <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Timesheets</h1>
+            <Clock size={18} className="text-m-blue" />
+            <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">Timesheets</h1>
           </div>
           <p className="text-sm text-zinc-500">
             Saisie des temps · Absences · Validation multi-acteurs (N+1 → Chef de Projet → PMO)
@@ -1038,12 +1038,12 @@ export default function Timesheets() {
         </div>
       </div>
 
-      <div className="flex items-center gap-1 mb-4 md:mb-6 border-b border-[#e7e3f2] overflow-x-auto">
+      <div className="flex items-center gap-1 mb-4 md:mb-6 border-b border-m-border-lav overflow-x-auto">
         {TABS.map(({ id, label, icon: Icon }) => (
           <button key={id} onClick={() => { setTab(id); if (id === "validation") setValidRefresh((n) => n + 1); }}
             data-testid={`tab-${id}`}
             className={`flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold border-b-[3px] -mb-px transition-colors ${
-              tab === id ? "text-[#2e5fe8] border-[#2e5fe8]" : "text-[#8a87a0] border-transparent hover:text-[#26243a]"
+              tab === id ? "text-m-blue border-m-blue" : "text-m-muted border-transparent hover:text-m-ink"
             }`}>
             <Icon size={13} /> {label}
           </button>

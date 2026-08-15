@@ -13,9 +13,9 @@ import ExcelToolbar from "@/components/ExcelToolbar";
 import KpiTile from "@/components/KpiTile";
 
 const LOAD_STYLES = {
-  red:    { head: "bg-[#fbe1de]", badge: "bg-[#cc4f45]", fill: "#cc4f45", label: "Surcharge" },
+  red:    { head: "bg-m-red-soft", badge: "bg-m-red", fill: "#cc4f45", label: "Surcharge" },
   orange: { head: "bg-[#f3edb5]", badge: "bg-[#a3891a]", fill: "#a3891a", label: "Tendu" },
-  green:  { head: "bg-[#ddf0d8]", badge: "bg-[#3f8a34]", fill: "#3f8a34", label: "OK" },
+  green:  { head: "bg-m-green-soft", badge: "bg-m-green", fill: "#3f8a34", label: "OK" },
 };
 
 const monthLabel = (period) =>
@@ -35,7 +35,7 @@ function TeamTile({ team, memberCount, load, canEdit, canDelete, onEdit, onDelet
 
   return (
     <div
-      className="relative bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] hover:shadow-[0_10px_30px_-10px_rgba(53,44,110,0.2)] transition-shadow duration-200 mt-2.5"
+      className="relative bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] hover:shadow-[0_10px_30px_-10px_rgba(53,44,110,0.2)] transition-shadow duration-200 mt-2.5"
       data-testid={`team-card-${team.team_id}`}
     >
       {/* Badge charge flottant */}
@@ -50,18 +50,18 @@ function TeamTile({ team, memberCount, load, canEdit, canDelete, onEdit, onDelet
       <div className={`${style.head} rounded-t-xl px-4 pt-3 pb-2.5`}>
         <Link
           to={`/teams/${team.team_id}`}
-          className="font-heading text-[13.5px] font-bold text-[#26243a] leading-snug hover:underline block pr-10 truncate"
+          className="font-heading text-[13.5px] font-bold text-m-ink leading-snug hover:underline block pr-10 truncate"
           data-testid={`team-link-${team.team_id}`}
           title={team.name}
         >
           {team.name}
         </Link>
         <div className="flex items-center gap-2 mt-1">
-          <span className="flex items-center gap-1 text-[10px] font-semibold text-[#3d3564] bg-white/60 px-1.5 py-px rounded">
+          <span className="flex items-center gap-1 text-[10px] font-semibold text-m-primary-dark bg-white/60 px-1.5 py-px rounded">
             <Users size={9} /> {memberCount} membre{memberCount > 1 ? "s" : ""}
           </span>
           {team.manager_name && (
-            <span className="flex items-center gap-1 text-[10px] text-[#5d5a75] truncate">
+            <span className="flex items-center gap-1 text-[10px] text-m-ink-soft truncate">
               <UserRound size={9} /> {team.manager_name}
             </span>
           )}
@@ -74,12 +74,12 @@ function TeamTile({ team, memberCount, load, canEdit, canDelete, onEdit, onDelet
           <Ring pct={pct} color={style.fill} label="Utilisation" caption="mois" />
           <div className="flex-1 min-w-0 space-y-1.5">
             <div className="flex items-center justify-between text-[10.5px]">
-              <span className="text-[#8a87a0]">Capacité</span>
-              <b className="font-mono-data text-[#26243a]">{capacity.toLocaleString("fr-FR")} JH</b>
+              <span className="text-m-muted">Capacité</span>
+              <b className="font-mono-data text-m-ink">{capacity.toLocaleString("fr-FR")} JH</b>
             </div>
             <div className="flex items-center justify-between text-[10.5px]">
-              <span className="text-[#8a87a0]">Charge allouée</span>
-              <b className={`font-mono-data ${pct > 100 ? "text-[#cc4f45]" : "text-[#26243a]"}`}>{allocated.toLocaleString("fr-FR")} JH</b>
+              <span className="text-m-muted">Charge allouée</span>
+              <b className={`font-mono-data ${pct > 100 ? "text-m-red" : "text-m-ink"}`}>{allocated.toLocaleString("fr-FR")} JH</b>
             </div>
             <div className="h-1.5 bg-[#eeecf6] rounded-full overflow-hidden">
               <div className="h-full rounded-full transition-all duration-700" style={{ width: `${Math.min(pct, 100)}%`, background: style.fill }} />
@@ -89,8 +89,8 @@ function TeamTile({ team, memberCount, load, canEdit, canDelete, onEdit, onDelet
 
         {/* Mini-cellules 3 mois */}
         {(load?.next || []).length > 0 && (
-          <div className="mt-3 pt-2 border-t border-[#f0eff6]" data-testid={`team-tile-months-${team.team_id}`}>
-            <div className="text-[8.5px] font-bold uppercase tracking-widest text-[#a39fb8] mb-1">Charge à 3 mois</div>
+          <div className="mt-3 pt-2 border-t border-m-border-soft" data-testid={`team-tile-months-${team.team_id}`}>
+            <div className="text-[8.5px] font-bold uppercase tracking-widest text-m-muted-2 mb-1">Charge à 3 mois</div>
             <div className="flex items-center gap-1.5">
               {load.next.map((p) => (
                 <Link
@@ -107,23 +107,23 @@ function TeamTile({ team, memberCount, load, canEdit, canDelete, onEdit, onDelet
           </div>
         )}
         {pct > 100 && cur && (
-          <p className="text-[10px] text-[#cc4f45] font-semibold mt-2">
+          <p className="text-[10px] text-m-red font-semibold mt-2">
             +{Math.round((allocated - capacity) * 10) / 10} JH au-dessus de la capacité ce mois-ci
           </p>
         )}
       </div>
 
       {/* Pied : actions */}
-      <div className="flex items-center gap-1 px-3.5 py-2 border-t border-[#f0eff6]">
-        <span className="text-[10.5px] text-[#8a87a0]">
-          Utilisation <b className={`font-mono-data ${pct > 100 ? "text-[#cc4f45]" : "text-[#26243a]"}`}>{pct}%</b>
+      <div className="flex items-center gap-1 px-3.5 py-2 border-t border-m-border-soft">
+        <span className="text-[10.5px] text-m-muted">
+          Utilisation <b className={`font-mono-data ${pct > 100 ? "text-m-red" : "text-m-ink"}`}>{pct}%</b>
         </span>
         <div className="ml-auto flex items-center">
           {canEdit && (
             <button
               onClick={onEdit}
               data-testid={`btn-edit-team-${team.team_id}`}
-              className="p-1.5 text-[#a39fb8] hover:text-[#2e5fe8] hover:bg-[#e9effe] rounded-lg transition-colors"
+              className="p-1.5 text-m-muted-2 hover:text-m-blue hover:bg-m-blue-soft rounded-lg transition-colors"
               title="Modifier"
             >
               <Pencil size={13} />
@@ -133,7 +133,7 @@ function TeamTile({ team, memberCount, load, canEdit, canDelete, onEdit, onDelet
             <button
               onClick={onDelete}
               data-testid={`btn-delete-team-${team.team_id}`}
-              className="p-1.5 text-[#a39fb8] hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
+              className="p-1.5 text-m-muted-2 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors"
               title="Supprimer"
             >
               <Trash2 size={13} />
@@ -142,7 +142,7 @@ function TeamTile({ team, memberCount, load, canEdit, canDelete, onEdit, onDelet
           <Link
             to={`/teams/${team.team_id}`}
             data-testid={`team-tile-open-${team.team_id}`}
-            className="p-1.5 text-[#a39fb8] hover:text-[#2e5fe8] hover:bg-[#e9effe] rounded-lg transition-colors"
+            className="p-1.5 text-m-muted-2 hover:text-m-blue hover:bg-m-blue-soft rounded-lg transition-colors"
             title="Ouvrir la fiche"
           >
             <ArrowUpRight size={14} />
@@ -242,11 +242,11 @@ export default function Teams() {
     <div className="p-4 md:p-6 lg:p-8" data-testid="teams-page">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Équipes</span></div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Équipes</h1>
+          <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Équipes</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">Équipes</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             {teams.length} équipe{teams.length > 1 ? "s" : ""} · {assigned} ressource{assigned > 1 ? "s" : ""} affectée{assigned > 1 ? "s" : ""}
-            {overloadedCount > 0 && <span className="text-[#cc4f45] font-semibold"> · {overloadedCount} en surcharge</span>}
+            {overloadedCount > 0 && <span className="text-m-red font-semibold"> · {overloadedCount} en surcharge</span>}
           </p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -255,7 +255,7 @@ export default function Teams() {
             <button
               onClick={() => { setSelectedTeam(null); setModalOpen(true); }}
               data-testid="btn-new-team"
-              className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+              className="flex items-center gap-2 px-4 py-2.5 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark transition-colors shadow-sm"
             >
               <Plus size={15} /> Nouvelle équipe
             </button>
@@ -304,7 +304,7 @@ export default function Teams() {
           label="Surcharges"
           value={overloadedCount}
           sub={overloadedCount > 0 ? "équipes > 100% ce mois-ci" : "aucune équipe > 100%"}
-          valueClass={overloadedCount > 0 ? "text-[#cc4f45]" : "text-[#26243a]"}
+          valueClass={overloadedCount > 0 ? "text-m-red" : "text-m-ink"}
         />
       </div>
 
@@ -314,25 +314,25 @@ export default function Teams() {
           <button
             onClick={() => setView("tiles")}
             data-testid="teams-view-tiles"
-            className={`flex items-center gap-1.5 text-[11.5px] font-bold px-3 py-1.5 rounded-md transition-colors ${view === "tiles" ? "bg-white text-[#26243a] shadow-sm" : "text-[#8a87a0] hover:text-[#26243a]"}`}
+            className={`flex items-center gap-1.5 text-[11.5px] font-bold px-3 py-1.5 rounded-md transition-colors ${view === "tiles" ? "bg-white text-m-ink shadow-sm" : "text-m-muted hover:text-m-ink"}`}
           >
             <LayoutGrid size={12} /> Tuiles
           </button>
           <button
             onClick={() => setView("matrix")}
             data-testid="teams-view-matrix"
-            className={`flex items-center gap-1.5 text-[11.5px] font-bold px-3 py-1.5 rounded-md transition-colors ${view === "matrix" ? "bg-white text-[#26243a] shadow-sm" : "text-[#8a87a0] hover:text-[#26243a]"}`}
+            className={`flex items-center gap-1.5 text-[11.5px] font-bold px-3 py-1.5 rounded-md transition-colors ${view === "matrix" ? "bg-white text-m-ink shadow-sm" : "text-m-muted hover:text-m-ink"}`}
           >
             <Table2 size={12} /> Vue croisée
           </button>
         </div>
         {view === "matrix" && (
           overCellsCount > 0 ? (
-            <span className="text-[11px] font-bold text-[#cc4f45] bg-[#fbe1de] px-2.5 py-1 rounded-md" data-testid="matrix-overload-badge">
+            <span className="text-[11px] font-bold text-m-red bg-m-red-soft px-2.5 py-1 rounded-md" data-testid="matrix-overload-badge">
               {overCellsCount} mois-équipe en surcharge sur {months} mois
             </span>
           ) : (
-            <span className="text-[11px] font-bold text-[#3f8a34] bg-[#ddf0d8] px-2.5 py-1 rounded-md" data-testid="matrix-overload-badge">
+            <span className="text-[11px] font-bold text-m-green bg-m-green-soft px-2.5 py-1 rounded-md" data-testid="matrix-overload-badge">
               Aucune surcharge détectée sur {months} mois
             </span>
           )
@@ -340,14 +340,14 @@ export default function Teams() {
       </div>
 
       {view === "matrix" ? (
-        <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 md:p-5" data-testid="teams-matrix-section">
+        <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 md:p-5" data-testid="teams-matrix-section">
           <div className="flex flex-wrap items-center justify-between gap-2 mb-3">
-            <div className="font-heading text-[13px] font-bold text-[#26243a]">Charge croisée équipes × mois</div>
+            <div className="font-heading text-[13px] font-bold text-m-ink">Charge croisée équipes × mois</div>
             <button
               onClick={exportMatrix}
               disabled={exporting}
               data-testid="matrix-export-btn"
-              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border border-[#e8e6f0] rounded-lg text-[#3d3564] hover:bg-[#f6f5fb] transition-colors disabled:opacity-50"
+              className="flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold border border-m-border rounded-lg text-m-primary-dark hover:bg-[#f6f5fb] transition-colors disabled:opacity-50"
             >
               <FileDown size={13} /> {exporting ? "Export en cours…" : "Exporter Excel"}
             </button>

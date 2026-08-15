@@ -44,7 +44,7 @@ export const OnboardingTour = () => {
   return (
     <div className="fixed inset-0 z-[90] bg-black/50 flex items-center justify-center p-4" data-testid="onboarding-tour">
       <div className="bg-white rounded-2xl shadow-2xl w-full max-w-md overflow-hidden">
-        <div className="bg-[#352c6e] px-7 py-8 text-center">
+        <div className="bg-m-primary px-7 py-8 text-center">
           <div className="w-14 h-14 rounded-2xl bg-white/10 flex items-center justify-center mx-auto mb-4">
             <Icon size={26} className="text-white" />
           </div>
@@ -54,7 +54,7 @@ export const OnboardingTour = () => {
           <p className="text-sm text-zinc-600 leading-relaxed text-center min-h-[84px]">{s.text}</p>
           <div className="flex justify-center gap-1.5 my-4">
             {STEPS.map((_, i) => (
-              <span key={i} className={`w-2 h-2 rounded-full ${i === step ? "bg-[#2e5fe8]" : "bg-zinc-200"}`} />
+              <span key={i} className={`w-2 h-2 rounded-full ${i === step ? "bg-m-blue" : "bg-zinc-200"}`} />
             ))}
           </div>
           <div className="flex items-center justify-between">
@@ -69,7 +69,7 @@ export const OnboardingTour = () => {
                 </button>
               )}
               <button onClick={last ? close : () => setStep((x) => x + 1)} data-testid="onboarding-next-btn"
-                className="flex items-center gap-1 px-4 py-2 text-xs font-bold bg-[#2e5fe8] text-white rounded-lg hover:bg-[#2450c8]">
+                className="flex items-center gap-1 px-4 py-2 text-xs font-bold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark">
                 {last ? "C'est parti !" : "Suivant"} {!last && <ChevronRight size={13} />}
               </button>
             </div>

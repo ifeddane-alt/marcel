@@ -5,7 +5,7 @@ import { programsAPI } from "@/api";
 import DateField from "@/components/ui/DateField";
 
 const EMPTY = { name: "", description: "", owner: "", start_date: "", end_date: "", budget_keur: "", status: "active" };
-const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue focus:ring-1 focus:ring-m-blue bg-white";
 
 function Field({ label, required, error, children }) {
   return (
@@ -115,7 +115,7 @@ export default function ProgramModal({ isOpen, onClose, program, onSaved }) {
         <div className="flex justify-end gap-3 pt-2 border-t border-zinc-100">
           <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">Annuler</button>
           <button type="submit" disabled={saving} data-testid="program-form-submit"
-            className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
+            className="flex items-center gap-2 px-5 py-2 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-50 transition-colors">
             {saving && <Loader2 size={14} className="animate-spin" />}
             {program ? "Enregistrer" : "Créer le programme"}
           </button>

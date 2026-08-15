@@ -19,11 +19,11 @@ export default function DateField({ value, onChange, required, disabled, testId,
           type="button"
           disabled={disabled}
           data-testid={testId}
-          className="relative w-full flex items-center gap-2 border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white text-left focus:outline-none focus:border-[#2e5fe8] focus:ring-2 focus:ring-[#2e5fe8]/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+          className="relative w-full flex items-center gap-2 border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white text-left focus:outline-none focus:border-m-blue focus:ring-2 focus:ring-m-blue/20 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
         >
-          <CalendarIcon size={13} className="text-[#8a87a0] flex-shrink-0" />
+          <CalendarIcon size={13} className="text-m-muted flex-shrink-0" />
           {valid ? (
-            <span className="text-[#26243a] font-mono-data text-[13px]">{format(date, "dd/MM/yyyy", { locale: fr })}</span>
+            <span className="text-m-ink font-mono-data text-[13px]">{format(date, "dd/MM/yyyy", { locale: fr })}</span>
           ) : (
             <span className="text-[#a3a0b8]">{placeholder}</span>
           )}
@@ -32,7 +32,7 @@ export default function DateField({ value, onChange, required, disabled, testId,
               role="button"
               tabIndex={-1}
               onClick={(e) => { e.stopPropagation(); onChange(""); }}
-              className="ml-auto text-[#c9c6da] hover:text-[#5d5a75]"
+              className="ml-auto text-[#c9c6da] hover:text-m-ink-soft"
               title="Effacer"
             >
               <X size={12} />

@@ -217,7 +217,7 @@ export default function AgentDrawer() {
             <div className="flex items-center justify-between px-4 py-3 border-b border-zinc-200 flex-shrink-0"
               style={{ background: "linear-gradient(135deg, #09090b 0%, #1E293B 100%)" }}>
               <div className="flex items-center gap-2.5">
-                <div className="w-7 h-7 rounded-lg bg-blue-600 flex items-center justify-center flex-shrink-0">
+                <div className="w-7 h-7 rounded-lg bg-m-blue flex items-center justify-center flex-shrink-0">
                   <BotMessageSquare size={15} className="text-white" />
                 </div>
                 <div>
@@ -263,7 +263,7 @@ export default function AgentDrawer() {
                   <div className="absolute left-0 right-0 mx-3 mt-1 bg-white border border-zinc-200 rounded-lg shadow-lg z-10 max-h-48 overflow-y-auto">
                     <button
                       onClick={startNewSession}
-                      className="w-full text-left px-3 py-2 text-xs text-blue-600 hover:bg-blue-50 flex items-center gap-2 border-b border-zinc-100"
+                      className="w-full text-left px-3 py-2 text-xs text-m-blue hover:bg-blue-50 flex items-center gap-2 border-b border-zinc-100"
                     >
                       <Plus size={11} /> Nouvelle conversation
                     </button>
@@ -295,7 +295,7 @@ export default function AgentDrawer() {
               {!loadingHistory && messages.length === 0 && (
                 <div className="py-6 text-center">
                   <div className="w-12 h-12 rounded-2xl bg-blue-50 flex items-center justify-center mx-auto mb-3">
-                    <BotMessageSquare size={22} className="text-blue-600" />
+                    <BotMessageSquare size={22} className="text-m-blue" />
                   </div>
                   <p className="text-zinc-700 font-semibold text-sm mb-1">Bonjour, je suis votre Agent IA PMO</p>
                   <p className="text-zinc-400 text-xs mb-4 px-4">Posez-moi une question sur votre portefeuille, ou essayez une suggestion :</p>
@@ -304,7 +304,7 @@ export default function AgentDrawer() {
                       <button
                         key={q}
                         onClick={() => { setInputText(q); inputRef.current?.focus(); }}
-                        className="w-full text-left text-xs px-3 py-2 rounded-lg border border-zinc-200 hover:border-blue-300 hover:bg-blue-50 text-zinc-600 hover:text-blue-700 transition-all"
+                        className="w-full text-left text-xs px-3 py-2 rounded-lg border border-zinc-200 hover:border-blue-300 hover:bg-blue-50 text-zinc-600 hover:text-m-blue-dark transition-all"
                       >
                         <Zap size={10} className="inline mr-1.5 text-blue-500" />{q}
                       </button>
@@ -400,7 +400,7 @@ export default function AgentDrawer() {
                   style={{ background: inputText.trim() && !isLoading ? "linear-gradient(135deg, #2563eb 0%, #0747A6 100%)" : "#E2E8F0" }}
                 >
                   {isLoading
-                    ? <Loader2 size={15} className="text-blue-600 animate-spin" />
+                    ? <Loader2 size={15} className="text-m-blue animate-spin" />
                     : <Send size={14} className={inputText.trim() ? "text-white" : "text-zinc-400"} />
                   }
                 </button>

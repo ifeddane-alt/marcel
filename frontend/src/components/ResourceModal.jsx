@@ -15,7 +15,7 @@ const EMPTY = {
   entry_date: "", contract_ref: "",
 };
 
-const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue focus:ring-1 focus:ring-m-blue bg-white";
 
 const TYPE_OPTIONS = [
   { value: "interne",         label: "Interne",         icon: User,      bg: "bg-blue-50 border-blue-300 text-blue-700" },
@@ -339,7 +339,7 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
             <span className="text-xs font-semibold text-zinc-600">Compétences</span>
             <button type="button" onClick={() => setSkills((s) => [...s, { name: "", level: 3 }])}
               data-testid="resource-skill-add-btn"
-              className="text-[11px] font-semibold text-blue-600 hover:underline">+ Ajouter</button>
+              className="text-[11px] font-semibold text-m-blue hover:underline">+ Ajouter</button>
           </div>
           {skills.length === 0 && <p className="text-[11px] text-zinc-400">Aucune compétence renseignée.</p>}
           <div className="space-y-2">
@@ -365,7 +365,7 @@ export default function ResourceModal({ isOpen, onClose, resource, onSaved }) {
             Annuler
           </button>
           <button type="submit" disabled={saving} data-testid="resource-form-submit"
-            className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
+            className="flex items-center gap-2 px-5 py-2 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-50 transition-colors">
             {saving && <Loader2 size={14} className="animate-spin" />}
             {resource ? "Enregistrer" : "Créer la ressource"}
           </button>

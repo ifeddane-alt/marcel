@@ -3,7 +3,7 @@ import { X, Loader2 } from "lucide-react";
 import { workAllocationsAPI } from "@/api";
 
 const PHASES = ["analyse", "conception", "implementation", "review", "test", "hypercare"];
-const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue bg-white";
 
 export default function WorkAllocationModal({ isOpen, onClose, wa, tasks, resources, onSaved }) {
   const isEdit = !!wa;
@@ -115,14 +115,14 @@ export default function WorkAllocationModal({ isOpen, onClose, wa, tasks, resour
 
           {estimatedCost !== null && (
             <p className="text-xs text-zinc-500">
-              Coût prévu estimé : <strong className="text-blue-600">{estimatedCost.toLocaleString("fr-FR")} €</strong>
+              Coût prévu estimé : <strong className="text-m-blue">{estimatedCost.toLocaleString("fr-FR")} €</strong>
             </p>
           )}
 
           <div className="flex justify-end gap-3 pt-2">
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">Annuler</button>
             <button type="submit" disabled={saving} data-testid="wa-modal-submit"
-              className="flex items-center gap-2 px-5 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60 transition-colors">
+              className="flex items-center gap-2 px-5 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-60 transition-colors">
               {saving && <Loader2 size={14} className="animate-spin" />}
               {isEdit ? "Enregistrer" : "Créer"}
             </button>

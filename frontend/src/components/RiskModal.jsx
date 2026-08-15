@@ -28,7 +28,7 @@ const EMPTY = {
   impact: "3", status: "identifié", mitigation_plan: "", owner: "", due_date: "",
 };
 
-const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue focus:ring-1 focus:ring-m-blue bg-white";
 
 function Field({ label, required, error, children }) {
   return (
@@ -215,7 +215,7 @@ export default function RiskModal({ isOpen, onClose, risk, projectId, onSaved })
             type="submit"
             disabled={saving}
             data-testid="risk-form-submit"
-            className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="flex items-center gap-2 px-5 py-2 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-50 transition-colors"
           >
             {saving && <Loader2 size={14} className="animate-spin" />}
             {risk ? "Enregistrer" : "Créer le risque"}

@@ -54,7 +54,7 @@ function AlertRuleModal({ onClose, onSave }) {
       <div className="bg-white rounded-none sm:rounded-2xl shadow-2xl w-full max-h-screen sm:max-h-[90vh] overflow-y-auto sm:max-w-md">
         <div className="flex items-center justify-between px-5 py-4 border-b border-zinc-100">
           <div className="flex items-center gap-2">
-            <Bell size={16} className="text-blue-600" />
+            <Bell size={16} className="text-m-blue" />
             <span className="font-semibold text-zinc-800 text-sm">Nouvelle règle d'alerte</span>
           </div>
           <button onClick={onClose} className="text-zinc-400 hover:text-zinc-700">
@@ -128,7 +128,7 @@ function AlertRuleModal({ onClose, onSave }) {
             onClick={handleSave}
             disabled={saving}
             data-testid="alert-save-btn"
-            className="text-sm text-white px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 disabled:opacity-50 transition-colors"
+            className="text-sm text-white px-4 py-2 rounded-lg bg-m-blue hover:bg-m-blue-dark disabled:opacity-50 transition-colors"
           >
             {saving ? "Enregistrement..." : "Créer la règle"}
           </button>
@@ -188,8 +188,8 @@ export default function MesAlertes() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Mes alertes</span></div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">
+          <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Mes alertes</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">
             Mes alertes
           </h1>
           <p className="text-sm text-zinc-500 mt-0.5">
@@ -199,7 +199,7 @@ export default function MesAlertes() {
         <button
           onClick={() => setShowModal(true)}
           data-testid="new-alert-rule-btn"
-          className="flex items-center gap-2 text-sm text-white px-4 py-2 rounded-lg bg-blue-600 hover:bg-blue-700 transition-colors shadow-sm"
+          className="flex items-center gap-2 text-sm text-white px-4 py-2 rounded-lg bg-m-blue hover:bg-m-blue-dark transition-colors shadow-sm"
         >
           <Plus size={14} /> Nouvelle règle
         </button>
@@ -208,7 +208,7 @@ export default function MesAlertes() {
       {/* Tableau des règles */}
       <div className="bg-white border border-zinc-200 rounded-lg shadow-sm" data-testid="alert-rules-table">
         <div className="px-5 py-3 border-b border-zinc-100 flex items-center gap-2">
-          <Bell size={14} className="text-blue-600" />
+          <Bell size={14} className="text-m-blue" />
           <span className="text-sm font-bold text-zinc-800">Règles d'alerte actives</span>
           <span className="text-xs bg-blue-100 text-blue-700 font-bold px-2 py-0.5 rounded-full">
             {rules.filter(r => r.enabled).length} actives
@@ -230,9 +230,9 @@ export default function MesAlertes() {
         ) : (
           <table className="w-full text-sm" data-testid="alert-rules-list">
             <thead>
-              <tr className="bg-[#fbfaff]">
+              <tr className="bg-m-bg">
                 {["Indicateur", "Seuil", "Périmètre", "Libellé", "Statut", "Actions"].map(h => (
-                  <th key={h} className="px-4 py-2.5 text-[10.5px] font-bold uppercase tracking-wider text-[#8a87a0] text-left border-b border-[#e8e6f0]">{h}</th>
+                  <th key={h} className="px-4 py-2.5 text-[10.5px] font-bold uppercase tracking-wider text-m-muted text-left border-b border-m-border">{h}</th>
                 ))}
               </tr>
             </thead>

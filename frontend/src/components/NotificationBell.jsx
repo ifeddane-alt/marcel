@@ -6,13 +6,13 @@ const BACKEND_URL = process.env.REACT_APP_BACKEND_URL || "";
 const WS_URL = BACKEND_URL.replace(/^https?/, (m) => (m === "https" ? "wss" : "ws"));
 
 const TYPE_CONFIG = {
-  scope_transmitted:     { icon: Zap,            color: "text-blue-600",    bg: "bg-blue-50" },
+  scope_transmitted:     { icon: Zap,            color: "text-m-blue",    bg: "bg-blue-50" },
   timesheet_validated:   { icon: CheckCircle,    color: "text-emerald-600", bg: "bg-emerald-50" },
   timesheet_rejected:    { icon: X,              color: "text-rose-600",    bg: "bg-rose-50" },
   recommendation_new:    { icon: AlertTriangle,  color: "text-amber-600",   bg: "bg-amber-50" },
   milestone_approaching: { icon: Calendar,       color: "text-purple-600",  bg: "bg-purple-50" },
   alert_triggered:       { icon: AlertTriangle,  color: "text-rose-600",    bg: "bg-rose-50" },
-  decision_created:      { icon: Info,           color: "text-blue-600",    bg: "bg-blue-50" },
+  decision_created:      { icon: Info,           color: "text-m-blue",    bg: "bg-blue-50" },
   demand_status_changed: { icon: Info,           color: "text-zinc-600",   bg: "bg-zinc-50" },
   envelope_overrun:      { icon: AlertTriangle,  color: "text-rose-600",   bg: "bg-rose-50" },
 };
@@ -153,7 +153,7 @@ export default function NotificationBell() {
               <button
                 onClick={markAllRead}
                 data-testid="mark-all-read-btn"
-                className="flex items-center gap-1 text-[10px] text-blue-600 hover:text-blue-800 font-semibold"
+                className="flex items-center gap-1 text-[10px] text-m-blue hover:text-blue-800 font-semibold"
               >
                 <CheckCheck size={11} /> Tout lire
               </button>

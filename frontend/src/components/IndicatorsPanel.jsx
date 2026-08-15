@@ -14,7 +14,7 @@ const COMP_CFG = {
   manual: { label: "Saisie manuelle", cls: "text-amber-600" },
   external: { label: "Source externe manquante", cls: "text-zinc-400" },
 };
-const PRIO_CLS = { P1: "bg-[#352c6e] text-white", P2: "bg-[#e9effe] text-[#2e5fe8]", P3: "bg-zinc-100 text-zinc-500" };
+const PRIO_CLS = { P1: "bg-m-primary text-white", P2: "bg-m-blue-soft text-m-blue", P3: "bg-zinc-100 text-zinc-500" };
 
 export function IndicatorSelectorModal({ scope, onClose, onSaved }) {
   const [catalog, setCatalog] = useState([]);
@@ -79,7 +79,7 @@ export function IndicatorSelectorModal({ scope, onClose, onSaved }) {
         <div className="flex items-center gap-2 px-5 py-2.5 border-b border-zinc-50 flex-wrap">
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher…"
             data-testid="indicator-search-input"
-            className="flex-1 min-w-[140px] text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600" />
+            className="flex-1 min-w-[140px] text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-m-blue" />
           <select value={prio} onChange={(e) => setPrio(e.target.value)} data-testid="indicator-prio-filter"
             className="text-xs border border-zinc-200 rounded-lg px-2 py-1.5">
             <option value="">Priorité</option><option>P1</option><option>P2</option><option>P3</option>
@@ -89,7 +89,7 @@ export function IndicatorSelectorModal({ scope, onClose, onSaved }) {
             <option value="">Méthode</option><option>Waterfall</option><option>Agile</option><option>SAFe</option><option>Transverse</option>
           </select>
           <button onClick={applyP1} data-testid="indicator-preset-p1-btn"
-            className="flex items-center gap-1 text-[11px] font-semibold text-[#352c6e] border border-[#352c6e]/25 rounded-lg px-2.5 py-1.5 hover:bg-[#f0eefc]">
+            className="flex items-center gap-1 text-[11px] font-semibold text-m-primary border border-m-primary/25 rounded-lg px-2.5 py-1.5 hover:bg-m-lilac">
             <Sparkles size={11} /> Socle P1
           </button>
         </div>
@@ -101,7 +101,7 @@ export function IndicatorSelectorModal({ scope, onClose, onSaved }) {
               <div key={domain} className="border border-zinc-100 rounded-lg overflow-hidden">
                 <button onClick={() => setOpenDomains((s) => { const n = new Set(s); n.has(domain) ? n.delete(domain) : n.add(domain); return n; })}
                   data-testid={`indicator-domain-${domain.slice(0, 3)}`}
-                  className="w-full flex items-center justify-between px-3 py-2 bg-[#f7f6fb] text-xs font-semibold text-zinc-700 hover:bg-[#f0eefc]">
+                  className="w-full flex items-center justify-between px-3 py-2 bg-m-surface text-xs font-semibold text-zinc-700 hover:bg-m-lilac">
                   <span>{domain} <span className="text-zinc-400 font-normal">{nSel}/{items.length}</span></span>
                   <ChevronDown size={13} className={`transition-transform ${open ? "rotate-180" : ""}`} />
                 </button>
@@ -130,7 +130,7 @@ export function IndicatorSelectorModal({ scope, onClose, onSaved }) {
         <div className="flex justify-end gap-2 px-5 py-3 border-t border-zinc-100">
           <button onClick={onClose} className="px-3.5 py-2 text-xs font-semibold text-zinc-500 hover:text-zinc-700">Annuler</button>
           <button onClick={save} disabled={saving} data-testid="indicator-selector-save-btn"
-            className="px-4 py-2 text-xs font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+            className="px-4 py-2 text-xs font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-50">
             Enregistrer
           </button>
         </div>
@@ -143,11 +143,24 @@ export const IndicatorsPanel = ({ scope, contextId, title = "Indicateurs" }) => 
   const [data, setData] = useState(null);
   const [selectorOpen, setSelectorOpen] = useState(false);
   const [detail, setDetail] = useState(null);
+  const [applying, setApplying] = useState(false);
 
   const load = useCallback(() => {
     catalogAPI.values(scope, contextId).then((r) => setData(r.data)).catch(() => setData({ items: [] }));
   }, [scope, contextId]);
   useEffect(() => { load(); }, [load]);
+
+  const quickPreset = async () => {
+    setApplying(true);
+    try {
+      const { data: res } = await catalogAPI.presetP1(scope);
+      toast.success(`Socle recommandé activé${res?.indicator_ids?.length ? ` — ${res.indicator_ids.length} indicateurs` : ""}`);
+      load();
+    } catch (e) {
+      toast.error(e?.response?.data?.detail || "Erreur lors de l'activation du socle");
+    }
+    setApplying(false);
+  };
 
   const byDomain = useMemo(() => {
     const g = {};
@@ -156,19 +169,29 @@ export const IndicatorsPanel = ({ scope, contextId, title = "Indicateurs" }) => 
   }, [data]);
 
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 md:p-5" data-testid={`indicators-panel-${scope}`}>
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 md:p-5" data-testid={`indicators-panel-${scope}`}>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-heading text-sm font-bold text-[#26243a]">{title}</h3>
+        <h3 className="font-heading text-sm font-bold text-m-ink">{title}</h3>
         <button onClick={() => setSelectorOpen(true)} data-testid={`indicators-manage-btn-${scope}`}
-          className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-600 hover:text-blue-700">
+          className="flex items-center gap-1.5 text-[11px] font-semibold text-m-blue hover:text-m-blue-dark">
           <Settings2 size={12} /> Gérer les indicateurs
         </button>
       </div>
       {data === null ? (
         <div className="text-xs text-zinc-300 py-4 text-center">Chargement…</div>
       ) : data.items.length === 0 ? (
-        <div className="text-center py-5 text-xs text-zinc-400 border border-dashed border-zinc-200 rounded-lg" data-testid={`indicators-empty-${scope}`}>
-          Aucun indicateur sélectionné — cliquez sur « Gérer les indicateurs » pour composer votre vue depuis le catalogue.
+        <div className="text-center py-6 border border-dashed border-zinc-200 rounded-lg" data-testid={`indicators-empty-${scope}`}>
+          <p className="text-xs text-zinc-400 mb-3">Aucun indicateur activé sur cette vue.</p>
+          <div className="flex flex-wrap items-center justify-center gap-2">
+            <button onClick={quickPreset} disabled={applying} data-testid={`indicators-quick-p1-${scope}`}
+              className="flex items-center gap-1.5 px-3.5 py-2 text-xs font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-50 transition-colors">
+              <Sparkles size={12} /> {applying ? "Activation…" : "Activer le socle recommandé (P1)"}
+            </button>
+            <button onClick={() => setSelectorOpen(true)} data-testid={`indicators-choose-${scope}`}
+              className="px-3.5 py-2 text-xs font-semibold text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">
+              Choisir mes indicateurs
+            </button>
+          </div>
         </div>
       ) : (
         <div className="space-y-3">
@@ -187,7 +210,7 @@ export const IndicatorsPanel = ({ scope, contextId, title = "Indicateurs" }) => 
                         <span className={`px-1 py-px text-[8px] font-bold rounded border ${st.cls}`}>{st.label}</span>
                       </div>
                       <div className="text-[11px] text-zinc-600 truncate mt-0.5" title={i.name}>{i.name}</div>
-                      <div className="font-mono-data text-sm font-bold text-[#26243a] mt-0.5" data-testid={`indicator-value-${i.indicator_id}`}>
+                      <div className="font-mono-data text-sm font-bold text-m-ink mt-0.5" data-testid={`indicator-value-${i.indicator_id}`}>
                         {i.display ?? "—"}
                       </div>
                       {i.detail && <div className="text-[10px] text-zinc-400 truncate" title={i.detail}>{i.detail}</div>}

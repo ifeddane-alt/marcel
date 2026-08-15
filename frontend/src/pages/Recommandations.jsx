@@ -46,7 +46,7 @@ function RecommendationCard({ rec }) {
         {rec.project_id && (
           <Link
             to={`/projects/${rec.project_id}`}
-            className="inline-flex items-center gap-1 text-[10px] text-blue-600 hover:text-blue-800 hover:underline mt-1.5"
+            className="inline-flex items-center gap-1 text-[10px] text-m-blue hover:text-blue-800 hover:underline mt-1.5"
           >
             Voir le projet <ChevronRight size={10} />
           </Link>
@@ -119,8 +119,8 @@ export default function Recommandations() {
       {/* Header */}
       <div className="flex items-start justify-between mb-6">
         <div>
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Recommandations IA</span></div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">
+          <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Recommandations IA</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">
             Recommandations IA
           </h1>
           <p className="text-sm text-zinc-500 mt-0.5">

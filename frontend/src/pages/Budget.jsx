@@ -56,12 +56,12 @@ const EcartIcon = ({ pct }) => {
 // ── Progress bar ──────────────────────────────────────────────────────────
 function ProgressBar({ value, max, label }) {
   const pct = max ? Math.min((value / max) * 100, 110) : 0;
-  const color = pct > 100 ? "bg-[#cc4f45]" : pct > 80 ? "bg-[#a3891a]" : "bg-[#3f8a34]";
+  const color = pct > 100 ? "bg-m-red" : pct > 80 ? "bg-[#a3891a]" : "bg-m-green";
   return (
     <div className="mt-2">
       <div className="flex justify-between text-xs mb-1">
-        <span className="text-[#5d5a75]">{label}</span>
-        <span className="font-mono-data text-[11px] text-[#8a87a0]">{pct.toFixed(0)}% de l'enveloppe ({fmtK(max)})</span>
+        <span className="text-m-ink-soft">{label}</span>
+        <span className="font-mono-data text-[11px] text-m-muted">{pct.toFixed(0)}% de l'enveloppe ({fmtK(max)})</span>
       </div>
       <div className="h-2 bg-[#eeecf6] rounded-full overflow-hidden">
         <div className={`h-2 rounded-full transition-all ${color}`} style={{ width: `${Math.min(pct, 100)}%` }} />
@@ -74,13 +74,13 @@ function ProgressBar({ value, max, label }) {
 function KpiCard({ label, value, sub, pct, ringColor, ringLabel, ringCaption, testId }) {
   return (
     <div
-      className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 flex items-center justify-between gap-3"
+      className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 flex items-center justify-between gap-3"
       data-testid={testId}
     >
       <div className="min-w-0">
         <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">{label}</div>
-        <div className="font-mono-data text-[22px] font-bold text-[#26243a] mt-1">{fmtK(value)}</div>
-        {sub && <div className="text-[10.5px] text-[#8a87a0] mt-0.5 truncate">{sub}</div>}
+        <div className="font-mono-data text-[22px] font-bold text-m-ink mt-1">{fmtK(value)}</div>
+        {sub && <div className="text-[10.5px] text-m-muted mt-0.5 truncate">{sub}</div>}
       </div>
       {pct != null && (
         <div className="flex-shrink-0">
@@ -158,7 +158,7 @@ function RevisionModal({ project, onClose, onSave }) {
         <div className="flex gap-3 justify-end">
           <button onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 border rounded-lg hover:bg-zinc-50">Annuler</button>
           <button onClick={handleSave} disabled={saving}
-            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60">
+            className="px-4 py-2 text-sm bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-60">
             {saving ? "Sauvegarde..." : "Sauvegarder"}
           </button>
         </div>
@@ -189,13 +189,13 @@ function BudgetDrawer({ project, onClose, onRevise, canEdit }) {
         {/* Header */}
         <div className="sticky top-0 bg-white border-b px-6 py-4 flex items-start justify-between z-10">
           <div>
-            <h2 className="font-heading font-bold text-[#26243a] text-base leading-tight">{project.name}</h2>
-            <p className="text-xs text-[#8a87a0] mt-0.5">{project.program_name}</p>
+            <h2 className="font-heading font-bold text-m-ink text-base leading-tight">{project.name}</h2>
+            <p className="text-xs text-m-muted mt-0.5">{project.program_name}</p>
           </div>
           <div className="flex items-center gap-2 flex-shrink-0 ml-3">
             {canEdit && (
               <button onClick={onRevise}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+                className="flex items-center gap-1.5 px-3 py-1.5 text-xs bg-m-blue text-white rounded-lg hover:bg-m-blue-dark">
                 <Edit2 size={12} /> Modifier
               </button>
             )}
@@ -220,7 +220,7 @@ function BudgetDrawer({ project, onClose, onRevise, canEdit }) {
                   ].map(({ l, v, c }) => (
                     <div key={l} className={`rounded-lg p-3 ${c}`}>
                       <p className="text-[10px] text-zinc-500 uppercase tracking-widest font-semibold">{l}</p>
-                      <p className="font-mono-data text-lg font-bold text-[#26243a]">{fmtK(v)}</p>
+                      <p className="font-mono-data text-lg font-bold text-m-ink">{fmtK(v)}</p>
                     </div>
                   ))}
                 </div>
@@ -281,8 +281,8 @@ function BudgetDrawer({ project, onClose, onRevise, canEdit }) {
 function SortIcon({ active, dir }) {
   if (!active) return <ChevronDown size={12} className="text-zinc-300 inline ml-0.5" />;
   return dir === "asc"
-    ? <ChevronUp size={12} className="text-blue-600 inline ml-0.5" />
-    : <ChevronDown size={12} className="text-blue-600 inline ml-0.5" />;
+    ? <ChevronUp size={12} className="text-m-blue inline ml-0.5" />
+    : <ChevronDown size={12} className="text-m-blue inline ml-0.5" />;
 }
 
 // ── Page principale ────────────────────────────────────────────────────────
@@ -361,7 +361,7 @@ export default function BudgetPage() {
   const toggleProgram = (name) =>
     setExpandedPrograms((prev) => ({ ...prev, [name]: !prev[name] }));
 
-  const thClass = "px-3 py-2.5 text-left text-[10.5px] font-bold uppercase tracking-wider text-[#8a87a0] cursor-pointer select-none hover:text-[#2e5fe8] whitespace-nowrap";
+  const thClass = "px-3 py-2.5 text-left text-[10.5px] font-bold uppercase tracking-wider text-m-muted cursor-pointer select-none hover:text-m-blue whitespace-nowrap";
   const tdClass = "px-3 py-2 text-sm text-zinc-700 whitespace-nowrap";
   const tdNum = "px-3 py-2 font-mono-data text-xs text-zinc-700 whitespace-nowrap text-right";
 
@@ -406,7 +406,7 @@ export default function BudgetPage() {
       <td className={tdNum}>{fmtK(p.capex_consumed)}</td>
       <td className={tdNum}>{fmtK(p.opex_planned)}</td>
       <td className={tdNum}>{fmtK(p.opex_consumed)}</td>
-      <td className={`${tdNum} font-bold text-[#26243a]`}>{fmtK(p.eac)}</td>
+      <td className={`${tdNum} font-bold text-m-ink`}>{fmtK(p.eac)}</td>
       <td className={tdNum}>{fmtK(p.raf)}</td>
       <td className={`${tdNum}`}>
         <span className={ecartColor(p.ecart_pct)}>
@@ -432,8 +432,8 @@ export default function BudgetPage() {
     const budget = tot.capex_planned + tot.opex_planned;
     const ecartTot = budget ? (tot.eac - budget) / budget * 100 : 0;
     return (
-      <tr className="bg-[#f7f6fb] font-semibold border-t-2 border-[#dcd9ea]">
-        <td className={`${tdClass} font-bold text-[#352c6e] text-xs uppercase tracking-wider`} colSpan={3}>Total</td>
+      <tr className="bg-m-surface font-semibold border-t-2 border-m-border-strong">
+        <td className={`${tdClass} font-bold text-m-primary text-xs uppercase tracking-wider`} colSpan={3}>Total</td>
         <td className={tdNum}>{fmtK(tot.capex_planned)}</td>
         <td className={tdNum}>{fmtK(tot.capex_consumed)}</td>
         <td className={tdNum}>{fmtK(tot.opex_planned)}</td>
@@ -453,8 +453,8 @@ export default function BudgetPage() {
       {/* En-tête */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Budget</span></div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight" data-testid="budget-page-title">Budget Portefeuille</h1>
+          <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Budget</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight" data-testid="budget-page-title">Budget Portefeuille</h1>
           <p className="text-sm text-zinc-500 mt-0.5">Suivi financier consolidé — CAPEX · OPEX · EAC · RAF</p>
         </div>
         <div className="flex flex-wrap gap-2">
@@ -475,7 +475,7 @@ export default function BudgetPage() {
             <Download size={14} /> PDF
           </button>
           <button onClick={load} data-testid="refresh-btn"
-            className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+            className="flex items-center gap-1.5 px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors shadow-sm">
             <RefreshCw size={14} /> Actualiser
           </button>
         </div>
@@ -507,7 +507,7 @@ export default function BudgetPage() {
 
           {/* Barres progression vs enveloppe */}
           {envelope?.capex_envelope && (
-            <div className="bg-white rounded-xl border border-[#e8e6f0] shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-5">
+            <div className="bg-white rounded-xl border border-m-border shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-5">
               <h3 className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold mb-3">Consommation vs Enveloppe 2026</h3>
               <ProgressBar value={kpis?.capex_consumed} max={envelope.capex_envelope}
                 label={`CAPEX — ${fmtK(kpis?.capex_consumed)} consommé`} />
@@ -520,13 +520,13 @@ export default function BudgetPage() {
           <div className="flex flex-wrap gap-3 items-center">
             <select value={filterProgram} onChange={(e) => setFilterProgram(e.target.value)}
               data-testid="filter-program"
-              className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600">
+              className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-m-blue">
               <option value="">Tous les programmes</option>
               {programs.map((p) => <option key={p.id} value={p.id}>{p.name}</option>)}
             </select>
             <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)}
               data-testid="filter-status"
-              className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600">
+              className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-m-blue">
               <option value="">Tous les statuts</option>
               <option value="actif">Actif</option>
               <option value="en_pause">En pause</option>
@@ -534,14 +534,14 @@ export default function BudgetPage() {
             </select>
             {(filterProgram || filterStatus) && (
               <button onClick={() => { setFilterProgram(""); setFilterStatus(""); }}
-                className="text-xs text-[#2e5fe8] hover:underline font-semibold">
+                className="text-xs text-m-blue hover:underline font-semibold">
                 Réinitialiser
               </button>
             )}
           </div>
 
           {/* Tabs */}
-          <div className="flex gap-1 border-b border-[#e7e3f2]">
+          <div className="flex gap-1 border-b border-m-border-lav">
             {[
               { id: "projets", label: "Projets", count: sortedProjects.length },
               { id: "programmes", label: "Par programme", count: byProgram.length },
@@ -556,12 +556,12 @@ export default function BudgetPage() {
                 data-testid={`tab-${t.id}`}
                 className={`flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold transition-colors border-b-[3px] -mb-px ${
                   activeTab === t.id
-                    ? "text-[#2e5fe8] border-[#2e5fe8]"
-                    : "text-[#8a87a0] border-transparent hover:text-[#26243a]"
+                    ? "text-m-blue border-m-blue"
+                    : "text-m-muted border-transparent hover:text-m-ink"
                 }`}>
                 {t.label}
                 {t.count != null && (
-                  <span className={`text-[10px] font-bold px-1.5 py-px rounded-full ${activeTab === t.id ? "bg-[#e9effe] text-[#2e5fe8]" : "bg-[#f0eefc] text-[#8a87a0]"}`}>
+                  <span className={`text-[10px] font-bold px-1.5 py-px rounded-full ${activeTab === t.id ? "bg-m-blue-soft text-m-blue" : "bg-m-lilac text-m-muted"}`}>
                     {t.count}
                   </span>
                 )}
@@ -571,8 +571,8 @@ export default function BudgetPage() {
 
           {/* ── TAB : Projets ────────────────────────────────────────────── */}
           {activeTab === "projets" && (
-            <div className="bg-white rounded-xl border border-[#e8e6f0] shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-hidden">
-              <div className="flex items-center justify-between px-4 py-3 border-b border-[#f0eff6]">
+            <div className="bg-white rounded-xl border border-m-border shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-hidden">
+              <div className="flex items-center justify-between px-4 py-3 border-b border-m-border-soft">
                 <span className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">
                   {sortedProjects.length} projets
                 </span>
@@ -586,7 +586,7 @@ export default function BudgetPage() {
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full text-sm" data-testid="budget-table">
-                  <thead className="bg-[#fbfaff] border-b border-[#e8e6f0]">
+                  <thead className="bg-m-bg border-b border-m-border">
                     <tr>
                       {[
                         { key: "name", label: "Projet" },
@@ -650,28 +650,28 @@ export default function BudgetPage() {
             <div className="space-y-3">
               {byProgram.map((pg) => (
                 <div key={pg.program_id || pg.program_name}
-                  className="bg-white rounded-xl border border-[#e8e6f0] shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-hidden"
+                  className="bg-white rounded-xl border border-m-border shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-hidden"
                   data-testid={`prog-block-${pg.program_id}`}>
                   <div
-                    className="flex items-center justify-between px-5 py-3 cursor-pointer hover:bg-[#fbfaff]"
+                    className="flex items-center justify-between px-5 py-3 cursor-pointer hover:bg-m-bg"
                     onClick={() => toggleProgram(pg.program_name)}>
                     <div className="flex items-center gap-3">
                       {expandedPrograms[pg.program_name]
                         ? <ChevronDown size={16} className="text-zinc-400" />
                         : <ChevronRight size={16} className="text-zinc-400" />}
                       <div>
-                        <p className="font-heading font-bold text-[#26243a]">{pg.program_name}</p>
-                        <p className="text-xs text-[#8a87a0]">{pg.nb_projects} projets</p>
+                        <p className="font-heading font-bold text-m-ink">{pg.program_name}</p>
+                        <p className="text-xs text-m-muted">{pg.nb_projects} projets</p>
                       </div>
                     </div>
                     <div className="flex gap-6 text-right text-sm">
                       <div>
                         <p className="text-[9px] uppercase tracking-widest text-zinc-400 font-semibold">Prévu</p>
-                        <p className="font-mono-data font-semibold text-[#26243a]">{fmtK(pg.capex_total + pg.opex_total)}</p>
+                        <p className="font-mono-data font-semibold text-m-ink">{fmtK(pg.capex_total + pg.opex_total)}</p>
                       </div>
                       <div>
                         <p className="text-[9px] uppercase tracking-widest text-zinc-400 font-semibold">EAC</p>
-                        <p className="font-mono-data font-semibold text-[#26243a]">{fmtK(pg.eac_total)}</p>
+                        <p className="font-mono-data font-semibold text-m-ink">{fmtK(pg.eac_total)}</p>
                       </div>
                       <div>
                         <p className="text-[9px] uppercase tracking-widest text-zinc-400 font-semibold">Écart</p>
@@ -705,9 +705,9 @@ export default function BudgetPage() {
                             {ragBadge(p.status_rag)}
                             <span className="text-zinc-700">{p.name}</span>
                           </div>
-                          <div className="flex gap-4 text-xs text-[#8a87a0]">
-                            <span>Prévu <b className="font-mono-data text-[#26243a]">{fmtK(p.capex_planned + p.opex_planned)}</b></span>
-                            <span>EAC <b className="font-mono-data text-[#26243a]">{fmtK(p.eac)}</b></span>
+                          <div className="flex gap-4 text-xs text-m-muted">
+                            <span>Prévu <b className="font-mono-data text-m-ink">{fmtK(p.capex_planned + p.opex_planned)}</b></span>
+                            <span>EAC <b className="font-mono-data text-m-ink">{fmtK(p.eac)}</b></span>
                             <span className={`font-mono-data font-bold ${ecartColor(p.ecart_pct)}`}>
                               {p.ecart_pct > 0 ? "+" : ""}{p.ecart_pct.toFixed(1)}%
                             </span>

@@ -42,13 +42,13 @@ export const SavedViews = ({ page, getFilters, onApply }) => {
         value={selected}
         onChange={(e) => apply(e.target.value)}
         data-testid="saved-views-select"
-        className="text-sm border border-zinc-200 rounded-lg px-2.5 py-2 bg-white focus:outline-none focus:border-blue-600 max-w-[160px]"
+        className="text-sm border border-zinc-200 rounded-lg px-2.5 py-2 bg-white focus:outline-none focus:border-m-blue max-w-[160px]"
       >
         <option value="">Mes vues…</option>
         {views.map((v) => <option key={v.view_id} value={v.view_id}>{v.name}</option>)}
       </select>
       <button onClick={save} title="Sauvegarder les filtres actuels" data-testid="saved-views-save-btn"
-        className="w-9 h-9 flex items-center justify-center border border-zinc-200 rounded-lg text-[#2e5fe8] hover:bg-[#e9effe] bg-white">
+        className="w-9 h-9 flex items-center justify-center border border-zinc-200 rounded-lg text-m-blue hover:bg-m-blue-soft bg-white">
         <Bookmark size={14} />
       </button>
       {selected && (

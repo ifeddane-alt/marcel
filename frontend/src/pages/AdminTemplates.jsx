@@ -10,7 +10,7 @@ const METHODOLOGY_LABELS = {
   safe: "SAFe",
 };
 
-const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue focus:ring-1 focus:ring-m-blue bg-white";
 
 function PhaseEditor({ phase, onChange, onDelete }) {
   const [open, setOpen] = useState(false);
@@ -94,7 +94,7 @@ function TemplateCard({ tpl, onEdit, onDelete, onDuplicate }) {
     <div className="bg-white border border-zinc-200 rounded-xl shadow-sm overflow-hidden" data-testid={`template-card-${tpl.template_id}`}>
       <div className="flex items-center gap-3 px-5 py-4">
         <div className="p-2 bg-blue-50 rounded-lg">
-          <Layers size={18} className="text-blue-600" />
+          <Layers size={18} className="text-m-blue" />
         </div>
         <div className="flex-1 min-w-0">
           <div className="flex items-center gap-2">
@@ -118,10 +118,10 @@ function TemplateCard({ tpl, onEdit, onDelete, onDuplicate }) {
           >
             {expanded ? <ChevronUp size={15} /> : <ChevronDown size={15} />}
           </button>
-          <button onClick={() => onDuplicate(tpl)} title="Dupliquer" className="p-1.5 text-zinc-400 hover:text-blue-600 rounded-lg">
+          <button onClick={() => onDuplicate(tpl)} title="Dupliquer" className="p-1.5 text-zinc-400 hover:text-m-blue rounded-lg">
             <Copy size={15} />
           </button>
-          <button onClick={() => onEdit(tpl)} title="Modifier" className="p-1.5 text-zinc-400 hover:text-blue-600 rounded-lg">
+          <button onClick={() => onEdit(tpl)} title="Modifier" className="p-1.5 text-zinc-400 hover:text-m-blue rounded-lg">
             <Pencil size={15} />
           </button>
           {!tpl.is_default && (
@@ -222,7 +222,7 @@ function TemplateModal({ isOpen, onClose, template, onSaved }) {
           <div className="space-y-2">
             <div className="flex items-center justify-between">
               <label className="text-xs font-semibold text-zinc-500">Phases</label>
-              <button type="button" onClick={addPhase} className="flex items-center gap-1 text-xs text-blue-600 hover:underline">
+              <button type="button" onClick={addPhase} className="flex items-center gap-1 text-xs text-m-blue hover:underline">
                 <Plus size={12} /> Ajouter une phase
               </button>
             </div>
@@ -238,7 +238,7 @@ function TemplateModal({ isOpen, onClose, template, onSaved }) {
         </div>
         <div className="flex justify-end gap-3 px-6 py-4 border-t bg-zinc-50 rounded-b-2xl">
           <button onClick={onClose} className="px-4 py-2 text-sm border border-zinc-300 rounded-lg text-zinc-600 hover:bg-zinc-100">Annuler</button>
-          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50">
+          <button onClick={handleSave} disabled={saving} className="flex items-center gap-2 px-5 py-2 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-50">
             {saving ? <RefreshCw size={14} className="animate-spin" /> : <Save size={14} />}
             Enregistrer
           </button>
@@ -294,15 +294,15 @@ export default function AdminTemplates() {
     <div className="p-4 md:p-6 lg:p-8 max-w-4xl space-y-6">
       <div className="flex items-center justify-between">
         <div>
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / Administration / <span className="text-[#352c6e] font-semibold">Templates</span></div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Templates Projets</h1>
+          <div className="text-xs text-m-muted mb-0.5">Accueil / Administration / <span className="text-m-primary font-semibold">Templates</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">Templates Projets</h1>
           <p className="text-sm text-zinc-500 mt-1">Gérez les templates utilisés à la création de projets</p>
         </div>
         {canAdmin && (
           <button
             data-testid="btn-create-template"
             onClick={() => setEditModal({ open: true, template: null })}
-            className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 bg-m-blue text-white rounded-lg text-sm font-semibold hover:bg-m-blue-dark transition-colors"
           >
             <Plus size={15} /> Nouveau template
           </button>

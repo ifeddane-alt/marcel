@@ -4,7 +4,7 @@ import Modal from "@/components/Modal";
 import { exportAPI, governanceAPI } from "@/api";
 import DateField from "@/components/ui/DateField";
 
-const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue focus:ring-1 focus:ring-m-blue bg-white";
 
 function Field({ label, children, hint }) {
   return (
@@ -74,13 +74,13 @@ export default function ExportCopilModal({ isOpen, onClose, selectedProjectIds =
         )}
 
         {/* Selected projects preview */}
-        <div className="bg-blue-50 border border-blue-600/20 rounded-lg px-3 py-2.5">
-          <div className="text-[10px] uppercase tracking-widest text-blue-600 font-semibold mb-1.5">
+        <div className="bg-blue-50 border border-m-blue/20 rounded-lg px-3 py-2.5">
+          <div className="text-[10px] uppercase tracking-widest text-m-blue font-semibold mb-1.5">
             {selectedProjectIds.length} projet{selectedProjectIds.length !== 1 ? "s" : ""} sélectionné{selectedProjectIds.length !== 1 ? "s" : ""}
           </div>
           <div className="flex flex-wrap gap-1">
             {selectedProjectNames.slice(0, 5).map((n, i) => (
-              <span key={i} className="inline-flex items-center px-2 py-0.5 rounded-lg bg-white border border-blue-600/20 text-[10px] text-zinc-700 font-medium">
+              <span key={i} className="inline-flex items-center px-2 py-0.5 rounded-lg bg-white border border-m-blue/20 text-[10px] text-zinc-700 font-medium">
                 {n.split("—")[0].trim().slice(0, 30)}
               </span>
             ))}
@@ -131,7 +131,7 @@ export default function ExportCopilModal({ isOpen, onClose, selectedProjectIds =
             <label className="flex items-center gap-2 cursor-pointer select-none" data-testid="include-roadmap-toggle">
               <input
                 type="checkbox"
-                className="accent-[#2563eb] w-4 h-4"
+                className="accent-m-blue w-4 h-4"
                 checked={form.includeRoadmap}
                 onChange={(e) => setForm((f) => ({ ...f, includeRoadmap: e.target.checked }))}
                 data-testid="include-roadmap-checkbox"
@@ -150,7 +150,7 @@ export default function ExportCopilModal({ isOpen, onClose, selectedProjectIds =
               onClick={handleExport}
               disabled={loading}
               data-testid="export-copil-submit"
-              className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-2 px-5 py-2 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-50 transition-colors"
             >
               {loading ? <Loader2 size={14} className="animate-spin" /> : <Presentation size={14} />}
               {loading ? "Génération…" : "Générer le PPT"}

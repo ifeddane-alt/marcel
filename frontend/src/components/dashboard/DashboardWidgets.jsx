@@ -20,7 +20,7 @@ function Donut({ pct, color, children }) {
       className="w-[52px] h-[52px] rounded-full flex items-center justify-center flex-shrink-0"
       style={{ background: `conic-gradient(${color} 0 ${p}%, #ece9f4 ${p}%)` }}
     >
-      <div className="w-[40px] h-[40px] rounded-full bg-white flex items-center justify-center font-heading text-[11.5px] font-extrabold text-[#26243a]">
+      <div className="w-[40px] h-[40px] rounded-full bg-white flex items-center justify-center font-heading text-[11.5px] font-extrabold text-m-ink">
         {children}
       </div>
     </div>
@@ -31,7 +31,7 @@ function MetricCard({ label, value, sub, icon: Icon, accent = "#2e5fe8", pct, te
   return (
     <div
       data-testid={testId}
-      className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 h-full flex items-center gap-3.5 hover:shadow-md transition-shadow"
+      className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 h-full flex items-center gap-3.5 hover:shadow-md transition-shadow"
     >
       {pct != null ? (
         <Donut pct={pct} color={accent}>{pct}%</Donut>
@@ -41,9 +41,9 @@ function MetricCard({ label, value, sub, icon: Icon, accent = "#2e5fe8", pct, te
         </div>
       )}
       <div className="min-w-0">
-        <div className="text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wide truncate">{label}</div>
-        <div className="font-mono-data text-[22px] font-bold text-[#26243a] leading-tight truncate">{value}</div>
-        {sub && <div className="text-[11px] text-[#8a87a0] truncate">{sub}</div>}
+        <div className="text-[10.5px] font-bold text-m-muted uppercase tracking-wide truncate">{label}</div>
+        <div className="font-mono-data text-[22px] font-bold text-m-ink leading-tight truncate">{value}</div>
+        {sub && <div className="text-[11px] text-m-muted truncate">{sub}</div>}
       </div>
     </div>
   );
@@ -67,15 +67,15 @@ function CustomTooltip({ active, payload, label }) {
 
 function WidgetShell({ title, icon: Icon, badge, link, linkLabel = "Voir tout", children, testId }) {
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] mb-5" data-testid={testId}>
-      <div className="flex items-center justify-between px-5 py-3 border-b border-[#f0eff6]">
-        <div className="flex items-center gap-2 font-heading text-[13px] font-bold text-[#26243a]">
-          {Icon && <Icon size={14} className="text-[#2e5fe8]" />}
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] mb-5" data-testid={testId}>
+      <div className="flex items-center justify-between px-5 py-3 border-b border-m-border-soft">
+        <div className="flex items-center gap-2 font-heading text-[13px] font-bold text-m-ink">
+          {Icon && <Icon size={14} className="text-m-blue" />}
           {title}
           {badge}
         </div>
         {link && (
-          <Link to={link} className="text-xs text-[#2e5fe8] font-semibold hover:underline flex items-center gap-1">
+          <Link to={link} className="text-xs text-m-blue font-semibold hover:underline flex items-center gap-1">
             {linkLabel} <ArrowRight size={11} />
           </Link>
         )}
@@ -107,12 +107,12 @@ export function BudgetSingleWidget({ summary, kind }) {
   }[kind];
   if (!M) return null;
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 h-full flex items-center gap-3.5" data-testid={`${kind}-widget`}>
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 h-full flex items-center gap-3.5" data-testid={`${kind}-widget`}>
       <Donut pct={M.pct} color={M.color}>{Math.min(M.pct, 999)}%</Donut>
       <div className="min-w-0">
-        <div className="text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wide truncate">{M.label}</div>
-        <div className="font-mono-data text-lg font-bold text-[#26243a] truncate">{M.value}</div>
-        <div className="text-[11px] text-[#8a87a0]">{M.pct}% du prévu</div>
+        <div className="text-[10.5px] font-bold text-m-muted uppercase tracking-wide truncate">{M.label}</div>
+        <div className="font-mono-data text-lg font-bold text-m-ink truncate">{M.value}</div>
+        <div className="text-[11px] text-m-muted">{M.pct}% du prévu</div>
       </div>
     </div>
   );
@@ -131,7 +131,7 @@ export function MetricsWidget({ summary }) {
 
 export function BudgetDetailWidget({ summary }) {
   const items = [
-    { label: "Budget consommé", value: formatEuro(summary.budget.consumed), pct: summary.budget.consumption_rate, color: "bg-blue-600" },
+    { label: "Budget consommé", value: formatEuro(summary.budget.consumed), pct: summary.budget.consumption_rate, color: "bg-m-blue" },
     { label: "Budget forecast", value: formatEuro(summary.budget.forecast), pct: Math.round((summary.budget.forecast / summary.budget.total) * 100), color: "bg-amber-500" },
     { label: "JH consommés / planifiés", value: `${summary.jh.consumed.toLocaleString("fr-FR")} / ${summary.jh.planned.toLocaleString("fr-FR")}`, pct: Math.round((summary.jh.consumed / summary.jh.planned) * 100), color: "bg-indigo-500" },
   ];
@@ -177,7 +177,7 @@ export function RegulatoryWidget({ regulatoryAlerts }) {
           return (
             <div key={m.milestone_id} className={`flex items-center justify-between px-5 py-2.5 ${bgMap[m.urgency_color] || ""}`} data-testid={`reg-alert-${m.milestone_id}`}>
               <div className="flex items-center gap-3 min-w-0">
-                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-lg border ${m.type === "regulatory" ? "bg-blue-50 text-blue-600 border-blue-200" : "bg-orange-50 text-orange-600 border-orange-200"}`}>
+                <span className={`text-[10px] font-bold px-1.5 py-0.5 rounded-lg border ${m.type === "regulatory" ? "bg-blue-50 text-m-blue border-blue-200" : "bg-orange-50 text-orange-600 border-orange-200"}`}>
                   {m.type === "regulatory" ? "RÉGL." : "DÉCOM."}
                 </span>
                 <div className="min-w-0">
@@ -279,7 +279,7 @@ export function RecommendationsWidget({ recommendations }) {
                 <p className="text-[10px] text-zinc-500 mt-0.5 line-clamp-1">{rec.description}</p>
               </div>
               {rec.project_id && (
-                <Link to={`/projects/${rec.project_id}`} className="flex-shrink-0 text-[10px] text-blue-600 hover:underline whitespace-nowrap">Voir →</Link>
+                <Link to={`/projects/${rec.project_id}`} className="flex-shrink-0 text-[10px] text-m-blue hover:underline whitespace-nowrap">Voir →</Link>
               )}
             </div>
           );
@@ -295,8 +295,8 @@ export function ChartBudgetWidget({ summary }) {
     Total: p.budget_total, Consommé: p.budget_consumed, Forecast: p.budget_forecast,
   }));
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 md:p-5 h-full flex flex-col" data-testid="chart-budget-widget">
-      <div className="font-heading text-[13px] font-bold text-[#26243a] mb-4">Budget par projet (€)</div>
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 md:p-5 h-full flex flex-col" data-testid="chart-budget-widget">
+      <div className="font-heading text-[13px] font-bold text-m-ink mb-4">Budget par projet (€)</div>
       <div className="flex-1 min-h-[140px]">
         <ResponsiveContainer width="100%" height="100%">
           <BarChart data={budgetData} margin={{ top: 0, right: 10, left: 10, bottom: 0 }}>
@@ -323,8 +323,8 @@ export function ChartRagWidget({ summary }) {
   ];
   const methodData = Object.entries(summary.methodology_counts).map(([k, v]) => ({ name: k.charAt(0).toUpperCase() + k.slice(1), value: v }));
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 md:p-5 h-full" data-testid="chart-rag-widget">
-      <div className="font-heading text-[13px] font-bold text-[#26243a] mb-4">Distribution RAG</div>
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 md:p-5 h-full" data-testid="chart-rag-widget">
+      <div className="font-heading text-[13px] font-bold text-m-ink mb-4">Distribution RAG</div>
       <div className="h-28 sm:h-36">
         <ResponsiveContainer width="100%" height="100%">
           <PieChart>
@@ -435,12 +435,12 @@ export function MilestonesGaugeWidget({ cxo }) {
   const m = cxo.milestones;
   const color = m.on_time_rate >= 80 ? "#3f8a34" : m.on_time_rate >= 60 ? "#a3891a" : "#cc4f45";
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 h-full flex items-center gap-4" data-testid="milestones-gauge-widget">
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 h-full flex items-center gap-4" data-testid="milestones-gauge-widget">
       <Donut pct={m.on_time_rate} color={color}>{m.on_time_rate}%</Donut>
       <div className="min-w-0">
-        <div className="text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wide">Jalons — taux à l'heure</div>
-        <div className="font-mono-data text-lg font-bold text-[#26243a]"><span style={{ color }}>{m.on_time}</span> / {m.total}</div>
-        <div className="text-[11px] text-[#8a87a0]">Forecast ≤ Baseline ou jalon atteint</div>
+        <div className="text-[10.5px] font-bold text-m-muted uppercase tracking-wide">Jalons — taux à l'heure</div>
+        <div className="font-mono-data text-lg font-bold text-m-ink"><span style={{ color }}>{m.on_time}</span> / {m.total}</div>
+        <div className="text-[11px] text-m-muted">Forecast ≤ Baseline ou jalon atteint</div>
       </div>
     </div>
   );
@@ -461,7 +461,7 @@ export function UpcomingMilestonesWidget({ extras }) {
           <div key={m.milestone_id} className={`flex items-center justify-between px-5 py-2.5 ${m.late ? "bg-rose-50/30" : ""}`} data-testid={`upcoming-ms-${m.milestone_id}`}>
             <div className="min-w-0">
               <span className={`text-xs font-semibold truncate block ${m.late ? "text-rose-700" : "text-zinc-800"}`}>{m.name}</span>
-              <Link to={`/projects/${m.project_id}`} className="text-[10px] text-blue-600 hover:underline truncate">{m.project_name}</Link>
+              <Link to={`/projects/${m.project_id}`} className="text-[10px] text-m-blue hover:underline truncate">{m.project_name}</Link>
             </div>
             <div className="flex items-center gap-3 shrink-0 ml-4">
               <span className="text-[10px] text-zinc-400 font-mono">{formatDate(m.date_forecast)}</span>
@@ -484,16 +484,16 @@ export function TopProjectsWidget({ cxo }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-[#fbfaff] text-left">
+            <tr className="bg-m-bg text-left">
               {["Projet", "Budget", "Consommé", "RAG"].map((h) => (
-                <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] border-b border-[#e8e6f0]">{h}</th>
+                <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted border-b border-m-border">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {projects.map((p) => (
               <tr key={p.project_id} className="border-b border-zinc-100 hover:bg-zinc-50/60">
-                <td className="px-4 py-2.5"><Link to={`/projects/${p.project_id}`} className="text-blue-600 hover:underline font-medium text-xs">{p.name}</Link></td>
+                <td className="px-4 py-2.5"><Link to={`/projects/${p.project_id}`} className="text-m-blue hover:underline font-medium text-xs">{p.name}</Link></td>
                 <td className="px-4 py-2.5 text-right font-mono-data text-xs">{formatEuro(p.budget_total)}</td>
                 <td className="px-4 py-2.5 text-right font-mono-data text-xs">{formatEuro(p.budget_consumed)}</td>
                 <td className="px-4 py-2.5"><RAGBadge status={p.status_rag} /></td>
@@ -533,7 +533,7 @@ export function PendingTimesheetsWidget({ extras }) {
 export function RecentDecisionsWidget({ extras }) {
   const items = extras?.recent_decisions || [];
   if (!items.length) return null;
-  const STATUS_CLS = { "proposée": "bg-blue-50 text-blue-600 border-blue-200", "validée": "bg-emerald-50 text-emerald-600 border-emerald-200", "rejetée": "bg-rose-50 text-rose-600 border-rose-200" };
+  const STATUS_CLS = { "proposée": "bg-blue-50 text-m-blue border-blue-200", "validée": "bg-emerald-50 text-emerald-600 border-emerald-200", "rejetée": "bg-rose-50 text-rose-600 border-rose-200" };
   return (
     <WidgetShell title="Dernières décisions" icon={Gavel} link="/gouvernance" testId="recent-decisions-widget">
       <div className="divide-y divide-zinc-50">
@@ -541,7 +541,7 @@ export function RecentDecisionsWidget({ extras }) {
           <div key={d.decision_id} className="flex items-center justify-between px-5 py-2.5">
             <div className="min-w-0">
               <span className="text-xs font-semibold text-zinc-800 truncate block">{d.title}</span>
-              <Link to={`/projects/${d.project_id}`} className="text-[10px] text-blue-600 hover:underline">{d.project_name}</Link>
+              <Link to={`/projects/${d.project_id}`} className="text-[10px] text-m-blue hover:underline">{d.project_name}</Link>
             </div>
             <div className="flex items-center gap-3 shrink-0 ml-4">
               <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-lg border capitalize ${STATUS_CLS[d.status] || "bg-zinc-50 text-zinc-500 border-zinc-200"}`}>{d.status}</span>
@@ -583,7 +583,7 @@ export function TeamLoadWidget({ teamLoad }) {
               <div className="flex items-center justify-between mb-1.5">
                 <div className="flex items-center gap-2 min-w-0">
                   {t.team_id ? (
-                    <Link to={`/teams/${t.team_id}`} className="text-xs font-semibold text-blue-600 hover:underline truncate">{t.team_name}</Link>
+                    <Link to={`/teams/${t.team_id}`} className="text-xs font-semibold text-m-blue hover:underline truncate">{t.team_name}</Link>
                   ) : (
                     <span className="text-xs font-semibold text-zinc-500 truncate">{t.team_name}</span>
                   )}
@@ -622,16 +622,16 @@ export function RecentProjectsWidget({ summary }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm" data-testid="recent-projects-table">
           <thead>
-            <tr className="bg-[#fbfaff] text-left">
+            <tr className="bg-m-bg text-left">
               {["Projet", "Méthodo", "Statut", "Budget total", "Consommé", "Fin prévue"].map((h) => (
-                <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] border-b border-[#e8e6f0]">{h}</th>
+                <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted border-b border-m-border">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {(summary.recent_projects || []).map((p) => (
               <tr key={p.project_id} className="border-b border-zinc-100 hover:bg-zinc-50/60 transition-colors" data-testid={`recent-project-row-${p.project_id}`}>
-                <td className="px-4 py-2.5"><Link to={`/projects/${p.project_id}`} className="text-blue-600 hover:text-blue-700 font-medium text-sm">{p.name}</Link></td>
+                <td className="px-4 py-2.5"><Link to={`/projects/${p.project_id}`} className="text-m-blue hover:text-m-blue-dark font-medium text-sm">{p.name}</Link></td>
                 <td className="px-4 py-2.5"><span className="text-xs text-zinc-600 capitalize">{p.methodology}</span></td>
                 <td className="px-4 py-2.5"><RAGBadge status={p.status_rag} /></td>
                 <td className="px-4 py-2.5 text-right font-mono-data text-xs text-zinc-700">{formatEuro(p.budget_total)}</td>
@@ -657,17 +657,17 @@ export function TopRisksWidget({ topRisks }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm" data-testid="top-risks-table">
           <thead>
-            <tr className="bg-[#fbfaff] text-left">
+            <tr className="bg-m-bg text-left">
               {["Crit.", "Risque", "Catégorie", "Projet", "Statut", "Échéance"].map((h) => (
-                <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] border-b border-[#e8e6f0]">{h}</th>
+                <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted border-b border-m-border">{h}</th>
               ))}
             </tr>
           </thead>
           <tbody>
             {topRisks.map((r) => {
               const critCls = r.criticality >= 16 ? "bg-rose-100 text-rose-700 border-rose-300" : r.criticality >= 7 ? "bg-amber-100 text-amber-700 border-amber-200" : "bg-emerald-100 text-emerald-700 border-emerald-200";
-              const catColors = { technique: "text-blue-600", budget: "text-violet-600", planning: "text-sky-600", ressource: "text-indigo-600", externe: "text-zinc-500", "conformité": "text-teal-600" };
-              const statusCls = { identifié: "text-blue-600", traité: "text-amber-600", clos: "text-emerald-600", accepté: "text-zinc-500" };
+              const catColors = { technique: "text-m-blue", budget: "text-violet-600", planning: "text-sky-600", ressource: "text-indigo-600", externe: "text-zinc-500", "conformité": "text-teal-600" };
+              const statusCls = { identifié: "text-m-blue", traité: "text-amber-600", clos: "text-emerald-600", accepté: "text-zinc-500" };
               return (
                 <tr key={r.risk_id} className="border-b border-zinc-100 hover:bg-zinc-50/60 transition-colors" data-testid={`top-risk-row-${r.risk_id}`}>
                   <td className="px-4 py-2.5"><span className={`inline-flex items-center justify-center w-7 h-7 rounded-full text-xs font-bold border ${critCls}`}>{r.criticality}</span></td>
@@ -676,7 +676,7 @@ export function TopRisksWidget({ topRisks }) {
                     {r.owner && <div className="text-[10px] text-zinc-400 mt-0.5">{r.owner}</div>}
                   </td>
                   <td className="px-4 py-2.5"><span className={`text-xs font-semibold capitalize ${catColors[r.category] || "text-zinc-500"}`}>{r.category}</span></td>
-                  <td className="px-4 py-2.5"><Link to={`/projects/${r.project_id}`} className="text-blue-600 hover:text-blue-700 text-xs font-medium line-clamp-1" data-testid={`top-risk-project-link-${r.risk_id}`}>{r.project_name}</Link></td>
+                  <td className="px-4 py-2.5"><Link to={`/projects/${r.project_id}`} className="text-m-blue hover:text-m-blue-dark text-xs font-medium line-clamp-1" data-testid={`top-risk-project-link-${r.risk_id}`}>{r.project_name}</Link></td>
                   <td className="px-4 py-2.5"><span className={`text-xs font-semibold capitalize ${statusCls[r.status] || "text-zinc-500"}`}>{r.status}</span></td>
                   <td className="px-4 py-2.5 text-xs text-zinc-500 whitespace-nowrap">{r.due_date ? formatDate(r.due_date) : "—"}</td>
                 </tr>
@@ -710,22 +710,22 @@ export function ContractsExpiryWidget({ resources }) {
       {expiring.length === 0 ? (
         <div className="px-5 py-6 text-center text-xs text-zinc-400">Aucun contrat n'expire sous 60 jours.</div>
       ) : (
-        <div className="divide-y divide-[#f0eff6]">
+        <div className="divide-y divide-m-border-soft">
           {expiring.slice(0, 6).map((r) => (
             <Link
               key={r.resource_id}
               to={`/resources/${r.resource_id}`}
-              className="flex items-center gap-3 px-5 py-2.5 hover:bg-[#fbfaff] transition-colors"
+              className="flex items-center gap-3 px-5 py-2.5 hover:bg-m-bg transition-colors"
               data-testid={`contract-expiry-${r.resource_id}`}
             >
               <div className="min-w-0 flex-1">
-                <div className="text-[13px] font-semibold text-[#26243a] truncate">{r.name}</div>
-                <div className="text-[11px] text-[#8a87a0] truncate">
+                <div className="text-[13px] font-semibold text-m-ink truncate">{r.name}</div>
+                <div className="text-[11px] text-m-muted truncate">
                   {r.role}{r.vendor ? ` · ${r.vendor}` : ""}{r.contract_ref ? ` · ${r.contract_ref}` : ""}
                 </div>
               </div>
               <div className="text-right flex-shrink-0">
-                <div className="font-mono-data text-[11px] text-[#5d5a75]">{formatDate(r.contract_end)}</div>
+                <div className="font-mono-data text-[11px] text-m-ink-soft">{formatDate(r.contract_end)}</div>
                 {r.days < 0 ? (
                   <span className="inline-flex text-[10px] font-bold px-1.5 py-px rounded bg-rose-100 text-rose-700">Expiré</span>
                 ) : r.days <= 30 ? (
@@ -755,18 +755,18 @@ export function HeatmapWidget({ heatmapRisks, programs, allProjects }) {
   const moderate = filtered.filter((r) => r.criticality >= 7 && r.criticality < 16);
   const low = filtered.filter((r) => r.criticality < 7);
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] mb-5" data-testid="dashboard-heatmap-section">
-      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 border-b border-[#f0eff6]">
-        <div className="flex items-center gap-2 font-heading text-[13px] font-bold text-[#26243a]">
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] mb-5" data-testid="dashboard-heatmap-section">
+      <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 border-b border-m-border-soft">
+        <div className="flex items-center gap-2 font-heading text-[13px] font-bold text-m-ink">
           <MapPin size={13} className="text-rose-400" />
           Cartographie des risques P × I
         </div>
         <div className="flex flex-wrap items-center gap-2">
-          <select value={filterProgram} onChange={(e) => { setFilterProgram(e.target.value); setFilterProject(""); }} className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-blue-600 bg-white" data-testid="heatmap-filter-programme">
+          <select value={filterProgram} onChange={(e) => { setFilterProgram(e.target.value); setFilterProject(""); }} className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-m-blue bg-white" data-testid="heatmap-filter-programme">
             <option value="">Tous programmes</option>
             {programs.map((p) => <option key={p.program_id} value={p.program_id}>{p.name}</option>)}
           </select>
-          <select value={filterProject} onChange={(e) => setFilterProject(e.target.value)} className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-blue-600 bg-white" data-testid="heatmap-filter-project">
+          <select value={filterProject} onChange={(e) => setFilterProject(e.target.value)} className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-m-blue bg-white" data-testid="heatmap-filter-project">
             <option value="">Tous projets</option>
             {allProjects.filter((p) => !filterProgram || p.program_id === filterProgram).map((p) => (
               <option key={p.project_id} value={p.project_id}>{p.name.split("—")[0].trim().slice(0, 45)}</option>
@@ -784,7 +784,7 @@ export function HeatmapWidget({ heatmapRisks, programs, allProjects }) {
         <div className="col-span-1 lg:col-span-7">
           <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold mb-3">
             Distribution criticité — {filtered.length} risque{filtered.length !== 1 ? "s" : ""}
-            {(filterProgram || filterProject) && <span className="ml-2 text-blue-600 normal-case font-normal">(filtre actif)</span>}
+            {(filterProgram || filterProject) && <span className="ml-2 text-m-blue normal-case font-normal">(filtre actif)</span>}
           </div>
           {[
             { label: "Élevés (16-25)", count: critical.length, color: "bg-rose-500", textColor: "text-rose-700" },
@@ -812,7 +812,7 @@ export function HeatmapWidget({ heatmapRisks, programs, allProjects }) {
                   <span className="inline-flex items-center justify-center w-6 h-6 rounded-full text-xs font-bold bg-rose-100 text-rose-700 border border-rose-200 flex-shrink-0">{r.criticality}</span>
                   <div className="min-w-0">
                     <div className="text-xs text-zinc-700 font-medium line-clamp-1">{r.title}</div>
-                    <Link to={`/projects/${r.project_id}`} className="text-[10px] text-blue-600 hover:underline">{r.project_name}</Link>
+                    <Link to={`/projects/${r.project_id}`} className="text-[10px] text-m-blue hover:underline">{r.project_name}</Link>
                   </div>
                 </div>
               ))}

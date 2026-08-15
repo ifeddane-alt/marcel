@@ -32,6 +32,47 @@ async def list_projects(current_user: TokenPayload) -> list:
     return await db.projects.find(query, {"_id": 0}).to_list(None)
 
 
+async def get_consistency_alerts(current_user: TokenPayload) -> list:
+    """Projets dont les chiffres déclarés (JH) divergent de la somme des tâches (>10 % et ≥5 JH)."""
+    query: dict = {"tenant_id": current_user.tenant_id, "status": {"$nin": ["cloture", "archive"]}}
+    if is_ownership_restricted(current_user, "projects.view_own"):
+        query["owner_id"] = current_user.user_id
+    projects = await db.projects.find(
+        query, {"_id": 0, "project_id": 1, "name": 1, "code": 1, "jh_planned": 1, "jh_consumed": 1}
+    ).to_list(None)
+    pids = [p["project_id"] for p in projects]
+    if not pids:
+        return []
+    sums = await db.tasks.aggregate([
+        {"$match": {"project_id": {"$in": pids}}},
+        {"$group": {"_id": "$project_id",
+                    "jh_planned": {"$sum": {"$ifNull": ["$jh_planned", 0]}},
+                    "jh_consumed": {"$sum": {"$ifNull": ["$jh_consumed", 0]}},
+                    "n": {"$sum": 1}}},
+    ]).to_list(None)
+    by_pid = {s["_id"]: s for s in sums}
+    alerts = []
+    for p in projects:
+        t = by_pid.get(p["project_id"])
+        if not t or t["n"] == 0:
+            continue
+        gaps = []
+        for field, label in (("jh_consumed", "JH consommés"), ("jh_planned", "JH prévus")):
+            declared = p.get(field) or 0
+            tasks_sum = round(t[field], 1)
+            base = max(declared, tasks_sum)
+            diff = abs(declared - tasks_sum)
+            if base > 0 and diff >= 5 and diff / base > 0.10:
+                gaps.append({"field": field, "label": label, "declared": declared,
+                             "tasks_sum": tasks_sum, "gap_pct": round(diff / base * 100)})
+        if gaps:
+            alerts.append({"project_id": p["project_id"], "name": p["name"], "code": p.get("code"),
+                           "task_count": t["n"], "gaps": gaps,
+                           "max_gap_pct": max(g["gap_pct"] for g in gaps)})
+    alerts.sort(key=lambda a: -a["max_gap_pct"])
+    return alerts
+
+
 async def get_project(project_id: str, current_user: TokenPayload) -> dict:
     project = await db.projects.find_one(
         {"project_id": project_id, "tenant_id": current_user.tenant_id}, {"_id": 0}

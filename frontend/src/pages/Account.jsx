@@ -59,8 +59,8 @@ export default function Account() {
   return (
     <div className="p-4 md:p-6 lg:p-8 max-w-4xl" data-testid="account-page">
       <div className="mb-6">
-        <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Mon compte</span></div>
-        <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Mon compte</h1>
+        <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Mon compte</span></div>
+        <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">Mon compte</h1>
         <p className="text-sm text-zinc-500 mt-0.5">Vos informations personnelles et la gestion de votre mot de passe</p>
       </div>
 
@@ -68,7 +68,7 @@ export default function Account() {
         {/* Profil */}
         <div className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-6">
           <div className="flex items-center gap-4 mb-5">
-            <div className="w-14 h-14 rounded-full bg-[#352c6e] flex items-center justify-center flex-shrink-0">
+            <div className="w-14 h-14 rounded-full bg-m-primary flex items-center justify-center flex-shrink-0">
               <span className="text-lg font-bold text-white">{account.name?.slice(0, 2).toUpperCase()}</span>
             </div>
             <div className="min-w-0">
@@ -89,7 +89,7 @@ export default function Account() {
         {/* Changement de mot de passe */}
         <div className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-6">
           <div className="flex items-center gap-2 mb-4">
-            <KeyRound size={15} className="text-blue-600" />
+            <KeyRound size={15} className="text-m-blue" />
             <h2 className="font-heading text-base font-bold text-zinc-950">Changer mon mot de passe</h2>
           </div>
           {!account.has_password ? (
@@ -102,23 +102,23 @@ export default function Account() {
                 <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Mot de passe actuel *</label>
                 <input type="password" value={currentPwd} onChange={(e) => setCurrentPwd(e.target.value)} required
                   autoComplete="current-password" data-testid="current-password-input"
-                  className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+                  className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Nouveau mot de passe * (8 car. min)</label>
                 <input type="password" value={newPwd} onChange={(e) => setNewPwd(e.target.value)} required minLength={8}
                   autoComplete="new-password" data-testid="new-password-input"
-                  className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+                  className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue" />
               </div>
               <div>
                 <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Confirmer le nouveau mot de passe *</label>
                 <input type="password" value={confirmPwd} onChange={(e) => setConfirmPwd(e.target.value)} required
                   autoComplete="new-password" data-testid="confirm-password-input"
-                  className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+                  className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue" />
               </div>
               {error && <p className="text-sm text-rose-600 font-medium" data-testid="change-password-error">{error}</p>}
               <button type="submit" disabled={saving} data-testid="change-password-btn"
-                className="w-full px-4 py-2.5 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60">
+                className="w-full px-4 py-2.5 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors disabled:opacity-60">
                 {saving ? "Modification…" : "Modifier mon mot de passe"}
               </button>
             </form>
@@ -173,12 +173,12 @@ function MfaSection() {
     } catch (e2) { setErr(e2.response?.data?.detail || "Code invalide"); }
   };
 
-  const inputCls = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 font-mono-data tracking-widest focus:outline-none focus:border-blue-600";
+  const inputCls = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 font-mono-data tracking-widest focus:outline-none focus:border-m-blue";
 
   return (
     <div className="bg-white border border-zinc-200 rounded-2xl shadow-sm p-6 max-w-2xl" data-testid="mfa-section">
       <div className="flex items-center gap-2 mb-1">
-        <ShieldCheck size={15} className="text-blue-600" />
+        <ShieldCheck size={15} className="text-m-blue" />
         <h2 className="font-heading text-base font-bold text-zinc-950">Double authentification (MFA)</h2>
         {status.enabled ? (
           <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-emerald-50 text-emerald-700 border border-emerald-200" data-testid="mfa-status-badge">ACTIVÉE</span>
@@ -192,7 +192,7 @@ function MfaSection() {
 
       {status.available && !status.enabled && !setup && (
         <button onClick={startSetup} data-testid="mfa-enable-btn"
-          className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">Activer le MFA</button>
+          className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark">Activer le MFA</button>
       )}
 
       {setup && (
@@ -205,7 +205,7 @@ function MfaSection() {
             <input value={code} onChange={(e) => setCode(e.target.value)} required placeholder="123456"
               data-testid="mfa-confirm-code-input" className={inputCls} />
             <button type="submit" data-testid="mfa-confirm-btn"
-              className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">Confirmer</button>
+              className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark">Confirmer</button>
             <button type="button" onClick={() => { setSetup(null); setCode(""); setErr(""); }} data-testid="mfa-cancel-btn"
               className="px-3 py-2 text-sm font-semibold text-zinc-500 border border-zinc-200 rounded-lg hover:bg-zinc-50">Annuler</button>
           </div>

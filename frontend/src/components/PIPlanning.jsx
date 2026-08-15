@@ -48,7 +48,7 @@ function FeatureCard({ task, onAssign, sprints }) {
 
       {/* Sélecteur sprint */}
       <select
-        className="w-full text-[11px] border border-zinc-200 rounded-lg px-2 py-1.5 bg-zinc-50 focus:outline-none focus:border-blue-600 disabled:opacity-60"
+        className="w-full text-[11px] border border-zinc-200 rounded-lg px-2 py-1.5 bg-zinc-50 focus:outline-none focus:border-m-blue disabled:opacity-60"
         value={task.sprint_id || ""}
         onChange={(e) => handleAssign(e.target.value)}
         disabled={assigning}

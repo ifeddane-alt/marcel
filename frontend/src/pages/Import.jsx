@@ -120,8 +120,8 @@ export default function Import() {
     <div className="p-4 md:p-6 lg:p-8 max-w-4xl" data-testid="import-page">
       {/* Header */}
       <div className="mb-6">
-        <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Import CSV</span></div>
-        <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">
+        <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Import CSV</span></div>
+        <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">
           Import CSV
         </h1>
         <p className="text-sm text-zinc-500 mt-0.5">
@@ -136,12 +136,12 @@ export default function Import() {
             <div className="flex items-center gap-2">
               <div className={`w-7 h-7 rounded-full flex items-center justify-center text-xs font-bold transition-colors ${
                 i < step ? "bg-emerald-500 text-white" :
-                i === step ? "bg-blue-600 text-white" :
+                i === step ? "bg-m-blue text-white" :
                 "bg-zinc-200 text-zinc-500"
               }`}>
                 {i < step ? <CheckCircle2 size={14} /> : i + 1}
               </div>
-              <span className={`text-sm font-medium ${i === step ? "text-blue-600" : i < step ? "text-emerald-600" : "text-zinc-400"}`}>
+              <span className={`text-sm font-medium ${i === step ? "text-m-blue" : i < step ? "text-emerald-600" : "text-zinc-400"}`}>
                 {label}
               </span>
             </div>
@@ -174,11 +174,11 @@ export default function Import() {
                   data-testid={`entity-btn-${ent.key}`}
                   className={`text-left p-4 rounded-lg border-2 transition-all ${
                     entity === ent.key
-                      ? "border-blue-600 bg-blue-50"
+                      ? "border-m-blue bg-blue-50"
                       : "border-zinc-200 bg-white hover:border-zinc-300"
                   }`}
                 >
-                  <div className={`text-sm font-bold mb-1 ${entity === ent.key ? "text-blue-600" : "text-zinc-800"}`}>
+                  <div className={`text-sm font-bold mb-1 ${entity === ent.key ? "text-m-blue" : "text-zinc-800"}`}>
                     {ent.label}
                   </div>
                   <div className="text-[11px] text-zinc-400 leading-snug">{ent.desc}</div>
@@ -196,7 +196,7 @@ export default function Import() {
             <button
               onClick={downloadTemplate}
               data-testid="download-template-btn"
-              className="flex items-center gap-1.5 text-sm text-blue-600 font-semibold hover:underline"
+              className="flex items-center gap-1.5 text-sm text-m-blue font-semibold hover:underline"
             >
               <Download size={14} /> Template {entity}.csv
             </button>
@@ -210,7 +210,7 @@ export default function Import() {
             onClick={() => fileInput.current.click()}
             data-testid="import-dropzone"
             className={`border-2 border-dashed rounded-lg p-12 text-center cursor-pointer transition-all ${
-              dragOver ? "border-blue-600 bg-blue-50" :
+              dragOver ? "border-m-blue bg-blue-50" :
               file ? "border-emerald-400 bg-emerald-50" :
               "border-zinc-300 hover:border-zinc-400 bg-white"
             }`}
@@ -232,7 +232,7 @@ export default function Import() {
               <div className="space-y-2">
                 <Upload size={32} className="text-zinc-400 mx-auto" />
                 <div className="text-sm text-zinc-500">
-                  Glissez-déposez votre fichier CSV ici, ou <span className="text-blue-600 font-semibold">cliquez pour parcourir</span>
+                  Glissez-déposez votre fichier CSV ici, ou <span className="text-m-blue font-semibold">cliquez pour parcourir</span>
                 </div>
                 <div className="text-xs text-zinc-400">Format attendu : .csv (séparateur , ou ;)</div>
               </div>
@@ -244,7 +244,7 @@ export default function Import() {
               onClick={handlePreview}
               disabled={!file || loading}
               data-testid="btn-analyse"
-              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-50 disabled:cursor-not-allowed transition-colors"
             >
               {loading ? <RefreshCw size={15} className="animate-spin" /> : <ChevronRight size={15} />}
               Analyser le fichier
@@ -272,7 +272,7 @@ export default function Import() {
                     value={mapping[col] || ""}
                     onChange={(e) => setMapping((m) => ({ ...m, [col]: e.target.value }))}
                     data-testid={`mapping-select-${col}`}
-                    className="text-xs border border-zinc-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:border-blue-600 w-48"
+                    className="text-xs border border-zinc-200 rounded-lg px-2 py-1 bg-white focus:outline-none focus:border-m-blue w-48"
                   >
                     <option value="">-- ignorer --</option>
                     {preview.entity_fields.map((f) => (
@@ -325,7 +325,7 @@ export default function Import() {
             <button
               onClick={handleValidate}
               data-testid="btn-valider"
-              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark transition-colors"
             >
               <ChevronRight size={15} /> Valider le mapping
             </button>
@@ -382,7 +382,7 @@ export default function Import() {
               onClick={handleCommit}
               disabled={loading}
               data-testid="btn-importer"
-              className="flex items-center gap-2 px-5 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors"
+              className="flex items-center gap-2 px-5 py-2.5 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-50 transition-colors"
             >
               {loading ? <RefreshCw size={15} className="animate-spin" /> : <Upload size={15} />}
               Lancer l'import

@@ -36,8 +36,8 @@ const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("fr-FR") : "—");
 
 function Kpi({ label, value, sub, icon: Icon, accent, testId }) {
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 flex items-center gap-3" data-testid={testId}>
-      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${accent || "bg-[#f0eefc] text-[#352c6e]"}`}><Icon size={16} /></div>
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 flex items-center gap-3" data-testid={testId}>
+      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${accent || "bg-m-lilac text-m-primary"}`}><Icon size={16} /></div>
       <div className="min-w-0">
         <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">{label}</div>
         <div className="font-mono-data font-bold text-lg text-zinc-950 truncate">{value}</div>
@@ -79,8 +79,8 @@ export default function Architecture() {
   return (
     <div className="p-4 md:p-6 space-y-4" data-testid="architecture-page">
       <div>
-        <h1 className="font-heading text-xl md:text-2xl font-extrabold text-[#26243a] flex items-center gap-2">
-          <Network size={20} className="text-[#352c6e]" /> Architecture
+        <h1 className="font-heading text-xl md:text-2xl font-extrabold text-m-ink flex items-center gap-2">
+          <Network size={20} className="text-m-primary" /> Architecture
         </h1>
         <p className="text-xs text-zinc-400 mt-0.5">Cartographie des flux, standards, radar technologique, dette technique et avis d'architecture</p>
       </div>
@@ -99,7 +99,7 @@ export default function Architecture() {
       <div className="flex items-center gap-1 flex-wrap">
         {TABS.map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)} data-testid={`arch-tab-${t.id}`}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${tab === t.id ? "bg-blue-600 text-white" : "text-zinc-500 border border-zinc-200 hover:bg-zinc-50"}`}>
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${tab === t.id ? "bg-m-blue text-white" : "text-zinc-500 border border-zinc-200 hover:bg-zinc-50"}`}>
             {t.label}
           </button>
         ))}
@@ -148,7 +148,7 @@ export default function Architecture() {
             onChanged={loadSummary}
             columns={[
               { key: "title", label: "Standard", render: (i) => <span className="font-medium text-zinc-800">{i.title}</span> },
-              { key: "category", label: "Catégorie", render: (i) => i.category ? <Badge cls="bg-[#f0eefc] text-[#352c6e] border-[#e0dcf5]">{i.category}</Badge> : "—" },
+              { key: "category", label: "Catégorie", render: (i) => i.category ? <Badge cls="bg-m-lilac text-m-primary border-m-border-strong">{i.category}</Badge> : "—" },
               { key: "status", label: "Statut", render: (i) => <Badge cls={i.status === "deprecie" ? "bg-zinc-50 text-zinc-400 border-zinc-200" : "bg-emerald-50 text-emerald-700 border-emerald-200"}>{i.status === "deprecie" ? "Déprécié" : "Actif"}</Badge> },
               { key: "description", label: "Description", render: (i) => <span className="text-zinc-500 max-w-[280px] truncate inline-block" title={i.description}>{i.description || "—"}</span> },
             ]}

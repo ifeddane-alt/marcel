@@ -78,15 +78,15 @@ export default function Resources() {
     <div className="p-4 md:p-6 lg:p-8" data-testid="resources-page">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Ressources</span></div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Ressources</h1>
+          <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Ressources</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">Ressources</h1>
           <p className="text-sm text-zinc-500 mt-0.5">{resources.length} ressources · Capacités et allocations</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
           <ExcelToolbar entity="resources" onImported={fetchAll} canImport={canCreate} />
           {canCreate && (
             <button onClick={openCreate} data-testid="btn-new-resource"
-              className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+              className="flex items-center gap-2 px-4 py-2.5 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark transition-colors shadow-sm">
               <Plus size={15} /> Nouvelle ressource
             </button>
           )}
@@ -94,7 +94,7 @@ export default function Resources() {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 mb-5 border-b border-[#e7e3f2]">
+      <div className="flex gap-1 mb-5 border-b border-m-border-lav">
         {[
           { id: "resources", label: "Annuaire ressources" },
           { id: "referentiel", label: "Référentiel", icon: FileText },
@@ -107,8 +107,8 @@ export default function Resources() {
             data-testid={`tab-${id}`}
             className={`flex items-center gap-2 px-4 py-2.5 text-[13px] font-semibold border-b-[3px] -mb-px transition-colors ${
               activeTab === id
-                ? "text-[#2e5fe8] border-[#2e5fe8]"
-                : "text-[#8a87a0] border-transparent hover:text-[#26243a]"
+                ? "text-m-blue border-m-blue"
+                : "text-m-muted border-transparent hover:text-m-ink"
             }`}
           >
             {Icon && <Icon size={14} />}
@@ -129,7 +129,7 @@ export default function Resources() {
           <div className="relative mb-4 max-w-xs">
             <input type="text" value={search} onChange={(e) => setSearch(e.target.value)}
               placeholder="Rechercher une ressource..." data-testid="resources-search-input"
-              className="w-full pl-4 pr-3 py-2 text-sm border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-blue-600" />
+              className="w-full pl-4 pr-3 py-2 text-sm border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-m-blue" />
           </div>
 
           {/* Filtres par type */}
@@ -159,7 +159,7 @@ export default function Resources() {
             ))}
           </div>
 
-          <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto">
+          <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto">
             <table className="w-full text-sm" data-testid="resources-table">
               <thead>
                 <tr className="bg-zinc-50 border-b border-zinc-200 text-left">
@@ -187,10 +187,10 @@ export default function Resources() {
                     >
                       <td className="px-4 py-3">
                         <div className="flex items-center gap-2.5">
-                          <div className="w-7 h-7 rounded-lg bg-blue-600/10 flex items-center justify-center flex-shrink-0">
-                            <span className="text-[10px] font-bold text-blue-600">{initials}</span>
+                          <div className="w-7 h-7 rounded-lg bg-m-blue/10 flex items-center justify-center flex-shrink-0">
+                            <span className="text-[10px] font-bold text-m-blue">{initials}</span>
                           </div>
-                          <span className="font-medium text-zinc-800 hover:text-[#2e5fe8] hover:underline" data-testid={`resource-link-${r.resource_id}`}>{r.name}</span>
+                          <span className="font-medium text-zinc-800 hover:text-m-blue hover:underline" data-testid={`resource-link-${r.resource_id}`}>{r.name}</span>
                         </div>
                       </td>
                       <td className="px-4 py-3">
@@ -224,7 +224,7 @@ export default function Resources() {
                         {totalAllocated > 0 ? (
                           <div className="flex items-center gap-2">
                             <div className="h-1.5 w-20 bg-zinc-100 rounded-full overflow-hidden">
-                              <div className={`h-full rounded-full ${overloaded ? "bg-rose-500" : "bg-blue-600"}`} style={{ width: `${Math.min(chargeRate, 100)}%` }} />
+                              <div className={`h-full rounded-full ${overloaded ? "bg-rose-500" : "bg-m-blue"}`} style={{ width: `${Math.min(chargeRate, 100)}%` }} />
                             </div>
                             <span className={`font-mono text-xs font-semibold ${overloaded ? "text-rose-600" : "text-zinc-600"}`}>{chargeRate}%</span>
                           </div>
@@ -235,7 +235,7 @@ export default function Resources() {
                           <div className="flex items-center justify-end gap-1">
                             {canEdit && (
                             <button onClick={(e) => openEdit(e, r)} data-testid={`btn-edit-resource-${r.resource_id}`}
-                              className="p-1.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Modifier">
+                              className="p-1.5 text-zinc-400 hover:text-m-blue hover:bg-blue-50 rounded-lg transition-colors" title="Modifier">
                               <Pencil size={13} />
                             </button>
                             )}
@@ -258,12 +258,12 @@ export default function Resources() {
       )}
 
       {activeTab === "referentiel" && (
-        <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto" data-testid="referentiel-section">
+        <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto" data-testid="referentiel-section">
           <table className="w-full text-sm" data-testid="referentiel-table">
             <thead>
-              <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+              <tr className="bg-m-bg border-b border-m-border text-left">
                 {["Ressource", "Type", "Rôle", "Équipe", "Date d'entrée", "Capacité annuelle", "Réf. contrat", "Fournisseur", "Expiration contrat"].map((h) => (
-                  <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] whitespace-nowrap">{h}</th>
+                  <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -290,7 +290,7 @@ export default function Resources() {
                     <td className="px-4 py-3 text-zinc-600">{r.role}</td>
                     <td className="px-4 py-3 text-zinc-500 text-xs">{r.team || "—"}</td>
                     <td className="px-4 py-3 font-mono-data text-xs text-zinc-600" data-testid={`ref-entry-${r.resource_id}`}>{fmt(r.entry_date) || "—"}</td>
-                    <td className="px-4 py-3 font-mono-data text-sm font-semibold text-[#26243a]">{capaAnnuelle} JH</td>
+                    <td className="px-4 py-3 font-mono-data text-sm font-semibold text-m-ink">{capaAnnuelle} JH</td>
                     <td className="px-4 py-3 font-mono-data text-xs text-zinc-600" data-testid={`ref-contract-${r.resource_id}`}>{r.contract_ref || "—"}</td>
                     <td className="px-4 py-3 text-xs text-zinc-500">{r.vendor || "—"}</td>
                     <td className="px-4 py-3 whitespace-nowrap" data-testid={`ref-expiry-${r.resource_id}`}>
@@ -322,7 +322,7 @@ export default function Resources() {
       {activeTab === "competences" && <SkillsTab />}
 
       {activeTab === "heatmap" && (
-        <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-5" data-testid="heatmap-section">
+        <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-5" data-testid="heatmap-section">
           <div className="mb-4">
             <h2 className="font-heading text-base font-bold text-zinc-950 tracking-tight">Heatmap capacité × période</h2>
             <p className="text-xs text-zinc-500 mt-0.5">Taux d'utilisation par équipe (allocations mensuelle / capacité effective)</p>
@@ -355,17 +355,17 @@ function SkillsTab() {
   if (skills === null) return <div className="p-6 text-sm text-zinc-400">Chargement des compétences…</div>;
   if (skills.length === 0)
     return (
-      <div className="bg-white border border-[#e8e6f0] rounded-xl p-10 text-center text-sm text-zinc-400" data-testid="skills-empty">
+      <div className="bg-white border border-m-border rounded-xl p-10 text-center text-sm text-zinc-400" data-testid="skills-empty">
         Aucune compétence saisie — ajoutez des compétences aux ressources depuis leur fiche (bouton Modifier).
       </div>
     );
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto" data-testid="skills-table">
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto" data-testid="skills-table">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+          <tr className="bg-m-bg border-b border-m-border text-left">
             {["Compétence", "Ressources", "Niveau moyen", "Qui ?"].map((h) => (
-              <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">{h}</th>
+              <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted">{h}</th>
             ))}
           </tr>
         </thead>
@@ -375,7 +375,7 @@ function SkillsTab() {
               <td className="px-4 py-2.5 font-semibold text-zinc-800">{s.name}</td>
               <td className="px-4 py-2.5 font-mono-data font-bold">{s.count}</td>
               <td className="px-4 py-2.5">
-                <span className="font-mono-data text-xs font-bold text-[#352c6e]">{s.avg_level}</span>
+                <span className="font-mono-data text-xs font-bold text-m-primary">{s.avg_level}</span>
                 <span className="text-[10px] text-zinc-400"> / 5</span>
               </td>
               <td className="px-4 py-2.5">
@@ -383,7 +383,7 @@ function SkillsTab() {
                   {s.resources.map((r) => (
                     <button key={r.resource_id} onClick={() => navigate(`/resources/${r.resource_id}`)}
                       data-testid={`skill-resource-${r.resource_id}`}
-                      className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#f0eefc] text-[#352c6e] hover:bg-[#e0dcf5]">
+                      className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-m-lilac text-m-primary hover:bg-m-border-strong">
                       {r.resource_name} · niv. {r.level}
                     </button>
                   ))}

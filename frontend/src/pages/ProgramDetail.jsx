@@ -50,18 +50,18 @@ export default function ProgramDetail() {
   return (
     <div className="p-4 md:p-6 lg:p-8" data-testid="program-detail-page">
       {/* Fil d'Ariane */}
-      <nav className="flex items-center gap-1.5 text-xs text-[#8a87a0] mb-4">
+      <nav className="flex items-center gap-1.5 text-xs text-m-muted mb-4">
         <span>Accueil</span>
         <span>/</span>
-        <Link to="/programmes" className="hover:text-[#2e5fe8]" data-testid="breadcrumb-programmes">Programmes</Link>
+        <Link to="/programmes" className="hover:text-m-blue" data-testid="breadcrumb-programmes">Programmes</Link>
         <span>/</span>
-        <span className="text-[#352c6e] font-semibold truncate max-w-xs">{program.name}</span>
+        <span className="text-m-primary font-semibold truncate max-w-xs">{program.name}</span>
       </nav>
 
       {/* Header */}
       <div className="flex items-start justify-between mb-5">
         <div className="flex-1 min-w-0 mr-4">
-          <h1 className="font-heading text-2xl sm:text-[28px] font-extrabold text-[#26243a] leading-tight flex flex-wrap items-center gap-x-3 gap-y-1" data-testid="program-name">
+          <h1 className="font-heading text-2xl sm:text-[28px] font-extrabold text-m-ink leading-tight flex flex-wrap items-center gap-x-3 gap-y-1" data-testid="program-name">
             {program.name}
             <span className="inline-flex items-center gap-2 align-middle">
               <RAGBadge status={metrics.rag_consolidated || "green"} />
@@ -88,7 +88,7 @@ export default function ProgramDetail() {
           <button
             onClick={() => setExportModalOpen(true)}
             data-testid="btn-export-copil-program"
-            className="flex items-center gap-2 px-4 py-2 border border-blue-600 text-blue-600 text-sm font-semibold rounded-lg hover:bg-blue-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-2 border border-m-blue text-m-blue text-sm font-semibold rounded-lg hover:bg-blue-50 transition-colors"
           >
             <Presentation size={14} /> Export COPIL
           </button>
@@ -96,7 +96,7 @@ export default function ProgramDetail() {
       </div>
 
       {/* Onglets façon Clarity */}
-      <div className="flex gap-1 border-b border-[#e7e3f2] mb-5 overflow-x-auto" data-testid="program-tabs">
+      <div className="flex gap-1 border-b border-m-border-lav mb-5 overflow-x-auto" data-testid="program-tabs">
         {[
           { id: "apercu", label: "Aperçu" },
           { id: "projets", label: "Projets", count: projects.length },
@@ -108,12 +108,12 @@ export default function ProgramDetail() {
             onClick={() => setActiveTab(t.id)}
             data-testid={`program-tab-${t.id}`}
             className={`flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold whitespace-nowrap border-b-[3px] -mb-px transition-colors ${
-              activeTab === t.id ? "text-[#2e5fe8] border-[#2e5fe8]" : "text-[#8a87a0] border-transparent hover:text-[#26243a]"
+              activeTab === t.id ? "text-m-blue border-m-blue" : "text-m-muted border-transparent hover:text-m-ink"
             }`}
           >
             {t.label}
             {t.count > 0 && (
-              <span className={`text-[10px] font-bold px-1.5 py-px rounded-full ${activeTab === t.id ? "bg-[#e9effe] text-[#2e5fe8]" : "bg-[#f0eefc] text-[#8a87a0]"}`}>
+              <span className={`text-[10px] font-bold px-1.5 py-px rounded-full ${activeTab === t.id ? "bg-m-blue-soft text-m-blue" : "bg-m-lilac text-m-muted"}`}>
                 {t.count}
               </span>
             )}
@@ -154,11 +154,11 @@ export default function ProgramDetail() {
               <div className="text-xs uppercase tracking-widest text-zinc-500 font-semibold">
                 Projets du programme ({projects.length})
               </div>
-              <div className="flex border border-[#dcd9ea] rounded-lg overflow-hidden bg-white">
+              <div className="flex border border-m-border-strong rounded-lg overflow-hidden bg-white">
                 <button
                   onClick={() => switchProjView("tiles")}
                   data-testid="program-view-toggle-tiles"
-                  className={`w-8 h-8 flex items-center justify-center transition-colors ${projView === "tiles" ? "bg-[#e9effe] text-[#2e5fe8]" : "text-[#8a87a0] hover:bg-[#f7f6fb]"}`}
+                  className={`w-8 h-8 flex items-center justify-center transition-colors ${projView === "tiles" ? "bg-m-blue-soft text-m-blue" : "text-m-muted hover:bg-m-surface"}`}
                   title="Vue tuiles"
                 >
                   <LayoutGrid size={14} />
@@ -166,7 +166,7 @@ export default function ProgramDetail() {
                 <button
                   onClick={() => switchProjView("list")}
                   data-testid="program-view-toggle-list"
-                  className={`w-8 h-8 flex items-center justify-center transition-colors border-l border-[#dcd9ea] ${projView === "list" ? "bg-[#e9effe] text-[#2e5fe8]" : "text-[#8a87a0] hover:bg-[#f7f6fb]"}`}
+                  className={`w-8 h-8 flex items-center justify-center transition-colors border-l border-m-border-strong ${projView === "list" ? "bg-m-blue-soft text-m-blue" : "text-m-muted hover:bg-m-surface"}`}
                   title="Vue liste"
                 >
                   <List size={14} />
@@ -185,9 +185,9 @@ export default function ProgramDetail() {
               <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-x-auto">
               <table className="w-full text-sm" data-testid="program-projects-table">
                 <thead>
-                  <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+                  <tr className="bg-m-bg border-b border-m-border text-left">
                     {["RAG", "Nom", "Méthodo", "Budget total", "Consommé", "Forecast", "Fin prévue"].map((h) => (
-                      <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">{h}</th>
+                      <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -206,7 +206,7 @@ export default function ProgramDetail() {
                         <td className="px-4 py-3 max-w-[220px]">
                           <Link
                             to={`/projects/${p.project_id}`}
-                            className="text-blue-600 hover:text-blue-700 font-medium text-sm leading-snug line-clamp-2"
+                            className="text-m-blue hover:text-m-blue-dark font-medium text-sm leading-snug line-clamp-2"
                           >
                             {p.name}
                           </Link>
@@ -278,9 +278,9 @@ export default function ProgramDetail() {
               </div>
               <table className="w-full text-sm">
                 <thead>
-                  <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+                  <tr className="bg-m-bg border-b border-m-border text-left">
                     {["Jalon", "Projet", "Baseline", "Forecast", "Statut"].map((h) => (
-                      <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">{h}</th>
+                      <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted">{h}</th>
                     ))}
                   </tr>
                 </thead>
@@ -290,12 +290,12 @@ export default function ProgramDetail() {
                     return (
                       <tr key={m.milestone_id} className="border-b border-zinc-100 hover:bg-zinc-50/50">
                         <td className="px-4 py-2.5 font-medium text-zinc-800 text-xs">
-                          {m.is_governance && <Flag size={11} className="text-blue-600 inline mr-1" />}
+                          {m.is_governance && <Flag size={11} className="text-m-blue inline mr-1" />}
                           {m.name}
                         </td>
                         <td className="px-4 py-2.5 text-xs text-zinc-500 max-w-[160px] truncate">
                           {proj ? (
-                            <Link to={`/projects/${proj.project_id}`} className="hover:text-blue-600">
+                            <Link to={`/projects/${proj.project_id}`} className="hover:text-m-blue">
                               {proj.name.split("—")[0].trim()}
                             </Link>
                           ) : "—"}
@@ -384,7 +384,7 @@ export default function ProgramDetail() {
             </div>
             <div className="h-3 bg-zinc-100 rounded-full overflow-hidden">
               <div
-                className={`h-full rounded-full transition-all ${consumedPct > 90 ? "bg-rose-500" : "bg-blue-600"}`}
+                className={`h-full rounded-full transition-all ${consumedPct > 90 ? "bg-rose-500" : "bg-m-blue"}`}
                 style={{ width: `${consumedPct}%` }}
               />
             </div>

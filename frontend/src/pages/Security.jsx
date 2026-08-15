@@ -34,8 +34,8 @@ const barColor = (s) => (s >= 80 ? "#3f8a34" : s >= 60 ? "#e0a800" : "#e11d48");
 
 function Kpi({ label, value, sub, icon: Icon, accent, testId }) {
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 flex items-center gap-3" data-testid={testId}>
-      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${accent || "bg-[#f0eefc] text-[#352c6e]"}`}><Icon size={16} /></div>
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 flex items-center gap-3" data-testid={testId}>
+      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${accent || "bg-m-lilac text-m-primary"}`}><Icon size={16} /></div>
       <div className="min-w-0">
         <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">{label}</div>
         <div className="font-mono-data font-bold text-lg text-zinc-950 truncate">{value}</div>
@@ -50,8 +50,8 @@ function PostureTab() {
   useEffect(() => { securityAPI.posture().then((r) => setRows(r.data)).catch(() => setRows([])); }, []);
   if (!rows) return <div className="p-6 text-sm text-zinc-400">Calcul de la posture…</div>;
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]" data-testid="posture-tab">
-      <div className="px-5 py-3 border-b border-zinc-100 font-heading text-[13px] font-bold text-[#26243a]">
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]" data-testid="posture-tab">
+      <div className="px-5 py-3 border-b border-zinc-100 font-heading text-[13px] font-bold text-m-ink">
         Score de posture sécurité par application
       </div>
       {rows.length === 0 ? (
@@ -61,7 +61,7 @@ function PostureTab() {
           {rows.map((r) => (
             <div key={r.application_id} className="flex items-center gap-3 px-5 py-2.5 flex-wrap" data-testid={`posture-row-${r.application_id}`}>
               <span className="text-xs font-semibold text-zinc-800 w-52 truncate">{r.name}</span>
-              <div className="flex-1 min-w-[120px] h-2 bg-[#ece9f4] rounded-full overflow-hidden">
+              <div className="flex-1 min-w-[120px] h-2 bg-m-border-soft rounded-full overflow-hidden">
                 <div className="h-full rounded-full" style={{ width: `${r.score}%`, background: barColor(r.score) }} />
               </div>
               <span className={`font-mono-data text-sm font-bold w-10 text-right ${scoreColor(r.score)}`}>{r.score}</span>
@@ -108,8 +108,8 @@ export default function Security() {
   return (
     <div className="p-4 md:p-6 space-y-4" data-testid="security-page">
       <div>
-        <h1 className="font-heading text-xl md:text-2xl font-extrabold text-[#26243a] flex items-center gap-2">
-          <ShieldHalf size={20} className="text-[#352c6e]" /> Sécurité
+        <h1 className="font-heading text-xl md:text-2xl font-extrabold text-m-ink flex items-center gap-2">
+          <ShieldHalf size={20} className="text-m-primary" /> Sécurité
         </h1>
         <p className="text-xs text-zinc-400 mt-0.5">Posture, vulnérabilités, conformité DORA / NIS2 / RGPD / ISO 27001, avis sécurité projets</p>
       </div>
@@ -128,7 +128,7 @@ export default function Security() {
       {Object.keys(fw).length > 0 && (
         <div className="flex items-center gap-2 flex-wrap">
           {Object.entries(fw).map(([name, d]) => (
-            <span key={name} className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold bg-white border border-[#e8e6f0] rounded-lg" data-testid={`fw-chip-${name}`}>
+            <span key={name} className="flex items-center gap-1.5 px-2.5 py-1 text-[11px] font-semibold bg-white border border-m-border rounded-lg" data-testid={`fw-chip-${name}`}>
               {name}
               <span className={`font-mono-data font-bold ${d.pct_conforme >= 80 ? "text-emerald-600" : d.pct_conforme >= 50 ? "text-amber-600" : "text-rose-600"}`}>
                 {d.pct_conforme}%
@@ -141,7 +141,7 @@ export default function Security() {
       <div className="flex items-center gap-1 flex-wrap">
         {TABS.map((t) => (
           <button key={t.id} onClick={() => setTab(t.id)} data-testid={`sec-tab-${t.id}`}
-            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${tab === t.id ? "bg-blue-600 text-white" : "text-zinc-500 border border-zinc-200 hover:bg-zinc-50"}`}>
+            className={`px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${tab === t.id ? "bg-m-blue text-white" : "text-zinc-500 border border-zinc-200 hover:bg-zinc-50"}`}>
             {t.label}
           </button>
         ))}
@@ -184,7 +184,7 @@ export default function Security() {
           emptyText="Aucune exigence — déclinez DORA, NIS2, RGPD ou ISO 27001 en exigences suivies."
           onChanged={loadSummary}
           columns={[
-            { key: "framework", label: "Cadre", render: (i) => <Badge cls="bg-[#f0eefc] text-[#352c6e] border-[#e0dcf5]">{i.framework}</Badge> },
+            { key: "framework", label: "Cadre", render: (i) => <Badge cls="bg-m-lilac text-m-primary border-m-border-strong">{i.framework}</Badge> },
             { key: "ref", label: "Réf.", render: (i) => <span className="font-mono-data">{i.ref || "—"}</span> },
             { key: "title", label: "Exigence", render: (i) => <span className="font-medium text-zinc-800">{i.title}</span> },
             { key: "application_name", label: "Application" },

@@ -322,7 +322,7 @@ function CapacityVsLoad({ data }) {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-[#8a87a0] text-xs">
+            <tr className="bg-m-bg border-b border-m-border text-m-muted text-xs">
               {["", "Équipe", "Capa dispo (JH)", "Charge SEC (JH)", "Charge ÉTENDU (JH)", "Marge (JH)", "Taux (%)", ""].map((h, i) => (
                 <th key={i} className="text-left px-3 py-2 font-semibold whitespace-nowrap">{h}</th>
               ))}
@@ -360,7 +360,7 @@ function CapacityVsLoad({ data }) {
                         <td className="px-3 py-1.5 pl-8 text-zinc-500">↳ {r.name}</td>
                         <td className="px-3 py-1.5 text-right">{r.capa}</td>
                         <td className="px-3 py-1.5 text-right text-emerald-600 font-medium">{r.charge_sec}</td>
-                        <td className="px-3 py-1.5 text-right text-blue-600">{r.charge_etendu}</td>
+                        <td className="px-3 py-1.5 text-right text-m-blue">{r.charge_etendu}</td>
                         <td className={`px-3 py-1.5 text-right font-medium ${r.marge < 0 ? "text-red-500" : ""}`}>
                           {r.marge > 0 ? "+" : ""}{r.marge}
                         </td>
@@ -492,7 +492,7 @@ function ScopeKanban({ candidates, onStatusChange, canEdit, unsavedChanges, onSa
           <button
             onClick={onSave}
             data-testid="kanban-save-btn"
-            className="flex items-center gap-1.5 text-sm font-semibold text-white bg-blue-600 px-3 py-1.5 rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-1.5 text-sm font-semibold text-white bg-m-blue px-3 py-1.5 rounded-lg hover:bg-m-blue-dark transition-colors"
           >
             <Save size={13} /> Enregistrer les modifications
           </button>
@@ -530,7 +530,7 @@ function FreezeModal({ projects, nextVersion, onClose, onFreeze }) {
       <div className="bg-white rounded-none sm:rounded-2xl shadow-2xl w-full max-h-screen sm:max-h-[90vh] overflow-y-auto sm:max-w-md">
         <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Lock size={18} className="text-blue-600" />
+            <Lock size={18} className="text-m-blue" />
             <h2 className="font-semibold text-zinc-800">Figer le scope v{nextVersion}</h2>
           </div>
           <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600 text-xl leading-none">&times;</button>
@@ -539,7 +539,7 @@ function FreezeModal({ projects, nextVersion, onClose, onFreeze }) {
           <div>
             <label className="block text-xs font-medium text-zinc-600 mb-1">Projet</label>
             <select value={projectId} onChange={(e) => setProjectId(e.target.value)}
-              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600"
+              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-m-blue"
               data-testid="freeze-project-select">
               <option value="">— Tous les projets —</option>
               {projects.map((p) => <option key={p.project_id} value={p.project_id}>{p.name}</option>)}
@@ -549,13 +549,13 @@ function FreezeModal({ projects, nextVersion, onClose, onFreeze }) {
             <label className="block text-xs font-medium text-zinc-600 mb-1">Référence période</label>
             <input value={periodRef} onChange={(e) => setPeriodRef(e.target.value)}
               placeholder="ex: PI-1 2026 ou 2026-Q2"
-              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600"
+              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-m-blue"
               data-testid="freeze-period-input" />
           </div>
           <div>
             <label className="block text-xs font-medium text-zinc-600 mb-1">Commentaire PMO</label>
             <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={3}
-              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600 resize-none"
+              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-m-blue resize-none"
               data-testid="freeze-comment-input" />
           </div>
         </div>
@@ -585,7 +585,7 @@ function TransmitModal({ snapshot, users, onClose, onTransmit }) {
       <div className="bg-white rounded-none sm:rounded-2xl shadow-2xl w-full max-h-screen sm:max-h-[90vh] overflow-y-auto sm:max-w-md">
         <div className="px-6 py-4 border-b border-zinc-100 flex items-center justify-between">
           <div className="flex items-center gap-2">
-            <Send size={18} className="text-blue-600" />
+            <Send size={18} className="text-m-blue" />
             <h2 className="font-semibold text-zinc-800">Transmettre au CP</h2>
           </div>
           <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600 text-xl leading-none">&times;</button>
@@ -597,7 +597,7 @@ function TransmitModal({ snapshot, users, onClose, onTransmit }) {
           <div>
             <label className="block text-xs font-medium text-zinc-600 mb-1">Destinataire (CP)</label>
             <select value={targetUserId} onChange={(e) => setTargetUserId(e.target.value)}
-              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600"
+              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-m-blue"
               data-testid="transmit-user-select">
               <option value="">— Choisir un CP —</option>
               {users.map((u) => <option key={u.user_id} value={u.user_id}>{u.name} ({u.email})</option>)}
@@ -606,7 +606,7 @@ function TransmitModal({ snapshot, users, onClose, onTransmit }) {
           <div>
             <label className="block text-xs font-medium text-zinc-600 mb-1">Commentaire</label>
             <textarea value={comment} onChange={(e) => setComment(e.target.value)} rows={3}
-              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-blue-600 resize-none"
+              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-1 focus:ring-m-blue resize-none"
               data-testid="transmit-comment-input" />
           </div>
         </div>
@@ -615,7 +615,7 @@ function TransmitModal({ snapshot, users, onClose, onTransmit }) {
           <button
             onClick={() => onTransmit(snapshot.snapshot_id, { target_user_id: targetUserId, comment })}
             disabled={!targetUserId}
-            className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50 flex items-center gap-2"
+            className="px-4 py-2 text-sm bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-50 flex items-center gap-2"
             data-testid="transmit-confirm-btn">
             <Send size={14} />
             Transmettre
@@ -832,8 +832,8 @@ export default function Scope() {
       {/* En-tête */}
       <div className="flex items-start justify-between flex-wrap gap-4">
         <div>
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Scope</span></div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Arbitrage Scope</h1>
+          <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Scope</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">Arbitrage Scope</h1>
           <p className="text-sm text-zinc-500 mt-0.5">Sélection, figeage et transmission des features candidates</p>
         </div>
         <div className="flex items-center gap-2 flex-wrap">
@@ -842,7 +842,7 @@ export default function Scope() {
             <button
               onClick={() => setViewMode("table")}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors
-                ${viewMode === "table" ? "bg-[#2e5fe8] text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
+                ${viewMode === "table" ? "bg-m-blue text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
               data-testid="view-table-btn">
               <Table2 size={13} />Tableau
             </button>
@@ -850,7 +850,7 @@ export default function Scope() {
               onClick={() => setViewMode("kanban")}
               disabled={!!viewSnap}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors disabled:opacity-40
-                ${viewMode === "kanban" ? "bg-[#2e5fe8] text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
+                ${viewMode === "kanban" ? "bg-m-blue text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
               data-testid="view-kanban-btn">
               <KanbanIcon size={13} />Kanban
             </button>
@@ -858,7 +858,7 @@ export default function Scope() {
               onClick={() => setViewMode("timeline")}
               disabled={!viewSnap}
               className={`flex items-center gap-1.5 px-3 py-1.5 text-sm transition-colors disabled:opacity-40 disabled:cursor-not-allowed
-                ${viewMode === "timeline" ? "bg-[#2e5fe8] text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
+                ${viewMode === "timeline" ? "bg-m-blue text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
               data-testid="view-timeline-btn"
               title={!viewSnap ? "Sélectionnez une version figée pour afficher la timeline" : ""}>
               <BarChart2 size={13} />Timeline
@@ -881,7 +881,7 @@ export default function Scope() {
                   } catch { /* silence */ }
                 }
               }}
-              className="border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-blue-600"
+              className="border border-zinc-200 rounded-lg px-3 py-2 text-sm bg-white focus:outline-none focus:ring-1 focus:ring-m-blue"
               data-testid="snapshot-version-select"
             >
               <option value="">Version courante</option>
@@ -979,7 +979,7 @@ export default function Scope() {
           <div className="flex items-center gap-2">
             {canTransmit && viewSnap.status !== "transmitted" && (
               <button onClick={() => openTransmit(viewSnap)}
-                className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700"
+                className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-m-blue text-white rounded-lg hover:bg-m-blue-dark"
                 data-testid="transmit-snapshot-btn">
                 <Send size={13} />Transmettre au CP
               </button>

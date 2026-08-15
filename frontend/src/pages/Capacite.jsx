@@ -44,16 +44,16 @@ export default function Capacite() {
     <div className="p-4 md:p-6 space-y-5" data-testid="capacite-page">
       <div className="flex flex-wrap items-end justify-between gap-3">
         <div>
-          <h1 className="font-heading text-xl md:text-2xl font-extrabold text-[#26243a] flex items-center gap-2">
-            <Layers size={20} className="text-[#352c6e]" /> Console capacitaire
+          <h1 className="font-heading text-xl md:text-2xl font-extrabold text-m-ink flex items-center gap-2">
+            <Layers size={20} className="text-m-primary" /> Console capacitaire
           </h1>
           <p className="text-xs text-zinc-400 mt-0.5">Charge vs capacité (JH) sur les prochains mois — allocations × capacité des ressources</p>
         </div>
         <div className="flex items-center gap-2">
-          <div className="flex rounded-[10px] border-[1.5px] border-[#dcd7ea] overflow-hidden bg-white">
+          <div className="flex rounded-lg border-[1.5px] border-m-border-strong overflow-hidden bg-white">
             {[3, 6].map((h) => (
               <button key={h} onClick={() => setHorizon(h)} data-testid={`capacity-horizon-${h}`}
-                className={`px-4 h-9 text-sm font-bold transition-colors ${horizon === h ? "bg-[#2e5fe8] text-white" : "text-[#5d5a75] hover:bg-[#f0eefc]"}`}>
+                className={`px-4 h-9 text-sm font-bold transition-colors ${horizon === h ? "bg-m-blue text-white" : "text-m-ink-soft hover:bg-m-lilac"}`}>
                 {h} mois
               </button>
             ))}
@@ -75,32 +75,32 @@ export default function Capacite() {
       <div className="flex items-center gap-1 flex-wrap">
         {AXES.map((a) => (
           <button key={a.id} onClick={() => setAxis(a.id)} data-testid={`capacity-axis-${a.id}`}
-            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${axis === a.id ? "bg-blue-600 text-white" : "text-zinc-500 border border-zinc-200 bg-white hover:bg-zinc-50"}`}>
+            className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold rounded-lg transition-colors ${axis === a.id ? "bg-m-blue text-white" : "text-zinc-500 border border-zinc-200 bg-white hover:bg-zinc-50"}`}>
             <a.icon size={13} /> {a.label}
           </button>
         ))}
       </div>
 
       {/* Grille */}
-      <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto" data-testid="capacity-grid">
+      <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto" data-testid="capacity-grid">
         <table className="w-full text-sm min-w-[640px]">
           <thead>
-            <tr className="text-left text-[10px] uppercase tracking-wider text-[#8a87a0] border-b border-[#f0eff6] bg-[#fbfaff]">
+            <tr className="text-left text-[10px] uppercase tracking-wider text-m-muted border-b border-m-border-soft bg-m-bg">
               <th className="px-4 py-2.5">{axis === "team" ? "Équipe" : axis === "resource" ? "Ressource" : "Compétence"}</th>
               <th className="px-2 py-2.5 text-center w-14">Res.</th>
               {months.map((m) => <th key={m} className="px-2 py-2.5 text-center">{fmtMonth(m)}</th>)}
-              <th className="px-3 py-2.5 text-center bg-[#f0eefc]">Total</th>
+              <th className="px-3 py-2.5 text-center bg-m-lilac">Total</th>
             </tr>
           </thead>
           <tbody>
-            {loading && <tr><td colSpan={months.length + 3} className="px-4 py-8 text-center text-[#8a87a0]">Chargement…</td></tr>}
+            {loading && <tr><td colSpan={months.length + 3} className="px-4 py-8 text-center text-m-muted">Chargement…</td></tr>}
             {!loading && rows.length === 0 && (
-              <tr><td colSpan={months.length + 3} className="px-4 py-8 text-center text-[#8a87a0]" data-testid="capacity-empty">Aucune donnée de capacité.</td></tr>
+              <tr><td colSpan={months.length + 3} className="px-4 py-8 text-center text-m-muted" data-testid="capacity-empty">Aucune donnée de capacité.</td></tr>
             )}
             {rows.map((r) => (
-              <tr key={r.key} className="border-b border-[#f7f6fb] hover:bg-[#fbfaff]" data-testid={`capacity-row-${r.key}`}>
-                <td className="px-4 py-2 font-semibold text-[#26243a] truncate max-w-[220px]" title={r.label}>{r.label}</td>
-                <td className="px-2 py-2 text-center text-xs text-[#8a87a0]">{r.resources}</td>
+              <tr key={r.key} className="border-b border-m-surface hover:bg-m-bg" data-testid={`capacity-row-${r.key}`}>
+                <td className="px-4 py-2 font-semibold text-m-ink truncate max-w-[220px]" title={r.label}>{r.label}</td>
+                <td className="px-2 py-2 text-center text-xs text-m-muted">{r.resources}</td>
                 {r.cells.map((c) => (
                   <td key={c.month} className="px-1.5 py-1.5 text-center">
                     <div className="rounded-lg px-1.5 py-1 leading-tight" style={rateStyle(c.rate, c.capacity)}>
@@ -109,11 +109,11 @@ export default function Capacite() {
                     </div>
                   </td>
                 ))}
-                <td className="px-3 py-2 text-center bg-[#fbfaff]">
+                <td className="px-3 py-2 text-center bg-m-bg">
                   <span className="text-[13px] font-extrabold" style={{ color: rateStyle(r.rate, r.total_capacity).color }}>
                     {r.total_capacity ? `${r.rate} %` : "—"}
                   </span>
-                  <div className="text-[9px] text-[#8a87a0]">{r.total_load} / {r.total_capacity} JH</div>
+                  <div className="text-[9px] text-m-muted">{r.total_load} / {r.total_capacity} JH</div>
                 </td>
               </tr>
             ))}
@@ -121,15 +121,15 @@ export default function Capacite() {
         </table>
       </div>
       {axis === "skill" && (
-        <p className="text-[11px] text-[#8a87a0]">Une ressource multi-compétences compte dans chaque compétence : les totaux par compétence ne s'additionnent pas.</p>
+        <p className="text-[11px] text-m-muted">Une ressource multi-compétences compte dans chaque compétence : les totaux par compétence ne s'additionnent pas.</p>
       )}
     </div>
   );
 }
 
 const Kpi = ({ label, value, color, testId }) => (
-  <div className="bg-white border border-[#e8e6f0] rounded-xl p-4 shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]" data-testid={testId}>
-    <p className="text-[10px] uppercase tracking-widest font-bold text-[#8a87a0]">{label}</p>
+  <div className="bg-white border border-m-border rounded-xl p-4 shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]" data-testid={testId}>
+    <p className="text-[10px] uppercase tracking-widest font-bold text-m-muted">{label}</p>
     <p className="text-2xl font-extrabold mt-1" style={{ color: color || "#26243a" }}>{value}</p>
   </div>
 );

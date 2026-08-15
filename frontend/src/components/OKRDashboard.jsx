@@ -25,7 +25,7 @@ const CAP_STATUS_LABEL = {
 
 const WSJF_FIBONACCI = [1, 2, 3, 5, 8, 13, 21];
 
-const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue focus:ring-1 focus:ring-m-blue bg-white";
 
 // ─── Helpers ──────────────────────────────────────────────────────────────────
 
@@ -211,7 +211,7 @@ function OKRModal({ isOpen, onClose, okr, trains, capabilities, onSaved }) {
           <div className="flex items-center justify-between mb-2">
             <label className="text-xs font-semibold text-zinc-600">Key Results</label>
             <button type="button" onClick={addKR}
-              className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700"
+              className="flex items-center gap-1 text-[11px] font-semibold text-m-blue hover:text-m-blue-dark"
               data-testid="okr-add-kr-btn">
               <Plus size={11} /> Ajouter un KR
             </button>
@@ -271,7 +271,7 @@ function OKRModal({ isOpen, onClose, okr, trains, capabilities, onSaved }) {
                   className={`flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-zinc-50 transition-colors ${selectedCaps.includes(cap.capability_id) ? "bg-blue-50/50" : ""}`}
                   data-testid={`okr-cap-checkbox-${cap.capability_id}`}
                 >
-                  <input type="checkbox" className="accent-[#2563eb]"
+                  <input type="checkbox" className="accent-m-blue"
                     checked={selectedCaps.includes(cap.capability_id)}
                     onChange={() => toggleCap(cap.capability_id)} />
                   <span className="text-xs text-zinc-700 flex-1 line-clamp-1">{cap.name}</span>
@@ -288,7 +288,7 @@ function OKRModal({ isOpen, onClose, okr, trains, capabilities, onSaved }) {
             Annuler
           </button>
           <button type="submit" disabled={saving} data-testid="okr-form-submit"
-            className="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50">
+            className="px-5 py-2 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-50">
             {okr ? "Enregistrer" : "Créer l'OKR"}
           </button>
         </div>
@@ -355,11 +355,11 @@ function WSJFModal({ isOpen, onClose, cap, onSaved }) {
           </div>
         )}
 
-        <div className="bg-blue-600/5 border border-blue-600/20 rounded-lg p-4 text-center">
-          <div className="text-[10px] uppercase tracking-widest text-blue-600 font-bold mb-1">
+        <div className="bg-m-blue/5 border border-m-blue/20 rounded-lg p-4 text-center">
+          <div className="text-[10px] uppercase tracking-widest text-m-blue font-bold mb-1">
             WSJF = (BV + TC + RR) ÷ Job Size
           </div>
-          <div className="text-3xl font-heading font-bold text-blue-600">{previewWSJF()}</div>
+          <div className="text-3xl font-heading font-bold text-m-blue">{previewWSJF()}</div>
         </div>
 
         <div className="space-y-3">
@@ -378,8 +378,8 @@ function WSJFModal({ isOpen, onClose, cap, onSaved }) {
                     onClick={() => setForm(f => ({ ...f, [key]: v }))}
                     className={`w-9 h-9 text-sm font-bold rounded-lg border transition-all ${
                       form[key] === v
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-zinc-600 border-zinc-200 hover:border-blue-600 hover:text-blue-600"
+                        ? "bg-m-blue text-white border-m-blue"
+                        : "bg-white text-zinc-600 border-zinc-200 hover:border-m-blue hover:text-m-blue"
                     }`}
                   >
                     {v}
@@ -396,7 +396,7 @@ function WSJFModal({ isOpen, onClose, cap, onSaved }) {
             Annuler
           </button>
           <button type="submit" disabled={saving} data-testid="wsjf-form-submit"
-            className="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50">
+            className="px-5 py-2 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-50">
             Calculer & Enregistrer
           </button>
         </div>
@@ -442,7 +442,7 @@ function OKRCard({ okr, onEdit, onDelete }) {
         <div className="flex items-center gap-1 flex-shrink-0">
           <button
             onClick={(e) => { e.stopPropagation(); onEdit(okr); }}
-            className="p-1.5 hover:bg-blue-50 rounded-lg text-zinc-400 hover:text-blue-600 transition-colors"
+            className="p-1.5 hover:bg-blue-50 rounded-lg text-zinc-400 hover:text-m-blue transition-colors"
             data-testid={`okr-edit-${okr.okr_id}`}
           >
             <Pencil size={13} />
@@ -581,7 +581,7 @@ export default function OKRDashboard({ selectedTrainId }) {
               <span className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">{label}</span>
               <Icon size={13} style={{ color: accent }} />
             </div>
-            <div className="font-heading font-heading text-2xl font-extrabold text-[#26243a]">{value ?? 0}</div>
+            <div className="font-heading font-heading text-2xl font-extrabold text-m-ink">{value ?? 0}</div>
           </div>
         ))}
       </div>
@@ -664,7 +664,7 @@ export default function OKRDashboard({ selectedTrainId }) {
         <div className="flex items-center justify-between mb-4">
           <div>
             <h2 className="font-bold text-zinc-800 text-base flex items-center gap-2">
-              <TrendingUp size={16} className="text-blue-600" />
+              <TrendingUp size={16} className="text-m-blue" />
               Objectifs & Key Results (OKR)
             </h2>
             <p className="text-xs text-zinc-400 mt-0.5">
@@ -674,7 +674,7 @@ export default function OKRDashboard({ selectedTrainId }) {
           <button
             onClick={() => setOkrModal({ open: true, okr: null })}
             data-testid="create-okr-btn"
-            className="flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+            className="flex items-center gap-1.5 px-4 py-2 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark transition-colors"
           >
             <Plus size={14} /> Nouvel OKR
           </button>
@@ -696,7 +696,7 @@ export default function OKRDashboard({ selectedTrainId }) {
               <div className="text-zinc-400 text-xs mt-1 mb-4">Créez votre premier objectif stratégique</div>
               <button
                 onClick={() => setOkrModal({ open: true, okr: null })}
-                className="inline-flex items-center gap-1.5 px-4 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700"
+                className="inline-flex items-center gap-1.5 px-4 py-2 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark"
               >
                 <Plus size={13} /> Créer un OKR
               </button>
@@ -743,7 +743,7 @@ export default function OKRDashboard({ selectedTrainId }) {
                 <WSJFScore value={cap.wsjf} />
                 <button
                   onClick={() => setWsjfModal({ open: true, cap })}
-                  className="flex items-center gap-1 text-[11px] text-blue-600 hover:text-blue-700 transition-all ml-1 flex-shrink-0"
+                  className="flex items-center gap-1 text-[11px] text-m-blue hover:text-m-blue-dark transition-all ml-1 flex-shrink-0"
                   data-testid={`wsjf-edit-${cap.capability_id}`}
                 >
                   <Pencil size={11} /> Scorer
@@ -765,7 +765,7 @@ export default function OKRDashboard({ selectedTrainId }) {
                   key={cap.capability_id}
                   onClick={() => setWsjfModal({ open: true, cap })}
                   data-testid={`wsjf-unscore-${cap.capability_id}`}
-                  className="flex items-center gap-1.5 px-3 py-1.5 border border-dashed border-zinc-300 rounded-lg text-xs text-zinc-500 hover:border-blue-600 hover:text-blue-600 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-1.5 border border-dashed border-zinc-300 rounded-lg text-xs text-zinc-500 hover:border-m-blue hover:text-m-blue transition-colors"
                 >
                   <Zap size={10} /> {cap.name}
                 </button>

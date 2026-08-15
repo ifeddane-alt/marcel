@@ -75,7 +75,7 @@ export default function TeamModal({ isOpen, onClose, team, resources, onSaved })
               onChange={(e) => setForm({ ...form, name: e.target.value })}
               placeholder="Ex: Dev A, Infra, QA…"
               data-testid="team-modal-name"
-              className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:border-blue-600"
+              className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:border-m-blue"
             />
           </div>
 
@@ -87,7 +87,7 @@ export default function TeamModal({ isOpen, onClose, team, resources, onSaved })
               value={form.manager_resource_id}
               onChange={(e) => setForm({ ...form, manager_resource_id: e.target.value })}
               data-testid="team-modal-manager"
-              className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:border-blue-600 bg-white"
+              className="w-full px-3 py-2 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:border-m-blue bg-white"
             >
               <option value="">— Aucun manager —</option>
               {resources.map((r) => (
@@ -110,7 +110,7 @@ export default function TeamModal({ isOpen, onClose, team, resources, onSaved })
               type="submit"
               disabled={saving}
               data-testid="team-modal-submit"
-              className="px-5 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60"
+              className="px-5 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors disabled:opacity-60"
             >
               {saving ? "Enregistrement…" : isEdit ? "Mettre à jour" : "Créer"}
             </button>

@@ -290,8 +290,8 @@ export default function Dashboard() {
       {/* Header */}
       <div className="mb-5 flex items-start justify-between gap-3">
         <div>
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Tableau de bord</span></div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">
+          <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Tableau de bord</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">
             Tableau de Bord
           </h1>
           <p className="text-xs sm:text-sm text-zinc-500 mt-0.5">
@@ -356,7 +356,7 @@ export default function Dashboard() {
           <button
             data-testid="dashboard-customize-btn"
             onClick={() => setCustomizing((v) => !v)}
-            className={`flex items-center gap-1.5 px-3 py-2 border rounded-lg text-sm transition-colors ${customizing ? "bg-[#2e5fe8] border-[#2e5fe8] text-white" : "bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}
+            className={`flex items-center gap-1.5 px-3 py-2 border rounded-lg text-sm transition-colors ${customizing ? "bg-m-blue border-m-blue text-white" : "bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}
           >
             {customizing ? <X size={14} /> : <Settings2 size={14} />}
             <span className="hidden sm:inline">{customizing ? "Quitter l'édition" : "Personnaliser"}</span>
@@ -366,7 +366,7 @@ export default function Dashboard() {
 
       {/* Barre de choix des blocs */}
       {customizing && (
-        <div className="mb-4 bg-white border border-blue-600/30 rounded-xl px-3 py-2.5" data-testid="dashboard-blocks-bar">
+        <div className="mb-4 bg-white border border-m-blue/30 rounded-xl px-3 py-2.5" data-testid="dashboard-blocks-bar">
           <p className="text-[11px] font-semibold text-zinc-500 mb-2">
             Blocs du tableau de bord — cliquez pour afficher / masquer, ou <strong>glissez n'importe quel bloc vers l'emplacement voulu dans la grille</strong> :
           </p>
@@ -386,7 +386,7 @@ export default function Dashboard() {
                   }}
                   onDragEnd={() => setDragWidget(null)}
                   title={on ? "Cliquer pour masquer, ou glisser pour repositionner dans la grille" : "Cliquer pour ajouter, ou glisser dans la grille"}
-                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors cursor-grab active:cursor-grabbing ${on ? "bg-blue-50 border-blue-600 text-blue-600" : "bg-zinc-50 border-zinc-200 text-zinc-400 hover:border-zinc-400"}`}
+                  className={`flex items-center gap-1 px-2.5 py-1 rounded-full text-[11px] font-medium border transition-colors cursor-grab active:cursor-grabbing ${on ? "bg-blue-50 border-m-blue text-m-blue" : "bg-zinc-50 border-zinc-200 text-zinc-400 hover:border-zinc-400"}`}
                 >
                   {on ? <Check size={10} /> : <GripVertical size={10} />}
                   <GripVertical size={10} className={on ? "opacity-40" : "hidden"} /> {WIDGET_LABELS[w] || w}
@@ -398,13 +398,13 @@ export default function Dashboard() {
       )}
       {customizing && (
         <p className="mb-4 text-[11px] text-zinc-400 flex items-center gap-1.5" data-testid="dashboard-edit-hint">
-          <Move size={11} className="text-blue-600" />
+          <Move size={11} className="text-m-blue" />
           Glissez-déposez chaque bloc pour le repositionner, tirez le coin bas-droit pour le redimensionner, croix pour masquer un bloc.
         </p>
       )}
 
       {!customizing && gridWidgets.length === 0 && (
-        <div className="bg-white border border-dashed border-[#e8e6f0] rounded-xl p-10 text-center" data-testid="dashboard-empty-state">
+        <div className="bg-white border border-dashed border-m-border rounded-xl p-10 text-center" data-testid="dashboard-empty-state">
           <p className="text-sm text-zinc-500 font-medium">Aucun bloc affiché sur le tableau de bord.</p>
           <p className="text-xs text-zinc-400 mt-1">Cliquez sur « Personnaliser » puis sélectionnez les blocs à afficher.</p>
         </div>
@@ -424,7 +424,7 @@ export default function Dashboard() {
         ref={gridWrapRef}
         onDragOver={handleGridDragOver}
         onDrop={handleGridDrop}
-        className={dragWidget ? "ring-2 ring-dashed ring-blue-600/50 rounded-xl" : ""}
+        className={dragWidget ? "ring-2 ring-dashed ring-m-blue/50 rounded-xl" : ""}
         data-testid="dashboard-grid-dropzone"
       >
       <ResponsiveGridLayout
@@ -450,11 +450,11 @@ export default function Dashboard() {
           <div
             key={w}
             data-grid={{ i: w, ...DEFAULT_GRID[w] }}
-            className={`h-full rounded-lg flex flex-col ${customizing ? "ring-2 ring-blue-600/30 ring-offset-2 cursor-move bg-white/50" : ""}`}
+            className={`h-full rounded-lg flex flex-col ${customizing ? "ring-2 ring-m-blue/30 ring-offset-2 cursor-move bg-white/50" : ""}`}
             data-testid={`grid-item-${w}`}
           >
             {customizing && (
-              <div className="flex items-center gap-1.5 px-2 py-1 bg-blue-600 text-white text-[10px] font-semibold rounded-t shrink-0">
+              <div className="flex items-center gap-1.5 px-2 py-1 bg-m-blue text-white text-[10px] font-semibold rounded-t shrink-0">
                 <Move size={10} />
                 <span className="flex-1 truncate">{WIDGET_LABELS[w]}</span>
                 <button

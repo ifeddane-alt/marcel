@@ -4,7 +4,7 @@ import { runAPI, applicationsAPI, projectsAPI } from "@/api";
 import { toast } from "sonner";
 import ConfirmDialog from "@/components/ConfirmDialog";
 
-const inputCls = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600";
+const inputCls = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue";
 const labelCls = "block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5";
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("fr-FR") : "—");
 const REL_ST = {
@@ -77,7 +77,7 @@ function ReleaseModal({ apps, projects, onClose, onSave }) {
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100">
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50">Annuler</button>
             <button type="submit" disabled={saving} data-testid="release-save-btn"
-              className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60">
+              className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-60">
               {saving ? "..." : "Créer"}
             </button>
           </div>
@@ -118,12 +118,12 @@ export default function RunReleasesTab({ canWrite }) {
   };
 
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]" data-testid="run-releases-tab">
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]" data-testid="run-releases-tab">
       <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
-        <div className="font-heading text-[13px] font-bold text-[#26243a]">Calendrier des MEP &amp; gels ({releases.length})</div>
+        <div className="font-heading text-[13px] font-bold text-m-ink">Calendrier des MEP &amp; gels ({releases.length})</div>
         {canWrite && (
           <button onClick={() => setModalOpen(true)} data-testid="btn-new-release"
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700">
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-m-blue text-white text-xs font-semibold rounded-lg hover:bg-m-blue-dark">
             <Plus size={12} /> Nouvelle MEP / gel
           </button>
         )}
@@ -134,7 +134,7 @@ export default function RunReleasesTab({ canWrite }) {
         <div className="divide-y divide-zinc-100">
           {releases.map((r) => (
             <div key={r.release_id} className="flex items-center gap-3 px-5 py-2.5 flex-wrap" data-testid={`release-row-${r.release_id}`}>
-              <span className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${r.type === "gel" ? "bg-sky-50 text-sky-600" : "bg-[#f0eefc] text-[#352c6e]"}`}>
+              <span className={`w-7 h-7 rounded-lg flex items-center justify-center flex-shrink-0 ${r.type === "gel" ? "bg-sky-50 text-sky-600" : "bg-m-lilac text-m-primary"}`}>
                 {r.type === "gel" ? <Snowflake size={13} /> : <Rocket size={13} />}
               </span>
               <div className="flex-1 min-w-[160px]">

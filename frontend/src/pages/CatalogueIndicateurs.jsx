@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from "react";
 import { catalogAPI } from "@/api";
 import { BookOpenCheck, Search } from "lucide-react";
 
-const PRIO_CLS = { P1: "bg-[#352c6e] text-white", P2: "bg-[#e9effe] text-[#2e5fe8]", P3: "bg-zinc-100 text-zinc-500" };
+const PRIO_CLS = { P1: "bg-m-primary text-white", P2: "bg-m-blue-soft text-m-blue", P3: "bg-zinc-100 text-zinc-500" };
 const COMP_CFG = {
   auto: { label: "Calculé auto", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
   manual: { label: "Saisie manuelle", cls: "bg-amber-50 text-amber-700 border-amber-200" },
@@ -30,8 +30,8 @@ export default function CatalogueIndicateurs() {
   return (
     <div className="p-4 md:p-6 lg:p-8" data-testid="catalogue-indicateurs-page">
       <div className="flex items-center gap-3 mb-1">
-        <BookOpenCheck size={22} className="text-[#352c6e]" />
-        <h1 className="font-heading text-xl md:text-2xl font-bold text-[#26243a]">Catalogue d'indicateurs PPM</h1>
+        <BookOpenCheck size={22} className="text-m-primary" />
+        <h1 className="font-heading text-xl md:text-2xl font-bold text-m-ink">Catalogue d'indicateurs PPM</h1>
       </div>
       <p className="text-xs text-zinc-400 mb-5">
         {catalog.length} indicateurs de référence — sélectionnables depuis la fiche projet, la vue programme, le portefeuille et le tableau de bord.
@@ -42,7 +42,7 @@ export default function CatalogueIndicateurs() {
           <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-300" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher un indicateur…"
             data-testid="catalogue-search"
-            className="w-full text-xs border border-zinc-200 rounded-lg pl-8 pr-3 py-2 focus:outline-none focus:border-blue-600" />
+            className="w-full text-xs border border-zinc-200 rounded-lg pl-8 pr-3 py-2 focus:outline-none focus:border-m-blue" />
         </div>
         <select value={domain} onChange={(e) => setDomain(e.target.value)} data-testid="catalogue-domain-filter"
           className="text-xs border border-zinc-200 rounded-lg px-2 py-2">
@@ -72,7 +72,7 @@ export default function CatalogueIndicateurs() {
           const c = COMP_CFG[i.computability] || COMP_CFG.manual;
           const open = expanded === i.indicator_id;
           return (
-            <div key={i.indicator_id} className="bg-white border border-[#e8e6f0] rounded-lg overflow-hidden">
+            <div key={i.indicator_id} className="bg-white border border-m-border rounded-lg overflow-hidden">
               <button onClick={() => setExpanded(open ? null : i.indicator_id)}
                 data-testid={`catalogue-row-${i.indicator_id}`}
                 className="w-full flex items-center gap-3 px-4 py-2.5 text-left hover:bg-zinc-50/60">

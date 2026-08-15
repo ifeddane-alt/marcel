@@ -85,7 +85,7 @@ export default function DependencyModal({
         {/* Header */}
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
           <div className="flex items-center gap-2">
-            <GitFork size={16} className="text-blue-600" />
+            <GitFork size={16} className="text-m-blue" />
             <h2 className="font-heading text-lg font-bold text-zinc-950">
               {isEdit ? "Modifier la dépendance" : "Nouvelle dépendance inter-projets"}
             </h2>
@@ -103,11 +103,11 @@ export default function DependencyModal({
             </label>
             <div className="flex items-center gap-2">
               <button type="button" onClick={() => setDirection("outbound")} data-testid="dep-dir-outbound"
-                className={`flex-1 py-2 text-sm font-semibold rounded-lg border transition-colors ${direction === "outbound" ? "bg-blue-600 text-white border-blue-600" : "bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50"}`}>
+                className={`flex-1 py-2 text-sm font-semibold rounded-lg border transition-colors ${direction === "outbound" ? "bg-m-blue text-white border-m-blue" : "bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50"}`}>
                 → Je dépends de
               </button>
               <button type="button" onClick={() => setDirection("inbound")} data-testid="dep-dir-inbound"
-                className={`flex-1 py-2 text-sm font-semibold rounded-lg border transition-colors ${direction === "inbound" ? "bg-blue-600 text-white border-blue-600" : "bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50"}`}>
+                className={`flex-1 py-2 text-sm font-semibold rounded-lg border transition-colors ${direction === "inbound" ? "bg-m-blue text-white border-m-blue" : "bg-white text-zinc-600 border-zinc-200 hover:bg-zinc-50"}`}>
                 ← Dépend de moi
               </button>
             </div>
@@ -120,7 +120,7 @@ export default function DependencyModal({
             </label>
             <select value={targetPid} onChange={(e) => setTargetPid(e.target.value)} required
               data-testid="dep-target-project"
-              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600">
+              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue">
               <option value="">— Sélectionner le projet —</option>
               {otherProjects.map((p) => (
                 <option key={p.project_id} value={p.project_id}>{p.name}</option>
@@ -135,7 +135,7 @@ export default function DependencyModal({
                 Nature
               </label>
               <select value={nature} onChange={(e) => setNature(e.target.value)} data-testid="dep-nature"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600">
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue">
                 {NATURES.map((n) => <option key={n.value} value={n.value}>{n.label}</option>)}
               </select>
             </div>
@@ -144,7 +144,7 @@ export default function DependencyModal({
                 Impact
               </label>
               <select value={impact} onChange={(e) => setImpact(e.target.value)} data-testid="dep-impact"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600">
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue">
                 {IMPACTS.map((i) => <option key={i.value} value={i.value}>{i.label}</option>)}
               </select>
             </div>
@@ -158,7 +158,7 @@ export default function DependencyModal({
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={3} required
               placeholder="Décrivez la nature de cette dépendance..."
               data-testid="dep-description"
-              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 resize-none" />
+              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue resize-none" />
           </div>
 
           {/* Date + Status */}
@@ -175,7 +175,7 @@ export default function DependencyModal({
                 Statut
               </label>
               <select value={status} onChange={(e) => setStatus(e.target.value)} data-testid="dep-status"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600">
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue">
                 {STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
             </div>
@@ -188,7 +188,7 @@ export default function DependencyModal({
                 Jalon source (optionnel)
               </label>
               <select value={srcMs} onChange={(e) => setSrcMs(e.target.value)} data-testid="dep-source-milestone"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600">
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue">
                 <option value="">— Aucun jalon associé —</option>
                 {sourceMilestones.map((m) => (
                   <option key={m.milestone_id} value={m.milestone_id}>{m.name}</option>
@@ -205,7 +205,7 @@ export default function DependencyModal({
               Annuler
             </button>
             <button type="submit" disabled={saving} data-testid="dep-save-btn"
-              className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60">
+              className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors disabled:opacity-60">
               {saving ? "Sauvegarde..." : isEdit ? "Enregistrer" : "Créer la dépendance"}
             </button>
           </div>

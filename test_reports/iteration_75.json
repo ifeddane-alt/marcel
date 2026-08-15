@@ -1,0 +1,43 @@
+{
+  "summary": "MARCEL — Lots 2/3/4 + ÉCART portefeuille. Backend pytest 5/5 PASS (création projet minimale, GET /projects/consistency shape+valeurs+auth+route-order, preset P1). Frontend: tous les data-testid attendus présents et fonctionnels (portfolio-consistency-alert avec 5 items → nav /projects/{id}?tab=taches OK ; modal création sans RAG/end-baseline avec budget-section-toggle + explainer ; modal édition complet avec RAG+3 dates+fin réelle ; 5 tabs projet + 5 sous-onglets ; ?tab=cycle et ?tab=taches deep-links OK ; btn-engagement-shortcut OK). Tokens CSS : h1 = rgb(38,36,58) ✓, btn primaire bg = rgb(46,95,232) ✓. Dark mode toggle OK, dashboard/portfolio lisibles. Aucun blocker.",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "/api/projects (POST)", "issue": "status_rag reste requis côté schéma backend même si le frontend en création envoie 'green' par défaut. Le test LOT2-C passe car le frontend injecte status_rag=green, mais la spec 'seulement 4 champs obligatoires' n'est vraie qu'au niveau UX. Le contrat API exige toujours status_rag+start_date+end_date_baseline+end_date_forecast. Non bloquant : le frontend gère les defaults, jh_planned=0 par défaut OK."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "Dark mode — h1 tokens", "issues": ["Une évaluation getComputedStyle sur h1 (ex sur /portfolio en dark) renvoie color=rgb(38,36,58) sur fond rgb(19,18,32). Visuellement le titre reste lisible dans le screenshot (classe dark: appliquée ailleurs), mais un h1 qui ne dépend QUE de text-m-ink serait invisible en dark. À revoir : garantir que text-m-ink a bien une variante dark (--m-ink différent en dark). Vérifier tous les composants qui utilisent text-m-ink sans dark:text-*."]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_lot234_ecart.py",
+    "/app/test_reports/pytest/lot234_results.xml"
+  ],
+  "action_items": [
+    "(Optionnel) Vérifier que --m-ink (et autres tokens m-*) a bien une valeur différente en dark mode dans index.css sous .dark { --m-ink: ... }. Sinon un h1 avec seule classe text-m-ink deviendrait illisible en dark. Le screenshot dark de /portfolio est OK — donc probablement déjà géré via dark:text-* ailleurs, mais point d'audit rapide recommandé.",
+    "(Doc) Noter dans la spec que status_rag reste requis à l'API — le frontend le fixe à 'green' par défaut, mais un client API externe qui suit littéralement 'seulement 4 champs' aurait un 422."
+  ],
+  "critical_code_review_comments": [
+    "ProjectDetail.jsx = 2153 lignes — split recommandé (déjà noté iter74).",
+    "Backend service.get_consistency_alerts : bien async, tri desc OK, gestion des cas t['n']==0 OK, valeurs exactes conformes à la spec (PRJ-006=100%, PRJ-004=31%, DATA-002=22%, PRJ-003=14%, PRJ-002=13%).",
+    "Route ordering /projects/consistency AVANT /projects/{project_id} correctement placée — test dédié PASS."
+  ],
+  "updated_files": ["/app/backend/tests/test_lot234_ecart.py"],
+  "success_rate": {"backend": "100% (5/5)", "frontend": "100% (features testées OK)"},
+  "test_credentials": "admin@altair.fr / Admin2026!",
+  "seed_data_creation": "Un projet 'TEST_LOT2_Minimal' créé puis supprimé via API (assert 201/204). Preset P1 dashboard activé pour admin@altair.fr — la sélection est user-scoped (indicator_ids CAP-06, CAP-08, GOU-01/02/04, PLA-05/06, RIS-01/12, SAF-09, VAL-09). Non critique : par-user, n'affecte pas les autres utilisateurs. À noter pour re-test empty-state.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Empty-state 'Mes indicateurs' (data-testid indicators-quick-p1-dashboard / indicators-choose-dashboard) NON testé en UI car l'admin a déjà une sélection P1 active (persistée en base user-scope). Pour re-tester : DELETE la sélection via /api/indicator-catalog/selections/dashboard puis reload /dashboard. Backend preset endpoint validé (POST retourne 200 et 11 indicator_ids). Projet Phoenix id=21fa6d43-0ce8-4ee7-8e06-114ef3199006 est stable pour tous les tests fiche projet.",
+  "consistency_data_verified": {
+    "PRJ-006": {"max_gap_pct": 100, "field": "jh_planned", "declared": 500, "tasks_sum": 0, "task_count": 17},
+    "PRJ-004": {"max_gap_pct": 31, "field": "jh_consumed", "declared": 580, "tasks_sum": 400, "task_count": 6},
+    "DATA-002": {"max_gap_pct": 22, "field": "jh_planned", "declared": 2400, "tasks_sum": 1880, "task_count": 5},
+    "PRJ-003": {"max_gap_pct": 14, "field": "jh_consumed", "declared": 1050, "tasks_sum": 905, "task_count": 5},
+    "PRJ-002": {"max_gap_pct": 13, "field": "jh_consumed", "declared": 1160, "tasks_sum": 1335, "task_count": 5}
+  }
+}

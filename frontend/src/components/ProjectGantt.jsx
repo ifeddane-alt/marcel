@@ -114,7 +114,7 @@ export default function ProjectGantt({ tasks = [], milestones = [], onTaskClick 
             data-testid={`gantt-view-${mode.toLowerCase().replace(" ", "-")}`}
             className={`px-3 py-1.5 text-xs font-medium rounded-lg transition-colors ${
               viewMode === mode
-                ? "bg-blue-600 text-white"
+                ? "bg-m-blue text-white"
                 : "text-zinc-600 border border-zinc-200 hover:bg-zinc-50"
             }`}
           >

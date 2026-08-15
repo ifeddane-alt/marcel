@@ -241,8 +241,8 @@ export default function Governance() {
     <div className="p-4 md:p-6 lg:p-8" data-testid="governance-page">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Gouvernance</span></div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">
+          <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Gouvernance</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">
             Gouvernance
           </h1>
           <p className="text-sm text-zinc-500 mt-0.5">
@@ -257,7 +257,7 @@ export default function Governance() {
 
       {/* Summary cards */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4 mb-6">
-        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4 border-l-4 border-l-[#2563eb]">
+        <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-4 border-l-4 border-l-m-blue">
           <div className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold">Total instances</div>
           <div className="font-heading text-2xl sm:text-3xl font-bold text-zinc-950 mt-2">{instances.length}</div>
         </div>
@@ -279,14 +279,14 @@ export default function Governance() {
       <div className="bg-white border border-zinc-200 rounded-lg shadow-sm mb-6" data-testid="decisions-global-section">
         <div className="flex flex-wrap items-center justify-between gap-3 px-5 py-3 border-b border-zinc-100">
           <div className="flex items-center gap-2 text-xs uppercase tracking-widest text-zinc-500 font-semibold">
-            <ClipboardList size={13} className="text-blue-600" />
+            <ClipboardList size={13} className="text-m-blue" />
             Registre des décisions — Portefeuille ({filteredDecisions.length})
           </div>
           <div className="flex flex-wrap items-center gap-2">
             <select
               value={filterStatus}
               onChange={(e) => setFilterStatus(e.target.value)}
-              className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-blue-600 bg-white"
+              className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-m-blue bg-white"
               data-testid="decisions-filter-status"
             >
               <option value="">Tous statuts</option>
@@ -295,7 +295,7 @@ export default function Governance() {
             <select
               value={filterCategory}
               onChange={(e) => setFilterCategory(e.target.value)}
-              className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-blue-600 bg-white"
+              className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-m-blue bg-white"
               data-testid="decisions-filter-category"
             >
               <option value="">Toutes catégories</option>
@@ -304,7 +304,7 @@ export default function Governance() {
             <select
               value={filterProject}
               onChange={(e) => setFilterProject(e.target.value)}
-              className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-blue-600 bg-white"
+              className="text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 text-zinc-600 focus:outline-none focus:border-m-blue bg-white"
               data-testid="decisions-filter-project"
             >
               <option value="">Tous projets</option>
@@ -325,7 +325,7 @@ export default function Governance() {
               <button
                 onClick={() => openNewDecision(null, null)}
                 data-testid="btn-new-decision-global"
-                className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-1.5 px-3 py-1.5 bg-m-blue text-white text-xs font-semibold rounded-lg hover:bg-m-blue-dark transition-colors"
               >
                 <Plus size={12} /> Nouvelle décision
               </button>
@@ -341,9 +341,9 @@ export default function Governance() {
           <div className="overflow-x-auto">
             <table className="w-full text-sm" data-testid="decisions-global-table">
               <thead>
-                <tr className="bg-[#fbfaff] text-left">
+                <tr className="bg-m-bg text-left">
                   {["Date", "Décision", "Catégorie", "Statut", "Projet", "Responsable", "Échéance", ""].map((h) => (
-                    <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] border-b border-[#e8e6f0] whitespace-nowrap">{h}</th>
+                    <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted border-b border-m-border whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -376,7 +376,7 @@ export default function Governance() {
                       <Link
                         to={`/projects/${d.project_id}`}
                         onClick={(e) => e.stopPropagation()}
-                        className="text-blue-600 hover:text-blue-700 text-xs font-medium line-clamp-1"
+                        className="text-m-blue hover:text-m-blue-dark text-xs font-medium line-clamp-1"
                         data-testid={`decision-project-link-${d.decision_id}`}
                       >
                         {getProjectName(d.project_id).split("—")[0].trim().slice(0, 35)}
@@ -413,17 +413,17 @@ export default function Governance() {
         <div className="flex items-center gap-2">
           <div className="flex items-center border border-zinc-200 rounded-lg overflow-hidden bg-white">
             <button onClick={() => setInstView("list")} data-testid="gov-view-list"
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${instView === "list" ? "bg-blue-600 text-white" : "text-zinc-500 hover:bg-zinc-50"}`}>
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${instView === "list" ? "bg-m-blue text-white" : "text-zinc-500 hover:bg-zinc-50"}`}>
               <List size={12} /> Liste
             </button>
             <button onClick={() => setInstView("calendar")} data-testid="gov-view-calendar"
-              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${instView === "calendar" ? "bg-blue-600 text-white" : "text-zinc-500 hover:bg-zinc-50"}`}>
+              className={`flex items-center gap-1.5 px-3 py-1.5 text-xs font-semibold transition-colors ${instView === "calendar" ? "bg-m-blue text-white" : "text-zinc-500 hover:bg-zinc-50"}`}>
               <CalendarDays size={12} /> Calendrier
             </button>
           </div>
           {canWrite && (
             <button onClick={() => { setEditingInstance(null); setInstanceModalOpen(true); }} data-testid="btn-new-instance"
-              className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+              className="flex items-center gap-1.5 px-3 py-1.5 bg-m-blue text-white text-xs font-semibold rounded-lg hover:bg-m-blue-dark transition-colors">
               <Plus size={12} /> Nouvelle instance
             </button>
           )}
@@ -459,7 +459,7 @@ export default function Governance() {
                   </div>
                   <div className="flex items-center gap-2 mt-0.5">
                     <Calendar size={11} className="text-zinc-400" />
-                    <span className={`text-xs ${isPast ? "text-zinc-400" : "text-blue-600 font-medium"}`}>
+                    <span className={`text-xs ${isPast ? "text-zinc-400" : "text-m-blue font-medium"}`}>
                       {formatDate(g.date_scheduled)}
                       {!isPast && " · À venir"}
                       {isPast && " · Passé"}
@@ -481,7 +481,7 @@ export default function Governance() {
                   <button
                     onClick={(e) => { e.stopPropagation(); setEditingInstance(g); setInstanceModalOpen(true); }}
                     data-testid={`btn-edit-instance-${g.governance_id}`}
-                    className="text-zinc-300 hover:text-blue-600 transition-colors flex-shrink-0"
+                    className="text-zinc-300 hover:text-m-blue transition-colors flex-shrink-0"
                     title="Modifier l'instance"
                   >
                     <Pencil size={13} />
@@ -530,7 +530,7 @@ export default function Governance() {
                         setExportModalOpen(true);
                       }}
                       data-testid={`btn-export-copil-instance-${g.governance_id}`}
-                      className="flex items-center gap-1.5 px-3 py-1.5 border border-blue-600 text-blue-600 text-xs font-semibold rounded-lg hover:bg-blue-50 transition-colors"
+                      className="flex items-center gap-1.5 px-3 py-1.5 border border-m-blue text-m-blue text-xs font-semibold rounded-lg hover:bg-blue-50 transition-colors"
                     >
                       <Presentation size={12} /> Export COPIL
                     </button>
@@ -544,10 +544,10 @@ export default function Governance() {
                       <div className="space-y-1">
                         {(g.projects_scope || []).map((pid) => (
                           <div key={pid} className="flex items-center gap-2">
-                            <span className="w-1.5 h-1.5 rounded-full bg-blue-600 flex-shrink-0" />
+                            <span className="w-1.5 h-1.5 rounded-full bg-m-blue flex-shrink-0" />
                             <Link
                               to={`/projects/${pid}`}
-                              className="text-xs text-blue-600 hover:text-blue-700 truncate"
+                              className="text-xs text-m-blue hover:text-m-blue-dark truncate"
                             >
                               {getProjectName(pid)}
                             </Link>
@@ -570,7 +570,7 @@ export default function Governance() {
                   <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 mb-4 border-t border-zinc-200 pt-4" data-testid={`agenda-block-${g.governance_id}`}>
                     <div>
                       <div className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold mb-2 flex items-center gap-1.5">
-                        <ListOrdered size={11} className="text-blue-600" /> Ordre du jour ({(g.agenda || []).length})
+                        <ListOrdered size={11} className="text-m-blue" /> Ordre du jour ({(g.agenda || []).length})
                       </div>
                       {(g.agenda || []).length === 0 ? (
                         <p className="text-xs text-zinc-400 italic">Aucun point à l'ordre du jour.</p>
@@ -578,7 +578,7 @@ export default function Governance() {
                         <ol className="space-y-1.5">
                           {(g.agenda || []).map((item, idx) => (
                             <li key={item.item_id || idx} className="flex items-start gap-2 text-xs" data-testid={`agenda-item-${g.governance_id}-${idx}`}>
-                              <span className="font-mono-data font-bold text-blue-600 flex-shrink-0">{idx + 1}.</span>
+                              <span className="font-mono-data font-bold text-m-blue flex-shrink-0">{idx + 1}.</span>
                               <span className="text-zinc-700 flex-1">{item.title}</span>
                               {item.presenter && <span className="text-zinc-400 flex-shrink-0">{item.presenter}</span>}
                               {item.duration_min > 0 && <span className="font-mono-data text-zinc-400 flex-shrink-0">{item.duration_min} min</span>}
@@ -615,14 +615,14 @@ export default function Governance() {
                   <div className="border-t border-zinc-200 pt-4">
                     <div className="flex items-center justify-between mb-3">
                       <div className="text-[10px] uppercase tracking-widest text-zinc-500 font-semibold flex items-center gap-1.5">
-                        <ClipboardList size={11} className="text-blue-600" />
+                        <ClipboardList size={11} className="text-m-blue" />
                         Décisions liées à cette instance ({instanceDecisions.length})
                       </div>
                       {canWrite && (
                         <button
                           onClick={() => openNewDecision(g.governance_id, null)}
                           data-testid={`btn-new-decision-instance-${g.governance_id}`}
-                          className="flex items-center gap-1 px-2.5 py-1 bg-blue-600 text-white text-[11px] font-semibold rounded-lg hover:bg-blue-700 transition-colors"
+                          className="flex items-center gap-1 px-2.5 py-1 bg-m-blue text-white text-[11px] font-semibold rounded-lg hover:bg-m-blue-dark transition-colors"
                         >
                           <Plus size={11} /> Ajouter
                         </button>
@@ -636,7 +636,7 @@ export default function Governance() {
                         {instanceDecisions.map((d) => (
                           <div
                             key={d.decision_id}
-                            className="flex items-start gap-3 p-2.5 bg-white border border-zinc-100 rounded-lg hover:border-blue-600/30 transition-colors"
+                            className="flex items-start gap-3 p-2.5 bg-white border border-zinc-100 rounded-lg hover:border-m-blue/30 transition-colors"
                             data-testid={`decision-instance-row-${d.decision_id}`}
                           >
                             <span className={`inline-flex items-center px-1.5 py-0.5 rounded-full text-[9px] font-semibold border flex-shrink-0 mt-0.5 ${DECISION_STATUS_COLORS[d.status] || "bg-zinc-100 text-zinc-700"}`}>
@@ -654,7 +654,7 @@ export default function Governance() {
                             {canWrite && (
                               <button
                                 onClick={() => openEditDecision(d)}
-                                className="text-zinc-300 hover:text-blue-600 transition-colors flex-shrink-0"
+                                className="text-zinc-300 hover:text-m-blue transition-colors flex-shrink-0"
                                 data-testid={`btn-edit-decision-instance-${d.decision_id}`}
                               >
                                 <ClipboardList size={13} />

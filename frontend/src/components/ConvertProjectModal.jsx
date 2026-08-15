@@ -90,7 +90,7 @@ export default function ConvertProjectModal({ demand, onClose, onConverted }) {
             <input
               data-testid="convert-name-input"
               type="text"
-              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30"
               value={form.name}
               onChange={(e) => change("name", e.target.value)}
             />
@@ -101,7 +101,7 @@ export default function ConvertProjectModal({ demand, onClose, onConverted }) {
             <textarea
               data-testid="convert-description-input"
               rows={2}
-              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 resize-none"
+              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30 resize-none"
               value={form.description}
               onChange={(e) => change("description", e.target.value)}
             />
@@ -135,7 +135,7 @@ export default function ConvertProjectModal({ demand, onClose, onConverted }) {
               <input
                 data-testid="convert-budget-input"
                 type="number"
-                className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30"
+                className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30"
                 placeholder="0"
                 min="0"
                 value={form.budget_total}
@@ -146,7 +146,7 @@ export default function ConvertProjectModal({ demand, onClose, onConverted }) {
               <label className="block text-xs font-semibold text-zinc-600 mb-1">Statut RAG</label>
               <select
                 data-testid="convert-rag-select"
-                className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 bg-white"
+                className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30 bg-white"
                 value={form.status_rag}
                 onChange={(e) => change("status_rag", e.target.value)}
               >
@@ -161,7 +161,7 @@ export default function ConvertProjectModal({ demand, onClose, onConverted }) {
             <label className="block text-xs font-semibold text-zinc-600 mb-1">Programme (optionnel)</label>
             <select
               data-testid="convert-program-select"
-              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 bg-white"
+              className="w-full border border-zinc-200 rounded-lg px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30 bg-white"
               value={form.program_id}
               onChange={(e) => change("program_id", e.target.value)}
             >

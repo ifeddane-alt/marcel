@@ -57,6 +57,7 @@ export const projectsAPI = {
   update: (id, data) => api.put(`/projects/${id}`, data),
   delete: (id) => api.delete(`/projects/${id}`),
   nextCode: (programId) => api.get("/projects/next-code", { params: programId ? { program_id: programId } : {} }),
+  consistency: () => api.get("/projects/consistency"),
   getBenefits: (id) => api.get(`/projects/${id}/benefits`),
   setBenefits: (id, data) => api.put(`/projects/${id}/benefits`, data),
 };

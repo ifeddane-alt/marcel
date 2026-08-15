@@ -16,6 +16,11 @@ async def next_project_code(program_id: str = None, current_user: TokenPayload =
     return {"code": await service.generate_project_code(current_user.tenant_id, program_id)}
 
 
+@router.get("/projects/consistency")
+async def get_consistency(current_user: TokenPayload = Depends(get_current_user)):
+    return await service.get_consistency_alerts(current_user)
+
+
 @router.get("/projects/custom-fields")
 async def get_custom_fields(current_user: TokenPayload = Depends(get_current_user)):
     return await service.get_custom_field_defs(current_user.tenant_id)

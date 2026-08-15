@@ -42,7 +42,7 @@ export default function RiskHeatmap({ risks, showProjectName = false }) {
                     return (
                       <div
                         key={impact}
-                        className={`relative flex-1 h-8 flex items-center justify-center rounded-lg border text-[10px] font-bold cursor-default transition-colors ${getCellColor(crit)} ${isHovered ? "ring-2 ring-blue-600" : ""}`}
+                        className={`relative flex-1 h-8 flex items-center justify-center rounded-lg border text-[10px] font-bold cursor-default transition-colors ${getCellColor(crit)} ${isHovered ? "ring-2 ring-m-blue" : ""}`}
                         onMouseEnter={() => cellRisks.length > 0 && setHoveredCell({ prob, impact })}
                         onMouseLeave={() => setHoveredCell(null)}
                         data-testid={`heatmap-cell-${prob}-${impact}`}

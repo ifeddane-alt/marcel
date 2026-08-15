@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Search, Plus, Pencil, Trash2, Presentation, LayoutGrid, List } from "lucide-react";
+import { Search, Plus, Pencil, Trash2, Presentation, LayoutGrid, List, AlertTriangle, ChevronDown } from "lucide-react";
 import { projectsAPI, programsAPI, resourcesAPI, favoritesAPI, exportsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -53,6 +53,11 @@ export default function Portfolio() {
 
   useEffect(() => {
     favoritesAPI.list().then((r) => setFavorites(new Set(r.data.favorites || []))).catch(() => {});
+  }, []);
+  const [consistency, setConsistency] = useState([]);
+  const [consistencyOpen, setConsistencyOpen] = useState(false);
+  useEffect(() => {
+    projectsAPI.consistency().then((r) => setConsistency(r.data || [])).catch(() => {});
   }, []);
   const [preGovernanceId, setPreGovernanceId] = useState(null);
   const [exportModalOpen, setExportModalOpen] = useState(false);
@@ -171,7 +176,7 @@ export default function Portfolio() {
     <div className="p-4 md:p-6 lg:p-8" data-testid="portfolio-page">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Portefeuille</h1>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">Portefeuille</h1>
           <p className="text-sm text-zinc-500 mt-0.5">{projects.length} projets — {ragCounts.red} rouge · {ragCounts.orange} orange · {ragCounts.green} vert</p>
         </div>
         <div className="flex flex-wrap items-center gap-2">
@@ -189,7 +194,7 @@ export default function Portfolio() {
               } catch { /* toast silencieux */ }
             }}
             data-testid="btn-export-copil-pptx"
-            className="flex items-center gap-2 px-4 py-2.5 bg-[#352c6e] text-white text-sm font-semibold rounded-lg hover:bg-[#2a2358] transition-colors shadow-sm"
+            className="flex items-center gap-2 px-4 py-2.5 bg-m-primary text-white text-sm font-semibold rounded-lg hover:bg-m-primary-deep transition-colors shadow-sm"
           >
             <Presentation size={15} /> COPIL PPTX
           </button>
@@ -197,7 +202,7 @@ export default function Portfolio() {
             <button
               onClick={openCreate}
               data-testid="btn-new-project"
-              className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm"
+              className="flex items-center gap-2 px-4 py-2.5 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark transition-colors shadow-sm"
             >
               <Plus size={15} /> Nouveau projet
             </button>
@@ -205,10 +210,44 @@ export default function Portfolio() {
         </div>
       </div>
 
+      {/* Alerte cohérence chiffres déclarés vs tâches */}
+      {consistency.length > 0 && (
+        <div className="mb-4 border border-amber-200 bg-amber-50 rounded-xl overflow-hidden" data-testid="portfolio-consistency-alert">
+          <button
+            onClick={() => setConsistencyOpen((v) => !v)}
+            data-testid="portfolio-consistency-toggle"
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-xs sm:text-sm text-amber-800 font-semibold hover:bg-amber-100/60 transition-colors"
+          >
+            <AlertTriangle size={15} className="flex-shrink-0" />
+            <span>{consistency.length} projet{consistency.length > 1 ? "s" : ""} dont les chiffres déclarés divergent de la somme des tâches (&gt;10 %)</span>
+            <ChevronDown size={14} className={`ml-auto flex-shrink-0 transition-transform ${consistencyOpen ? "rotate-180" : ""}`} />
+          </button>
+          {consistencyOpen && (
+            <div className="px-4 pb-3 space-y-1.5">
+              {consistency.map((c) => (
+                <Link
+                  key={c.project_id}
+                  to={`/projects/${c.project_id}?tab=taches`}
+                  data-testid={`consistency-item-${c.project_id}`}
+                  className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs bg-white border border-amber-100 rounded-lg px-3 py-2 hover:border-amber-300 transition-colors"
+                >
+                  <span className="font-semibold text-zinc-700">{c.code ? `${c.code} · ` : ""}{c.name}</span>
+                  {c.gaps.map((g) => (
+                    <span key={g.field} className="font-mono-data text-amber-700">
+                      {g.label} : {(g.declared || 0).toLocaleString("fr-FR")} déclarés vs {(g.tasks_sum || 0).toLocaleString("fr-FR")} Σ tâches ({g.gap_pct} %)
+                    </span>
+                  ))}
+                </Link>
+              ))}
+            </div>
+          )}
+        </div>
+      )}
+
       {/* Export COPIL action bar */}
       {selectedProjects.size > 0 && (
         <div
-          className="flex items-center gap-4 px-5 py-3 mb-4 bg-blue-600 rounded-lg shadow-md"
+          className="flex items-center gap-4 px-5 py-3 mb-4 bg-m-blue rounded-lg shadow-md"
           data-testid="export-action-bar"
         >
           <span className="text-white font-semibold text-sm">
@@ -217,7 +256,7 @@ export default function Portfolio() {
           <button
             onClick={() => setExportModalOpen(true)}
             data-testid="btn-export-copil"
-            className="flex items-center gap-2 px-4 py-1.5 bg-white text-blue-600 text-sm font-bold rounded-lg hover:bg-blue-50 transition-colors"
+            className="flex items-center gap-2 px-4 py-1.5 bg-white text-m-blue text-sm font-bold rounded-lg hover:bg-blue-50 transition-colors"
           >
             <Presentation size={14} /> Export COPIL
           </button>
@@ -238,16 +277,16 @@ export default function Portfolio() {
           <input
             type="text" value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher..." data-testid="portfolio-search"
-            className="pl-8 pr-3 py-2 text-sm border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-blue-600 w-52"
+            className="pl-8 pr-3 py-2 text-sm border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-m-blue w-52"
           />
         </div>
         <select value={filterRag} onChange={(e) => setFilterRag(e.target.value)} data-testid="portfolio-filter-rag"
-          className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600">
+          className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-m-blue">
           <option value="">Tous RAG</option>
           {["green","orange","red"].map((r) => <option key={r} value={r}>{RAG_LABELS[r]}</option>)}
         </select>
         <select value={filterMethod} onChange={(e) => setFilterMethod(e.target.value)} data-testid="portfolio-filter-methodology"
-          className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600">
+          className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-m-blue">
           <option value="">Toutes méthodos</option>
           <option value="waterfall">Waterfall</option>
           <option value="agile">Agile</option>
@@ -255,13 +294,13 @@ export default function Portfolio() {
         </select>
         {programs.length > 0 && (
           <select value={filterProgram} onChange={(e) => setFilterProgram(e.target.value)} data-testid="portfolio-filter-program"
-            className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600">
+            className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-m-blue">
             <option value="">Tous programmes</option>
             {programs.map((prog) => <option key={prog.program_id} value={prog.program_id}>{prog.name}</option>)}
           </select>
         )}
         <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} data-testid="portfolio-filter-status"
-          className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600">
+          className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-m-blue">
           <option value="">Tous statuts</option>
           <option value="en_preparation">En préparation</option>
           <option value="actif">Actif</option>
@@ -293,11 +332,11 @@ export default function Portfolio() {
           ★ Favoris{favorites.size > 0 ? ` (${favorites.size})` : ""}
         </button>
         {/* Bascule tuiles / liste */}
-        <div className="ml-auto flex border border-[#dcd9ea] rounded-lg overflow-hidden bg-white">
+        <div className="ml-auto flex border border-m-border-strong rounded-lg overflow-hidden bg-white">
           <button
             onClick={() => switchView("tiles")}
             data-testid="view-toggle-tiles"
-            className={`w-9 h-9 flex items-center justify-center transition-colors ${view === "tiles" ? "bg-[#e9effe] text-[#2e5fe8]" : "text-[#8a87a0] hover:bg-[#f7f6fb]"}`}
+            className={`w-9 h-9 flex items-center justify-center transition-colors ${view === "tiles" ? "bg-m-blue-soft text-m-blue" : "text-m-muted hover:bg-m-surface"}`}
             title="Vue tuiles"
           >
             <LayoutGrid size={15} />
@@ -305,7 +344,7 @@ export default function Portfolio() {
           <button
             onClick={() => switchView("list")}
             data-testid="view-toggle-list"
-            className={`w-9 h-9 flex items-center justify-center transition-colors border-l border-[#dcd9ea] ${view === "list" ? "bg-[#e9effe] text-[#2e5fe8]" : "text-[#8a87a0] hover:bg-[#f7f6fb]"}`}
+            className={`w-9 h-9 flex items-center justify-center transition-colors border-l border-m-border-strong ${view === "list" ? "bg-m-blue-soft text-m-blue" : "text-m-muted hover:bg-m-surface"}`}
             title="Vue liste"
           >
             <List size={15} />
@@ -341,7 +380,7 @@ export default function Portfolio() {
       <div className={`bg-white border border-zinc-200 rounded-lg shadow-sm overflow-x-auto ${view === "tiles" ? "hidden" : ""}`}>
         <table className="w-full text-sm" data-testid="portfolio-table">
           <thead>
-            <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+            <tr className="bg-m-bg border-b border-m-border text-left">
               <th className="px-4 py-3 w-8">
                 <input
                   ref={selectAllRef}
@@ -349,12 +388,12 @@ export default function Portfolio() {
                   checked={selectedProjects.size === filtered.length && filtered.length > 0}
                   onChange={toggleSelectAll}
                   data-testid="checkbox-select-all"
-                  className="w-4 h-4 rounded-lg border-zinc-300 text-blue-600 focus:ring-blue-600 cursor-pointer"
+                  className="w-4 h-4 rounded-lg border-zinc-300 text-m-blue focus:ring-m-blue cursor-pointer"
                 />
               </th>
               {[["status_rag","RAG"],["name","Nom"],["methodology","Méthodo"],["budget_total","Budget total"],["budget_forecast","Forecast"],["end_date_forecast","Fin prévue"]].map(([key, label]) => (
                 <th key={key} onClick={() => toggleSort(key)}
-                  className="px-4 py-3 text-xs font-semibold text-zinc-600 cursor-pointer hover:text-blue-600 select-none whitespace-nowrap">
+                  className="px-4 py-3 text-xs font-semibold text-zinc-600 cursor-pointer hover:text-m-blue select-none whitespace-nowrap">
                   {label}{sortKey === key ? (sortDir === "asc" ? " ↑" : " ↓") : ""}
                 </th>
               ))}
@@ -375,12 +414,12 @@ export default function Portfolio() {
                       onChange={() => toggleSelect(p.project_id)}
                       onClick={(e) => e.stopPropagation()}
                       data-testid={`checkbox-project-${p.project_id}`}
-                      className="w-4 h-4 rounded-lg border-zinc-300 text-blue-600 focus:ring-blue-600 cursor-pointer"
+                      className="w-4 h-4 rounded-lg border-zinc-300 text-m-blue focus:ring-m-blue cursor-pointer"
                     />
                   </td>
                   <td className="px-4 py-3"><RAGBadge status={p.status_rag} /></td>
                   <td className="px-4 py-3 max-w-xs">
-                    <Link to={`/projects/${p.project_id}`} className="text-blue-600 hover:text-blue-700 font-medium text-sm leading-snug" data-testid={`project-link-${p.project_id}`}>
+                    <Link to={`/projects/${p.project_id}`} className="text-m-blue hover:text-m-blue-dark font-medium text-sm leading-snug" data-testid={`project-link-${p.project_id}`}>
                       {p.code && <span className="font-mono text-[10px] font-semibold text-zinc-400 mr-1.5" data-testid={`project-code-${p.project_id}`}>{p.code}</span>}
                       {p.name}
                     </Link>
@@ -412,7 +451,7 @@ export default function Portfolio() {
                       <div className="flex items-center justify-end gap-1">
                         {canEdit && (
                         <button onClick={(e) => openEdit(e, p)} data-testid={`btn-edit-project-${p.project_id}`}
-                          className="p-1.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Modifier">
+                          className="p-1.5 text-zinc-400 hover:text-m-blue hover:bg-blue-50 rounded-lg transition-colors" title="Modifier">
                           <Pencil size={13} />
                         </button>
                         )}

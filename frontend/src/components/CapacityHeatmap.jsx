@@ -61,7 +61,7 @@ export default function CapacityHeatmap({ data, months, onMonthsChange }) {
           <select
             value={months}
             onChange={(e) => onMonthsChange(Number(e.target.value))}
-            className="appearance-none text-xs border border-[#e8e6f0] rounded-lg px-3 py-1.5 pr-7 bg-white focus:outline-none focus:border-blue-600 text-zinc-600"
+            className="appearance-none text-xs border border-m-border rounded-lg px-3 py-1.5 pr-7 bg-white focus:outline-none focus:border-m-blue text-zinc-600"
             data-testid="heatmap-months-select"
           >
             {[3, 6, 9, 12].map((v) => (
@@ -77,14 +77,14 @@ export default function CapacityHeatmap({ data, months, onMonthsChange }) {
         <table className="w-full text-xs border-collapse" data-testid="heatmap-table">
           <thead>
             <tr>
-              <th className="text-left px-3 py-2 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] bg-[#fbfaff] border border-[#e8e6f0] min-w-[120px]">
+              <th className="text-left px-3 py-2 text-[10.5px] uppercase tracking-wider font-bold text-m-muted bg-m-bg border border-m-border min-w-[120px]">
                 Équipe
               </th>
-              <th className="px-2 py-2 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] bg-[#fbfaff] border border-[#e8e6f0] text-center min-w-[60px]">
+              <th className="px-2 py-2 text-[10.5px] uppercase tracking-wider font-bold text-m-muted bg-m-bg border border-m-border text-center min-w-[60px]">
                 Capa/mois
               </th>
               {periods.map((p) => (
-                <th key={p.period} className="px-2 py-2 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] bg-[#fbfaff] border border-[#e8e6f0] text-center min-w-[72px]">
+                <th key={p.period} className="px-2 py-2 text-[10.5px] uppercase tracking-wider font-bold text-m-muted bg-m-bg border border-m-border text-center min-w-[72px]">
                   {fmtPeriod(p.period)}
                 </th>
               ))}
@@ -93,15 +93,15 @@ export default function CapacityHeatmap({ data, months, onMonthsChange }) {
           <tbody>
             {data.map((row) => (
               <tr key={row.team_name} data-testid={`heatmap-row-${row.team_name}`}>
-                <td className="px-3 py-2 font-semibold text-zinc-700 border border-[#e8e6f0] bg-white">
+                <td className="px-3 py-2 font-semibold text-zinc-700 border border-m-border bg-white">
                   <div className="flex items-center gap-2">
-                    <div className="w-5 h-5 rounded-lg bg-blue-600/10 flex items-center justify-center flex-shrink-0">
-                      <span className="text-[9px] font-bold text-blue-600">
+                    <div className="w-5 h-5 rounded-lg bg-m-blue/10 flex items-center justify-center flex-shrink-0">
+                      <span className="text-[9px] font-bold text-m-blue">
                         {row.team_name.slice(0, 2).toUpperCase()}
                       </span>
                     </div>
                     {row.team_id ? (
-                      <Link to={`/teams/${row.team_id}`} className="hover:underline hover:text-blue-600 transition-colors">
+                      <Link to={`/teams/${row.team_id}`} className="hover:underline hover:text-m-blue transition-colors">
                         {row.team_name}
                       </Link>
                     ) : (
@@ -109,7 +109,7 @@ export default function CapacityHeatmap({ data, months, onMonthsChange }) {
                     )}
                   </div>
                 </td>
-                <td className="px-2 py-2 text-center border border-[#e8e6f0] font-mono-data text-zinc-600 bg-[#fbfaff]">
+                <td className="px-2 py-2 text-center border border-m-border font-mono-data text-zinc-600 bg-m-bg">
                   {row.capacity_jh_month} JH
                 </td>
                 {row.periods.map((p) => {
@@ -129,7 +129,7 @@ export default function CapacityHeatmap({ data, months, onMonthsChange }) {
                   return (
                     <td
                       key={p.period}
-                      className={`text-center border border-[#e8e6f0] relative transition-all ${style.bg} ${style.text}`}
+                      className={`text-center border border-m-border relative transition-all ${style.bg} ${style.text}`}
                       data-testid={`heatmap-cell-${row.team_name}-${p.period}`}
                       onMouseEnter={() => setTooltip({ team: row.team_name, period: p.period, ...p })}
                       onMouseLeave={() => setTooltip(null)}
@@ -154,10 +154,10 @@ export default function CapacityHeatmap({ data, months, onMonthsChange }) {
           </tbody>
           <tfoot>
             <tr data-testid="heatmap-total-row">
-              <td className="px-3 py-2 font-heading text-[11px] font-bold text-[#26243a] border border-[#e8e6f0] bg-[#fbfaff]">
+              <td className="px-3 py-2 font-heading text-[11px] font-bold text-m-ink border border-m-border bg-m-bg">
                 Total portefeuille
               </td>
-              <td className="px-2 py-2 text-center border border-[#e8e6f0] font-mono-data font-bold text-[#26243a] bg-[#fbfaff]">
+              <td className="px-2 py-2 text-center border border-m-border font-mono-data font-bold text-m-ink bg-m-bg">
                 {totalCapMonth} JH
               </td>
               {totals.map((t) => {
@@ -165,7 +165,7 @@ export default function CapacityHeatmap({ data, months, onMonthsChange }) {
                 return (
                   <td
                     key={t.period}
-                    className={`px-2 py-2 text-center border border-[#e8e6f0] font-mono-data font-bold ${style.bg} ${style.text}`}
+                    className={`px-2 py-2 text-center border border-m-border font-mono-data font-bold ${style.bg} ${style.text}`}
                     data-testid={`heatmap-total-${t.period}`}
                   >
                     {t.capacity_jh === 0 ? <span className="text-zinc-200">—</span> : (

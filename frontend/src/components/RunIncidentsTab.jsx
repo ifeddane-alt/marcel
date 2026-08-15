@@ -15,7 +15,7 @@ const ST_CFG = {
   en_cours: { label: "En cours", cls: "bg-amber-50 text-amber-700 border-amber-200" },
   resolu: { label: "Résolu", cls: "bg-emerald-50 text-emerald-700 border-emerald-200" },
 };
-const inputCls = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600";
+const inputCls = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue";
 const labelCls = "block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5";
 const fmtDate = (d) => (d ? new Date(d).toLocaleDateString("fr-FR") : "—");
 
@@ -85,7 +85,7 @@ function IncidentModal({ incident, apps, onClose, onSave }) {
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100">
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50">Annuler</button>
             <button type="submit" disabled={saving} data-testid="incident-save-btn"
-              className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60">
+              className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-60">
               {saving ? "..." : "Enregistrer"}
             </button>
           </div>
@@ -130,12 +130,12 @@ export default function RunIncidentsTab({ canWrite, onChanged }) {
   };
 
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]" data-testid="run-incidents-tab">
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]" data-testid="run-incidents-tab">
       <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
-        <div className="font-heading text-[13px] font-bold text-[#26243a]">Incidents &amp; SLA ({incidents.length})</div>
+        <div className="font-heading text-[13px] font-bold text-m-ink">Incidents &amp; SLA ({incidents.length})</div>
         {canWrite && (
           <button onClick={() => setModal({})} data-testid="btn-new-incident"
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700">
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-m-blue text-white text-xs font-semibold rounded-lg hover:bg-m-blue-dark">
             <Plus size={12} /> Nouvel incident
           </button>
         )}
@@ -146,9 +146,9 @@ export default function RunIncidentsTab({ canWrite, onChanged }) {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+              <tr className="bg-m-bg border-b border-m-border text-left">
                 {["Incident", "Application", "Sévérité", "Statut", "Ouvert le", "Résolu le", "SLA", ""].map((h) => (
-                  <th key={h} className="px-3 py-2 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] whitespace-nowrap">{h}</th>
+                  <th key={h} className="px-3 py-2 text-[10.5px] uppercase tracking-wider font-bold text-m-muted whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -174,7 +174,7 @@ export default function RunIncidentsTab({ canWrite, onChanged }) {
                     {canWrite && (
                       <div className="flex items-center gap-1">
                         <button onClick={() => setModal({ incident: i })} data-testid={`btn-edit-incident-${i.incident_id}`}
-                          className="p-1 text-zinc-400 hover:text-blue-600"><Pencil size={12} /></button>
+                          className="p-1 text-zinc-400 hover:text-m-blue"><Pencil size={12} /></button>
                         <button onClick={() => setConfirmDelete(i)} className="p-1 text-zinc-400 hover:text-rose-500"><Trash2 size={12} /></button>
                       </div>
                     )}

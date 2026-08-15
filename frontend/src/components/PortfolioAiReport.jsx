@@ -75,7 +75,7 @@ export default function PortfolioAiReport({ onClose }) {
           ) : (
             <div className="space-y-4" data-testid="ptf-report-content">
               <div className="flex items-center gap-2 flex-wrap">
-                <span className="font-heading text-sm font-bold text-[#26243a]">{selected.week_label}</span>
+                <span className="font-heading text-sm font-bold text-m-ink">{selected.week_label}</span>
                 <span className={`inline-flex items-center gap-1 px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-lg border ${t.cls}`}>
                   <t.icon size={10} /> {t.label}
                 </span>

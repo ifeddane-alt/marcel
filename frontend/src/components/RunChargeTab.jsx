@@ -17,9 +17,9 @@ export default function RunChargeTab() {
   if (!data) return <div className="p-6 text-sm text-zinc-400">Calcul de la charge consolidée…</div>;
 
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]" data-testid="run-charge-tab">
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]" data-testid="run-charge-tab">
       <div className="px-5 py-3 border-b border-zinc-100 flex items-center justify-between flex-wrap gap-2">
-        <div className="font-heading text-[13px] font-bold text-[#26243a]">
+        <div className="font-heading text-[13px] font-bold text-m-ink">
           Charge consolidée Build + Run par ressource (JH)
         </div>
         <div className="flex items-center gap-3 text-[10px] text-zinc-400">
@@ -31,11 +31,11 @@ export default function RunChargeTab() {
       <div className="overflow-x-auto">
         <table className="w-full text-sm">
           <thead>
-            <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
-              <th className="px-3 py-2 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] whitespace-nowrap">Ressource</th>
-              <th className="px-3 py-2 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] whitespace-nowrap">Capacité /m</th>
+            <tr className="bg-m-bg border-b border-m-border text-left">
+              <th className="px-3 py-2 text-[10.5px] uppercase tracking-wider font-bold text-m-muted whitespace-nowrap">Ressource</th>
+              <th className="px-3 py-2 text-[10.5px] uppercase tracking-wider font-bold text-m-muted whitespace-nowrap">Capacité /m</th>
               {data.periods.map((p) => (
-                <th key={p} className="px-2 py-2 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] text-center whitespace-nowrap">{p}</th>
+                <th key={p} className="px-2 py-2 text-[10.5px] uppercase tracking-wider font-bold text-m-muted text-center whitespace-nowrap">{p}</th>
               ))}
             </tr>
           </thead>

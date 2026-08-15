@@ -9,8 +9,8 @@ import ApplicationModal, { APP_STATUSES, APP_STATUS_CFG, TIME_RATINGS, TIME_CFG,
 
 function Kpi({ label, value, icon: Icon, accent, testId }) {
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 flex items-center gap-3" data-testid={testId}>
-      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${accent || "bg-[#f0eefc] text-[#352c6e]"}`}>
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 flex items-center gap-3" data-testid={testId}>
+      <div className={`w-9 h-9 rounded-lg flex items-center justify-center flex-shrink-0 ${accent || "bg-m-lilac text-m-primary"}`}>
         <Icon size={16} />
       </div>
       <div className="min-w-0">
@@ -63,14 +63,14 @@ export default function Applications() {
     <div className="p-4 md:p-6 space-y-4" data-testid="applications-page">
       <div className="flex items-center justify-between flex-wrap gap-3">
         <div>
-          <h1 className="font-heading text-xl md:text-2xl font-extrabold text-[#26243a] flex items-center gap-2">
-            <AppWindow size={20} className="text-[#352c6e]" /> Portefeuille Applicatif
+          <h1 className="font-heading text-xl md:text-2xl font-extrabold text-m-ink flex items-center gap-2">
+            <AppWindow size={20} className="text-m-primary" /> Portefeuille Applicatif
           </h1>
           <p className="text-xs text-zinc-400 mt-0.5">Référentiel des applications de la DSI — cycle de vie, TCO, rationalisation TIME</p>
         </div>
         {canWrite && (
           <button onClick={() => setModalOpen(true)} data-testid="btn-new-application"
-            className="flex items-center gap-1.5 px-3.5 py-2 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700 transition-colors">
+            className="flex items-center gap-1.5 px-3.5 py-2 bg-m-blue text-white text-xs font-semibold rounded-lg hover:bg-m-blue-dark transition-colors">
             <Plus size={13} /> Nouvelle application
           </button>
         )}
@@ -88,32 +88,32 @@ export default function Applications() {
       <div className="flex items-center gap-2 flex-wrap">
         <div className="flex items-center gap-1">
           <button onClick={() => setView("liste")} data-testid="apm-view-liste-btn"
-            className={`flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold rounded-lg transition-colors ${view === "liste" ? "bg-blue-600 text-white" : "text-zinc-500 border border-zinc-200 hover:bg-zinc-50"}`}>
+            className={`flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold rounded-lg transition-colors ${view === "liste" ? "bg-m-blue text-white" : "text-zinc-500 border border-zinc-200 hover:bg-zinc-50"}`}>
             <ClipboardList size={11} /> Liste
           </button>
           <button onClick={() => setView("time")} data-testid="apm-view-time-btn"
-            className={`flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold rounded-lg transition-colors ${view === "time" ? "bg-blue-600 text-white" : "text-zinc-500 border border-zinc-200 hover:bg-zinc-50"}`}>
+            className={`flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold rounded-lg transition-colors ${view === "time" ? "bg-m-blue text-white" : "text-zinc-500 border border-zinc-200 hover:bg-zinc-50"}`}>
             <Grid3X3 size={11} /> Matrice TIME
           </button>
           <button onClick={() => setView("capacites")} data-testid="apm-view-capacites-btn"
-            className={`flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold rounded-lg transition-colors ${view === "capacites" ? "bg-blue-600 text-white" : "text-zinc-500 border border-zinc-200 hover:bg-zinc-50"}`}>
+            className={`flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold rounded-lg transition-colors ${view === "capacites" ? "bg-m-blue text-white" : "text-zinc-500 border border-zinc-200 hover:bg-zinc-50"}`}>
             <AppWindow size={11} /> Capacités métiers
           </button>
         </div>
         <div className="relative ml-auto">
           <Search size={13} className="absolute left-2.5 top-1/2 -translate-y-1/2 text-zinc-400" />
           <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Rechercher…" data-testid="apm-search-input"
-            className="pl-8 pr-3 py-1.5 text-xs border border-zinc-200 rounded-lg focus:outline-none focus:border-blue-600 w-44" />
+            className="pl-8 pr-3 py-1.5 text-xs border border-zinc-200 rounded-lg focus:outline-none focus:border-m-blue w-44" />
         </div>
         <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)} data-testid="apm-status-filter"
-          className="text-xs border border-zinc-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-blue-600">
+          className="text-xs border border-zinc-200 rounded-lg px-2 py-1.5 bg-white focus:outline-none focus:border-m-blue">
           <option value="">Tous statuts</option>
           {APP_STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
         </select>
       </div>
 
       {view === "capacites" ? <CapacitiesView apps={apps} navigate={navigate} /> : view === "liste" ? (
-        <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto">
+        <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto">
           {filtered.length === 0 ? (
             <div className="px-5 py-12 text-sm text-zinc-400 text-center" data-testid="apm-empty">
               Aucune application — créez la première fiche du référentiel applicatif.
@@ -121,9 +121,9 @@ export default function Applications() {
           ) : (
             <table className="w-full text-sm">
               <thead>
-                <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+                <tr className="bg-m-bg border-b border-m-border text-left">
                   {["Application", "Cycle de vie", "Criticité", "TIME", "Éditeur / Techno", "TCO annuel", "Projets", "Obsolescence"].map((h) => (
-                    <th key={h} className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] whitespace-nowrap">{h}</th>
+                    <th key={h} className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted whitespace-nowrap">{h}</th>
                   ))}
                 </tr>
               </thead>
@@ -182,7 +182,7 @@ export default function Applications() {
           {TIME_RATINGS.map((t) => {
             const items = filtered.filter((a) => a.time_rating === t.value);
             return (
-              <div key={t.value} className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4" data-testid={`time-quadrant-${t.value}`}>
+              <div key={t.value} className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4" data-testid={`time-quadrant-${t.value}`}>
                 <div className="flex items-center justify-between mb-3">
                   <span className={`px-2 py-0.5 text-[10px] font-bold uppercase rounded-lg border ${TIME_CFG[t.value]}`}>{t.label}</span>
                   <span className="font-mono-data text-xs font-bold text-zinc-500">{items.length}</span>
@@ -192,7 +192,7 @@ export default function Applications() {
                   {items.map((a) => (
                     <button key={a.application_id} onClick={() => navigate(`/applications/${a.application_id}`)}
                       data-testid={`time-chip-${a.application_id}`}
-                      className="flex items-center gap-1.5 px-2 py-1 text-[11px] font-medium text-zinc-700 bg-[#fbfaff] border border-[#e8e6f0] rounded-lg hover:border-blue-400 transition-colors">
+                      className="flex items-center gap-1.5 px-2 py-1 text-[11px] font-medium text-zinc-700 bg-m-bg border border-m-border rounded-lg hover:border-blue-400 transition-colors">
                       <span className={`w-1.5 h-1.5 rounded-full ${a.criticality === "critique" ? "bg-rose-500" : a.criticality === "haute" ? "bg-amber-500" : "bg-zinc-300"}`} />
                       {a.name}
                     </button>
@@ -202,7 +202,7 @@ export default function Applications() {
             );
           })}
           {filtered.some((a) => !a.time_rating) && (
-            <div className="md:col-span-2 bg-white border border-dashed border-[#e8e6f0] rounded-xl p-4">
+            <div className="md:col-span-2 bg-white border border-dashed border-m-border rounded-xl p-4">
               <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold mb-2">Non classées</div>
               <div className="flex flex-wrap gap-1.5">
                 {filtered.filter((a) => !a.time_rating).map((a) => (
@@ -237,17 +237,17 @@ function CapacitiesView({ apps, navigate }) {
   const caps = Object.values(agg).sort((a, b) => b.apps.length - a.apps.length);
   if (caps.length === 0)
     return (
-      <div className="bg-white border border-[#e8e6f0] rounded-xl p-10 text-center text-sm text-zinc-400" data-testid="capacities-empty">
+      <div className="bg-white border border-m-border rounded-xl p-10 text-center text-sm text-zinc-400" data-testid="capacities-empty">
         Aucune capacité métier renseignée — ajoutez-les sur les fiches applications (champ « Capacités métiers »).
       </div>
     );
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto" data-testid="capacities-table">
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-x-auto" data-testid="capacities-table">
       <table className="w-full text-sm">
         <thead>
-          <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+          <tr className="bg-m-bg border-b border-m-border text-left">
             {["Capacité métier", "Applications", "TCO annuel cumulé", "Redondance"].map((h) => (
-              <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0]">{h}</th>
+              <th key={h} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted">{h}</th>
             ))}
           </tr>
         </thead>
@@ -260,7 +260,7 @@ function CapacitiesView({ apps, navigate }) {
                   {c.apps.map((a) => (
                     <button key={a.application_id} onClick={() => navigate(`/applications/${a.application_id}`)}
                       data-testid={`capacity-app-${a.application_id}`}
-                      className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-[#e9effe] text-[#2e5fe8] hover:bg-[#d5e2fc]">
+                      className="px-2 py-0.5 rounded-full text-[11px] font-medium bg-m-blue-soft text-m-blue hover:bg-[#d5e2fc]">
                       {a.name}
                     </button>
                   ))}

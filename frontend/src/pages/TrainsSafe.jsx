@@ -74,7 +74,7 @@ function CapabilityCard({ cap, onEdit, onDelete }) {
         </div>
         <div className="flex gap-1 opacity-0 group-hover:opacity-100 transition-opacity flex-shrink-0">
           <button onClick={() => onEdit(cap)}
-            className="p-1 hover:bg-blue-50 rounded-lg text-zinc-400 hover:text-blue-600 transition-colors">
+            className="p-1 hover:bg-blue-50 rounded-lg text-zinc-400 hover:text-m-blue transition-colors">
             <Pencil size={11} />
           </button>
           <button onClick={() => onDelete(cap)}
@@ -147,8 +147,8 @@ function PIPanel({ pi, onAddCapability, onEditCapability, onDeleteCapability, on
         onClick={() => setExpanded(e => !e)}
       >
         <div className="flex items-center gap-3">
-          <div className="w-10 h-10 rounded-lg bg-blue-600/10 flex items-center justify-center flex-shrink-0">
-            <Target size={18} className="text-blue-600" />
+          <div className="w-10 h-10 rounded-lg bg-m-blue/10 flex items-center justify-center flex-shrink-0">
+            <Target size={18} className="text-m-blue" />
           </div>
           <div>
             <div className="flex items-center gap-2">
@@ -211,7 +211,7 @@ function PIPanel({ pi, onAddCapability, onEditCapability, onDeleteCapability, on
               </div>
               <button
                 onClick={() => onManageFeatures(pi)}
-                className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                className="flex items-center gap-1.5 text-[11px] font-semibold text-m-blue hover:text-m-blue-dark transition-colors"
                 data-testid={`manage-features-btn-${pi.pi_id}`}
               >
                 <Plus size={12} /> Gérer les features
@@ -230,7 +230,7 @@ function PIPanel({ pi, onAddCapability, onEditCapability, onDeleteCapability, on
                     <span className="text-zinc-700 truncate flex-1">
                       {f.name}
                       {f.project_code && <span className="font-mono text-[10px] text-zinc-400 ml-1.5">{f.project_code}</span>}
-                      {f.wsjf != null && <span className="ml-1.5 px-1 py-px text-[9px] font-bold rounded bg-[#f0eefc] text-[#352c6e] font-mono">WSJF {f.wsjf}</span>}
+                      {f.wsjf != null && <span className="ml-1.5 px-1 py-px text-[9px] font-bold rounded bg-m-lilac text-m-primary font-mono">WSJF {f.wsjf}</span>}
                     </span>
                     <span className="flex items-center gap-2 flex-shrink-0 ml-2">
                       {f.scope_status && (
@@ -256,7 +256,7 @@ function PIPanel({ pi, onAddCapability, onEditCapability, onDeleteCapability, on
               </div>
               <button
                 onClick={() => onAddCapability(pi)}
-                className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                className="flex items-center gap-1.5 text-[11px] font-semibold text-m-blue hover:text-m-blue-dark transition-colors"
                 data-testid={`add-cap-btn-${pi.pi_id}`}
               >
                 <Plus size={12} /> Ajouter
@@ -334,7 +334,7 @@ function CapabilityModal({ isOpen, onClose, trainId, pi, capability, onSaved }) 
     } finally { setSaving(false); }
   };
 
-  const INPUT = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600";
+  const INPUT = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue focus:ring-1 focus:ring-m-blue";
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={capability ? "Modifier la capability" : "Nouvelle capability"}>
       <form onSubmit={handleSubmit} className="space-y-3">
@@ -365,7 +365,7 @@ function CapabilityModal({ isOpen, onClose, trainId, pi, capability, onSaved }) 
             Annuler
           </button>
           <button type="submit" disabled={saving}
-            className="px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50"
+            className="px-5 py-2 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-50"
             data-testid="cap-form-submit">
             {capability ? "Enregistrer" : "Créer"}
           </button>
@@ -409,7 +409,7 @@ function FeaturesModal({ isOpen, onClose, pi, onChanged }) {
       </span>
       {f.pi_id === pi.pi_id && (
         <span className="flex items-center gap-1 flex-shrink-0" title="Score WSJF (Weighted Shortest Job First)">
-          <span className="text-[9px] font-bold text-[#352c6e]">WSJF</span>
+          <span className="text-[9px] font-bold text-m-primary">WSJF</span>
           <input type="number" min="0" step="0.5" defaultValue={f.wsjf ?? ""}
             data-testid={`feature-wsjf-input-${f.task_id}`}
             onBlur={async (e) => {
@@ -421,7 +421,7 @@ function FeaturesModal({ isOpen, onClose, pi, onChanged }) {
                 onChanged();
               } catch {}
             }}
-            className="w-14 text-[11px] border border-zinc-200 rounded px-1.5 py-0.5 font-mono text-right focus:outline-none focus:border-blue-600" />
+            className="w-14 text-[11px] border border-zinc-200 rounded px-1.5 py-0.5 font-mono text-right focus:outline-none focus:border-m-blue" />
         </span>
       )}
       <span className="font-mono text-[10px] text-zinc-500 flex-shrink-0">{f.jh_planned || 0} jh · {(f.cost_eur || 0).toLocaleString("fr-FR")} €</span>
@@ -451,7 +451,7 @@ function FeaturesModal({ isOpen, onClose, pi, onChanged }) {
         )}
         <div className="flex justify-end pt-2 border-t border-zinc-100">
           <button onClick={onClose} data-testid="features-modal-close"
-            className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">Terminé</button>
+            className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark">Terminé</button>
         </div>
       </div>
     </Modal>
@@ -530,9 +530,9 @@ export default function TrainsSafe() {
       {/* Header */}
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Trains SAFe</span></div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight flex items-center gap-2">
-            <Train size={26} className="text-blue-600" />
+          <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Trains SAFe</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight flex items-center gap-2">
+            <Train size={26} className="text-m-blue" />
             Trains SAFe
           </h1>
           <p className="text-sm text-zinc-500 mt-0.5">Release Trains Agiles — Programmes Incrémentiels</p>
@@ -549,8 +549,8 @@ export default function TrainsSafe() {
               data-testid={`train-tab-${t.train_id}`}
               className={`px-4 py-2 text-sm font-semibold rounded-lg border transition-all ${
                 selectedTrainId === t.train_id
-                  ? "bg-blue-600 text-white border-blue-600"
-                  : "bg-white text-zinc-600 border-zinc-200 hover:border-blue-600 hover:text-blue-600"
+                  ? "bg-m-blue text-white border-m-blue"
+                  : "bg-white text-zinc-600 border-zinc-200 hover:border-m-blue hover:text-m-blue"
               }`}
             >
               {t.name}
@@ -573,8 +573,8 @@ export default function TrainsSafe() {
           <div className="bg-white border border-zinc-200 rounded-lg shadow-sm p-5 mb-5">
             <div className="flex items-start justify-between">
               <div className="flex items-start gap-4">
-                <div className="w-12 h-12 rounded-xl bg-blue-600/10 flex items-center justify-center flex-shrink-0">
-                  <Train size={22} className="text-blue-600" />
+                <div className="w-12 h-12 rounded-xl bg-m-blue/10 flex items-center justify-center flex-shrink-0">
+                  <Train size={22} className="text-m-blue" />
                 </div>
                 <div>
                   <div className="font-bold text-xl text-zinc-800">{train.name}</div>
@@ -633,7 +633,7 @@ export default function TrainsSafe() {
           </div>
 
           {/* Tabs : Overview | PI Planning | Dashboard Programme */}
-          <div className="flex gap-1 mb-5 border-b border-[#e7e3f2]">
+          <div className="flex gap-1 mb-5 border-b border-m-border-lav">
             {[
               { id: "overview",   label: "Vue d'ensemble",       Icon: BarChart3 },
               { id: "planning",   label: "PI Planning",          Icon: Layout },
@@ -645,8 +645,8 @@ export default function TrainsSafe() {
                 onClick={() => setActiveTab(id)}
                 className={`flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold whitespace-nowrap border-b-[3px] -mb-px transition-colors ${
                   activeTab === id
-                    ? "text-[#2e5fe8] border-[#2e5fe8]"
-                    : "text-[#8a87a0] border-transparent hover:text-[#26243a]"
+                    ? "text-m-blue border-m-blue"
+                    : "text-m-muted border-transparent hover:text-m-ink"
                 }`}
               >
                 <Icon size={14} />
@@ -693,8 +693,8 @@ export default function TrainsSafe() {
                     onClick={() => setActivePIId(pi.pi_id)}
                     className={`px-3 py-1.5 text-sm font-semibold rounded-lg border transition-all ${
                       activePIId === pi.pi_id
-                        ? "bg-blue-600 text-white border-blue-600"
-                        : "bg-white text-zinc-600 border-zinc-200 hover:border-blue-600"
+                        ? "bg-m-blue text-white border-m-blue"
+                        : "bg-white text-zinc-600 border-zinc-200 hover:border-m-blue"
                     }`}
                   >
                     {pi.name}
@@ -703,7 +703,7 @@ export default function TrainsSafe() {
                 {!activePIId && overview?.pis?.length > 0 && (
                   <button
                     onClick={() => setActivePIId(overview.pis[0].pi_id)}
-                    className="text-blue-600 text-sm underline"
+                    className="text-m-blue text-sm underline"
                   >
                     Sélectionner un PI →
                   </button>

@@ -46,7 +46,7 @@ function MultiYearModal({ row, years, onClose, onSaved }) {
               <input type="number" min="0" step="1000" value={values[String(y)]}
                 onChange={(e) => setValues((prev) => ({ ...prev, [String(y)]: e.target.value }))}
                 data-testid={`my-input-${y}`}
-                className="flex-1 text-sm text-right border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 font-mono-data" />
+                className="flex-1 text-sm text-right border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue font-mono-data" />
               <span className="text-xs text-zinc-400 w-4">€</span>
             </div>
           ))}
@@ -69,7 +69,7 @@ function MultiYearModal({ row, years, onClose, onSaved }) {
               <button onClick={onClose}
                 className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">Annuler</button>
               <button onClick={() => save(false)} disabled={saving} data-testid="my-save"
-                className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60">
+                className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors disabled:opacity-60">
                 {saving ? "Sauvegarde..." : "Enregistrer"}
               </button>
             </div>
@@ -127,7 +127,7 @@ export default function MultiYearPlan({ canEdit }) {
               <div className="font-heading text-2xl font-bold text-zinc-950 font-mono-data">{formatEuro(total)}</div>
               {env ? (
                 <>
-                  <div className="mt-2 h-1.5 bg-[#ece9f4] rounded-full overflow-hidden">
+                  <div className="mt-2 h-1.5 bg-m-border-soft rounded-full overflow-hidden">
                     <div className="h-full rounded-full"
                       style={{
                         width: `${Math.min(env.total_envelope ? (total / env.total_envelope) * 100 : 0, 100)}%`,
@@ -140,7 +140,7 @@ export default function MultiYearPlan({ canEdit }) {
                 </>
               ) : (
                 <div className="text-[11px] text-zinc-400 mt-2">
-                  Aucune enveloppe définie — <Link to="/arbitrage" className="text-blue-600 hover:underline">créer dans Arbitrage</Link>
+                  Aucune enveloppe définie — <Link to="/arbitrage" className="text-m-blue hover:underline">créer dans Arbitrage</Link>
                 </div>
               )}
             </div>
@@ -151,8 +151,8 @@ export default function MultiYearPlan({ canEdit }) {
       {/* Table */}
       <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-hidden">
         <div className="flex items-center gap-2 px-5 py-3 border-b border-zinc-100">
-          <CalendarRange size={13} className="text-blue-600" />
-          <span className="font-heading text-[13px] font-bold text-[#26243a]">
+          <CalendarRange size={13} className="text-m-blue" />
+          <span className="font-heading text-[13px] font-bold text-m-ink">
             Schéma directeur — répartition des budgets par exercice
           </span>
           <span className="text-[11px] text-zinc-400 ml-2">Pro-rata temporis par défaut, ajustable projet par projet</span>
@@ -175,7 +175,7 @@ export default function MultiYearPlan({ canEdit }) {
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-[10.5px] text-[#8a87a0] uppercase tracking-wider font-bold">
+              <tr className="bg-m-bg border-b border-m-border text-[10.5px] text-m-muted uppercase tracking-wider font-bold">
                 <th className="px-4 py-2.5 text-left">Projet</th>
                 <th className="px-3 py-2.5 text-left whitespace-nowrap">Période</th>
                 {years.map((y) => <th key={y} className="px-3 py-2.5 text-right font-mono-data">{y}</th>)}
@@ -191,7 +191,7 @@ export default function MultiYearPlan({ canEdit }) {
                   <td className="px-4 py-2.5">
                     <div className="flex items-center gap-2 min-w-0">
                       <span className={`w-2 h-2 rounded-full flex-shrink-0 ${RAG_DOT[r.status_rag] || "bg-zinc-300"}`} />
-                      <Link to={`/projects/${r.project_id}`} className="text-xs font-medium text-zinc-700 hover:text-blue-600 truncate max-w-[220px]" title={r.name}>
+                      <Link to={`/projects/${r.project_id}`} className="text-xs font-medium text-zinc-700 hover:text-m-blue truncate max-w-[220px]" title={r.name}>
                         {r.name}
                       </Link>
                     </div>
@@ -218,7 +218,7 @@ export default function MultiYearPlan({ canEdit }) {
                   {canEdit && (
                     <td className="px-3 py-2.5 text-center">
                       <button onClick={() => setEditing(r)} data-testid={`btn-edit-multiyear-${r.project_id}`}
-                        className="p-1 text-zinc-400 hover:text-blue-600 rounded-lg transition-colors" title="Ajuster la répartition">
+                        className="p-1 text-zinc-400 hover:text-m-blue rounded-lg transition-colors" title="Ajuster la répartition">
                         <Pencil size={12} />
                       </button>
                     </td>
@@ -227,7 +227,7 @@ export default function MultiYearPlan({ canEdit }) {
               ))}
             </tbody>
             <tfoot>
-              <tr className="bg-[#fbfaff] border-t-2 border-[#e8e6f0]" data-testid="my-total-row">
+              <tr className="bg-m-bg border-t-2 border-m-border" data-testid="my-total-row">
                 <td className="px-4 py-2.5 text-xs font-bold text-zinc-700" colSpan={2}>Total portefeuille</td>
                 {years.map((y) => (
                   <td key={y} className="px-3 py-2.5 text-right font-mono-data text-xs font-bold text-zinc-900">
@@ -240,7 +240,7 @@ export default function MultiYearPlan({ canEdit }) {
                 <td colSpan={canEdit ? 3 : 2}></td>
               </tr>
               {Object.keys(envelopes).length > 0 && (
-                <tr className="bg-[#fbfaff]">
+                <tr className="bg-m-bg">
                   <td className="px-4 py-2 text-[10.5px] text-zinc-400 uppercase tracking-wider font-bold" colSpan={2}>Enveloppes / écart</td>
                   {years.map((y) => {
                     const env = envelopes[String(y)];

@@ -9,7 +9,7 @@ const LEVEL_CONFIG = {
 
 const PHASE_COLORS = {
   backlog:        "bg-zinc-100 text-zinc-600",
-  review:         "bg-blue-50 text-blue-600",
+  review:         "bg-blue-50 text-m-blue",
   analysis:       "bg-amber-50 text-amber-700",
   implementation: "bg-indigo-50 text-indigo-700",
   test:           "bg-violet-50 text-violet-700",

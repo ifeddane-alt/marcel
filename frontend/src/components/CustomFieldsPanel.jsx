@@ -25,15 +25,15 @@ export const CustomFieldsPanel = ({ project, canWrite }) => {
     } catch { toast.error("Erreur d'enregistrement"); }
   };
 
-  const inputCls = "w-full text-sm border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600";
+  const inputCls = "w-full text-sm border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-m-blue";
 
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-5" data-testid="custom-fields-panel">
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-5" data-testid="custom-fields-panel">
       <div className="flex items-center justify-between mb-4">
-        <div className="font-heading text-[13px] font-bold text-[#26243a]">Champs personnalisés</div>
+        <div className="font-heading text-[13px] font-bold text-m-ink">Champs personnalisés</div>
         {canWrite && dirty && (
           <button onClick={save} data-testid="custom-fields-save-btn"
-            className="px-2.5 py-1 rounded-lg bg-[#2e5fe8] text-white text-[11px] font-semibold hover:bg-[#2450c8]">
+            className="px-2.5 py-1 rounded-lg bg-m-blue text-white text-[11px] font-semibold hover:bg-m-blue-dark">
             Enregistrer
           </button>
         )}

@@ -90,7 +90,7 @@ function TargetBlock({ o, canWrite, onSaved }) {
             <button onClick={() => { setEditing(true); setValue(o.target_current ?? ""); }}
               data-testid={`btn-update-target-${o.objective_id}`}
               title="Mettre à jour le réalisé"
-              className="p-1 rounded hover:bg-zinc-100 text-zinc-400 hover:text-blue-600 transition-colors">
+              className="p-1 rounded hover:bg-zinc-100 text-zinc-400 hover:text-m-blue transition-colors">
               <Pencil size={11} />
             </button>
           )}
@@ -114,9 +114,9 @@ function TargetBlock({ o, canWrite, onSaved }) {
           <input type="number" step="any" value={value} onChange={(e) => setValue(e.target.value)}
             autoFocus data-testid={`target-value-input-${o.objective_id}`}
             placeholder={`Réalisé actuel${unit ? ` (${unit})` : ""}`}
-            className="w-36 text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-blue-600" />
+            className="w-36 text-xs border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-m-blue" />
           <button onClick={save} disabled={saving || value === ""} data-testid={`target-save-${o.objective_id}`}
-            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-50">
+            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-50">
             <Check size={11} /> Enregistrer
           </button>
           <button onClick={() => setEditing(false)}
@@ -175,7 +175,7 @@ function ObjectiveModal({ objective, onClose, onSaved }) {
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[90vh] overflow-y-auto">
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
           <div className="flex items-center gap-2">
-            <Target size={16} className="text-blue-600" />
+            <Target size={16} className="text-m-blue" />
             <h2 className="font-heading text-lg font-bold text-zinc-950">
               {isEdit ? "Modifier l'objectif" : "Nouvel objectif stratégique"}
             </h2>
@@ -187,25 +187,25 @@ function ObjectiveModal({ objective, onClose, onSaved }) {
             <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Titre *</label>
             <input value={title} onChange={(e) => setTitle(e.target.value)} required data-testid="obj-title-input"
               placeholder="Ex : Réduire le coût de run de 15 %"
-              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue" />
           </div>
           <div>
             <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Description</label>
             <textarea value={description} onChange={(e) => setDescription(e.target.value)} rows={2} data-testid="obj-desc-input"
-              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 resize-none" />
+              className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue resize-none" />
           </div>
           <div className="grid grid-cols-2 gap-3">
             <div>
               <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Axe stratégique</label>
               <input value={pillar} onChange={(e) => setPillar(e.target.value)} data-testid="obj-pillar-input"
                 placeholder="Ex : Excellence opérationnelle"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Horizon</label>
               <input value={horizon} onChange={(e) => setHorizon(e.target.value)} data-testid="obj-horizon-input"
                 placeholder="Ex : 2026-2028"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue" />
             </div>
           </div>
           <div className="grid grid-cols-2 gap-3">
@@ -213,44 +213,44 @@ function ObjectiveModal({ objective, onClose, onSaved }) {
               <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Sponsor / porteur</label>
               <input value={owner} onChange={(e) => setOwner(e.target.value)} data-testid="obj-owner-input"
                 placeholder="Ex : DSI"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600" />
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue" />
             </div>
             <div>
               <label className="block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5">Statut</label>
               <select value={status} onChange={(e) => setStatus(e.target.value)} data-testid="obj-status-select"
-                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 bg-white">
+                className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue bg-white">
                 {STATUSES.map((s) => <option key={s.value} value={s.value}>{s.label}</option>)}
               </select>
             </div>
           </div>
           <div className="border border-zinc-100 rounded-lg p-3 bg-zinc-50/50">
             <div className="flex items-center gap-1.5 text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-2">
-              <Gauge size={12} className="text-blue-600" /> Cible mesurable <span className="text-zinc-400 normal-case font-normal tracking-normal">(optionnel)</span>
+              <Gauge size={12} className="text-m-blue" /> Cible mesurable <span className="text-zinc-400 normal-case font-normal tracking-normal">(optionnel)</span>
             </div>
             <div className="grid grid-cols-2 gap-3">
               <div>
                 <label className="block text-[10.5px] font-semibold text-zinc-500 mb-1">Unité</label>
                 <input value={targetUnit} onChange={(e) => setTargetUnit(e.target.value)} data-testid="obj-target-unit-input"
                   placeholder="Ex : %, M€, jours"
-                  className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600" />
+                  className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-m-blue" />
               </div>
               <div>
                 <label className="block text-[10.5px] font-semibold text-zinc-500 mb-1">Valeur de départ</label>
                 <input type="number" step="any" value={targetBaseline} onChange={(e) => setTargetBaseline(e.target.value)} data-testid="obj-target-baseline-input"
                   placeholder="Ex : 0"
-                  className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600" />
+                  className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-m-blue" />
               </div>
               <div>
                 <label className="block text-[10.5px] font-semibold text-zinc-500 mb-1">Cible à atteindre</label>
                 <input type="number" step="any" value={targetValue} onChange={(e) => setTargetValue(e.target.value)} data-testid="obj-target-value-input"
                   placeholder="Ex : 15"
-                  className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600" />
+                  className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-m-blue" />
               </div>
               <div>
                 <label className="block text-[10.5px] font-semibold text-zinc-500 mb-1">Réalisé actuel</label>
                 <input type="number" step="any" value={targetCurrent} onChange={(e) => setTargetCurrent(e.target.value)} data-testid="obj-target-current-input"
                   placeholder="Ex : 4"
-                  className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600" />
+                  className="w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-m-blue" />
               </div>
             </div>
             <p className="text-[10.5px] text-zinc-400 mt-2">Ex : « Réduire le coût de run de 15 % » → unité %, départ 0, cible 15, réalisé mis à jour au fil de l'eau.</p>
@@ -260,7 +260,7 @@ function ObjectiveModal({ objective, onClose, onSaved }) {
             <button type="button" onClick={onClose}
               className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">Annuler</button>
             <button type="submit" disabled={saving} data-testid="obj-save-btn"
-              className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60">
+              className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors disabled:opacity-60">
               {saving ? "Sauvegarde..." : isEdit ? "Enregistrer" : "Créer l'objectif"}
             </button>
           </div>
@@ -294,7 +294,7 @@ function LinkProjectsModal({ objective, projects, onClose, onSaved }) {
       <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg max-h-[85vh] flex flex-col">
         <div className="flex items-center justify-between px-6 py-4 border-b border-zinc-100">
           <div className="flex items-center gap-2 min-w-0">
-            <Link2 size={15} className="text-blue-600 flex-shrink-0" />
+            <Link2 size={15} className="text-m-blue flex-shrink-0" />
             <h2 className="font-heading text-base font-bold text-zinc-950 truncate">Projets rattachés — {objective.title}</h2>
           </div>
           <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600 flex-shrink-0"><X size={18} /></button>
@@ -316,7 +316,7 @@ function LinkProjectsModal({ objective, projects, onClose, onSaved }) {
             <button onClick={onClose}
               className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">Annuler</button>
             <button onClick={submit} disabled={saving} data-testid="link-projects-save"
-              className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-60">
+              className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors disabled:opacity-60">
               {saving ? "Sauvegarde..." : "Enregistrer"}
             </button>
           </div>
@@ -381,13 +381,13 @@ export default function Objectives() {
     <div className="p-4 md:p-6 lg:p-8" data-testid="objectives-page">
       <div className="mb-6 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Objectifs stratégiques</span></div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Objectifs stratégiques</h1>
+          <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Objectifs stratégiques</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">Objectifs stratégiques</h1>
           <p className="text-sm text-zinc-500 mt-0.5">Référentiel des objectifs DSI et alignement du portefeuille projets</p>
         </div>
         {canWrite && (
           <button onClick={() => { setEditing(null); setModalOpen(true); }} data-testid="btn-new-objective"
-            className="flex items-center gap-1.5 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+            className="flex items-center gap-1.5 px-4 py-2.5 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark transition-colors shadow-sm">
             <Plus size={15} /> Nouvel objectif
           </button>
         )}
@@ -471,7 +471,7 @@ export default function Objectives() {
                     <div className="flex flex-wrap gap-1.5 mt-3">
                       {o.projects.map((p) => (
                         <Link key={p.project_id} to={`/projects/${p.project_id}`}
-                          className="flex items-center gap-1.5 px-2 py-0.5 bg-zinc-50 border border-zinc-200 rounded-full text-[10.5px] text-zinc-600 hover:border-blue-400 hover:text-blue-600 transition-colors">
+                          className="flex items-center gap-1.5 px-2 py-0.5 bg-zinc-50 border border-zinc-200 rounded-full text-[10.5px] text-zinc-600 hover:border-blue-400 hover:text-m-blue transition-colors">
                           <span className={`w-1.5 h-1.5 rounded-full ${RAG_DOT[p.status_rag] || "bg-zinc-300"}`} />
                           {(p.code ? `${p.code} · ` : "") + p.name.split("—")[0].trim().slice(0, 35)}
                           <span className="font-mono-data text-[9.5px] text-zinc-400">{p.progress}%</span>
@@ -484,11 +484,11 @@ export default function Objectives() {
                   <div className="flex items-center gap-1 flex-shrink-0">
                     <button onClick={() => setLinking(o)} data-testid={`btn-link-projects-${o.objective_id}`}
                       title="Rattacher des projets"
-                      className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
+                      className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-m-blue border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors">
                       <Link2 size={12} /> Projets
                     </button>
                     <button onClick={() => { setEditing(o); setModalOpen(true); }} data-testid={`btn-edit-objective-${o.objective_id}`}
-                      className="p-1.5 text-zinc-400 hover:text-blue-600 rounded-lg transition-colors"><Pencil size={13} /></button>
+                      className="p-1.5 text-zinc-400 hover:text-m-blue rounded-lg transition-colors"><Pencil size={13} /></button>
                     <button onClick={() => setConfirmDelete(o)} data-testid={`btn-delete-objective-${o.objective_id}`}
                       className="p-1.5 text-zinc-400 hover:text-rose-500 rounded-lg transition-colors"><Trash2 size={13} /></button>
                   </div>
@@ -509,7 +509,7 @@ export default function Objectives() {
           <div className="divide-y divide-zinc-50">
             {alignment.unaligned.map((p) => (
               <div key={p.project_id} className="flex items-center justify-between px-5 py-2.5" data-testid={`unaligned-project-${p.project_id}`}>
-                <Link to={`/projects/${p.project_id}`} className="text-xs text-blue-600 hover:underline font-medium truncate">
+                <Link to={`/projects/${p.project_id}`} className="text-xs text-m-blue hover:underline font-medium truncate">
                   {(p.code ? `${p.code} — ` : "") + p.name}
                 </Link>
                 <span className="font-mono-data text-[11px] text-zinc-400 flex-shrink-0">{formatEuro(p.budget_total)}</span>

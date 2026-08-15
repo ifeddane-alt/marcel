@@ -3,7 +3,7 @@ import { Loader2 } from "lucide-react";
 import Modal from "@/components/Modal";
 import api from "@/api";
 
-const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue focus:ring-1 focus:ring-m-blue bg-white";
 
 function Field({ label, required, error, hint, children }) {
   return (
@@ -107,7 +107,7 @@ export default function BudgetRevisionModal({ isOpen, onClose, project, onSaved 
         <div className="flex justify-end gap-3 pt-2 border-t border-zinc-100">
           <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50 transition-colors">Annuler</button>
           <button type="submit" disabled={saving} data-testid="revision-form-submit"
-            className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
+            className="flex items-center gap-2 px-5 py-2 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-50 transition-colors">
             {saving && <Loader2 size={14} className="animate-spin" />}
             Enregistrer la révision
           </button>

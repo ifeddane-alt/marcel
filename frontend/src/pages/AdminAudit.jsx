@@ -69,9 +69,9 @@ export default function AdminAudit() {
       {/* Header */}
       <div className="bg-white border-b border-zinc-200 px-6 py-4 flex-shrink-0">
         <div className="mb-4">
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / Administration / <span className="text-[#352c6e] font-semibold">Journal d'audit</span></div>
-          <h1 className="font-heading text-2xl font-extrabold text-[#26243a] tracking-tight flex items-center gap-2">
-            <History size={20} className="text-blue-600" />
+          <div className="text-xs text-m-muted mb-0.5">Accueil / Administration / <span className="text-m-primary font-semibold">Journal d'audit</span></div>
+          <h1 className="font-heading text-2xl font-extrabold text-m-ink tracking-tight flex items-center gap-2">
+            <History size={20} className="text-m-blue" />
             Journal d'audit
           </h1>
           <p className="text-sm text-zinc-500 mt-0.5">
@@ -82,11 +82,11 @@ export default function AdminAudit() {
           <div className="relative">
             <Search size={13} className="absolute left-3 top-1/2 -translate-y-1/2 text-zinc-400" />
             <input data-testid="audit-search" type="text" placeholder="Entité ou utilisateur…"
-              className="pl-8 pr-3 py-1.5 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-blue-600/30 w-56"
+              className="pl-8 pr-3 py-1.5 text-sm border border-zinc-200 rounded-lg focus:outline-none focus:ring-2 focus:ring-m-blue/30 w-56"
               value={q} onChange={(e) => setQ(e.target.value)} />
           </div>
           <select data-testid="audit-filter-entity"
-            className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 bg-white"
+            className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30 bg-white"
             value={filterEntity} onChange={(e) => setFilterEntity(e.target.value)}>
             <option value="">Tous les types</option>
             <option value="project">Projet</option>
@@ -96,7 +96,7 @@ export default function AdminAudit() {
             <option value="objective">Objectif</option>
           </select>
           <select data-testid="audit-filter-action"
-            className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 bg-white"
+            className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30 bg-white"
             value={filterAction} onChange={(e) => setFilterAction(e.target.value)}>
             <option value="">Toutes les actions</option>
             {Object.entries(ACTION_CONFIG).map(([k, v]) => (
@@ -111,9 +111,9 @@ export default function AdminAudit() {
         <div className="bg-white rounded-2xl border border-zinc-200 overflow-hidden shadow-sm">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#fbfaff] border-b border-[#e8e6f0]">
+              <tr className="bg-m-bg border-b border-m-border">
                 {["", "Date", "Utilisateur", "Action", "Type", "Entité", "Détails"].map((h, i) => (
-                  <th key={i} className="text-left px-4 py-3 text-[10.5px] font-bold text-[#8a87a0] uppercase tracking-wider">{h}</th>
+                  <th key={i} className="text-left px-4 py-3 text-[10.5px] font-bold text-m-muted uppercase tracking-wider">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -152,7 +152,7 @@ export default function AdminAudit() {
                       <td className="px-4 py-3 text-xs max-w-[240px] truncate">
                         {l.entity_type === "project" && l.action !== "deleted" ? (
                           <Link to={`/projects/${l.entity_id}`} onClick={(e) => e.stopPropagation()}
-                            className="text-blue-600 hover:underline font-medium">{l.entity_name || l.entity_id}</Link>
+                            className="text-m-blue hover:underline font-medium">{l.entity_name || l.entity_id}</Link>
                         ) : (
                           <span className="text-zinc-700 font-medium">{l.entity_name || "—"}</span>
                         )}
@@ -162,7 +162,7 @@ export default function AdminAudit() {
                       </td>
                     </tr>
                     {isOpen && hasChanges && (
-                      <tr className="bg-[#fbfaff] border-b border-zinc-100" data-testid={`audit-changes-${l.audit_id}`}>
+                      <tr className="bg-m-bg border-b border-zinc-100" data-testid={`audit-changes-${l.audit_id}`}>
                         <td colSpan={7} className="px-12 py-3">
                           <div className="space-y-1">
                             {l.changes.map((c, i) => (
@@ -185,7 +185,7 @@ export default function AdminAudit() {
           {logs.length < total && (
             <div className="px-4 py-3 border-t border-zinc-100 text-center">
               <button onClick={() => load(logs.length, true)} disabled={loading} data-testid="audit-load-more"
-                className="px-4 py-1.5 text-xs font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50">
+                className="px-4 py-1.5 text-xs font-semibold text-m-blue border border-blue-200 rounded-lg hover:bg-blue-50 transition-colors disabled:opacity-50">
                 {loading ? "Chargement…" : `Charger plus (${logs.length}/${total})`}
               </button>
             </div>

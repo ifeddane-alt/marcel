@@ -258,14 +258,14 @@ export default function Layout() {
   const RailContent = ({ isDrawer = false }) => (
     <>
       {isDrawer && (
-        <div className="px-4 py-4 border-b border-[#f0eff6] flex items-center justify-between flex-shrink-0">
+        <div className="px-4 py-4 border-b border-m-border-soft flex items-center justify-between flex-shrink-0">
           <Link to="/home" onClick={() => setMobileDrawerOpen(false)} className="flex items-center gap-2.5 hover:opacity-80 transition-opacity" data-testid="drawer-brand-link" aria-label="Accueil MARCEL">
-            <div className="w-8 h-8 rounded-lg bg-[#352c6e] flex items-center justify-center text-white font-heading font-extrabold text-base">M</div>
-            <span className="font-heading text-[#352c6e] text-base font-extrabold tracking-tight">MARCEL</span>
+            <div className="w-8 h-8 rounded-lg bg-m-primary flex items-center justify-center text-white font-heading font-extrabold text-base">M</div>
+            <span className="font-heading text-m-primary text-base font-extrabold tracking-tight">MARCEL</span>
           </Link>
           <button
             onClick={() => setMobileDrawerOpen(false)}
-            className="text-[#a39fb8] hover:text-[#26243a] ml-2 flex-shrink-0"
+            className="text-m-muted-2 hover:text-m-ink ml-2 flex-shrink-0"
             data-testid="sidebar-close-btn"
             aria-label="Fermer le menu"
           >
@@ -277,8 +277,8 @@ export default function Layout() {
       <nav className="flex-1 py-2.5 space-y-0.5 overflow-y-auto overflow-x-hidden [scrollbar-width:thin]">
         {sections.map((section, si) => (
           <React.Fragment key={section.title}>
-            {si > 0 && <div className="mx-3 my-2 border-t border-[#f0eff6]" />}
-            <div className={`text-[9.5px] uppercase tracking-widest text-[#a39fb8] px-3 pb-1 font-bold whitespace-nowrap overflow-hidden ${isDrawer ? "block" : "hidden group-hover:block"}`}>
+            {si > 0 && <div className="mx-3 my-2 border-t border-m-border-soft" />}
+            <div className={`text-[9.5px] uppercase tracking-widest text-m-muted-2 px-3 pb-1 font-bold whitespace-nowrap overflow-hidden ${isDrawer ? "block" : "hidden group-hover:block"}`}>
               {section.title}
             </div>
             {section.items.map((item) => (
@@ -289,17 +289,17 @@ export default function Layout() {
       </nav>
 
       {/* Footer utilisateur */}
-      <div className="pb-2.5 border-t border-[#f0eff6] pt-2 flex-shrink-0">
+      <div className="pb-2.5 border-t border-m-border-soft pt-2 flex-shrink-0">
         <Link to="/account" data-testid="nav-account" title="Mon compte"
-          className={`flex items-center gap-2.5 mx-1.5 px-[7px] py-1.5 rounded-lg hover:bg-[#f7f6fb] transition-colors ${isDrawer ? "" : ""}`}>
-          <div className="w-[26px] h-[26px] rounded-full bg-[#352c6e] flex items-center justify-center flex-shrink-0">
+          className={`flex items-center gap-2.5 mx-1.5 px-[7px] py-1.5 rounded-lg hover:bg-m-surface transition-colors ${isDrawer ? "" : ""}`}>
+          <div className="w-[26px] h-[26px] rounded-full bg-m-primary flex items-center justify-center flex-shrink-0">
             <span className="text-[10px] font-bold text-white">
               {user?.name?.slice(0, 2).toUpperCase() || "?"}
             </span>
           </div>
           <div className={`flex-1 min-w-0 ${isDrawer ? "block" : "hidden group-hover:block"}`}>
-            <div className="text-[12.5px] text-[#26243a] font-semibold truncate">{user?.name}</div>
-            <div className="text-[10px] text-[#a39fb8] truncate" data-testid="sidebar-profile-label">
+            <div className="text-[12.5px] text-m-ink font-semibold truncate">{user?.name}</div>
+            <div className="text-[10px] text-m-muted-2 truncate" data-testid="sidebar-profile-label">
               {profileLabel}
             </div>
           </div>
@@ -307,7 +307,7 @@ export default function Layout() {
         <button
           onClick={handleLogout}
           data-testid="logout-btn"
-          className={`rail-item w-[calc(100%-12px)] mt-0.5 text-[#8a87a0] hover:text-rose-600 hover:bg-rose-50 ${isDrawer ? "px-3 py-2" : "px-[9px] py-2"}`}
+          className={`rail-item w-[calc(100%-12px)] mt-0.5 text-m-muted hover:text-rose-600 hover:bg-rose-50 ${isDrawer ? "px-3 py-2" : "px-[9px] py-2"}`}
           title="Déconnexion"
         >
           <span className="flex-shrink-0 flex items-center justify-center w-[22px]"><LogOut size={16} strokeWidth={1.75} /></span>
@@ -318,15 +318,15 @@ export default function Layout() {
   );
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[#f7f6fb]">
+    <div className="flex flex-col h-screen overflow-hidden bg-m-surface">
 
       {/* ── Barre d'application ───────────────────────────── */}
-      <header className="h-[50px] bg-white border-b border-[#e8e6f0] flex items-center px-3 md:px-4 flex-shrink-0 z-30">
+      <header className="h-[50px] bg-white border-b border-m-border flex items-center px-3 md:px-4 flex-shrink-0 z-30">
         {/* Hamburger — mobile uniquement */}
         <button
           onClick={() => setMobileDrawerOpen(true)}
           data-testid="sidebar-open-btn"
-          className="mr-3 text-[#5d5a75] hover:text-[#26243a] md:hidden flex-shrink-0"
+          className="mr-3 text-m-ink-soft hover:text-m-ink md:hidden flex-shrink-0"
           aria-label="Ouvrir le menu"
         >
           <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2">
@@ -337,13 +337,13 @@ export default function Layout() {
         </button>
 
         <Link to="/home" className="flex items-center gap-2.5 flex-shrink-0 mr-4 hover:opacity-80 transition-opacity" data-testid="topbar-brand-link" aria-label="Accueil MARCEL">
-          <div className="w-[30px] h-[30px] rounded-lg bg-[#352c6e] flex items-center justify-center text-white font-heading font-extrabold text-[15px]">M</div>
-          <span className="font-heading text-[#352c6e] text-[17px] font-extrabold tracking-tight hidden sm:block">MARCEL</span>
+          <div className="w-[30px] h-[30px] rounded-lg bg-m-primary flex items-center justify-center text-white font-heading font-extrabold text-[15px]">M</div>
+          <span className="font-heading text-m-primary text-[17px] font-extrabold tracking-tight hidden sm:block">MARCEL</span>
         </Link>
 
-        <div className="hidden lg:flex items-center gap-1.5 text-xs text-[#8a87a0] min-w-0 border-l border-[#e8e6f0] pl-4">
+        <div className="hidden lg:flex items-center gap-1.5 text-xs text-m-muted min-w-0 border-l border-m-border pl-4">
           <Building2 size={13} className="flex-shrink-0" />
-          <span className="text-[#5d5a75] font-semibold truncate">Groupe Altair Industries</span>
+          <span className="text-m-ink-soft font-semibold truncate">Groupe Altair Industries</span>
         </div>
 
         <GlobalSearch />
@@ -353,7 +353,7 @@ export default function Layout() {
             onClick={toggleLang}
             data-testid="lang-toggle-btn"
             title={i18n.language?.startsWith("en") ? "Passer en français" : "Switch to English"}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold text-[#5d5a75] hover:bg-[#f0eefc] transition-colors"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-[11px] font-bold text-m-ink-soft hover:bg-m-lilac transition-colors"
           >
             {i18n.language?.startsWith("en") ? "EN" : "FR"}
           </button>
@@ -361,13 +361,13 @@ export default function Layout() {
             onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
             data-testid="theme-toggle-btn"
             title={theme === "dark" ? t("theme.light", "Mode clair") : t("theme.dark", "Mode sombre")}
-            className="w-8 h-8 rounded-lg flex items-center justify-center text-[#5d5a75] hover:bg-[#f0eefc] transition-colors"
+            className="w-8 h-8 rounded-lg flex items-center justify-center text-m-ink-soft hover:bg-m-lilac transition-colors"
           >
             {theme === "dark" ? <Sun size={15} /> : <Moon size={15} />}
           </button>
           <NotificationBell />
           <span
-            className="text-[11px] font-mono-data text-[#5d5a75] bg-[#f0eefc] px-2 py-0.5 rounded-lg hidden md:block"
+            className="text-[11px] font-mono-data text-m-ink-soft bg-m-lilac px-2 py-0.5 rounded-lg hidden md:block"
             data-testid="header-profile-badge"
           >
             {profileLabel}
@@ -390,7 +390,7 @@ export default function Layout() {
         <aside
           data-testid="sidebar-mobile"
           className={`
-            fixed top-0 left-0 h-full z-50 w-72 bg-white border-r border-[#e8e6f0] flex flex-col
+            fixed top-0 left-0 h-full z-50 w-72 bg-white border-r border-m-border flex flex-col
             transform transition-transform duration-300 ease-in-out
             ${mobileDrawerOpen ? "translate-x-0" : "-translate-x-full"}
             md:hidden
@@ -405,7 +405,7 @@ export default function Layout() {
             data-testid="sidebar"
             className="
               absolute inset-y-0 left-0 z-30 w-[54px] hover:w-[236px]
-              bg-white border-r border-[#e8e6f0] flex flex-col
+              bg-white border-r border-m-border flex flex-col
               transition-[width] duration-200 ease-out overflow-hidden group
               hover:shadow-[8px_0_30px_-12px_rgba(53,44,110,0.18)]
             "

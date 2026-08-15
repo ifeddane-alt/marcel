@@ -74,7 +74,7 @@ function DemandCard({ demand, onClick, onDragStart }) {
       </div>
 
       {/* Title */}
-      <div className="text-sm font-semibold text-zinc-800 line-clamp-2 mb-2 group-hover:text-blue-600 transition-colors">
+      <div className="text-sm font-semibold text-zinc-800 line-clamp-2 mb-2 group-hover:text-m-blue transition-colors">
         {demand.title}
       </div>
 
@@ -116,7 +116,7 @@ function KanbanColumn({ col, demands, onCardClick, onDragStart, onDrop, canWrite
       data-testid={`kanban-col-${col.key}`}
       className={`flex flex-col rounded-2xl border border-zinc-200 min-h-[400px] w-56 flex-shrink-0 overflow-hidden
         border-t-4 ${col.color} transition-all
-        ${over && canWrite ? "ring-2 ring-blue-600/30 bg-blue-50/30" : ""}`}
+        ${over && canWrite ? "ring-2 ring-m-blue/30 bg-blue-50/30" : ""}`}
       onDragOver={(e) => { e.preventDefault(); setOver(true); }}
       onDragLeave={() => setOver(false)}
       onDrop={(e) => { setOver(false); onDrop(e, col.key); }}
@@ -301,8 +301,8 @@ export default function Demands() {
       <div className="bg-white border-b border-zinc-200 px-6 py-4 flex-shrink-0">
         <div className="flex items-center justify-between mb-4">
           <div>
-            <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Demandes</span></div>
-            <h1 className="font-heading text-2xl font-extrabold text-[#26243a] tracking-tight">Gestion de la Demande</h1>
+            <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Demandes</span></div>
+            <h1 className="font-heading text-2xl font-extrabold text-m-ink tracking-tight">Gestion de la Demande</h1>
             <p className="text-sm text-zinc-500 mt-0.5">Qualification et priorisation des demandes projets</p>
           </div>
           <div className="flex items-center gap-2">
@@ -320,7 +320,7 @@ export default function Demands() {
                 data-testid="view-kanban-btn"
                 onClick={() => setView("kanban")}
                 className={`px-3 py-2 flex items-center gap-1.5 text-xs font-medium transition-colors
-                  ${view === "kanban" ? "bg-blue-600 text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
+                  ${view === "kanban" ? "bg-m-blue text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
               >
                 <LayoutGrid size={14} />
                 Kanban
@@ -329,7 +329,7 @@ export default function Demands() {
                 data-testid="view-table-btn"
                 onClick={() => setView("table")}
                 className={`px-3 py-2 flex items-center gap-1.5 text-xs font-medium transition-colors
-                  ${view === "table" ? "bg-blue-600 text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
+                  ${view === "table" ? "bg-m-blue text-white" : "text-zinc-600 hover:bg-zinc-50"}`}
               >
                 <List size={14} />
                 Tableau
@@ -339,7 +339,7 @@ export default function Demands() {
               <button
                 data-testid="new-demand-btn"
                 onClick={() => setShowCreateModal(true)}
-                className="flex items-center gap-2 px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-2 px-4 py-2 bg-m-blue text-white rounded-lg text-sm font-semibold hover:bg-m-blue-dark transition-colors"
               >
                 <Plus size={15} />
                 Nouvelle demande
@@ -371,14 +371,14 @@ export default function Demands() {
               data-testid="search-demands"
               type="text"
               placeholder="Rechercher…"
-              className="pl-8 pr-3 py-1.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 w-48"
+              className="pl-8 pr-3 py-1.5 border border-zinc-200 rounded-lg text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30 w-48"
               value={search}
               onChange={(e) => setSearch(e.target.value)}
             />
           </div>
           <select
             data-testid="filter-status"
-            className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 bg-white"
+            className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30 bg-white"
             value={filterStatus}
             onChange={(e) => setFilterStatus(e.target.value)}
           >
@@ -389,7 +389,7 @@ export default function Demands() {
           </select>
           <select
             data-testid="filter-urgency"
-            className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 bg-white"
+            className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30 bg-white"
             value={filterUrgency}
             onChange={(e) => setFilterUrgency(e.target.value)}
           >
@@ -402,7 +402,7 @@ export default function Demands() {
           {view === "table" && (
             <select
               data-testid="sort-demands"
-              className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-blue-600/30 bg-white"
+              className="border border-zinc-200 rounded-lg px-3 py-1.5 text-sm focus:outline-none focus:ring-2 focus:ring-m-blue/30 bg-white"
               value={sortBy}
               onChange={(e) => setSortBy(e.target.value)}
             >
@@ -561,7 +561,7 @@ export default function Demands() {
               <button
                 data-testid="dnd-confirm-btn"
                 onClick={confirmDndDialog}
-                className="px-4 py-2 bg-blue-600 text-white rounded-lg text-sm font-semibold hover:bg-blue-700"
+                className="px-4 py-2 bg-m-blue text-white rounded-lg text-sm font-semibold hover:bg-m-blue-dark"
               >
                 Confirmer
               </button>

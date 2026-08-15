@@ -37,15 +37,15 @@ function VendorCard({ vendor }) {
   const totalAlerts = vendor.alerts.length;
 
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-hidden" data-testid={`vendor-card-${vendor.vendor.replace(/\s/g, "-").toLowerCase()}`}>
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] overflow-hidden" data-testid={`vendor-card-${vendor.vendor.replace(/\s/g, "-").toLowerCase()}`}>
       {/* En-tête fournisseur */}
       <div
         className="flex items-center justify-between px-5 py-4 cursor-pointer hover:bg-zinc-50/70 transition-colors"
         onClick={() => setExpanded((e) => !e)}
       >
         <div className="flex items-center gap-3">
-          <div className="w-9 h-9 rounded-lg bg-blue-600/10 flex items-center justify-center flex-shrink-0">
-            <Building2 size={16} className="text-blue-600" />
+          <div className="w-9 h-9 rounded-lg bg-m-blue/10 flex items-center justify-center flex-shrink-0">
+            <Building2 size={16} className="text-m-blue" />
           </div>
           <div>
             <div className="font-bold text-zinc-800 text-sm">{vendor.vendor}</div>
@@ -109,7 +109,7 @@ function VendorCard({ vendor }) {
               </div>
               <table className="w-full text-sm" data-testid={`regie-table-${vendor.vendor}`}>
                 <thead>
-                  <tr className="text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] text-left">
+                  <tr className="text-[10.5px] uppercase tracking-wider font-bold text-m-muted text-left">
                     <th className="pb-2">Consultant</th>
                     <th className="pb-2 text-right">TJM Contrat</th>
                     <th className="pb-2 text-right">TJM Facturé</th>
@@ -266,9 +266,9 @@ export default function Vendors() {
       {/* En-tête */}
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Suivi Fournisseurs</span></div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight flex items-center gap-2">
-            <Handshake size={26} className="text-blue-600" />
+          <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Suivi Fournisseurs</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight flex items-center gap-2">
+            <Handshake size={26} className="text-m-blue" />
             Suivi Fournisseurs
           </h1>
           <p className="text-sm text-zinc-500 mt-0.5">
@@ -279,7 +279,7 @@ export default function Vendors() {
         <button
           onClick={handleExportCSV}
           data-testid="export-csv-btn"
-          className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-blue-600 border border-blue-600/30 rounded-lg hover:bg-blue-600/5 transition-colors"
+          className="flex items-center gap-2 px-4 py-2 text-sm font-semibold text-m-blue border border-m-blue/30 rounded-lg hover:bg-m-blue/5 transition-colors"
         >
           <Download size={14} />
           Export CSV
@@ -315,7 +315,7 @@ export default function Vendors() {
           label="Alertes actives"
           value={summary.total_alerts || 0}
           sub="dépassements forfait & seuils contrats"
-          valueClass={(summary.total_alerts || 0) > 0 ? "text-[#cc4f45]" : "text-[#26243a]"}
+          valueClass={(summary.total_alerts || 0) > 0 ? "text-m-red" : "text-m-ink"}
         />
       </div>
 
@@ -332,7 +332,7 @@ export default function Vendors() {
 
       {/* Liste des fournisseurs */}
       {vendors.length === 0 ? (
-        <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-12 text-center">
+        <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-12 text-center">
           <Package size={32} className="text-zinc-300 mx-auto mb-3" />
           <div className="text-zinc-500 text-sm font-medium">Aucune ressource externe configurée</div>
           <div className="text-zinc-400 text-xs mt-1">

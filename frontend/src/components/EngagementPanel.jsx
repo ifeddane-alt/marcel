@@ -4,7 +4,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { toast } from "sonner";
 import { Check, X, Settings2, Presentation, Plus, Trash2 } from "lucide-react";
 
-const inputCls = "text-xs border border-zinc-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-blue-600";
+const inputCls = "text-xs border border-zinc-200 rounded-lg px-2 py-1.5 focus:outline-none focus:border-m-blue";
 
 function CriteriaManagerModal({ fromPhase, onClose, onChanged }) {
   const [criteria, setCriteria] = useState(null);
@@ -43,7 +43,7 @@ function CriteriaManagerModal({ fromPhase, onClose, onChanged }) {
                 {c.type === "auto" ? "Auto" : "Attesté"}
               </span>
               <button onClick={() => patch(c, { mandatory: !c.mandatory })} data-testid={`criteria-mandatory-${c.key}`}
-                className={`px-1.5 py-px text-[9px] font-bold rounded border ${c.mandatory ? "bg-[#352c6e] text-white border-[#352c6e]" : "bg-white text-zinc-400 border-zinc-200"}`}>
+                className={`px-1.5 py-px text-[9px] font-bold rounded border ${c.mandatory ? "bg-m-primary text-white border-m-primary" : "bg-white text-zinc-400 border-zinc-200"}`}>
                 {c.mandatory ? "Obligatoire" : "Recommandé"}
               </button>
               <button onClick={() => patch(c, { active: !c.active })}
@@ -60,7 +60,7 @@ function CriteriaManagerModal({ fromPhase, onClose, onChanged }) {
             <input value={newLabel} onChange={(e) => setNewLabel(e.target.value)} placeholder="Nouveau critère (attesté)…"
               data-testid="criteria-new-input" className={`${inputCls} flex-1`} />
             <button onClick={add} data-testid="criteria-add-btn"
-              className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50">
+              className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-m-blue border border-blue-200 rounded-lg hover:bg-blue-50">
               <Plus size={11} /> Ajouter
             </button>
           </div>
@@ -118,17 +118,17 @@ export const EngagementPanel = ({ projectId }) => {
   const attested = data.items.filter((i) => i.type === "attested");
 
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-sm p-5" data-testid="engagement-panel">
+    <div className="bg-white border border-m-border rounded-xl shadow-sm p-5" data-testid="engagement-panel">
       <div className="flex items-center justify-between flex-wrap gap-2 mb-3">
         <div className="flex items-center gap-3">
-          <h3 className="font-heading font-bold text-[#26243a]">Dossier d'engagement</h3>
+          <h3 className="font-heading font-bold text-m-ink">Dossier d'engagement</h3>
           <span data-testid="readiness-score"
             className={`px-2 py-0.5 text-[11px] font-bold rounded-lg border ${data.ready
-              ? "bg-[#ddf0d8] text-[#3f8a34] border-[#bfe0b6]" : "bg-[#fdf6e3] text-[#8a6d1a] border-[#eadfb8]"}`}>
+              ? "bg-m-green-soft text-m-green border-[#bfe0b6]" : "bg-[#fdf6e3] text-[#8a6d1a] border-[#eadfb8]"}`}>
             Prêt à {data.score_pct}%
           </span>
           {!data.ready && (
-            <span className="text-[11px] text-[#cc4f45]" data-testid="readiness-missing-count">
+            <span className="text-[11px] text-m-red" data-testid="readiness-missing-count">
               {data.mandatory_missing.length} obligatoire{data.mandatory_missing.length > 1 ? "s" : ""} manquant{data.mandatory_missing.length > 1 ? "s" : ""}
             </span>
           )}
@@ -136,18 +136,18 @@ export const EngagementPanel = ({ projectId }) => {
         <div className="flex items-center gap-2">
           {canManage && (
             <button onClick={() => setManagerOpen(true)} data-testid="manage-criteria-btn"
-              className="flex items-center gap-1 text-[11px] font-semibold text-blue-600 hover:text-blue-700">
+              className="flex items-center gap-1 text-[11px] font-semibold text-m-blue hover:text-m-blue-dark">
               <Settings2 size={12} /> Gérer les critères
             </button>
           )}
           <button onClick={exportDeck} data-testid="export-engagement-btn"
-            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-[#352c6e] border border-[#352c6e]/25 rounded-lg hover:bg-[#f0eefc]">
+            className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-m-primary border border-m-primary/25 rounded-lg hover:bg-m-lilac">
             <Presentation size={11} /> Dossier PPTX
           </button>
         </div>
       </div>
       <div className="h-1.5 bg-zinc-100 rounded-full mb-4 overflow-hidden">
-        <div className={`h-full rounded-full transition-all ${data.ready ? "bg-[#3f8a34]" : "bg-[#e8a33d]"}`}
+        <div className={`h-full rounded-full transition-all ${data.ready ? "bg-m-green" : "bg-[#e8a33d]"}`}
           style={{ width: `${data.score_pct}%` }} />
       </div>
 
@@ -157,9 +157,9 @@ export const EngagementPanel = ({ projectId }) => {
           <div className="space-y-1">
             {autos.map((i) => (
               <div key={i.criterion_id} className="flex items-center gap-2 text-xs" data-testid={`readiness-item-${i.key}`}>
-                {i.ok ? <Check size={13} className="text-[#3f8a34] flex-shrink-0" /> : <X size={13} className="text-[#cc4f45] flex-shrink-0" />}
+                {i.ok ? <Check size={13} className="text-m-green flex-shrink-0" /> : <X size={13} className="text-m-red flex-shrink-0" />}
                 <span className={i.ok ? "text-zinc-600" : "text-zinc-800 font-medium"}>{i.label}</span>
-                {i.mandatory && !i.ok && <span className="text-[9px] font-bold text-[#cc4f45]">obligatoire</span>}
+                {i.mandatory && !i.ok && <span className="text-[9px] font-bold text-m-red">obligatoire</span>}
               </div>
             ))}
           </div>
@@ -176,7 +176,7 @@ export const EngagementPanel = ({ projectId }) => {
                       data-testid={`attest-check-${i.key}`}
                       onChange={(e) => attest(i, { checked: e.target.checked })} />
                     <span className={i.ok ? "text-zinc-600" : "text-zinc-800 font-medium"}>{i.label}</span>
-                    {i.mandatory && !i.ok && <span className="text-[9px] font-bold text-[#cc4f45]">obligatoire</span>}
+                    {i.mandatory && !i.ok && <span className="text-[9px] font-bold text-m-red">obligatoire</span>}
                     <button onClick={() => attest(i, { not_applicable: !a.not_applicable, checked: false })}
                       disabled={!canAttest} data-testid={`attest-na-${i.key}`}
                       className={`ml-auto px-1.5 py-px text-[9px] font-bold rounded border ${a.not_applicable

@@ -3,7 +3,7 @@ import { Plus, Pencil, Trash2, X } from "lucide-react";
 import { toast } from "sonner";
 import ConfirmDialog from "@/components/ConfirmDialog";
 
-const inputCls = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600";
+const inputCls = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue";
 const labelCls = "block text-xs font-semibold text-zinc-600 uppercase tracking-widest mb-1.5";
 
 function FieldInput({ field, value, onChange }) {
@@ -72,7 +72,7 @@ function CrudModal({ item, fields, title, onClose, onSave }) {
           <div className="flex items-center justify-end gap-2 pt-2 border-t border-zinc-100">
             <button type="button" onClick={onClose} className="px-4 py-2 text-sm text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50">Annuler</button>
             <button type="submit" disabled={saving} data-testid="crud-save-btn"
-              className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60">
+              className="px-4 py-2 text-sm font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-60">
               {saving ? "..." : "Enregistrer"}
             </button>
           </div>
@@ -118,12 +118,12 @@ export default function CrudSection({ title, addLabel, api, idField, columns, fi
   };
 
   return (
-    <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]" data-testid={`${testPrefix}-section`}>
+    <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)]" data-testid={`${testPrefix}-section`}>
       <div className="flex items-center justify-between px-5 py-3 border-b border-zinc-100">
-        <div className="font-heading text-[13px] font-bold text-[#26243a]">{title} ({items.length})</div>
+        <div className="font-heading text-[13px] font-bold text-m-ink">{title} ({items.length})</div>
         {canWrite && (
           <button onClick={() => setModal({})} data-testid={`${testPrefix}-add-btn`}
-            className="flex items-center gap-1.5 px-3 py-1.5 bg-blue-600 text-white text-xs font-semibold rounded-lg hover:bg-blue-700">
+            className="flex items-center gap-1.5 px-3 py-1.5 bg-m-blue text-white text-xs font-semibold rounded-lg hover:bg-m-blue-dark">
             <Plus size={12} /> {addLabel || "Ajouter"}
           </button>
         )}
@@ -136,9 +136,9 @@ export default function CrudSection({ title, addLabel, api, idField, columns, fi
         <div className="overflow-x-auto">
           <table className="w-full text-sm">
             <thead>
-              <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+              <tr className="bg-m-bg border-b border-m-border text-left">
                 {columns.map((c) => (
-                  <th key={c.key} className="px-3 py-2 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] whitespace-nowrap">{c.label}</th>
+                  <th key={c.key} className="px-3 py-2 text-[10.5px] uppercase tracking-wider font-bold text-m-muted whitespace-nowrap">{c.label}</th>
                 ))}
                 <th className="px-3 py-2 w-16"></th>
               </tr>
@@ -155,7 +155,7 @@ export default function CrudSection({ title, addLabel, api, idField, columns, fi
                     {canWrite && (
                       <div className="flex items-center gap-1 justify-end">
                         <button onClick={() => setModal({ item: it })} data-testid={`${testPrefix}-edit-${it[idField]}`}
-                          className="p-1 text-zinc-400 hover:text-blue-600"><Pencil size={12} /></button>
+                          className="p-1 text-zinc-400 hover:text-m-blue"><Pencil size={12} /></button>
                         <button onClick={() => setConfirmDelete(it)} className="p-1 text-zinc-400 hover:text-rose-500"><Trash2 size={12} /></button>
                       </div>
                     )}

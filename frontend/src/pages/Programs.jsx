@@ -75,8 +75,8 @@ export default function Programs() {
     <div className="p-4 md:p-6 lg:p-8" data-testid="programs-page">
       <div className="mb-5 flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Programmes</span></div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Programmes</h1>
+          <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Programmes</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">Programmes</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             {programs.length} programme{programs.length > 1 ? "s" : ""} · {totalProjects} projets · {formatEuro(totalBudget)} consolidés — {ragCounts.red} rouge · {ragCounts.orange} orange · {ragCounts.green} vert
           </p>
@@ -85,7 +85,7 @@ export default function Programs() {
           <ExcelToolbar entity="programs" onImported={fetchAll} canImport={canCreate} />
           {canCreate && (
             <button onClick={openCreate} data-testid="btn-new-program"
-              className="flex items-center gap-2 px-4 py-2.5 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 transition-colors shadow-sm">
+              className="flex items-center gap-2 px-4 py-2.5 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark transition-colors shadow-sm">
               <Plus size={15} /> Nouveau programme
             </button>
           )}
@@ -99,25 +99,25 @@ export default function Programs() {
           <input
             type="text" value={search} onChange={(e) => setSearch(e.target.value)}
             placeholder="Rechercher..." data-testid="programs-search"
-            className="pl-8 pr-3 py-2 text-sm border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-blue-600 w-52"
+            className="pl-8 pr-3 py-2 text-sm border border-zinc-200 rounded-lg bg-white focus:outline-none focus:border-m-blue w-52"
           />
         </div>
         <select value={filterRag} onChange={(e) => setFilterRag(e.target.value)} data-testid="programs-filter-rag"
-          className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600">
+          className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-m-blue">
           <option value="">Tous RAG</option>
           {["green","orange","red"].map((r) => <option key={r} value={r}>{RAG_LABELS[r]}</option>)}
         </select>
         <select value={filterStatus} onChange={(e) => setFilterStatus(e.target.value)} data-testid="programs-filter-status"
-          className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-blue-600">
+          className="text-sm border border-zinc-200 rounded-lg px-3 py-2 bg-white focus:outline-none focus:border-m-blue">
           <option value="">Tous statuts</option>
           {Object.entries(STATUS_LABELS).map(([v, l]) => <option key={v} value={v}>{l}</option>)}
         </select>
         {/* Bascule tuiles / liste */}
-        <div className="ml-auto flex border border-[#dcd9ea] rounded-lg overflow-hidden bg-white">
+        <div className="ml-auto flex border border-m-border-strong rounded-lg overflow-hidden bg-white">
           <button
             onClick={() => switchView("tiles")}
             data-testid="programs-view-toggle-tiles"
-            className={`w-9 h-9 flex items-center justify-center transition-colors ${view === "tiles" ? "bg-[#e9effe] text-[#2e5fe8]" : "text-[#8a87a0] hover:bg-[#f7f6fb]"}`}
+            className={`w-9 h-9 flex items-center justify-center transition-colors ${view === "tiles" ? "bg-m-blue-soft text-m-blue" : "text-m-muted hover:bg-m-surface"}`}
             title="Vue tuiles"
           >
             <LayoutGrid size={15} />
@@ -125,7 +125,7 @@ export default function Programs() {
           <button
             onClick={() => switchView("list")}
             data-testid="programs-view-toggle-list"
-            className={`w-9 h-9 flex items-center justify-center transition-colors border-l border-[#dcd9ea] ${view === "list" ? "bg-[#e9effe] text-[#2e5fe8]" : "text-[#8a87a0] hover:bg-[#f7f6fb]"}`}
+            className={`w-9 h-9 flex items-center justify-center transition-colors border-l border-m-border-strong ${view === "list" ? "bg-m-blue-soft text-m-blue" : "text-m-muted hover:bg-m-surface"}`}
             title="Vue liste"
           >
             <List size={15} />
@@ -157,9 +157,9 @@ export default function Programs() {
         <div className="bg-white border border-zinc-200 rounded-lg shadow-sm overflow-x-auto">
           <table className="w-full text-sm" data-testid="programs-table">
             <thead>
-              <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-left">
+              <tr className="bg-m-bg border-b border-m-border text-left">
                 {["RAG", "Nom", "Statut", "Projets", "Budget total", "Consommé", "Période", ""].map((h, i) => (
-                  <th key={i} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-[#8a87a0] whitespace-nowrap">{h}</th>
+                  <th key={i} className="px-4 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted whitespace-nowrap">{h}</th>
                 ))}
               </tr>
             </thead>
@@ -171,7 +171,7 @@ export default function Programs() {
                   <tr key={prog.program_id} className="border-b border-zinc-100 hover:bg-blue-50/30 transition-colors" data-testid={`program-row-${prog.program_id}`}>
                     <td className="px-4 py-3"><RAGBadge status={prog.rag_consolidated} /></td>
                     <td className="px-4 py-3 max-w-xs">
-                      <Link to={`/programmes/${prog.program_id}`} className="text-blue-600 hover:text-blue-700 font-medium text-sm leading-snug" data-testid={`program-link-${prog.program_id}`}>
+                      <Link to={`/programmes/${prog.program_id}`} className="text-m-blue hover:text-m-blue-dark font-medium text-sm leading-snug" data-testid={`program-link-${prog.program_id}`}>
                         {prog.name}
                       </Link>
                       {prog.owner && <div className="text-[10px] text-zinc-400 mt-0.5">Owner : {prog.owner}</div>}
@@ -192,7 +192,7 @@ export default function Programs() {
                       <div className="flex items-center justify-end gap-1">
                         {canEdit && (
                           <button onClick={(e) => openEdit(e, prog)} data-testid={`btn-edit-program-${prog.program_id}`}
-                            className="p-1.5 text-zinc-400 hover:text-blue-600 hover:bg-blue-50 rounded-lg transition-colors" title="Modifier">
+                            className="p-1.5 text-zinc-400 hover:text-m-blue hover:bg-blue-50 rounded-lg transition-colors" title="Modifier">
                             <Pencil size={13} />
                           </button>
                         )}
@@ -202,7 +202,7 @@ export default function Programs() {
                             <Trash2 size={13} />
                           </button>
                         )}
-                        <Link to={`/programmes/${prog.program_id}`} className="flex items-center gap-1 text-xs text-blue-600 hover:text-blue-700 font-semibold ml-1" data-testid={`program-detail-link-${prog.program_id}`}>
+                        <Link to={`/programmes/${prog.program_id}`} className="flex items-center gap-1 text-xs text-m-blue hover:text-m-blue-dark font-semibold ml-1" data-testid={`program-detail-link-${prog.program_id}`}>
                           Détail <ChevronRight size={13} />
                         </Link>
                       </div>

@@ -227,10 +227,10 @@ export default function AdminPowerBI() {
     <div className="p-4 md:p-6 lg:p-8 max-w-4xl mx-auto" data-testid="admin-powerbi-page">
       {/* Header */}
       <div className="mb-6">
-        <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / Administration / <span className="text-[#352c6e] font-semibold">Power BI</span></div>
+        <div className="text-xs text-m-muted mb-0.5">Accueil / Administration / <span className="text-m-primary font-semibold">Power BI</span></div>
         <div className="flex items-center gap-2 mb-1">
           <Database size={20} className="text-[#F2C811]" />
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">
             Connecteur Power BI
           </h1>
         </div>
@@ -250,7 +250,7 @@ export default function AdminPowerBI() {
       {/* Clé API */}
       <div className="bg-white border border-zinc-200 rounded-xl shadow-sm p-5 mb-6" data-testid="api-key-section">
         <div className="flex items-center gap-2 mb-4">
-          <Key size={16} className="text-blue-600" />
+          <Key size={16} className="text-m-blue" />
           <h2 className="font-semibold text-zinc-800">Clé API Power BI</h2>
         </div>
 
@@ -285,7 +285,7 @@ export default function AdminPowerBI() {
                   onClick={generateKey}
                   disabled={generating}
                   data-testid="generate-key-btn"
-                  className="flex items-center gap-1.5 px-3 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-60 transition-colors"
+                  className="flex items-center gap-1.5 px-3 py-2 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-60 transition-colors"
                 >
                   <RefreshCw size={14} className={generating ? "animate-spin" : ""} />
                   {keyInfo?.has_key ? "Régénérer" : "Générer une clé"}
@@ -314,7 +314,7 @@ export default function AdminPowerBI() {
       {/* Endpoints */}
       <div className="bg-white border border-zinc-200 rounded-xl shadow-sm p-5 mb-6" data-testid="endpoints-section">
         <div className="flex items-center gap-2 mb-4">
-          <Zap size={16} className="text-blue-600" />
+          <Zap size={16} className="text-m-blue" />
           <h2 className="font-semibold text-zinc-800">Endpoints disponibles</h2>
         </div>
 
@@ -332,7 +332,7 @@ export default function AdminPowerBI() {
                     href={fullUrl}
                     target="_blank"
                     rel="noreferrer"
-                    className="text-xs text-blue-600 hover:underline flex items-center gap-1"
+                    className="text-xs text-m-blue hover:underline flex items-center gap-1"
                   >
                     Tester <ExternalLink size={11} />
                   </a>
@@ -352,7 +352,7 @@ export default function AdminPowerBI() {
       {/* Tuto connexion Power BI Desktop */}
       <div className="bg-white border border-zinc-200 rounded-xl shadow-sm p-5 mb-6" data-testid="tutorial-section">
         <div className="flex items-center gap-2 mb-4">
-          <BookOpen size={16} className="text-blue-600" />
+          <BookOpen size={16} className="text-m-blue" />
           <h2 className="font-semibold text-zinc-800">Connexion depuis Power BI Desktop</h2>
         </div>
 
@@ -385,7 +385,7 @@ export default function AdminPowerBI() {
             },
           ].map(({ step, title, detail }) => (
             <div key={step} className="flex gap-3">
-              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-blue-600 text-white text-xs font-bold flex items-center justify-center mt-0.5">
+              <div className="flex-shrink-0 w-6 h-6 rounded-full bg-m-blue text-white text-xs font-bold flex items-center justify-center mt-0.5">
                 {step}
               </div>
               <div>
@@ -400,7 +400,7 @@ export default function AdminPowerBI() {
           <div className="text-xs font-semibold text-blue-700 mb-1">
             Astuce — Authentification JWT (sans clé API)
           </div>
-          <div className="text-xs text-blue-600">
+          <div className="text-xs text-m-blue">
             Récupérez votre token JWT via <code>POST /api/auth/login</code>, puis utilisez-le dans
             le header <code>Authorization: Bearer &lt;token&gt;</code>. Le token expire dans 24h —
             préférez la clé API pour les actualisations planifiées.
@@ -475,7 +475,7 @@ function MQuerySection({ baseUrl, apiKey }) {
       </div>
 
       {/* Tabs */}
-      <div className="flex gap-1 border-b border-[#e7e3f2] mb-4 overflow-x-auto">
+      <div className="flex gap-1 border-b border-m-border-lav mb-4 overflow-x-auto">
         {allTabs.map((tab, i) => (
           <button
             key={i}
@@ -483,8 +483,8 @@ function MQuerySection({ baseUrl, apiKey }) {
             data-testid={`mquery-tab-${tab.label.toLowerCase()}`}
             className={`flex-shrink-0 px-3 py-2 text-xs font-semibold border-b-[3px] -mb-px transition-colors ${
               activeTab === i
-                ? "text-[#2e5fe8] border-[#2e5fe8]"
-                : "text-[#8a87a0] border-transparent hover:text-[#26243a]"
+                ? "text-m-blue border-m-blue"
+                : "text-m-muted border-transparent hover:text-m-ink"
             }`}
           >
             {tab.isParam ? "Paramètres" : tab.label}

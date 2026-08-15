@@ -17,7 +17,7 @@ const EMPTY = {
   sprint_id: "",
 };
 
-const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-blue-600 focus:ring-1 focus:ring-blue-600 bg-white";
+const INPUT_CLS = "w-full text-sm border border-zinc-200 rounded-lg px-3 py-2 focus:outline-none focus:border-m-blue focus:ring-1 focus:ring-m-blue bg-white";
 
 const LEVEL_OPTIONS = [
   { value: "task",       label: "Tâche",       icon: FileText, bg: "bg-zinc-50  border-zinc-300  text-zinc-600" },
@@ -294,19 +294,19 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
                     <label key={t.task_id}
                       className={`flex items-center gap-2.5 px-3 py-2 cursor-pointer hover:bg-zinc-50 transition-colors ${checked ? "bg-blue-50/50" : ""}`}
                     >
-                      <input type="checkbox" className="accent-[#2563eb] flex-shrink-0"
+                      <input type="checkbox" className="accent-m-blue flex-shrink-0"
                         checked={checked} onChange={() => toggleDep(t.task_id)}
                         data-testid={`dep-checkbox-${t.task_id}`} />
                       <span className="text-xs text-zinc-700 leading-snug line-clamp-1 flex-1">{t.name}</span>
                       {t.task_level && t.task_level !== "task" && (
-                        <span className="text-[9px] font-bold text-blue-600 flex-shrink-0">{t.task_level.toUpperCase()}</span>
+                        <span className="text-[9px] font-bold text-m-blue flex-shrink-0">{t.task_level.toUpperCase()}</span>
                       )}
                     </label>
                   );
                 })}
               </div>
               {form.dependencies.length > 0 && (
-                <p className="text-[10px] text-blue-600 mt-1">
+                <p className="text-[10px] text-m-blue mt-1">
                   {form.dependencies.length} dépendance{form.dependencies.length > 1 ? "s" : ""} sélectionnée{form.dependencies.length > 1 ? "s" : ""}
                 </p>
               )}
@@ -319,7 +319,7 @@ export default function TaskModal({ isOpen, onClose, task, projectId, resources 
             Annuler
           </button>
           <button type="submit" disabled={saving} data-testid="task-form-submit"
-            className="flex items-center gap-2 px-5 py-2 bg-blue-600 text-white text-sm font-semibold rounded-lg hover:bg-blue-700 disabled:opacity-50 transition-colors">
+            className="flex items-center gap-2 px-5 py-2 bg-m-blue text-white text-sm font-semibold rounded-lg hover:bg-m-blue-dark disabled:opacity-50 transition-colors">
             {saving && <Loader2 size={14} className="animate-spin" />}
             {task ? "Enregistrer" : "Créer la tâche"}
           </button>

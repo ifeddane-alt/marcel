@@ -354,8 +354,8 @@ export default function Arbitrage() {
       {/* ── Header ── */}
       <div className="flex flex-wrap items-start justify-between gap-3">
         <div>
-          <div className="text-xs text-[#8a87a0] mb-0.5">Accueil / <span className="text-[#352c6e] font-semibold">Arbitrage</span></div>
-          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-[#26243a] tracking-tight">Arbitrage Portefeuille</h1>
+          <div className="text-xs text-m-muted mb-0.5">Accueil / <span className="text-m-primary font-semibold">Arbitrage</span></div>
+          <h1 className="font-heading text-2xl sm:text-3xl font-extrabold text-m-ink tracking-tight">Arbitrage Portefeuille</h1>
           <p className="text-sm text-zinc-500 mt-0.5">
             Scoring multi-critères · Enveloppes budgétaires · Simulateur What-if
           </p>
@@ -405,7 +405,7 @@ export default function Arbitrage() {
       </div>
 
       {/* ── Onglets ── */}
-      <div className="flex gap-1 border-b border-[#e7e3f2] overflow-x-auto">
+      <div className="flex gap-1 border-b border-m-border-lav overflow-x-auto">
         {[
           { key: "scoring",    icon: Target,      label: "Scoring Projets" },
           { key: "envelopes",  icon: BarChart2,   label: "Enveloppes Budget" },
@@ -418,12 +418,12 @@ export default function Arbitrage() {
             data-testid={`tab-${key}`}
             className={`flex items-center gap-1.5 px-4 py-2.5 text-[13px] font-semibold whitespace-nowrap border-b-[3px] -mb-px transition-colors
               ${activeTab === key
-                ? "text-[#2e5fe8] border-[#2e5fe8]"
-                : "text-[#8a87a0] border-transparent hover:text-[#26243a]"}`}
+                ? "text-m-blue border-m-blue"
+                : "text-m-muted border-transparent hover:text-m-ink"}`}
           >
             <Icon size={14} /> {label}
             {count > 0 && (
-              <span className={`text-[10px] font-bold px-1.5 py-px rounded-full ${activeTab === key ? "bg-[#e9effe] text-[#2e5fe8]" : "bg-[#f0eefc] text-[#8a87a0]"}`}>
+              <span className={`text-[10px] font-bold px-1.5 py-px rounded-full ${activeTab === key ? "bg-m-blue-soft text-m-blue" : "bg-m-lilac text-m-muted"}`}>
                 {count}
               </span>
             )}
@@ -455,7 +455,7 @@ export default function Arbitrage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm" data-testid="scoring-table">
                 <thead>
-                  <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-[10.5px] text-[#8a87a0] uppercase tracking-wider font-bold">
+                  <tr className="bg-m-bg border-b border-m-border text-[10.5px] text-m-muted uppercase tracking-wider font-bold">
                     <th className="px-4 py-2.5 text-left">Projet</th>
                     {CRITERIA_LABELS.map(c => (
                       <th key={c.key} className="px-2 py-2.5 text-center whitespace-nowrap">
@@ -658,7 +658,7 @@ export default function Arbitrage() {
                       className={`flex items-center gap-1.5 px-3 py-2 text-sm rounded-lg transition-colors ${
                         existing
                           ? "border border-zinc-200 bg-white text-zinc-600 hover:bg-zinc-50"
-                          : "bg-blue-600 text-white hover:bg-blue-700"
+                          : "bg-m-blue text-white hover:bg-m-blue-dark"
                       }`}
                     >
                       {existing ? <Edit3 size={13} /> : <Plus size={14} />}
@@ -698,7 +698,7 @@ export default function Arbitrage() {
                     {canEdit && (
                       <button
                         onClick={() => { setEnvForm({ year: env.year, capex_envelope: env.capex_envelope, opex_envelope: env.opex_envelope }); setEnvModal(true); }}
-                        className="p-1.5 rounded-lg text-zinc-400 hover:text-blue-600 hover:bg-blue-50 transition-colors"
+                        className="p-1.5 rounded-lg text-zinc-400 hover:text-m-blue hover:bg-blue-50 transition-colors"
                       >
                         <Edit3 size={13} />
                       </button>
@@ -824,7 +824,7 @@ export default function Arbitrage() {
                       </div>
                       <div className="rounded-lg border border-zinc-100 overflow-hidden">
                         <table className="w-full text-xs">
-                          <thead className="bg-[#fbfaff] text-[#8a87a0] uppercase tracking-wider font-bold">
+                          <thead className="bg-m-bg text-m-muted uppercase tracking-wider font-bold">
                             <tr>
                               <th className="px-3 py-2 text-left">Projet</th>
                               <th className="px-3 py-2 text-right">CAPEX</th>
@@ -904,7 +904,7 @@ export default function Arbitrage() {
                     onClick={() => setSaveScenarioModal(true)}
                     disabled={!sandboxDirty}
                     data-testid="btn-save-scenario"
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-blue-200 rounded-lg text-blue-600 hover:bg-blue-50 transition-colors disabled:opacity-40"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm border border-blue-200 rounded-lg text-m-blue hover:bg-blue-50 transition-colors disabled:opacity-40"
                   >
                     <Save size={13} /> Sauvegarder scénario
                   </button>
@@ -912,7 +912,7 @@ export default function Arbitrage() {
                     onClick={handleApplySandbox}
                     disabled={!sandboxDirty}
                     data-testid="btn-apply-sandbox"
-                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors disabled:opacity-40"
+                    className="flex items-center gap-1.5 px-3 py-1.5 text-sm bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors disabled:opacity-40"
                   >
                     <CheckCircle size={13} /> Appliquer
                   </button>
@@ -957,7 +957,7 @@ export default function Arbitrage() {
             <div className="overflow-x-auto">
               <table className="w-full text-sm" data-testid="simulator-table">
                 <thead>
-                  <tr className="bg-[#fbfaff] border-b border-[#e8e6f0] text-[10.5px] text-[#8a87a0] uppercase tracking-wider font-bold">
+                  <tr className="bg-m-bg border-b border-m-border text-[10.5px] text-m-muted uppercase tracking-wider font-bold">
                     <th className="px-4 py-2.5 text-left">Projet</th>
                     <th className="px-3 py-2.5 text-center">Statut</th>
                     <th className="px-3 py-2.5 text-right">CAPEX planifié</th>
@@ -1074,7 +1074,7 @@ export default function Arbitrage() {
           {/* Header actions */}
           <div className="flex items-center justify-between">
             <div className="flex items-center gap-2">
-              <Save size={15} className="text-blue-600" />
+              <Save size={15} className="text-m-blue" />
               <span className="text-sm font-semibold text-zinc-800">
                 {scenarios.length} scénario{scenarios.length > 1 ? "s" : ""} sauvegardé{scenarios.length > 1 ? "s" : ""}
               </span>
@@ -1083,7 +1083,7 @@ export default function Arbitrage() {
               <button
                 onClick={() => { setCompareMode(true); setCompareA(null); setCompareB(null); }}
                 data-testid="btn-compare-mode"
-                className="flex items-center gap-1.5 text-xs px-3 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors"
+                className="flex items-center gap-1.5 text-xs px-3 py-2 bg-m-blue text-white rounded-lg hover:bg-m-blue-dark transition-colors"
               >
                 <GitCompare size={13} /> Comparer 2 scénarios
               </button>
@@ -1210,7 +1210,7 @@ export default function Arbitrage() {
             <div className="bg-white border border-zinc-200 rounded-xl p-5">
               <div className="flex items-center justify-between mb-4">
                 <div className="flex items-center gap-2">
-                  <Eye size={15} className="text-blue-600" />
+                  <Eye size={15} className="text-m-blue" />
                   <h3 className="font-semibold text-zinc-800">Détail — {detailScenario.name}</h3>
                 </div>
                 <button onClick={() => setDetailScenario(null)} className="text-zinc-400 hover:text-zinc-600"><X size={16} /></button>
@@ -1239,7 +1239,7 @@ export default function Arbitrage() {
                               </td>
                             )}
                             <td className="py-2 px-3 text-zinc-700">{field}</td>
-                            <td className="py-2 px-3 font-medium text-blue-600">{String(value)}</td>
+                            <td className="py-2 px-3 font-medium text-m-blue">{String(value)}</td>
                           </tr>
                         ))
                     )}
@@ -1253,7 +1253,7 @@ export default function Arbitrage() {
           {compareMode && compareA && compareB && (
             <div className="bg-white border border-zinc-200 rounded-xl p-5">
               <div className="flex items-center gap-2 mb-4">
-                <GitCompare size={15} className="text-blue-600" />
+                <GitCompare size={15} className="text-m-blue" />
                 <h3 className="font-semibold text-zinc-800">
                   Comparaison : {compareA.name} <ArrowRight size={13} className="inline" /> {compareB.name}
                 </h3>
@@ -1349,7 +1349,7 @@ export default function Arbitrage() {
                 onClick={handleSaveWeights}
                 disabled={savingWeights}
                 data-testid="btn-save-weights"
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60"
+                className="px-4 py-2 text-sm bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-60"
               >
                 {savingWeights ? "Sauvegarde..." : "Sauvegarder"}
               </button>
@@ -1394,7 +1394,7 @@ export default function Arbitrage() {
             </div>
             <div className="flex justify-end gap-2 mt-5">
               <button onClick={() => setEnvModal(false)} className="px-4 py-2 text-sm border border-zinc-200 rounded-lg text-zinc-600 hover:bg-zinc-50">Annuler</button>
-              <button onClick={handleUpsertEnvelope} data-testid="btn-save-envelope" className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700">
+              <button onClick={handleUpsertEnvelope} data-testid="btn-save-envelope" className="px-4 py-2 text-sm bg-m-blue text-white rounded-lg hover:bg-m-blue-dark">
                 Sauvegarder
               </button>
             </div>
@@ -1438,7 +1438,7 @@ export default function Arbitrage() {
                 onClick={handleSaveScenario}
                 disabled={!scenarioName}
                 data-testid="btn-confirm-save-scenario"
-                className="px-4 py-2 text-sm bg-blue-600 text-white rounded-lg hover:bg-blue-700 disabled:opacity-60"
+                className="px-4 py-2 text-sm bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-60"
               >
                 Sauvegarder
               </button>
