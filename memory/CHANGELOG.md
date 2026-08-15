@@ -340,3 +340,16 @@
 
 ## 2026-06 (fork) — Dossier d'engagement DÉPLOYÉ PROD (commit 5f493a0, bundle main.e031b98c.js)
 - update.sh OK, conteneurs healthy, health/DB ok, /api/engagement/* protégé 403, tous marqueurs frontend présents. Le référentiel de critères s'auto-seede par tenant au premier accès. Disque 60 %.
+
+## 2026-06 (fork) — Lot 1 audits UX/UI « cohérence des chiffres » DÉPLOYÉ PROD (commit 88ecb0b, bundle main.09f356f3.js)
+- ✅ F01 : heatmap /teams remonte les vraies utilisations (Dev A 67 %, Support 100 % surcharge) — filtre period_month corrigé (format YYYY-MM-01 en base) + bannière teams-no-alloc-banner si aucune allocation. Régression préexistante réparée au passage : create_team avait perdu sa signature def dans teams/service.py → POST /api/teams crashait (testé 201 + DELETE 204).
+- ✅ F02/F03 : fiche projet — JH consommés/prévus = Σ tâches quand elles existent (mention « Σ tâches » / « déclaré »), KPI EAC marqué « déclaré », panneau RAF enrichi de « EAC déclaré » + « Écart atterrissage vs EAC » (rouge si >5 %).
+- ✅ F04 : anneau « Avancement » renommé « Temps écoulé » (ProjectTile + KPI fiche projet) — il affichait le temps écoulé.
+- ✅ F05 : Roadmap bascule auto en vue complète si <30 % des projets visibles dans la fenêtre 12 mois. F06 (Gantt mai 2022) NON reproduit → non corrigé.
+- ✅ F07 : overrides .dark dans index.css pour tous les fonds/bordures/textes d'alertes clairs (rose/amber/emerald/blue-50/100).
+- ✅ F09 : GET /api/profiles dédoublonne par code (garde le profil référencé par des users, supprime les orphelins) + user_count par profil — 12 codes uniques.
+- ✅ F10-F12 : connecteurs désactivés → « Dernier test (connecteur désactivé) » ; KPI Vendors alertes → sous-titre « dépassements forfait & seuils contrats » ; widgets Dashboard verts/à risque → « % du portefeuille » ; Conformité → badge « En retard » (rose) si days_remaining < 0 ; Arbitrage → jitter des bulles superposées + taille ∝ budget.
+- Testé iteration_74 : 100 % PASS backend (7/7 pytest) + frontend (14 flux), aucune régression (IndicatorsPanel monté 1 seule fois, dashboard/portefeuille OK). Suite pytest : backend/tests/test_lot1_coherence_chiffres.py.
+- PROD marcel-ppm.com : update.sh (VPS saturé ~4 min pendant le rebuild puis récupéré, schéma connu), commit 88ecb0b, bundle main.09f356f3.js avec tous les marqueurs (vérif fragments ASCII — les accents sont encodés dans le bundle minifié, grep accentué = faux négatif), health 200/DB ok, routes protégées 403, login 200, conteneurs healthy, disque 59 % (7,1 Go libres).
+- Recos non bloquantes du testing agent (backlog) : scinder ProjectDetail.jsx (2104 lignes), placeholder « Pas de RAF calculé » quand raf absent, seuil 30 % roadmap configurable.
+- Backlog audits (non validé par l'utilisateur) : Lot 2 intuitivité (~35-50 cr), Lot 3 navigation/12 onglets (~40-55 cr), Lot 4 design system (~50-70 cr).

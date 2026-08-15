@@ -453,3 +453,9 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - ✅ 149 indicateurs (Excel utilisateur) : catalogue consultable, sélection par thématique dans 4 contextes (projet/programme/portefeuille/dashboard), 24 calculés auto, statut calculabilité honnête. Testé iteration_72 100% PASS.
 - Reste (phases suivantes évoquées) : saisie manuelle des indicateurs non calculables + seuils RAG personnalisables (~20-30 cr) ; catalogue Run (l'utilisateur fournira son fichier) ; brancher plus d'indicateurs auto.
 - ⏳ TOUJOURS EN ATTENTE : schéma du cycle de vie projets (coordination inter-modules) ; assistant migration Excel/Clarity/Planview/Triskell (~50-70 cr).
+
+## 2026-06 (fork) — Lot 1 audits UX/UI « cohérence des chiffres » (DÉPLOYÉ PROD, commit 88ecb0b, bundle main.09f356f3.js)
+- ✅ F01 capacité équipes réelle, F02/F03 JH/EAC Σ tâches vs déclaré + écart atterrissage, F04 « Temps écoulé », F05 roadmap auto vue complète, F07 dark mode alertes, F09 profils dédoublonnés, F10-F12 connecteurs/Vendors/Dashboard, badge « En retard » Conformité, jitter Arbitrage.
+- ✅ Régression préexistante réparée : create_team sans signature def (POST /api/teams cassé).
+- Testé iteration_74 : 100 % PASS. F06 (Gantt mai 2022) NON reproduit — non corrigé volontairement.
+- Backlog audits restant (non validé) : Lot 2 intuitivité parcours (~35-50 cr), Lot 3 navigation/12 onglets fiche projet (~40-55 cr), Lot 4 système de design/tokens (~50-70 cr).
