@@ -328,3 +328,12 @@
 
 ## 2026-06 (fork) — Catalogue d'indicateurs DÉPLOYÉ PROD (commit f816cfd, bundle main.e08616f2.js)
 - update.sh OK, conteneurs healthy, health/DB ok, /api/indicator-catalog protégé 403, tous marqueurs frontend présents, openpyxl 3.1.5 dans l'image, data_catalogue.xlsx présent dans le conteneur (/app/data_catalogue.xlsx) → auto-seed au premier accès authentifié. Disque 59 %.
+
+## 2026-06 (fork) — Dossier d'engagement (Preview, NON déployé prod, commit 379d3bb)
+- ✅ Inspiré des documents client (sanity check + template comité) SANS plagiat : moteur générique MARCEL, formulations neutres, critères paramétrables.
+- ✅ Champs projet structurés : scope_in/out, nfr, impacted_entities, governance_roles [{role,name}], build_to_run, budget_breakdown [{entity,capex,opex}] — section « Cadrage & gouvernance » dans l'onglet Informations.
+- ✅ Module engagement : référentiel de critères par phase (21 cadrage / 29 conception / socles allégés real/recette/deploiement), seed par tenant, types auto (22 checkers sur données réelles) et attesté (checkbox + N/A avec justification OBLIGATOIRE + trace par/quand), CRUD critères (renommer, obligatoire/recommandé, actif, custom).
+- ✅ Readiness : GET /projects/{id}/engagement/readiness (score %, manquants obligatoires) ; demande de gate bloquée 422 si obligatoires manquants, dérogation readiness_override tracée sur la gate (readiness_score stocké).
+- ✅ Deck « Dossier d'engagement » PPTX : GET /exports/engagement/{id}.pptx (10 slides : identité, pitch & périmètre, valeur, gouvernance, jalons, features, budget+ventilation, build-to-run, risques, préparation+décision attendue) + bouton dans le panneau.
+- ✅ UI : panneau en tête de l'onglet Cycle de vie (score, barre, 2 colonnes auto/attestés, Gérer les critères, Dossier PPTX) ; dérogation via confirm dans la demande de passage.
+- Testé : iteration_73 = 13/13 backend + frontend 100 %, zéro bug. Post-test : justification obligatoire pour N/A ajoutée (400) + catch frontend.
