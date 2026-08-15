@@ -12,6 +12,7 @@ import { pushRecentProject } from "@/utils/recentProjects";
 import { usePermissions } from "@/hooks/usePermissions";
 import RAGBadge, { MethodologyBadge, MilestoneBadge, TaskTypeBadge, TaskStatusBadge, ProjectStatusBadge } from "@/components/RAGBadge";
 import ProjectModal from "@/components/ProjectModal";
+import { IndicatorsPanel } from "@/components/IndicatorsPanel";
 import TaskModal from "@/components/TaskModal";
 import TaskTreeView from "@/components/TaskTreeView";
 import BudgetRevisionModal from "@/components/BudgetRevisionModal";
@@ -426,6 +427,7 @@ export default function ProjectDetail() {
           { id: "decisions", label: "Décisions", count: decisions.length },
           { id: "equipe", label: "Équipe", count: workAllocations.length + allocations.length },
           { id: "pilotage", label: "Pilotage" },
+          { id: "indicateurs", label: "Indicateurs" },
           { id: "cycle", label: "Cycle de vie" },
           { id: "benefices", label: "Business case" },
           ...(scopeSnapshots.length > 0 ? [{ id: "scope", label: "Scope", count: scopeSnapshots.length }] : []),
@@ -1755,6 +1757,11 @@ export default function ProjectDetail() {
           </div>
         )}
 
+        {activeTab === "indicateurs" && (
+          <div className="lg:col-span-12">
+            <IndicatorsPanel scope="project" contextId={id} title="Indicateurs du projet" />
+          </div>
+        )}
         {activeTab === "pilotage" && (
           <div className="col-span-12">
             <ProjectIndicators projectId={id} canWrite={canWrite} />

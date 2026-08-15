@@ -6,6 +6,7 @@ import "react-resizable/css/styles.css";
 import { Settings2, RefreshCw, Check, X, Move, RotateCcw, Plus, GripVertical, FileDown, MonitorPlay } from "lucide-react";
 import { dashboardAPI, programsAPI, projectsAPI, teamsAPI, milestonesAPI, arbitrageAPI, agentAPI, resourcesAPI } from "@/api";
 import { usePermissions } from "@/hooks/usePermissions";
+import { IndicatorsPanel } from "@/components/IndicatorsPanel";
 import PortfolioAiReport from "@/components/PortfolioAiReport";
 import {
   MetricSingleWidget, BudgetSingleWidget, CapacityWidget, RegulatoryWidget,
@@ -473,6 +474,11 @@ export default function Dashboard() {
         ))}
       </ResponsiveGridLayout>
       </div>
+
+      <div className="mt-4">
+        <IndicatorsPanel scope="dashboard" title="Mes indicateurs" />
+      </div>
+
       {aiReportOpen && <PortfolioAiReport onClose={() => setAiReportOpen(false)} />}
     </div>
   );

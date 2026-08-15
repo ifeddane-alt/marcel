@@ -1,0 +1,56 @@
+{
+  "summary": "Full backend + frontend testing of MARCEL Indicator Catalog module (149 indicators, 4 scopes, 24 auto-computed). 14/14 backend tests pass. Frontend UI verified: catalog page (149 rows, search/filters/expandable rows), portfolio panel (11 P1 cards, selector modal, detail modal), project detail 'Indicateurs' tab, program detail 'Indicateurs' tab, dashboard 'Mes indicateurs' section without regression on existing widgets. Non-regression on /pb and /roadmap OK.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [],
+    "testid_naming_deviation": [
+      {"page": "/catalogue-indicateurs", "expected": "catalogue-priority-filter", "actual": "catalogue-prio-filter", "impact": "cosmetic — automated tests need to know the actual testid"},
+      {"page": "/catalogue-indicateurs", "expected": "catalogue-computability-filter", "actual": "catalogue-comp-filter", "impact": "cosmetic"}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_indicator_catalog.py",
+    "/app/test_reports/pytest/indicator_catalog.xml"
+  ],
+  "action_items": [
+    "Optional: rename data-testid 'catalogue-prio-filter' → 'catalogue-priority-filter' and 'catalogue-comp-filter' → 'catalogue-computability-filter' to match the spec (or update spec). Not blocking."
+  ],
+  "critical_code_review_comments": [
+    "Backend PUT /api/indicator-catalog/selections/{scope} correctly filters invalid IDs (verified: FAKE-999/NOT-REAL rejected).",
+    "Dashboard selection is per-user (admin & pmo have independent selections — verified).",
+    "Portfolio preset-p1 returns 11 P1 indicators including GOU-01/GOU-04/PLA-05/PLA-06/RIS-01/RIS-12/SAF-09 as expected.",
+    "GET values/project without context_id returns 400 as expected."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_indicator_catalog.py"
+  ],
+  "success_rate": {"backend": "100% (14/14)", "frontend": "100% (all requested flows)"},
+  "test_credentials": "admin@altair.fr/Admin2026!, pmo@altair.fr/Pmo1234! (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "None — catalog auto-seeded (149 indicators). Applied preset-p1 on portfolio and project scopes during tests.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend collection: mongo 'indicator_catalog' (149 docs), 'indicator_selections' (per tenant for project/program/portfolio, per user for dashboard). Field name is 'indicator_id' not 'id'. Projects use 'project_id'. Frontend nav 'Indicateurs' → /catalogue-indicateurs; portfolio has section at bottom; project/program have 'Indicateurs' tab; dashboard has 'Mes indicateurs' section preserving all existing widgets (17 detected).",
+  "verified_flows": [
+    "Login admin & pmo",
+    "GET /api/indicator-catalog returns 149 (auth-gated 403 without token)",
+    "Scope filter ?scope=portfolio returns only Portefeuille/ART indicators",
+    "GET/PUT selections for project/program/portfolio/dashboard",
+    "PUT filters invalid ids",
+    "Dashboard selection is per-user (isolation admin vs pmo)",
+    "POST preset-p1 returns expected P1 indicators",
+    "GET values/portfolio returns computed items (status='computed')",
+    "GET values/project requires context_id (400 otherwise)",
+    "GET values/program with context_id succeeds",
+    "Frontend catalog page: 149/149 rows, search 'vélocité' → 1 row, expand row shows Formule/Lecture/Données",
+    "Frontend portfolio: 11 indicator cards, indicator-detail-modal opens on card click, indicator-selector-modal opens with preset-p1-btn + save-btn",
+    "Frontend project detail: project-tabs present, Indicateurs tab clickable, indicators-panel-project renders",
+    "Frontend program detail: program-tabs present, indicators-panel-program renders",
+    "Frontend dashboard: indicators-panel-dashboard present + 17 existing widget elements retained",
+    "Non-regression: /pb and /roadmap load without error boundaries"
+  ]
+}

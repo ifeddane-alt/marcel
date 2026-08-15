@@ -6,6 +6,7 @@ import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
 import RAGBadge, { MethodologyBadge, ProjectStatusBadge } from "@/components/RAGBadge";
 import ProjectModal from "@/components/ProjectModal";
+import { IndicatorsPanel } from "@/components/IndicatorsPanel";
 import ExportCopilModal from "@/components/ExportCopilModal";
 import ConfirmDialog from "@/components/ConfirmDialog";
 import { formatEuro, formatDate } from "@/utils/format";
@@ -432,6 +433,10 @@ export default function Portfolio() {
             )}
           </tbody>
         </table>
+      </div>
+
+      <div className="mt-6">
+        <IndicatorsPanel scope="portfolio" title="Indicateurs du portefeuille" />
       </div>
 
       <ExportCopilModal

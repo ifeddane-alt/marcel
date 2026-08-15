@@ -604,3 +604,11 @@ export const exportsAPI = {
   roadmapPptx: () => api.get("/exports/roadmap.pptx", { responseType: "blob" }),
   pbPptx: (sessionId) => api.get(`/exports/pb/${sessionId}.pptx`, { responseType: "blob" }),
 };
+
+export const catalogAPI = {
+  list:         (scope) => api.get("/indicator-catalog", { params: scope ? { scope } : {} }),
+  getSelection: (scope) => api.get(`/indicator-catalog/selections/${scope}`),
+  setSelection: (scope, ids) => api.put(`/indicator-catalog/selections/${scope}`, { indicator_ids: ids }),
+  presetP1:     (scope) => api.post(`/indicator-catalog/selections/${scope}/preset-p1`),
+  values:       (scope, contextId) => api.get(`/indicator-catalog/values/${scope}`, { params: contextId ? { context_id: contextId } : {} }),
+};

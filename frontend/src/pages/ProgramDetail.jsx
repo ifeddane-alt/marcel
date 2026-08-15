@@ -6,6 +6,7 @@ import {
 import { programsAPI } from "@/api";
 import ExportCopilModal from "@/components/ExportCopilModal";
 import ProjectTile from "@/components/ProjectTile";
+import { IndicatorsPanel } from "@/components/IndicatorsPanel";
 import RAGBadge, { MethodologyBadge, MilestoneBadge } from "@/components/RAGBadge";
 import { formatEuro, formatDate } from "@/utils/format";
 
@@ -100,6 +101,7 @@ export default function ProgramDetail() {
           { id: "apercu", label: "Aperçu" },
           { id: "projets", label: "Projets", count: projects.length },
           { id: "jalons", label: "Jalons", count: milestones.length },
+          { id: "indicateurs", label: "Indicateurs" },
         ].map((t) => (
           <button
             key={t.id}
@@ -260,6 +262,10 @@ export default function ProgramDetail() {
               </div>
             )}
           </div>
+
+          {activeTab === "indicateurs" && (
+            <IndicatorsPanel scope="program" contextId={id} title="Indicateurs du programme" />
+          )}
 
           {/* Milestones agrégés */}
           <div className={activeTab === "jalons" ? "" : "hidden"}>

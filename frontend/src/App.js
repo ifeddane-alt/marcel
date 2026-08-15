@@ -45,6 +45,7 @@ import Run from "@/pages/Run";
 import Security from "@/pages/Security";
 import Architecture from "@/pages/Architecture";
 import Pilotage from "@/pages/Pilotage";
+import CatalogueIndicateurs from "@/pages/CatalogueIndicateurs";
 import ParticipatoryBudgeting from "@/pages/ParticipatoryBudgeting";
 import MyValidations from "@/pages/MyValidations";
 import Presentation from "@/pages/Presentation";
@@ -130,6 +131,7 @@ function AppRoutes() {
         <Route path="securite" element={<Security />} />
         <Route path="architecture" element={<Architecture />} />
         <Route path="pilotage" element={<Pilotage />} />
+        <Route path="catalogue-indicateurs" element={<CatalogueIndicateurs />} />
         <Route path="calendrier" element={<Calendrier />} />
         <Route path="capacite" element={<Capacite />} />
         <Route path="pb" element={<ParticipatoryBudgeting />} />
