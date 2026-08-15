@@ -325,3 +325,6 @@
 - ✅ Frontend : page /catalogue-indicateurs (nav « Indicateurs », recherche+filtres+fiches dépliables), composant IndicatorsPanel réutilisable (cartes par thématique, badge statut, fiche détail, sélecteur accordéon avec Socle P1) intégré dans : fiche projet (onglet), programme (onglet), portefeuille (section), dashboard (section « Mes indicateurs » — widgets existants préservés, 17 vérifiés).
 - Testé : iteration_72 = 100 % PASS backend (14/14) + frontend (tous flux) + non-régression /pb /roadmap. 2 écarts cosmétiques de noms testids notés non bloquants.
 - Piège corrigé en cours de dev : édit ProgramDetail avait cassé `].map(` — détecté et corrigé immédiatement (toujours relire les édits de tableaux JSX).
+
+## 2026-06 (fork) — Catalogue d'indicateurs DÉPLOYÉ PROD (commit f816cfd, bundle main.e08616f2.js)
+- update.sh OK, conteneurs healthy, health/DB ok, /api/indicator-catalog protégé 403, tous marqueurs frontend présents, openpyxl 3.1.5 dans l'image, data_catalogue.xlsx présent dans le conteneur (/app/data_catalogue.xlsx) → auto-seed au premier accès authentifié. Disque 59 %.
