@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
-import { HandCoins, Plus, Trash2, X, Vote, BarChart3, Lock, CheckCircle2 } from "lucide-react";
-import { pbAPI, safeAPI } from "@/api";
+import { HandCoins, Plus, Trash2, X, Vote, BarChart3, Lock, CheckCircle2, Presentation } from "lucide-react";
+import { pbAPI, safeAPI, exportsAPI } from "@/api";
 import { toast } from "sonner";
 import { formatEuro } from "@/utils/format";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -465,6 +465,24 @@ export default function ParticipatoryBudgeting() {
                   <button onClick={() => setResultsSession(s)} data-testid={`pb-results-btn-${s.session_id}`}
                     className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-zinc-600 border border-zinc-200 rounded-lg hover:bg-zinc-50">
                     <BarChart3 size={11} /> Restitution
+                  </button>
+                  <button
+                    onClick={async () => {
+                      toast.info("Génération du deck d'arbitrage…");
+                      try {
+                        const r = await exportsAPI.pbPptx(s.session_id);
+                        const url = URL.createObjectURL(r.data);
+                        const a = document.createElement("a");
+                        a.href = url;
+                        a.download = `Arbitrage_${s.name.replace(/\s+/g, "_")}_${new Date().toISOString().slice(0, 10)}.pptx`;
+                        a.click();
+                        URL.revokeObjectURL(url);
+                        toast.success("Deck d'arbitrage téléchargé");
+                      } catch { toast.error("Erreur lors de l'export"); }
+                    }}
+                    data-testid={`pb-pptx-btn-${s.session_id}`}
+                    className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-[#352c6e] border border-[#352c6e]/25 rounded-lg hover:bg-[#f0eefc]">
+                    <Presentation size={11} /> PPTX
                   </button>
                   {canManage && s.status === "open" && (
                     <button onClick={() => setStatus(s, "closed")} data-testid={`pb-close-btn-${s.session_id}`}

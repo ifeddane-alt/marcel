@@ -314,3 +314,7 @@
 - ✅ Testé Preview : 4 WSJF fixés par API (12/8.5/15/6), session créée avec wsjf dans les items, 4 badges visibles dans le modal de vote (screenshot). Session dupliquée de test supprimée.
 - ✅ PROD marcel-ppm.com déployée (update.sh, conteneurs healthy, disque 59 %) : bundle main.ffad235c.js contient tous les marqueurs PB SAFe + WSJF, health ok, routes protégées 403.
 - Rappel piège : la RACINE marcel-ppm.com = site marketing → vérifier le bundle via /app, pas via /.
+
+## 2026-06 (fork) — Deck PPTX d'arbitrage PB (Preview, NON déployé prod)
+- ✅ GET /api/exports/pb/{session_id}.pptx (permission portfolio.view) : cover (session + ART·PI), KPIs (enveloppe, votants, retenues, coût retenu, reste), tableau feature par feature (#, WSJF, coût, allocation moy., décision Retenue verte/Reportée rouge) avec sous-titre ligne de coupe, slide décision appliquée si status decided. Fonctionne aussi en mode manuel (candidats libres, financé/partiel).
+- ✅ Bouton « PPTX » sur chaque carte de session (/pb, pb-pptx-btn-{id}) + toast. Testé : 200 authentifié (2 modes), 403 sans auth, download UI OK.

@@ -563,3 +563,62 @@ async def build_event_pptx(event_id: str, user):
     deck.section("Merci", f"Reporting généré automatiquement par MARCEL — {event.get('title', '')}")
     slug = "".join(c if c.isalnum() else "_" for c in event.get("title", "instance"))[:40]
     return deck.to_bytes(), f"{slug}_{d}.pptx"
+
+
+async def build_pb_pptx(session_id: str, user) -> bytes:
+    """Deck de restitution d'un arbitrage Budget Participatif."""
+    from modules.pb import service as pb_service
+    results = await pb_service.get_results(session_id, user)
+    s = results["session"]
+    deck = await _deck(user)
+    is_safe = s.get("mode") == "safe"
+    sub = f"{s.get('train_name')} · {s.get('pi_name')}" if is_safe else "Candidats libres"
+    deck.cover("Arbitrage Budget Participatif", f"{s['name']} — {sub}")
+
+    envelope = s.get("envelope") or 0
+    kpi_items = [
+        {"label": "Enveloppe", "value": _eur(envelope)},
+        {"label": "Votants", "value": str(results["participation"])},
+    ]
+    if is_safe:
+        kpi_items += [
+            {"label": "Features retenues", "value": str(results.get("retained_count", 0)), "color": GREEN},
+            {"label": "Coût retenu", "value": _eur(results.get("retained_cost", 0)), "color": GREEN},
+            {"label": "Reste", "value": _eur(max(envelope - (results.get("retained_cost") or 0), 0)), "color": MUTED},
+        ]
+    else:
+        funded = sum(1 for it in results["items"] if it.get("funded") == "financé")
+        kpi_items.append({"label": "Financés", "value": str(funded), "color": GREEN})
+    deck.kpis("Synthèse de l'arbitrage", kpi_items,
+              subtitle=f"Statut : {s.get('status')} · pondération direction ×{s.get('direction_weight')}" if s.get("weighted") else f"Statut : {s.get('status')}")
+
+    headers = ["#", "Feature" if is_safe else "Candidat", "WSJF", "Coût", "Allocation moy.", "Décision"]
+    rows, colors = [], {}
+    for i, it in enumerate(results["items"][:16]):
+        retained = it.get("retained")
+        decision = ("Retenue" if retained else "Reportée") if is_safe else (it.get("funded") or "—")
+        rows.append([
+            str(i + 1),
+            it["label"][:52],
+            f"{it['wsjf']:g}" if it.get("wsjf") is not None else "—",
+            _eur(it.get("cost") or 0),
+            _eur(it.get("avg_allocation") or 0),
+            decision,
+        ])
+        colors[(i, 5)] = GREEN if (retained or decision == "financé") else RED if decision in ("Reportée", "non_financé") else AMBER
+    cut = f"Ligne de coupe : {_eur(results.get('retained_cost', 0))} retenus sur {_eur(envelope)}" if is_safe else None
+    deck.table("Résultat feature par feature" if is_safe else "Résultat par candidat",
+               headers, rows, subtitle=cut, col_widths=[0.5, 5, 1, 1.6, 1.7, 1.5])
+
+    if s.get("decision"):
+        d = s["decision"]
+        deck.bullets("Décision appliquée au scope", [
+            f"{d.get('features_sec', 0)} feature(s) retenue(s) → scope sécurisé",
+            f"{d.get('features_etendu', 0)} feature(s) reportée(s) → scope étendu",
+            f"Application le {str(d.get('applied_at', ''))[:10]}",
+            "Traçabilité : décision enregistrée sur chaque feature (pb_decision)",
+        ])
+    elif results["participation"] == 0:
+        deck.bullets("Vote en cours", ["Aucun vote soumis pour le moment — la restitution sera complète après clôture."])
+    deck.section("Merci", "Généré automatiquement par MARCEL")
+    return deck.to_bytes()

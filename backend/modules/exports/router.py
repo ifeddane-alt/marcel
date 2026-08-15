@@ -35,3 +35,11 @@ async def event_pptx(event_id: str, current_user: TokenPayload = Depends(permiss
         raise HTTPException(status_code=404, detail="Instance introuvable")
     return StreamingResponse(io.BytesIO(data), media_type=PPTX_MIME,
                              headers={"Content-Disposition": f'attachment; filename="{filename}"'})
+
+
+@router.get("/exports/pb/{session_id}.pptx")
+async def pb_pptx(session_id: str, current_user: TokenPayload = Depends(permission_required("portfolio.view"))):
+    data = await service.build_pb_pptx(session_id, current_user)
+    filename = f"Arbitrage_PB_{date.today().isoformat()}.pptx"
+    return StreamingResponse(io.BytesIO(data), media_type=PPTX_MIME,
+                             headers={"Content-Disposition": f'attachment; filename="{filename}"'})

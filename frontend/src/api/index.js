@@ -602,4 +602,5 @@ export const exportsAPI = {
   copilPptx: () => api.get("/exports/copil.pptx", { responseType: "blob" }),
   eventPptx: (eventId) => api.get(`/exports/event/${eventId}.pptx`, { responseType: "blob" }),
   roadmapPptx: () => api.get("/exports/roadmap.pptx", { responseType: "blob" }),
+  pbPptx: (sessionId) => api.get(`/exports/pb/${sessionId}.pptx`, { responseType: "blob" }),
 };
