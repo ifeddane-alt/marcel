@@ -308,3 +308,9 @@
 - ✅ Décision appliquée au scope : « Appliquer l'arbitrage au scope » → features retenues scope_status=sec, reportées=etendu + trace pb_decision sur les tasks + résumé decision sur la session + toast.
 - Testé : iteration_71 backend 17/17 PASS + /pb frontend validé. 1 bug critique trouvé (FeaturesModal non défini — le search_replace avait signalé succès sans écrire le composant) → ré-ajouté via insert_text, /safe/trains re-validé interactivement (rows, modal, toggle 4→5→4, refresh).
 - LEÇON (récurrence) : toujours grep après un gros search_replace multi-blocs — 2e occurrence du phénomène « edit fantôme ».
+
+## 2026-06 (fork) — WSJF dans l'arbitrage PB + déploiement prod PB SAFe (commit aa3df8f)
+- ✅ WSJF par feature : saisie inline dans « Gérer les features » (PATCH /api/safe/features/{id}/wsjf, validation ≥ 0), badge WSJF affiché dans l'aperçu de création de session, le modal de vote (pb-vote-wsjf-*) et la restitution. Les items PB SAFe embarquent le wsjf à la création.
+- ✅ Testé Preview : 4 WSJF fixés par API (12/8.5/15/6), session créée avec wsjf dans les items, 4 badges visibles dans le modal de vote (screenshot). Session dupliquée de test supprimée.
+- ✅ PROD marcel-ppm.com déployée (update.sh, conteneurs healthy, disque 59 %) : bundle main.ffad235c.js contient tous les marqueurs PB SAFe + WSJF, health ok, routes protégées 403.
+- Rappel piège : la RACINE marcel-ppm.com = site marketing → vérifier le bundle via /app, pas via /.
