@@ -176,3 +176,8 @@ async def list_feature_candidates(current_user: TokenPayload = Depends(get_curre
 @router.patch("/safe/features/{task_id}/pi")
 async def assign_feature_pi(task_id: str, data: dict, current_user: TokenPayload = Depends(get_current_user)):
     return await service.assign_feature_pi(task_id, data.get("pi_id"), current_user)
+
+
+@router.patch("/safe/features/{task_id}/wsjf")
+async def set_feature_wsjf(task_id: str, data: dict, current_user: TokenPayload = Depends(get_current_user)):
+    return await service.set_feature_wsjf(task_id, data.get("wsjf"), current_user)

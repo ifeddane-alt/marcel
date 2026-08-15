@@ -143,7 +143,10 @@ function CreateModal({ onClose, onSave }) {
                     <div className="max-h-44 overflow-y-auto divide-y divide-zinc-50">
                       {piFeatures.map((f) => (
                         <div key={f.task_id} className="flex items-center justify-between px-3 py-1.5 text-xs" data-testid={`pb-preview-feature-${f.task_id}`}>
-                          <span className="text-zinc-700 truncate flex-1">{f.name}{f.project_code ? <span className="font-mono-data text-[10px] text-zinc-400 ml-1">{f.project_code}</span> : null}</span>
+                          <span className="text-zinc-700 truncate flex-1">
+                            {f.name}{f.project_code ? <span className="font-mono-data text-[10px] text-zinc-400 ml-1">{f.project_code}</span> : null}
+                            {f.wsjf != null && <span className="ml-1.5 px-1 py-px text-[9px] font-bold rounded bg-[#f0eefc] text-[#352c6e] font-mono-data">WSJF {f.wsjf}</span>}
+                          </span>
                           <span className="font-mono-data text-zinc-500 ml-2 flex-shrink-0">{f.jh_planned || 0} jh · {formatEuro(f.cost_eur || 0)}</span>
                         </div>
                       ))}
@@ -248,7 +251,14 @@ function VoteModal({ session, onClose, onVoted }) {
           {detail.items.map((it) => (
             <div key={it.item_id} className="flex items-center gap-3" data-testid={`pb-vote-item-${it.item_id}`}>
               <div className="flex-1 min-w-0">
-                <div className="text-xs font-semibold text-zinc-800 truncate">{it.label}</div>
+                <div className="text-xs font-semibold text-zinc-800 truncate flex items-center gap-1.5">
+                  <span className="truncate">{it.label}</span>
+                  {it.wsjf != null && (
+                    <span className="flex-shrink-0 px-1.5 py-px text-[9px] font-bold rounded bg-[#f0eefc] text-[#352c6e] border border-[#352c6e]/20 font-mono-data" data-testid={`pb-vote-wsjf-${it.item_id}`}>
+                      WSJF {it.wsjf}
+                    </span>
+                  )}
+                </div>
                 {it.cost > 0 && <div className="font-mono-data text-[10px] text-zinc-400">coût estimé : {formatEuro(it.cost)}</div>}
               </div>
               <input type="number" min="0" step="1000" value={alloc[it.item_id] ?? ""}
@@ -320,6 +330,9 @@ function ResultsModal({ session, onClose }) {
               <div className="flex items-center justify-between mb-1 flex-wrap gap-1">
                 <span className="text-xs font-semibold text-zinc-800">
                   <span className="font-mono-data text-zinc-400 mr-1.5">#{rank + 1}</span>{it.label}
+                  {it.wsjf != null && (
+                    <span className="ml-1.5 px-1.5 py-px text-[9px] font-bold rounded bg-[#f0eefc] text-[#352c6e] border border-[#352c6e]/20 font-mono-data">WSJF {it.wsjf}</span>
+                  )}
                 </span>
                 <span className="flex items-center gap-2">
                   {it.consensus && <span className={`text-[10px] font-bold ${CONSENSUS[it.consensus].cls}`}>{CONSENSUS[it.consensus].label}</span>}

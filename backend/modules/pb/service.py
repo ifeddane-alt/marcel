@@ -69,6 +69,7 @@ async def _build_safe_items(pi_id: str, user: TokenPayload) -> tuple:
             "cost": float(f.get("cost_eur") or 0),
             "ref": f["task_id"],
             "jh": f.get("jh_planned") or 0,
+            "wsjf": f.get("wsjf"),
         })
     meta = {"mode": "safe", "pi_id": pi_id, "pi_name": pi.get("name"),
             "train_id": pi.get("train_id"), "train_name": (train or {}).get("name")}

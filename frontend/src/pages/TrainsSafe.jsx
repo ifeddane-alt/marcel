@@ -230,6 +230,7 @@ function PIPanel({ pi, onAddCapability, onEditCapability, onDeleteCapability, on
                     <span className="text-zinc-700 truncate flex-1">
                       {f.name}
                       {f.project_code && <span className="font-mono text-[10px] text-zinc-400 ml-1.5">{f.project_code}</span>}
+                      {f.wsjf != null && <span className="ml-1.5 px-1 py-px text-[9px] font-bold rounded bg-[#f0eefc] text-[#352c6e] font-mono">WSJF {f.wsjf}</span>}
                     </span>
                     <span className="flex items-center gap-2 flex-shrink-0 ml-2">
                       {f.scope_status && (
@@ -399,15 +400,32 @@ function FeaturesModal({ isOpen, onClose, pi, onChanged }) {
   const assigned = (candidates || []).filter((f) => f.pi_id === pi.pi_id);
   const others = (candidates || []).filter((f) => f.pi_id !== pi.pi_id);
   const row = (f) => (
-    <label key={f.task_id} className="flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-zinc-50 cursor-pointer" data-testid={`feature-toggle-${f.task_id}`}>
-      <input type="checkbox" checked={f.pi_id === pi.pi_id} disabled={busy === f.task_id} onChange={() => toggle(f)} />
+    <div key={f.task_id} className="flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-zinc-50" data-testid={`feature-toggle-${f.task_id}`}>
+      <input type="checkbox" checked={f.pi_id === pi.pi_id} disabled={busy === f.task_id} onChange={() => toggle(f)} className="cursor-pointer" />
       <span className="flex-1 min-w-0">
         <span className="text-zinc-700">{f.name}</span>
         {f.project_code && <span className="font-mono text-[10px] text-zinc-400 ml-1.5">{f.project_code}</span>}
         {f.pi_name && f.pi_id !== pi.pi_id && <span className="ml-1.5 text-[10px] text-amber-600">→ {f.pi_name}</span>}
       </span>
+      {f.pi_id === pi.pi_id && (
+        <span className="flex items-center gap-1 flex-shrink-0" title="Score WSJF (Weighted Shortest Job First)">
+          <span className="text-[9px] font-bold text-[#352c6e]">WSJF</span>
+          <input type="number" min="0" step="0.5" defaultValue={f.wsjf ?? ""}
+            data-testid={`feature-wsjf-input-${f.task_id}`}
+            onBlur={async (e) => {
+              const v = e.target.value === "" ? null : parseFloat(e.target.value);
+              if (v === (f.wsjf ?? null)) return;
+              try {
+                await safeAPI.setFeatureWSJF(f.task_id, v);
+                setCandidates((arr) => arr.map((x) => x.task_id === f.task_id ? { ...x, wsjf: v } : x));
+                onChanged();
+              } catch {}
+            }}
+            className="w-14 text-[11px] border border-zinc-200 rounded px-1.5 py-0.5 font-mono text-right focus:outline-none focus:border-blue-600" />
+        </span>
+      )}
       <span className="font-mono text-[10px] text-zinc-500 flex-shrink-0">{f.jh_planned || 0} jh · {(f.cost_eur || 0).toLocaleString("fr-FR")} €</span>
-    </label>
+    </div>
   );
   return (
     <Modal isOpen={isOpen} onClose={onClose} title={`Features du ${pi.name}`}>

@@ -287,6 +287,7 @@ export const safeAPI = {
   piFeatures:        (piId) => api.get(`/safe/pis/${piId}/features`),
   featureCandidates: () => api.get("/safe/features/candidates"),
   assignFeaturePI:   (taskId, piId) => api.patch(`/safe/features/${taskId}/pi`, { pi_id: piId }),
+  setFeatureWSJF:    (taskId, wsjf) => api.patch(`/safe/features/${taskId}/wsjf`, { wsjf }),
   // Tasks phase lifecycle
   transitionPhase: (taskId, data) => api.post(`/tasks/${taskId}/transition`, data),
   getPhaseHistory: (taskId) => api.get(`/tasks/${taskId}/phase-history`),

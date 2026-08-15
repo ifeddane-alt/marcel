@@ -346,3 +346,18 @@ async def assign_feature_pi(task_id: str, pi_id: Optional[str], current_user: To
         train_id = pi["train_id"]
     await db.tasks.update_one({"task_id": task_id}, {"$set": {"pi_id": pi_id, "train_id": train_id}})
     return await db.tasks.find_one({"task_id": task_id}, {"_id": 0})
+
+
+async def set_feature_wsjf(task_id: str, wsjf, current_user: TokenPayload) -> dict:
+    require_write(current_user)
+    task = await db.tasks.find_one(
+        {"task_id": task_id, "tenant_id": current_user.tenant_id, "type": "feature"}, {"_id": 0})
+    if not task:
+        raise HTTPException(status_code=404, detail="Feature introuvable")
+    val = None
+    if wsjf is not None and str(wsjf).strip() != "":
+        val = float(wsjf)
+        if val < 0:
+            raise HTTPException(status_code=400, detail="WSJF invalide")
+    await db.tasks.update_one({"task_id": task_id}, {"$set": {"wsjf": val}})
+    return await db.tasks.find_one({"task_id": task_id}, {"_id": 0})
