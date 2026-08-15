@@ -337,3 +337,6 @@
 - ✅ Deck « Dossier d'engagement » PPTX : GET /exports/engagement/{id}.pptx (10 slides : identité, pitch & périmètre, valeur, gouvernance, jalons, features, budget+ventilation, build-to-run, risques, préparation+décision attendue) + bouton dans le panneau.
 - ✅ UI : panneau en tête de l'onglet Cycle de vie (score, barre, 2 colonnes auto/attestés, Gérer les critères, Dossier PPTX) ; dérogation via confirm dans la demande de passage.
 - Testé : iteration_73 = 13/13 backend + frontend 100 %, zéro bug. Post-test : justification obligatoire pour N/A ajoutée (400) + catch frontend.
+
+## 2026-06 (fork) — Dossier d'engagement DÉPLOYÉ PROD (commit 5f493a0, bundle main.e031b98c.js)
+- update.sh OK, conteneurs healthy, health/DB ok, /api/engagement/* protégé 403, tous marqueurs frontend présents. Le référentiel de critères s'auto-seede par tenant au premier accès. Disque 60 %.
