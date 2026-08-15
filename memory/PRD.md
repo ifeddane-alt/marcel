@@ -448,3 +448,8 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - ✅ Livré : affectation features↔PI (UI Trains SAFe), session PB sur Train+PI avec valorisation auto (jh×TJM), ligne de coupe, application au scope sec/étendu. Testé iteration_71 (17/17 backend, frontend OK après fix FeaturesModal).
 - ⏳ EN ATTENTE UTILISATEUR : schéma du cycle de vie des projets (il veut le dessiner lui-même) → ensuite chiffrage coordination inter-modules (chaînage Demande→Projet→Gouvernance→Budget, cockpit par rôle, demandes récurrentes vs spécifiques) + Assistant de migration (Excel + presets Clarity/Planview/Triskell, ~50-70 cr MVP).
 - Contexte commercial : 2 segments clients cibles = utilisateurs Excel et utilisateurs Clarity/Planview/Triskell → migration à l'onboarding via assistant unique (mapping guidé, dry-run, presets par outil).
+
+## 2026-06 (fork) — Catalogue d'indicateurs PPM (Preview, PAS déployé prod)
+- ✅ 149 indicateurs (Excel utilisateur) : catalogue consultable, sélection par thématique dans 4 contextes (projet/programme/portefeuille/dashboard), 24 calculés auto, statut calculabilité honnête. Testé iteration_72 100% PASS.
+- Reste (phases suivantes évoquées) : saisie manuelle des indicateurs non calculables + seuils RAG personnalisables (~20-30 cr) ; catalogue Run (l'utilisateur fournira son fichier) ; brancher plus d'indicateurs auto.
+- ⏳ TOUJOURS EN ATTENTE : schéma du cycle de vie projets (coordination inter-modules) ; assistant migration Excel/Clarity/Planview/Triskell (~50-70 cr).
