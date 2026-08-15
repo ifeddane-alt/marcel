@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { HandCoins, Plus, Trash2, X, Vote, BarChart3, Lock, CheckCircle2 } from "lucide-react";
-import { pbAPI } from "@/api";
+import { pbAPI, safeAPI } from "@/api";
 import { toast } from "sonner";
 import { formatEuro } from "@/utils/format";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -20,25 +20,55 @@ const CONSENSUS = {
 };
 
 function CreateModal({ onClose, onSave }) {
+  const [mode, setMode] = useState("safe"); // safe | manual
   const [form, setForm] = useState({ name: "", envelope: "", deadline: "" });
   const [items, setItems] = useState([{ label: "", cost: "" }, { label: "", cost: "" }]);
   const [weighted, setWeighted] = useState(false);
   const [directionWeight, setDirectionWeight] = useState("2");
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [trains, setTrains] = useState([]);
+  const [pis, setPis] = useState([]);
+  const [trainId, setTrainId] = useState("");
+  const [piId, setPiId] = useState("");
+  const [piFeatures, setPiFeatures] = useState(null);
+
+  useEffect(() => {
+    safeAPI.listTrains().then((r) => {
+      setTrains(r.data || []);
+      if (r.data?.length === 1) setTrainId(r.data[0].train_id);
+    }).catch(() => setTrains([]));
+  }, []);
+  useEffect(() => {
+    if (!trainId) { setPis([]); return; }
+    safeAPI.listPIs({ train_id: trainId }).then((r) => setPis(r.data || [])).catch(() => setPis([]));
+    setPiId("");
+    setPiFeatures(null);
+  }, [trainId]);
+  useEffect(() => {
+    if (!piId) { setPiFeatures(null); return; }
+    safeAPI.piFeatures(piId).then((r) => setPiFeatures(r.data || [])).catch(() => setPiFeatures([]));
+  }, [piId]);
+
+  const totalCost = (piFeatures || []).reduce((s, f) => s + (f.cost_eur || 0), 0);
   const setItem = (i, k, v) => setItems((arr) => arr.map((it, j) => (j === i ? { ...it, [k]: v } : it)));
   const submit = async (e) => {
     e.preventDefault();
     setSaving(true);
     setError("");
     try {
-      await onSave({
+      const payload = {
         ...form,
         envelope: parseFloat(form.envelope) || 0,
         weighted,
         direction_weight: parseFloat(directionWeight) || 2,
-        items: items.filter((it) => it.label.trim()).map((it) => ({ label: it.label, cost: parseFloat(it.cost) || 0 })),
-      });
+      };
+      if (mode === "safe") {
+        payload.pi_id = piId;
+      } else {
+        payload.items = items.filter((it) => it.label.trim()).map((it) => ({ label: it.label, cost: parseFloat(it.cost) || 0 }));
+      }
+      await onSave(payload);
     } catch (err) {
       setError(err?.response?.data?.detail || "Erreur");
       setSaving(false);
@@ -52,11 +82,19 @@ function CreateModal({ onClose, onSave }) {
           <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600"><X size={18} /></button>
         </div>
         <form onSubmit={submit} className="p-6 space-y-4">
+          <div className="flex rounded-lg border border-zinc-200 overflow-hidden w-fit" data-testid="pb-mode-toggle">
+            {[{ id: "safe", label: "Features d'un PI (SAFe)" }, { id: "manual", label: "Candidats libres" }].map((m) => (
+              <button key={m.id} type="button" onClick={() => setMode(m.id)} data-testid={`pb-mode-${m.id}`}
+                className={`px-3.5 py-2 text-xs font-semibold transition-colors ${mode === m.id ? "bg-[#352c6e] text-white" : "bg-white text-zinc-500 hover:bg-zinc-50"}`}>
+                {m.label}
+              </button>
+            ))}
+          </div>
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-3">
             <div className="sm:col-span-1">
               <label className={labelCls}>Nom *</label>
               <input value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} required
-                placeholder="PB PI-4 2026" data-testid="pb-name-input" className={inputCls} />
+                placeholder="Arbitrage PI-2 2026" data-testid="pb-name-input" className={inputCls} />
             </div>
             <div>
               <label className={labelCls}>Enveloppe (€) *</label>
@@ -69,6 +107,52 @@ function CreateModal({ onClose, onSave }) {
                 data-testid="pb-deadline-input" className={inputCls} />
             </div>
           </div>
+
+          {mode === "safe" ? (
+            <div className="space-y-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                <div>
+                  <label className={labelCls}>Train (ART) *</label>
+                  <select value={trainId} onChange={(e) => setTrainId(e.target.value)} required data-testid="pb-train-select" className={inputCls}>
+                    <option value="">— Choisir un train —</option>
+                    {trains.map((t) => <option key={t.train_id} value={t.train_id}>{t.name}</option>)}
+                  </select>
+                </div>
+                <div>
+                  <label className={labelCls}>Program Increment *</label>
+                  <select value={piId} onChange={(e) => setPiId(e.target.value)} required disabled={!trainId} data-testid="pb-pi-select" className={inputCls}>
+                    <option value="">— Choisir un PI —</option>
+                    {pis.map((p) => <option key={p.pi_id} value={p.pi_id}>{p.name}</option>)}
+                  </select>
+                </div>
+              </div>
+              {piId && piFeatures !== null && (
+                piFeatures.length === 0 ? (
+                  <p className="text-xs text-amber-700 bg-amber-50 border border-amber-200 rounded-lg px-3 py-2" data-testid="pb-no-features-warning">
+                    Aucune feature affectée à ce PI. Affectez les features depuis Trains SAFe → « Gérer les features ».
+                  </p>
+                ) : (
+                  <div className="border border-zinc-100 rounded-lg overflow-hidden" data-testid="pb-pi-features-preview">
+                    <div className="flex items-center justify-between px-3 py-2 bg-[#f7f6fb] text-[11px] font-semibold text-zinc-600">
+                      <span>{piFeatures.length} features valorisées (charge × TJM ou budget saisi)</span>
+                      <button type="button" onClick={() => setForm((f) => ({ ...f, envelope: String(totalCost) }))}
+                        data-testid="pb-use-total-btn" className="text-blue-600 hover:underline font-mono-data">
+                        Total : {formatEuro(totalCost)}
+                      </button>
+                    </div>
+                    <div className="max-h-44 overflow-y-auto divide-y divide-zinc-50">
+                      {piFeatures.map((f) => (
+                        <div key={f.task_id} className="flex items-center justify-between px-3 py-1.5 text-xs" data-testid={`pb-preview-feature-${f.task_id}`}>
+                          <span className="text-zinc-700 truncate flex-1">{f.name}{f.project_code ? <span className="font-mono-data text-[10px] text-zinc-400 ml-1">{f.project_code}</span> : null}</span>
+                          <span className="font-mono-data text-zinc-500 ml-2 flex-shrink-0">{f.jh_planned || 0} jh · {formatEuro(f.cost_eur || 0)}</span>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )
+              )}
+            </div>
+          ) : (
           <div>
             <label className={labelCls}>Candidats (value streams / epics) *</label>
             <div className="space-y-2">
@@ -92,6 +176,7 @@ function CreateModal({ onClose, onSave }) {
               <Plus size={11} /> Ajouter un candidat
             </button>
           </div>
+          )}
           {error && <p className="text-sm text-rose-600 font-medium">{error}</p>}
           <div className="flex flex-wrap items-center gap-3 border border-zinc-100 rounded-lg p-3">
             <label className="flex items-center gap-2 text-xs font-semibold text-zinc-600 cursor-pointer">
@@ -215,6 +300,19 @@ function ResultsModal({ session, onClose }) {
           <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600"><X size={18} /></button>
         </div>
         <div className="flex-1 overflow-y-auto p-5 space-y-4">
+          {res.session.mode === "safe" && res.participation > 0 && (
+            <div className="flex items-center justify-between bg-[#f7f6fb] border border-[#e8e6f0] rounded-lg px-3 py-2 text-xs" data-testid="pb-cutline-summary">
+              <span className="font-semibold text-[#352c6e]">
+                Ligne de coupe : {res.retained_count} feature{res.retained_count > 1 ? "s" : ""} retenue{res.retained_count > 1 ? "s" : ""}
+              </span>
+              <span className="font-mono-data text-zinc-500">{formatEuro(res.retained_cost)} / {formatEuro(res.session.envelope)}</span>
+            </div>
+          )}
+          {res.session.decision && (
+            <p className="text-[11px] text-emerald-700 bg-emerald-50 border border-emerald-200 rounded-lg px-3 py-2" data-testid="pb-decision-applied">
+              Arbitrage appliqué au scope le {new Date(res.session.decision.applied_at).toLocaleDateString("fr-FR")} : {res.session.decision.features_sec} sécurisée{res.session.decision.features_sec > 1 ? "s" : ""}, {res.session.decision.features_etendu} reportée{res.session.decision.features_etendu > 1 ? "s" : ""}
+            </p>
+          )}
           {res.participation === 0 ? (
             <p className="text-sm text-zinc-400 text-center py-6">Aucun vote soumis pour l'instant.</p>
           ) : res.items.map((it, rank) => (
@@ -225,12 +323,20 @@ function ResultsModal({ session, onClose }) {
                 </span>
                 <span className="flex items-center gap-2">
                   {it.consensus && <span className={`text-[10px] font-bold ${CONSENSUS[it.consensus].cls}`}>{CONSENSUS[it.consensus].label}</span>}
+                  {res.session.mode === "safe" ? (
+                    <span className={`px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-lg border ${
+                      it.retained ? "bg-emerald-50 text-emerald-700 border-emerald-200" : "bg-zinc-50 text-zinc-400 border-zinc-200"}`}
+                      data-testid={`pb-retained-badge-${it.item_id}`}>
+                      {it.retained ? "Retenue" : "Reportée"}
+                    </span>
+                  ) : (
                   <span className={`px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-lg border ${
                     it.funded === "financé" ? "bg-emerald-50 text-emerald-700 border-emerald-200"
                     : it.funded === "partiel" ? "bg-amber-50 text-amber-700 border-amber-200"
                     : "bg-zinc-50 text-zinc-400 border-zinc-200"}`}>
                     {it.funded === "non_financé" ? "Non financé" : it.funded}
                   </span>
+                  )}
                 </span>
               </div>
               <div className="flex items-center gap-2">
@@ -273,8 +379,12 @@ export default function ParticipatoryBudgeting() {
     load();
   };
   const setStatus = async (s, status) => {
-    await pbAPI.update(s.session_id, { status });
-    toast.success(status === "closed" ? "Vote clôturé" : "Répartition validée");
+    const r = await pbAPI.update(s.session_id, { status });
+    if (status === "decided" && r.data?.decision) {
+      toast.success(`Arbitrage appliqué : ${r.data.decision.features_sec} feature(s) sécurisée(s), ${r.data.decision.features_etendu} reportée(s)`);
+    } else {
+      toast.success(status === "closed" ? "Vote clôturé" : "Répartition validée");
+    }
     load();
   };
   const del = async () => {
@@ -316,8 +426,13 @@ export default function ParticipatoryBudgeting() {
                 <div className="flex items-start justify-between gap-2">
                   <div>
                     <div className="font-heading text-sm font-bold text-[#26243a]">{s.name}</div>
+                    {s.mode === "safe" && (
+                      <span className="inline-block mt-0.5 px-1.5 py-0.5 text-[9px] font-bold uppercase rounded-lg bg-[#f0eefc] text-[#352c6e] border border-[#352c6e]/20" data-testid={`pb-pi-badge-${s.session_id}`}>
+                        {s.train_name ? `${s.train_name} · ` : ""}{s.pi_name}
+                      </span>
+                    )}
                     <div className="font-mono-data text-[11px] text-zinc-400 mt-0.5">
-                      Enveloppe {formatEuro(s.envelope)} · {s.items?.length || 0} candidats
+                      Enveloppe {formatEuro(s.envelope)} · {s.items?.length || 0} {s.mode === "safe" ? "features" : "candidats"}
                       {s.deadline ? ` · échéance ${new Date(s.deadline).toLocaleDateString("fr-FR")}` : ""}
                     </div>
                   </div>
@@ -347,7 +462,7 @@ export default function ParticipatoryBudgeting() {
                   {canManage && s.status === "closed" && (
                     <button onClick={() => setStatus(s, "decided")} data-testid={`pb-decide-btn-${s.session_id}`}
                       className="flex items-center gap-1 px-2.5 py-1.5 text-[11px] font-semibold text-blue-600 border border-blue-200 rounded-lg hover:bg-blue-50">
-                      <CheckCircle2 size={11} /> Valider la répartition
+                      <CheckCircle2 size={11} /> {s.mode === "safe" ? "Appliquer l'arbitrage au scope" : "Valider la répartition"}
                     </button>
                   )}
                   {canManage && (

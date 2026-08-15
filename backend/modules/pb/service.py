@@ -51,6 +51,30 @@ def _clean_items(items: list) -> list:
     return out
 
 
+async def _build_safe_items(pi_id: str, user: TokenPayload) -> tuple:
+    from modules.safe import service as safe_service
+    pi = await db.pis.find_one({"pi_id": pi_id, "tenant_id": user.tenant_id}, {"_id": 0})
+    if not pi:
+        raise HTTPException(404, "PI introuvable")
+    features = await safe_service.list_pi_features(pi_id, user)
+    if len(features) < 2:
+        raise HTTPException(400, "Ce PI compte moins de 2 features — affectez d'abord les features au PI depuis Trains SAFe")
+    train = await db.trains.find_one({"train_id": pi.get("train_id")}, {"_id": 0, "name": 1})
+    items = []
+    for f in features:
+        suffix = f.get("project_code") or f.get("project_name")
+        items.append({
+            "item_id": str(uuid.uuid4()),
+            "label": f["name"] + (f" · {suffix}" if suffix else ""),
+            "cost": float(f.get("cost_eur") or 0),
+            "ref": f["task_id"],
+            "jh": f.get("jh_planned") or 0,
+        })
+    meta = {"mode": "safe", "pi_id": pi_id, "pi_name": pi.get("name"),
+            "train_id": pi.get("train_id"), "train_name": (train or {}).get("name")}
+    return items, meta
+
+
 async def create_session(data: dict, user: TokenPayload) -> dict:
     require_dsi_write(user)
     if not (data.get("name") or "").strip():
@@ -58,9 +82,13 @@ async def create_session(data: dict, user: TokenPayload) -> dict:
     envelope = float(data.get("envelope") or 0)
     if envelope <= 0:
         raise HTTPException(400, "L'enveloppe doit être positive")
-    items = _clean_items(data.get("items"))
-    if len(items) < 2:
-        raise HTTPException(400, "Au moins 2 candidats sont requis")
+    meta = {}
+    if data.get("pi_id"):
+        items, meta = await _build_safe_items(data["pi_id"], user)
+    else:
+        items = _clean_items(data.get("items"))
+        if len(items) < 2:
+            raise HTTPException(400, "Au moins 2 candidats sont requis")
     s = {
         "session_id": str(uuid.uuid4()),
         "tenant_id": user.tenant_id,
@@ -69,6 +97,7 @@ async def create_session(data: dict, user: TokenPayload) -> dict:
         "deadline": data.get("deadline"),
         "status": "open",
         "items": items,
+        **meta,
         "weighted": bool(data.get("weighted")),
         "direction_weight": float(data.get("direction_weight") or 2),
         "created_by": user.user_id,
@@ -98,7 +127,35 @@ async def update_session(session_id: str, data: dict, user: TokenPayload) -> dic
     )
     if res.matched_count == 0:
         raise HTTPException(404, "Session introuvable")
+    if payload.get("status") == "decided":
+        await _apply_safe_decision(session_id, user)
     return await get_session(session_id, user)
+
+
+async def _apply_safe_decision(session_id: str, user: TokenPayload):
+    """Session SAFe décidée : features retenues → scope sec, reportées → étendu."""
+    s = await db.pb_sessions.find_one(
+        {"session_id": session_id, "tenant_id": user.tenant_id}, {"_id": 0})
+    if not s or s.get("mode") != "safe":
+        return
+    results = await get_results(session_id, user)
+    now = _now()
+    sec = etendu = 0
+    for it in results["items"]:
+        if not it.get("ref"):
+            continue
+        retained = bool(it.get("retained"))
+        await db.tasks.update_one(
+            {"task_id": it["ref"], "tenant_id": user.tenant_id},
+            {"$set": {"scope_status": "sec" if retained else "etendu",
+                      "pb_decision": {"session_id": session_id, "retained": retained, "decided_at": now}}})
+        if retained:
+            sec += 1
+        else:
+            etendu += 1
+    await db.pb_sessions.update_one(
+        {"session_id": session_id},
+        {"$set": {"decision": {"applied_at": now, "features_sec": sec, "features_etendu": etendu}}})
 
 
 async def delete_session(session_id: str, user: TokenPayload) -> None:
@@ -177,10 +234,24 @@ async def get_results(session_id: str, user: TokenPayload) -> dict:
             "consensus": consensus,
         })
     items.sort(key=lambda x: -x["avg_allocation"])
+    # Ligne de coupe : par rang d'allocation, cumul des coûts dans l'enveloppe
+    remaining = s["envelope"]
+    retained_cost = 0
+    for it in items:
+        cost = it.get("cost") or 0
+        if n > 0 and it["avg_allocation"] > 0 and 0 < cost <= remaining:
+            it["retained"] = True
+            remaining -= cost
+            retained_cost += cost
+        else:
+            it["retained"] = False
     return {
-        "session": {**{k: s[k] for k in ("session_id", "name", "envelope", "status", "deadline")},
+        "session": {**{k: s.get(k) for k in ("session_id", "name", "envelope", "status", "deadline",
+                                             "mode", "pi_id", "pi_name", "train_name", "decision")},
                     "weighted": weighted, "direction_weight": dw},
         "participation": n,
         "total_avg_allocated": round(sum(i["avg_allocation"] for i in items)),
+        "retained_count": sum(1 for i in items if i["retained"]),
+        "retained_cost": round(retained_cost),
         "items": items,
     }

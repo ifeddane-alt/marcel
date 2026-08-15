@@ -1,0 +1,45 @@
+{
+  "summary": "Tested SAFe Budget Participatif refonte: 17/17 backend tests PASS (features candidates, PI features, assign/unassign, PB SAFe session creation + cutline greedy retention + decision applying scope_status sec/etendu, manual mode non-regression). Frontend /pb SAFe modal WORKS PERFECTLY (mode toggle, train/PI selects, features preview showing 4 features / 2 056 250 €, use-total btn filling envelope, manual toggle). CRITICAL: /safe/trains page is completely broken by a ReferenceError: 'FeaturesModal is not defined' — component is JSX-rendered at line 650 but never defined nor imported. This blocks entire Vue d'ensemble section and 'Gérer les features' modal.",
+  "backend_issues": {
+    "critical": [],
+    "minor": []
+  },
+  "frontend_issues": {
+    "ui_bugs": [
+      {
+        "component": "TrainsSafe.jsx",
+        "issue": "ReferenceError: FeaturesModal is not defined — used at line 650-655 but component is neither defined in file nor imported. Page /safe/trains crashes on render (React error overlay). Blocks: PIPanel expansion, pi-feature-row-* rendering, manage-features-btn-* interactions, features-modal-body, features-modal-close. All /trains features from user story #11 are untestable due to this crash.",
+        "selector": "[data-testid^=\"pi-feature-row-\"], [data-testid^=\"manage-features-btn-\"], [data-testid=\"features-modal-body\"], [data-testid=\"features-modal-close\"]",
+        "priority": "CRITICAL"
+      }
+    ],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_pb_safe.py",
+    "/app/test_reports/pytest/pb_safe.xml"
+  ],
+  "action_items": [
+    "URGENT: Define and/or import FeaturesModal component in /app/frontend/src/pages/TrainsSafe.jsx. It should render a modal with data-testid='features-modal-body', 2 groups (Dans ce PI / Disponibles) using safeAPI.featureCandidates + safeAPI.assignFeaturePI, and a close button with data-testid='features-modal-close'. After fix, /safe/trains page needs re-testing for pi-feature-row-*, manage-features-btn-*, feature groups toggling and panel refresh."
+  ],
+  "critical_code_review_comments": [
+    "TrainsSafe.jsx uses <FeaturesModal .../> but component is missing — this is a hard runtime crash on any /safe/trains route load.",
+    "TrainsSafe.jsx is 659 lines — approaching the 700-line threshold; consider splitting PIPanel/CapabilityModal into separate files.",
+    "In pb/service.get_results, greedy cutline works but 'weighted' branch divides by wsum instead of sum of weights per voter who allocated — acceptable but be aware of semantics.",
+    "In pb/service._apply_safe_decision the check `s.get('mode') != 'safe'` correctly skips manual sessions (manual sessions never have `mode` field set) — verified by test."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_pb_safe.py (new)"
+  ],
+  "success_rate": {
+    "backend": "100% (17/17)",
+    "frontend": "50% — /pb modal + toggle works fully; /safe/trains completely broken"
+  },
+  "test_credentials": "admin@altair.fr / Admin2026! and pmo@altair.fr / Pmo1234! (from /app/memory/test_credentials.md)",
+  "seed_data_creation": "None persistent. Test sessions TEST_PB_SAFE_ITER and TEST_MANUAL_ITER were created and deleted within the same test run. Note: the test_decide_applies_arbitrage did modify scope_status on 4 features under PI-2 2026 (686c54ee) to sec/etendu — this is expected/normal behaviour (as the main agent already noted).",
+  "retest_needed": true,
+  "should_main_agent_self_test": false,
+  "context_for_next_testing_agent": "Backend PB SAFe API is 100% functional. Frontend /pb (modal SAFe + manual) validated visually and interactively. Only remaining item is /safe/trains — once FeaturesModal is defined/imported by main agent, retest: (1) expand PI-2 2026 panel, (2) verify pi-feature-row-* rows show 4 features with scope badges + jh/€ totals, (3) click manage-features-btn-686c54ee-b5ec-46c5-98b3-9c63dcacd42b, (4) verify features-modal-body with 2 groups (In PI / Available), (5) toggle a checkbox to assign/unassign and confirm PATCH /api/safe/features/{task_id}/pi is called, (6) click features-modal-close and verify panel list refreshes. Route is /safe/trains (NOT /trains).",
+  "rca of the issue": "TrainsSafe.jsx line 650 renders <FeaturesModal ...> but grep of the file shows FeaturesModal is only referenced at that one line — not defined as a function/component anywhere in the file, and not imported from any module. React throws 'ReferenceError: FeaturesModal is not defined' during render → error overlay covers the whole page. Reproduction: login as admin@altair.fr, navigate to /safe/trains → runtime error overlay appears. Mitigation: main agent must add the FeaturesModal component (likely was planned but forgotten). Should be a modal listing features grouped by 'assigned to this PI' vs 'available', with checkboxes that call safeAPI.assignFeaturePI(task_id, {pi_id: ...|null}) on toggle."
+}

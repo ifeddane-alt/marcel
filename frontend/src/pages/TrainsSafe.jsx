@@ -120,10 +120,18 @@ function SprintCard({ sprint }) {
 }
 
 // ─── PI Panel ─────────────────────────────────────────────────────────────────
-function PIPanel({ pi, onAddCapability, onEditCapability, onDeleteCapability }) {
+function PIPanel({ pi, onAddCapability, onEditCapability, onDeleteCapability, onManageFeatures, featuresVersion }) {
   const [expanded, setExpanded] = useState(true);
+  const [features, setFeatures] = useState(null);
   const statusCfg = PI_STATUS[pi.status] || PI_STATUS.planning;
   const fmt = (d) => d ? new Date(d).toLocaleDateString("fr-FR", { day: "numeric", month: "long", year: "numeric" }) : "—";
+
+  useEffect(() => {
+    if (!expanded) return;
+    safeAPI.piFeatures(pi.pi_id).then((r) => setFeatures(r.data || [])).catch(() => setFeatures([]));
+  }, [expanded, pi.pi_id, featuresVersion]);
+
+  const totalCost = (features || []).reduce((s, f) => s + (f.cost_eur || 0), 0);
 
   const capsByStatus = STATUS_ORDER.reduce((acc, s) => {
     acc[s] = (pi.capabilities || []).filter(c => c.status === s);
@@ -194,6 +202,50 @@ function PIPanel({ pi, onAddCapability, onEditCapability, onDeleteCapability }) 
               </div>
             </div>
           )}
+
+          {/* Features du PI */}
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <div className="text-[10px] uppercase tracking-widest font-bold text-zinc-400">
+                Features du PI ({(features || []).length}){totalCost > 0 && <span className="ml-2 font-mono text-zinc-500 normal-case tracking-normal">valorisation {totalCost.toLocaleString("fr-FR")} €</span>}
+              </div>
+              <button
+                onClick={() => onManageFeatures(pi)}
+                className="flex items-center gap-1.5 text-[11px] font-semibold text-blue-600 hover:text-blue-700 transition-colors"
+                data-testid={`manage-features-btn-${pi.pi_id}`}
+              >
+                <Plus size={12} /> Gérer les features
+              </button>
+            </div>
+            {features === null ? (
+              <div className="text-[11px] text-zinc-300">Chargement…</div>
+            ) : features.length === 0 ? (
+              <div className="text-center py-3 text-[11px] text-zinc-300 border border-dashed border-zinc-200 rounded-lg">
+                Aucune feature affectée à ce PI — cliquez sur « Gérer les features »
+              </div>
+            ) : (
+              <div className="border border-zinc-100 rounded-lg divide-y divide-zinc-50 overflow-hidden">
+                {features.map((f) => (
+                  <div key={f.task_id} className="flex items-center justify-between px-3 py-1.5 text-xs" data-testid={`pi-feature-row-${f.task_id}`}>
+                    <span className="text-zinc-700 truncate flex-1">
+                      {f.name}
+                      {f.project_code && <span className="font-mono text-[10px] text-zinc-400 ml-1.5">{f.project_code}</span>}
+                    </span>
+                    <span className="flex items-center gap-2 flex-shrink-0 ml-2">
+                      {f.scope_status && (
+                        <span className={`px-1.5 py-0.5 text-[9px] font-bold uppercase rounded ${
+                          String(f.scope_status).toLowerCase() === "sec" ? "bg-emerald-50 text-emerald-700"
+                          : f.scope_status === "etendu" ? "bg-amber-50 text-amber-700" : "bg-zinc-100 text-zinc-500"}`}>
+                          {String(f.scope_status).toLowerCase() === "sec" ? "Sécurisé" : f.scope_status === "etendu" ? "Étendu" : "Hors scope"}
+                        </span>
+                      )}
+                      <span className="font-mono text-[10px] text-zinc-500">{f.jh_planned || 0} jh · {(f.cost_eur || 0).toLocaleString("fr-FR")} €</span>
+                    </span>
+                  </div>
+                ))}
+              </div>
+            )}
+          </div>
 
           {/* Capabilities Board */}
           <div>
@@ -322,6 +374,73 @@ function CapabilityModal({ isOpen, onClose, trainId, pi, capability, onSaved }) 
   );
 }
 
+// ─── Modal Features ↔ PI ──────────────────────────────────────────────────────
+function FeaturesModal({ isOpen, onClose, pi, onChanged }) {
+  const [candidates, setCandidates] = useState(null);
+  const [busy, setBusy] = useState(null);
+
+  useEffect(() => {
+    if (!isOpen) return;
+    setCandidates(null);
+    safeAPI.featureCandidates().then((r) => setCandidates(r.data || [])).catch(() => setCandidates([]));
+  }, [isOpen]);
+
+  if (!isOpen || !pi) return null;
+  const toggle = async (f) => {
+    const assigned = f.pi_id === pi.pi_id;
+    setBusy(f.task_id);
+    try {
+      await safeAPI.assignFeaturePI(f.task_id, assigned ? null : pi.pi_id);
+      setCandidates((arr) => arr.map((x) => x.task_id === f.task_id ? { ...x, pi_id: assigned ? null : pi.pi_id, pi_name: assigned ? null : pi.name } : x));
+      onChanged();
+    } catch {}
+    setBusy(null);
+  };
+  const assigned = (candidates || []).filter((f) => f.pi_id === pi.pi_id);
+  const others = (candidates || []).filter((f) => f.pi_id !== pi.pi_id);
+  const row = (f) => (
+    <label key={f.task_id} className="flex items-center gap-2.5 px-3 py-2 text-xs hover:bg-zinc-50 cursor-pointer" data-testid={`feature-toggle-${f.task_id}`}>
+      <input type="checkbox" checked={f.pi_id === pi.pi_id} disabled={busy === f.task_id} onChange={() => toggle(f)} />
+      <span className="flex-1 min-w-0">
+        <span className="text-zinc-700">{f.name}</span>
+        {f.project_code && <span className="font-mono text-[10px] text-zinc-400 ml-1.5">{f.project_code}</span>}
+        {f.pi_name && f.pi_id !== pi.pi_id && <span className="ml-1.5 text-[10px] text-amber-600">→ {f.pi_name}</span>}
+      </span>
+      <span className="font-mono text-[10px] text-zinc-500 flex-shrink-0">{f.jh_planned || 0} jh · {(f.cost_eur || 0).toLocaleString("fr-FR")} €</span>
+    </label>
+  );
+  return (
+    <Modal isOpen={isOpen} onClose={onClose} title={`Features du ${pi.name}`}>
+      <div className="space-y-3" data-testid="features-modal-body">
+        <p className="text-[11px] text-zinc-400">Cochez les features à embarquer dans ce PI — elles alimenteront l'arbitrage du budget participatif.</p>
+        {candidates === null ? (
+          <div className="text-xs text-zinc-400 py-4 text-center">Chargement…</div>
+        ) : (
+          <>
+            <div>
+              <div className="text-[10px] uppercase tracking-widest font-bold text-zinc-400 mb-1">Dans ce PI ({assigned.length})</div>
+              <div className="border border-zinc-100 rounded-lg divide-y divide-zinc-50 max-h-40 overflow-y-auto">
+                {assigned.length === 0 ? <div className="text-[11px] text-zinc-300 px-3 py-2">Aucune</div> : assigned.map(row)}
+              </div>
+            </div>
+            <div>
+              <div className="text-[10px] uppercase tracking-widest font-bold text-zinc-400 mb-1">Disponibles ({others.length})</div>
+              <div className="border border-zinc-100 rounded-lg divide-y divide-zinc-50 max-h-52 overflow-y-auto">
+                {others.length === 0 ? <div className="text-[11px] text-zinc-300 px-3 py-2">Aucune feature disponible</div> : others.map(row)}
+              </div>
+            </div>
+          </>
+        )}
+        <div className="flex justify-end pt-2 border-t border-zinc-100">
+          <button onClick={onClose} data-testid="features-modal-close"
+            className="px-4 py-2 text-sm font-semibold bg-blue-600 text-white rounded-lg hover:bg-blue-700">Terminé</button>
+        </div>
+      </div>
+    </Modal>
+  );
+}
+
+
 // ─── Page principale ──────────────────────────────────────────────────────────
 export default function TrainsSafe() {
   const { trainId } = useParams();
@@ -337,6 +456,8 @@ export default function TrainsSafe() {
 
   // Capability modal state
   const [capModal, setCapModal] = useState({ open: false, pi: null, cap: null });
+  const [featModal, setFeatModal] = useState({ open: false, pi: null });
+  const [featuresVersion, setFeaturesVersion] = useState(0);
 
   const loadTrains = useCallback(async () => {
     try {
@@ -533,6 +654,8 @@ export default function TrainsSafe() {
                         setCapModal({ open: true, pi, cap });
                       }}
                       onDeleteCapability={handleDeleteCapability}
+                      onManageFeatures={(pi) => setFeatModal({ open: true, pi })}
+                      featuresVersion={featuresVersion}
                     />
                   ))}
                 </div>
@@ -590,6 +713,12 @@ export default function TrainsSafe() {
         pi={capModal.pi}
         capability={capModal.cap}
         onSaved={refreshOverview}
+      />
+      <FeaturesModal
+        isOpen={featModal.open}
+        onClose={() => setFeatModal({ open: false, pi: null })}
+        pi={featModal.pi}
+        onChanged={() => setFeaturesVersion((v) => v + 1)}
       />
     </div>
   );

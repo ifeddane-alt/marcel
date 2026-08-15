@@ -283,6 +283,10 @@ export const safeAPI = {
   createCapability:(data) => api.post("/safe/capabilities", data),
   updateCapability:(id, data) => api.put(`/safe/capabilities/${id}`, data),
   deleteCapability:(id) => api.delete(`/safe/capabilities/${id}`),
+  // Features ↔ PI
+  piFeatures:        (piId) => api.get(`/safe/pis/${piId}/features`),
+  featureCandidates: () => api.get("/safe/features/candidates"),
+  assignFeaturePI:   (taskId, piId) => api.patch(`/safe/features/${taskId}/pi`, { pi_id: piId }),
   // Tasks phase lifecycle
   transitionPhase: (taskId, data) => api.post(`/tasks/${taskId}/transition`, data),
   getPhaseHistory: (taskId) => api.get(`/tasks/${taskId}/phase-history`),

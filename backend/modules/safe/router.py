@@ -160,3 +160,19 @@ async def delete_capability(
     current_user: TokenPayload = Depends(permission_required("capabilities.create")),
 ):
     await service.delete_capability(cap_id, current_user)
+
+
+# ─── Features ↔ PI ───────────────────────────────────────────────────────────
+@router.get("/safe/pis/{pi_id}/features")
+async def list_pi_features(pi_id: str, current_user: TokenPayload = Depends(get_current_user)):
+    return await service.list_pi_features(pi_id, current_user)
+
+
+@router.get("/safe/features/candidates")
+async def list_feature_candidates(current_user: TokenPayload = Depends(get_current_user)):
+    return await service.list_feature_candidates(current_user)
+
+
+@router.patch("/safe/features/{task_id}/pi")
+async def assign_feature_pi(task_id: str, data: dict, current_user: TokenPayload = Depends(get_current_user)):
+    return await service.assign_feature_pi(task_id, data.get("pi_id"), current_user)

@@ -299,3 +299,12 @@
 - Testé : iteration_70 = 100 % PASS backend+frontend (zoom, groupby, phases, gates tooltips, 3 modes dépendances, épinglage, conflits, download PPTX, non-régression onglets/filtres/liens). Curl : 200 authentifié / 403 sans auth.
 - Prod vérifiée : bundle main.47d8ef9b.js (tous marqueurs), health ok, route protégée 403, 4 conteneurs healthy, disque 58 %.
 - Leçon : l'URL preview di-360-dash était une ancienne URL d'un job précédent → toujours lire REACT_APP_BACKEND_URL (project-sync-61).
+
+## 2026-06 (fork) — Budget Participatif sur le modèle SAFe (Preview, NON déployé prod)
+- ✅ Affectation features ↔ PI : GET /api/safe/pis/{id}/features, GET /api/safe/features/candidates, PATCH /api/safe/features/{task_id}/pi (+ train_id auto). UI Trains SAFe : section « Features du PI (n) · valorisation totale » dans chaque panneau PI + modal « Gérer les features » (2 groupes Dans ce PI / Disponibles, cases à cocher, jh + €).
+- ✅ Valorisation feature : budget_planned_k×1000 sinon jh_planned × TJM ressource (fallback TJM moyen tenant, 600 si aucun).
+- ✅ Session PB mode SAFe : création sur Train+PI → items auto-générés depuis les features valorisées (ref=task_id), aperçu avec total cliquable pour remplir l'enveloppe. Mode manuel conservé (toggle).
+- ✅ Arbitrage ligne de coupe : résultats triés par allocation moyenne, retained = cumul coûts ≤ enveloppe (greedy, allocation > 0), retained_count/retained_cost + badges Retenue/Reportée + bandeau ligne de coupe.
+- ✅ Décision appliquée au scope : « Appliquer l'arbitrage au scope » → features retenues scope_status=sec, reportées=etendu + trace pb_decision sur les tasks + résumé decision sur la session + toast.
+- Testé : iteration_71 backend 17/17 PASS + /pb frontend validé. 1 bug critique trouvé (FeaturesModal non défini — le search_replace avait signalé succès sans écrire le composant) → ré-ajouté via insert_text, /safe/trains re-validé interactivement (rows, modal, toggle 4→5→4, refresh).
+- LEÇON (récurrence) : toujours grep après un gros search_replace multi-blocs — 2e occurrence du phénomène « edit fantôme ».

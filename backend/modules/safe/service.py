@@ -286,3 +286,63 @@ async def delete_capability(cap_id: str, current_user: TokenPayload) -> None:
     )
     if result.deleted_count == 0:
         raise HTTPException(status_code=404, detail="Capability introuvable")
+
+
+# ─── Features ↔ PI ───────────────────────────────────────────────────────────
+async def _enrich_feature_costs(tenant_id: str, features: list) -> None:
+    resources = await db.resources.find(
+        {"tenant_id": tenant_id}, {"_id": 0, "resource_id": 1, "tjm_eur": 1, "contract_tjm": 1}).to_list(None)
+    tjms = {r["resource_id"]: (r.get("tjm_eur") or r.get("contract_tjm") or 0) for r in resources}
+    vals = [t for t in tjms.values() if t]
+    default_tjm = sum(vals) / len(vals) if vals else 600
+    proj_ids = list({f["project_id"] for f in features if f.get("project_id")})
+    projects = await db.projects.find(
+        {"project_id": {"$in": proj_ids}}, {"_id": 0, "project_id": 1, "name": 1, "code": 1}).to_list(None)
+    pmap = {p["project_id"]: p for p in projects}
+    for f in features:
+        if f.get("budget_planned_k"):
+            f["cost_eur"] = round(float(f["budget_planned_k"]) * 1000)
+        else:
+            tjm = tjms.get(f.get("resource_id")) or default_tjm
+            f["cost_eur"] = round(float(f.get("jh_planned") or 0) * tjm)
+        p = pmap.get(f.get("project_id")) or {}
+        f["project_name"] = p.get("name")
+        f["project_code"] = p.get("code")
+
+
+async def list_pi_features(pi_id: str, current_user: TokenPayload) -> list:
+    pi = await db.pis.find_one({"pi_id": pi_id, "tenant_id": current_user.tenant_id}, {"_id": 0})
+    if not pi:
+        raise HTTPException(status_code=404, detail="PI introuvable")
+    features = await db.tasks.find(
+        {"tenant_id": current_user.tenant_id, "type": "feature", "pi_id": pi_id}, {"_id": 0}).to_list(None)
+    await _enrich_feature_costs(current_user.tenant_id, features)
+    return features
+
+
+async def list_feature_candidates(current_user: TokenPayload) -> list:
+    features = await db.tasks.find(
+        {"tenant_id": current_user.tenant_id, "type": "feature"}, {"_id": 0}).to_list(None)
+    await _enrich_feature_costs(current_user.tenant_id, features)
+    pi_ids = list({f["pi_id"] for f in features if f.get("pi_id")})
+    pis = await db.pis.find({"pi_id": {"$in": pi_ids}}, {"_id": 0, "pi_id": 1, "name": 1}).to_list(None)
+    pi_map = {p["pi_id"]: p["name"] for p in pis}
+    for f in features:
+        f["pi_name"] = pi_map.get(f.get("pi_id"))
+    return features
+
+
+async def assign_feature_pi(task_id: str, pi_id: Optional[str], current_user: TokenPayload) -> dict:
+    require_write(current_user)
+    task = await db.tasks.find_one(
+        {"task_id": task_id, "tenant_id": current_user.tenant_id, "type": "feature"}, {"_id": 0})
+    if not task:
+        raise HTTPException(status_code=404, detail="Feature introuvable")
+    train_id = None
+    if pi_id:
+        pi = await db.pis.find_one({"pi_id": pi_id, "tenant_id": current_user.tenant_id}, {"_id": 0})
+        if not pi:
+            raise HTTPException(status_code=404, detail="PI introuvable")
+        train_id = pi["train_id"]
+    await db.tasks.update_one({"task_id": task_id}, {"$set": {"pi_id": pi_id, "train_id": train_id}})
+    return await db.tasks.find_one({"task_id": task_id}, {"_id": 0})
