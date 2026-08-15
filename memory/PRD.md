@@ -459,3 +459,10 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - ✅ Régression préexistante réparée : create_team sans signature def (POST /api/teams cassé).
 - Testé iteration_74 : 100 % PASS. F06 (Gantt mai 2022) NON reproduit — non corrigé volontairement.
 - Backlog audits restant (non validé) : Lot 2 intuitivité parcours (~35-50 cr), Lot 3 navigation/12 onglets fiche projet (~40-55 cr), Lot 4 système de design/tokens (~50-70 cr).
+
+## 2026-06 (fork) — Lots 2/3/4 audits + alerte cohérence portefeuille (DÉPLOYÉ PROD, commit b3643f9, bundle main.5dd8edd7.js)
+- ✅ Lot 2 : formulaire nouveau projet simplifié (4 champs requis, RAG masqué en création, budget/JH optionnels repliables, API jh_planned/status_rag optionnels) ; indicateurs activables en 1 clic (bouton « Activer le socle recommandé (P1) » dans les états vides).
+- ✅ Lot 3 : fiche projet 12 onglets → 5 groupes (Aperçu/Informations/Exécution/Pilotage/Gouvernance) + sous-onglets pills + deep-link ?tab= + bouton « Dossier d'engagement » dans le header.
+- ✅ Lot 4 : ~2000 classes hex → tokens design m-* (CSS variables + tailwind <alpha-value>), bleus/rouges unifiés, rounded-[10px]→rounded-lg, dark mode adaptatif par redéfinition de variables.
+- ✅ Alerte cohérence : GET /api/projects/consistency + bandeau /portfolio (écarts JH déclarés vs Σ tâches >10 %, liens vers fiches).
+- Testé iteration_75 : 100 % PASS backend + frontend.
