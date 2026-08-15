@@ -76,6 +76,13 @@ class ProjectUpdate(BaseModel):
     art_train_id: Optional[str] = None
     epic_owner_id: Optional[str] = None
     strategic_theme_id: Optional[str] = None
+    scope_in: Optional[str] = None
+    scope_out: Optional[str] = None
+    nfr: Optional[str] = None
+    impacted_entities: Optional[list] = None
+    governance_roles: Optional[list] = None
+    build_to_run: Optional[str] = None
+    budget_breakdown: Optional[list] = None
 
 
 class BudgetRevisionCreate(BaseModel):

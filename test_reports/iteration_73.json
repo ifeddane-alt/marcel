@@ -1,0 +1,30 @@
+{
+  "summary": "MARCEL — Full validation of the Dossier d'engagement feature (Chantier Engagement): criteria referential (21/29/light), CRUD, attest workflow, readiness score, gate blocking 422 vs readiness_override, PPTX export, new project fields (scope_in/out, NFR, entities, governance_roles, build_to_run, budget_breakdown). Backend: 13/13 pytest PASS. Frontend: all data-testids present, info tab persistence verified, engagement panel renders 16 auto + 5 attested criteria, readiness updates live (67%→71% on attest), criteria manager modal + custom criterion add works, PPTX downloads, request-gate opens confirmation modal. No blocking issues.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": []
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_engagement_dossier.py",
+    "/app/test_reports/pytest/engagement_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "PATCH not supported on /api/projects/{id}: only PUT. Frontend uses projectsAPI.update which uses PUT — coherent. Just noting for future API consumers.",
+    "In engagement/service.py::readiness, the `not_applicable` attestation counts as OK — good UX, but this makes it possible to auto-pass a mandatory criterion just by clicking N/A without any justification. Consider requiring a justification when not_applicable=True (currently `justification: '' ` accepted).",
+    "delete_criterion returns 400 for non-custom OR unknown id (indistinguishable) — could return 404 for unknown to help debugging.",
+    "readiness for 'run' phase returns score 100%: correct but silently — if a project is misconfigured to phase 'run' the engagement panel simply disappears without a hint. Minor."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_engagement_dossier.py"
+  ],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin@altair.fr / Admin2026! (TENANT_ADMIN)",
+  "seed_data_creation": "None persistent. All test artefacts cleaned: (i) TEST scope/entities/roles restored to empty on project DATA-001; (ii) TEST custom criterion deleted; (iii) any open gate on DATA-001 cancelled; (iv) 'Documents de référence' attestation was toggled on then off. Note: pre-existing attestation 'Charges validées par les responsables' by Sophie Martin was NOT modified.",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend engagement suite is /app/backend/tests/test_engagement_dossier.py — 13 tests, must be run with REACT_APP_BACKEND_URL exported. Frontend Playwright flow: use localStorage key 'projetenne_token' (NOT 'access_token'). Project DATA-001 (id 343282cb-...) is a reliable cadrage project with 4-7 mandatory missing depending on state — good for 422 tests. The 'Demander le passage' button opens a rendered modal (date + governance) — the native window.confirm() dialog only appears AFTER clicking 'Créer la demande' inside that modal when readiness is incomplete. Always cancel open gates via DELETE /api/lifecycle/gates/{id} before re-running tests.",
+  "rca of the issue": "N/A — no bugs found. All 6 backend feature bullets and all 6 frontend feature bullets from the review request pass."
+}

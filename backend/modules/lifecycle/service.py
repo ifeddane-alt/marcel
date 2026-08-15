@@ -136,6 +136,15 @@ async def request_gate(project_id: str, data: dict, user: TokenPayload) -> dict:
     if existing:
         raise HTTPException(409, "Un passage est déjà en cours de validation pour ce projet")
 
+    from modules.engagement.service import readiness as _readiness
+    rdy = await _readiness(project_id, user, current)
+    if rdy["mandatory_missing"] and not data.get("readiness_override"):
+        raise HTTPException(422, {
+            "message": "Dossier d'engagement incomplet",
+            "score_pct": rdy["score_pct"],
+            "mandatory_missing": rdy["mandatory_missing"],
+        })
+
     governance_id = data.get("governance_id")
     if data.get("new_governance"):
         from modules.governance.service import create_governance
@@ -173,6 +182,8 @@ async def request_gate(project_id: str, data: dict, user: TokenPayload) -> dict:
         "decision": None,
         "requested_by": user.user_id,
         "requested_by_name": user.name,
+        "readiness_score": rdy["score_pct"],
+        "readiness_override": bool(data.get("readiness_override")) if rdy["mandatory_missing"] else False,
         "created_at": _now(),
         "updated_at": _now(),
     }

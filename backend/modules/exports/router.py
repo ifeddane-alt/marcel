@@ -43,3 +43,11 @@ async def pb_pptx(session_id: str, current_user: TokenPayload = Depends(permissi
     filename = f"Arbitrage_PB_{date.today().isoformat()}.pptx"
     return StreamingResponse(io.BytesIO(data), media_type=PPTX_MIME,
                              headers={"Content-Disposition": f'attachment; filename="{filename}"'})
+
+
+@router.get("/exports/engagement/{project_id}.pptx")
+async def engagement_pptx(project_id: str, current_user: TokenPayload = Depends(permission_required("portfolio.view"))):
+    data = await service.build_engagement_pptx(project_id, current_user)
+    filename = f"Dossier_engagement_{date.today().isoformat()}.pptx"
+    return StreamingResponse(io.BytesIO(data), media_type=PPTX_MIME,
+                             headers={"Content-Disposition": f'attachment; filename="{filename}"'})

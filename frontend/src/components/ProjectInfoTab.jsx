@@ -25,7 +25,14 @@ export const ProjectInfoTab = ({ project, canWrite, onSaved }) => {
     impacted_application_ids: project.impacted_application_ids || [],
     art_train_id: project.art_train_id || "",
     epic_owner_id: project.epic_owner_id || "",
+    scope_in: project.scope_in || "",
+    scope_out: project.scope_out || "",
+    nfr: project.nfr || "",
+    impacted_entities: (project.impacted_entities || []).join(", "),
+    build_to_run: project.build_to_run || "",
   });
+  const [roles, setRoles] = useState(project.governance_roles || []);
+  const [breakdown, setBreakdown] = useState(project.budget_breakdown || []);
   const [programs, setPrograms] = useState([]);
   const [applications, setApplications] = useState([]);
   const [trains, setTrains] = useState([]);
@@ -57,6 +64,11 @@ export const ProjectInfoTab = ({ project, canWrite, onSaved }) => {
         program_id: form.program_id || null,
         art_train_id: form.art_train_id || null,
         epic_owner_id: form.epic_owner_id || null,
+        impacted_entities: form.impacted_entities.split(",").map((s) => s.trim()).filter(Boolean),
+        governance_roles: roles.filter((r) => r.name?.trim()),
+        budget_breakdown: breakdown.filter((b) => b.entity?.trim()).map((b) => ({
+          entity: b.entity, capex: parseFloat(b.capex) || 0, opex: parseFloat(b.opex) || 0,
+        })),
       };
       await projectsAPI.update(project.project_id, payload);
       toast.success("Informations projet enregistrées");
@@ -147,6 +159,81 @@ export const ProjectInfoTab = ({ project, canWrite, onSaved }) => {
               })}
             </div>
           )}
+        </Field>
+
+        <div className="md:col-span-2 border-t border-zinc-100 pt-4 mt-1">
+          <h3 className="font-heading text-sm font-bold text-[#26243a] mb-3">Cadrage & gouvernance</h3>
+        </div>
+        <Field label="Périmètre inclus">
+          <textarea value={form.scope_in} onChange={set("scope_in")} disabled={!canWrite} rows={2}
+            placeholder="Ce qui fait partie du projet" data-testid="info-scope-in-input" className={areaCls} />
+        </Field>
+        <Field label="Périmètre exclu">
+          <textarea value={form.scope_out} onChange={set("scope_out")} disabled={!canWrite} rows={2}
+            placeholder="Ce qui n'en fait pas partie" data-testid="info-scope-out-input" className={areaCls} />
+        </Field>
+        <Field label="Exigences non fonctionnelles">
+          <textarea value={form.nfr} onChange={set("nfr")} disabled={!canWrite} rows={2}
+            placeholder="Performance, sécurité, RGPD, disponibilité…" data-testid="info-nfr-input" className={areaCls} />
+        </Field>
+        <Field label="Entités / sites impactés">
+          <input value={form.impacted_entities} onChange={set("impacted_entities")} disabled={!canWrite}
+            placeholder="Siège, Filiale Espagne, Usine Lyon (séparés par des virgules)" data-testid="info-entities-input" className={inputCls} />
+        </Field>
+        <Field label="Impact exploitation (build-to-run)" full>
+          <textarea value={form.build_to_run} onChange={set("build_to_run")} disabled={!canWrite} rows={2}
+            placeholder="Impact sur le run : maintenance, supervision, support, horaires de service…" data-testid="info-build-to-run-input" className={areaCls} />
+        </Field>
+        <Field label="Rôles de gouvernance" full>
+          <div className="space-y-1.5" data-testid="info-governance-roles">
+            {roles.map((r, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <select value={r.role} disabled={!canWrite}
+                  onChange={(e) => setRoles((arr) => arr.map((x, j) => (j === i ? { ...x, role: e.target.value } : x)))}
+                  className={`${inputCls} w-56`}>
+                  {["Sponsor", "Chef de projet", "Responsable produit", "Product Owner", "Architecte", "Sécurité", "DPO", "Juridique", "Responsable métier", "Autre"].map((o) => <option key={o}>{o}</option>)}
+                </select>
+                <input value={r.name} disabled={!canWrite} placeholder="Nom"
+                  onChange={(e) => setRoles((arr) => arr.map((x, j) => (j === i ? { ...x, name: e.target.value } : x)))}
+                  data-testid={`info-role-name-${i}`} className={`${inputCls} flex-1`} />
+                {canWrite && (
+                  <button type="button" onClick={() => setRoles((arr) => arr.filter((_, j) => j !== i))}
+                    className="text-zinc-300 hover:text-rose-500 text-lg leading-none px-1">×</button>
+                )}
+              </div>
+            ))}
+            {canWrite && (
+              <button type="button" onClick={() => setRoles((arr) => [...arr, { role: "Sponsor", name: "" }])}
+                data-testid="info-add-role-btn"
+                className="text-[11px] font-semibold text-[#2e5fe8] hover:underline">+ Ajouter un rôle</button>
+            )}
+          </div>
+        </Field>
+        <Field label="Ventilation budgétaire par entité" full>
+          <div className="space-y-1.5" data-testid="info-budget-breakdown">
+            {breakdown.map((b, i) => (
+              <div key={i} className="flex items-center gap-2">
+                <input value={b.entity} disabled={!canWrite} placeholder="Entité (ex. Siège)"
+                  onChange={(e) => setBreakdown((arr) => arr.map((x, j) => (j === i ? { ...x, entity: e.target.value } : x)))}
+                  className={`${inputCls} flex-1`} />
+                <input type="number" value={b.capex} disabled={!canWrite} placeholder="Capex €"
+                  onChange={(e) => setBreakdown((arr) => arr.map((x, j) => (j === i ? { ...x, capex: e.target.value } : x)))}
+                  className={`${inputCls} w-32`} />
+                <input type="number" value={b.opex} disabled={!canWrite} placeholder="Opex €"
+                  onChange={(e) => setBreakdown((arr) => arr.map((x, j) => (j === i ? { ...x, opex: e.target.value } : x)))}
+                  className={`${inputCls} w-32`} />
+                {canWrite && (
+                  <button type="button" onClick={() => setBreakdown((arr) => arr.filter((_, j) => j !== i))}
+                    className="text-zinc-300 hover:text-rose-500 text-lg leading-none px-1">×</button>
+                )}
+              </div>
+            ))}
+            {canWrite && (
+              <button type="button" onClick={() => setBreakdown((arr) => [...arr, { entity: "", capex: "", opex: "" }])}
+                data-testid="info-add-breakdown-btn"
+                className="text-[11px] font-semibold text-[#2e5fe8] hover:underline">+ Ajouter une entité</button>
+            )}
+          </div>
         </Field>
       </div>
     </div>

@@ -603,6 +603,16 @@ export const exportsAPI = {
   eventPptx: (eventId) => api.get(`/exports/event/${eventId}.pptx`, { responseType: "blob" }),
   roadmapPptx: () => api.get("/exports/roadmap.pptx", { responseType: "blob" }),
   pbPptx: (sessionId) => api.get(`/exports/pb/${sessionId}.pptx`, { responseType: "blob" }),
+  engagementPptx: (projectId) => api.get(`/exports/engagement/${projectId}.pptx`, { responseType: "blob" }),
+};
+
+export const engagementAPI = {
+  criteria:        (fromPhase) => api.get(`/engagement/criteria/${fromPhase}`),
+  updateCriterion: (id, data) => api.patch(`/engagement/criteria/${id}`, data),
+  createCriterion: (data) => api.post("/engagement/criteria", data),
+  deleteCriterion: (id) => api.delete(`/engagement/criteria/${id}`),
+  attest:          (projectId, data) => api.post(`/projects/${projectId}/engagement/attest`, data),
+  readiness:       (projectId, fromPhase) => api.get(`/projects/${projectId}/engagement/readiness`, { params: fromPhase ? { from_phase: fromPhase } : {} }),
 };
 
 export const catalogAPI = {

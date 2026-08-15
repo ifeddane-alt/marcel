@@ -4,6 +4,7 @@ import { usePermissions } from "@/hooks/usePermissions";
 import { toast } from "sonner";
 import { Check, X, AlertTriangle, Plus, ChevronRight, Diamond, Trash2 } from "lucide-react";
 import DateField from "@/components/ui/DateField";
+import { EngagementPanel } from "@/components/EngagementPanel";
 
 const GATE_BADGES = {
   en_validation: { label: "En validation", cls: "bg-[#fdf6e3] text-[#8a6d1a] border-[#eadfb8]" },
@@ -66,20 +67,33 @@ export const LifecycleTab = ({ projectId }) => {
 
   const requestGate = async () => {
     setBusy(true);
+    const payload = { target_date: form.target_date };
+    if (form.mode === "new" && form.newName && form.newDate) {
+      payload.new_governance = { name: form.newName, type: form.newType, date_scheduled: form.newDate };
+    } else if (form.governance_id) {
+      payload.governance_id = form.governance_id;
+    }
     try {
-      const payload = { target_date: form.target_date };
-      if (form.mode === "new" && form.newName && form.newDate) {
-        payload.new_governance = { name: form.newName, type: form.newType, date_scheduled: form.newDate };
-      } else if (form.governance_id) {
-        payload.governance_id = form.governance_id;
-      }
       await lifecycleAPI.requestGate(projectId, payload);
       toast.success("Demande de passage créée — valideurs notifiés");
       setShowModal(false);
       setForm({ target_date: "", governance_id: "", mode: "existing", newName: "", newType: "copil", newDate: "" });
       load();
     } catch (e) {
-      toast.error(e.response?.data?.detail || "Erreur lors de la demande");
+      const det = e.response?.data?.detail;
+      if (e.response?.status === 422 && det?.mandatory_missing) {
+        if (window.confirm(
+          `Dossier d'engagement incomplet (prêt à ${det.score_pct}%).\n\nCritères obligatoires manquants :\n- ${det.mandatory_missing.join("\n- ")}\n\nPasser outre ? (dérogation tracée sur le passage)`)) {
+          try {
+            await lifecycleAPI.requestGate(projectId, { ...payload, readiness_override: true });
+            toast.success("Demande créée avec dérogation de complétude");
+            setShowModal(false);
+            load();
+          } catch (e2) { toast.error(e2.response?.data?.detail || "Erreur"); }
+        }
+      } else {
+        toast.error(typeof det === "string" ? det : "Erreur lors de la demande");
+      }
     } finally { setBusy(false); }
   };
 
@@ -119,6 +133,7 @@ export const LifecycleTab = ({ projectId }) => {
 
   return (
     <div className="space-y-5" data-testid="lifecycle-tab">
+      <EngagementPanel projectId={projectId} />
       {/* Frise des phases */}
       <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-sm p-5">
         <div className="flex items-center justify-between mb-4">

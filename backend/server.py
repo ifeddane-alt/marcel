@@ -89,6 +89,7 @@ from modules.security.router import router as security_router
 from modules.architecture.router import router as architecture_router
 from modules.indicators.router import router as indicators_router
 from modules.catalog.router import router as catalog_router
+from modules.engagement.router import router as engagement_router
 from modules.pb.router import router as pb_router
 from modules.lifecycle.router import router as lifecycle_router
 from modules.auth.mfa import router as mfa_router
@@ -181,6 +182,7 @@ for _router in [
     architecture_router,
     indicators_router,
     catalog_router,
+    engagement_router,
     pb_router,
     lifecycle_router,
     mfa_router,

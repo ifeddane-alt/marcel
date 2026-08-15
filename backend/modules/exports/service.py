@@ -1,6 +1,7 @@
 """Exports PowerPoint — COPIL portefeuille + reporting dédié par instance."""
 from datetime import date
 
+from fastapi import HTTPException
 from core.database import db
 from core.pptx import MarcelDeck, GREEN, AMBER, RED, INDIGO, MUTED, BLUE
 
@@ -620,5 +621,107 @@ async def build_pb_pptx(session_id: str, user) -> bytes:
         ])
     elif results["participation"] == 0:
         deck.bullets("Vote en cours", ["Aucun vote soumis pour le moment — la restitution sera complète après clôture."])
+    deck.section("Merci", "Généré automatiquement par MARCEL")
+    return deck.to_bytes()
+
+
+async def build_engagement_pptx(project_id: str, user) -> bytes:
+    """Dossier d'engagement projet — deck charte MARCEL."""
+    from modules.engagement.service import readiness as _readiness
+    from modules.lifecycle.service import PHASE_LABELS, PHASE_KEYS
+    p = await db.projects.find_one({"project_id": project_id, "tenant_id": user.tenant_id}, {"_id": 0})
+    if not p:
+        raise HTTPException(status_code=404, detail="Projet introuvable")
+    rdy = await _readiness(project_id, user)
+    phase = p.get("lifecycle_phase") or "cadrage"
+    idx = PHASE_KEYS.index(phase) if phase in PHASE_KEYS else 0
+    to_phase = PHASE_KEYS[idx + 1] if idx < len(PHASE_KEYS) - 1 else None
+    milestones = await db.milestones.find({"project_id": project_id}, {"_id": 0}).to_list(None)
+    risks = await db.risks.find({"project_id": project_id}, {"_id": 0}).to_list(None)
+    features = await db.tasks.find({"project_id": project_id, "type": "feature"}, {"_id": 0}).to_list(None)
+    deps = await db.project_dependencies.count_documents(
+        {"tenant_id": user.tenant_id, "$or": [{"source_project_id": project_id}, {"target_project_id": project_id}]})
+
+    deck = await _deck(user)
+    deck.cover("Dossier d'engagement", f"{p.get('code') or ''} — {p['name']}")
+
+    deck.kpis("Identité du projet", [
+        {"label": "Phase", "value": PHASE_LABELS.get(phase, phase)},
+        {"label": "Météo", "value": (p.get("status_rag") or "—").upper(),
+         "color": GREEN if p.get("status_rag") == "green" else AMBER if p.get("status_rag") == "amber" else RED},
+        {"label": "Budget total", "value": _eur(p.get("budget_total"))},
+        {"label": "EAC", "value": _eur(p.get("eac")) if p.get("eac") else "—"},
+        {"label": "Charge", "value": f"{p.get('jh_planned') or 0:.0f} jh"},
+    ], subtitle=f"Direction : {p.get('direction') or '—'} · {p.get('start_date','')} → {p.get('end_date_forecast','')}")
+
+    pitch = [("Pitch : " + (p.get("description") or "—"))[:220]]
+    if p.get("scope_in"):
+        pitch.append(("Périmètre inclus : " + p["scope_in"])[:220])
+    if p.get("scope_out"):
+        pitch.append(("Périmètre exclu : " + p["scope_out"])[:220])
+    if p.get("nfr"):
+        pitch.append(("Exigences non fonctionnelles : " + p["nfr"])[:220])
+    deck.bullets("Pitch & périmètre", pitch)
+
+    value = []
+    if p.get("leading_indicators"):
+        value.append(("Indicateurs avancés : " + p["leading_indicators"])[:200])
+    if p.get("outcome"):
+        value.append(("Outcome attendu : " + p["outcome"])[:200])
+    if p.get("expected_result"):
+        value.append(("Résultat attendu : " + p["expected_result"])[:200])
+    if p.get("income"):
+        value.append(f"Income attendu : {_eur(p['income'])}")
+    sc = [f"{lbl} {p.get(f)}" for f, lbl in
+          (("strategic_alignment", "Alignement"), ("business_value", "Valeur"), ("roi_estimated", "ROI"),
+           ("urgency", "Urgence"), ("risk_score", "Risque"), ("complexity", "Complexité")) if p.get(f) is not None]
+    if sc:
+        value.append("Scoring : " + " · ".join(sc))
+    deck.bullets("Valeur & alignement stratégique", value or ["Non renseigné"])
+
+    roles = p.get("governance_roles") or []
+    if roles:
+        deck.table("Gouvernance", ["Rôle", "Nom"],
+                   [[r.get("role", ""), r.get("name", "")] for r in roles[:10]],
+                   subtitle=f"Applications impactées : {len(p.get('impacted_application_ids') or [])} · Dépendances : {deps}")
+
+    if milestones:
+        rows = [[m.get("name", "")[:40], (m.get("date_forecast") or m.get("date_baseline") or "")[:10],
+                 m.get("status", "")] for m in sorted(milestones, key=lambda x: x.get("date_forecast") or "")[:9]]
+        deck.table("Jalons", ["Jalon", "Date", "Statut"], rows, col_widths=[5.5, 1.8, 1.8])
+
+    if features:
+        rows = [[f.get("name", "")[:44], f"{f.get('jh_planned') or 0:.0f}",
+                 f"{f.get('wsjf'):g}" if f.get("wsjf") is not None else "—",
+                 f.get("scope_status") or "—"] for f in features[:11]]
+        deck.table("Features", ["Feature", "jh", "WSJF", "Scope"], rows, col_widths=[5.5, 1, 1.2, 1.5])
+
+    bud = [
+        {"label": "Capex prévu", "value": _eur(p.get("capex_planned"))},
+        {"label": "Opex prévu", "value": _eur(p.get("opex_planned"))},
+        {"label": "Consommé", "value": _eur(p.get("budget_consumed"))},
+        {"label": "EAC", "value": _eur(p.get("eac")) if p.get("eac") else "—"},
+    ]
+    deck.kpis("Budget", bud, subtitle=("Ventilation : " + " · ".join(
+        f"{b.get('entity')} {_eur((b.get('capex') or 0) + (b.get('opex') or 0))}"
+        for b in (p.get("budget_breakdown") or [])[:4])) if p.get("budget_breakdown") else None)
+
+    if p.get("build_to_run"):
+        deck.bullets("Build to run", [p["build_to_run"][:400]])
+
+    if risks:
+        rows = [[r.get("name", r.get("title", ""))[:46], str(r.get("criticality", "—")),
+                 r.get("status", "")] for r in risks[:8]]
+        deck.table("Risques", ["Risque", "Criticité", "Statut"], rows, col_widths=[5.8, 1.4, 1.6])
+
+    missing = rdy["mandatory_missing"]
+    deck.kpis("Préparation du dossier", [
+        {"label": "Score de complétude", "value": f"{rdy['score_pct']}%",
+         "color": GREEN if rdy["ready"] else RED},
+        {"label": "Critères obligatoires manquants", "value": str(len(missing)),
+         "color": GREEN if not missing else RED},
+    ], subtitle=(f"Décision attendue : passage {PHASE_LABELS.get(phase)} → {PHASE_LABELS.get(to_phase)}" if to_phase else "Projet en Run"))
+    if missing:
+        deck.bullets("Points manquants (obligatoires)", missing[:10])
     deck.section("Merci", "Généré automatiquement par MARCEL")
     return deck.to_bytes()
