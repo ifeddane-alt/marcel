@@ -442,3 +442,9 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - ✅ Les 5 volets validés (option B, ~75-95 crédits) : lisibilité (fenêtre 12 mois/zoom 3 niveaux/Aujourd'hui), phases+gates dans les barres, groupements Programme/Direction/Thème/ART, export PPTX Roadmap, dépendances refondues (survol/épinglage, orthogonal, conflits rouges).
 - Testé iteration_70 : 100 % PASS. Prod vérifiée (health, bundle, 403).
 - Backlog restant inchangé : traduction EN pages internes (~40-60 cr), exports PPTX additionnels (gate/reforecast/décisions/PI/capacitaire/trajectoire ~10-15 cr pièce), instances liées gouvernance (clic COPIL calendrier → ODJ), alerte capacité >100 %.
+
+## 2026-06 (fork) — PB modèle SAFe (Preview, PAS déployé prod — attente ordre utilisateur)
+- ✅ Demande utilisateur : « prendre toutes les features sur un PI donné, les valoriser feature par feature, et c'est là qu'on fait l'arbitrage ». Option a validée (~40-55 crédits).
+- ✅ Livré : affectation features↔PI (UI Trains SAFe), session PB sur Train+PI avec valorisation auto (jh×TJM), ligne de coupe, application au scope sec/étendu. Testé iteration_71 (17/17 backend, frontend OK après fix FeaturesModal).
+- ⏳ EN ATTENTE UTILISATEUR : schéma du cycle de vie des projets (il veut le dessiner lui-même) → ensuite chiffrage coordination inter-modules (chaînage Demande→Projet→Gouvernance→Budget, cockpit par rôle, demandes récurrentes vs spécifiques) + Assistant de migration (Excel + presets Clarity/Planview/Triskell, ~50-70 cr MVP).
+- Contexte commercial : 2 segments clients cibles = utilisateurs Excel et utilisateurs Clarity/Planview/Triskell → migration à l'onboarding via assistant unique (mapping guidé, dry-run, presets par outil).
