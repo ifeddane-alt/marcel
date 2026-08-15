@@ -415,6 +415,10 @@ export default function Dashboard() {
         </div>
       )}
 
+      <div className="mb-4">
+        <IndicatorsPanel scope="dashboard" title="Mes indicateurs" />
+      </div>
+
       {/* Grille matricielle */}
       <div
         ref={gridWrapRef}
