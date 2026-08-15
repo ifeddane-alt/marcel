@@ -277,6 +277,11 @@ export default function ProjectDetail() {
     }),
     { jh_planned: 0, jh_consumed: 0, budget_planned_k: 0, budget_consumed_k: 0, budget_landing: 0, jh_landing: 0 }
   );
+  // Source unique : Σ tâches quand elles existent, sinon valeurs déclarées du projet
+  const hasTasks = tasks.length > 0;
+  const jhConsumedD = hasTasks ? taskTotals.jh_consumed : (project.jh_consumed || 0);
+  const jhPlannedD = hasTasks ? taskTotals.jh_planned : (project.jh_planned || 0);
+  const jhPctD = jhPlannedD > 0 ? clamp(Math.round((jhConsumedD / jhPlannedD) * 100)) : 0;
 
   const getResourceName = (resourceId) => {
     const r = resources.find((res) => res.resource_id === resourceId);
@@ -454,7 +459,7 @@ export default function ProjectDetail() {
       <div className={`grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-4 ${activeTab === "apercu" ? "" : "hidden"}`} data-testid="project-kpi-tiles">
         <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 flex items-center justify-between gap-3" data-testid="project-kpi-avancement">
           <div className="min-w-0">
-            <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Avancement</div>
+            <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">Temps écoulé</div>
             <div className="font-mono-data text-[22px] font-bold text-[#26243a] mt-1">{progressPct}%</div>
             <div className="text-[10.5px] text-[#8a87a0] mt-0.5 truncate">fin prévue {formatDate(project.end_date_forecast)}</div>
           </div>
@@ -473,7 +478,7 @@ export default function ProjectDetail() {
             <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">EAC</div>
             <div className={`font-mono-data text-[22px] font-bold mt-1 ${eacOver ? "text-[#cc4f45]" : "text-[#26243a]"}`}>{Math.round(eacVal / 1000).toLocaleString("fr-FR")} K€</div>
             <div className={`text-[10.5px] mt-0.5 truncate font-mono-data ${eacOver ? "text-[#cc4f45]" : "text-[#3f8a34]"}`}>
-              {eacVal - (project.budget_total || 0) > 0 ? "+" : ""}{Math.round((eacVal - (project.budget_total || 0)) / 1000).toLocaleString("fr-FR")} K€ vs budget
+              {eacVal - (project.budget_total || 0) > 0 ? "+" : ""}{Math.round((eacVal - (project.budget_total || 0)) / 1000).toLocaleString("fr-FR")} K€ vs budget · déclaré
             </div>
           </div>
           <div className="flex-shrink-0"><Ring pct={eacPct} color={eacOver ? "#cc4f45" : "#3f8a34"} label="EAC" caption="vs budget" /></div>
@@ -481,10 +486,10 @@ export default function ProjectDetail() {
         <div className="bg-white border border-[#e8e6f0] rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 flex items-center justify-between gap-3" data-testid="project-kpi-jh">
           <div className="min-w-0">
             <div className="text-[10px] uppercase tracking-widest text-zinc-400 font-semibold">JH consommés</div>
-            <div className="font-mono-data text-[22px] font-bold text-[#26243a] mt-1">{(project.jh_consumed || 0).toLocaleString("fr-FR")}</div>
-            <div className="text-[10.5px] text-[#8a87a0] mt-0.5 truncate">sur {(project.jh_planned || 0).toLocaleString("fr-FR")} JH prévus</div>
+            <div className="font-mono-data text-[22px] font-bold text-[#26243a] mt-1">{jhConsumedD.toLocaleString("fr-FR")}</div>
+            <div className="text-[10.5px] text-[#8a87a0] mt-0.5 truncate">sur {jhPlannedD.toLocaleString("fr-FR")} JH prévus{hasTasks ? " · Σ tâches" : " · déclaré"}</div>
           </div>
-          <div className="flex-shrink-0"><Ring pct={jhPct} color="#6d28d9" label="JH" caption="conso" /></div>
+          <div className="flex-shrink-0"><Ring pct={jhPctD} color="#6d28d9" label="JH" caption="conso" /></div>
         </div>
       </div>
 
@@ -601,7 +606,7 @@ export default function ProjectDetail() {
                   <div className="mt-3 flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-zinc-500 border-t border-current border-opacity-20 pt-2">
                     <span>Budget total : <span className="font-mono-data font-bold text-zinc-700">{Math.round(budgetTotal / 1000).toLocaleString("fr-FR")} K€</span></span>
                     <span>Consommé total : <span className="font-mono-data font-bold text-zinc-700">{Math.round((project.budget_consumed || 0) / 1000).toLocaleString("fr-FR")} K€</span></span>
-                    <span>JH : <span className="font-mono-data font-bold text-zinc-700">{(project.jh_consumed || 0).toLocaleString("fr-FR")}/{(project.jh_planned || 0).toLocaleString("fr-FR")}</span></span>
+                    <span>JH : <span className="font-mono-data font-bold text-zinc-700">{jhConsumedD.toLocaleString("fr-FR")}/{jhPlannedD.toLocaleString("fr-FR")}</span></span>
                   </div>
                 </div>
               );
@@ -1108,10 +1113,10 @@ export default function ProjectDetail() {
                         )}
                       </td>
                       <td className="px-3 py-2.5 text-right font-mono-data text-xs text-zinc-600 font-bold">
-                        {project.jh_planned.toLocaleString("fr-FR")} JH
+                        {taskTotals.jh_planned.toLocaleString("fr-FR")} JH
                       </td>
                       <td className="px-3 py-2.5 text-right font-mono-data text-xs text-zinc-600 font-bold">
-                        {project.jh_consumed.toLocaleString("fr-FR")} JH
+                        {taskTotals.jh_consumed.toLocaleString("fr-FR")} JH
                       </td>
                       <td className="px-3 py-2.5"></td>
                     </tr>
@@ -1832,6 +1837,8 @@ export default function ProjectDetail() {
                   { label: "RAF (JH)", value: `${raf.raf_md} JH`, color: "text-amber-600 font-bold" },
                   { label: "RAF (€)", value: `${(raf.raf_cost_eur || 0).toLocaleString("fr-FR")} €`, color: "text-amber-600 font-bold" },
                   { label: "Atterrissage (€)", value: `${(raf.atterrissage_eur || 0).toLocaleString("fr-FR")} €`, color: "text-blue-600 font-bold" },
+                  { label: "EAC déclaré", value: `${(project.eac || project.budget_forecast || 0).toLocaleString("fr-FR")} €`, color: "text-zinc-700" },
+                  { label: "Écart atterrissage vs EAC", value: `${((raf.atterrissage_eur || 0) - (project.eac || project.budget_forecast || 0) > 0 ? "+" : "")}${((raf.atterrissage_eur || 0) - (project.eac || project.budget_forecast || 0)).toLocaleString("fr-FR")} €`, color: Math.abs((raf.atterrissage_eur || 0) - (project.eac || project.budget_forecast || 0)) > 0.05 * ((project.eac || project.budget_forecast) || 1) ? "text-[#cc4f45] font-bold" : "text-zinc-500" },
                 ].map(({ label, value, color }) => (
                   <div key={label} className="flex justify-between items-center border-b border-zinc-50 pb-2 last:border-0">
                     <span className="text-xs text-zinc-400">{label}</span>

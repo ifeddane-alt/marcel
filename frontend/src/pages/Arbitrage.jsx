@@ -564,7 +564,7 @@ export default function Arbitrage() {
                   label={{ value: "Risque ↑", angle: -90, position: "insideLeft", offset: 10, fontSize: 11, fill: "#94a3b8" }}
                   tick={{ fontSize: 10, fill: "#94a3b8" }}
                 />
-                <ZAxis type="number" dataKey="z" range={[200, 1200]} name="Budget" />
+                <ZAxis type="number" dataKey="z" range={[80, 1200]} name="Budget" />
                 <Tooltip
                   cursor={{ strokeDasharray: "3 3" }}
                   content={({ active, payload }) => {
@@ -586,15 +586,26 @@ export default function Arbitrage() {
                 <ReferenceLine x={3} stroke="#cbd5e1" strokeDasharray="4 4" />
                 <ReferenceLine y={3} stroke="#cbd5e1" strokeDasharray="4 4" />
                 <Scatter
-                  data={projects.map(p => ({
-                    x: p.business_value || 3,
-                    y: p.risk_score || 3,
-                    z: Math.max(200, Math.sqrt(p.budget_total || 0) / 30),
-                    name: p.name,
-                    rawBudget: p.budget_total,
-                    score: p.score,
-                    rag: p.status_rag,
-                  }))}
+                  data={(() => {
+                    const seen = {};
+                    return projects.map(p => {
+                      let x = p.business_value || 3, y = p.risk_score || 3;
+                      const k = `${x}|${y}`;
+                      const n = seen[k] = (seen[k] || 0) + 1;
+                      if (n > 1) {
+                        x += 0.12 * (n - 1) * (n % 2 ? 1 : -1);
+                        y += 0.09 * (n - 1) * (n % 2 ? -1 : 1);
+                      }
+                      return {
+                        x, y,
+                        z: Math.max(60, Math.round(Math.sqrt(p.budget_total || 0))),
+                        name: p.name,
+                        rawBudget: p.budget_total,
+                        score: p.score,
+                        rag: p.status_rag,
+                      };
+                    });
+                  })()}
                 >
                   {projects.map((p, i) => (
                     <Cell key={i} fill={RAG_COLORS[p.status_rag] || "#94a3b8"} fillOpacity={0.75} stroke={RAG_COLORS[p.status_rag]} strokeWidth={1.5} />

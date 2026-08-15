@@ -296,9 +296,29 @@ def _now() -> str:
 # ─── CRUD ─────────────────────────────────────────────────────────────────────
 
 async def list_profiles(user: TokenPayload) -> list:
-    return await db.profiles.find(
+    profiles = await db.profiles.find(
         {"tenant_id": user.tenant_id}, {"_id": 0}
     ).sort("name", 1).to_list(None)
+    # Dédoublonnage par code : conserver le profil référencé par des users, sinon le premier
+    used_ids = set(await db.users.distinct("profile_id", {"tenant_id": user.tenant_id}))
+    by_code: dict = {}
+    to_delete = []
+    for p in sorted(profiles, key=lambda x: (x["profile_id"] not in used_ids, x.get("created_at") or "")):
+        if p["code"] in by_code:
+            to_delete.append(p["profile_id"])
+        else:
+            by_code[p["code"]] = p
+    if to_delete:
+        await db.profiles.delete_many({"profile_id": {"$in": to_delete}, "tenant_id": user.tenant_id})
+    result = list(by_code.values())
+    counts = await db.users.aggregate([
+        {"$match": {"tenant_id": user.tenant_id}},
+        {"$group": {"_id": "$profile_id", "n": {"$sum": 1}}},
+    ]).to_list(None)
+    cmap = {c["_id"]: c["n"] for c in counts}
+    for p in result:
+        p["user_count"] = cmap.get(p["profile_id"], 0)
+    return sorted(result, key=lambda x: x.get("name") or "")
 
 
 async def get_profile(profile_id: str, user: TokenPayload) -> dict:

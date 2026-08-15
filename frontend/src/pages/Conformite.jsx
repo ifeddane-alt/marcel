@@ -286,10 +286,12 @@ export default function Conformite() {
                   <td className="px-4 py-3">
                     <span className={`inline-flex items-center px-2 py-0.5 rounded-lg text-[10px] font-semibold border
                       ${m.status === "done" || m.status === "completed" ? "bg-emerald-50 text-emerald-700 border-emerald-200"
+                        : (m.days_remaining ?? 0) < 0 ? "bg-rose-50 text-rose-700 border-rose-200"
                         : m.status === "in_progress" ? "bg-blue-50 text-blue-700 border-blue-200"
                         : "bg-zinc-50 text-zinc-600 border-zinc-200"}`}>
-                      {m.status === "in_progress" ? "En cours"
-                        : m.status === "done" || m.status === "completed" ? "Terminé"
+                      {m.status === "done" || m.status === "completed" ? "Terminé"
+                        : (m.days_remaining ?? 0) < 0 ? "En retard"
+                        : m.status === "in_progress" ? "En cours"
                         : m.status === "planned" ? "Planifié"
                         : (m.status || "—")}
                     </span>

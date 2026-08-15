@@ -91,8 +91,8 @@ export function MetricSingleWidget({ summary, kind }) {
   const total = summary.total_projects || 1;
   const M = {
     metric_projects: { label: "Projets totaux", value: summary.total_projects, sub: "dans le portefeuille", icon: Briefcase, accent: "#2e5fe8" },
-    metric_green: { label: "Projets verts", value: summary.rag_counts.green, sub: "dans les délais et budget", icon: CheckCircle, accent: "#3f8a34", pct: Math.round((summary.rag_counts.green / total) * 100) },
-    metric_at_risk: { label: "Projets à risque", value: summary.rag_counts.orange + summary.rag_counts.red, sub: `${summary.rag_counts.orange} orange, ${summary.rag_counts.red} rouge`, icon: AlertTriangle, accent: "#cc4f45", pct: Math.round(((summary.rag_counts.orange + summary.rag_counts.red) / total) * 100) },
+    metric_green: { label: "Projets verts", value: summary.rag_counts.green, sub: `${Math.round((summary.rag_counts.green / total) * 100)}% du portefeuille`, icon: CheckCircle, accent: "#3f8a34", pct: Math.round((summary.rag_counts.green / total) * 100) },
+    metric_at_risk: { label: "Projets à risque", value: summary.rag_counts.orange + summary.rag_counts.red, sub: `${summary.rag_counts.orange} orange, ${summary.rag_counts.red} rouge · ${Math.round(((summary.rag_counts.orange + summary.rag_counts.red) / total) * 100)}% du portefeuille`, icon: AlertTriangle, accent: "#cc4f45", pct: Math.round(((summary.rag_counts.orange + summary.rag_counts.red) / total) * 100) },
     metric_budget: { label: "Budget total", value: formatEuro(summary.budget.total), sub: `${summary.budget.consumption_rate}% consommé`, icon: TrendingUp, accent: "#e0a800", pct: summary.budget.consumption_rate },
   }[kind];
   if (!M) return null;

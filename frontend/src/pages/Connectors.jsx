@@ -166,8 +166,10 @@ function ConnectorCard({ connector, onConfigure, onSync, onLogs, syncing }) {
               <span className="text-zinc-700 font-medium">{formatDate(connector.last_sync_at)}</span>
             </div>
             <div className="flex items-center justify-between text-xs">
-              <span className="text-zinc-500">Statut</span>
-              <StatusBadge status={connector.last_sync_status} />
+              <span className="text-zinc-500">{connector.enabled ? "Statut" : "Dernier test"}</span>
+              {connector.enabled
+                ? <StatusBadge status={connector.last_sync_status} />
+                : <span className="text-zinc-400">{STATUS_LABELS[connector.last_sync_status]?.label || "—"} (connecteur désactivé)</span>}
             </div>
             {connector.last_sync_error && (
               <div className="text-xs text-red-500 truncate" title={connector.last_sync_error}>

@@ -143,7 +143,7 @@ export default function ProjectTile({
 
         {/* Anneaux */}
         <div className="flex justify-between px-1">
-          <Ring pct={progress} color={style.ring} label="Avancement" caption="temps" />
+          <Ring pct={progress} color={style.ring} label="Temps" caption="écoulé" />
           <Ring pct={budgetPct} color={overBudget ? "#cc4f45" : "#2e5fe8"} label="Budget" caption="conso" />
           <DateCircle date={p.end_date_forecast} label="Date de fin" />
         </div>

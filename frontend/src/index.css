@@ -130,3 +130,23 @@
 .dark .sidebar-item { color: #b3b0c9; }
 .dark .sidebar-item:hover { color: #eceaf6; background-color: #262340; }
 .dark ::selection { background-color: #1d2a4d; color: #7d9bff; }
+
+/* F07 — mode sombre : fonds/bordures/textes des alertes et badges clairs */
+.dark .bg-rose-50 { background-color: rgba(204, 79, 69, 0.14) !important; }
+.dark .bg-red-50 { background-color: rgba(204, 79, 69, 0.14) !important; }
+.dark .bg-amber-50 { background-color: rgba(224, 168, 0, 0.13) !important; }
+.dark .bg-orange-50 { background-color: rgba(224, 140, 60, 0.13) !important; }
+.dark .bg-emerald-50 { background-color: rgba(63, 138, 52, 0.15) !important; }
+.dark .bg-green-50 { background-color: rgba(63, 138, 52, 0.15) !important; }
+.dark .bg-blue-50 { background-color: rgba(46, 95, 232, 0.14) !important; }
+.dark .bg-rose-100, .dark .bg-red-100 { background-color: rgba(204, 79, 69, 0.22) !important; }
+.dark .bg-amber-100 { background-color: rgba(224, 168, 0, 0.2) !important; }
+.dark .bg-emerald-100 { background-color: rgba(63, 138, 52, 0.22) !important; }
+.dark .border-rose-200, .dark .border-red-200 { border-color: rgba(204, 79, 69, 0.4) !important; }
+.dark .border-amber-200, .dark .border-orange-200 { border-color: rgba(224, 168, 0, 0.4) !important; }
+.dark .border-emerald-200, .dark .border-green-200 { border-color: rgba(63, 138, 52, 0.4) !important; }
+.dark .border-blue-200 { border-color: rgba(46, 95, 232, 0.4) !important; }
+.dark .text-rose-700, .dark .text-rose-800, .dark .text-red-700, .dark .text-red-800 { color: #f2a09a !important; }
+.dark .text-amber-700, .dark .text-amber-800 { color: #eac97e !important; }
+.dark .text-emerald-700, .dark .text-emerald-800, .dark .text-green-700 { color: #9fd8a5 !important; }
+.dark .text-blue-700, .dark .text-blue-800 { color: #9dbdf7 !important; }

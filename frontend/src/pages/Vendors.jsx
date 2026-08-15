@@ -314,7 +314,7 @@ export default function Vendors() {
           testId="vendors-kpi-alerts"
           label="Alertes actives"
           value={summary.total_alerts || 0}
-          sub={`${summary.total_expiring_soon || 0} contrat${(summary.total_expiring_soon || 0) !== 1 ? "s" : ""} expirant < 90j`}
+          sub="dépassements forfait & seuils contrats"
           valueClass={(summary.total_alerts || 0) > 0 ? "text-[#cc4f45]" : "text-[#26243a]"}
         />
       </div>

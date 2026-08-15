@@ -234,6 +234,7 @@ export default function Teams() {
   const totalAllocated = Math.round(teams.reduce((s, t) => s + (loadByTeam[t.team_id]?.cur?.allocated_jh || 0), 0));
   const globalPct = totalCapacity ? Math.round((totalAllocated / totalCapacity) * 100) : 0;
   const overCellsCount = heatmap.flatMap((t) => (t.periods || []).filter((p) => p.utilization_pct > 100)).length;
+  const hasAnyAlloc = heatmap.some((t) => (t.periods || []).some((p) => (p.allocated_jh || 0) > 0));
 
   if (loading) return <div className="p-8 text-zinc-400 text-sm">Chargement des équipes...</div>;
 
@@ -263,6 +264,12 @@ export default function Teams() {
       </div>
 
       <CapacityAlertBanner alerts={alerts} />
+
+      {!hasAnyAlloc && heatmap.length > 0 && (
+        <div className="mb-4 px-4 py-2.5 bg-amber-50 border border-amber-200 rounded-xl text-xs text-amber-800" data-testid="teams-no-alloc-banner">
+          Aucune allocation saisie sur la période affichée — les taux d'utilisation sont à 0 % par absence de données, pas parce que les équipes sont disponibles.
+        </div>
+      )}
 
       {/* KPI tuiles */}
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4 mb-6">

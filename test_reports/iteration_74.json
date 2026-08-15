@@ -1,0 +1,38 @@
+{
+  "summary": "MARCEL — Lot 1 'cohérence des chiffres' validation (F01-F12 + créat°équipe régression + Conformité + Arbitrage + non-régression dashboard). Backend: 7/7 pytest PASS. Frontend: toutes les features vérifiées en UI. Aucun blocage. GO PROD OK.",
+  "backend_issues": {"critical": [], "minor": []},
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_lot1_coherence_chiffres.py",
+    "/app/test_reports/pytest/lot1_results.xml"
+  ],
+  "action_items": [],
+  "critical_code_review_comments": [
+    "ProjectDetail.jsx contains 2104 lines — should be split into smaller modules (Aperçu, Pilotage, RAF, Tâches subcomponents) to ease future maintenance. Not blocking, but recommended before further chantiers touch this file.",
+    "Le panneau RAF (lignes 1828-1846 ProjectDetail.jsx) est monté conditionnellement (raf && …). Sur les projets sans données de timesheet/tâches consommées, il ne s'affiche pas — donc les lignes 'EAC déclaré' / 'Écart atterrissage vs EAC' peuvent être invisibles pour un utilisateur. Consider showing a placeholder 'Pas de RAF calculé' pour cohérence UX (ce n'est pas un bug de Lot 1).",
+    "Roadmap /roadmap useEffect fullSpan bascule OK (10/10 projets visibles). Le seuil hardcodé à 30% (Roadmap.jsx ~715) devrait être configurable pour clients ayant des portefeuilles très long-terme."
+  ],
+  "updated_files": ["/app/backend/tests/test_lot1_coherence_chiffres.py"],
+  "success_rate": {"backend": "100%", "frontend": "100%"},
+  "test_credentials": "admin@altair.fr / Admin2026!",
+  "seed_data_creation": "Aucune donnée persistante ajoutée. Une équipe TEST_LOT1_TEAM créée puis supprimée via l'API (assert 201/204).",
+  "retest_needed": false,
+  "main_agent_can_self_test": true,
+  "context_for_next_testing_agent": "Backend pytest suite: /app/backend/tests/test_lot1_coherence_chiffres.py (7 tests). URLs frontend importantes: /portfolio (pas /projets), /admin/connectors (pas /connecteurs). Theme toggle testid = 'theme-toggle-btn'. Projet avec 62 tasks + RAF calculé: P01-001 (id 21fa6d43-...). Le tenant Altair contient bien 12 profils, 10 projets, 5 équipes actives, 11 ressources affectées, 2 équipes en surcharge (Support 100% + Support 100% août/sept).",
+  "detailed_findings": {
+    "F01_teams_heatmap": "PASS — heatmap allocated_jh > 0 (Dev A 67%, Dev B 59%, Infra 30%, QA 67%, Support 100% rouge), pas de bannière teams-no-alloc-banner.",
+    "create_team_regression": "PASS — POST /api/teams renvoie 201 avec id, DELETE /api/teams/{id} renvoie 204.",
+    "F09_profiles": "PASS — 12 profils, aucun code dupliqué, user_count présent sur chaque profil.",
+    "F02_project_kpi_jh": "PASS — texte 'JH CONSOMMÉS 4 103,5 sur 8 225 JH prévus · Σ tâches' sur P01-001 (avec 62 tâches).",
+    "F03_project_kpi_eac_and_raf": "PASS — KPI EAC = '1 000 K€ · déclaré' ; panneau RAF affiche 'EAC déclaré 999 999 €' + 'Écart atterrissage vs EAC -930 499 €' en rouge (|930k| > 5% * 1000k).",
+    "F04_ring_temps": "PASS — Tuile portfolio: ring '100% ÉCOULÉ Temps' ; KPI project-kpi-avancement label='TEMPS ÉCOULÉ' + caption 'Temps ÉCOULÉ' (au lieu d'Avancement).",
+    "F05_roadmap_fullspan": "PASS — 10 barres projets visibles (Refonte, Phoenix, DORA, ERP SAP, Migration Infra, CRM Salesforce, Modernisation SI Fin, Digital Workplace, Test Template, Siebel).",
+    "F07_darkmode": "PASS — theme-toggle-btn active class 'dark' sur <html>. Alertes/badges lisibles en dark (badge 'En retard' rgb(190,18,60) sur fond rose transparent, bandeau surcharge dark red translucide OK). Aucun fond bg-rose-50/amber-50 blanc trouvé en dark mode dans les bandeaux critiques.",
+    "F10_connectors": "PASS — 'Dernier test' + '(connecteur désactivé)' présents pour SAP et ServiceNow (enabled=false).",
+    "F11_vendors_kpi_alerts": "PASS — sous-titre KPI: 'dépassements forfait & seuils contrats'.",
+    "F12_dashboard_widgets": "PASS — '% du portefeuille' présent dans les sous-titres MetricSingleWidget. IndicatorsPanel monté 1 seule fois ('Mes indicateurs' occurrence = 1).",
+    "Conformite_en_retard": "PASS — 2 jalons en retard affichent le badge 'En retard' rose (rgb 255,241,242 bg + rgb 190,18,60 text).",
+    "Arbitrage_scatter": "PASS — 27 cercles SVG visibles avec jitter/dispersion sur carte Valeur/Risque, tailles variables selon budget."
+  },
+  "rca of the issue": "N/A — aucun bug détecté sur le Lot 1. Toutes les 12 features et non-régression validées."
+}

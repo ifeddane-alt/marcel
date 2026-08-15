@@ -712,6 +712,20 @@ export default function Roadmap() {
 
   const filteredProjectIds = useMemo(() => new Set(filtered.map((p) => p.project_id)), [filtered]);
 
+  // F05 — si la fenêtre 12 mois ne montre presque aucun projet, basculer en vue complète
+  useEffect(() => {
+    if (!projects.length) return;
+    const now = new Date();
+    const min = new Date(now.getFullYear(), now.getMonth() - 3, 1).getTime();
+    const max = new Date(now.getFullYear(), now.getMonth() + 10, 1).getTime();
+    const visible = projects.filter((p) => {
+      const s = dateToMs(p.start_date);
+      const e = dateToMs(p.end_date_forecast || p.end_date_baseline);
+      return s && e && e > min && s < max;
+    }).length;
+    if (visible / projects.length < 0.3) setFullSpan(true);
+  }, [projects]);
+
   // Time range — fenêtre 12 mois glissants par défaut (-3 / +9), ou span complet
   const { timeMin, timeMax } = useMemo(() => {
     if (!fullSpan) {

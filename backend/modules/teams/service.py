@@ -69,7 +69,7 @@ async def get_capacity_heatmap(months: int, current_user: TokenPayload) -> list:
 
     allocations = await db.allocations.find(
         {"project_id": {"$in": tenant_project_ids},
-         "period_month": {"$gte": periods[0], "$lte": periods[-1]}},
+         "period_month": {"$gte": periods[0][:7], "$lte": periods[-1][:7] + "-31"}},
         {"_id": 0, "resource_id": 1, "period_month": 1, "jh_allocated": 1},
     ).to_list(None)
 
@@ -472,7 +472,7 @@ async def get_team_detail(team_id: str, current_user: TokenPayload) -> dict:
     }
 
 
-
+async def create_team(data: TeamCreate, current_user: TokenPayload) -> dict:
     require_write(current_user)
     doc = {
         "team_id": str(uuid.uuid4()),
