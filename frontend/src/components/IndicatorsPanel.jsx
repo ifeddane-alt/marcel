@@ -144,6 +144,13 @@ export const IndicatorsPanel = ({ scope, contextId, title = "Indicateurs" }) => 
   const [selectorOpen, setSelectorOpen] = useState(false);
   const [detail, setDetail] = useState(null);
   const [applying, setApplying] = useState(false);
+  const [collapsed, setCollapsed] = useState(() => localStorage.getItem(`indicators-collapsed-${scope}`) === "1");
+  const toggleCollapsed = () => {
+    setCollapsed((v) => {
+      localStorage.setItem(`indicators-collapsed-${scope}`, v ? "0" : "1");
+      return !v;
+    });
+  };
 
   const load = useCallback(() => {
     catalogAPI.values(scope, contextId).then((r) => setData(r.data)).catch(() => setData({ items: [] }));
@@ -171,13 +178,20 @@ export const IndicatorsPanel = ({ scope, contextId, title = "Indicateurs" }) => 
   return (
     <div className="bg-white border border-m-border rounded-xl shadow-[0_2px_8px_-3px_rgba(53,44,110,0.08)] p-4 md:p-5" data-testid={`indicators-panel-${scope}`}>
       <div className="flex items-center justify-between mb-3">
-        <h3 className="font-heading text-sm font-bold text-m-ink">{title}</h3>
+        <button onClick={toggleCollapsed} data-testid={`indicators-collapse-${scope}`}
+          className="flex items-center gap-1.5 text-left" title={collapsed ? "Déplier" : "Replier"}>
+          <h3 className="font-heading text-sm font-bold text-m-ink">{title}</h3>
+          {data?.items?.length > 0 && (
+            <span className="text-[10px] font-bold px-1.5 py-px rounded-full bg-m-lilac text-m-muted">{data.items.length}</span>
+          )}
+          <ChevronDown size={14} className={`text-m-muted transition-transform ${collapsed ? "-rotate-90" : ""}`} />
+        </button>
         <button onClick={() => setSelectorOpen(true)} data-testid={`indicators-manage-btn-${scope}`}
           className="flex items-center gap-1.5 text-[11px] font-semibold text-m-blue hover:text-m-blue-dark">
           <Settings2 size={12} /> Gérer les indicateurs
         </button>
       </div>
-      {data === null ? (
+      {collapsed ? null : data === null ? (
         <div className="text-xs text-zinc-300 py-4 text-center">Chargement…</div>
       ) : data.items.length === 0 ? (
         <div className="text-center py-6 border border-dashed border-zinc-200 rounded-lg" data-testid={`indicators-empty-${scope}`}>
