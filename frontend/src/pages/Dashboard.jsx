@@ -359,16 +359,21 @@ export default function Dashboard() {
               </button>
             </>
           )}
-          {view === "dashboard" && (
-            <button
-              data-testid="dashboard-customize-btn"
-              onClick={() => setCustomizing((v) => !v)}
-              className={`flex items-center gap-1.5 px-3 py-2 border rounded-lg text-sm transition-colors ${customizing ? "bg-m-blue border-m-blue text-white" : "bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}
-            >
-              {customizing ? <X size={14} /> : <Settings2 size={14} />}
-              <span className="hidden sm:inline">{customizing ? "Quitter l'édition" : "Personnaliser"}</span>
-            </button>
-          )}
+          <button
+            data-testid="dashboard-customize-btn"
+            onClick={() => {
+              if (view !== "dashboard") {
+                switchView("dashboard");
+                setCustomizing(true);
+              } else {
+                setCustomizing((v) => !v);
+              }
+            }}
+            className={`flex items-center gap-1.5 px-3 py-2 border rounded-lg text-sm transition-colors ${customizing ? "bg-m-blue border-m-blue text-white" : "bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}
+          >
+            {customizing ? <X size={14} /> : <Settings2 size={14} />}
+            <span className="hidden sm:inline">{customizing ? "Quitter l'édition" : "Personnaliser"}</span>
+          </button>
         </div>
       </div>
 
