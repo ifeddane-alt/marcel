@@ -473,3 +473,8 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - ✅ Saisie manuelle des indicateurs non calculables : valeur + unité + sens + seuils vert/orange → pastille RAG ; RBAC projects.edit.
 - ✅ RAG projet automatique (EAC vs budget, glissement, jalons en retard, risques critiques) avec raisons en tooltip ; champ RAG retiré des formulaires.
 - Testé iteration_76 (2 HIGH corrigés : RBAC + GOU-04 orange).
+
+## 2026-06 (fork) — Budget cible : valorisation RAF + choix MVP par projet (DÉPLOYÉ PROD, commit 34e78ab)
+- ✅ Leviers projet valorisés sur le reste à faire réel (tâches restantes × TJM), plus le budget comptable.
+- ✅ Choix par projet : Arrêt complet vs Réduire au MVP (préserve le scope sec, sort les tâches hors MVP).
+- ✅ Fix bouton Personnaliser toujours visible (8e633cf).
