@@ -1,6 +1,6 @@
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { catalogAPI } from "@/api";
-import { Settings2, X, ChevronDown, Info, Sparkles } from "lucide-react";
+import { Settings2, X, ChevronDown, Info, Sparkles, Pencil } from "lucide-react";
 import { toast } from "sonner";
 
 const STATUS_CFG = {
@@ -139,10 +139,117 @@ export function IndicatorSelectorModal({ scope, onClose, onSaved }) {
   );
 }
 
+const ManualValueModal = ({ scope, contextId, item, onClose, onSaved }) => {
+  const m = item.manual || {};
+  const [value, setValue] = useState(m.value ?? "");
+  const [unit, setUnit] = useState(m.unit || "");
+  const [direction, setDirection] = useState(m.direction || "higher");
+  const [green, setGreen] = useState(m.green ?? "");
+  const [orange, setOrange] = useState(m.orange ?? "");
+  const [saving, setSaving] = useState(false);
+  const cmp = direction === "lower" ? "≤" : "≥";
+
+  const save = async (clear = false) => {
+    setSaving(true);
+    try {
+      await catalogAPI.setManual(scope, item.indicator_id, clear
+        ? { value: null, context_id: contextId || null }
+        : {
+            value: Number(value), unit, direction,
+            green: green === "" ? null : Number(green),
+            orange: orange === "" ? null : Number(orange),
+            context_id: contextId || null,
+          });
+      toast.success(clear ? "Valeur effacée" : "Valeur enregistrée");
+      onSaved();
+      onClose();
+    } catch (e) {
+      toast.error(e?.response?.data?.detail || "Erreur d'enregistrement");
+    }
+    setSaving(false);
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" onClick={onClose}>
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-5" onClick={(e) => e.stopPropagation()} data-testid="manual-value-modal">
+        <div className="flex items-start justify-between gap-2 mb-3">
+          <h4 className="font-heading text-sm font-bold text-zinc-950">
+            <span className="font-mono text-[10px] text-zinc-400 mr-1.5">{item.indicator_id}</span>{item.name}
+          </h4>
+          <button onClick={onClose} className="text-zinc-400 hover:text-zinc-600" data-testid="manual-modal-close"><X size={15} /></button>
+        </div>
+        <div className="space-y-3">
+          <div className="grid grid-cols-2 gap-2">
+            <div>
+              <label className="block text-[11px] font-semibold text-zinc-500 mb-1">Valeur</label>
+              <input type="number" step="any" value={value} onChange={(e) => setValue(e.target.value)}
+                data-testid="manual-value-input" autoFocus
+                className="w-full text-sm border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-m-blue" />
+            </div>
+            <div>
+              <label className="block text-[11px] font-semibold text-zinc-500 mb-1">Unité <span className="font-normal text-zinc-400">(%, J, K€…)</span></label>
+              <input value={unit} onChange={(e) => setUnit(e.target.value)} maxLength={20}
+                data-testid="manual-unit-input"
+                className="w-full text-sm border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-m-blue" />
+            </div>
+          </div>
+          <div>
+            <label className="block text-[11px] font-semibold text-zinc-500 mb-1">Sens de lecture</label>
+            <select value={direction} onChange={(e) => setDirection(e.target.value)} data-testid="manual-direction-select"
+              className="w-full text-sm border border-zinc-200 rounded-lg px-2.5 py-1.5">
+              <option value="higher">Plus c'est haut, mieux c'est</option>
+              <option value="lower">Plus c'est bas, mieux c'est</option>
+            </select>
+          </div>
+          <div className="bg-zinc-50 border border-zinc-100 rounded-lg p-3">
+            <div className="text-[11px] font-semibold text-zinc-500 mb-2">Seuils RAG <span className="font-normal text-zinc-400">(optionnels)</span></div>
+            <div className="grid grid-cols-2 gap-2">
+              <div>
+                <label className="flex items-center gap-1 text-[11px] text-zinc-500 mb-1">
+                  <span className="w-2 h-2 rounded-full bg-emerald-500" /> Vert si {cmp}
+                </label>
+                <input type="number" step="any" value={green} onChange={(e) => setGreen(e.target.value)}
+                  data-testid="manual-green-input"
+                  className="w-full text-sm border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-m-blue" />
+              </div>
+              <div>
+                <label className="flex items-center gap-1 text-[11px] text-zinc-500 mb-1">
+                  <span className="w-2 h-2 rounded-full bg-amber-500" /> Orange si {cmp}
+                </label>
+                <input type="number" step="any" value={orange} onChange={(e) => setOrange(e.target.value)}
+                  data-testid="manual-orange-input"
+                  className="w-full text-sm border border-zinc-200 rounded-lg px-2.5 py-1.5 focus:outline-none focus:border-m-blue" />
+              </div>
+            </div>
+            <p className="text-[10px] text-zinc-400 mt-1.5">Au-delà du seuil orange, l'indicateur passe rouge.</p>
+          </div>
+          <div className="flex items-center justify-between gap-2 pt-1">
+            {item.manual ? (
+              <button onClick={() => save(true)} disabled={saving} data-testid="manual-clear-btn"
+                className="text-[11px] font-semibold text-rose-500 hover:text-rose-700 transition-colors">
+                Effacer la valeur
+              </button>
+            ) : <span />}
+            <div className="flex items-center gap-2">
+              <button onClick={onClose} className="px-3 py-1.5 text-xs text-zinc-500 border border-zinc-200 rounded-lg hover:bg-zinc-50">Annuler</button>
+              <button onClick={() => save(false)} disabled={saving || value === "" || isNaN(Number(value))}
+                data-testid="manual-save-btn"
+                className="px-4 py-1.5 text-xs font-semibold bg-m-blue text-white rounded-lg hover:bg-m-blue-dark disabled:opacity-50 transition-colors">
+                {saving ? "Enregistrement…" : "Enregistrer"}
+              </button>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+};
+
 export const IndicatorsPanel = ({ scope, contextId, title = "Indicateurs" }) => {
   const [data, setData] = useState(null);
   const [selectorOpen, setSelectorOpen] = useState(false);
   const [detail, setDetail] = useState(null);
+  const [manualEdit, setManualEdit] = useState(null);
   const [applying, setApplying] = useState(false);
   const [collapsed, setCollapsed] = useState(() => localStorage.getItem(`indicators-collapsed-${scope}`) === "1");
   const toggleCollapsed = () => {
@@ -215,20 +322,36 @@ export const IndicatorsPanel = ({ scope, contextId, title = "Indicateurs" }) => 
               <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-2">
                 {items.map((i) => {
                   const st = STATUS_CFG[i.status] || STATUS_CFG.manual;
+                  const ragCls = i.rag === "green" ? "bg-emerald-500" : i.rag === "orange" ? "bg-amber-500" : i.rag === "red" ? "bg-rose-500" : null;
                   return (
-                    <button key={i.indicator_id} onClick={() => setDetail(i)}
+                    <div key={i.indicator_id} onClick={() => setDetail(i)} role="button" tabIndex={0}
                       data-testid={`indicator-card-${i.indicator_id}`}
-                      className="text-left border border-zinc-100 rounded-lg px-3 py-2 hover:border-blue-200 hover:bg-blue-50/30 transition-colors">
+                      className="relative text-left border border-zinc-100 rounded-lg px-3 py-2 hover:border-blue-200 hover:bg-blue-50/30 transition-colors cursor-pointer">
                       <div className="flex items-center justify-between gap-1">
                         <span className="font-mono text-[9px] text-zinc-400">{i.indicator_id}</span>
-                        <span className={`px-1 py-px text-[8px] font-bold rounded border ${st.cls}`}>{st.label}</span>
+                        <span className="flex items-center gap-1">
+                          {i.editable && (
+                            <button
+                              onClick={(e) => { e.stopPropagation(); setManualEdit(i); }}
+                              data-testid={`indicator-manual-edit-${i.indicator_id}`}
+                              className="p-0.5 text-zinc-300 hover:text-m-blue transition-colors"
+                              title="Saisir la valeur manuellement"
+                            >
+                              <Pencil size={10} />
+                            </button>
+                          )}
+                          <span className={`px-1 py-px text-[8px] font-bold rounded border ${st.cls}`}>{st.label}</span>
+                        </span>
                       </div>
                       <div className="text-[11px] text-zinc-600 truncate mt-0.5" title={i.name}>{i.name}</div>
-                      <div className="font-mono-data text-sm font-bold text-m-ink mt-0.5" data-testid={`indicator-value-${i.indicator_id}`}>
-                        {i.display ?? "—"}
+                      <div className="flex items-center gap-1.5 mt-0.5">
+                        {ragCls && <span className={`w-2 h-2 rounded-full flex-shrink-0 ${ragCls}`} data-testid={`indicator-rag-${i.indicator_id}`} />}
+                        <span className="font-mono-data text-sm font-bold text-m-ink" data-testid={`indicator-value-${i.indicator_id}`}>
+                          {i.display ?? "—"}
+                        </span>
                       </div>
                       {i.detail && <div className="text-[10px] text-zinc-400 truncate" title={i.detail}>{i.detail}</div>}
-                    </button>
+                    </div>
                   );
                 })}
               </div>
@@ -237,6 +360,10 @@ export const IndicatorsPanel = ({ scope, contextId, title = "Indicateurs" }) => 
         </div>
       )}
       {selectorOpen && <IndicatorSelectorModal scope={scope} onClose={() => setSelectorOpen(false)} onSaved={load} />}
+      {manualEdit && (
+        <ManualValueModal scope={scope} contextId={contextId} item={manualEdit}
+          onClose={() => setManualEdit(null)} onSaved={load} />
+      )}
       {detail && (
         <div className="fixed inset-0 bg-black/40 flex items-center justify-center z-50 p-4" onClick={() => setDetail(null)}>
           <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-5" onClick={(e) => e.stopPropagation()} data-testid="indicator-detail-modal">

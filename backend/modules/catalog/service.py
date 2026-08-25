@@ -5,7 +5,7 @@ from pathlib import Path
 
 from fastapi import HTTPException
 from core.database import db
-from core.auth import TokenPayload, require_write
+from core.auth import TokenPayload, require_write, has_perm
 
 from . import computations
 
@@ -108,6 +108,46 @@ async def preset_p1(scope: str, user: TokenPayload) -> dict:
     return await set_selection(scope, ids, user)
 
 
+def _fmt_val(v: float, unit: str) -> str:
+    s = f"{v:,.1f}".rstrip("0").rstrip(".").replace(",", " ")
+    return f"{s} {unit}".strip() if unit else s
+
+
+def _manual_rag(v: float, direction: str, green, orange):
+    if green is None or orange is None:
+        return None
+    if direction == "lower":
+        return "green" if v <= green else ("orange" if v <= orange else "red")
+    return "green" if v >= green else ("orange" if v >= orange else "red")
+
+
+async def set_manual_value(scope: str, indicator_id: str, data: dict, user: TokenPayload) -> dict:
+    if scope not in ("project", "program", "portfolio", "dashboard"):
+        raise HTTPException(400, "Scope invalide")
+    if scope != "dashboard" and not has_perm(user, "projects.edit"):
+        raise HTTPException(403, "Permission projects.edit requise pour la saisie sur ce périmètre")
+    cat = await db.indicator_catalog.find_one({"indicator_id": indicator_id}, {"_id": 0, "indicator_id": 1})
+    if not cat:
+        raise HTTPException(404, "Indicateur introuvable")
+    context_id = data.get("context_id") or None
+    q = {"tenant_id": user.tenant_id, "scope": scope, "context_id": context_id, "indicator_id": indicator_id}
+    if data.get("value") is None:
+        await db.indicator_manual_values.delete_one(q)
+        return {"deleted": True}
+    try:
+        value = float(data["value"])
+        green = float(data["green"]) if data.get("green") is not None else None
+        orange = float(data["orange"]) if data.get("orange") is not None else None
+    except (TypeError, ValueError):
+        raise HTTPException(400, "Valeur ou seuils non numériques")
+    doc = {**q, "value": value, "unit": str(data.get("unit") or "").strip()[:20],
+           "direction": data.get("direction") if data.get("direction") in ("higher", "lower") else "higher",
+           "green": green, "orange": orange,
+           "updated_by": user.name, "updated_at": _now()}
+    await db.indicator_manual_values.update_one(q, {"$set": doc}, upsert=True)
+    return doc
+
+
 async def compute_values(scope: str, context_id: str | None, user: TokenPayload) -> dict:
     if scope not in ("project", "program", "portfolio", "dashboard"):
         raise HTTPException(400, "Scope invalide")
@@ -118,6 +158,10 @@ async def compute_values(scope: str, context_id: str | None, user: TokenPayload)
     cats = await db.indicator_catalog.find(
         {"indicator_id": {"$in": ids}}, {"_id": 0}).to_list(None)
     cat_map = {c["indicator_id"]: c for c in cats}
+    manual_docs = await db.indicator_manual_values.find(
+        {"tenant_id": user.tenant_id, "scope": scope, "context_id": context_id or None,
+         "indicator_id": {"$in": ids}}, {"_id": 0}).to_list(None)
+    manual_map = {m["indicator_id"]: m for m in manual_docs}
     ctx = await computations.load_context(scope, context_id, user)
     items = []
     for ind_id in ids:
@@ -128,6 +172,7 @@ async def compute_values(scope: str, context_id: str | None, user: TokenPayload)
             "indicator_id", "domain", "subdomain", "name", "priority", "method",
             "definition", "formula", "reading", "pitfall", "computability")}}
         fn = computations.REGISTRY.get(scope, {}).get(ind_id)
+        item["editable"] = fn is None
         if fn:
             try:
                 item.update(fn(ctx))
@@ -135,6 +180,16 @@ async def compute_values(scope: str, context_id: str | None, user: TokenPayload)
             except Exception:
                 item.update({"display": "—", "status": "error"})
         else:
-            item.update({"display": "—", "status": cat.get("computability", "manual")})
+            mv = manual_map.get(ind_id)
+            if mv:
+                item.update({
+                    "display": _fmt_val(mv["value"], mv.get("unit") or ""),
+                    "status": "manual",
+                    "rag": _manual_rag(mv["value"], mv.get("direction", "higher"), mv.get("green"), mv.get("orange")),
+                    "detail": f"Saisi le {str(mv.get('updated_at'))[:10]} par {mv.get('updated_by') or '—'}",
+                    "manual": {k: mv.get(k) for k in ("value", "unit", "direction", "green", "orange")},
+                })
+            else:
+                item.update({"display": "—", "status": cat.get("computability", "manual")})
         items.append(item)
     return {"scope": scope, "context_id": context_id, "items": items}

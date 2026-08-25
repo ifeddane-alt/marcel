@@ -1,0 +1,46 @@
+{
+  "summary": "Iteration 76 — Tests backend (pytest, 18 cas) + frontend (Playwright, 3 scénarios) sur : onglets /portfolio (Portefeuille/Indicateurs + persistance localStorage), saisie manuelle d'indicateurs avec seuils RAG (PUT /api/indicator-catalog/manual/{scope}/{id} + modal ManualValueModal), RAG projet automatique (status_rag + rag_reasons persistés, cohérence tuiles/fiche), suppression du champ 'Statut RAG' des formulaires projet, et non-régression (onglets dashboard, heatmap équipes, PDF COMEX, création projet sans status_rag, filtres/tuiles-liste, bandeau cohérence). 16/18 tests backend PASS, tous les scénarios frontend PASS. 2 défauts trouvés : (1) RBAC — un profil READ_ONLY peut écrire des valeurs manuelles sur les scopes portfolio/program/project (200 au lieu de 403) ; (2) l'indicateur GOU-04 'Répartition des statuts RAG' compte la clé 'amber' alors que status_rag vaut 'orange' → affiche '0 V · 0 O · 5 R' au lieu de '0 V · 5 O · 5 R' (incohérence de chiffres visible sur /portfolio onglet Indicateurs vs en-tête '5 rouge · 5 orange').",
+  "backend_issues": {
+    "critical": [
+      {"endpoint": "PUT /api/indicator-catalog/manual/{scope}/{indicator_id}", "issue": "READ_ONLY (viewer@altair.fr) obtient 200 sur le scope portfolio alors que 403 est attendu. Cause : service.set_manual_value utilise require_write() → permission virtuelle '_write' validée dès qu'un profil possède UNE permission ne finissant pas par .view (le profil READ_ONLY a export.ppt, scope.simulate, lifecycle.decide, agent.chat...). Recommandation : remplacer require_write par permission_required/_enforce_permission sur une permission granulaire (ex 'portfolio.edit' ou 'indicators.edit') comme le fait /api/projects (403 correct).", "priority": "HIGH"},
+      {"endpoint": "GET /api/indicator-catalog/values/portfolio (GOU-04)", "issue": "modules/catalog/computations.py:gou04 utilise counts={'green','amber','red'} alors que status_rag = 'orange' → les projets orange ne sont jamais comptés. Affiche '0 V · 0 O · 5 R' au lieu de '0 V · 5 O · 5 R' (10 projets : 5 red / 5 orange). Incohérence de chiffres directement visible à côté de l'en-tête portefeuille.", "priority": "HIGH"}
+    ],
+    "minor": [
+      {"endpoint": "POST /api/auth/login", "issue": "Le throttling anti-bruteforce (429 'Trop de tentatives') fait échouer en cascade les suites pytest existantes qui se loguent à chaque test (test_projects_crud.py, test_indicator_catalog.py). Relancés isolément : 100% PASS. Envisager un fixture de token partagé (scope=session) dans les suites legacy."},
+      {"endpoint": "GET /api/indicator-catalog/values/{scope}", "issue": "Ambiguïté de champ : item.status vaut 'manual' à la fois quand une valeur manuelle est saisie ET quand l'indicateur est simplement non calculable (computability=manual). Sans impact visuel actuel (même badge) mais fragile ; préférer status='manual_input' vs 'manual_pending'."}
+    ]
+  },
+  "frontend_issues": {
+    "ui_bugs": [],
+    "integration_issues": [],
+    "design_issues": [
+      {"screen": "/portfolio onglet Indicateurs", "issues": ["Carte GOU-04 affiche '0 V · 0 O · 5 R' alors que l'en-tête indique '10 projets — 5 rouge · 5 orange · 0 vert' (bug backend gou04, voir backend_issues)"]}
+    ]
+  },
+  "test_report_links": [
+    "/app/backend/tests/test_iter76_manual_rag.py",
+    "/app/test_reports/pytest/iter76.xml"
+  ],
+  "action_items": [
+    "Corriger gou04 (modules/catalog/computations.py) : compter 'orange' au lieu de 'amber' (accepter les deux pour robustesse).",
+    "Durcir l'autorisation de PUT /api/indicator-catalog/manual/{scope}/{id} : permission granulaire au lieu de require_write (READ_ONLY passe actuellement).",
+    "Optionnel : nettoyer ProjectModal.jsx (status_rag reste dans EMPTY et dans le setForm d'édition alors qu'il n'est plus ni affiché ni envoyé) — code mort.",
+    "Optionnel : _apply_auto_rag exécute 2 agrégations + bulk_write à chaque GET /projects et GET /projects/{id} ; envisager un recalcul conditionnel/caché si la volumétrie augmente."
+  ],
+  "critical_code_review_comments": [
+    "gou04 : mapping RAG incohérent avec le référentiel ('amber' vs 'orange') — source directe d'incohérence de chiffres.",
+    "set_manual_value : require_write('_write') est trop permissif ; la logique _enforce_permission('_write') considère toute permission non-.view comme droit d'écriture, ce qui ouvre l'écriture aux profils READ_ONLY.",
+    "_apply_auto_rag exclut 'annule' en plus de cloture/archive (conforme à l'esprit de la spec) ; les projets clôturés conservent leur status_rag historique sans rag_reasons — comportement attendu, à documenter.",
+    "compute_values : status='manual' surchargé (valeur saisie vs indicateur non calculable) ; risque de confusion pour de futurs consommateurs de l'API."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_iter76_manual_rag.py (nouveau)"
+  ],
+  "success_rate": {"backend": "89% (16/18)", "frontend": "100% (tous les scénarios testés)"},
+  "seed_data_creation": "Aucune donnée résiduelle. Créé/supprimé : projet TEST_ITER76_RAG (créé sans status_rag → 201, vert, supprimé + 404 vérifié). Valeurs manuelles AGI-10 (dashboard pmo + portfolio) créées puis effacées → collection indicator_manual_values vide (vérifiée en base). Sélection dashboard de pmo@altair.fr restaurée à ['VAL-10','VAL-11']. IMPORTANT : la suite legacy tests/test_indicator_catalog.py a écrasé la sélection dashboard d'admin@altair.fr (['AGI-10','BUD-16'], non restaurée par cette suite) ; j'ai supprimé ce document pour remettre admin en état vierge (aucun indicateur sélectionné). À corriger dans test_indicator_catalog.py : snapshot/restore de la sélection admin.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "admin@altair.fr/Admin2026!, pmo@altair.fr/Pmo1234!, viewer@altair.fr/View1234! (/app/memory/test_credentials.md)",
+  "context_for_next_testing_agent": "Validé cette itération : onglets portfolio (portfolio-view-tab-portfolio/indicateurs, persistance localStorage 'portfolio-view-tab', masquage tuiles/filtres/bandeau cohérence, retour onglet Portefeuille avec filtres RAG 10→5, bascule tuiles/liste) ; saisie manuelle sur /dashboard (pmo) : pencil indicator-manual-edit-AGI-10 → manual-value-modal → 85/%/higher/90/75 → carte '85 %' + pastille bg-amber-500 + 'Saisi le 2026-08-25 par Thomas Dubois' ; réouverture préremplie ; manual-clear-btn → '—' + pastille retirée. Backend : rag calculé (higher/lower, bornes green/orange), clear, 404 indicateur inconnu, 400 non numérique, 400 scope invalide, 401 sans token. RAG auto vérifié contre la base pour les 10 projets (jalons en retard, risques criticité≥15 statuts identifié/en cours, glissement, EAC) : P01-001 red, DATA-001 red (EAC +29 %, +182 j, 2 jalons, 2 risques), PRJ-006 red, PRJ-003 orange, DATA-002 orange, rag_counts du dashboard summary = 5 red / 5 orange / 0 green cohérents. Tooltips tile-status-* et rag-badge-red = mêmes raisons. Formulaires création ET édition : plus de 'Statut RAG', rag-auto-hint présent. Non-régression OK : onglets dashboard, /teams/capacity-heatmap 200 non vide, /dashboard/export/pdf 200, /projects/consistency 200, suites legacy test_lot1_coherence_chiffres (7), test_lot234_ecart (5), test_projects_crud (10), test_indicator_catalog (14) toutes PASS (aucune adaptation nécessaire vis-à-vis de status_rag). Note UI : l'OnboardingTour (data-testid='onboarding-tour') s'affiche en overlay plein écran et bloque les clics — le dismisser ('Passer la visite') après chaque navigation dans les scripts Playwright. Le login redirige vers /home (pas /dashboard). L'input manual-value-input est type=number : impossible d'y saisir du texte (test 400 non numérique = API only).",
+  "rca_of_the_issue": "GOU-04 : gou04() initialise counts={'green':0,'amber':0,'red':0} et incrémente counts[rag] uniquement si la clé existe ; comme le RAG automatique persiste 'orange', les 5 projets orange sont ignorés → '0 O'. Fix : renommer la clé en 'orange' (ou normaliser amber→orange). RBAC manual : _enforce_permission(user,'_write') retourne OK dès qu'une permission du profil ne finit pas par .view/.view_own/.view_all ; le profil READ_ONLY d'Altair possède export.ppt/scope.simulate/lifecycle.decide → droit d'écriture accordé à tort sur tous les endpoints protégés par require_write (mais /api/projects utilise permission_required('projects.create') et renvoie bien 403, donc l'impact est limité aux endpoints require_write, dont la nouvelle route manual)."
+}

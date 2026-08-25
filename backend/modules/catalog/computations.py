@@ -234,12 +234,14 @@ def gou02(ctx):
 
 def gou04(ctx):
     ps = ctx["projects"]
-    counts = {"green": 0, "amber": 0, "red": 0}
+    counts = {"green": 0, "orange": 0, "red": 0}
     for p in ps:
         rag = (p.get("status_rag") or "").lower()
+        if rag == "amber":
+            rag = "orange"
         if rag in counts:
             counts[rag] += 1
-    return {"value": counts, "display": f"{counts['green']} V · {counts['amber']} O · {counts['red']} R"}
+    return {"value": counts, "display": f"{counts['green']} V · {counts['orange']} O · {counts['red']} R"}
 
 
 def gou08(ctx):

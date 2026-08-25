@@ -88,6 +88,7 @@ export default function ProjectTile({
       <span
         className={`absolute -top-2.5 right-3 z-10 text-[10px] font-extrabold text-white px-2.5 py-[3px] rounded-md font-heading tracking-wide ${style.badge}`}
         data-testid={`tile-status-${p.project_id}`}
+        title={p.rag_reasons?.length ? `RAG auto : ${p.rag_reasons.join(" · ")}` : undefined}
       >
         {style.label}
       </span>

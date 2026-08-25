@@ -56,6 +56,8 @@ export default function Portfolio() {
   }, []);
   const [consistency, setConsistency] = useState([]);
   const [consistencyOpen, setConsistencyOpen] = useState(false);
+  const [pfTab, setPfTab] = useState(() => localStorage.getItem("portfolio-view-tab") || "portfolio");
+  const switchPfTab = (v) => { setPfTab(v); localStorage.setItem("portfolio-view-tab", v); };
   useEffect(() => {
     projectsAPI.consistency().then((r) => setConsistency(r.data || [])).catch(() => {});
   }, []);
@@ -210,6 +212,26 @@ export default function Portfolio() {
         </div>
       </div>
 
+      {/* Onglets Portefeuille / Indicateurs */}
+      <div className="flex gap-1 border-b border-m-border-lav mb-5" data-testid="portfolio-view-tabs">
+        {[
+          { id: "portfolio", label: "Portefeuille" },
+          { id: "indicateurs", label: "Indicateurs" },
+        ].map((t) => (
+          <button
+            key={t.id}
+            onClick={() => switchPfTab(t.id)}
+            data-testid={`portfolio-view-tab-${t.id}`}
+            className={`px-4 py-2.5 text-[13px] font-semibold whitespace-nowrap border-b-[3px] -mb-px transition-colors ${
+              pfTab === t.id ? "text-m-blue border-m-blue" : "text-m-muted border-transparent hover:text-m-ink"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
+      <div className={pfTab === "portfolio" ? "" : "hidden"}>
       {/* Alerte cohérence chiffres déclarés vs tâches */}
       {consistency.length > 0 && (
         <div className="mb-4 border border-amber-200 bg-amber-50 rounded-xl overflow-hidden" data-testid="portfolio-consistency-alert">
@@ -474,9 +496,13 @@ export default function Portfolio() {
         </table>
       </div>
 
-      <div className="mt-6">
-        <IndicatorsPanel scope="portfolio" title="Indicateurs du portefeuille" />
       </div>
+
+      {pfTab === "indicateurs" && (
+        <div className="mt-2">
+          <IndicatorsPanel scope="portfolio" title="Indicateurs du portefeuille" />
+        </div>
+      )}
 
       <ExportCopilModal
         isOpen={exportModalOpen}

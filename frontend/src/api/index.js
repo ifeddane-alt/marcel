@@ -621,5 +621,6 @@ export const catalogAPI = {
   getSelection: (scope) => api.get(`/indicator-catalog/selections/${scope}`),
   setSelection: (scope, ids) => api.put(`/indicator-catalog/selections/${scope}`, { indicator_ids: ids }),
   presetP1:     (scope) => api.post(`/indicator-catalog/selections/${scope}/preset-p1`),
+  setManual:    (scope, indicatorId, body) => api.put(`/indicator-catalog/manual/${scope}/${indicatorId}`, body),
   values:       (scope, contextId) => api.get(`/indicator-catalog/values/${scope}`, { params: contextId ? { context_id: contextId } : {} }),
 };

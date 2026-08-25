@@ -15,7 +15,7 @@ const DEFAULT_STATUS_OPTIONS = [
 
 const EMPTY = {
   name: "", source_id: "", description: "", owner_id: "",
-  program_id: "", methodology: "waterfall", status_rag: "green", status: "en_preparation",
+  program_id: "", methodology: "waterfall", status: "en_preparation",
   start_date: "", end_date_baseline: "", end_date_forecast: "", end_date_actual: "",
   capex_planned: "", capex_consumed: "0",
   opex_planned: "", opex_consumed: "0",
@@ -72,7 +72,6 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
         owner_id: project.owner_id || "",
         program_id: project.program_id || "",
         methodology: project.methodology || "waterfall",
-        status_rag: project.status_rag || "green",
         status: project.status || "actif",
         start_date: project.start_date || "",
         end_date_baseline: project.end_date_baseline || "",
@@ -147,7 +146,6 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
         owner_id: form.owner_id || null,
         program_id: form.program_id || null,
         methodology: form.methodology,
-        status_rag: form.status_rag,
         status: form.status,
         start_date: form.start_date,
         end_date_baseline: form.end_date_baseline || form.end_date_forecast,
@@ -226,8 +224,8 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
           </Field>
         </div>
 
-        {/* Méthodologie + Statut (+ RAG en édition uniquement) */}
-        <div className={`grid ${isEdit ? "grid-cols-3" : "grid-cols-2"} gap-3`}>
+        {/* Méthodologie + Statut — RAG calculé automatiquement */}
+        <div className="grid grid-cols-2 gap-3">
           <Field label="Méthodologie" required error={errors.methodology}>
             <select data-testid="project-form-methodology" className={INPUT_CLS} value={form.methodology} onChange={set("methodology")}>
               <option value="waterfall">Waterfall</option>
@@ -235,24 +233,15 @@ export default function ProjectModal({ isOpen, onClose, project, resources = [],
               <option value="safe">SAFe</option>
             </select>
           </Field>
-          {isEdit && (
-            <Field label="Statut RAG" required error={errors.status_rag}>
-              <select data-testid="project-form-rag" className={INPUT_CLS} value={form.status_rag} onChange={set("status_rag")}>
-                <option value="green">Vert</option>
-                <option value="orange">Orange</option>
-                <option value="red">Rouge</option>
-              </select>
-            </Field>
-          )}
           <Field label="Statut projet" required>
             <select data-testid="project-form-status" className={INPUT_CLS} value={form.status} onChange={set("status")}>
               {STATUS_OPTIONS.map((o) => <option key={o.value} value={o.value}>{o.label}</option>)}
             </select>
           </Field>
         </div>
-        {!isEdit && (
-          <p className="text-[11px] text-zinc-400 -mt-2">Le statut RAG démarre à Vert — il s'ajuste ensuite depuis la fiche projet selon le suivi réel.</p>
-        )}
+        <p className="text-[11px] text-zinc-400 -mt-2" data-testid="rag-auto-hint">
+          Le statut RAG est calculé automatiquement à partir du budget (EAC), des délais (jalons, glissement) et des risques critiques.
+        </p>
 
         {/* Dates */}
         <div className="border-t border-zinc-100 pt-3">

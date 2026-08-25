@@ -25,6 +25,12 @@ async def preset_p1(scope: str, current_user: TokenPayload = Depends(get_current
     return await service.preset_p1(scope, current_user)
 
 
+@router.put("/indicator-catalog/manual/{scope}/{indicator_id}")
+async def set_manual_value(scope: str, indicator_id: str, data: dict,
+                           current_user: TokenPayload = Depends(get_current_user)):
+    return await service.set_manual_value(scope, indicator_id, data, current_user)
+
+
 @router.get("/indicator-catalog/values/{scope}")
 async def compute_values(scope: str, context_id: str | None = None,
                          current_user: TokenPayload = Depends(get_current_user)):

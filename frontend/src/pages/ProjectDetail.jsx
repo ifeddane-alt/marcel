@@ -313,7 +313,7 @@ export default function ProjectDetail() {
             {project.code && <span className="font-mono-data text-base font-semibold text-m-muted" data-testid="project-detail-code">{project.code}</span>}
             {project.name}
             <span className="inline-flex items-center gap-2 align-middle">
-              <RAGBadge status={project.status_rag} />
+              <RAGBadge status={project.status_rag} reasons={project.rag_reasons} />
               <MethodologyBadge methodology={project.methodology} />
             </span>
           </h1>

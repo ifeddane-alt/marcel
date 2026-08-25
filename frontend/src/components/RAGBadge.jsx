@@ -6,12 +6,14 @@ const RAG_CONFIG = {
   red: { label: "Rouge", classes: "bg-rose-100 text-rose-800 border-rose-200" },
 };
 
-export default function RAGBadge({ status, showDot = true }) {
+export default function RAGBadge({ status, showDot = true, reasons }) {
   const config = RAG_CONFIG[status] || { label: status, classes: "bg-zinc-100 text-zinc-700 border-zinc-200" };
+  const title = reasons?.length ? `RAG calculé automatiquement : ${reasons.join(" · ")}` : "RAG calculé automatiquement (budget, délais, risques)";
   return (
     <span
-      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-medium border ${config.classes}`}
+      className={`inline-flex items-center gap-1.5 px-2 py-0.5 rounded-lg text-xs font-medium border cursor-help ${config.classes}`}
       data-testid={`rag-badge-${status}`}
+      title={title}
     >
       {showDot && (
         <span

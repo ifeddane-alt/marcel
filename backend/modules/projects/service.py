@@ -29,7 +29,75 @@ async def list_projects(current_user: TokenPayload) -> list:
     # Filtrage ownership : CHEF_DE_PROJET ne voit que ses projets
     if is_ownership_restricted(current_user, "projects.view_own"):
         query["owner_id"] = current_user.user_id
-    return await db.projects.find(query, {"_id": 0}).to_list(None)
+    projects = await db.projects.find(query, {"_id": 0}).to_list(None)
+    await _apply_auto_rag(projects)
+    return projects
+
+
+RAG_LEVELS = ("green", "orange", "red")
+
+
+def _compute_rag(p: dict, late_ms: int, crit_risks: int) -> tuple:
+    level, reasons = 0, []
+    budget = p.get("budget_total") or 0
+    eac = p.get("eac") or p.get("budget_forecast") or 0
+    if budget > 0 and eac > 0:
+        over = (eac - budget) / budget
+        if over > 0.10:
+            level = max(level, 2); reasons.append(f"EAC +{round(over * 100)} % vs budget")
+        elif over > 0.05:
+            level = max(level, 1); reasons.append(f"EAC +{round(over * 100)} % vs budget")
+    try:
+        slip = (datetime.strptime(str(p.get("end_date_forecast"))[:10], "%Y-%m-%d")
+                - datetime.strptime(str(p.get("end_date_baseline"))[:10], "%Y-%m-%d")).days
+    except (ValueError, TypeError):
+        slip = 0
+    if slip > 90:
+        level = max(level, 2); reasons.append(f"Glissement fin +{slip} j")
+    elif slip > 30:
+        level = max(level, 1); reasons.append(f"Glissement fin +{slip} j")
+    if late_ms >= 3:
+        level = max(level, 2); reasons.append(f"{late_ms} jalons en retard")
+    elif late_ms >= 1:
+        level = max(level, 1); reasons.append(f"{late_ms} jalon{'s' if late_ms > 1 else ''} en retard")
+    if crit_risks >= 2:
+        level = max(level, 2); reasons.append(f"{crit_risks} risques critiques ouverts")
+    elif crit_risks >= 1:
+        level = max(level, 1); reasons.append("1 risque critique ouvert")
+    return RAG_LEVELS[level], reasons
+
+
+async def _apply_auto_rag(projects: list) -> None:
+    """RAG automatique (budget, délais, risques) — recalcule et persiste sur les projets actifs."""
+    active = [p for p in projects if p.get("status") not in ("cloture", "archive", "annule")]
+    if not active:
+        return
+    pids = [p["project_id"] for p in active]
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    late_agg = await db.milestones.aggregate([
+        {"$match": {"project_id": {"$in": pids}, "status": {"$nin": ["achieved", "done"]}}},
+        {"$project": {"project_id": 1, "d": {"$ifNull": ["$date_forecast", "$date_baseline"]}}},
+        {"$match": {"d": {"$lt": today, "$ne": None}}},
+        {"$group": {"_id": "$project_id", "n": {"$sum": 1}}},
+    ]).to_list(None)
+    risk_agg = await db.risks.aggregate([
+        {"$match": {"project_id": {"$in": pids}, "status": {"$in": ["identifié", "en cours"]},
+                    "criticality": {"$gte": 15}}},
+        {"$group": {"_id": "$project_id", "n": {"$sum": 1}}},
+    ]).to_list(None)
+    late_map = {x["_id"]: x["n"] for x in late_agg}
+    risk_map = {x["_id"]: x["n"] for x in risk_agg}
+    from pymongo import UpdateOne
+    ops = []
+    for p in active:
+        rag, reasons = _compute_rag(p, late_map.get(p["project_id"], 0), risk_map.get(p["project_id"], 0))
+        if rag != p.get("status_rag") or reasons != p.get("rag_reasons"):
+            ops.append(UpdateOne({"project_id": p["project_id"]},
+                                 {"$set": {"status_rag": rag, "rag_reasons": reasons}}))
+        p["status_rag"] = rag
+        p["rag_reasons"] = reasons
+    if ops:
+        await db.projects.bulk_write(ops)
 
 
 async def get_consistency_alerts(current_user: TokenPayload) -> list:
@@ -79,6 +147,7 @@ async def get_project(project_id: str, current_user: TokenPayload) -> dict:
     )
     if not project:
         raise HTTPException(status_code=404, detail="Projet introuvable")
+    await _apply_auto_rag([project])
     return project
 
 
