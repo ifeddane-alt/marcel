@@ -466,3 +466,10 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - ✅ Lot 4 : ~2000 classes hex → tokens design m-* (CSS variables + tailwind <alpha-value>), bleus/rouges unifiés, rounded-[10px]→rounded-lg, dark mode adaptatif par redéfinition de variables.
 - ✅ Alerte cohérence : GET /api/projects/consistency + bandeau /portfolio (écarts JH déclarés vs Σ tâches >10 %, liens vers fiches).
 - Testé iteration_75 : 100 % PASS backend + frontend.
+
+## 2026-06 (fork) — Onglets Dashboard & Portefeuille, saisie manuelle indicateurs, RAG auto (DÉPLOYÉ PROD, commit 2de7008)
+- ✅ Dashboard : 2 onglets « Tableau de bord » (widgets) / « Mes indicateurs » ; exports consolident les deux (PDF COMEX + slide Présentation + Rapport IA).
+- ✅ Portefeuille : mêmes onglets « Portefeuille » / « Indicateurs » (programme déjà en onglets).
+- ✅ Saisie manuelle des indicateurs non calculables : valeur + unité + sens + seuils vert/orange → pastille RAG ; RBAC projects.edit.
+- ✅ RAG projet automatique (EAC vs budget, glissement, jalons en retard, risques critiques) avec raisons en tooltip ; champ RAG retiré des formulaires.
+- Testé iteration_76 (2 HIGH corrigés : RBAC + GOU-04 orange).
