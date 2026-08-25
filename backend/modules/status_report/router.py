@@ -87,7 +87,17 @@ from . import portfolio_report as ptf_mod
 async def generate_portfolio_ai_report(current_user: TokenPayload = Depends(get_current_user)):
     if not has_perm(current_user, "export.status_report"):
         raise HTTPException(403, "Permission export.status_report requise")
-    return await ptf_mod.generate_portfolio_report(current_user.tenant_id, current_user.name)
+    from modules.catalog import service as catalog_service
+    try:
+        vals = await catalog_service.compute_values("dashboard", None, current_user)
+        indicators = [
+            {"code": i.get("indicator_id"), "nom": i.get("name"),
+             "valeur": i.get("display"), "detail": i.get("detail")}
+            for i in vals.get("items", []) if i.get("display") not in (None, "—")
+        ]
+    except Exception:
+        indicators = []
+    return await ptf_mod.generate_portfolio_report(current_user.tenant_id, current_user.name, indicators)
 
 
 @router.get("/portfolio/ai-reports")

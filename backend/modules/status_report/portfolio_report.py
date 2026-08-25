@@ -66,11 +66,13 @@ async def _collect_portfolio_data(tenant_id: str) -> dict:
     }
 
 
-async def generate_portfolio_report(tenant_id: str, generated_by: str) -> dict:
+async def generate_portfolio_report(tenant_id: str, generated_by: str, indicators: list | None = None) -> dict:
     api_key = os.environ.get("EMERGENT_LLM_KEY")
     if not api_key:
         raise HTTPException(500, "Clé LLM non configurée")
     data = await _collect_portfolio_data(tenant_id)
+    if indicators:
+        data["indicateurs_pilotage_selectionnes"] = indicators
 
     from emergentintegrations.llm.chat import LlmChat, UserMessage
     chat = LlmChat(

@@ -123,6 +123,12 @@ export default function Dashboard() {
   const [widgets, setWidgets] = useState(null);
   const [layouts, setLayouts] = useState(null);
   const [customizing, setCustomizing] = useState(false);
+  const [view, setView] = useState(() => localStorage.getItem("dashboard-view-tab") || "dashboard");
+  const switchView = (v) => {
+    setView(v);
+    localStorage.setItem("dashboard-view-tab", v);
+    if (v !== "dashboard") setCustomizing(false);
+  };
   const [saving, setSaving] = useState(false);
   const [dragWidget, setDragWidget] = useState(null);
   const [exportingPdf, setExportingPdf] = useState(false);
@@ -353,19 +359,40 @@ export default function Dashboard() {
               </button>
             </>
           )}
-          <button
-            data-testid="dashboard-customize-btn"
-            onClick={() => setCustomizing((v) => !v)}
-            className={`flex items-center gap-1.5 px-3 py-2 border rounded-lg text-sm transition-colors ${customizing ? "bg-m-blue border-m-blue text-white" : "bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}
-          >
-            {customizing ? <X size={14} /> : <Settings2 size={14} />}
-            <span className="hidden sm:inline">{customizing ? "Quitter l'édition" : "Personnaliser"}</span>
-          </button>
+          {view === "dashboard" && (
+            <button
+              data-testid="dashboard-customize-btn"
+              onClick={() => setCustomizing((v) => !v)}
+              className={`flex items-center gap-1.5 px-3 py-2 border rounded-lg text-sm transition-colors ${customizing ? "bg-m-blue border-m-blue text-white" : "bg-white border-zinc-200 text-zinc-600 hover:bg-zinc-50"}`}
+            >
+              {customizing ? <X size={14} /> : <Settings2 size={14} />}
+              <span className="hidden sm:inline">{customizing ? "Quitter l'édition" : "Personnaliser"}</span>
+            </button>
+          )}
         </div>
       </div>
 
+      {/* Onglets Dashboard / Indicateurs */}
+      <div className="flex gap-1 border-b border-m-border-lav mb-5" data-testid="dashboard-view-tabs">
+        {[
+          { id: "dashboard", label: "Tableau de bord" },
+          { id: "indicateurs", label: "Mes indicateurs" },
+        ].map((t) => (
+          <button
+            key={t.id}
+            onClick={() => switchView(t.id)}
+            data-testid={`dashboard-view-tab-${t.id}`}
+            className={`px-4 py-2.5 text-[13px] font-semibold whitespace-nowrap border-b-[3px] -mb-px transition-colors ${
+              view === t.id ? "text-m-blue border-m-blue" : "text-m-muted border-transparent hover:text-m-ink"
+            }`}
+          >
+            {t.label}
+          </button>
+        ))}
+      </div>
+
       {/* Barre de choix des blocs */}
-      {customizing && (
+      {view === "dashboard" && customizing && (
         <div className="mb-4 bg-white border border-m-blue/30 rounded-xl px-3 py-2.5" data-testid="dashboard-blocks-bar">
           <p className="text-[11px] font-semibold text-zinc-500 mb-2">
             Blocs du tableau de bord — cliquez pour afficher / masquer, ou <strong>glissez n'importe quel bloc vers l'emplacement voulu dans la grille</strong> :
@@ -396,30 +423,33 @@ export default function Dashboard() {
           </div>
         </div>
       )}
-      {customizing && (
+      {view === "dashboard" && customizing && (
         <p className="mb-4 text-[11px] text-zinc-400 flex items-center gap-1.5" data-testid="dashboard-edit-hint">
           <Move size={11} className="text-m-blue" />
           Glissez-déposez chaque bloc pour le repositionner, tirez le coin bas-droit pour le redimensionner, croix pour masquer un bloc.
         </p>
       )}
 
-      {!customizing && gridWidgets.length === 0 && (
+      {!customizing && view === "dashboard" && gridWidgets.length === 0 && (
         <div className="bg-white border border-dashed border-m-border rounded-xl p-10 text-center" data-testid="dashboard-empty-state">
           <p className="text-sm text-zinc-500 font-medium">Aucun bloc affiché sur le tableau de bord.</p>
           <p className="text-xs text-zinc-400 mt-1">Cliquez sur « Personnaliser » puis sélectionnez les blocs à afficher.</p>
         </div>
       )}
-      {customizing && gridWidgets.length === 0 && (
+      {view === "dashboard" && customizing && gridWidgets.length === 0 && (
         <div className="mb-4 border-2 border-dashed border-blue-300 bg-blue-50/40 rounded-xl p-8 text-center text-sm text-blue-500" data-testid="dashboard-empty-dropzone-hint">
           Grille vide — cliquez sur un bloc dans la barre ci-dessus ou glissez-le dans la grille.
         </div>
       )}
 
-      <div className="mb-4">
-        <IndicatorsPanel scope="dashboard" title="Mes indicateurs" />
-      </div>
+      {view === "indicateurs" && (
+        <div className="mb-4">
+          <IndicatorsPanel scope="dashboard" title="Mes indicateurs" />
+        </div>
+      )}
 
       {/* Grille matricielle */}
+      {view === "dashboard" && (
       <div
         ref={gridWrapRef}
         onDragOver={handleGridDragOver}
@@ -478,6 +508,7 @@ export default function Dashboard() {
         ))}
       </ResponsiveGridLayout>
       </div>
+      )}
 
       {aiReportOpen && <PortfolioAiReport onClose={() => setAiReportOpen(false)} />}
     </div>

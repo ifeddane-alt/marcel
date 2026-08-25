@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useCallback } from "react";
 import { useNavigate } from "react-router-dom";
 import { X, ChevronLeft, ChevronRight } from "lucide-react";
-import { projectsAPI, dashboardAPI } from "@/api";
+import { projectsAPI, dashboardAPI, catalogAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { formatEuro } from "@/utils/format";
 
@@ -19,11 +19,13 @@ export default function Presentation() {
   const { user } = useAuth();
   const [projects, setProjects] = useState([]);
   const [extras, setExtras] = useState(null);
+  const [indicators, setIndicators] = useState([]);
   const [slide, setSlide] = useState(0);
 
   useEffect(() => {
     projectsAPI.list().then((r) => setProjects(r.data || [])).catch(() => {});
     dashboardAPI.extras().then((r) => setExtras(r.data)).catch(() => setExtras({}));
+    catalogAPI.values("dashboard").then((r) => setIndicators(r.data?.items || [])).catch(() => {});
   }, []);
 
   const active = projects.filter((p) => !["cloture", "archive", "annule"].includes(p.status));
@@ -85,6 +87,26 @@ export default function Presentation() {
         </div>
       ),
     },
+    ...(indicators.length > 0 ? [{
+      key: "indicateurs",
+      render: () => (
+        <div className="space-y-8 w-full max-w-5xl">
+          <h2 className="font-heading text-3xl font-bold text-white text-center">Mes indicateurs</h2>
+          <div className="grid grid-cols-2 md:grid-cols-3 gap-4">
+            {indicators.slice(0, 9).map((it) => (
+              <div key={it.indicator_id} className="bg-white/5 border border-white/10 rounded-xl p-5 text-center" data-testid={`presentation-indicator-${it.indicator_id}`}>
+                <div className="text-[10px] font-mono-data uppercase tracking-widest text-white/40">{it.indicator_id}</div>
+                <div className="font-mono-data text-3xl font-extrabold text-white mt-1">{it.display ?? "—"}</div>
+                <div className="text-xs text-white/50 mt-1.5 leading-snug">{it.name}</div>
+              </div>
+            ))}
+          </div>
+          {indicators.length > 9 && (
+            <p className="text-center text-white/30 text-xs">+ {indicators.length - 9} autres indicateurs dans MARCEL</p>
+          )}
+        </div>
+      ),
+    }] : []),
     {
       key: "top",
       render: () => (

@@ -153,6 +153,30 @@ async def export_dashboard_pdf(current_user: TokenPayload) -> bytes:
     ]))
     story.append(rt)
 
+    # ── Mes indicateurs (sélection personnelle — onglet Indicateurs) ──────
+    from modules.catalog import service as catalog_service
+    try:
+        ind_values = await catalog_service.compute_values("dashboard", None, current_user)
+        ind_items = ind_values.get("items", [])
+    except Exception:
+        ind_items = []
+    if ind_items:
+        story.append(Paragraph("Mes indicateurs (sélection personnelle)", h_section))
+        ind_data = [["Code", "Indicateur", "Valeur", "Détail"]]
+        for it in ind_items[:16]:
+            ind_data.append([
+                str(it.get("indicator_id") or "—"),
+                Paragraph(str(it.get("name") or "—")[:70], p_cell),
+                str(it.get("display") or "—"),
+                Paragraph(str(it.get("detail") or "")[:70], p_cell),
+            ])
+        it_table = Table(ind_data, colWidths=[1.8 * cm, 8 * cm, 3.4 * cm, 5.1 * cm])
+        it_table.setStyle(TableStyle(_table_style(4) + [
+            ("ALIGN", (2, 0), (2, -1), "CENTER"),
+            ("FONTNAME", (2, 1), (2, -1), "Helvetica-Bold"),
+        ]))
+        story.append(it_table)
+
     # ── Top projets par budget ─────────────────────────────────────────────
     story.append(Paragraph("Top 5 projets par budget", h_section))
     projects_all = await db.projects.find(
