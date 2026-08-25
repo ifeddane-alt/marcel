@@ -142,14 +142,37 @@ async def get_levers(tenant_id: str, project_id: str = None) -> dict:
             "jh": jh, "value": round(jh * tjm),
         })
     if not project_id:
-        for p in projects:
-            remaining = max((p.get("budget_total") or 0) - (p.get("budget_consumed") or 0), 0)
-            if remaining <= 0:
+        raf_tasks = await db.tasks.find(
+            {"project_id": {"$in": pids}, "status": {"$nin": ["done", "termine", "completed"]}},
+            {"_id": 0, "project_id": 1, "resource_id": 1, "scope_status": 1,
+             "jh_restants_estimes": 1, "jh_planned": 1, "jh_consumed": 1}).to_list(None)
+        raf_map: dict = {}
+        for t in raf_tasks:
+            raf = t.get("jh_restants_estimes")
+            if raf is None:
+                raf = max((t.get("jh_planned") or 0) - (t.get("jh_consumed") or 0), 0)
+            if raf <= 0:
                 continue
+            tjm = tjms.get(t.get("resource_id")) or default_tjm
+            e = raf_map.setdefault(t["project_id"], {"jh_total": 0.0, "val_total": 0.0, "jh_mvp": 0.0, "val_mvp": 0.0})
+            e["jh_total"] += raf
+            e["val_total"] += raf * tjm
+            if (t.get("scope_status") or "").lower() == "sec":
+                e["jh_mvp"] += raf
+                e["val_mvp"] += raf * tjm
+        for p in projects:
+            e = raf_map.get(p["project_id"])
+            if not e or e["val_total"] <= 0:
+                continue
+            value_full = round(e["val_total"])
             levers.append({
                 "type": "pause", "id": p["project_id"], "project_id": p["project_id"],
                 "project_name": p.get("name"), "label": f"Mettre en pause — {p.get('name')}",
-                "scope_status": None, "jh": None, "value": round(remaining),
+                "scope_status": None, "jh": round(e["jh_total"], 1), "value": value_full,
+                "value_full": value_full, "jh_full": round(e["jh_total"], 1),
+                "value_mvp": round(e["val_total"] - e["val_mvp"]),
+                "jh_mvp_preserved": round(e["jh_mvp"], 1),
+                "value_mvp_preserved": round(e["val_mvp"]),
             })
     levers.sort(key=lambda l: -l["value"])
     return {"levers": levers, "default_tjm": default_tjm}
@@ -170,6 +193,20 @@ async def apply_cuts(data: dict, user) -> dict:
             applied["tasks_out"] += 1
             applied["total_saved"] += it.get("value", 0)
             details.append({"type": "task", "id": it["id"], "label": task.get("name", ""), "value": it.get("value", 0)})
+        elif it["type"] == "reduce_mvp":
+            proj = await db.projects.find_one(
+                {"project_id": it["id"], "tenant_id": user.tenant_id}, {"_id": 0, "name": 1})
+            if not proj:
+                continue
+            res = await db.tasks.update_many(
+                {"project_id": it["id"], "status": {"$nin": ["done", "termine", "completed"]},
+                 "scope_status": {"$not": {"$regex": "^sec$", "$options": "i"}}},
+                {"$set": {"scope_status": "out"}})
+            applied["tasks_out"] += res.modified_count
+            applied["projects_reduced"] = applied.get("projects_reduced", 0) + 1
+            applied["total_saved"] += it.get("value", 0)
+            details.append({"type": "reduce_mvp", "id": it["id"],
+                            "label": f"Réduction au MVP — {proj.get('name', '')}", "value": it.get("value", 0)})
         elif it["type"] == "pause":
             proj = await db.projects.find_one(
                 {"project_id": it["id"], "tenant_id": user.tenant_id}, {"_id": 0, "name": 1})
