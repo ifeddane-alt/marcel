@@ -2,6 +2,8 @@
 import uuid
 from datetime import datetime, timezone
 
+from fastapi import HTTPException
+
 from core.database import db
 from core.audit import log_audit
 
@@ -193,7 +195,8 @@ async def apply_cuts(data: dict, user) -> dict:
     details = []
     for it in items:
         if it["type"] == "task":
-            task = await db.tasks.find_one({"task_id": it["id"]}, {"_id": 0, "name": 1, "project_id": 1})
+            task = await db.tasks.find_one(
+                {"task_id": it["id"]}, {"_id": 0, "name": 1, "project_id": 1, "scope_status": 1})
             proj = task and await db.projects.find_one(
                 {"project_id": task["project_id"], "tenant_id": user.tenant_id}, {"_id": 0, "project_id": 1})
             if not proj:
@@ -201,31 +204,39 @@ async def apply_cuts(data: dict, user) -> dict:
             await db.tasks.update_one({"task_id": it["id"]}, {"$set": {"scope_status": "out"}})
             applied["tasks_out"] += 1
             applied["total_saved"] += it.get("value", 0)
-            details.append({"type": "task", "id": it["id"], "label": task.get("name", ""), "value": it.get("value", 0)})
+            details.append({"type": "task", "id": it["id"], "label": task.get("name", ""), "value": it.get("value", 0),
+                            "restore": {"tasks": [{"task_id": it["id"], "prev_scope": task.get("scope_status")}]}})
         elif it["type"] == "reduce_mvp":
             proj = await db.projects.find_one(
                 {"project_id": it["id"], "tenant_id": user.tenant_id}, {"_id": 0, "name": 1})
             if not proj:
                 continue
-            res = await db.tasks.update_many(
+            affected = await db.tasks.find(
                 {"project_id": it["id"], "status": {"$nin": ["done", "termine", "completed"]},
                  "scope_status": {"$not": {"$regex": "^(sec|out)$", "$options": "i"}}},
-                {"$set": {"scope_status": "out"}})
-            applied["tasks_out"] += res.modified_count
+                {"_id": 0, "task_id": 1, "scope_status": 1}).to_list(None)
+            if affected:
+                await db.tasks.update_many(
+                    {"task_id": {"$in": [a["task_id"] for a in affected]}},
+                    {"$set": {"scope_status": "out"}})
+            applied["tasks_out"] += len(affected)
             applied["projects_reduced"] = applied.get("projects_reduced", 0) + 1
             applied["total_saved"] += it.get("value", 0)
             details.append({"type": "reduce_mvp", "id": it["id"],
-                            "label": f"Réduction au MVP — {proj.get('name', '')}", "value": it.get("value", 0)})
+                            "label": f"Réduction au MVP — {proj.get('name', '')}", "value": it.get("value", 0),
+                            "restore": {"tasks": [{"task_id": a["task_id"], "prev_scope": a.get("scope_status")}
+                                                  for a in affected]}})
         elif it["type"] == "pause":
             proj = await db.projects.find_one(
-                {"project_id": it["id"], "tenant_id": user.tenant_id}, {"_id": 0, "name": 1})
+                {"project_id": it["id"], "tenant_id": user.tenant_id}, {"_id": 0, "name": 1, "status": 1})
             if not proj:
                 continue
             await db.projects.update_one(
                 {"project_id": it["id"], "tenant_id": user.tenant_id}, {"$set": {"status": "pause"}})
             applied["projects_paused"] += 1
             applied["total_saved"] += it.get("value", 0)
-            details.append({"type": "pause", "id": it["id"], "label": proj.get("name", ""), "value": it.get("value", 0)})
+            details.append({"type": "pause", "id": it["id"], "label": proj.get("name", ""), "value": it.get("value", 0),
+                            "restore": {"project_status": proj.get("status")}})
     await db.budget_cuts.insert_one({
         "cut_id": str(uuid.uuid4()), "tenant_id": user.tenant_id,
         "target": data.get("target"), "total_saved": applied["total_saved"],
@@ -237,3 +248,46 @@ async def apply_cuts(data: dict, user) -> dict:
 
 async def list_cuts(tenant_id: str) -> list:
     return await db.budget_cuts.find({"tenant_id": tenant_id}, {"_id": 0}).sort("created_at", -1).limit(20).to_list(None)
+
+
+async def restore_cut(cut_id: str, user) -> dict:
+    cut = await db.budget_cuts.find_one({"cut_id": cut_id, "tenant_id": user.tenant_id}, {"_id": 0})
+    if not cut:
+        raise HTTPException(status_code=404, detail="Coupe introuvable")
+    if cut.get("restored"):
+        raise HTTPException(status_code=409, detail="Cette coupe a déjà été restaurée")
+    restored = {"tasks_restored": 0, "projects_reactivated": 0}
+    for d in cut.get("details", []):
+        info = d.get("restore") or {}
+        if d["type"] in ("task", "reduce_mvp"):
+            entries = info.get("tasks")
+            if entries is None:
+                if d["type"] == "task":
+                    entries = [{"task_id": d["id"]}]
+                else:  # legacy reduce_mvp sans mémoire : tâches out non terminées du projet
+                    legacy = await db.tasks.find(
+                        {"project_id": d["id"], "scope_status": "out",
+                         "status": {"$nin": ["done", "termine", "completed"]}},
+                        {"_id": 0, "task_id": 1}).to_list(None)
+                    entries = [{"task_id": t["task_id"]} for t in legacy]
+            for e in entries:
+                prev = e.get("prev_scope")
+                if prev in ("sec", "etendu", "out"):
+                    update = {"$set": {"scope_status": prev}}
+                elif "prev_scope" in e:
+                    update = {"$unset": {"scope_status": ""}}   # non qualifiée à l'origine
+                else:
+                    update = {"$set": {"scope_status": "etendu"}}   # coupe legacy sans mémoire
+                r = await db.tasks.update_one({"task_id": e["task_id"]}, update)
+                restored["tasks_restored"] += r.matched_count
+        elif d["type"] == "pause":
+            prev = info.get("project_status") or "actif"
+            r = await db.projects.update_one(
+                {"project_id": d["id"], "tenant_id": user.tenant_id}, {"$set": {"status": prev}})
+            restored["projects_reactivated"] += r.matched_count
+    await db.budget_cuts.update_one(
+        {"cut_id": cut_id, "tenant_id": user.tenant_id},
+        {"$set": {"restored": True, "restored_by": user.email, "restored_at": _now()}})
+    await log_audit(user, "budget_cuts_restored", "portfolio", "portfolio", "Console budget cible",
+                    [{"field": "cut_id", "new": cut_id}])
+    return restored

@@ -1,7 +1,7 @@
 from fastapi import APIRouter, Depends
 from typing import Optional, List
-from core.auth import TokenPayload, get_current_user
-from .schemas import TaskCreate, TaskUpdate, PhaseTransition, PhaseEstimate
+from core.auth import TokenPayload, get_current_user, permission_required
+from .schemas import TaskCreate, TaskUpdate, PhaseTransition, PhaseEstimate, BulkScope
 from . import service
 
 router = APIRouter(tags=["tasks"])
@@ -18,6 +18,11 @@ async def list_tasks(
 @router.post("/tasks", status_code=201)
 async def create_task(data: TaskCreate, current_user: TokenPayload = Depends(get_current_user)):
     return await service.create_task(data, current_user)
+
+
+@router.post("/tasks/bulk-scope")
+async def bulk_scope(data: BulkScope, current_user: TokenPayload = Depends(permission_required("projects.edit"))):
+    return await service.bulk_scope(data, current_user)
 
 
 @router.put("/tasks/{task_id}")

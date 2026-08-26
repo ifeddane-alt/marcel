@@ -29,3 +29,8 @@ async def apply_cuts(data: dict, current_user: TokenPayload = Depends(permission
 @router.get("/forecast/cuts")
 async def list_cuts(current_user: TokenPayload = Depends(permission_required("budget.view"))):
     return await service.list_cuts(current_user.tenant_id)
+
+
+@router.post("/forecast/cuts/{cut_id}/restore")
+async def restore_cut(cut_id: str, current_user: TokenPayload = Depends(permission_required("budget.edit"))):
+    return await service.restore_cut(cut_id, current_user)

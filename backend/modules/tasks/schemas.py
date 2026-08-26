@@ -71,3 +71,8 @@ class PhaseTransition(BaseModel):
     to_phase: str
     note: Optional[str] = None
 
+
+class BulkScope(BaseModel):
+    task_ids: List[str]
+    scope_status: str   # sec | etendu | out
+

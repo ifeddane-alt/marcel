@@ -58,6 +58,7 @@ export const projectsAPI = {
   delete: (id) => api.delete(`/projects/${id}`),
   nextCode: (programId) => api.get("/projects/next-code", { params: programId ? { program_id: programId } : {} }),
   consistency: () => api.get("/projects/consistency"),
+  scopeQualification: () => api.get("/projects/scope-qualification"),
   getBenefits: (id) => api.get(`/projects/${id}/benefits`),
   setBenefits: (id, data) => api.put(`/projects/${id}/benefits`, data),
 };
@@ -116,6 +117,7 @@ export const tasksAPI = {
   create: (data) => api.post("/tasks", data),
   update: (id, data) => api.put(`/tasks/${id}`, data),
   delete: (id) => api.delete(`/tasks/${id}`),
+  bulkScope: (data) => api.post("/tasks/bulk-scope", data),
 };
 
 export const programsAPI = {
@@ -574,6 +576,7 @@ export const forecastAPI = {
   levers:    (projectId)  => api.get("/forecast/levers", { params: projectId ? { project_id: projectId } : {} }),
   applyCuts: (data)       => api.post("/forecast/apply-cuts", data),
   cuts:      ()           => api.get("/forecast/cuts"),
+  restoreCut: (cutId)     => api.post(`/forecast/cuts/${cutId}/restore`),
 };
 
 export const capacityAPI = {

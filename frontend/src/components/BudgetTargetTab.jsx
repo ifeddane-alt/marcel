@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Crosshair, PauseCircle, Scissors } from "lucide-react";
+import { Crosshair, PauseCircle, RotateCcw, Scissors } from "lucide-react";
 import { toast } from "sonner";
 import { forecastAPI } from "@/api";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -54,6 +54,16 @@ export const BudgetTargetTab = () => {
       setSelected({});
       load();
     } catch { toast.error("Erreur lors de l'application"); } finally { setBusy(false); }
+  };
+
+  const restoreCut = async (c) => {
+    if (!window.confirm(`Restaurer cette coupe de ${eur(c.total_saved)} ?\nLes tâches sorties du scope retrouveront leur scope d'origine et les projets mis en pause seront réactivés.`)) return;
+    setBusy(true);
+    try {
+      const r = await forecastAPI.restoreCut(c.cut_id);
+      toast.success(`Coupe restaurée : ${r.data.tasks_restored} tâche(s) remise(s) au scope${r.data.projects_reactivated ? `, ${r.data.projects_reactivated} projet(s) réactivé(s)` : ""}`);
+      load();
+    } catch (e) { toast.error(e.response?.data?.detail || "Erreur lors de la restauration"); } finally { setBusy(false); }
   };
 
   return (
@@ -162,10 +172,28 @@ export const BudgetTargetTab = () => {
           </div>
           <div className="divide-y divide-m-surface">
             {cuts.map((c) => (
-              <div key={c.cut_id} className="px-4 py-2.5 flex items-center gap-3 text-[13px]" data-testid={`cut-row-${c.cut_id}`}>
+              <div key={c.cut_id} className="px-4 py-2.5 flex flex-wrap items-center gap-3 text-[13px]" data-testid={`cut-row-${c.cut_id}`}>
                 <span className="text-xs text-m-muted">{c.created_at?.slice(0, 10)}</span>
                 <span className="flex-1 text-m-ink-soft">{c.details?.length || 0} levier(s) — par {c.created_by}</span>
-                <span className="font-bold text-m-red">−{eur(c.total_saved)}</span>
+                {c.restored ? (
+                  <>
+                    <span className="font-bold text-m-muted line-through">−{eur(c.total_saved)}</span>
+                    <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200" data-testid={`cut-restored-badge-${c.cut_id}`}>
+                      Restaurée le {c.restored_at?.slice(0, 10)}
+                    </span>
+                  </>
+                ) : (
+                  <>
+                    <span className="font-bold text-m-red">−{eur(c.total_saved)}</span>
+                    {canEdit && (
+                      <button onClick={() => restoreCut(c)} disabled={busy} data-testid={`cut-restore-btn-${c.cut_id}`}
+                        title="Remettre les tâches coupées au scope et réactiver les projets mis en pause"
+                        className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-lg border border-m-border-strong text-m-ink-soft hover:border-m-blue hover:text-m-blue transition-colors disabled:opacity-50">
+                        <RotateCcw size={11} /> Restaurer
+                      </button>
+                    )}
+                  </>
+                )}
               </div>
             ))}
           </div>

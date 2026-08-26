@@ -8,6 +8,7 @@ import {
 } from "lucide-react";
 import { projectsAPI, milestonesAPI, allocationsAPI, tasksAPI, resourcesAPI, risksAPI, decisionsAPI, workAllocationsAPI, projectDependenciesAPI, vendorsAPI, scopeAPI, msprojectAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
+import { toast } from "sonner";
 import { pushRecentProject } from "@/utils/recentProjects";
 import { usePermissions } from "@/hooks/usePermissions";
 import RAGBadge, { MethodologyBadge, MilestoneBadge, TaskTypeBadge, TaskStatusBadge, ProjectStatusBadge } from "@/components/RAGBadge";
@@ -157,6 +158,28 @@ export default function ProjectDetail() {
   }, [id]);
 
   useEffect(() => { fetchAll(); }, [fetchAll]);
+
+  // Qualification en masse du scope (sec / etendu / out)
+  const [selectedTaskIds, setSelectedTaskIds] = useState(new Set());
+  const [bulkBusy, setBulkBusy] = useState(false);
+  const toggleTaskSelect = (tid) => setSelectedTaskIds((prev) => {
+    const next = new Set(prev);
+    if (next.has(tid)) next.delete(tid); else next.add(tid);
+    return next;
+  });
+  const toggleSelectAllTasks = () => setSelectedTaskIds((prev) =>
+    prev.size === tasks.length ? new Set() : new Set(tasks.map((t) => t.task_id)));
+  const applyBulkScope = async (scope) => {
+    const labels = { sec: "Noyau MVP (sec)", etendu: "Étendu", out: "Hors scope" };
+    setBulkBusy(true);
+    try {
+      const r = await tasksAPI.bulkScope({ task_ids: [...selectedTaskIds], scope_status: scope });
+      toast.success(`${r.data.updated} tâche(s) qualifiée(s) « ${labels[scope]} »`);
+      setSelectedTaskIds(new Set());
+      fetchAll();
+    } catch (e) { toast.error(e.response?.data?.detail || "Erreur lors de la qualification"); }
+    finally { setBulkBusy(false); }
+  };
 
   // ── MS Project export/import ──
   const msImportRef = useRef(null);
@@ -874,6 +897,30 @@ export default function ProjectDetail() {
               )}
             </div>
 
+            {taskView === "table" && canWrite && selectedTaskIds.size > 0 && (
+              <div className="flex flex-wrap items-center gap-2 px-5 py-2.5 bg-blue-50 border-b border-m-border" data-testid="bulk-scope-bar">
+                <span className="text-xs font-bold text-m-blue">
+                  {selectedTaskIds.size} tâche{selectedTaskIds.size > 1 ? "s" : ""} sélectionnée{selectedTaskIds.size > 1 ? "s" : ""} — qualifier le scope :
+                </span>
+                <button onClick={() => applyBulkScope("sec")} disabled={bulkBusy} data-testid="bulk-scope-sec-btn"
+                  className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-emerald-600 text-white hover:bg-emerald-700 transition-colors disabled:opacity-50">
+                  Noyau MVP (sec)
+                </button>
+                <button onClick={() => applyBulkScope("etendu")} disabled={bulkBusy} data-testid="bulk-scope-etendu-btn"
+                  className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-m-blue text-white hover:bg-m-blue-dark transition-colors disabled:opacity-50">
+                  Étendu
+                </button>
+                <button onClick={() => applyBulkScope("out")} disabled={bulkBusy} data-testid="bulk-scope-out-btn"
+                  className="px-3 py-1.5 text-[11px] font-bold rounded-lg bg-zinc-600 text-white hover:bg-zinc-700 transition-colors disabled:opacity-50">
+                  Hors scope
+                </button>
+                <button onClick={() => setSelectedTaskIds(new Set())} data-testid="bulk-scope-cancel-btn"
+                  className="ml-auto text-xs text-m-muted hover:text-m-ink transition-colors">
+                  Annuler la sélection
+                </button>
+              </div>
+            )}
+
             {tasks.length === 0 ? (
               <div className="px-5 py-8 text-sm text-zinc-400 text-center">
                 Aucune tâche/feature définie pour ce projet
@@ -901,6 +948,17 @@ export default function ProjectDetail() {
                 <table className="w-full text-xs" data-testid="tasks-table">
                   <thead>
                     <tr className="bg-m-bg border-b border-m-border text-left">
+                      {canWrite && (
+                        <th className="px-3 py-2.5 w-8">
+                          <input
+                            type="checkbox"
+                            checked={tasks.length > 0 && selectedTaskIds.size === tasks.length}
+                            onChange={toggleSelectAllTasks}
+                            data-testid="task-select-all-checkbox"
+                            className="w-4 h-4 accent-m-blue cursor-pointer"
+                          />
+                        </th>
+                      )}
                       <th className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted text-center w-12">RAG</th>
                       <th className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted min-w-[180px]">Nom</th>
                       <th className="px-3 py-2.5 text-[10.5px] uppercase tracking-wider font-bold text-m-muted">Type</th>
@@ -941,6 +999,19 @@ export default function ProjectDetail() {
                           }`}
                           data-testid={`task-row-${t.task_id}`}
                         >
+                          {/* Sélection qualification en masse */}
+                          {canWrite && (
+                            <td className="px-3 py-2.5">
+                              <input
+                                type="checkbox"
+                                checked={selectedTaskIds.has(t.task_id)}
+                                onChange={() => toggleTaskSelect(t.task_id)}
+                                data-testid={`task-select-checkbox-${t.task_id}`}
+                                className="w-4 h-4 accent-m-blue cursor-pointer"
+                              />
+                            </td>
+                          )}
+
                           {/* RAG badge — first column */}
                           <td className="px-3 py-2.5 text-center">
                             <div
@@ -962,6 +1033,20 @@ export default function ProjectDetail() {
                           <td className="px-3 py-2.5 font-medium text-zinc-800 max-w-[200px]">
                             <div className="flex items-center gap-1.5 flex-wrap">
                               <span className="line-clamp-2 leading-snug">{t.name}</span>
+                              {(() => {
+                                const sc = SCOPE_STATUS_CFG[t.scope_status];
+                                if (sc) return (
+                                  <span className={`text-[9px] font-bold px-1 py-0.5 rounded-lg border flex-shrink-0 ${sc.bg} ${sc.text} ${sc.border}`} data-testid={`task-scope-badge-${t.task_id}`}>
+                                    {sc.label}
+                                  </span>
+                                );
+                                if (!["done", "termine", "completed", "cancelled"].includes(t.status)) return (
+                                  <span className="text-[9px] font-bold px-1 py-0.5 rounded-lg border flex-shrink-0 bg-amber-50 text-amber-600 border-amber-200" data-testid={`task-scope-badge-${t.task_id}`}>
+                                    À QUALIFIER
+                                  </span>
+                                );
+                                return null;
+                              })()}
                               {t.task_level && t.task_level !== "task" && (
                                 <span className={`text-[9px] font-bold px-1 py-0.5 rounded-lg border flex-shrink-0 ${
                                   t.task_level === "feature"
@@ -1110,7 +1195,7 @@ export default function ProjectDetail() {
                   {/* Totals row */}
                   <tfoot>
                     <tr className="bg-zinc-950 text-white" data-testid="tasks-totals-row">
-                      <td className="px-3 py-3 font-bold text-sm" colSpan={canWrite ? 7 : 6}>
+                      <td className="px-3 py-3 font-bold text-sm" colSpan={canWrite ? 8 : 6}>
                         TOTAUX DÉCOMPOSITION ({tasks.length} éléments)
                       </td>
                       <td className="px-3 py-3 text-right font-mono-data font-bold text-sm">
@@ -1143,7 +1228,7 @@ export default function ProjectDetail() {
 
                     {/* Coherence check vs project-level */}
                     <tr className="bg-zinc-50 border-t-2 border-m-blue" data-testid="tasks-coherence-row">
-                      <td className="px-3 py-2.5 text-[10px] text-zinc-500 font-semibold uppercase tracking-wide" colSpan={canWrite ? 7 : 6}>
+                      <td className="px-3 py-2.5 text-[10px] text-zinc-500 font-semibold uppercase tracking-wide" colSpan={canWrite ? 8 : 6}>
                         DONNÉES PROJET (référentiel)
                       </td>
                       <td className="px-3 py-2.5 text-right font-mono-data text-xs text-zinc-600 font-bold">

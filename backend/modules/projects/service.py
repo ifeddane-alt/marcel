@@ -141,6 +141,52 @@ async def get_consistency_alerts(current_user: TokenPayload) -> list:
     return alerts
 
 
+async def get_scope_qualification(current_user: TokenPayload) -> list:
+    """Taux de qualification du scope (JH restants qualifiés sec/etendu/out) par projet actif."""
+    query: dict = {"tenant_id": current_user.tenant_id,
+                   "status": {"$nin": ["cloture", "archive", "termine", "annule"]}}
+    if is_ownership_restricted(current_user, "projects.view_own"):
+        query["owner_id"] = current_user.user_id
+    projects = await db.projects.find(
+        query, {"_id": 0, "project_id": 1, "name": 1, "code": 1}).to_list(None)
+    pids = [p["project_id"] for p in projects]
+    if not pids:
+        return []
+    tasks = await db.tasks.find(
+        {"project_id": {"$in": pids}, "status": {"$nin": ["done", "termine", "completed", "cancelled"]}},
+        {"_id": 0, "project_id": 1, "scope_status": 1,
+         "jh_restants_estimes": 1, "jh_planned": 1, "jh_consumed": 1}).to_list(None)
+    agg: dict = {}
+    for t in tasks:
+        raf = t.get("jh_restants_estimes")
+        if raf is None:
+            raf = max((t.get("jh_planned") or 0) - (t.get("jh_consumed") or 0), 0)
+        if raf <= 0:
+            continue
+        e = agg.setdefault(t["project_id"], {"jh_total": 0.0, "jh_qualified": 0.0,
+                                             "tasks_total": 0, "tasks_unqualified": 0})
+        e["jh_total"] += raf
+        e["tasks_total"] += 1
+        if (t.get("scope_status") or "").strip().lower() in ("sec", "etendu", "out"):
+            e["jh_qualified"] += raf
+        else:
+            e["tasks_unqualified"] += 1
+    rows = []
+    for p in projects:
+        e = agg.get(p["project_id"])
+        if not e or e["jh_total"] <= 0:
+            continue
+        rows.append({"project_id": p["project_id"], "name": p["name"], "code": p.get("code"),
+                     "jh_total": round(e["jh_total"], 1),
+                     "jh_qualified": round(e["jh_qualified"], 1),
+                     "jh_unqualified": round(e["jh_total"] - e["jh_qualified"], 1),
+                     "tasks_total": e["tasks_total"],
+                     "tasks_unqualified": e["tasks_unqualified"],
+                     "pct_qualified": round(e["jh_qualified"] / e["jh_total"] * 100)})
+    rows.sort(key=lambda r: r["pct_qualified"])
+    return rows
+
+
 async def get_project(project_id: str, current_user: TokenPayload) -> dict:
     project = await db.projects.find_one(
         {"project_id": project_id, "tenant_id": current_user.tenant_id}, {"_id": 0}

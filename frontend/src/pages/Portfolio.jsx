@@ -1,6 +1,6 @@
 import React, { useEffect, useState, useRef } from "react";
 import { Link, useSearchParams } from "react-router-dom";
-import { Search, Plus, Pencil, Trash2, Presentation, LayoutGrid, List, AlertTriangle, ChevronDown } from "lucide-react";
+import { Search, Plus, Pencil, Trash2, Presentation, LayoutGrid, List, AlertTriangle, ChevronDown, ListChecks } from "lucide-react";
 import { projectsAPI, programsAPI, resourcesAPI, favoritesAPI, exportsAPI } from "@/api";
 import { useAuth } from "@/contexts/AuthContext";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -56,10 +56,13 @@ export default function Portfolio() {
   }, []);
   const [consistency, setConsistency] = useState([]);
   const [consistencyOpen, setConsistencyOpen] = useState(false);
+  const [qualification, setQualification] = useState([]);
+  const [qualifOpen, setQualifOpen] = useState(false);
   const [pfTab, setPfTab] = useState(() => localStorage.getItem("portfolio-view-tab") || "portfolio");
   const switchPfTab = (v) => { setPfTab(v); localStorage.setItem("portfolio-view-tab", v); };
   useEffect(() => {
     projectsAPI.consistency().then((r) => setConsistency(r.data || [])).catch(() => {});
+    projectsAPI.scopeQualification().then((r) => setQualification(r.data || [])).catch(() => {});
   }, []);
   const [preGovernanceId, setPreGovernanceId] = useState(null);
   const [exportModalOpen, setExportModalOpen] = useState(false);
@@ -173,6 +176,7 @@ export default function Portfolio() {
 
   const ragCounts = { green: 0, orange: 0, red: 0 };
   projects.forEach((p) => { if (p.status_rag in ragCounts) ragCounts[p.status_rag]++; });
+  const unqualified = qualification.filter((q) => q.pct_qualified < 100);
 
   return (
     <div className="p-4 md:p-6 lg:p-8" data-testid="portfolio-page">
@@ -261,6 +265,47 @@ export default function Portfolio() {
                   ))}
                 </Link>
               ))}
+            </div>
+          )}
+        </div>
+      )}
+
+      {/* Alerte qualification du scope (MVP / étendu / hors scope) */}
+      {unqualified.length > 0 && (
+        <div className="mb-4 border border-indigo-200 bg-indigo-50 rounded-xl overflow-hidden" data-testid="portfolio-qualification-alert">
+          <button
+            onClick={() => setQualifOpen((v) => !v)}
+            data-testid="portfolio-qualification-toggle"
+            className="w-full flex items-center gap-2 px-4 py-2.5 text-left text-xs sm:text-sm text-indigo-800 font-semibold hover:bg-indigo-100/60 transition-colors"
+          >
+            <ListChecks size={15} className="flex-shrink-0" />
+            <span>{unqualified.length} projet{unqualified.length > 1 ? "s" : ""} avec un scope non qualifié (MVP / étendu / hors scope) — exigez la qualification des tâches restantes</span>
+            <ChevronDown size={14} className={`ml-auto flex-shrink-0 transition-transform ${qualifOpen ? "rotate-180" : ""}`} />
+          </button>
+          {qualifOpen && (
+            <div className="px-4 pb-3 space-y-1.5">
+              {unqualified.map((q) => {
+                const color = q.pct_qualified < 50 ? "#e11d48" : q.pct_qualified < 80 ? "#d97706" : "#059669";
+                return (
+                  <Link
+                    key={q.project_id}
+                    to={`/projects/${q.project_id}?tab=taches`}
+                    data-testid={`qualification-item-${q.project_id}`}
+                    className="flex flex-wrap items-center gap-x-3 gap-y-1 text-xs bg-white border border-indigo-100 rounded-lg px-3 py-2 hover:border-indigo-300 transition-colors"
+                  >
+                    <span className="font-semibold text-zinc-700">{q.code ? `${q.code} · ` : ""}{q.name}</span>
+                    <span className="font-mono-data font-bold" style={{ color }} data-testid={`qualification-pct-${q.project_id}`}>
+                      {q.pct_qualified} % qualifié
+                    </span>
+                    <span className="text-zinc-500">
+                      {q.jh_unqualified.toLocaleString("fr-FR")} JH non qualifiés sur {q.jh_total.toLocaleString("fr-FR")} JH restants · {q.tasks_unqualified} tâche{q.tasks_unqualified > 1 ? "s" : ""} à qualifier
+                    </span>
+                    <span className="ml-auto w-24 h-1.5 bg-zinc-100 rounded-full overflow-hidden flex-shrink-0">
+                      <span className="block h-full rounded-full" style={{ width: `${q.pct_qualified}%`, backgroundColor: color }} />
+                    </span>
+                  </Link>
+                );
+              })}
             </div>
           )}
         </div>

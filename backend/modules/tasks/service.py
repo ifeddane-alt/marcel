@@ -5,7 +5,7 @@ import uuid
 from core.database import db
 from core.auth import TokenPayload, require_write
 from shared.rag import calculate_task_rag, _get_task_rag_settings
-from .schemas import TaskCreate, TaskUpdate, PhaseTransition, PhaseEstimate
+from .schemas import TaskCreate, TaskUpdate, PhaseTransition, PhaseEstimate, BulkScope
 
 # 3d — Matrice de transitions valides (anti-rollback : terminal = done/rejected)
 VALID_TRANSITIONS: dict = {
@@ -123,6 +123,19 @@ async def update_task(task_id: str, data: TaskUpdate, current_user: TokenPayload
         raise HTTPException(status_code=404, detail="Tâche introuvable")
     updated = await db.tasks.find_one({"task_id": task_id}, {"_id": 0})
     return updated
+
+
+async def bulk_scope(data: BulkScope, current_user: TokenPayload) -> dict:
+    require_write(current_user)
+    if data.scope_status not in ("sec", "etendu", "out"):
+        raise HTTPException(status_code=422, detail="scope_status invalide (sec | etendu | out)")
+    if not data.task_ids:
+        raise HTTPException(status_code=422, detail="Aucune tâche sélectionnée")
+    result = await db.tasks.update_many(
+        {"task_id": {"$in": data.task_ids}, "tenant_id": current_user.tenant_id},
+        {"$set": {"scope_status": data.scope_status}},
+    )
+    return {"updated": result.matched_count, "scope_status": data.scope_status}
 
 
 async def delete_task(task_id: str, current_user: TokenPayload) -> None:
