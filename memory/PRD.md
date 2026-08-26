@@ -478,3 +478,9 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - ✅ Leviers projet valorisés sur le reste à faire réel (tâches restantes × TJM), plus le budget comptable.
 - ✅ Choix par projet : Arrêt complet vs Réduire au MVP (préserve le scope sec, sort les tâches hors MVP).
 - ✅ Fix bouton Personnaliser toujours visible (8e633cf).
+
+## 2026-06 (fork) — Qualification scope : bulk + restauration coupes + taux portefeuille (DÉPLOYÉ PROD, commit 96819a2)
+- ✅ Qualification en masse depuis la liste des tâches (checkboxes + barre sec/étendu/hors scope, badge « À QUALIFIER »).
+- ✅ Bouton « Restaurer » sur l'historique des coupes (scope d'origine mémorisé, projets réactivés, 409 si déjà restaurée).
+- ✅ Bandeau portefeuille « taux de qualification du scope » par projet (JH restants, % coloré, lien vers les tâches).
+- ⚠ Token GitHub expiré → déployé par push SSH direct au VPS ; GitHub en retard sur prod (re-sync via « Save to Github » à prévoir).
