@@ -191,6 +191,7 @@ async def get_levers(tenant_id: str, project_id: str = None) -> dict:
 
 async def apply_cuts(data: dict, user) -> dict:
     items = data.get("items", [])
+    scenario_id = data.get("scenario_id")
     applied = {"tasks_out": 0, "projects_paused": 0, "total_saved": 0}
     details = []
     for it in items:
@@ -237,10 +238,16 @@ async def apply_cuts(data: dict, user) -> dict:
             applied["total_saved"] += it.get("value", 0)
             details.append({"type": "pause", "id": it["id"], "label": proj.get("name", ""), "value": it.get("value", 0),
                             "restore": {"project_status": proj.get("status")}})
+    cut_id = str(uuid.uuid4())
     await db.budget_cuts.insert_one({
-        "cut_id": str(uuid.uuid4()), "tenant_id": user.tenant_id,
+        "cut_id": cut_id, "tenant_id": user.tenant_id,
         "target": data.get("target"), "total_saved": applied["total_saved"],
+        "scenario_id": scenario_id,
         "details": details, "created_by": user.email, "created_at": _now()})
+    if scenario_id:
+        await db.cut_scenarios.update_one(
+            {"scenario_id": scenario_id, "tenant_id": user.tenant_id},
+            {"$set": {"status": "applied", "applied_at": _now(), "applied_cut_id": cut_id}})
     await log_audit(user, "budget_cuts_applied", "portfolio", "portfolio", "Console budget cible",
                     [{"field": "total_saved", "new": applied["total_saved"]}])
     return applied
@@ -288,6 +295,56 @@ async def restore_cut(cut_id: str, user) -> dict:
     await db.budget_cuts.update_one(
         {"cut_id": cut_id, "tenant_id": user.tenant_id},
         {"$set": {"restored": True, "restored_by": user.email, "restored_at": _now()}})
+    if cut.get("scenario_id"):
+        await db.cut_scenarios.update_one(
+            {"scenario_id": cut["scenario_id"], "tenant_id": user.tenant_id},
+            {"$set": {"status": "draft"}, "$unset": {"applied_at": "", "applied_cut_id": ""}})
     await log_audit(user, "budget_cuts_restored", "portfolio", "portfolio", "Console budget cible",
                     [{"field": "cut_id", "new": cut_id}])
     return restored
+
+
+# ─── Scénarios de coupe versionnés ────────────────────────────────────────────
+
+async def list_scenarios(tenant_id: str) -> list:
+    return await db.cut_scenarios.find(
+        {"tenant_id": tenant_id}, {"_id": 0}).sort("created_at", -1).limit(50).to_list(None)
+
+
+async def save_scenario(data: dict, user) -> dict:
+    name = (data.get("name") or "").strip()
+    if not name:
+        raise HTTPException(status_code=422, detail="Nom du scénario requis")
+    items = data.get("items") or []
+    if not items:
+        raise HTTPException(status_code=422, detail="Aucun levier sélectionné")
+    lineage_id = data.get("lineage_id")
+    version = 1
+    if lineage_id:
+        last = await db.cut_scenarios.find(
+            {"tenant_id": user.tenant_id, "lineage_id": lineage_id},
+            {"_id": 0, "version": 1}).sort("version", -1).limit(1).to_list(1)
+        if not last:
+            raise HTTPException(status_code=404, detail="Lignée de scénario introuvable")
+        version = last[0]["version"] + 1
+    else:
+        lineage_id = str(uuid.uuid4())
+    doc = {
+        "scenario_id": str(uuid.uuid4()), "tenant_id": user.tenant_id,
+        "lineage_id": lineage_id, "version": version, "name": name,
+        "target": data.get("target"),
+        "items": [{"type": it.get("type"), "id": it.get("id"), "mode": it.get("mode"),
+                   "label": it.get("label", ""), "value_saved": it.get("value", 0)} for it in items],
+        "total_saved": sum(it.get("value", 0) for it in items),
+        "status": "draft", "created_by": user.email, "created_at": _now()}
+    await db.cut_scenarios.insert_one(doc)
+    doc.pop("_id", None)
+    await log_audit(user, "cut_scenario_saved", "portfolio", "portfolio", f"Scénario {name} V{version}",
+                    [{"field": "total_saved", "new": doc["total_saved"]}])
+    return doc
+
+
+async def delete_scenario(scenario_id: str, user) -> None:
+    result = await db.cut_scenarios.delete_one({"scenario_id": scenario_id, "tenant_id": user.tenant_id})
+    if result.deleted_count == 0:
+        raise HTTPException(status_code=404, detail="Scénario introuvable")

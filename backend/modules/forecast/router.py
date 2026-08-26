@@ -34,3 +34,18 @@ async def list_cuts(current_user: TokenPayload = Depends(permission_required("bu
 @router.post("/forecast/cuts/{cut_id}/restore")
 async def restore_cut(cut_id: str, current_user: TokenPayload = Depends(permission_required("budget.edit"))):
     return await service.restore_cut(cut_id, current_user)
+
+
+@router.get("/forecast/scenarios")
+async def list_scenarios(current_user: TokenPayload = Depends(permission_required("budget.view"))):
+    return await service.list_scenarios(current_user.tenant_id)
+
+
+@router.post("/forecast/scenarios", status_code=201)
+async def save_scenario(data: dict, current_user: TokenPayload = Depends(permission_required("budget.edit"))):
+    return await service.save_scenario(data, current_user)
+
+
+@router.delete("/forecast/scenarios/{scenario_id}", status_code=204)
+async def delete_scenario(scenario_id: str, current_user: TokenPayload = Depends(permission_required("budget.edit"))):
+    await service.delete_scenario(scenario_id, current_user)

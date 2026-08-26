@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useState } from "react";
-import { Crosshair, PauseCircle, RotateCcw, Scissors } from "lucide-react";
+import { BookmarkPlus, Crosshair, FilePlus2, PauseCircle, RotateCcw, Scissors, Trash2, Upload } from "lucide-react";
 import { toast } from "sonner";
 import { forecastAPI } from "@/api";
 import { usePermissions } from "@/hooks/usePermissions";
@@ -20,10 +20,15 @@ export const BudgetTargetTab = () => {
   const [modes, setModes] = useState({});
   const [cuts, setCuts] = useState([]);
   const [busy, setBusy] = useState(false);
+  const [scenarios, setScenarios] = useState([]);
+  const [loadedScenario, setLoadedScenario] = useState(null);
+  const [saveFormOpen, setSaveFormOpen] = useState(false);
+  const [scenarioName, setScenarioName] = useState("");
 
   const load = useCallback(() => {
     forecastAPI.levers().then((r) => setLevers(r.data.levers || [])).catch(() => {});
     forecastAPI.cuts().then((r) => setCuts(r.data || [])).catch(() => {});
+    forecastAPI.scenarios().then((r) => setScenarios(r.data || [])).catch(() => {});
   }, []);
   useEffect(() => { load(); }, [load]);
 
@@ -36,6 +41,59 @@ export const BudgetTargetTab = () => {
   const targetNum = parseFloat(target) || 0;
   const progress = targetNum > 0 ? Math.min(Math.round((saved / targetNum) * 100), 100) : 0;
 
+  const resetScenario = () => {
+    setSelected({}); setModes({}); setTarget(""); setLoadedScenario(null);
+    setSaveFormOpen(false); setScenarioName("");
+  };
+
+  const loadScenario = (s) => {
+    const sel = {}; const m = {};
+    let missing = 0;
+    (s.items || []).forEach((it) => {
+      const l = levers.find((x) => x.type === it.type && x.id === it.id);
+      if (!l) { missing += 1; return; }
+      sel[`${l.type}:${l.id}`] = l;
+      if (it.mode) m[`${l.type}:${l.id}`] = it.mode;
+    });
+    setSelected(sel); setModes(m);
+    setTarget(s.target != null ? String(s.target) : "");
+    setLoadedScenario(s);
+    setSaveFormOpen(false);
+    if (missing) toast.warning(`Scénario « ${s.name} » V${s.version} chargé — ${missing} levier(s) introuvable(s) (projet terminé ou déjà coupé), montants recalculés à date`);
+    else toast.success(`Scénario « ${s.name} » V${s.version} chargé — montants recalculés à date`);
+  };
+
+  const saveScenario = async (name) => {
+    setBusy(true);
+    try {
+      const r = await forecastAPI.saveScenario({
+        name,
+        lineage_id: loadedScenario?.lineage_id || null,
+        target: targetNum || null,
+        items: picked.map((l) => ({
+          type: l.type, id: l.id,
+          mode: l.type === "pause" ? leverMode(l) : null,
+          label: l.label, value: leverValue(l),
+        })),
+      });
+      toast.success(`Scénario « ${r.data.name} » enregistré en V${r.data.version}`);
+      setLoadedScenario(r.data);
+      setSaveFormOpen(false); setScenarioName("");
+      forecastAPI.scenarios().then((res) => setScenarios(res.data || [])).catch(() => {});
+    } catch (e) { toast.error(e.response?.data?.detail || "Erreur lors de l'enregistrement du scénario"); }
+    finally { setBusy(false); }
+  };
+
+  const deleteScenario = async (s) => {
+    if (!window.confirm(`Supprimer le scénario « ${s.name} » V${s.version} ?`)) return;
+    try {
+      await forecastAPI.deleteScenario(s.scenario_id);
+      if (loadedScenario?.scenario_id === s.scenario_id) setLoadedScenario(null);
+      setScenarios((prev) => prev.filter((x) => x.scenario_id !== s.scenario_id));
+      toast.success("Scénario supprimé");
+    } catch { toast.error("Erreur lors de la suppression"); }
+  };
+
   const apply = async () => {
     const nMvp = picked.filter((l) => l.type === "pause" && leverMode(l) === "mvp").length;
     const nPause = picked.filter((l) => l.type === "pause" && leverMode(l) !== "mvp").length;
@@ -44,6 +102,7 @@ export const BudgetTargetTab = () => {
     try {
       const r = await forecastAPI.applyCuts({
         target: targetNum || null,
+        scenario_id: loadedScenario?.scenario_id || null,
         items: picked.map((l) => ({
           type: l.type === "pause" && leverMode(l) === "mvp" ? "reduce_mvp" : l.type,
           id: l.id,
@@ -52,6 +111,7 @@ export const BudgetTargetTab = () => {
       });
       toast.success(`Coupes appliquées : ${r.data.tasks_out} tâche(s)/feature(s) hors scope, ${r.data.projects_paused} projet(s) en pause${r.data.projects_reduced ? `, ${r.data.projects_reduced} réduit(s) au MVP` : ""} — ${eur(r.data.total_saved)} économisés`);
       setSelected({});
+      setLoadedScenario(null);
       load();
     } catch { toast.error("Erreur lors de l'application"); } finally { setBusy(false); }
   };
@@ -98,7 +158,89 @@ export const BudgetTargetTab = () => {
             </button>
           )}
         </div>
+        {canEdit && (
+          <div className="flex flex-wrap items-center gap-2 mt-4 pt-3 border-t border-m-border-soft" data-testid="scenario-toolbar">
+            {loadedScenario && (
+              <span className="text-[11px] font-bold px-2.5 py-1 rounded-full bg-indigo-50 text-indigo-700 border border-indigo-200" data-testid="scenario-loaded-badge">
+                Scénario chargé : {loadedScenario.name} · V{loadedScenario.version}
+              </span>
+            )}
+            {saveFormOpen ? (
+              <>
+                <input
+                  value={scenarioName} onChange={(e) => setScenarioName(e.target.value)}
+                  placeholder="Nom du scénario (ex. Plan austérité T3)" autoFocus
+                  data-testid="scenario-name-input"
+                  className="h-8 w-64 bg-m-bg border-[1.5px] border-m-border-strong rounded-lg px-3 text-xs font-semibold"
+                  onKeyDown={(e) => { if (e.key === "Enter" && scenarioName.trim()) saveScenario(scenarioName.trim()); }}
+                />
+                <button onClick={() => scenarioName.trim() && saveScenario(scenarioName.trim())} disabled={!scenarioName.trim() || busy}
+                  data-testid="scenario-save-confirm-btn"
+                  className="h-8 px-3 bg-m-blue text-white text-[11px] font-bold rounded-lg hover:bg-m-blue-dark disabled:opacity-50">
+                  Enregistrer V1
+                </button>
+                <button onClick={() => { setSaveFormOpen(false); setScenarioName(""); }} data-testid="scenario-save-cancel-btn"
+                  className="h-8 px-3 text-[11px] font-bold text-m-muted hover:text-m-ink">
+                  Annuler
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => (loadedScenario ? saveScenario(loadedScenario.name) : setSaveFormOpen(true))}
+                disabled={picked.length === 0 || busy}
+                data-testid="scenario-save-btn"
+                className="flex items-center gap-1.5 h-8 px-3 text-[11px] font-bold rounded-lg border border-m-border-strong text-m-ink-soft hover:border-m-blue hover:text-m-blue transition-colors disabled:opacity-50">
+                <BookmarkPlus size={12} />
+                {loadedScenario ? `Enregistrer en V${loadedScenario.version + 1}` : "Enregistrer le scénario"}
+              </button>
+            )}
+            <button onClick={resetScenario} data-testid="scenario-new-btn"
+              className="flex items-center gap-1.5 h-8 px-3 text-[11px] font-bold rounded-lg border border-m-border-strong text-m-ink-soft hover:border-m-blue hover:text-m-blue transition-colors">
+              <FilePlus2 size={12} /> Nouveau scénario
+            </button>
+            <span className="text-[10px] text-m-muted">V1 n'est jamais écrasée : ré-enregistrer depuis une version chargée crée V{loadedScenario ? loadedScenario.version + 1 : 2}, V3…</span>
+          </div>
+        )}
       </div>
+
+      {scenarios.length > 0 && (
+        <div className="bg-white border border-m-border rounded-xl overflow-hidden" data-testid="scenarios-panel">
+          <div className="px-4 py-3 border-b border-m-border-soft">
+            <span className="text-[10px] uppercase tracking-widest text-zinc-400 font-bold">Scénarios enregistrés ({scenarios.length})</span>
+          </div>
+          <div className="divide-y divide-m-surface max-h-[280px] overflow-y-auto">
+            {scenarios.map((s) => (
+              <div key={s.scenario_id} className={`px-4 py-2.5 flex flex-wrap items-center gap-3 text-[13px] ${loadedScenario?.scenario_id === s.scenario_id ? "bg-indigo-50/60" : ""}`}
+                data-testid={`scenario-row-${s.scenario_id}`}>
+                <span className="font-semibold text-m-ink">
+                  {s.name}
+                  <span className="ml-1.5 text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-m-lilac text-m-ink-soft" data-testid={`scenario-version-${s.scenario_id}`}>V{s.version}</span>
+                </span>
+                <span className="text-xs text-m-muted">{s.created_at?.slice(0, 10)} · {s.created_by} · {s.items?.length || 0} levier(s){s.target ? ` · cible ${eur(s.target)}` : ""}</span>
+                <span className="font-bold text-m-blue">{eur(s.total_saved)}</span>
+                {s.status === "applied" && (
+                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-emerald-50 text-emerald-700 border border-emerald-200" data-testid={`scenario-applied-badge-${s.scenario_id}`}>
+                    Appliqué
+                  </span>
+                )}
+                <div className="ml-auto flex items-center gap-1.5">
+                  <button onClick={() => loadScenario(s)} data-testid={`scenario-load-btn-${s.scenario_id}`}
+                    title="Recharger la sélection de ce scénario (montants recalculés à date)"
+                    className="flex items-center gap-1 px-2.5 py-1 text-[11px] font-bold rounded-lg border border-m-border-strong text-m-ink-soft hover:border-m-blue hover:text-m-blue transition-colors">
+                    <Upload size={11} /> Charger
+                  </button>
+                  {canEdit && (
+                    <button onClick={() => deleteScenario(s)} data-testid={`scenario-delete-btn-${s.scenario_id}`}
+                      className="p-1.5 text-zinc-400 hover:text-rose-600 hover:bg-rose-50 rounded-lg transition-colors" title="Supprimer">
+                      <Trash2 size={12} />
+                    </button>
+                  )}
+                </div>
+              </div>
+            ))}
+          </div>
+        </div>
+      )}
 
       <div className="bg-white border border-m-border rounded-xl overflow-hidden">
         <div className="px-4 py-3 border-b border-m-border-soft">

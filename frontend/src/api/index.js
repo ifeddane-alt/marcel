@@ -577,6 +577,9 @@ export const forecastAPI = {
   applyCuts: (data)       => api.post("/forecast/apply-cuts", data),
   cuts:      ()           => api.get("/forecast/cuts"),
   restoreCut: (cutId)     => api.post(`/forecast/cuts/${cutId}/restore`),
+  scenarios: ()           => api.get("/forecast/scenarios"),
+  saveScenario: (data)    => api.post("/forecast/scenarios", data),
+  deleteScenario: (id)    => api.delete(`/forecast/scenarios/${id}`),
 };
 
 export const capacityAPI = {
