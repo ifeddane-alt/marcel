@@ -134,13 +134,16 @@ export const BudgetTargetTab = () => {
                       <button type="button" disabled={!canEdit} onClick={() => setLeverMode(l, "mvp")}
                         data-testid={`lever-mode-mvp-${l.id}`}
                         className={`px-2.5 py-1 text-[10px] font-bold rounded-full border transition-colors ${mode === "mvp" ? "bg-m-blue border-m-blue text-white" : "bg-white border-m-border-strong text-m-ink-soft hover:border-m-blue"}`}>
-                        Réduire au MVP · {eur(l.value_mvp ?? 0)}
+                        Réduire au MVP · économise {eur(l.value_mvp ?? 0)}
                       </button>
                       {mode === "mvp" && (
                         <span className="text-[10px] text-m-muted" data-testid={`lever-mvp-preserved-${l.id}`}>
                           {(l.jh_mvp_preserved ?? 0) > 0
-                            ? `préserve le MVP (scope sec) : ${l.jh_mvp_preserved} JH · ${eur(l.value_mvp_preserved)}`
-                            : "aucune tâche marquée MVP (scope sec) sur ce projet — tout le RAF est coupé"}
+                            ? `conserve le MVP (scope sec) : ${l.jh_mvp_preserved} JH · ${eur(l.value_mvp_preserved)} — coupe ${Math.round(((l.jh_full ?? 0) - (l.jh_mvp_preserved ?? 0)) * 10) / 10} JH`
+                            : `aucune tâche marquée MVP (scope sec) — tout le RAF est coupé`}
+                          {(l.jh_unqualified ?? 0) > 0 && (
+                            <span className="text-amber-600 font-semibold"> · ⚠ dont {l.jh_unqualified} JH non qualifiés ({eur(l.value_unqualified)}) — qualifiez le scope des tâches</span>
+                          )}
                         </span>
                       )}
                     </div>

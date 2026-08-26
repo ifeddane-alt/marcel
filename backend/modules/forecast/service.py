@@ -148,18 +148,25 @@ async def get_levers(tenant_id: str, project_id: str = None) -> dict:
              "jh_restants_estimes": 1, "jh_planned": 1, "jh_consumed": 1}).to_list(None)
         raf_map: dict = {}
         for t in raf_tasks:
+            scope = (t.get("scope_status") or "").strip().lower()
+            if scope == "out":
+                continue
             raf = t.get("jh_restants_estimes")
             if raf is None:
                 raf = max((t.get("jh_planned") or 0) - (t.get("jh_consumed") or 0), 0)
             if raf <= 0:
                 continue
             tjm = tjms.get(t.get("resource_id")) or default_tjm
-            e = raf_map.setdefault(t["project_id"], {"jh_total": 0.0, "val_total": 0.0, "jh_mvp": 0.0, "val_mvp": 0.0})
+            e = raf_map.setdefault(t["project_id"], {"jh_total": 0.0, "val_total": 0.0, "jh_mvp": 0.0,
+                                                     "val_mvp": 0.0, "jh_unq": 0.0, "val_unq": 0.0})
             e["jh_total"] += raf
             e["val_total"] += raf * tjm
-            if (t.get("scope_status") or "").lower() == "sec":
+            if scope == "sec":
                 e["jh_mvp"] += raf
                 e["val_mvp"] += raf * tjm
+            elif not scope:
+                e["jh_unq"] += raf
+                e["val_unq"] += raf * tjm
         for p in projects:
             e = raf_map.get(p["project_id"])
             if not e or e["val_total"] <= 0:
@@ -173,6 +180,8 @@ async def get_levers(tenant_id: str, project_id: str = None) -> dict:
                 "value_mvp": round(e["val_total"] - e["val_mvp"]),
                 "jh_mvp_preserved": round(e["jh_mvp"], 1),
                 "value_mvp_preserved": round(e["val_mvp"]),
+                "jh_unqualified": round(e["jh_unq"], 1),
+                "value_unqualified": round(e["val_unq"]),
             })
     levers.sort(key=lambda l: -l["value"])
     return {"levers": levers, "default_tjm": default_tjm}
@@ -200,7 +209,7 @@ async def apply_cuts(data: dict, user) -> dict:
                 continue
             res = await db.tasks.update_many(
                 {"project_id": it["id"], "status": {"$nin": ["done", "termine", "completed"]},
-                 "scope_status": {"$not": {"$regex": "^sec$", "$options": "i"}}},
+                 "scope_status": {"$not": {"$regex": "^(sec|out)$", "$options": "i"}}},
                 {"$set": {"scope_status": "out"}})
             applied["tasks_out"] += res.modified_count
             applied["projects_reduced"] = applied.get("projects_reduced", 0) + 1
