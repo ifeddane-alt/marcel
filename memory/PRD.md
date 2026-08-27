@@ -484,3 +484,8 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - ✅ Bouton « Restaurer » sur l'historique des coupes (scope d'origine mémorisé, projets réactivés, 409 si déjà restaurée).
 - ✅ Bandeau portefeuille « taux de qualification du scope » par projet (JH restants, % coloré, lien vers les tâches).
 - ⚠ Token GitHub expiré → déployé par push SSH direct au VPS ; GitHub en retard sur prod (re-sync via « Save to Github » à prévoir).
+
+## 2026-06 (fork) — Scénarios de coupe versionnés (DÉPLOYÉ PROD, 4e1836a + 56fd038)
+- ✅ Enregistrer un scénario de coupes (nom + leviers + cible) en V1 ; recharger, modifier, ré-enregistrer en V2/V3 (même lignée, jamais d'écrasement) ; from scratch ; badge « Appliqué » ; suppression.
+- ✅ Incident prod 26/08 diagnostiqué : panne réseau ens2 Scaleway (preuves syslog) — pas un gel machine. Protections : watchdog réseau auto-réparant, swap 2 Go, reload nginx dans update.sh.
+- ⚠ Reboot Scaleway réinitialise les clés SSH (procédure de récupération documentée au CHANGELOG).
