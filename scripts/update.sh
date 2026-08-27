@@ -27,6 +27,11 @@ info "Reconstruction des images (2-3 min)..."
 docker compose up -d --build 2>&1 | tail -5
 ok "Containers relancés"
 
+# Reload nginx (le conteneur backend change d'IP après rebuild → évite les 502)
+sleep 5
+docker exec marcel-nginx-http-1 nginx -s reload 2>/dev/null || true
+ok "Nginx rechargé"
+
 # Synchro des profils (nouvelles permissions)
 sleep 5
 info "Synchronisation des permissions..."
