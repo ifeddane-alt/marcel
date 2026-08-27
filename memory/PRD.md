@@ -489,3 +489,7 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - ✅ Enregistrer un scénario de coupes (nom + leviers + cible) en V1 ; recharger, modifier, ré-enregistrer en V2/V3 (même lignée, jamais d'écrasement) ; from scratch ; badge « Appliqué » ; suppression.
 - ✅ Incident prod 26/08 diagnostiqué : panne réseau ens2 Scaleway (preuves syslog) — pas un gel machine. Protections : watchdog réseau auto-réparant, swap 2 Go, reload nginx dans update.sh.
 - ⚠ Reboot Scaleway réinitialise les clés SSH (procédure de récupération documentée au CHANGELOG).
+
+## 2026-06 (fork) — Données démo « full opérationnel » Banque/Assurance (PROD)
+- ✅ 100 applications, 13 programmes, 350 projets, ~4 300 tâches, 220 adhérences, 260 ressources, tous modules peuplés (Run, sécu, archi, SAFe, gouvernance, budget, OKRs, agenda 383 événements). Fiches projets complètes, chiffres cohérents inter-écrans, RAG auto 97 V / 66 O / 32 R.
+- Scripts : /app/scripts/seed_bank_full.py (+ seed_events.py). Reproductible (seed 42). Anciennes données Phoenix/DORA remplacées (choix utilisateur).
