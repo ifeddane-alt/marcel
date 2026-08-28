@@ -57,3 +57,37 @@ et prod. Preuves citées fichier:ligne ou endpoint. Aucune conformité (ISO/SOC2
 
 ## Limites de l'audit
 Isolation tenant vérifiée par sondage dynamique (non exhaustive sur 418 endpoints — recommander un test automatisé). Valeur exacte du secret prod non extraite (marquée LIKELY). Runtime Traefik/nginx et état réel SSO (OIDC/SAML/Entra) non testés dynamiquement. Uploads et injection NoSQL à approfondir. Aucun test intrusif exécuté.
+
+---
+# PHASE 1 — Correction des blockers (exécutée le 2026-06)
+
+## Réalisé (déployé prod commit 5b926a5)
+### 1. JWT (P0 CRITICAL) → PASS
+- core/auth.py : suppression du fallback hardcodé ; `_load_jwt_secret()` refuse le démarrage si secret absent / <32c / valeur compromise connue ; `JWT_SECRET` chargé à l'import (fail-fast global).
+- Rotation effectuée : nouveau secret aléatoire 256 bits (64 hex) en preview ET prod. Ancien secret blacklisté.
+- Tests backend/tests/test_jwt_security.py : 8/8 PASS (absent→refus, <32→refus, compromis→refus, valide→OK, token valide→accepté, ancien secret→rejeté, falsifié→rejeté, expiré→rejeté).
+- Vérif prod : health OK, login inchangé (Admin2026!), token forgé avec ancien secret → 401.
+
+### 3. Credentials/secrets exposés (P0) → PARTIAL→traité
+- profiles/service.py : création auto des 4 comptes démo désormais GATÉE par SEED_DEMO_USERS (défaut false). En prod (flag absent) → aucun compte démo créé, y compris pour tout NOUVEAU tenant client. La synchro profils/permissions continue de tourner.
+- seed.py, seed_beta_corp.py : mots de passe lus depuis l'environnement (SEED_ADMIN_PASSWORD / SEED_DEMO_PASSWORD / SEED_BETA_*), génération aléatoire + affichage si absents ; plus aucun mot de passe littéral dans ces fichiers.
+- profiles/service.py : mot de passe démo via SEED_DEMO_PASSWORD (plus de littéral "Altair2026!").
+- memory/test_credentials.md : retiré du suivi git + ajouté à .gitignore.
+- CI (.github/workflows/ci.yml) : job secret-scan Gitleaks ajouté.
+- Preview : SEED_* renseignés dans .env pour préserver les logins de test connus ; prod : non renseignés (pas de reseed auto).
+
+## BEFORE / AFTER
+| Control | Before | After | Test | Status | Remaining risk |
+|---|---|---|---|---|---|
+| Secret JWT (fallback + faible) | FAIL/CRITICAL | Secret 256-bit env, fail-fast, rotation | test_jwt_security 8/8 + prod 401 ancien secret | PASS | Secret manager (P2) ; iss/aud non ajoutés (P2) |
+| Création auto comptes démo en prod | FAIL/HIGH | Gatée SEED_DEMO_USERS (off en prod) | code + prod (flag absent) | PASS | Rotation des mots de passe altair/beta existants = action user |
+| Mots de passe en dur dans seeds | FAIL/HIGH | Lus depuis env, aléatoire sinon | revue code | PASS | Historique git contient encore les anciennes valeurs |
+| test_credentials.md dans le repo | FAIL/MEDIUM | Dé-tracké + gitignore | git ls-files | PASS | Présent dans l'historique git |
+| Secret scanning CI | FAIL/MEDIUM | Job Gitleaks | ci.yml | PARTIAL | À valider au 1er run CI |
+
+## RISQUES OUVERTS après Phase 1 (à traiter ultérieurement, NON demandés dans cette phase)
+- Historique Git contient encore : ancien secret JWT (désormais inutile car rotaté), mots de passe démo, token GitHub expiré. → nécessite git filter-repo/BFG + rotation de TOUT secret encore valide, opération destructive à planifier (proposée, non exécutée).
+- Mots de passe des comptes existants (altair/betacorp) toujours ceux connus publiquement → l'utilisateur doit les changer via l'app (rotation côté user, non fait pour éviter tout lockout).
+- require_write (escalade intra-tenant, P0 RBAC) : matrice produite, refonte EN ATTENTE DE VALIDATION UTILISATEUR.
+
+NON déclaré : Marcel n'est ni "secure", ni "GDPR compliant", ni "ISO 27001", ni "production ready" à l'issue de cette phase.
