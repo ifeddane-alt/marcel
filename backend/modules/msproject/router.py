@@ -1,6 +1,7 @@
 from fastapi import APIRouter, Depends, UploadFile, File
 from fastapi.responses import Response
 from core.auth import TokenPayload, get_current_user
+from core.uploads import read_upload_limited
 from . import service
 
 router = APIRouter(tags=["msproject"])
@@ -22,7 +23,7 @@ async def analyze_msproject(
     file: UploadFile = File(...),
     current_user: TokenPayload = Depends(get_current_user),
 ):
-    content = await file.read()
+    content = await read_upload_limited(file, {".mpp", ".xml"})
     return await service.analyze_import(project_id, file.filename or "", content, current_user)
 
 
@@ -31,7 +32,7 @@ async def import_new_msproject(
     file: UploadFile = File(...),
     current_user: TokenPayload = Depends(get_current_user),
 ):
-    content = await file.read()
+    content = await read_upload_limited(file, {".mpp", ".xml"})
     return await service.import_new_project(file.filename or "", content, current_user)
 
 
@@ -41,5 +42,5 @@ async def import_msproject(
     file: UploadFile = File(...),
     current_user: TokenPayload = Depends(get_current_user),
 ):
-    content = await file.read()
+    content = await read_upload_limited(file, {".mpp", ".xml"})
     return await service.import_project_file(project_id, file.filename or "", content, current_user)

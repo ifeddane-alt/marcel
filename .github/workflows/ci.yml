@@ -20,6 +20,31 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+  dependency-scan:
+    name: Dependency scan (pip-audit + SBOM)
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install scanners
+        run: pip install pip-audit cyclonedx-bom
+      - name: pip-audit (report, non-blocking)
+        working-directory: backend
+        run: pip-audit -r requirements.txt --progress-spinner off || true
+      - name: Generate CycloneDX SBOM
+        working-directory: backend
+        run: cyclonedx-py requirements requirements.txt > sbom_backend.cdx.json
+      - name: Upload SBOM
+        uses: actions/upload-artifact@v4
+        with:
+          name: sbom-backend
+          path: backend/sbom_backend.cdx.json
+      - name: yarn audit (report, non-blocking)
+        working-directory: frontend
+        run: yarn audit || true
+
   backend:
     name: Backend — pytest
     runs-on: ubuntu-latest

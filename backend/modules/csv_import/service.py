@@ -5,7 +5,8 @@ import uuid
 from datetime import datetime, timezone
 from fastapi import HTTPException, UploadFile
 from core.database import db
-from core.auth import TokenPayload, require_write, require_perm
+from core.auth import TokenPayload, require_perm
+from core.uploads import read_upload_limited
 from .schemas import IMPORT_TEMPLATES, FIELD_ALIASES, VALID_VALUES
 
 
@@ -86,7 +87,7 @@ async def preview_import(file: UploadFile, entity: str, current_user: TokenPaylo
     require_perm(current_user, "import.csv")
     if entity not in IMPORT_TEMPLATES:
         raise HTTPException(status_code=400, detail=f"Entité inconnue : {entity}")
-    content = await file.read()
+    content = await read_upload_limited(file, {".csv"})
     headers, rows = _parse_csv_bytes(content)
     if not headers:
         raise HTTPException(status_code=422, detail="Fichier CSV vide ou illisible")
@@ -120,7 +121,7 @@ async def commit_import(
     except Exception:
         raise HTTPException(status_code=422, detail="Mapping JSON invalide")
 
-    content = await file.read()
+    content = await read_upload_limited(file, {".csv"})
     headers, rows = _parse_csv_bytes(content)
     if not headers:
         raise HTTPException(status_code=422, detail="Fichier CSV vide ou illisible")

@@ -3,6 +3,7 @@ from fastapi.responses import Response
 from pydantic import BaseModel
 from urllib.parse import quote
 from core.auth import TokenPayload, get_current_user
+from core.uploads import read_upload_limited
 from . import service
 
 router = APIRouter(tags=["excel"])
@@ -28,7 +29,7 @@ async def import_preview(
     file: UploadFile = File(...),
     current_user: TokenPayload = Depends(get_current_user),
 ):
-    content = await file.read()
+    content = await read_upload_limited(file, {".xlsx", ".xlsm"})
     return await service.preview_import(entity, content, current_user)
 
 
