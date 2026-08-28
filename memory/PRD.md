@@ -1,5 +1,15 @@
 # PRD — MARCEL
 
+## 2026-08-28 — Programme sécurité « READY FOR EXTERNAL PENTEST » (DÉPLOYÉ PROD — commits 83d0727, 3f1df01, 801c6d6)
+- **RBAC déployé + prouvé prod** : require_write laxiste supprimé (74 fonctions → permissions explicites edit/create/delete), scope objet Chef de Projet (owner_id), Viewer read-only strict, révocation via perm_version (claim pv, token 8h). Migration perm_version des 8 users prod. Tests : Preview 16/16, **prod 21/21** (verify_rbac_prod.py) dont scope CP réel (65/350, non-possédé 403), révocation (bump→401). Rapport : `MARCEL_RBAC_SECURITY_REPORT.md`.
+- **Isolation cross-tenant exhaustive** : `test_cross_tenant.py` **53/53 PASS** (12 entités list/GET/PUT/DELETE + 5 exports/PDF + budget, altair vs betacorp), aucun objet Altair supprimé (non destructif vérifié).
+- **CORS strict prod** : jamais wildcard+credentials, allowlist explicite (evil.com bloqué, marcel-ppm.com autorisé). **Garde SSRF** (`core/ssrf.py`) sur connecteurs Jira/SAP/ServiceNow + webhooks (https only, blocage loopback/RFC1918/link-local/metadata + DNS) — 7/7.
+- **Uploads durcis** (`core/uploads.py`) : extension allowlist + lecture bornée 15 Mo → 413. Testé prod (.txt 400, csv 200, 16 Mo 413).
+- **Backups réparés** : marcel-backup était INEXISTANT (échec silencieux, 0 backup). Nouveau backup.sh chiffré AES-256, cron quotidien 03h30 + restore test hebdo, rétention 30j, backup préventif au déploiement. **restore_test PASS** (comptes identiques, DB scratch supprimée).
+- **SBOM CycloneDX (155 composants) + scan CVE** (pip-audit/yarn audit) + job CI dependency-scan. Rapports dans `memory/security/`.
+- **Verdict : READY FOR EXTERNAL PENTEST** (`MARCEL_PRODUCTION_READINESS_REPORT.md`). Risques résiduels documentés (NON bloquants pentest) : deps CVE non patchées, backups non off-site, SPOF/DR, Mongo at-rest, RGPD data-subject, mass assignment `data: dict`, audit login+IP, TLS verify=False connecteurs, monitoring/SIEM. Aucune certification déclarée.
+
+
 ## 2026-08 (3) — DSI 360° + Cockpit indicateurs + PB SAFe + IA proactive — DÉPLOYÉ PROD (commit 741eb08, testé iteration_66 backend 34/34 + frontend 100 %)
 - **Modules DSI 360°** (Application = objet pivot) : APM/portefeuille applicatif (`modules/applications/`, pages Applications + ApplicationDetail, matrice TIME, cycle de vie, TCO, obsolescence, lien projets↔apps), Run (`modules/run/`, activités récurrentes, budget OPEX, allocations ressources build+run intégrées à la heatmap, incidents/SLA, MEP/gels), Sécurité (`modules/security/`, risques, exigences DORA/NIS2/RGPD/ISO27001, vulnérabilités, posture par app), Architecture (`modules/architecture/`, flux, standards/dérogations, radar techno, dette technique). `core/simple_crud.py` factorisé.
 - **Cockpit indicateurs par méthodologie** (`modules/indicators/`, `ProjectIndicators.jsx`, onglet Pilotage sur fiche projet + page /pilotage portefeuille) : socle commun + EVM CPI/SPI (waterfall), vélocité/burndown (agile, saisie sprints), PI predictability (SAFe), WIP (kanban). Bug tab Pilotage manquant dans tabs array trouvé par testing_agent et corrigé.
