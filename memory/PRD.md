@@ -1,5 +1,17 @@
 # PRD — MARCEL
 
+## 2026-08-28 (2) — Sprint PRE-RED-TEAM HARDENING (DÉPLOYÉ PROD — commit 9341bb8)
+- **Mass assignment traité** : audit des 77 `data: dict` (allowlists `SimpleCrud`/`_clean_*`/Pydantic déjà en place) ; seul `project_templates` propageait `data` brut → corrigé via `core/payloads.strip_protected`. Test `test_mass_assignment.py` 9/9 (injection tenant_id/owner_id/role/permissions/is_admin/_id rejetée).
+- **TLS durci** : 4× `verify=False` (SAP/ServiceNow) supprimés ; `core/ssrf.connector_tls_verify` (défaut True, opt-out ignoré en prod via `MARCEL_ENV=production`). 0 `verify=False` résiduel.
+- **Audit trail auth** : `log_auth_event` (login_success/failed/blocked/logout/mfa) + `profile.permissions_changed` + IP proxy-aware (`core/request_ctx`, `TRUSTED_PROXY=1` en prod). Vérifié prod : IP client réelle capturée. Jamais de secret journalisé.
+- **RGPD technique** : module `modules/rgpd` — export sujet (sans password_hash), anonymisation (intégrité préservée), suppression tenant fortement protégée (admin + confirmation == son tenant). `test_rgpd.py` 9/9 (cross-tenant 404/400, viewer 403).
+- **Monitoring** : `/api/admin/monitoring` enrichi (disque, âge dernier backup + alerte, erreurs, scheduler) ; statut backup consigné en base par `backup.sh`.
+- **CVE** : 20→8 paquets vulnérables (bumps testés requests/urllib3/idna/cryptography/pillow/multipart/pyjwt/pymongo/…), triage `security/CVE_TRIAGE.md` (restants transitifs LLM / pin FastAPI / non exercés HS256 / DEV). SBOM CycloneDX + job CI dependency-scan.
+- **Backup off-site** : code S3-compatible (chiffré avant upload, gated par env) dans `backup.sh` ; restore hebdo. Credentials = action externe.
+- **Adversarial 9/9** : bypass RBAC/scope/cross-tenant/forged-JWT/alg=none/SSRF(12/12)/CORS leurre/upload double-ext tous bloqués.
+- **Verdict : PRE-RED-TEAM HARDENED** (`MARCEL_PRE_RED_TEAM_REPORT.md`). Blockers restants = infra/juridique externes (`MARCEL_EXTERNAL_ACTIONS.md` : backups off-site, Mongo at-rest, DR, DPA hors UE). Régressions : JWT 8/8, cross-tenant 53/53, RBAC prod 21/21, backup/restore PASS.
+
+
 ## 2026-08-28 — Programme sécurité « READY FOR EXTERNAL PENTEST » (DÉPLOYÉ PROD — commits 83d0727, 3f1df01, 801c6d6)
 - **RBAC déployé + prouvé prod** : require_write laxiste supprimé (74 fonctions → permissions explicites edit/create/delete), scope objet Chef de Projet (owner_id), Viewer read-only strict, révocation via perm_version (claim pv, token 8h). Migration perm_version des 8 users prod. Tests : Preview 16/16, **prod 21/21** (verify_rbac_prod.py) dont scope CP réel (65/350, non-possédé 403), révocation (bump→401). Rapport : `MARCEL_RBAC_SECURITY_REPORT.md`.
 - **Isolation cross-tenant exhaustive** : `test_cross_tenant.py` **53/53 PASS** (12 entités list/GET/PUT/DELETE + 5 exports/PDF + budget, altair vs betacorp), aucun objet Altair supprimé (non destructif vérifié).

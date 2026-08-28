@@ -2,7 +2,15 @@
 Date : 2026-08-28 · Périmètre : application SaaS multi-tenant MARCEL (marcel-ppm.com)
 Méthode : correctifs + tests dynamiques (Preview 2 tenants + Production), preuves citées. Aucun test intrusif tiers exécuté.
 
-## VERDICT : **READY FOR EXTERNAL PENTEST**
+## VERDICT : **READY FOR EXTERNAL PENTEST** — renforcé « PRE-RED-TEAM HARDENED » (2026-08-28)
+
+> Mise à jour 2026-08-28 (sprint pré-red-team) : les risques résiduels ci-dessous ont été traités ou documentés.
+> Voir `MARCEL_PRE_RED_TEAM_REPORT.md` (matrice complète + tests adversariaux) et `MARCEL_EXTERNAL_ACTIONS.md`.
+> Résumé : mass-assignment traité (0 endpoint dangereux), `verify=False` éliminé (0 en prod), SSRF durci (12/12 bypass bloqués),
+> audit auth login/logout/révocation + IP proxy-aware, RGPD technique (export/anonymize/tenant-delete scoped, 9/9),
+> monitoring enrichi (disque/backup), CVE 20→8 paquets (triage documenté), backup off-site (code prêt, gated).
+> Blockers restants = infra/juridique externes (backups off-site, Mongo at-rest, DR, DPA hors UE).
+
 
 Justification : les blockers P0 identifiés à l'audit initial (secret JWT faible, escalade de privilège intra-tenant)
 sont corrigés, déployés en production et prouvés par tests. L'isolation cross-tenant est vérifiée dynamiquement
