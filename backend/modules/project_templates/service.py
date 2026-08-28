@@ -6,6 +6,7 @@ from typing import Optional
 from fastapi import HTTPException
 from core.auth import TokenPayload, has_perm
 from core.database import db
+from core.payloads import strip_protected
 from .templates_data import DEFAULT_TEMPLATES
 
 
@@ -59,7 +60,7 @@ async def create_template(data: dict, user: TokenPayload) -> dict:
     if not has_perm(user, "admin.templates"):
         raise HTTPException(403, "Permission admin.templates requise")
     doc = {
-        **data,
+        **strip_protected(data),
         "template_id": str(uuid.uuid4()),
         "tenant_id": user.tenant_id,
         "is_default": False,
@@ -80,6 +81,7 @@ async def update_template(template_id: str, data: dict, user: TokenPayload) -> d
     )
     if not tpl:
         raise HTTPException(404, "Template introuvable")
+    data = strip_protected(data)
     data.pop("_id", None)
     data.pop("template_id", None)
     data.pop("tenant_id", None)

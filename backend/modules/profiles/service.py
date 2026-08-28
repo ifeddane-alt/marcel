@@ -401,6 +401,9 @@ async def update_profile(profile_id: str, data: ProfileUpdate, user: TokenPayloa
             {"profile_id": profile_id, "tenant_id": user.tenant_id},
             {"$inc": {"perm_version": 1}},
         )
+        from core.audit import log_audit
+        await log_audit(user, "profile.permissions_changed", "profile", profile_id, p.get("name", ""),
+                        [{"field": "permissions", "old": "…", "new": "…"}])
     return await get_profile(profile_id, user)
 
 

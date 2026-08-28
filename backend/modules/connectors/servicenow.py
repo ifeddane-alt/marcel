@@ -74,12 +74,12 @@ async def test_connection(base_url: str, auth_type: str, credentials: dict) -> d
 
     try:
         import httpx
-        from core.ssrf import validate_public_url
+        from core.ssrf import validate_public_url, connector_tls_verify
         user  = credentials.get("username") or credentials.get("email", "")
         pw    = credentials.get("password", "")
         url   = f"{base_url.rstrip('/')}/api/now/table/sys_user?sysparm_limit=1"
         validate_public_url(base_url.rstrip("/"))
-        async with httpx.AsyncClient(timeout=8, verify=False, auth=(user, pw)) as client:
+        async with httpx.AsyncClient(timeout=8, verify=connector_tls_verify(), auth=(user, pw)) as client:
             resp = await client.get(url, headers={"Accept": "application/json"})
         if resp.status_code == 200:
             return {"success": True, "message": "Connexion ServiceNow établie"}
@@ -121,12 +121,14 @@ def _mock_sync_result(direction: str) -> dict:
 async def _real_sync(config: dict, direction: str) -> dict:
     """Sync réelle ServiceNow (V1 — import Change Requests uniquement)."""
     import httpx
+    from core.ssrf import validate_public_url, connector_tls_verify
     base_url = config.get("base_url", "").rstrip("/")
     creds    = config.get("_decrypted_creds", {})
     user     = creds.get("username") or creds.get("email", "")
     pw       = creds.get("password", "")
+    validate_public_url(base_url)
     url      = f"{base_url}/api/now/table/change_request?sysparm_limit=50&sysparm_display_value=true"
-    async with httpx.AsyncClient(timeout=30, verify=False, auth=(user, pw)) as client:
+    async with httpx.AsyncClient(timeout=30, verify=connector_tls_verify(config), auth=(user, pw)) as client:
         resp = await client.get(url, headers={"Accept": "application/json"})
         if resp.status_code != 200:
             raise Exception(f"ServiceNow Table API error {resp.status_code}")

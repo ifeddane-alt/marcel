@@ -44,3 +44,40 @@ find "$BACKUP_DIR" -name "*.gz.enc" -mtime +$KEEP_DAYS -delete
 SIZE=$(du -sh "$ENC" 2>/dev/null | cut -f1)
 echo "[$(date)] OK Sauvegarde chiffree : $ENC ($SIZE)"
 ls -lh "$BACKUP_DIR"/*.gz.enc 2>/dev/null | awk '{print "  "$5, $9}'
+
+# Consigner le statut en base (visible par l'API de monitoring)
+ISO=$(date -u +%Y-%m-%dT%H:%M:%S+00:00)
+OFFSITE="none"
+
+# ── Upload off-site S3-compatible (OPTIONNEL, activé si configuré) ────────────
+# Le fichier est DÉJÀ chiffré (AES-256) avant tout upload. Credentials hors repo.
+# Requiert : S3_BACKUP_BUCKET (+ AWS_ACCESS_KEY_ID/AWS_SECRET_ACCESS_KEY dans l'env),
+# optionnel S3_ENDPOINT_URL (ex. Scaleway https://s3.fr-par.scw.cloud).
+if [ -n "${S3_BACKUP_BUCKET:-}" ]; then
+  if command -v aws >/dev/null 2>&1; then
+    EP_ARG=""
+    [ -n "${S3_ENDPOINT_URL:-}" ] && EP_ARG="--endpoint-url ${S3_ENDPOINT_URL}"
+    if aws s3 cp "$ENC" "s3://${S3_BACKUP_BUCKET}/$(basename "$ENC")" $EP_ARG >/dev/null 2>&1; then
+      # Vérification de présence côté bucket
+      if aws s3 ls "s3://${S3_BACKUP_BUCKET}/$(basename "$ENC")" $EP_ARG >/dev/null 2>&1; then
+        OFFSITE="ok"
+        echo "[$(date)] OK Upload off-site : s3://${S3_BACKUP_BUCKET}/$(basename "$ENC")"
+      else
+        OFFSITE="upload_unverified"
+        echo "[$(date)] WARN upload off-site non vérifié"
+      fi
+    else
+      OFFSITE="upload_failed"
+      echo "[$(date)] WARN échec upload off-site S3"
+    fi
+  else
+    OFFSITE="aws_cli_absent"
+    echo "[$(date)] WARN S3_BACKUP_BUCKET défini mais aws CLI absent — upload off-site ignoré"
+  fi
+fi
+
+docker compose exec -T mongo mongosh --quiet --eval "
+db.getSiblingDB('${DB_NAME}').backup_status.insertOne({
+  result:'success', file:'$(basename "$ENC")', size:'${SIZE}',
+  offsite:'${OFFSITE}', created_at:'${ISO}'
+});" >/dev/null 2>&1 || true

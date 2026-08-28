@@ -76,6 +76,7 @@ from modules.powerbi.router import router as powerbi_router
 from modules.status_report.router import router as status_report_router
 from modules.project_templates.router import router as project_templates_router
 from modules.monitoring.router import router as monitoring_router
+from modules.rgpd.router import router as rgpd_router
 from modules.msproject.router import router as msproject_router
 from modules.sso.router import router as sso_router
 from modules.excel_io.router import router as excel_io_router
@@ -176,6 +177,7 @@ for _router in [
     status_report_router,
     project_templates_router,
     monitoring_router,
+    rgpd_router,
     msproject_router,
     sso_router,
     excel_io_router,

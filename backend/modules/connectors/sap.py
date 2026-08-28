@@ -56,13 +56,13 @@ async def test_connection(base_url: str, auth_type: str, credentials: dict) -> d
 
     try:
         import httpx
-        from core.ssrf import validate_public_url
+        from core.ssrf import validate_public_url, connector_tls_verify
         headers = {"Accept": "application/json"}
         user = credentials.get("username") or credentials.get("email", "")
         password = credentials.get("password", "")
         url = f"{base_url.rstrip('/')}/sap/opu/odata/sap/ZBDG_BUDGET_SRV/$metadata"
         validate_public_url(base_url.rstrip("/"))
-        async with httpx.AsyncClient(timeout=8, verify=False, auth=(user, password)) as client:
+        async with httpx.AsyncClient(timeout=8, verify=connector_tls_verify(), auth=(user, password)) as client:
             resp = await client.get(url, headers=headers)
         if resp.status_code in (200, 401, 403):
             if resp.status_code == 200:
@@ -181,14 +181,16 @@ def _mock_sync_result(direction: str) -> dict:
 async def _real_odata_sync(config: dict, direction: str) -> dict:
     """Sync réelle SAP OData (V1 — import budgets uniquement)."""
     import httpx
+    from core.ssrf import validate_public_url, connector_tls_verify
     base_url = config.get("base_url", "").rstrip("/")
     creds = config.get("_decrypted_creds", {})
     user  = creds.get("username") or creds.get("email", "")
     pw    = creds.get("password", "")
     auth  = (user, pw)
 
+    validate_public_url(base_url)
     url = f"{base_url}/sap/opu/odata/sap/ZBDG_BUDGET_SRV/BudgetSet?$format=json&$top=50"
-    async with httpx.AsyncClient(timeout=30, verify=False, auth=auth) as client:
+    async with httpx.AsyncClient(timeout=30, verify=connector_tls_verify(config), auth=auth) as client:
         resp = await client.get(url)
         if resp.status_code != 200:
             raise Exception(f"SAP OData error {resp.status_code}")

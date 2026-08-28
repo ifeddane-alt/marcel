@@ -4,6 +4,7 @@ Bloque les cibles internes (loopback, RFC1918, link-local, metadata cloud) et le
 non http(s). La résolution DNS est vérifiée pour empêcher le rebinding vers une IP privée.
 """
 import ipaddress
+import os
 import socket
 from urllib.parse import urlparse
 
@@ -52,3 +53,15 @@ def validate_public_url(url: str, *, allow_http: bool = False) -> None:
         ip = info[4][0]
         if _ip_is_blocked(ip):
             raise ValueError(f"Cible interne interdite ({host} → {ip})")
+
+
+def connector_tls_verify(config: dict | None = None) -> bool:
+    """Politique TLS des connecteurs sortants.
+
+    Vérification activée par défaut. Un opt-out par connecteur (config verify_tls=false)
+    n'est honoré QUE hors production (MARCEL_ENV != production). En prod, jamais de bypass.
+    """
+    prod = os.environ.get("MARCEL_ENV", "").lower() == "production"
+    if not prod and config and config.get("verify_tls") is False:
+        return False
+    return True

@@ -1,0 +1,30 @@
+cryptography     46.0.7  PYSEC-2026-3554     49.0.0
+cryptography     46.0.7  GHSA-537c-gmf6-5ccf 48.0.1
+ecdsa            0.19.2  PYSEC-2026-1325
+starlette        0.37.2  PYSEC-2026-161      1.0.1
+starlette        0.37.2  PYSEC-2026-161      1.0.1
+starlette        0.37.2  PYSEC-2026-248      1.3.0
+starlette        0.37.2  PYSEC-2026-249      1.3.1
+starlette        0.37.2  PYSEC-2026-248      1.3.0
+starlette        0.37.2  PYSEC-2026-1943     0.40.0
+starlette        0.37.2  PYSEC-2026-1941     0.47.2
+starlette        0.37.2  PYSEC-2026-2281     1.1.0
+starlette        0.37.2  PYSEC-2026-2280     1.1.0
+litellm          1.80.0  PYSEC-2026-388      1.84.0
+litellm          1.80.0  PYSEC-2026-390      1.83.0
+litellm          1.80.0  PYSEC-2026-388      1.84.0
+litellm          1.80.0  PYSEC-2026-2597     1.83.0
+litellm          1.80.0  PYSEC-2026-2599     1.83.7
+litellm          1.80.0  PYSEC-2026-2598     1.83.14
+litellm          1.80.0  PYSEC-2026-2600     1.83.10
+litellm          1.80.0  PYSEC-2026-3477     1.83.7
+litellm          1.80.0  PYSEC-2026-3479     1.84.0
+litellm          1.80.0  PYSEC-2026-3478     1.82.0
+litellm          1.80.0  PYSEC-2026-3476     1.83.10
+litellm          1.80.0  GHSA-69x8-hrgq-fjj8 1.83.0
+pytest           9.0.2   PYSEC-2026-1845     9.0.3
+python-multipart 0.0.30  PYSEC-2026-3040     0.0.31
+
+Name                 Skip Reason
+-------------------- -----------------------------------------------------------------------------------
+emergentintegrations Dependency not found on PyPI and could not be audited: emergentintegrations (0.1.0)

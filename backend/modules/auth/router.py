@@ -8,6 +8,8 @@ from threading import Lock
 from pydantic import BaseModel
 from core.auth import TokenPayload, get_current_user, create_token
 from core.database import db
+from core.request_ctx import client_ip
+from core.audit import log_auth_event
 from .schemas import LoginRequest
 
 router = APIRouter(tags=["auth"])
@@ -41,22 +43,36 @@ def _check_rate_limit(email: str) -> None:
 @router.post("/auth/login")
 async def login(req: LoginRequest, request: Request):
     # ── Rate limiting par email ──
-    _check_rate_limit(req.email)
-    client_ip = request.client.host if request.client else "?"
+    ip = client_ip(request)
+    try:
+        _check_rate_limit(req.email)
+    except HTTPException:
+        await log_auth_event("auth.login_blocked", result="blocked", email=req.email, source_ip=ip, detail="rate_limit")
+        raise
 
     user = await db.users.find_one({"email": req.email}, {"_id": 0})
     if not user:
-        logger.warning("[auth] Tentative échouée (email inconnu): %s depuis %s", req.email, client_ip)
+        logger.warning("[auth] Tentative échouée (email inconnu): %s depuis %s", req.email, ip)
+        await log_auth_event("auth.login_failed", result="failure", email=req.email, source_ip=ip, detail="unknown_email")
         raise HTTPException(status_code=401, detail="Identifiants invalides")
     if user.get("is_active") is False:
-        logger.warning("[auth] Tentative sur compte désactivé: %s depuis %s", req.email, client_ip)
+        logger.warning("[auth] Tentative sur compte désactivé: %s depuis %s", req.email, ip)
+        await log_auth_event("auth.login_failed", result="failure", email=req.email,
+                             tenant_id=user.get("tenant_id", ""), user_id=user.get("user_id", ""),
+                             source_ip=ip, detail="account_disabled")
         raise HTTPException(status_code=403, detail="Compte désactivé — contactez votre administrateur")
     if not user.get("password_hash"):
         # Compte SSO sans mot de passe local
-        logger.warning("[auth] Tentative mdp sur compte SSO: %s depuis %s", req.email, client_ip)
+        logger.warning("[auth] Tentative mdp sur compte SSO: %s depuis %s", req.email, ip)
+        await log_auth_event("auth.login_failed", result="failure", email=req.email,
+                             tenant_id=user.get("tenant_id", ""), user_id=user.get("user_id", ""),
+                             source_ip=ip, detail="sso_account")
         raise HTTPException(status_code=401, detail="Ce compte utilise le SSO — utilisez la connexion SSO")
     if not bcrypt.checkpw(req.password.encode(), user["password_hash"].encode()):
-        logger.warning("[auth] Tentative échouée (mauvais mdp): %s depuis %s", req.email, client_ip)
+        logger.warning("[auth] Tentative échouée (mauvais mdp): %s depuis %s", req.email, ip)
+        await log_auth_event("auth.login_failed", result="failure", email=req.email,
+                             tenant_id=user.get("tenant_id", ""), user_id=user.get("user_id", ""),
+                             source_ip=ip, detail="bad_password")
         raise HTTPException(status_code=401, detail="Identifiants invalides")
 
     if user.get("mfa_enabled"):
@@ -64,6 +80,8 @@ async def login(req: LoginRequest, request: Request):
             "tenant_id": user["tenant_id"], "user_id": user["user_id"],
             "email": user["email"], "type": "mfa",
         })
+        await log_auth_event("auth.mfa_challenge", result="success", email=user["email"],
+                             tenant_id=user["tenant_id"], user_id=user["user_id"], source_ip=ip)
         return {"mfa_required": True, "mfa_ticket": ticket}
 
     # Charger les permissions et le nom du profil
@@ -86,6 +104,8 @@ async def login(req: LoginRequest, request: Request):
         for k in ("user_id", "email", "name", "role", "tenant_id", "resource_id", "profile_id")
     }
     user_data["profile_name"] = profile_name
+    await log_auth_event("auth.login_success", result="success", email=user["email"],
+                         tenant_id=user["tenant_id"], user_id=user["user_id"], source_ip=ip)
 
     return {
         "access_token": token,
@@ -120,6 +140,16 @@ async def _load_profile_data(user: dict) -> tuple[list[str], str]:
 @router.get("/auth/me")
 async def get_me(current_user: TokenPayload = Depends(get_current_user)):
     return current_user.model_dump()
+
+
+@router.post("/auth/logout")
+async def logout(request: Request, current_user: TokenPayload = Depends(get_current_user)):
+    """Logout côté client (JWT stateless). Journalisé pour l'audit trail.
+    La révocation serveur immédiate reste assurée par perm_version (bump des droits)."""
+    await log_auth_event("auth.logout", result="success", email=current_user.email,
+                         tenant_id=current_user.tenant_id, user_id=current_user.user_id,
+                         source_ip=client_ip(request))
+    return {"logged_out": True}
 
 
 class ChangePasswordRequest(BaseModel):
