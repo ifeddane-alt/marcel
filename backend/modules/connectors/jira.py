@@ -11,6 +11,7 @@ from datetime import datetime, timezone
 import httpx
 
 from core.database import db
+from core.ssrf import validate_public_url
 
 JIRA_DEFAULT_MAPPING = {
     "fields": [
@@ -31,6 +32,11 @@ def _now() -> str:
 
 def _is_demo(base_url: str) -> bool:
     return not base_url or any(p in base_url.lower() for p in _DEMO_URL_PATTERNS)
+
+
+def _ensure_safe(base_url: str) -> None:
+    """Garde SSRF : bloque toute cible interne avant un appel réseau réel."""
+    validate_public_url(base_url.rstrip("/"))
 
 
 def _auth_headers(credentials: dict) -> dict:
@@ -77,10 +83,13 @@ async def test_connection(base_url: str, auth_type: str, credentials: dict) -> d
             "server_info": {"serverTitle": "Jira Cloud (simulation)", "deployment": "Cloud"},
         }
     try:
+        _ensure_safe(base_url)
         async with httpx.AsyncClient(base_url=base_url.rstrip("/"), timeout=10,
                                      headers=_auth_headers(credentials)) as client:
             data = await _request(client, "GET", "/rest/api/3/myself")
         return {"success": True, "message": f"Connecté en tant que {data.get('displayName', 'inconnu')}"}
+    except ValueError as e:
+        return {"success": False, "message": f"URL refusée : {e}"}
     except Exception as e:
         return {"success": False, "message": f"Connexion impossible : {str(e)[:150]}"}
 
@@ -96,6 +105,7 @@ async def list_projects(config: dict) -> list:
             {"key": "DATA", "name": "Plateforme Data"},
         ]
     results, start = [], 0
+    _ensure_safe(base_url)
     async with httpx.AsyncClient(base_url=base_url, timeout=15, headers=_auth_headers(creds)) as client:
         while True:
             page = await _request(client, "GET", "/rest/api/3/project/search",
@@ -139,6 +149,7 @@ async def project_summary(config: dict, jira_key: str) -> dict:
         et = random.randint(3, 9)
         return {"key": jira_key, "issues_done": done, "issues_total": total,
                 "epics_done": random.randint(0, et), "epics_total": et}
+    _ensure_safe(base_url)
     async with httpx.AsyncClient(base_url=base_url, timeout=30, headers=_auth_headers(creds)) as client:
         done, total = await _search_count(client, f'project = "{jira_key}"')
         e_done, e_total = await _search_count(client, f'project = "{jira_key}" AND issuetype = Epic')

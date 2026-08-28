@@ -8,6 +8,7 @@ from core.auth import TokenPayload
 from .schemas import (
     ModulesUpdate, WorkflowsUpdate, EnumsUpdate,
     HolidaysUpdate, ThresholdsUpdate, PPTBrandingUpdate,
+    WebhooksUpdate, EmailAlertsUpdate, SSOUpdate, ProjectCodesUpdate,
 )
 
 # ─── Lire la configuration complète ──────────────────────────────────────────
@@ -68,25 +69,25 @@ async def update_ppt_branding(data: PPTBrandingUpdate, current_user: TokenPayloa
     )
 
 
-async def update_webhooks(data: "WebhooksUpdate", current_user: TokenPayload) -> dict:
+async def update_webhooks(data: WebhooksUpdate, current_user: TokenPayload) -> dict:
     return await _update_section(
         current_user.tenant_id, "webhook", data.webhook.model_dump()
     )
 
 
-async def update_email_alerts(data: "EmailAlertsUpdate", current_user: TokenPayload) -> dict:
+async def update_email_alerts(data: EmailAlertsUpdate, current_user: TokenPayload) -> dict:
     return await _update_section(
         current_user.tenant_id, "email_alerts", data.email_alerts.model_dump()
     )
 
 
-async def update_sso(data: "SSOUpdate", current_user: TokenPayload) -> dict:
+async def update_sso(data: SSOUpdate, current_user: TokenPayload) -> dict:
     return await _update_section(
         current_user.tenant_id, "sso", data.sso.model_dump()
     )
 
 
-async def update_project_codes(data: "ProjectCodesUpdate", current_user: TokenPayload) -> dict:
+async def update_project_codes(data: ProjectCodesUpdate, current_user: TokenPayload) -> dict:
     cfg = data.project_codes.model_dump()
     cfg["default_prefix"] = (cfg.get("default_prefix") or "PRJ").strip().upper()
     cfg["program_prefixes"] = {

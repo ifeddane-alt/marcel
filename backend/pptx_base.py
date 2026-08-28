@@ -2,12 +2,9 @@
 import io
 import base64
 from datetime import datetime
-from typing import List, Optional
 
 import matplotlib
 matplotlib.use("Agg")
-import matplotlib.pyplot as plt
-import matplotlib.patches as mpatches
 
 from pptx import Presentation
 from pptx.util import Inches, Pt, Emu

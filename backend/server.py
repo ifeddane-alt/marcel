@@ -144,10 +144,17 @@ class ErrorTrackingMiddleware(BaseHTTPMiddleware):
 
 app.add_middleware(ErrorTrackingMiddleware)
 
+# ── CORS ──────────────────────────────────────────────────────────────────────
+# Jamais de wildcard combiné à allow_credentials (interdit par la spec + dangereux).
+# App servie en same-origin (nginx sert le front et proxifie /api) → allowlist vide
+# = sûr par défaut. En prod, CORS_ORIGINS liste les origines explicites autorisées.
+_cors_env = os.environ.get("CORS_ORIGINS", "").strip()
+_cors_origins = [o.strip() for o in _cors_env.split(",") if o.strip()]
+_cors_wildcard = _cors_origins == ["*"]
 app.add_middleware(
     CORSMiddleware,
-    allow_credentials=True,
-    allow_origins=os.environ.get("CORS_ORIGINS", "*").split(","),
+    allow_credentials=not _cors_wildcard,
+    allow_origins=_cors_origins,
     allow_methods=["*"],
     allow_headers=["*"],
 )
@@ -222,11 +229,7 @@ scheduler = AsyncIOScheduler()
 async def _run_scheduled_sync(connector_type: str):
     """Exécute la sync d'un connecteur et log le résultat."""
     from modules.connectors import service as conn_svc
-    import uuid
-    from datetime import datetime, timezone
     logger.info(f"[Scheduler] Démarrage sync {connector_type}")
-    log_id = str(uuid.uuid4())
-    started_at = datetime.now(timezone.utc)
     try:
         # Récupère toutes les configs actives pour ce type de connecteur
         configs = await db.connector_configs.find(

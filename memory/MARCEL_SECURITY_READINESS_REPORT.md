@@ -91,3 +91,25 @@ Isolation tenant vérifiée par sondage dynamique (non exhaustive sur 418 endpoi
 - require_write (escalade intra-tenant, P0 RBAC) : matrice produite, refonte EN ATTENTE DE VALIDATION UTILISATEUR.
 
 NON déclaré : Marcel n'est ni "secure", ni "GDPR compliant", ni "ISO 27001", ni "production ready" à l'issue de cette phase.
+
+---
+# PHASE 2 — RBAC explicite + object-level authorization (déployée prod le 2026-08-28, commit 83d0727)
+
+Détail complet et matrice profil/permission : `/app/memory/MARCEL_RBAC_SECURITY_REPORT.md`.
+
+## BEFORE / AFTER
+| Control | Before | After | Test | Status | Remaining risk |
+|---|---|---|---|---|---|
+| Escalade privilège intra-tenant (require_write) | FAIL/HIGH — toute perm d'écriture ouvrait 74 fonctions | Permissions explicites par module (edit/create/delete distincts), 0 usage résiduel de require_write | Preview 16/16 + prod 21/21 (verify_rbac_prod.py) | PASS | Endpoints `data: dict` (76) restent à typer Pydantic (P1 mass assignment) |
+| Viewer read-only | FAIL — timesheet/leave self.write implicites | READ_ONLY sans aucune écriture | viewer PUT/POST/DELETE → 403 (prod), perms token vérifiées | PASS | — |
+| Object-level authorization (Chef de Projet) | FAIL — permission globale suffisait | Scope owner_id sur projets + tâches rattachées ; list/get/update filtrés | prod : CP voit 65/350, PUT non-possédé 403, PUT possédé 200 | PASS | Autres entités (risques, jalons) héritent du scope via le projet mais non testées une à une |
+| Révocation de session | FAIL/MEDIUM — JWT 24h sans révocation | perm_version + claim pv, token 8h ; bump = 401 immédiat | prod : bump pv → ancien token 401, re-login pv incrémenté | PASS | Pas de logout serveur/denylist par jti (P2) |
+| Auto-élévation admin | non couvert | Gardes anti auto-élévation/auto-désactivation | testé preview | PASS | — |
+| Migration comptes existants | — | perm_version=1 initialisé (12 users preview, 8 users prod) | count sans perm_version = 0 | PASS | — |
+
+## Vérifications déploiement prod (2026-08-28)
+- update.sh : backup préventif, git pull (83d0727), rebuild, nginx reload, sync permissions 2 tenants — log sans erreur.
+- Image en cours contient le code RBAC (grep perm_version dans le conteneur = 4).
+- /api/health 200 database ok ; login admin/viewer/cp OK ; frontend /home OK (screenshot).
+- Retest création risque admin avec payload valide : 201 + cleanup 204 (le 422 du smoke précédent était un payload de test invalide, pas une régression).
+

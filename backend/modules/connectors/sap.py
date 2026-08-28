@@ -3,7 +3,6 @@ Connecteur SAP — Import budgets/centres de coût ↔ MARCEL projets.
 V1 : Import CSV structuré SAP + OData si disponible.
 V2 : RFC natif PyRFC (fallback OData/mock).
 """
-import random
 
 SAP_DEFAULT_MAPPING = {
     "fields": [
@@ -57,10 +56,12 @@ async def test_connection(base_url: str, auth_type: str, credentials: dict) -> d
 
     try:
         import httpx
+        from core.ssrf import validate_public_url
         headers = {"Accept": "application/json"}
         user = credentials.get("username") or credentials.get("email", "")
         password = credentials.get("password", "")
         url = f"{base_url.rstrip('/')}/sap/opu/odata/sap/ZBDG_BUDGET_SRV/$metadata"
+        validate_public_url(base_url.rstrip("/"))
         async with httpx.AsyncClient(timeout=8, verify=False, auth=(user, password)) as client:
             resp = await client.get(url, headers=headers)
         if resp.status_code in (200, 401, 403):
@@ -104,7 +105,7 @@ async def _test_rfc_connection(credentials: dict) -> dict:
             "lang":   "FR",
         }
         conn = pyrfc.Connection(**conn_params)
-        result = conn.call("RFC_PING")
+        conn.call("RFC_PING")
         conn.close()
         return {"success": True, "message": "Connexion SAP RFC établie via pyrfc", "mode": "rfc_native"}
     except ImportError:

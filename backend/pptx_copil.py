@@ -1,6 +1,23 @@
 """Générateur COPIL PowerPoint — MARCEL."""
-from pptx_base import *
-from pptx_base import _brand, _set_brand, _blank_slide, _rect, _tb, _clear, _run, _header, _footer, _section_label, _styled_table, _kv_table, _CURRENT_BRAND
+import io
+import base64
+from datetime import datetime
+import matplotlib
+matplotlib.use("Agg")
+import matplotlib.pyplot as plt
+import matplotlib.patches as mpatches
+from pptx import Presentation
+from pptx.util import Inches, Pt, Emu
+from pptx.enum.text import PP_ALIGN
+from pptx.dml.color import RGBColor
+from pptx_base import (
+    SW, SH, FONT, NAVY, BLUE, LIGHT_BLUE, WHITE, BG, DARK, MID, LIGHT, BORDER,
+    RED, ORANGE_C, GREEN_C, LIGHT_RED, LIGHT_AMBER, LIGHT_GREEN,
+    DECISION_STATUS_COLORS, fmt_date, eur, keur, jh_fmt, trunc,
+    rag_color, rag_label, status_label, crit_bg, crit_color, decision_status_label,
+    _brand, _blank_slide, _rect, _tb, _clear, _run,
+    _header, _footer, _section_label, _styled_table, _kv_table,
+)
 
 
 def _cname(p, default="?"):
@@ -339,7 +356,6 @@ def add_slide_sommaire(prs, projects, instance_name="", instance_date="", brand=
         total = p.get("budget_total", 0) or 0
         eac = p.get("eac") or total
         ecart = eac - total
-        ecart_pct = (ecart / total * 100) if total else 0
         ecart_str = f"{'+'if ecart>0 else ''}{int(ecart/1000):,}".replace(",", "\u202f")
         ecart_bg = LIGHT_RED if ecart > 0 else LIGHT_GREEN if ecart < 0 else BG
         rag = p.get("status_rag", "green")
@@ -620,7 +636,6 @@ def add_slide_fiche(prs, project, milestones, risks, decisions, instance_name=""
     R_X = SW - COL_W - Inches(0.2)
     TOP_H = Inches(2.75)
     BTM_Y = BODY_Y + TOP_H + Inches(0.1)
-    BTM_H = SH - BTM_Y - Inches(0.35)
 
     # ---- BUDGET — table KV 2 colonnes (top-left) ----
     capex_p = project.get("capex_planned", 0) or 0

@@ -74,9 +74,11 @@ async def test_connection(base_url: str, auth_type: str, credentials: dict) -> d
 
     try:
         import httpx
+        from core.ssrf import validate_public_url
         user  = credentials.get("username") or credentials.get("email", "")
         pw    = credentials.get("password", "")
         url   = f"{base_url.rstrip('/')}/api/now/table/sys_user?sysparm_limit=1"
+        validate_public_url(base_url.rstrip("/"))
         async with httpx.AsyncClient(timeout=8, verify=False, auth=(user, pw)) as client:
             resp = await client.get(url, headers={"Accept": "application/json"})
         if resp.status_code == 200:

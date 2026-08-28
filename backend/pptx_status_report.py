@@ -1,6 +1,15 @@
 """Générateur Status Report PPT — MARCEL."""
-from pptx_base import *
-from pptx_base import _brand, _set_brand, _blank_slide, _rect, _tb, _clear, _run, _footer, _CURRENT_BRAND
+import io
+import base64
+from datetime import datetime
+from pptx import Presentation
+from pptx.util import Inches, Pt
+from pptx.enum.text import PP_ALIGN
+from pptx.dml.color import RGBColor
+from pptx_base import (
+    SW, SH, WHITE, BG, DARK, MID, BORDER, fmt_date, trunc,
+    _brand, _set_brand, _blank_slide, _rect, _tb, _clear, _run, _footer,
+)
 
 # ═══════════════════════════════════════════════════════════════════════════════
 # STATUS REPORT PPT — 6 slides
@@ -68,8 +77,6 @@ def _weather_cell(slide, left, top, width, height, indicator_label: str, level: 
     circle_size = Inches(0.75)
     cx = left + (width - circle_size) / 2
     cy = top + Inches(0.42)
-    from pptx.enum.shapes import MSO_SHAPE_TYPE
-    from pptx.util import Emu
     circle = slide.shapes.add_shape(
         9,  # MSO_SHAPE_TYPE.OVAL
         cx, cy, circle_size, circle_size
@@ -108,7 +115,6 @@ def _sr_table(slide, left, top, width, headers: list, rows: list, col_widths: li
     """Tableau générique pour slides 3-6."""
     row_h = Inches(0.28)
     hdr_h = Inches(0.32)
-    total_h = hdr_h + row_h * min(len(rows), 16)
 
     # En-têtes
     x = left

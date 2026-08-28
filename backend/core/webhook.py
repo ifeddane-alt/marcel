@@ -1,9 +1,10 @@
 """Webhook utility — fire-and-forget HTTP POST to configured URL."""
-import asyncio
 import logging
 from datetime import datetime, timezone
 
 import httpx
+
+from core.ssrf import validate_public_url
 
 logger = logging.getLogger(__name__)
 
@@ -11,6 +12,11 @@ logger = logging.getLogger(__name__)
 async def fire_webhook(webhook_url: str, event: str, payload: dict) -> None:
     """Envoie un POST asynchrone non-bloquant à l'URL configurée."""
     if not webhook_url:
+        return
+    try:
+        validate_public_url(webhook_url)
+    except ValueError as exc:
+        logger.warning("[Webhook] URL refusée (SSRF) %s : %s", webhook_url[:60], exc)
         return
     body = {
         "event": event,

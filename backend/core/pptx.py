@@ -7,7 +7,6 @@ from pptx.util import Inches, Pt, Emu
 from pptx.dml.color import RGBColor
 from pptx.enum.text import PP_ALIGN, MSO_ANCHOR
 from pptx.enum.shapes import MSO_SHAPE
-from pptx.oxml.ns import qn
 
 INDIGO = RGBColor(0x35, 0x2C, 0x6E)
 BLUE = RGBColor(0x2E, 0x5F, 0xE8)
@@ -189,7 +188,7 @@ class MarcelDeck:
     def bullets(self, title: str, lines: list, subtitle: str = None):
         slide = self._new()
         self._header(slide, title, subtitle)
-        card = _round_rect(slide, Inches(0.6), Inches(1.7), SW - Inches(1.2), Inches(4.9), CARD)
+        _round_rect(slide, Inches(0.6), Inches(1.7), SW - Inches(1.2), Inches(4.9), CARD)
         tb = slide.shapes.add_textbox(Inches(1.0), Inches(2.0), SW - Inches(2.0), Inches(4.3))
         tf = tb.text_frame
         tf.word_wrap = True
