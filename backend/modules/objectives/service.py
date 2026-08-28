@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone
 from fastapi import HTTPException
 from core.database import db
-from core.auth import TokenPayload
+from core.auth import TokenPayload, require_perm
 
 VALID_STATUSES = ["actif", "atteint", "abandonne"]
 
@@ -116,7 +116,7 @@ def _num(v):
 
 
 async def create_objective(data: dict, user: TokenPayload) -> dict:
-    _require_write(user)
+    require_perm(user, "objectives.manage")
     title = (data.get("title") or "").strip()
     if not title:
         raise HTTPException(422, "Le titre de l'objectif est obligatoire")
@@ -149,7 +149,7 @@ async def create_objective(data: dict, user: TokenPayload) -> dict:
 
 
 async def update_objective(objective_id: str, data: dict, user: TokenPayload) -> dict:
-    _require_write(user)
+    require_perm(user, "objectives.manage")
     old = await db.strategic_objectives.find_one(
         {"objective_id": objective_id, "tenant_id": user.tenant_id}, {"_id": 0}
     )
@@ -185,7 +185,7 @@ async def update_objective(objective_id: str, data: dict, user: TokenPayload) ->
 
 async def update_target_value(objective_id: str, value, user: TokenPayload) -> dict:
     """Met à jour le réalisé de la cible mesurable (avec historique)."""
-    _require_write(user)
+    require_perm(user, "objectives.manage")
     v = _num(value)
     if v is None:
         raise HTTPException(422, "Valeur requise")
@@ -208,7 +208,7 @@ async def update_target_value(objective_id: str, value, user: TokenPayload) -> d
 
 
 async def delete_objective(objective_id: str, user: TokenPayload) -> None:
-    _require_write(user)
+    require_perm(user, "objectives.manage")
     old = await db.strategic_objectives.find_one(
         {"objective_id": objective_id, "tenant_id": user.tenant_id}, {"_id": 0}
     )
@@ -226,7 +226,7 @@ async def delete_objective(objective_id: str, user: TokenPayload) -> None:
 
 
 async def set_objective_projects(objective_id: str, project_ids: list, user: TokenPayload) -> dict:
-    _require_write(user)
+    require_perm(user, "objectives.manage")
     obj = await db.strategic_objectives.find_one(
         {"objective_id": objective_id, "tenant_id": user.tenant_id}, {"_id": 0}
     )

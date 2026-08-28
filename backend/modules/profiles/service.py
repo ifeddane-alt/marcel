@@ -115,6 +115,24 @@ ALL_PERMISSIONS = [
     {"key": "agent.chat",                  "label": "Dialoguer avec l'Agent IA PMO",  "module": "Agent IA"},
     {"key": "agent.recommend",             "label": "Voir les recommandations IA",    "module": "Agent IA"},
     {"key": "agent.alerts",                "label": "Gérer ses alertes personnalisées","module": "Agent IA"},
+    # ─── Permissions ajoutées (refonte RBAC 2026-06) ─────────────────────────
+    {"key": "projects.edit_own",           "label": "Modifier ses propres projets (owner)", "module": "Projets"},
+    {"key": "tasks.delete",                "label": "Supprimer des tâches",           "module": "Tâches"},
+    {"key": "programs.manage",             "label": "Créer/modifier des programmes",  "module": "Programmes"},
+    {"key": "programs.delete",             "label": "Supprimer des programmes",       "module": "Programmes"},
+    {"key": "risks.edit",                  "label": "Modifier des risques",           "module": "Risques"},
+    {"key": "decisions.edit",              "label": "Modifier des décisions",         "module": "Décisions"},
+    {"key": "resources.delete",            "label": "Supprimer des ressources",       "module": "Ressources"},
+    {"key": "allocations.manage",          "label": "Modifier/supprimer des allocations", "module": "Allocations"},
+    {"key": "applications.manage",         "label": "Gérer le patrimoine applicatif", "module": "Applications"},
+    {"key": "indicators.manage",           "label": "Gérer la sélection d'indicateurs","module": "Indicateurs"},
+    {"key": "import.data",                 "label": "Importer des données (Excel/MPP)","module": "Import"},
+    {"key": "objectives.manage",           "label": "Gérer les objectifs stratégiques","module": "Objectifs"},
+    {"key": "okrs.manage",                 "label": "Gérer les OKRs",                 "module": "OKR"},
+    {"key": "engagement.manage",           "label": "Gérer les critères d'engagement","module": "Engagement"},
+    {"key": "run.manage",                  "label": "Gérer le Run (activités/incidents/releases)", "module": "Run"},
+    {"key": "run.delete",                  "label": "Supprimer des éléments de Run",  "module": "Run"},
+    {"key": "safe.manage",                 "label": "Gérer PI/sprints/capabilities SAFe", "module": "SAFe"},
 ]
 
 # ─── 12 Profils par défaut ────────────────────────────────────────────────────
@@ -140,7 +158,7 @@ DEFAULT_PROFILES = [
             "vendors.view", "vendors.view_contracts",
             "arbitrage.view", "lifecycle.decide",
             "agent.chat", "agent.recommend", "agent.alerts",
-            "export.powerbi",
+            "export.powerbi", "indicators.manage",
         ],
     },
     {
@@ -167,6 +185,11 @@ DEFAULT_PROFILES = [
             "lifecycle.request", "lifecycle.review_pmo", "lifecycle.decide",
             "agent.chat", "agent.recommend", "agent.alerts",
             "export.powerbi",
+            "programs.manage", "programs.delete", "tasks.delete", "risks.edit",
+            "decisions.edit", "resources.delete", "allocations.manage",
+            "applications.manage", "indicators.manage", "import.data",
+            "objectives.manage", "okrs.manage", "engagement.manage",
+            "run.manage", "run.delete", "safe.manage",
         ],
     },
     {
@@ -175,16 +198,17 @@ DEFAULT_PROFILES = [
         "description": "CRUD sur ses projets (owner). Valide timesheets finales.",
         "is_system": True,
         "permissions": [
-            "dashboard.view", "portfolio.view", "projects.view_own", "export.ppt",
+            "dashboard.view", "portfolio.view", "projects.view_own", "projects.create",
+            "projects.edit_own", "export.ppt",
             "export.status_report",
-            "tasks.create", "tasks.edit", "milestones.create", "milestones.edit", "roadmap.view",
-            "dependencies.create", "teams.view", "allocations.create",
+            "tasks.create", "tasks.edit", "tasks.delete", "milestones.create", "milestones.edit", "roadmap.view",
+            "dependencies.create", "teams.view", "allocations.create", "allocations.manage",
             "budget.view", "budget.edit", "budget.revise_eac", "raf.view",
             "timesheets.submit", "timesheets.validate_step3", "leaves.submit",
-            "risks.create", "risks.view", "decisions.create", "decisions.view",
+            "risks.create", "risks.edit", "risks.view", "decisions.create", "decisions.edit", "decisions.view",
             "governance.view", "compliance.view", "demands.submit", "demands.view_own",
             "capabilities.create", "scope.receive", "vendors.view",
-            "arbitrage.view", "lifecycle.request",
+            "arbitrage.view", "lifecycle.request", "indicators.manage",
         ],
     },
     {
@@ -197,7 +221,7 @@ DEFAULT_PROFILES = [
             "teams.edit", "resources.edit", "raf.view", "timesheets.submit",
             "timesheets.validate_step2", "timesheets.view_all", "leaves.submit",
             "leaves.validate", "risks.view", "decisions.view", "demands.submit",
-            "demands.view_own",
+            "demands.view_own", "indicators.manage",
         ],
     },
     {
@@ -212,7 +236,7 @@ DEFAULT_PROFILES = [
             "risks.create", "risks.view", "decisions.create", "decisions.view",
             "compliance.view", "demands.submit", "demands.view_own", "trains.create",
             "trains.edit", "trains.view", "capabilities.create", "scope.receive",
-            "lifecycle.request",
+            "lifecycle.request", "safe.manage", "okrs.manage", "indicators.manage",
         ],
     },
     {
@@ -225,7 +249,7 @@ DEFAULT_PROFILES = [
             "teams.view", "budget.view", "raf.view", "timesheets.submit",
             "leaves.submit", "risks.create", "risks.view", "compliance.view",
             "demands.submit", "demands.view_own", "trains.view", "scope.receive",
-            "lifecycle.review_architecture",
+            "lifecycle.review_architecture", "applications.manage", "indicators.manage",
         ],
     },
     {
@@ -250,7 +274,7 @@ DEFAULT_PROFILES = [
             "timesheets.view_all", "risks.view", "compliance.view", "demands.view_own",
             "trains.view", "scope.simulate", "vendors.view", "vendors.view_contracts",
             "arbitrage.view", "arbitrage.edit",
-            "export.powerbi",
+            "export.powerbi", "indicators.manage",
         ],
     },
     {
@@ -371,6 +395,12 @@ async def update_profile(profile_id: str, data: ProfileUpdate, user: TokenPayloa
     await db.profiles.update_one(
         {"profile_id": profile_id, "tenant_id": user.tenant_id}, {"$set": updates}
     )
+    # Si les permissions changent → révoquer les tokens des porteurs de ce profil
+    if "permissions" in updates:
+        await db.users.update_many(
+            {"profile_id": profile_id, "tenant_id": user.tenant_id},
+            {"$inc": {"perm_version": 1}},
+        )
     return await get_profile(profile_id, user)
 
 
@@ -519,6 +549,12 @@ async def seed_full_profiles_and_users(tenant_id: str) -> dict:
             )
             updated += res.modified_count
 
+    # Initialiser perm_version (révocation JWT) sur les users qui ne l'ont pas encore
+    await db.users.update_many(
+        {"tenant_id": tenant_id, "perm_version": {"$exists": False}},
+        {"$set": {"perm_version": 1}},
+    )
+
     # Step 3: Nouveaux utilisateurs de démonstration.
     # ⚠ Sécurité : ne JAMAIS créer automatiquement de comptes démo en production.
     # Activation explicite via SEED_DEMO_USERS=true (préview/dev uniquement).
@@ -639,10 +675,17 @@ async def update_user(user_id: str, updates: dict, user: TokenPayload) -> dict:
         for k, v in updates.items() if target.get(k) != v
     ]
     updates["updated_at"] = _now()
-    await db.users.update_one(
-        {"user_id": user_id, "tenant_id": user.tenant_id},
-        {"$set": updates}
-    )
+    # Révocation immédiate si les droits changent (rôle/profil/permissions/désactivation)
+    if any(f in updates for f in ("role", "profile_id", "permissions", "is_active")):
+        await db.users.update_one(
+            {"user_id": user_id, "tenant_id": user.tenant_id},
+            {"$set": updates, "$inc": {"perm_version": 1}},
+        )
+    else:
+        await db.users.update_one(
+            {"user_id": user_id, "tenant_id": user.tenant_id},
+            {"$set": updates},
+        )
     updated = await db.users.find_one(
         {"user_id": user_id, "tenant_id": user.tenant_id},
         {"_id": 0, "password_hash": 0}
@@ -686,6 +729,7 @@ async def create_user(data: dict, user: TokenPayload) -> dict:
         "role": data.get("role") or "READ_ONLY",
         "profile_id": profile_id,
         "is_active": True,
+        "perm_version": 1,
         "password_hash": bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode(),
         "created_at": _now(),
     }

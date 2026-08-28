@@ -3,7 +3,7 @@ from datetime import datetime, timezone, date
 from dateutil.relativedelta import relativedelta
 import uuid
 from core.database import db
-from core.auth import TokenPayload, require_write, require_admin, is_ownership_restricted
+from core.auth import TokenPayload, require_write, require_admin, is_ownership_restricted, require_perm
 from .schemas import TeamCreate, TeamUpdate
 
 
@@ -473,7 +473,7 @@ async def get_team_detail(team_id: str, current_user: TokenPayload) -> dict:
 
 
 async def create_team(data: TeamCreate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "teams.create")
     doc = {
         "team_id": str(uuid.uuid4()),
         "tenant_id": current_user.tenant_id,
@@ -486,7 +486,7 @@ async def create_team(data: TeamCreate, current_user: TokenPayload) -> dict:
 
 
 async def update_team(team_id: str, data: TeamUpdate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "teams.edit")
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     if not update_data:
         raise HTTPException(status_code=422, detail="Aucune donnée à mettre à jour")

@@ -3,7 +3,7 @@ from typing import Optional
 from datetime import datetime, timezone
 import uuid
 from core.database import db
-from core.auth import TokenPayload, require_write
+from core.auth import TokenPayload, require_write, require_perm
 from .schemas import RiskCreate, RiskUpdate
 
 
@@ -15,7 +15,7 @@ async def list_risks(project_id: Optional[str], current_user: TokenPayload) -> l
 
 
 async def create_risk(data: RiskCreate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "risks.create")
     project = await db.projects.find_one(
         {"project_id": data.project_id, "tenant_id": current_user.tenant_id},
         {"_id": 0, "project_id": 1},
@@ -35,7 +35,7 @@ async def create_risk(data: RiskCreate, current_user: TokenPayload) -> dict:
 
 
 async def update_risk(risk_id: str, data: RiskUpdate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "risks.edit")
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     if "probability" in update_data or "impact" in update_data:
         existing = await db.risks.find_one(

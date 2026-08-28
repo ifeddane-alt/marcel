@@ -78,6 +78,7 @@ async def login(req: LoginRequest, request: Request):
         "resource_id":  user.get("resource_id"),
         "profile_id":   user.get("profile_id"),
         "permissions":  permissions,
+        "pv":           user.get("perm_version", 1),
     })
 
     user_data = {

@@ -2,7 +2,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 from fastapi import HTTPException
 from core.database import db
-from core.auth import TokenPayload
+from core.auth import TokenPayload, require_perm
 
 VALID_STATUSES = ["etude", "build", "production", "decommissionnement", "retiree"]
 VALID_TIME = ["invest", "tolerate", "migrate", "eliminate"]
@@ -111,7 +111,7 @@ def _clean_payload(data: dict) -> dict:
 
 
 async def create_application(data: dict, user: TokenPayload) -> dict:
-    _require_write(user)
+    require_perm(user, "applications.manage")
     if not (data.get("name") or "").strip():
         raise HTTPException(400, "Le nom de l'application est requis")
     payload = _clean_payload(data)
@@ -132,7 +132,7 @@ async def create_application(data: dict, user: TokenPayload) -> dict:
 
 
 async def update_application(application_id: str, data: dict, user: TokenPayload) -> dict:
-    _require_write(user)
+    require_perm(user, "applications.manage")
     payload = _clean_payload(data)
     payload["updated_at"] = _now()
     res = await db.applications.update_one(
@@ -144,7 +144,7 @@ async def update_application(application_id: str, data: dict, user: TokenPayload
 
 
 async def delete_application(application_id: str, user: TokenPayload) -> None:
-    _require_write(user)
+    require_perm(user, "applications.manage")
     res = await db.applications.delete_one(
         {"application_id": application_id, "tenant_id": user.tenant_id}
     )
@@ -153,7 +153,7 @@ async def delete_application(application_id: str, user: TokenPayload) -> None:
 
 
 async def set_projects(application_id: str, project_ids: list, user: TokenPayload) -> dict:
-    _require_write(user)
+    require_perm(user, "applications.manage")
     valid = await db.projects.find(
         {"project_id": {"$in": project_ids}, "tenant_id": user.tenant_id},
         {"_id": 0, "project_id": 1},

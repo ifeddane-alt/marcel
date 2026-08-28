@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 import uuid
 from typing import Optional
 from core.database import db
-from core.auth import TokenPayload, require_write
+from core.auth import TokenPayload, require_write, require_perm
 from .schemas import OKRCreate, OKRUpdate, WSJFUpdate
 
 
@@ -29,7 +29,7 @@ async def list_okrs(train_id: Optional[str], current_user: TokenPayload) -> list
 
 
 async def create_okr(data: OKRCreate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "okrs.manage")
     krs = []
     for kr in (data.key_results or []):
         krs.append({
@@ -57,7 +57,7 @@ async def create_okr(data: OKRCreate, current_user: TokenPayload) -> dict:
 
 
 async def update_okr(okr_id: str, data: OKRUpdate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "okrs.manage")
     update: dict = {}
     if data.objective is not None:
         update["objective"] = data.objective
@@ -98,7 +98,7 @@ async def update_okr(okr_id: str, data: OKRUpdate, current_user: TokenPayload) -
 
 
 async def delete_okr(okr_id: str, current_user: TokenPayload) -> None:
-    require_write(current_user)
+    require_perm(current_user, "okrs.manage")
     result = await db.okrs.delete_one(
         {"okr_id": okr_id, "tenant_id": current_user.tenant_id}
     )
@@ -110,7 +110,7 @@ async def delete_okr(okr_id: str, current_user: TokenPayload) -> None:
 
 async def update_wsjf_criteria(cap_id: str, data: WSJFUpdate, current_user: TokenPayload) -> dict:
     """Met à jour les critères WSJF d'une capability et recalcule le WSJF."""
-    require_write(current_user)
+    require_perm(current_user, "okrs.manage")
     cap = await db.capabilities.find_one(
         {"capability_id": cap_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
     )

@@ -3,7 +3,7 @@ from typing import Optional, List
 from datetime import datetime, timezone
 import uuid
 from core.database import db
-from core.auth import TokenPayload, require_write
+from core.auth import TokenPayload, require_write, require_perm, ensure_project_scope
 from shared.rag import calculate_task_rag, _get_task_rag_settings
 from .schemas import TaskCreate, TaskUpdate, PhaseTransition, PhaseEstimate, BulkScope
 
@@ -79,7 +79,8 @@ async def list_tasks(project_id: Optional[str], current_user: TokenPayload) -> l
 
 
 async def create_task(data: TaskCreate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "tasks.create")
+    await ensure_project_scope(current_user, data.project_id, edit_perm="projects.edit", own_perm="projects.edit_own")
     proj = await db.projects.find_one(
         {"project_id": data.project_id, "tenant_id": current_user.tenant_id}
     )
@@ -104,12 +105,13 @@ async def create_task(data: TaskCreate, current_user: TokenPayload) -> dict:
 
 
 async def update_task(task_id: str, data: TaskUpdate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "tasks.edit")
     existing = await db.tasks.find_one(
         {"task_id": task_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
     )
     if not existing:
         raise HTTPException(status_code=404, detail="Tâche introuvable")
+    await ensure_project_scope(current_user, existing.get("project_id", ""), edit_perm="projects.edit", own_perm="projects.edit_own")
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     if "dependencies" in update_data and update_data["dependencies"]:
         project_id = existing.get("project_id", "")
@@ -126,7 +128,7 @@ async def update_task(task_id: str, data: TaskUpdate, current_user: TokenPayload
 
 
 async def bulk_scope(data: BulkScope, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "tasks.edit")
     if data.scope_status not in ("sec", "etendu", "out"):
         raise HTTPException(status_code=422, detail="scope_status invalide (sec | etendu | out)")
     if not data.task_ids:
@@ -139,7 +141,12 @@ async def bulk_scope(data: BulkScope, current_user: TokenPayload) -> dict:
 
 
 async def delete_task(task_id: str, current_user: TokenPayload) -> None:
-    require_write(current_user)
+    require_perm(current_user, "tasks.delete")
+    existing = await db.tasks.find_one(
+        {"task_id": task_id, "tenant_id": current_user.tenant_id}, {"_id": 0, "project_id": 1})
+    if not existing:
+        raise HTTPException(status_code=404, detail="Tâche introuvable")
+    await ensure_project_scope(current_user, existing.get("project_id", ""), edit_perm="projects.edit", own_perm="projects.edit_own")
     result = await db.tasks.delete_one(
         {"task_id": task_id, "tenant_id": current_user.tenant_id}
     )
@@ -152,7 +159,7 @@ async def delete_task(task_id: str, current_user: TokenPayload) -> None:
 async def transition_task_phase(
     task_id: str, data: PhaseTransition, current_user: TokenPayload
 ) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "tasks.edit")
     task = await db.tasks.find_one(
         {"task_id": task_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
     )
@@ -217,7 +224,7 @@ async def get_phase_history(task_id: str, current_user: TokenPayload) -> list:
 async def update_phase_estimates(
     task_id: str, phase_estimates: List[PhaseEstimate], current_user: TokenPayload
 ) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "tasks.edit")
     task = await db.tasks.find_one(
         {"task_id": task_id, "tenant_id": current_user.tenant_id}, {"_id": 0, "task_id": 1}
     )

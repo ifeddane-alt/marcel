@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from datetime import datetime, timezone
 import uuid
 from core.database import db
-from core.auth import TokenPayload, require_write, is_ownership_restricted
+from core.auth import TokenPayload, require_write, is_ownership_restricted, require_perm
 from .schemas import ProgramCreate, ProgramUpdate
 
 
@@ -97,7 +97,7 @@ async def get_program(program_id: str, current_user: TokenPayload) -> dict:
 
 
 async def create_program(data: ProgramCreate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "programs.manage")
     program = {
         "program_id": str(uuid.uuid4()),
         "tenant_id": current_user.tenant_id,
@@ -110,7 +110,7 @@ async def create_program(data: ProgramCreate, current_user: TokenPayload) -> dic
 
 
 async def update_program(program_id: str, data: ProgramUpdate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "programs.manage")
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     result = await db.programs.update_one(
         {"program_id": program_id, "tenant_id": current_user.tenant_id},
@@ -123,7 +123,7 @@ async def update_program(program_id: str, data: ProgramUpdate, current_user: Tok
 
 
 async def delete_program(program_id: str, current_user: TokenPayload) -> None:
-    require_write(current_user)
+    require_perm(current_user, "programs.delete")
     await db.projects.update_many(
         {"program_id": program_id, "tenant_id": current_user.tenant_id},
         {"$unset": {"program_id": ""}},

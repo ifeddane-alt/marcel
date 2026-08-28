@@ -5,7 +5,7 @@ from pathlib import Path
 
 from fastapi import HTTPException
 from core.database import db
-from core.auth import TokenPayload, require_write, has_perm
+from core.auth import TokenPayload, require_write, has_perm, require_perm
 
 from . import computations
 
@@ -92,7 +92,7 @@ async def get_selection(scope: str, user: TokenPayload) -> dict:
 
 async def set_selection(scope: str, indicator_ids: list, user: TokenPayload) -> dict:
     if scope != "dashboard":
-        require_write(user)
+        require_perm(user, "indicators.manage")
     valid = await db.indicator_catalog.distinct("indicator_id", {"scopes": scope})
     ids = [i for i in (indicator_ids or []) if i in valid]
     await db.indicator_selections.update_one(

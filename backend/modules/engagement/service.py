@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 from fastapi import HTTPException
 from core.database import db
-from core.auth import TokenPayload, require_write
+from core.auth import TokenPayload, require_write, require_perm
 
 # (key, label, type auto|attested, check_key, mandatory)
 _C = lambda k, l, t, c, m: {"key": k, "label": l, "type": t, "check_key": c, "mandatory": m}
@@ -86,7 +86,7 @@ async def list_criteria(from_phase: str, user: TokenPayload) -> list:
 
 
 async def update_criterion(criterion_id: str, data: dict, user: TokenPayload) -> dict:
-    require_write(user)
+    require_perm(user, "engagement.manage")
     payload = {k: v for k, v in data.items() if k in ("label", "mandatory", "active") and v is not None}
     res = await db.gate_criteria.update_one(
         {"criterion_id": criterion_id, "tenant_id": user.tenant_id}, {"$set": payload})
@@ -96,7 +96,7 @@ async def update_criterion(criterion_id: str, data: dict, user: TokenPayload) ->
 
 
 async def create_criterion(data: dict, user: TokenPayload) -> dict:
-    require_write(user)
+    require_perm(user, "engagement.manage")
     if not (data.get("label") or "").strip() or data.get("from_phase") not in DEFAULT_CRITERIA:
         raise HTTPException(400, "Label et phase requis")
     n = await db.gate_criteria.count_documents({"tenant_id": user.tenant_id, "from_phase": data["from_phase"]})
@@ -111,7 +111,7 @@ async def create_criterion(data: dict, user: TokenPayload) -> dict:
 
 
 async def delete_criterion(criterion_id: str, user: TokenPayload):
-    require_write(user)
+    require_perm(user, "engagement.manage")
     res = await db.gate_criteria.delete_one(
         {"criterion_id": criterion_id, "tenant_id": user.tenant_id, "custom": True})
     if res.deleted_count == 0:

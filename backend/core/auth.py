@@ -5,6 +5,9 @@ from typing import Optional, List
 from jose import jwt, JWTError
 from datetime import datetime, timezone, timedelta
 import os
+import logging
+
+logger = logging.getLogger("auth")
 
 JWT_ALGORITHM = "HS256"
 _MIN_SECRET_LEN = 32
@@ -55,10 +58,15 @@ class TokenPayload(BaseModel):
     resource_id: Optional[str]       = None
     profile_id:  Optional[str]       = None
     permissions: Optional[List[str]] = None   # Chargées au login depuis le profil
+    pv:          Optional[int]       = None   # Permission version (révocation)
+
+
+# Durée de vie courte : borne la fenêtre de droits périmés (révocation via perm_version).
+ACCESS_TOKEN_HOURS = 8
 
 
 def create_token(payload: dict) -> str:
-    data = {**payload, "exp": datetime.now(timezone.utc) + timedelta(hours=24)}
+    data = {**payload, "exp": datetime.now(timezone.utc) + timedelta(hours=ACCESS_TOKEN_HOURS)}
     return jwt.encode(data, JWT_SECRET, algorithm=JWT_ALGORITHM)
 
 
@@ -76,21 +84,71 @@ async def get_current_user(
 ) -> TokenPayload:
     try:
         payload = jwt.decode(creds.credentials, JWT_SECRET, algorithms=[JWT_ALGORITHM])
-        return TokenPayload(**payload)
+        tp = TokenPayload(**payload)
     except (JWTError, Exception):
         raise HTTPException(status_code=401, detail="Token invalide ou expiré")
+
+    # Révocation & propagation des changements de droits (compte désactivé,
+    # rôle/profil/permissions modifiés) : le token porte pv ; on le compare à
+    # la version courante de l'utilisateur. Fail-open uniquement en cas d'erreur DB.
+    from core.database import db
+    try:
+        u = await db.users.find_one(
+            {"user_id": tp.user_id, "tenant_id": tp.tenant_id},
+            {"_id": 0, "user_id": 1, "perm_version": 1, "is_active": 1},
+        )
+    except Exception as e:            # pragma: no cover - incident infra
+        logger.warning("perm_version check indisponible: %s", e)
+        return tp
+    if u is None:
+        raise HTTPException(status_code=401, detail="Session invalide")
+    if u.get("is_active") is False:
+        raise HTTPException(status_code=403, detail="Compte désactivé")
+    if (tp.pv or 0) != u.get("perm_version", 1):
+        raise HTTPException(status_code=401, detail="Droits modifiés — reconnectez-vous")
+    return tp
+
+
+async def ensure_project_scope(
+    user: "TokenPayload", project_id: str,
+    edit_perm: str = "projects.edit", own_perm: str = "projects.view_own",
+) -> None:
+    """Autorisation au niveau objet : une permission d'édition large autorise tout ;
+    une permission « own » n'autorise que les projets dont l'utilisateur est owner.
+    Lève 403 sinon. La permission de module doit déjà avoir été vérifiée en amont."""
+    perms = user.permissions or []
+    if "*" in perms or edit_perm in perms:
+        return
+    if own_perm in perms:
+        from core.database import db
+        proj = await db.projects.find_one(
+            {"project_id": project_id, "tenant_id": user.tenant_id},
+            {"_id": 0, "owner_id": 1},
+        )
+        if proj and proj.get("owner_id") == user.user_id:
+            return
+        raise HTTPException(status_code=403, detail="Accès limité à vos propres projets")
+    # Aucune restriction d'ownership déclarée : la permission de module suffit.
+    return
 
 
 # ─── Helpers backward-compat ─────────────────────────────────────────────────
 
 def require_write(user: TokenPayload) -> None:
-    """Backward compat : vérifie droit d'écriture générique."""
-    _enforce_permission(user, "_write")   # perm virtuelle, voir _role_fallback
+    """OBSOLÈTE — l'ancienne permission virtuelle laxiste '_write' est supprimée.
+    Fail-closed : tout appel résiduel exige la permission inexistante '_write'
+    (donc refus, sauf wildcard admin). Utiliser _enforce_permission(user, '<mod>.<action>')."""
+    _enforce_permission(user, "_write")
 
 
 def require_admin(user: TokenPayload) -> None:
     """Backward compat : vérifie droit admin."""
     _enforce_permission(user, "admin.config")
+
+
+def require_perm(user: TokenPayload, permission: str) -> None:
+    """Exige une permission explicite (deny by default). Remplace require_write."""
+    _enforce_permission(user, permission)
 
 
 # ─── permission_required — middleware principal ───────────────────────────────
@@ -111,6 +169,23 @@ def permission_required(permission: str):
     ) -> TokenPayload:
         _enforce_permission(current_user, permission)
         return current_user
+
+    return dep
+
+
+def permission_required_any(*permissions: str):
+    """Autorise si l'utilisateur possède AU MOINS UNE des permissions listées.
+    Le scope objet (ownership) est ensuite vérifié dans le service via ensure_project_scope."""
+    async def dep(
+        current_user: TokenPayload = Depends(get_current_user),
+    ) -> TokenPayload:
+        perms = current_user.permissions or []
+        if "*" in perms or any(p in perms for p in permissions):
+            return current_user
+        raise HTTPException(
+            status_code=403,
+            detail=f"Permission requise (une parmi) : {', '.join(permissions)}",
+        )
 
     return dep
 
@@ -151,20 +226,9 @@ def _enforce_permission(user: TokenPayload, permission: str) -> None:
     perms = user.permissions or []
 
     if perms:
-        # Token avec permissions → vérification stricte
+        # Token avec permissions → vérification stricte (deny by default)
         if "*" in perms or permission in perms:
             return
-        # Permission virtuelle _write : tout sauf les .view uniquement
-        if permission == "_write":
-            has_write = any(
-                p for p in perms
-                if not p.endswith(".view")
-                   and not p.endswith(".view_own")
-                   and not p.endswith(".view_all")
-                   and p != "*"
-            )
-            if has_write:
-                return
         raise HTTPException(
             status_code=403,
             detail=f"Permission '{permission}' refusée pour ce profil",
@@ -187,12 +251,11 @@ def _role_fallback(user: TokenPayload, permission: str) -> None:
             return
         raise HTTPException(status_code=403, detail="Droits administrateur requis")
 
-    # READ_ONLY : uniquement lecture + saisie basique
+    # READ_ONLY : lecture STRICTE (aucune écriture, y compris timesheets/congés)
     _READ_ONLY_PERMS = {
         "dashboard.view", "portfolio.view", "roadmap.view", "teams.view",
         "risks.view", "decisions.view", "governance.view", "compliance.view",
         "demands.view_own", "budget.view", "raf.view", "trains.view",
-        "timesheets.submit", "leaves.submit",
     }
     if permission in _READ_ONLY_PERMS:
         return

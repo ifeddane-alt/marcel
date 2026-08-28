@@ -10,7 +10,7 @@ from openpyxl.styles import Font, PatternFill, Alignment, Border, Side
 from openpyxl.utils import get_column_letter
 
 from core.database import db
-from core.auth import TokenPayload, require_write
+from core.auth import TokenPayload, require_write, require_perm
 from .specs import SPECS
 
 XLSX_MIME = "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"
@@ -658,7 +658,7 @@ async def _analyze(entity: str, parsed: list[dict], user: TokenPayload) -> list[
 
 
 async def preview_import(entity: str, content: bytes, user: TokenPayload) -> dict:
-    require_write(user)
+    require_perm(user, "import.data")
     spec = _spec(entity)
     parsed = _parse_xlsx(content, spec)
     analyzed = await _analyze(entity, parsed, user)
@@ -679,7 +679,7 @@ async def preview_import(entity: str, content: bytes, user: TokenPayload) -> dic
 
 
 async def commit_import(entity: str, rows: list[dict], user: TokenPayload) -> dict:
-    require_write(user)
+    require_perm(user, "import.data")
     spec = _spec(entity)
     if not rows:
         raise HTTPException(status_code=422, detail="Aucune ligne à importer")

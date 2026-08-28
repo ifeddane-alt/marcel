@@ -122,6 +122,7 @@ async def _login_user(tenant_id: str, email: str, name: str, sso_cfg: dict) -> s
         "resource_id": user.get("resource_id"),
         "profile_id":  user.get("profile_id"),
         "permissions": permissions,
+        "pv":          user.get("perm_version", 1),
     })
     user_data = {
         k: user.get(k)

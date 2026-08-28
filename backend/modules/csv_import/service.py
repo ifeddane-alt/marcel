@@ -5,7 +5,7 @@ import uuid
 from datetime import datetime, timezone
 from fastapi import HTTPException, UploadFile
 from core.database import db
-from core.auth import TokenPayload, require_write
+from core.auth import TokenPayload, require_write, require_perm
 from .schemas import IMPORT_TEMPLATES, FIELD_ALIASES, VALID_VALUES
 
 
@@ -83,7 +83,7 @@ def _validate_row(row_dict: dict, entity: str, row_num: int) -> list:
 
 
 async def preview_import(file: UploadFile, entity: str, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "import.csv")
     if entity not in IMPORT_TEMPLATES:
         raise HTTPException(status_code=400, detail=f"Entité inconnue : {entity}")
     content = await file.read()
@@ -112,7 +112,7 @@ async def commit_import(
     mapping: str,
     current_user: TokenPayload,
 ) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "import.csv")
     if entity not in IMPORT_TEMPLATES:
         raise HTTPException(status_code=400, detail=f"Entité inconnue : {entity}")
     try:

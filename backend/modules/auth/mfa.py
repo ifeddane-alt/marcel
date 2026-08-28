@@ -123,6 +123,7 @@ async def mfa_verify(data: dict):
         "tenant_id": user["tenant_id"], "user_id": user["user_id"], "email": user["email"],
         "role": user["role"], "name": user["name"], "resource_id": user.get("resource_id"),
         "profile_id": user.get("profile_id"), "permissions": permissions,
+        "pv": user.get("perm_version", 1),
     })
     user_data = {k: user.get(k) for k in ("user_id", "email", "name", "role", "tenant_id", "resource_id", "profile_id")}
     user_data["profile_name"] = profile_name

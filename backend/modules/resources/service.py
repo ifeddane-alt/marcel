@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from datetime import datetime, timezone, date
 import uuid
 from core.database import db
-from core.auth import TokenPayload, require_write, is_ownership_restricted
+from core.auth import TokenPayload, require_write, is_ownership_restricted, require_perm
 from .schemas import ResourceCreate, ResourceUpdate
 
 
@@ -24,7 +24,7 @@ async def list_resources(current_user: TokenPayload) -> list:
 
 
 async def create_resource(data: ResourceCreate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "resources.create")
     doc = {
         "resource_id": str(uuid.uuid4()),
         "tenant_id": current_user.tenant_id,
@@ -37,7 +37,7 @@ async def create_resource(data: ResourceCreate, current_user: TokenPayload) -> d
 
 
 async def update_resource(resource_id: str, data: ResourceUpdate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "resources.edit")
     # Inclure les champs None explicitement pour permettre la mise à null
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     # Permettre la mise à null de validator_resource_id
@@ -56,7 +56,7 @@ async def update_resource(resource_id: str, data: ResourceUpdate, current_user: 
 
 
 async def delete_resource(resource_id: str, current_user: TokenPayload) -> None:
-    require_write(current_user)
+    require_perm(current_user, "resources.delete")
     result = await db.resources.delete_one(
         {"resource_id": resource_id, "tenant_id": current_user.tenant_id}
     )

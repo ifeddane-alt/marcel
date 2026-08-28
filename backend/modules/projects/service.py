@@ -4,7 +4,7 @@ import asyncio
 import re
 import uuid
 from core.database import db
-from core.auth import TokenPayload, require_write, is_ownership_restricted
+from core.auth import TokenPayload, require_write, is_ownership_restricted, require_perm, ensure_project_scope
 from .schemas import ProjectCreate, ProjectUpdate, BudgetRevisionCreate
 
 
@@ -254,7 +254,7 @@ async def backfill_codes(tenant_id: str) -> dict:
 
 
 async def create_project(data: ProjectCreate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "projects.create")
     doc = data.model_dump()
     doc = _sync_budget_aggregates(doc)
     code = await generate_project_code(current_user.tenant_id, doc.get("program_id"))
@@ -277,7 +277,7 @@ async def create_project(data: ProjectCreate, current_user: TokenPayload) -> dic
 
 
 async def update_project(project_id: str, data: ProjectUpdate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    await ensure_project_scope(current_user, project_id, edit_perm="projects.edit", own_perm="projects.edit_own")
     old = await db.projects.find_one(
         {"project_id": project_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
     )
@@ -354,7 +354,8 @@ async def add_budget_revision(
     data: BudgetRevisionCreate,
     current_user: TokenPayload,
 ) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "budget.revise_eac")
+    await ensure_project_scope(current_user, project_id, edit_perm="projects.edit", own_perm="projects.edit_own")
     project = await db.projects.find_one(
         {"project_id": project_id, "tenant_id": current_user.tenant_id}, {"_id": 0}
     )
@@ -440,7 +441,7 @@ async def get_benefits(project_id: str, current_user: TokenPayload) -> dict:
 
 
 async def set_benefits(project_id: str, benefits: list, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    await ensure_project_scope(current_user, project_id, edit_perm="projects.edit", own_perm="projects.edit_own")
     project = await db.projects.find_one(
         {"project_id": project_id, "tenant_id": current_user.tenant_id},
         {"_id": 0, "name": 1, "benefits": 1},

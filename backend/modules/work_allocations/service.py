@@ -2,7 +2,7 @@ from fastapi import HTTPException
 from datetime import datetime, timezone
 import uuid
 from core.database import db
-from core.auth import TokenPayload, require_write
+from core.auth import TokenPayload, require_write, require_perm
 from .schemas import WorkAllocationCreate, WorkAllocationUpdate
 
 
@@ -50,7 +50,7 @@ async def list_work_allocations(project_id: str, current_user: TokenPayload) -> 
 
 
 async def create_work_allocation(data: WorkAllocationCreate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "allocations.create")
     # Vérifier que la task appartient au tenant
     task = await db.tasks.find_one(
         {"task_id": data.task_id, "tenant_id": current_user.tenant_id}
@@ -77,7 +77,7 @@ async def create_work_allocation(data: WorkAllocationCreate, current_user: Token
 
 
 async def update_work_allocation(wa_id: str, data: WorkAllocationUpdate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "allocations.manage")
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     if not update_data:
         raise HTTPException(status_code=422, detail="Aucune donnée à mettre à jour")
@@ -93,7 +93,7 @@ async def update_work_allocation(wa_id: str, data: WorkAllocationUpdate, current
 
 
 async def delete_work_allocation(wa_id: str, current_user: TokenPayload) -> None:
-    require_write(current_user)
+    require_perm(current_user, "allocations.manage")
     result = await db.work_allocations.delete_one(
         {"work_allocation_id": wa_id, "tenant_id": current_user.tenant_id}
     )

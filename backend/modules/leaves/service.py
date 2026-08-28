@@ -5,7 +5,7 @@ from datetime import datetime, timezone, date
 from fastapi import HTTPException
 
 from core.database import db
-from core.auth import TokenPayload, require_write
+from core.auth import TokenPayload, require_write, require_perm
 from shared.holidays import get_holidays_for_dates, get_holidays_for_month, count_working_days
 from .schemas import LeaveUpsert
 
@@ -17,7 +17,12 @@ def _now() -> str:
 # ─── Upsert absence ──────────────────────────────────────────────────────────
 
 async def upsert_leave(data: LeaveUpsert, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    # Self-service : chacun saisit ses propres absences (leaves.submit) ;
+    # saisir pour un AUTRE collaborateur exige leaves.validate (manager/RH).
+    if data.resource_id and data.resource_id == current_user.resource_id:
+        require_perm(current_user, "leaves.submit")
+    else:
+        require_perm(current_user, "leaves.validate")
 
     # Valider la valeur
     if data.value not in (0.0, 0.5, 1.0):

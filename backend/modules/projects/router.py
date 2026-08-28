@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from core.auth import TokenPayload, get_current_user, permission_required
+from core.auth import TokenPayload, get_current_user, permission_required, permission_required_any
 from .schemas import ProjectCreate, ProjectUpdate, BudgetRevisionCreate
 from . import service
 
@@ -56,7 +56,7 @@ async def create_project(
 async def update_project(
     project_id: str,
     data: ProjectUpdate,
-    current_user: TokenPayload = Depends(permission_required("projects.edit")),
+    current_user: TokenPayload = Depends(permission_required_any("projects.edit", "projects.edit_own")),
 ):
     return await service.update_project(project_id, data, current_user)
 
@@ -106,6 +106,6 @@ async def get_benefits(
 async def set_benefits(
     project_id: str,
     data: dict,
-    current_user: TokenPayload = Depends(get_current_user),
+    current_user: TokenPayload = Depends(permission_required_any("projects.edit", "projects.edit_own")),
 ):
     return await service.set_benefits(project_id, data.get("benefits") or [], current_user)

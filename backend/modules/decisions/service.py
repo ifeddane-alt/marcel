@@ -3,7 +3,7 @@ from typing import Optional
 from datetime import datetime, timezone
 import uuid
 from core.database import db
-from core.auth import TokenPayload, require_write
+from core.auth import TokenPayload, require_write, require_perm
 from .schemas import DecisionCreate, DecisionUpdate
 
 
@@ -21,7 +21,7 @@ async def list_decisions(
 
 
 async def create_decision(data: DecisionCreate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "decisions.create")
     project = await db.projects.find_one(
         {"project_id": data.project_id, "tenant_id": current_user.tenant_id},
         {"_id": 0, "project_id": 1},
@@ -42,7 +42,7 @@ async def create_decision(data: DecisionCreate, current_user: TokenPayload) -> d
 
 
 async def update_decision(decision_id: str, data: DecisionUpdate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "decisions.edit")
     update_data = data.model_dump(exclude_unset=True)
     if not update_data:
         raise HTTPException(status_code=422, detail="Aucun champ à mettre à jour")

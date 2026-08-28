@@ -10,7 +10,7 @@ from datetime import datetime, timezone
 
 from fastapi import HTTPException
 from core.database import db
-from core.auth import TokenPayload, require_write
+from core.auth import TokenPayload, require_write, require_perm
 
 MSPDI_NS = "http://schemas.microsoft.com/project"
 
@@ -222,7 +222,7 @@ async def _build_plan(project_id: str, items: list, tenant_id: str) -> dict:
 
 async def analyze_import(project_id: str, filename: str, content: bytes, user: TokenPayload) -> dict:
     """Analyse un fichier MS Project et retourne le diff sans rien modifier."""
-    require_write(user)
+    require_perm(user, "import.data")
     project = await db.projects.find_one(
         {"project_id": project_id, "tenant_id": user.tenant_id}, {"_id": 0, "name": 1}
     )
@@ -286,7 +286,7 @@ async def _insert_item(project_id: str, entry: dict, tenant_id: str) -> str:
 
 async def apply_import(project_id: str, filename: str, content: bytes, user: TokenPayload) -> dict:
     """Applique le fichier au projet : met à jour les éléments existants, crée les nouveaux."""
-    require_write(user)
+    require_perm(user, "import.data")
     project = await db.projects.find_one(
         {"project_id": project_id, "tenant_id": user.tenant_id}, {"_id": 0}
     )
@@ -343,7 +343,7 @@ async def import_project_file(project_id: str, filename: str, content: bytes, us
 
 async def import_new_project(filename: str, content: bytes, user: TokenPayload) -> dict:
     """Crée un nouveau projet MARCEL directement depuis un fichier MS Project."""
-    require_write(user)
+    require_perm(user, "import.data")
     parsed = await _parse_any(filename, content)
     items = parsed["items"]
     if not items:

@@ -10,7 +10,7 @@ import uuid, io, csv as csv_mod
 from collections import defaultdict
 
 from core.database import db
-from core.auth import TokenPayload, require_write
+from core.auth import TokenPayload, require_write, require_perm
 from shared.holidays import get_holidays_for_dates
 from .schemas import (
     TimesheetEntryUpsert, TimesheetSubmitWeek,
@@ -252,7 +252,7 @@ async def get_grid(resource_id: str, week_start: str, current_user: TokenPayload
 # ─── S3-01  Upsert entrée (auto-draft) ──────────────────────────────────────
 
 async def upsert_entry(data: TimesheetEntryUpsert, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "timesheets.submit")
     resource = await _resource(data.resource_id, current_user.tenant_id)
 
     wa = await db.work_allocations.find_one(
@@ -338,7 +338,7 @@ async def upsert_entry(data: TimesheetEntryUpsert, current_user: TokenPayload) -
 # ─── S3-01  Soumettre la semaine ─────────────────────────────────────────────
 
 async def submit_week(data: TimesheetSubmitWeek, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "timesheets.submit")
     days = _week_days(data.week_start)
     now  = datetime.now(timezone.utc).isoformat()
     # draft ET rejected peuvent être (re)soumis

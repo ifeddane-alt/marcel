@@ -3,7 +3,7 @@ from datetime import datetime, timezone
 from typing import Optional
 import uuid
 from core.database import db
-from core.auth import TokenPayload, require_write, require_admin
+from core.auth import TokenPayload, require_write, require_admin, require_perm
 from .schemas import (
     TrainCreate, TrainUpdate,
     PICreate, PIUpdate,
@@ -35,7 +35,7 @@ async def get_train(train_id: str, current_user: TokenPayload) -> dict:
 
 
 async def create_train(data: TrainCreate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "trains.create")
     doc = {
         "train_id": str(uuid.uuid4()),
         "tenant_id": current_user.tenant_id,
@@ -48,7 +48,7 @@ async def create_train(data: TrainCreate, current_user: TokenPayload) -> dict:
 
 
 async def update_train(train_id: str, data: TrainUpdate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "trains.edit")
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     if not update_data:
         raise HTTPException(status_code=422, detail="Aucune donnée à mettre à jour")
@@ -139,7 +139,7 @@ async def list_pis(train_id: Optional[str], current_user: TokenPayload) -> list:
 
 
 async def create_pi(data: PICreate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "safe.manage")
     # Vérifier que le train appartient au tenant
     train = await db.trains.find_one(
         {"train_id": data.train_id, "tenant_id": current_user.tenant_id}
@@ -158,7 +158,7 @@ async def create_pi(data: PICreate, current_user: TokenPayload) -> dict:
 
 
 async def update_pi(pi_id: str, data: PIUpdate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "safe.manage")
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     if not update_data:
         raise HTTPException(status_code=422, detail="Aucune donnée à mettre à jour")
@@ -192,7 +192,7 @@ async def list_sprints(pi_id: Optional[str], train_id: Optional[str], current_us
 
 
 async def create_sprint(data: SprintCreate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "safe.manage")
     pi = await db.pis.find_one(
         {"pi_id": data.pi_id, "tenant_id": current_user.tenant_id}
     )
@@ -210,7 +210,7 @@ async def create_sprint(data: SprintCreate, current_user: TokenPayload) -> dict:
 
 
 async def update_sprint(sprint_id: str, data: SprintUpdate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "safe.manage")
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     if not update_data:
         raise HTTPException(status_code=422, detail="Aucune donnée à mettre à jour")
@@ -248,7 +248,7 @@ async def list_capabilities(
 
 
 async def create_capability(data: CapabilityCreate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "safe.manage")
     train = await db.trains.find_one(
         {"train_id": data.train_id, "tenant_id": current_user.tenant_id}
     )
@@ -266,7 +266,7 @@ async def create_capability(data: CapabilityCreate, current_user: TokenPayload) 
 
 
 async def update_capability(cap_id: str, data: CapabilityUpdate, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "safe.manage")
     update_data = {k: v for k, v in data.model_dump().items() if v is not None}
     if not update_data:
         raise HTTPException(status_code=422, detail="Aucune donnée à mettre à jour")
@@ -280,7 +280,7 @@ async def update_capability(cap_id: str, data: CapabilityUpdate, current_user: T
 
 
 async def delete_capability(cap_id: str, current_user: TokenPayload) -> None:
-    require_write(current_user)
+    require_perm(current_user, "safe.manage")
     result = await db.capabilities.delete_one(
         {"capability_id": cap_id, "tenant_id": current_user.tenant_id}
     )
@@ -333,7 +333,7 @@ async def list_feature_candidates(current_user: TokenPayload) -> list:
 
 
 async def assign_feature_pi(task_id: str, pi_id: Optional[str], current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "safe.manage")
     task = await db.tasks.find_one(
         {"task_id": task_id, "tenant_id": current_user.tenant_id, "type": "feature"}, {"_id": 0})
     if not task:
@@ -349,7 +349,7 @@ async def assign_feature_pi(task_id: str, pi_id: Optional[str], current_user: To
 
 
 async def set_feature_wsjf(task_id: str, wsjf, current_user: TokenPayload) -> dict:
-    require_write(current_user)
+    require_perm(current_user, "safe.manage")
     task = await db.tasks.find_one(
         {"task_id": task_id, "tenant_id": current_user.tenant_id, "type": "feature"}, {"_id": 0})
     if not task:

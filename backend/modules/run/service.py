@@ -3,7 +3,7 @@ from datetime import datetime, timezone, date
 from dateutil.relativedelta import relativedelta
 from fastapi import HTTPException
 from core.database import db
-from core.auth import TokenPayload
+from core.auth import TokenPayload, require_perm
 
 VALID_TYPES = ["mco", "support", "supervision", "maintenance_corrective",
                "maintenance_evolutive", "patching", "sauvegardes", "astreinte", "autre"]
@@ -59,7 +59,7 @@ def _clean_activity(data: dict) -> dict:
 
 
 async def create_activity(data: dict, user: TokenPayload) -> dict:
-    _require_write(user)
+    require_perm(user, "run.manage")
     if not (data.get("name") or "").strip():
         raise HTTPException(400, "Le nom de l'activité est requis")
     act = {
@@ -78,7 +78,7 @@ async def create_activity(data: dict, user: TokenPayload) -> dict:
 
 
 async def update_activity(activity_id: str, data: dict, user: TokenPayload) -> dict:
-    _require_write(user)
+    require_perm(user, "run.manage")
     payload = _clean_activity(data)
     payload["updated_at"] = _now()
     res = await db.run_activities.update_one(
@@ -90,7 +90,7 @@ async def update_activity(activity_id: str, data: dict, user: TokenPayload) -> d
 
 
 async def delete_activity(activity_id: str, user: TokenPayload) -> None:
-    _require_write(user)
+    require_perm(user, "run.delete")
     res = await db.run_activities.delete_one(
         {"activity_id": activity_id, "tenant_id": user.tenant_id}
     )
@@ -113,7 +113,7 @@ async def get_activity_allocations(activity_id: str, user: TokenPayload) -> list
 
 
 async def set_activity_allocations(activity_id: str, allocations: list, user: TokenPayload) -> list:
-    _require_write(user)
+    require_perm(user, "run.manage")
     act = await db.run_activities.find_one(
         {"activity_id": activity_id, "tenant_id": user.tenant_id}, {"_id": 0, "activity_id": 1}
     )
@@ -233,7 +233,7 @@ def _clean_incident(data: dict) -> dict:
 
 
 async def create_incident(data: dict, user: TokenPayload) -> dict:
-    _require_write(user)
+    require_perm(user, "run.manage")
     if not (data.get("title") or "").strip():
         raise HTTPException(400, "Le titre de l'incident est requis")
     inc = {
@@ -252,7 +252,7 @@ async def create_incident(data: dict, user: TokenPayload) -> dict:
 
 
 async def update_incident(incident_id: str, data: dict, user: TokenPayload) -> dict:
-    _require_write(user)
+    require_perm(user, "run.manage")
     payload = _clean_incident(data)
     if payload.get("status") == "resolu" and not payload.get("resolved_at"):
         payload["resolved_at"] = _now()
@@ -267,7 +267,7 @@ async def update_incident(incident_id: str, data: dict, user: TokenPayload) -> d
 
 
 async def delete_incident(incident_id: str, user: TokenPayload) -> None:
-    _require_write(user)
+    require_perm(user, "run.delete")
     res = await db.incidents.delete_one({"incident_id": incident_id, "tenant_id": user.tenant_id})
     if res.deleted_count == 0:
         raise HTTPException(404, "Incident introuvable")
@@ -290,7 +290,7 @@ async def list_releases(user: TokenPayload) -> list:
 
 
 async def create_release(data: dict, user: TokenPayload) -> dict:
-    _require_write(user)
+    require_perm(user, "run.manage")
     if not (data.get("name") or "").strip() or not data.get("date"):
         raise HTTPException(400, "Nom et date requis")
     if data.get("type") and data["type"] not in VALID_RELEASE_TYPES:
@@ -310,7 +310,7 @@ async def create_release(data: dict, user: TokenPayload) -> dict:
 
 
 async def update_release(release_id: str, data: dict, user: TokenPayload) -> dict:
-    _require_write(user)
+    require_perm(user, "run.manage")
     payload = {k: v for k, v in data.items() if k in
                {"name", "date", "end_date", "type", "status", "application_id", "project_id", "comment"}}
     res = await db.releases.update_one(
@@ -322,7 +322,7 @@ async def update_release(release_id: str, data: dict, user: TokenPayload) -> dic
 
 
 async def delete_release(release_id: str, user: TokenPayload) -> None:
-    _require_write(user)
+    require_perm(user, "run.delete")
     res = await db.releases.delete_one({"release_id": release_id, "tenant_id": user.tenant_id})
     if res.deleted_count == 0:
         raise HTTPException(404, "MEP introuvable")
