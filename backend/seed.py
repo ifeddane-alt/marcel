@@ -34,6 +34,16 @@ def pw(password: str) -> str:
     return bcrypt.hashpw(password.encode(), bcrypt.gensalt()).decode()
 
 
+# Mots de passe de démo : depuis l'environnement, jamais codés en dur dans le repo.
+import secrets as _secrets
+_ADMIN_PW = os.environ.get("SEED_ADMIN_PASSWORD") or _secrets.token_urlsafe(12)
+_DEMO_PW = os.environ.get("SEED_DEMO_PASSWORD") or _secrets.token_urlsafe(12)
+if not os.environ.get("SEED_ADMIN_PASSWORD"):
+    print(f"[seed] SEED_ADMIN_PASSWORD non défini — admin: {_ADMIN_PW}")
+if not os.environ.get("SEED_DEMO_PASSWORD"):
+    print(f"[seed] SEED_DEMO_PASSWORD non défini — comptes démo: {_DEMO_PW}")
+
+
 # ---- IDs fixes pour la cohérence des données ----
 PROJECT_IDS = [str(uuid.uuid4()) for _ in range(8)]
 RESOURCE_IDS = [str(uuid.uuid4()) for _ in range(10)]
@@ -1773,13 +1783,13 @@ async def seed():
 
     # Users
     users = [
-        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "admin@altair.fr",   "name": "Sophie Martin",     "role": "TENANT_ADMIN", "password_hash": pw("Admin2026!")},
-        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "pmo@altair.fr",     "name": "Thomas Dubois",     "role": "PMO_USER",     "password_hash": pw("Pmo1234!")},
-        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "viewer@altair.fr",  "name": "Marie Leclerc",     "role": "READ_ONLY",    "password_hash": pw("View1234!")},
-        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "cp@altair.fr",      "name": "Nicolas Petit",     "role": "PMO_USER",     "password_hash": pw("Altair2026!")},
-        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "manager@altair.fr", "name": "Isabelle Bernard",  "role": "PMO_USER",     "password_hash": pw("Altair2026!")},
-        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "user@altair.fr",    "name": "Julien Girard",     "role": "READ_ONLY",    "password_hash": pw("Altair2026!")},
-        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "achats@altair.fr",  "name": "Marc Lefebvre",     "role": "READ_ONLY",    "password_hash": pw("Altair2026!")},
+        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "admin@altair.fr",   "name": "Sophie Martin",     "role": "TENANT_ADMIN", "password_hash": pw(_ADMIN_PW)},
+        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "pmo@altair.fr",     "name": "Thomas Dubois",     "role": "PMO_USER",     "password_hash": pw(_DEMO_PW)},
+        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "viewer@altair.fr",  "name": "Marie Leclerc",     "role": "READ_ONLY",    "password_hash": pw(_DEMO_PW)},
+        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "cp@altair.fr",      "name": "Nicolas Petit",     "role": "PMO_USER",     "password_hash": pw(_DEMO_PW)},
+        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "manager@altair.fr", "name": "Isabelle Bernard",  "role": "PMO_USER",     "password_hash": pw(_DEMO_PW)},
+        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "user@altair.fr",    "name": "Julien Girard",     "role": "READ_ONLY",    "password_hash": pw(_DEMO_PW)},
+        {"user_id": str(uuid.uuid4()), "tenant_id": TENANT_ID, "email": "achats@altair.fr",  "name": "Marc Lefebvre",     "role": "READ_ONLY",    "password_hash": pw(_DEMO_PW)},
     ]
     await db.users.insert_many(users)
     print(f"Utilisateurs créés : {[u['email'] for u in users]}")
@@ -2587,7 +2597,6 @@ async def seed():
         },
     ]
 
-    from datetime import timedelta
     base_time = datetime.now(timezone.utc) - timedelta(days=3)
     for sess in demo_sessions:
         for i, ex in enumerate(sess["exchanges"]):

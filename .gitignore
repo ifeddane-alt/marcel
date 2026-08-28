@@ -135,3 +135,6 @@ frontend/node_modules/.cache/default-development/55.pack
 credentials.json
 *.key
 .credentials
+
+# Identifiants de test (jamais dans le repo)
+memory/test_credentials.md

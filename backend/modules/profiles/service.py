@@ -6,6 +6,8 @@ Le middleware ne regarde JAMAIS le code du profil, uniquement permissions[].
 from fastapi import HTTPException
 from datetime import datetime, timezone
 import uuid
+import os
+import secrets
 
 from core.database import db
 from core.auth import TokenPayload
@@ -517,9 +519,23 @@ async def seed_full_profiles_and_users(tenant_id: str) -> dict:
             )
             updated += res.modified_count
 
-    # Step 3: Nouveaux utilisateurs
+    # Step 3: Nouveaux utilisateurs de démonstration.
+    # ⚠ Sécurité : ne JAMAIS créer automatiquement de comptes démo en production.
+    # Activation explicite via SEED_DEMO_USERS=true (préview/dev uniquement).
+    if os.environ.get("SEED_DEMO_USERS", "false").lower() != "true":
+        return {
+            "profiles_seeded": 12,
+            "users_updated": updated,
+            "users_created": 0,
+            "new_users": [],
+            "demo_users_skipped": True,
+        }
+
     def pw(p: str) -> str:
         return bcrypt.hashpw(p.encode(), bcrypt.gensalt()).decode()
+
+    # Mot de passe des comptes démo : depuis l'environnement, jamais codé en dur.
+    demo_pw = os.environ.get("SEED_DEMO_PASSWORD") or secrets.token_urlsafe(12)
 
     new_users = [
         {
@@ -529,7 +545,7 @@ async def seed_full_profiles_and_users(tenant_id: str) -> dict:
             "name":         "Claire Dupont",
             "role":         "PMO_USER",  # fallback role
             "profile_id":   profiles.get("CHEF_DE_PROJET"),
-            "password_hash": pw("Altair2026!"),
+            "password_hash": pw(demo_pw),
         },
         {
             "user_id":      str(uuid.uuid4()),
@@ -538,7 +554,7 @@ async def seed_full_profiles_and_users(tenant_id: str) -> dict:
             "name":         "Stéphane Renard",
             "role":         "PMO_USER",
             "profile_id":   profiles.get("MANAGER"),
-            "password_hash": pw("Altair2026!"),
+            "password_hash": pw(demo_pw),
         },
         {
             "user_id":      str(uuid.uuid4()),
@@ -547,7 +563,7 @@ async def seed_full_profiles_and_users(tenant_id: str) -> dict:
             "name":         "Lucie Martin",
             "role":         "READ_ONLY",
             "profile_id":   profiles.get("USER"),
-            "password_hash": pw("Altair2026!"),
+            "password_hash": pw(demo_pw),
         },
         {
             "user_id":      str(uuid.uuid4()),
@@ -556,7 +572,7 @@ async def seed_full_profiles_and_users(tenant_id: str) -> dict:
             "name":         "Bruno Leroy",
             "role":         "READ_ONLY",
             "profile_id":   profiles.get("ACHATS"),
-            "password_hash": pw("Altair2026!"),
+            "password_hash": pw(demo_pw),
         },
     ]
 

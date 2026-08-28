@@ -17,6 +17,15 @@ MONGO_URL = os.environ.get("MONGO_URL", "mongodb://localhost:27017")
 DB_NAME   = os.environ.get("DB_NAME", "projetenne")
 pwd_ctx   = CryptContext(schemes=["bcrypt"], deprecated="auto")
 
+# Mots de passe de démo : depuis l'environnement, jamais codés en dur.
+import secrets as _secrets
+_BETA_ADMIN_PW = os.environ.get("SEED_BETA_ADMIN_PASSWORD") or _secrets.token_urlsafe(12)
+_BETA_PM_PW = os.environ.get("SEED_BETA_PM_PASSWORD") or _secrets.token_urlsafe(12)
+if not os.environ.get("SEED_BETA_ADMIN_PASSWORD"):
+    print(f"[seed_beta] admin@betacorp.fr : {_BETA_ADMIN_PW}")
+if not os.environ.get("SEED_BETA_PM_PASSWORD"):
+    print(f"[seed_beta] pm@betacorp.fr : {_BETA_PM_PW}")
+
 
 def _now():
     return datetime.now(timezone.utc).isoformat()
@@ -96,7 +105,7 @@ async def seed():
             "profile_id": admin_profile_id,
             "profile_name": "Administrateur",
             "permissions": ["*"],
-            "password_hash": pwd_ctx.hash("Beta2026!"),
+            "password_hash": pwd_ctx.hash(_BETA_ADMIN_PW),
             "is_active": True,
             "created_at": _now(),
         },
@@ -113,7 +122,7 @@ async def seed():
                 "roadmap.view", "scope.arbitrate", "scope.freeze", "scope.receive",
                 "arbitrage.view", "timesheets.submit", "agent.chat", "agent.recommend",
             ],
-            "password_hash": pwd_ctx.hash("PM2026!"),
+            "password_hash": pwd_ctx.hash(_BETA_PM_PW),
             "is_active": True,
             "created_at": _now(),
         },

@@ -6,8 +6,42 @@ from jose import jwt, JWTError
 from datetime import datetime, timezone, timedelta
 import os
 
-JWT_SECRET    = os.environ.get("JWT_SECRET", "projetenne-secret-key-2025")
 JWT_ALGORITHM = "HS256"
+_MIN_SECRET_LEN = 32
+_KNOWN_WEAK_SECRETS = {
+    "projetenne-secret-key-2025",
+    "projetenne-secret-key-2025-altair",
+    "changeme", "secret", "your-secret-key", "dev-secret",
+}
+
+
+def _load_jwt_secret() -> str:
+    """Charge le secret JWT depuis l'environnement. Aucune valeur par défaut.
+    L'application REFUSE DE DÉMARRER si le secret est manquant, trop court
+    ou correspond à une valeur par défaut connue comme compromise."""
+    secret = (os.environ.get("JWT_SECRET") or "").strip()
+    if not secret:
+        raise RuntimeError(
+            "JWT_SECRET manquant. Configurez un secret aléatoire d'au moins "
+            f"{_MIN_SECRET_LEN} caractères dans backend/.env "
+            "(ex. python -c \"import secrets; print(secrets.token_hex(32))\"). "
+            "L'application refuse de démarrer sans secret valide."
+        )
+    if len(secret) < _MIN_SECRET_LEN:
+        raise RuntimeError(
+            f"JWT_SECRET trop court ({len(secret)} caractères). "
+            f"Au moins {_MIN_SECRET_LEN} caractères requis."
+        )
+    if secret in _KNOWN_WEAK_SECRETS:
+        raise RuntimeError(
+            "JWT_SECRET correspond à une valeur par défaut compromise. "
+            "Générez un nouveau secret aléatoire et effectuez une rotation."
+        )
+    return secret
+
+
+# Chargé à l'import : si invalide, l'import échoue et l'app ne démarre pas.
+JWT_SECRET = _load_jwt_secret()
 
 security = HTTPBearer()
 
