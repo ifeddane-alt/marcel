@@ -55,14 +55,13 @@ async def test_connection(base_url: str, auth_type: str, credentials: dict) -> d
         return {"success": False, "message": "Credentials SAP non configurés"}
 
     try:
-        import httpx
-        from core.ssrf import validate_public_url, connector_tls_verify
+        from core.ssrf import validate_public_url, connector_tls_verify, hardened_async_client
         headers = {"Accept": "application/json"}
         user = credentials.get("username") or credentials.get("email", "")
         password = credentials.get("password", "")
         url = f"{base_url.rstrip('/')}/sap/opu/odata/sap/ZBDG_BUDGET_SRV/$metadata"
         validate_public_url(base_url.rstrip("/"))
-        async with httpx.AsyncClient(timeout=8, verify=connector_tls_verify(), auth=(user, password)) as client:
+        async with hardened_async_client(timeout=8, verify=connector_tls_verify(), auth=(user, password)) as client:
             resp = await client.get(url, headers=headers)
         if resp.status_code in (200, 401, 403):
             if resp.status_code == 200:
