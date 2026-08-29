@@ -436,3 +436,11 @@
 - Rotation ENCRYPTION_KEY : procédure docs_security/ENCRYPTION_KEY_ROTATION.md + scripts/rotate_encryption_key.py (idempotent).
 - Secrets : token GitHub nulle part persistant (pod/VPS/repo vérifiés, wrappers /tmp purgés) — encore ACTIF, à révoquer par l'utilisateur après ce run.
 - État final : origin/main == prod == 74cd1185edd6055103635cf15cf8e9323ac498ec, CI 5/5 verte (rbac 55 passed/1 skipped, gitleaks 0 leak), smoke prod 26/26.
+
+## 2026-06 (fork) — RED TEAM externe (marcel-ppm.com) — PASS (remédiation c0e0417)
+- Audit offensif indépendant (statique code) + passe dynamique non destructive prod. Base 74cd118, remédiation c0e0417.
+- Critical 0 / High 0. SEC-001 (MEDIUM, SSRF DNS-rebinding SAP test_connection, admin-only) REMÉDIÉ : chemin routé via hardened_async_client (plus aucun httpx brut dans les connecteurs) + test NR backend/tests/test_ssrf_connectors.py. SEC-002 RÉSOLU (MARCEL_ENV=production vérifié → pas de fallback clé/TLS).
+- Preuves prod : smoke 26/26 ; red team dynamique 34/39 (5 FAIL = artefacts: betacorp absent prod=401, payloads 422 schéma) ; re-test payloads valides 9/9 (arbitrage viewer=403, mass-assign tenant_id/risk_id/criticality forcés, cross-tenant=404). JWT alg=none/tampon/malformé rejetés, NoSQL injection 422, throttle 429, headers OK, CORS non réfléchi.
+- RÈGLE appliquée : un 422 (payload invalide) n'est jamais une faille RBAC — retest obligatoire avec schéma valide.
+- Hardening P3 restant (non bloquant) : CSP unsafe-inline/eval, clé licence en dur, garde fail-closed MARCEL_ENV, strip_protected défensif. CORS wildcard = artefact Preview (prod=allowlist).
+- État : origin/main == prod == c0e0417, CI 5/5 verte, Mongo auth ON. Rapport: /app/memory/MARCEL_RED_TEAM_REPORT.md.
