@@ -80,8 +80,71 @@ jobs:
             --ignore=tests/test_agent.py \
             --ignore=tests/test_agent_wf.py \
             --ignore=tests/test_items_13_19.py \
+            --ignore=tests/test_rbac_audit_v2.py \
+            --ignore=tests/test_rbac_audit_v2_minperm.py \
+            --ignore=tests/test_rbac_audit_v2_supplemental.py \
             -k "not sap and not connector_sync" \
             || true
+
+  rbac-audit:
+    name: RBAC audit V2 — blocking (anti-régression)
+    runs-on: ubuntu-latest
+    services:
+      mongodb:
+        image: mongo:6
+        ports: ['27017:27017']
+    env:
+      MONGO_URL: mongodb://localhost:27017
+      DB_NAME: marcel_ci_rbac
+      JWT_SECRET: ci_rbac_secret_key_min_32_chars_long_xx
+      ENCRYPTION_KEY: ci-rbac-encryption-key-not-production
+      ANTHROPIC_API_KEY: skip
+      SKIP_LICENSE_CHECK: "true"
+      MARCEL_ENV: test
+      SEED_ADMIN_PASSWORD: "Admin2026!"
+      SEED_DEMO_PASSWORD: "Altair2026!"
+      REACT_APP_BACKEND_URL: http://localhost:8001
+      PYTHONPATH: .
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-python@v5
+        with:
+          python-version: '3.11'
+      - name: Install dependencies
+        run: |
+          pip install --upgrade pip
+          pip install -r backend/requirements.txt \
+            --extra-index-url https://d33sy5i8bnduwe.cloudfront.net/simple/ \
+            || pip install -r backend/requirements.txt
+      - name: Seed altair tenant + accounts
+        working-directory: backend
+        run: python seed.py
+      - name: Normalize test-account passwords (suite expects distinct pw per account)
+        working-directory: backend
+        run: |
+          python -c "
+          import asyncio, bcrypt, os
+          from motor.motor_asyncio import AsyncIOMotorClient
+          async def m():
+              db = AsyncIOMotorClient(os.environ['MONGO_URL'])[os.environ['DB_NAME']]
+              creds = [('admin@altair.fr','Admin2026!'),('manager@altair.fr','Altair2026!'),('viewer@altair.fr','View1234!')]
+              for email, pwd in creds:
+                  h = bcrypt.hashpw(pwd.encode(), bcrypt.gensalt()).decode()
+                  await db.users.update_one({'email': email}, {'\$set': {'password_hash': h, 'is_active': True}})
+              print('test-account passwords normalized')
+          asyncio.run(m())
+          "
+      - name: Start API
+        working-directory: backend
+        run: |
+          uvicorn server:app --host 0.0.0.0 --port 8001 &
+          for i in $(seq 1 30); do
+            curl -sf http://localhost:8001/api/health && break
+            sleep 2
+          done
+      - name: RBAC audit suite (BLOCKING)
+        working-directory: backend
+        run: pytest tests/test_rbac_audit_v2.py tests/test_rbac_audit_v2_minperm.py tests/test_rbac_audit_v2_supplemental.py -q
 
   frontend:
     name: Frontend — build
