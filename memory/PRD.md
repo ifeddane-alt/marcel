@@ -545,3 +545,10 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 - ✅ Prod déployée sur b88fb47 via /opt/marcel/scripts/update.sh. Smoke prod : 26 PASS / 0 FAIL + engagement 3/3 (viewer 403, admin attest 200, readiness 200, attestation de test nettoyée).
 - ✅ État final : origin/main == HEAD prod == b88fb478ad3bd9ebdc95d797ab2235efe6976ba3, repo prod propre, pull futur fast-forward sûr. GO RED TEAM prononcé.
 - ⚠ Token GitHub (classic, repo+workflow) utilisé pour les push — à RÉVOQUER par l'utilisateur (github.com/settings/tokens).
+
+## 2026-06 (fork) — OPS HARDENING pré-Red Team (74cd118, déployé prod)
+- ✅ Mongo auth production ACTIVE (marcel_root admin + marcel_app readWrite mono-DB, moindre privilège prouvé). Données intactes : smoke 26/26, restore test PASS.
+- ✅ Backups : locaux chiffrés 3×/j (cron) + restore test OK sous auth. Off-site S3 : infra 100 % prête (aws CLI, rétention 90 j, /root/s3.sh) — EN ATTENTE des clés Scaleway Object Storage utilisateur.
+- ✅ Alerting : workflow uptime 30 min (health + fraîcheur backup → email GitHub en échec, run testé SUCCESS) ; CI failures = notifications GitHub natives ; backup_alert dans /api/health.
+- ✅ Secrets : aucune trace persistante du token GitHub (à révoquer) ; rotation ENCRYPTION_KEY documentée + script idempotent.
+- État : origin/main == prod == 74cd1185edd6055103635cf15cf8e9323ac498ec, CI 5/5 verte. GO RED TEAM maintenu.

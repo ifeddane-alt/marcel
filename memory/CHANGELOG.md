@@ -427,3 +427,12 @@
 - CI: seed betacorp + profil CI_VIEWER_PLUS (viewer = lecture + indicators.manage + export.ppt, parité Preview). .gitleaks.toml: allowlist 2 valeurs factices (ci_rbac_secret_key…, projetenne-secret-key-2025), 0 leak sur 303 commits.
 - Smoke prod 26/26 + engagement 3/3, attestation test nettoyée, throttle 429 confirmé (dernier test, grille l'IP ~quelques minutes).
 - PIÈGE évité: gitleaks-action scanne la PLAGE poussée (15 commits) mais un scan full-history trouve aussi l'ancien défaut projetenne-secret-key-2025 (historique) — couvert par l'allowlist.
+
+## 2026-06 (fork) — OPS HARDENING pré-Red Team (commit 74cd118, déployé prod)
+- Mongo auth PROD ACTIVÉE : users marcel_root (admin) + marcel_app (readWrite sur la seule DB app, moindre privilège prouvé par 3 refus), MONGO_URL authentifiée dans .env VPS (jamais en repo), --auth via MONGO_ROOT_USERNAME/PASSWORD (compose 5adbbaf). Backup avant bascule + .env.bak-* conservé. Données intactes (smoke 26/26, restore test PASS 350 projets/4229 tâches).
+- PIÈGE (3 échecs avant fix): `docker compose exec -T` AVALE le stdin d'un script `bash -s` distant → toujours `< /dev/null` sur les exec dans les scripts pipés par ssh. Aussi: `[ -n ... ] && cmd` fatal sous set -e quand le test est faux.
+- backup.sh/restore_test.sh auth-aware (AUTH_ARGS si MONGO_ROOT_USERNAME présent) + source /opt/marcel/secrets/s3.env + rétention S3 90 j. aws CLI v2 installé sur VPS. /root/s3.sh prêt (saisie 3 valeurs → s3.env 600). OFF-SITE EN ATTENTE des clés Scaleway Object Storage (utilisateur).
+- Alerting sans nouvelle dépendance : workflow uptime.yml (cron 30 min, health + backup_alert → échec = email GitHub) testé SUCCESS ; backup_alert ajouté à /api/health (booléen, aucune donnée sensible) ; échecs CI = notifications GitHub natives.
+- Rotation ENCRYPTION_KEY : procédure docs_security/ENCRYPTION_KEY_ROTATION.md + scripts/rotate_encryption_key.py (idempotent).
+- Secrets : token GitHub nulle part persistant (pod/VPS/repo vérifiés, wrappers /tmp purgés) — encore ACTIF, à révoquer par l'utilisateur après ce run.
+- État final : origin/main == prod == 74cd1185edd6055103635cf15cf8e9323ac498ec, CI 5/5 verte (rbac 55 passed/1 skipped, gitleaks 0 leak), smoke prod 26/26.
