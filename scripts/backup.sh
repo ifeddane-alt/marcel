@@ -22,8 +22,20 @@ fi
 
 echo "[$(date)] Demarrage sauvegarde MARCEL (db=$DB_NAME)..."
 
-# Dump MongoDB (mongo sans auth, interne au reseau Docker) -> archive gzip dans le container
-docker compose exec -T mongo mongodump \
+# Auth Mongo optionnelle (activée si MONGO_ROOT_USERNAME présent dans le .env)
+MUSER="$(grep -E '^MONGO_ROOT_USERNAME=' "$INSTALL_DIR/.env" | cut -d'=' -f2- | tr -d '"')"
+MPASS="$(grep -E '^MONGO_ROOT_PASSWORD=' "$INSTALL_DIR/.env" | cut -d'=' -f2- | tr -d '"')"
+AUTH_ARGS=""
+[ -n "$MUSER" ] && AUTH_ARGS="-u $MUSER -p $MPASS --authenticationDatabase admin"
+
+# Credentials S3 hors repo (optionnel)
+if [ -f /opt/marcel/secrets/s3.env ]; then
+  . /opt/marcel/secrets/s3.env
+  export AWS_ACCESS_KEY_ID AWS_SECRET_ACCESS_KEY
+fi
+
+# Dump MongoDB (archive gzip dans le container)
+docker compose exec -T mongo mongodump $AUTH_ARGS \
   --db "$DB_NAME" \
   --archive="/tmp/marcel_backup_${DATE}.gz" \
   --gzip >/dev/null
@@ -62,6 +74,16 @@ if [ -n "${S3_BACKUP_BUCKET:-}" ]; then
       if aws s3 ls "s3://${S3_BACKUP_BUCKET}/$(basename "$ENC")" $EP_ARG >/dev/null 2>&1; then
         OFFSITE="ok"
         echo "[$(date)] OK Upload off-site : s3://${S3_BACKUP_BUCKET}/$(basename "$ENC")"
+        # Rétention off-site (defaut 90 jours)
+        S3_KEEP="${S3_KEEP_DAYS:-90}"
+        CUTOFF=$(date -d "-${S3_KEEP} days" +%s)
+        aws s3 ls "s3://${S3_BACKUP_BUCKET}/" $EP_ARG 2>/dev/null | while read -r d t _ name; do
+          [ -z "${name:-}" ] && continue
+          ts=$(date -d "$d $t" +%s 2>/dev/null) || continue
+          if [ "$ts" -lt "$CUTOFF" ]; then
+            aws s3 rm "s3://${S3_BACKUP_BUCKET}/${name}" $EP_ARG >/dev/null 2>&1 || true
+          fi
+        done
       else
         OFFSITE="upload_unverified"
         echo "[$(date)] WARN upload off-site non vérifié"
@@ -76,7 +98,7 @@ if [ -n "${S3_BACKUP_BUCKET:-}" ]; then
   fi
 fi
 
-docker compose exec -T mongo mongosh --quiet --eval "
+docker compose exec -T mongo mongosh --quiet $AUTH_ARGS --eval "
 db.getSiblingDB('${DB_NAME}').backup_status.insertOne({
   result:'success', file:'$(basename "$ENC")', size:'${SIZE}',
   offsite:'${OFFSITE}', created_at:'${ISO}'

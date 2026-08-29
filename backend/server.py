@@ -216,11 +216,26 @@ async def health():
         db_status = f"error: {e}"
 
     uptime = int(time.time() - _start_time)
+
+    # Alerte backup (ops) : dernier backup absent, en échec ou > 36 h
+    backup_alert = True
+    try:
+        from core.database import db as _db
+        from datetime import datetime, timezone
+        _lb = await _db.backup_status.find_one(
+            {}, {"_id": 0, "created_at": 1, "result": 1}, sort=[("created_at", -1)])
+        if _lb and _lb.get("created_at"):
+            _age_h = (datetime.now(timezone.utc) - datetime.fromisoformat(_lb["created_at"])).total_seconds() / 3600
+            backup_alert = _age_h > 36 or _lb.get("result") != "success"
+    except Exception:
+        pass
+
     return {
         "status": "ok" if db_status == "ok" else "degraded",
         "version": "1.1.0",
         "uptime_seconds": uptime,
         "database": db_status,
+        "backup_alert": backup_alert,
         "error_counts": dict(_error_counts),
     }
 

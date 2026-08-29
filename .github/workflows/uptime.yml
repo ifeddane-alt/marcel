@@ -1,0 +1,27 @@
+name: Uptime — MARCEL prod
+
+on:
+  schedule:
+    - cron: '*/30 * * * *'
+  workflow_dispatch:
+
+jobs:
+  probe:
+    name: Health + fraîcheur backup (marcel-ppm.com)
+    runs-on: ubuntu-latest
+    steps:
+      - name: Probe /api/health
+        run: |
+          RESP=$(curl -sf --max-time 20 https://marcel-ppm.com/api/health) || { echo "::error::Backend injoignable (HTTP failure)"; exit 1; }
+          echo "$RESP"
+          echo "$RESP" | python3 -c "
+          import sys, json
+          d = json.load(sys.stdin)
+          errs = []
+          if d.get('status') != 'ok': errs.append('backend status=' + str(d.get('status')))
+          if d.get('database') != 'ok': errs.append('database=' + str(d.get('database')))
+          if d.get('backup_alert', True): errs.append('backup absent, en echec ou > 36h')
+          if errs:
+              print('::error::' + ' | '.join(errs)); sys.exit(1)
+          print('OK: backend healthy, database ok, dernier backup frais')
+          "
