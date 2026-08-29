@@ -1,13 +1,15 @@
 """Endpoints publics du site vitrine — sans authentification."""
 import logging
+import html
 import re
 import uuid
 from datetime import datetime, timezone
 
-from fastapi import APIRouter, HTTPException
+from fastapi import APIRouter, HTTPException, Request
 from pydantic import BaseModel
 
 from core.database import db
+from core.limiter import limiter
 
 logger = logging.getLogger(__name__)
 router = APIRouter(tags=["public_site"])
@@ -25,7 +27,8 @@ class ContactRequest(BaseModel):
 
 
 @router.post("/public/contact", status_code=201)
-async def submit_contact(data: ContactRequest):
+@limiter.limit("5/minute")
+async def submit_contact(request: Request, data: ContactRequest):
     if data.website.strip():
         return {"status": "ok"}  # bot piégé par le honeypot — on ignore silencieusement
     name = data.name.strip()[:200]
@@ -61,17 +64,17 @@ async def _notify(doc: dict) -> None:
         import resend
         resend.api_key = api_key
         sender = os.environ.get("SENDER_EMAIL", "onboarding@resend.dev")
-        html = (
+        body_html = (
             f"<h2>Nouvelle demande de démo MARCEL</h2>"
-            f"<p><b>Nom :</b> {doc['name']}<br><b>Société :</b> {doc['company']}<br>"
-            f"<b>Email :</b> {doc['email']}<br><b>Langue :</b> {doc['locale']}</p>"
-            f"<p><b>Message :</b><br>{doc['message'] or '—'}</p>"
+            f"<p><b>Nom :</b> {html.escape(doc['name'])}<br><b>Société :</b> {html.escape(doc['company'])}<br>"
+            f"<b>Email :</b> {html.escape(doc['email'])}<br><b>Langue :</b> {html.escape(doc['locale'])}</p>"
+            f"<p><b>Message :</b><br>{html.escape(doc['message'] or '—')}</p>"
         )
         await asyncio.to_thread(resend.Emails.send, {
             "from": sender,
             "to": [to_email],
-            "subject": f"[MARCEL] Demande de démo — {doc['company']}",
-            "html": html,
+            "subject": f"[MARCEL] Demande de démo — {doc['company'][:120]}",
+            "html": body_html,
         })
     except Exception as exc:
         logger.warning("[PublicContact] Échec notification email : %s", exc)

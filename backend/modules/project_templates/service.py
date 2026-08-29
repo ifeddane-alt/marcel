@@ -4,7 +4,7 @@ from datetime import datetime, timezone, timedelta
 from typing import Optional
 
 from fastapi import HTTPException
-from core.auth import TokenPayload, has_perm
+from core.auth import TokenPayload, has_perm, is_ownership_restricted
 from core.database import db
 from core.payloads import strip_protected
 from .templates_data import DEFAULT_TEMPLATES
@@ -135,11 +135,15 @@ async def apply_template(
     user: TokenPayload,
 ) -> dict:
     """Crée tâches et jalons depuis un template."""
+    if not (has_perm(user, "projects.edit") or has_perm(user, "projects.edit_own")):
+        raise HTTPException(403, "Permission projects.edit requise")
     project = await db.projects.find_one(
         {"project_id": project_id, "tenant_id": user.tenant_id}, {"_id": 0}
     )
     if not project:
         raise HTTPException(404, "Projet introuvable")
+    if is_ownership_restricted(user, "projects.edit_own") and project.get("owner_id") != user.user_id:
+        raise HTTPException(403, "Accès refusé — projet non assigné")
 
     tpl = await db.project_templates.find_one(
         {"template_id": template_id, "tenant_id": user.tenant_id}, {"_id": 0}

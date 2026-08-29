@@ -1,5 +1,16 @@
 # PRD — MARCEL
 
+## 2026-06 (fork) — AUDIT SÉCURITÉ INDÉPENDANT V2 + remédiation (Preview, NON déployé)
+- **Cible auditée** : backend V2 complet (`_v2/`, 604 fichiers). `/app/backend` synchronisé sur V2 pour audit dynamique + correctifs (Preview seulement). Rapport complet : `/app/memory/MARCEL_V2_SECURITY_AUDIT.md`.
+- **Verdict** : V2 telle que livrée = **NO-GO RED TEAM** (1 HIGH exploitable). Après remédiation de cette session = **GO RED TEAM** (plus aucun Critical/High exploitable ; résiduels Medium/Low documentés, non bloquants).
+- **HIGH corrigé (H1)** : module Arbitrage — AUCUNE autorisation sur toutes les écritures (`PUT weights`, `PATCH scoring`, `POST/DELETE envelopes`, `POST/apply/DELETE scenarios`). `apply_scenario` mutait les vrais projets/budgets. N'importe quel authentifié (viewer) exploitait. Fix : `require_perm arbitrage.edit`/`arbitrage.simulate`. **Prouvé** : viewer 7/7→403, manager→200/201.
+- **MEDIUM/LOW corrigés** : profiles seed/seed-full (→admin.config), apply-template (projects.edit+scope), connectors/test (admin.config), engagement/attest (projects.edit+scope), catalog dashboard manual (indicators.manage), export/copil (export.ppt), tenant/settings (rôle→permission), bug échappement email public_site.
+- **Résiduels documentés (non bloquants GO)** : SSRF rebinding DNS TOCTOU (admin-gated, Medium), CSP unsafe-inline/eval (Medium/Low), login bruteforce in-memory par email (Low), énumération users login (Low), WS decode_token sans révocation (Low), clé chiffrement connecteurs fallback dev non-prod (Info), PB vote sans allowlist participants (Low), profils « lecture »-type sur-dotés (décision métier).
+- **Validation** : preuve dynamique `_v2/rbac_proof.py` + agent de test `test_reports/iteration_77.json` **55/55 PASS** (deny=403 avant logique métier, allow OK, CRUD projets/tâches/risques non régressé). Suite régression : `backend/tests/test_rbac_audit_v2*.py`.
+- ⚠️ **Aucun déploiement production**. Correctifs en Preview uniquement, à déployer sur décision explicite.
+- Non-findings confirmés (V2 solide) : JWT fail-fast/fail-closed/pv, MFA imposée+one-shot, OIDC RS256/JWKS/nonce, SAML strict+signed+anti-rejeu, SimpleCrud sans bypass PMO_USER, mass-assignment allowlists, isolation tenant, Mongo auth Docker, CORS sûr, uploads bornés.
+
+
 ## 2026-08-28 (2) — Sprint PRE-RED-TEAM HARDENING (DÉPLOYÉ PROD — commit 9341bb8)
 - **Mass assignment traité** : audit des 77 `data: dict` (allowlists `SimpleCrud`/`_clean_*`/Pydantic déjà en place) ; seul `project_templates` propageait `data` brut → corrigé via `core/payloads.strip_protected`. Test `test_mass_assignment.py` 9/9 (injection tenant_id/owner_id/role/permissions/is_admin/_id rejetée).
 - **TLS durci** : 4× `verify=False` (SAP/ServiceNow) supprimés ; `core/ssrf.connector_tls_verify` (défaut True, opt-out ignoré en prod via `MARCEL_ENV=production`). 0 `verify=False` résiduel.

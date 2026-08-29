@@ -7,7 +7,7 @@ from datetime import datetime, timezone
 import uuid
 
 from core.database import db
-from core.auth import TokenPayload, is_ownership_restricted
+from core.auth import TokenPayload, is_ownership_restricted, require_perm
 from .schemas import ScoringPatch, ArbitrageWeightsUpdate, EnvelopeUpsert, ScenarioCreate
 
 # ─── Poids par défaut ─────────────────────────────────────────────────────────
@@ -90,6 +90,7 @@ async def get_weights(user: TokenPayload) -> dict:
 
 
 async def update_weights(data: ArbitrageWeightsUpdate, user: TokenPayload) -> dict:
+    require_perm(user, "arbitrage.edit")
     w = data.model_dump()
     await db.tenants.update_one(
         {"tenant_id": user.tenant_id},
@@ -155,6 +156,7 @@ async def get_portfolio_summary(user: TokenPayload) -> dict:
 # ─── Patch scoring d'un projet ────────────────────────────────────────────────
 
 async def patch_project_scoring(project_id: str, data: ScoringPatch, user: TokenPayload) -> dict:
+    require_perm(user, "arbitrage.edit")
     updates = {k: v for k, v in data.model_dump().items() if v is not None}
     if not updates:
         raise HTTPException(400, "Aucun champ à mettre à jour")
@@ -197,6 +199,7 @@ async def list_envelopes(user: TokenPayload) -> list:
 
 
 async def upsert_envelope(data: EnvelopeUpsert, user: TokenPayload) -> dict:
+    require_perm(user, "arbitrage.edit")
     existing = await db.portfolio_envelopes.find_one(
         {"tenant_id": user.tenant_id, "year": data.year}
     )
@@ -229,6 +232,7 @@ async def upsert_envelope(data: EnvelopeUpsert, user: TokenPayload) -> dict:
 
 
 async def delete_envelope(envelope_id: str, user: TokenPayload) -> dict:
+    require_perm(user, "arbitrage.edit")
     env = await db.portfolio_envelopes.find_one(
         {"envelope_id": envelope_id, "tenant_id": user.tenant_id}
     )
@@ -256,6 +260,7 @@ async def get_scenario(scenario_id: str, user: TokenPayload) -> dict:
 
 
 async def save_scenario(data: ScenarioCreate, user: TokenPayload) -> dict:
+    require_perm(user, "arbitrage.simulate")
     doc = {
         "scenario_id":  str(uuid.uuid4()),
         "tenant_id":    user.tenant_id,
@@ -274,6 +279,7 @@ async def save_scenario(data: ScenarioCreate, user: TokenPayload) -> dict:
 
 async def apply_scenario(scenario_id: str, user: TokenPayload) -> dict:
     """Applique les modifications d'un scénario aux vrais projets."""
+    require_perm(user, "arbitrage.edit")
     scenario = await db.scenarios.find_one(
         {"scenario_id": scenario_id, "tenant_id": user.tenant_id}, {"_id": 0}
     )
@@ -310,6 +316,7 @@ async def apply_scenario(scenario_id: str, user: TokenPayload) -> dict:
 
 
 async def delete_scenario(scenario_id: str, user: TokenPayload) -> dict:
+    require_perm(user, "arbitrage.edit")
     s = await db.scenarios.find_one(
         {"scenario_id": scenario_id, "tenant_id": user.tenant_id}
     )

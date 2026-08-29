@@ -124,7 +124,10 @@ def _manual_rag(v: float, direction: str, green, orange):
 async def set_manual_value(scope: str, indicator_id: str, data: dict, user: TokenPayload) -> dict:
     if scope not in ("project", "program", "portfolio", "dashboard"):
         raise HTTPException(400, "Scope invalide")
-    if scope != "dashboard" and not has_perm(user, "projects.edit"):
+    if scope == "dashboard":
+        if not has_perm(user, "indicators.manage"):
+            raise HTTPException(403, "Permission indicators.manage requise pour la saisie portefeuille")
+    elif not has_perm(user, "projects.edit"):
         raise HTTPException(403, "Permission projects.edit requise pour la saisie sur ce périmètre")
     cat = await db.indicator_catalog.find_one({"indicator_id": indicator_id}, {"_id": 0, "indicator_id": 1})
     if not cat:

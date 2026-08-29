@@ -501,7 +501,7 @@ function HolidaysSection({ config, onSave }) {
               <tr key={i} className="hover:bg-zinc-50/70" data-testid={`holiday-row-${i}`}>
                 <td className="px-3 py-1.5">
                   <DateField className={INPUT_CLS + " text-xs"} value={h.date}
- onChange={e => set(i, "date", v)} />
+ onChange={v => set(i, "date", v)} />
                 </td>
                 <td className="px-3 py-1.5">
                   <input className={INPUT_CLS + " text-xs"} value={h.name}

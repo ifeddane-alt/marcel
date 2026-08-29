@@ -240,6 +240,7 @@ async def update_mapping(connector_type: str, data: MappingUpdate, user: TokenPa
 # ─── Test connexion ───────────────────────────────────────────────────────────
 
 async def test_connection(connector_type: str, user: TokenPayload) -> dict:
+    _require_admin_config(user)
     cfg = await db.connector_configs.find_one(
         {"tenant_id": user.tenant_id, "type": connector_type}
     )

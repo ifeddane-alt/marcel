@@ -1,0 +1,47 @@
+{
+  "summary": "Independent BACKEND-ONLY validation of the MARCEL V2 RBAC/authorization fixes. 56 pytest cases executed against the public URL (REACT_APP_BACKEND_URL) across 3 new files: 55 passed, 1 skipped (no negative subject among seeded profiles -> covered instead by a purpose-built minimal-permission profile). ALL requested DENY cases return HTTP 403 (never 422/401), and ALL requested ALLOW cases succeed for legitimate users -> no over-restriction regression. Core CRUD (projects/risks/tasks) still works for admin and manager, and is 403 for users lacking create perms. Extra coverage added: indicators.manage gate on indicator-catalog manual dashboard values, export.ppt gate on /export/copil, cross-tenant isolation, bcrypt $2b$ hash format, login brute-force throttling, invalid/missing token rejection. No 500s were produced by any test call (verified in backend logs).",
+  "backend_issues": {
+    "critical": [],
+    "minor": [
+      {"endpoint": "POST /api/auth/login", "issue": "Brute-force throttling is EMAIL-ONLY and IN-MEMORY (10 attempts/60s per email, module-level dict). No IP-based throttling => a single IP can spray/enumerate across many emails unthrottled, and the counter resets on every backend restart / is not shared across workers or pods. Playbook expects lockout after 5 fails. Verified: 10x401 then 429 (stable, no 500)."},
+      {"endpoint": "POST /api/auth/login", "issue": "User-enumeration via distinct responses: unknown email/bad password -> 401 'Identifiants invalides' (good), but disabled account -> 403 'Compte désactivé' and SSO account -> 401 'Ce compte utilise le SSO'. These distinguishable answers confirm an email exists. LOW."},
+      {"endpoint": "PUT /api/tenant/settings", "issue": "Guarded by a hard ROLE check (current_user.role != 'TENANT_ADMIN') instead of the permission model (admin.config). Inconsistent with the deny-by-default RBAC refactor: a custom profile granted admin.config would be wrongly denied, and the profile permission matrix cannot govern this write. Deny path verified OK (manager/viewer -> 403)."},
+      {"endpoint": "PATCH /api/arbitrage/projects/{id}/scoring", "issue": "Not a security bug but noteworthy: 'strategic_alignment' is rejected with 400 (computed from objectives). The permission check correctly runs BEFORE this business rule (viewer gets 403, manager gets 400/200), so the gate is sound."},
+      {"endpoint": "DELETE /api/admin/users/{id}", "issue": "No delete-user endpoint exists (deactivate-only via PATCH is_active). Test fixtures therefore need direct DB purge for cleanup - flagged for awareness, not a security defect."},
+      {"endpoint": "DELETE /api/profiles/{id}", "issue": "Returns 400 while a (even deactivated) user is still attached - expected safety behaviour, documented so future test teardown does DB purge."}
+    ]
+  },
+  "frontend_issues": {"ui_bugs": [], "integration_issues": [], "design_issues": []},
+  "test_report_links": [
+    "/app/backend/tests/test_rbac_audit_v2.py",
+    "/app/backend/tests/test_rbac_audit_v2_supplemental.py",
+    "/app/backend/tests/test_rbac_audit_v2_minperm.py",
+    "/app/test_reports/pytest/pytest_rbac_audit_v2.xml"
+  ],
+  "action_items": [
+    "OPTIONAL HARDENING (no Critical/High blocker found): add IP-based (not only per-email) and persistent/shared brute-force throttling on /api/auth/login; current limiter is in-memory per-process.",
+    "OPTIONAL: normalise login failure responses (disabled / SSO accounts) to the generic 401 to remove the user-enumeration signal.",
+    "OPTIONAL CONSISTENCY: migrate PUT /api/tenant/settings from the hard role check to Depends(permission_required('admin.config'))."
+  ],
+  "critical_code_review_comments": [
+    "VALIDATED: arbitrage service enforces require_perm('arbitrage.edit') on update_weights / patch_project_scoring / upsert_envelope / delete_envelope / apply_scenario / delete_scenario and require_perm('arbitrage.simulate') on save_scenario - all deny paths return 403 BEFORE any business validation or 404 lookup (no information leak, no 422 short-circuit).",
+    "VALIDATED: /profiles/seed and /profiles/seed-full now Depends(permission_required('admin.config')) -> 403 for PORTFOLIO/CIO/min-perm, 200 for TENANT_ADMIN; connectors/jira/test -> 403 for manager, non-403 for admin.",
+    "VALIDATED: apply_template and engagement.attest enforce projects.edit/edit_own -> viewer 403, manager passes the gate (404 'Template introuvable' for a bogus template_id = permission check passed; attest returns 200).",
+    "VALIDATED: catalog.set_manual_value dashboard scope requires indicators.manage (403 proven with the minimal profile) and POST /export/copil requires export.ppt (403 with minimal profile, non-403 for viewer who holds export.ppt).",
+    "Static sweep of all 158 write routes: modules initially flagged as unguarded (architecture, security, pb, indicators, budget, admin_config, rgpd) are in fact guarded via SimpleCrud.write_permission / require_dsi_write -> require_perm / permission_required alias / _require_admin. Only PUT /tenant/settings remains role-based rather than permission-based.",
+    "NOTE on architecture (not a blocker): the app is Bearer-token based (JWT in JSON body + Authorization header), so the playbook's httpOnly-cookie expectation does not apply. JWT_SECRET is fail-fast validated (>=32 chars, weak-secret blocklist), token TTL 8h with perm_version revocation - reconfirmed by code review.",
+    "All seeded profiles (CIO, PORTFOLIO, PMO, READ_ONLY, Achats) carry indicators.manage AND export.ppt - review whether READ_ONLY-type profiles should really be able to write manual indicator values / generate COPIL exports (business decision, not an implementation bug)."
+  ],
+  "updated_files": [
+    "/app/backend/tests/test_rbac_audit_v2.py",
+    "/app/backend/tests/test_rbac_audit_v2_supplemental.py",
+    "/app/backend/tests/test_rbac_audit_v2_minperm.py"
+  ],
+  "success_rate": {"backend": "100% (55/55 executed, 1 skipped by design)", "frontend": "not tested (backend-only request)"},
+  "seed_data_creation": "Temporary only, fully cleaned up: profile TEST_MinPerm (dashboard.view/portfolio.view/arbitrage.view) + user test.rbac.minperm@altair.fr (deactivated then purged from DB by fixture teardown); arbitrage envelope year 2098 and scenario TEST_scenario_rbac deleted via API; TEST_RBAC_Project / TEST_RBAC_Project_Mgr / TEST_RBAC_Risk / TEST_RBAC_Task deleted and 404 verified. Post-run DB/API verification confirms zero leftovers.",
+  "should_call_test_agent_after_fix": false,
+  "should_main_agent_self_test": true,
+  "test_credentials": "admin@altair.fr/Admin2026!, manager@altair.fr/Altair2026!, viewer@altair.fr/View1234!, admin@betacorp.fr/Beta2026! - all verified working. /app/memory/test_credentials.md is present and accurate (profile labels there are role names, not profile codes).",
+  "context_for_next_testing_agent": "Run `pytest tests/test_rbac_audit_v2.py tests/test_rbac_audit_v2_supplemental.py tests/test_rbac_audit_v2_minperm.py -p no:randomly` from /app/backend as the RBAC regression suite. Two gotchas: (1) the brute-force test trips the per-email 10/60s limiter, so re-running immediately can 429 other logins for the SAME probe email only (real accounts unaffected); wait ~60s between full runs to be safe. (2) All seeded profiles hold indicators.manage/export.ppt, so deny-path testing for those needs the TEST_MinPerm fixture in test_rbac_audit_v2_minperm.py. Frontend was NOT tested per request.",
+  "rca_of_the_issue": "No exploitable Critical/High authorization defect found in the audited scope. The fixes are effective because the permission gate is evaluated at the top of each service function (require_perm) or as a router-level Depends(permission_required(...)), i.e. before DB lookups and before Pydantic-independent business rules - so unauthorized callers get 403 and never reach the write. Deny-by-default holds in core.auth._enforce_permission (non-empty permissions => strict membership check, wildcard '*' only for TENANT_ADMIN). Residual risk is limited to Medium/Low hardening items: IP-less in-memory login throttling, login user-enumeration signals, and one role-based (instead of permission-based) tenant-settings write."
+}

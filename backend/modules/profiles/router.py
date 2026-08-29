@@ -1,5 +1,5 @@
 from fastapi import APIRouter, Depends
-from core.auth import TokenPayload, get_current_user
+from core.auth import TokenPayload, get_current_user, permission_required
 from . import service
 from .schemas import ProfileCreate, ProfileUpdate, ProfileDuplicate
 from pydantic import BaseModel
@@ -63,12 +63,12 @@ async def duplicate_profile(
 
 
 @router.post("/profiles/seed")
-async def seed_profiles(current_user: TokenPayload = Depends(get_current_user)):
+async def seed_profiles(current_user: TokenPayload = Depends(permission_required("admin.config"))):
     return await service.seed_default_profiles(current_user.tenant_id)
 
 
 @router.post("/profiles/seed-full")
-async def seed_full(current_user: TokenPayload = Depends(get_current_user)):
+async def seed_full(current_user: TokenPayload = Depends(permission_required("admin.config"))):
     """Seed complet : profils + réaffectation users + nouveaux users."""
     return await service.seed_full_profiles_and_users(current_user.tenant_id)
 

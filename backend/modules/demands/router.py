@@ -70,6 +70,6 @@ async def convert_to_project(
 
 @router.post("/demands/seed")
 async def seed_demands(
-    current_user: TokenPayload = Depends(get_current_user),
+    current_user: TokenPayload = Depends(permission_required("admin.config")),
 ):
     return await service.seed_demo_demands(current_user.tenant_id)

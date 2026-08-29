@@ -4,7 +4,7 @@ from datetime import datetime, timezone
 
 from fastapi import HTTPException
 from core.database import db
-from core.auth import TokenPayload, require_write, require_perm
+from core.auth import TokenPayload, require_write, require_perm, has_perm, is_ownership_restricted
 
 # (key, label, type auto|attested, check_key, mandatory)
 _C = lambda k, l, t, c, m: {"key": k, "label": l, "type": t, "check_key": c, "mandatory": m}
@@ -119,6 +119,14 @@ async def delete_criterion(criterion_id: str, user: TokenPayload):
 
 
 async def attest(project_id: str, data: dict, user: TokenPayload) -> dict:
+    if not (has_perm(user, "projects.edit") or has_perm(user, "projects.edit_own")):
+        raise HTTPException(403, "Permission projects.edit requise")
+    proj = await db.projects.find_one(
+        {"project_id": project_id, "tenant_id": user.tenant_id}, {"_id": 0, "owner_id": 1})
+    if not proj:
+        raise HTTPException(404, "Projet introuvable")
+    if is_ownership_restricted(user, "projects.edit_own") and proj.get("owner_id") != user.user_id:
+        raise HTTPException(403, "Accès refusé — projet non assigné")
     if data.get("not_applicable") and not (data.get("justification") or "").strip():
         raise HTTPException(400, "Une justification est requise pour marquer un critère non applicable")
     doc = {
