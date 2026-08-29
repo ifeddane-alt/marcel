@@ -2,9 +2,8 @@
 import logging
 from datetime import datetime, timezone
 
-import httpx
 
-from core.ssrf import validate_public_url
+from core.ssrf import validate_public_url, hardened_async_client
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +23,7 @@ async def fire_webhook(webhook_url: str, event: str, payload: dict) -> None:
         **payload,
     }
     try:
-        async with httpx.AsyncClient(timeout=5.0) as client:
+        async with hardened_async_client(timeout=5.0) as client:
             resp = await client.post(webhook_url, json=body)
             logger.info("[Webhook] %s → %s HTTP %d", event, webhook_url[:60], resp.status_code)
     except Exception as exc:

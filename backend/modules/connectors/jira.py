@@ -11,7 +11,7 @@ from datetime import datetime, timezone
 import httpx
 
 from core.database import db
-from core.ssrf import validate_public_url
+from core.ssrf import validate_public_url, hardened_async_client
 
 JIRA_DEFAULT_MAPPING = {
     "fields": [
@@ -84,7 +84,7 @@ async def test_connection(base_url: str, auth_type: str, credentials: dict) -> d
         }
     try:
         _ensure_safe(base_url)
-        async with httpx.AsyncClient(base_url=base_url.rstrip("/"), timeout=10,
+        async with hardened_async_client(base_url=base_url.rstrip("/"), timeout=10,
                                      headers=_auth_headers(credentials)) as client:
             data = await _request(client, "GET", "/rest/api/3/myself")
         return {"success": True, "message": f"Connecté en tant que {data.get('displayName', 'inconnu')}"}
@@ -106,7 +106,7 @@ async def list_projects(config: dict) -> list:
         ]
     results, start = [], 0
     _ensure_safe(base_url)
-    async with httpx.AsyncClient(base_url=base_url, timeout=15, headers=_auth_headers(creds)) as client:
+    async with hardened_async_client(base_url=base_url, timeout=15, headers=_auth_headers(creds)) as client:
         while True:
             page = await _request(client, "GET", "/rest/api/3/project/search",
                                   params={"startAt": start, "maxResults": 50})
@@ -150,7 +150,7 @@ async def project_summary(config: dict, jira_key: str) -> dict:
         return {"key": jira_key, "issues_done": done, "issues_total": total,
                 "epics_done": random.randint(0, et), "epics_total": et}
     _ensure_safe(base_url)
-    async with httpx.AsyncClient(base_url=base_url, timeout=30, headers=_auth_headers(creds)) as client:
+    async with hardened_async_client(base_url=base_url, timeout=30, headers=_auth_headers(creds)) as client:
         done, total = await _search_count(client, f'project = "{jira_key}"')
         e_done, e_total = await _search_count(client, f'project = "{jira_key}" AND issuetype = Epic')
     return {"key": jira_key, "issues_done": done, "issues_total": total,

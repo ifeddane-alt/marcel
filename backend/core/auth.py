@@ -91,7 +91,14 @@ async def get_current_user(
 
     # Révocation & propagation des changements de droits (compte désactivé,
     # rôle/profil/permissions modifiés) : le token porte pv ; on le compare à
-    # la version courante de l'utilisateur. Fail-open uniquement en cas d'erreur DB.
+    # la version courante de l'utilisateur.
+    await _verify_revocation(tp)
+    return tp
+
+
+async def _verify_revocation(tp: TokenPayload) -> None:
+    """Contrôle de révocation partagé (HTTP + WebSocket) : compte actif + perm_version.
+    Lève 503 uniquement si la vérification DB est indisponible (fail-closed)."""
     from core.database import db
     try:
         u = await db.users.find_one(
@@ -107,6 +114,13 @@ async def get_current_user(
         raise HTTPException(status_code=403, detail="Compte désactivé")
     if (tp.pv or 0) != u.get("perm_version", 1):
         raise HTTPException(status_code=401, detail="Droits modifiés — reconnectez-vous")
+
+
+async def authenticate_ws_token(token: str) -> TokenPayload:
+    """Auth WebSocket : signature + expiration PUIS révocation (pv/is_active), cohérent
+    avec get_current_user. Empêche un token révoqué/désactivé de garder un canal WS ouvert."""
+    tp = decode_token(token)
+    await _verify_revocation(tp)
     return tp
 
 

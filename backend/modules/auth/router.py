@@ -15,52 +15,67 @@ from .schemas import LoginRequest
 router = APIRouter(tags=["auth"])
 logger = logging.getLogger(__name__)
 
-# ── Rate limiter in-memory (10 tentatives / email / 60s) ─────────────────────
+# ── Rate limiter in-memory (email + IP, fenêtre glissante) ───────────────────
 _rl_lock = Lock()
-_rl_store: dict = defaultdict(list)  # email → [timestamp, ...]
-_RL_MAX = 10
-_RL_WINDOW = 60  # secondes
+_rl_store: dict = defaultdict(list)   # "email:<x>" / "ip:<x>" → [timestamps]
+_RL_EMAIL_MAX = 10                    # tentatives / email / fenêtre
+_RL_IP_MAX = 30                       # tentatives / IP / fenêtre (anti spraying multi-emails)
+_RL_WINDOW = 60                       # secondes
+
+# Hash bcrypt fictif : égalise le temps de réponse quand l'email est inconnu (anti-timing).
+_DUMMY_HASH = bcrypt.hashpw(b"marcel-timing-equalizer", bcrypt.gensalt())
+_UNIFORM_LOGIN_ERROR = "Identifiants invalides"
 
 
-def _check_rate_limit(email: str) -> None:
-    """Lève HTTPException 429 si l'email dépasse 10 tentatives/minute."""
+def _rl_hit(key: str, limit: int, now: float) -> int | None:
+    """Enregistre une tentative ; renvoie retry_after (s) si la limite est dépassée, sinon None."""
+    timestamps = [t for t in _rl_store[key] if now - t < _RL_WINDOW]
+    _rl_store[key] = timestamps
+    if len(timestamps) >= limit:
+        return int(_RL_WINDOW - (now - timestamps[0])) or 1
+    _rl_store[key].append(now)
+    return None
+
+
+def _check_rate_limit(email: str, ip: str) -> None:
+    """Lève 429 si l'email OU l'IP dépasse sa limite sur la fenêtre glissante."""
     now = time.time()
-    key = email.lower().strip()
     with _rl_lock:
-        timestamps = [t for t in _rl_store[key] if now - t < _RL_WINDOW]
-        _rl_store[key] = timestamps
-        if len(timestamps) >= _RL_MAX:
-            retry_after = int(_RL_WINDOW - (now - timestamps[0]))
-            logger.warning("[auth] Rate limit atteint pour %s (%d tentatives)", key, len(timestamps))
-            raise HTTPException(
-                status_code=429,
-                detail=f"Trop de tentatives. Réessayez dans {retry_after}s.",
-                headers={"Retry-After": str(retry_after)},
-            )
-        _rl_store[key].append(now)
+        for key, limit in ((f"email:{email.lower().strip()}", _RL_EMAIL_MAX),
+                           (f"ip:{ip}", _RL_IP_MAX)):
+            retry_after = _rl_hit(key, limit, now)
+            if retry_after is not None:
+                logger.warning("[auth] Rate limit atteint (%s)", key)
+                raise HTTPException(
+                    status_code=429,
+                    detail=f"Trop de tentatives. Réessayez dans {retry_after}s.",
+                    headers={"Retry-After": str(retry_after)},
+                )
 
 
 @router.post("/auth/login")
 async def login(req: LoginRequest, request: Request):
-    # ── Rate limiting par email ──
+    # ── Rate limiting par email ET par IP ──
     ip = client_ip(request)
     try:
-        _check_rate_limit(req.email)
+        _check_rate_limit(req.email, ip)
     except HTTPException:
         await log_auth_event("auth.login_blocked", result="blocked", email=req.email, source_ip=ip, detail="rate_limit")
         raise
 
     user = await db.users.find_one({"email": req.email}, {"_id": 0})
     if not user:
+        # Temps constant + message uniforme : n'expose pas l'existence du compte.
+        bcrypt.checkpw(req.password.encode(), _DUMMY_HASH)
         logger.warning("[auth] Tentative échouée (email inconnu): %s depuis %s", req.email, ip)
         await log_auth_event("auth.login_failed", result="failure", email=req.email, source_ip=ip, detail="unknown_email")
-        raise HTTPException(status_code=401, detail="Identifiants invalides")
+        raise HTTPException(status_code=401, detail=_UNIFORM_LOGIN_ERROR)
     if user.get("is_active") is False:
         logger.warning("[auth] Tentative sur compte désactivé: %s depuis %s", req.email, ip)
         await log_auth_event("auth.login_failed", result="failure", email=req.email,
                              tenant_id=user.get("tenant_id", ""), user_id=user.get("user_id", ""),
                              source_ip=ip, detail="account_disabled")
-        raise HTTPException(status_code=403, detail="Compte désactivé — contactez votre administrateur")
+        raise HTTPException(status_code=401, detail=_UNIFORM_LOGIN_ERROR)
     if not user.get("password_hash"):
         # Compte SSO sans mot de passe local
         logger.warning("[auth] Tentative mdp sur compte SSO: %s depuis %s", req.email, ip)
@@ -73,7 +88,7 @@ async def login(req: LoginRequest, request: Request):
         await log_auth_event("auth.login_failed", result="failure", email=req.email,
                              tenant_id=user.get("tenant_id", ""), user_id=user.get("user_id", ""),
                              source_ip=ip, detail="bad_password")
-        raise HTTPException(status_code=401, detail="Identifiants invalides")
+        raise HTTPException(status_code=401, detail=_UNIFORM_LOGIN_ERROR)
 
     if user.get("mfa_enabled"):
         jti = __import__("secrets").token_urlsafe(24)

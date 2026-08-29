@@ -1,6 +1,4 @@
 """SSO — OIDC (Google, Microsoft Entra ID) + SAML 2.0 SP-initiated, config par tenant."""
-import base64
-import json
 import logging
 import os
 import secrets
@@ -8,7 +6,7 @@ import uuid
 from datetime import datetime, timezone, timedelta
 from urllib.parse import urlencode
 
-import httpx
+from core.ssrf import hardened_async_client
 from fastapi import HTTPException, Request
 
 from core.database import db
@@ -170,7 +168,7 @@ def _oidc_discovery_url(provider: str, pcfg: dict) -> str:
 
 
 async def _fetch_discovery(provider: str, pcfg: dict) -> dict:
-    async with httpx.AsyncClient(timeout=10.0) as client:
+    async with hardened_async_client(timeout=10.0) as client:
         resp = await client.get(_oidc_discovery_url(provider, pcfg))
         resp.raise_for_status()
         return resp.json()
@@ -217,7 +215,7 @@ async def _verify_oidc_id_token(id_token: str, disc: dict, client_id: str) -> di
     kid = header.get("kid")
     if not kid or not disc.get("jwks_uri"):
         raise HTTPException(401, "Clé de signature OIDC introuvable")
-    async with httpx.AsyncClient(timeout=10.0) as client:
+    async with hardened_async_client(timeout=10.0) as client:
         r = await client.get(disc["jwks_uri"])
         r.raise_for_status()
         keys = r.json().get("keys") or []
@@ -245,7 +243,7 @@ async def oidc_callback(provider: str, code: str, state: str, base_url: str) -> 
         raise HTTPException(400, f"SSO {provider} désactivé")
 
     disc = await _fetch_discovery(provider, pcfg)
-    async with httpx.AsyncClient(timeout=15.0) as client:
+    async with hardened_async_client(timeout=15.0) as client:
         resp = await client.post(disc["token_endpoint"], data={
             "grant_type": "authorization_code",
             "code": code,

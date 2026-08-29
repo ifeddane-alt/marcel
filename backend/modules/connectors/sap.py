@@ -180,8 +180,7 @@ def _mock_sync_result(direction: str) -> dict:
 
 async def _real_odata_sync(config: dict, direction: str) -> dict:
     """Sync réelle SAP OData (V1 — import budgets uniquement)."""
-    import httpx
-    from core.ssrf import validate_public_url, connector_tls_verify
+    from core.ssrf import validate_public_url, connector_tls_verify, hardened_async_client
     base_url = config.get("base_url", "").rstrip("/")
     creds = config.get("_decrypted_creds", {})
     user  = creds.get("username") or creds.get("email", "")
@@ -190,7 +189,7 @@ async def _real_odata_sync(config: dict, direction: str) -> dict:
 
     validate_public_url(base_url)
     url = f"{base_url}/sap/opu/odata/sap/ZBDG_BUDGET_SRV/BudgetSet?$format=json&$top=50"
-    async with httpx.AsyncClient(timeout=30, verify=connector_tls_verify(config), auth=auth) as client:
+    async with hardened_async_client(timeout=30, verify=connector_tls_verify(config), auth=auth) as client:
         resp = await client.get(url)
         if resp.status_code != 200:
             raise Exception(f"SAP OData error {resp.status_code}")

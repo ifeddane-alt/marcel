@@ -1,6 +1,6 @@
 """Router WebSocket + REST notifications."""
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Query
-from core.auth import TokenPayload, get_current_user, decode_token
+from core.auth import TokenPayload, get_current_user, authenticate_ws_token
 from . import service
 
 router = APIRouter(tags=["notifications"])
@@ -14,7 +14,7 @@ async def websocket_endpoint(websocket: WebSocket, token: str = Query(...)):
     Connecte l'utilisateur pour recevoir des notifications en temps réel.
     """
     try:
-        payload = decode_token(token)
+        payload = await authenticate_ws_token(token)
         user_id = payload.user_id
         tenant_id = payload.tenant_id
     except Exception:
