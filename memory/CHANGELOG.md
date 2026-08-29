@@ -419,3 +419,11 @@
 - ⚠ PIÈGE : event_types (référentiel) n'existait pas en prod → events générés à 0 au premier run. Fix : POST /api/events/types/seed-defaults (22 types) puis /app/scripts/seed_events.py (383 événements). Pour tout nouveau tenant, seed-defaults d'abord.
 - Exécution prod : push SSH → docker cp script dans marcel-backend-1 → docker exec python /tmp/seed_bank_full.py (~1 min). Vérifs prod : 11 endpoints 200 < 1 s.
 - Ajustement réalisme : drifts/late milestones/EAC overrun réduits pour ~50 % vert / 34 % orange / 16 % rouge.
+
+## 2026-06 (fork) — Réconciliation GitHub + CI verte + prod b88fb47 (GO RED TEAM)
+- origin/main: 2821879 → 5adbbaf (push exact FF) → b88fb47 (correctifs CI). Prod déployée b88fb47 == origin/main.
+- Save to GitHub inopérant en session forkée (connexion GitHub non transférée, échec silencieux) → push via token PAT utilisateur (à révoquer après usage).
+- Bug réel corrigé: engagement/service.py attest — projection {"owner_id":1} → {} falsy si champ absent → faux 404. Reproduit en local (seed CI vierge), validé 55 passed/1 skipped.
+- CI: seed betacorp + profil CI_VIEWER_PLUS (viewer = lecture + indicators.manage + export.ppt, parité Preview). .gitleaks.toml: allowlist 2 valeurs factices (ci_rbac_secret_key…, projetenne-secret-key-2025), 0 leak sur 303 commits.
+- Smoke prod 26/26 + engagement 3/3, attestation test nettoyée, throttle 429 confirmé (dernier test, grille l'IP ~quelques minutes).
+- PIÈGE évité: gitleaks-action scanne la PLAGE poussée (15 commits) mais un scan full-history trouve aussi l'ancien défaut projetenne-secret-key-2025 (historique) — couvert par l'allowlist.

@@ -536,3 +536,12 @@ Construire et développer en continu une application SaaS multi-tenant appelée 
 ## 2026-06 (fork) — Données démo « full opérationnel » Banque/Assurance (PROD)
 - ✅ 100 applications, 13 programmes, 350 projets, ~4 300 tâches, 220 adhérences, 260 ressources, tous modules peuplés (Run, sécu, archi, SAFe, gouvernance, budget, OKRs, agenda 383 événements). Fiches projets complètes, chiffres cohérents inter-écrans, RAG auto 97 V / 66 O / 32 R.
 - Scripts : /app/scripts/seed_bank_full.py (+ seed_events.py). Reproductible (seed 42). Anciennes données Phoenix/DORA remplacées (choix utilisateur).
+
+## 2026-06 (fork) — Source de vérité GitHub réconciliée + CI verte + prod alignée (b88fb47)
+- ✅ Push exact de 5adbbaf sur origin/main (fast-forward, sans force) via token utilisateur (Save to GitHub cassé en session forkée : connexion GitHub non transférée — diagnostic support).
+- ✅ CI GitHub d'abord ROUGE, puis corrigée et VERTE (run 33270924112, 5/5 jobs) : rbac-audit 55 passed/1 skipped, gitleaks 0 leak.
+- ✅ Vrai bug backend corrigé (1 ligne, `modules/engagement/service.py`) : projection Mongo `{"owner_id":1}` renvoie `{}` (falsy) si champ absent → faux 404 « Projet introuvable » sur attest. Fix `if proj is None`.
+- ✅ ci.yml : seed CI enrichi (tenant betacorp + profil CI_VIEWER_PLUS pour parité avec l'audit Preview). `.gitleaks.toml` : allowlist de 2 valeurs factices précises uniquement (regexTarget=line, useDefault=true).
+- ✅ Prod déployée sur b88fb47 via /opt/marcel/scripts/update.sh. Smoke prod : 26 PASS / 0 FAIL + engagement 3/3 (viewer 403, admin attest 200, readiness 200, attestation de test nettoyée).
+- ✅ État final : origin/main == HEAD prod == b88fb478ad3bd9ebdc95d797ab2235efe6976ba3, repo prod propre, pull futur fast-forward sûr. GO RED TEAM prononcé.
+- ⚠ Token GitHub (classic, repo+workflow) utilisé pour les push — à RÉVOQUER par l'utilisateur (github.com/settings/tokens).
