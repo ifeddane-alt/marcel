@@ -1,5 +1,15 @@
 # PRD — MARCEL
 
+## 2026-08-29 — DÉPLOYÉ EN PRODUCTION (commit 5adbbaf) + durcissement
+- **PROD = commit `5adbbaf73f2893b525bf84ecfb8f3c3bfd901f3c`** (marcel-ppm.com). Backend rebuild `--no-deps`, mongo/frontend/nginx intacts, backup préventif OK.
+- **Smoke sécurité prod : 26/26 PASS** — arbitrage 6/6→403 viewer ; apply-template/connectors-test/profiles-seed/engagement-attest/tenant-settings→403 ; manager/admin légitimes OK ; isolation tenant + IDOR OK ; login/auth OK ; JWT pv + MFA non régressés ; CRUD OK ; login uniforme + throttle IP 429.
+- **Durcissement ajouté (au-delà des 8 correctifs RBAC)** : (1) SSRF anti-rebinding DNS = transport httpx qui valide + épingle l'IP à chaque connexion + `follow_redirects=False` (connecteurs Jira/SAP/ServiceNow, webhooks, SSO/OIDC) ; (2) throttle login par IP (30/min) en plus de par email (10/min) + message d'erreur uniforme + bcrypt à temps constant (anti-énumération) ; (3) révocation WebSocket cohérente JWT (`authenticate_ws_token` vérifie perm_version + is_active). Validé Preview 11/11.
+- **CI** : job bloquant `rbac-audit` (`.github/workflows/ci.yml`) exécutant `test_rbac_audit_v2*` (seed + normalisation mdp + uvicorn + pytest). Suite verte en local (55/55). S'active au push GitHub.
+- **PROD SECURITY GATE = PASS · GO RED TEAM** : aucun Critical/High exploitable en prod.
+- ⚠️ **Divergence dépôt** : VPS `/opt/marcel` sur `5adbbaf` (code audité) ; GitHub `origin/main` divergent (`2821879`). Réconcilier GitHub sur `5adbbaf` (Save to GitHub) avant tout `update.sh` (sinon merge régressif) et pour activer la CI.
+- **Infra prod-safe** : docker-compose Mongo-auth optionnel (rétro-compatible, no-auth conservé comme aujourd'hui) ; `ENCRYPTION_KEY` forte + `PUBLIC_BASE_URL` ajoutées au `.env` prod. Auth réseau Mongo at-rest = migration infra coordonnée restant à planifier.
+
+
 ## 2026-06 (fork) — AUDIT SÉCURITÉ INDÉPENDANT V2 + remédiation (Preview, NON déployé)
 - **Cible auditée** : backend V2 complet (`_v2/`, 604 fichiers). `/app/backend` synchronisé sur V2 pour audit dynamique + correctifs (Preview seulement). Rapport complet : `/app/memory/MARCEL_V2_SECURITY_AUDIT.md`.
 - **Verdict** : V2 telle que livrée = **NO-GO RED TEAM** (1 HIGH exploitable). Après remédiation de cette session = **GO RED TEAM** (plus aucun Critical/High exploitable ; résiduels Medium/Low documentés, non bloquants).

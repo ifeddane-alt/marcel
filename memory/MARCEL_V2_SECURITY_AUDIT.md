@@ -134,4 +134,16 @@ Vérifié par lecture de code + tests. Les points suivants sont solides et NE so
 - Correctifs (Preview) : `arbitrage/service.py`, `connectors/service.py`, `project_templates/service.py`, `engagement/service.py`, `catalog/service.py`, `profiles/router.py`, `export/router.py`, `tenant/router.py`, `public_site/router.py`.
 
 ## État de déploiement
-- Correctifs appliqués et testés en **Preview uniquement**. **Aucun déploiement production** effectué (conforme au cadre d'audit). À déployer sur décision explicite après revue.
+- Correctifs appliqués et testés en **Preview** (55/55 RBAC + 11/11 durcissement).
+- **DÉPLOYÉ EN PRODUCTION** le 2026-08-29 — commit `5adbbaf73f2893b525bf84ecfb8f3c3bfd901f3c`.
+
+## Déploiement production (2026-08-29)
+- **Commit déployé** : `5adbbaf73f2893b525bf84ecfb8f3c3bfd901f3c` (VPS `/opt/marcel`, backend rebuild `--no-deps`, mongo/frontend/nginx intacts).
+- **Méthode** : git bundle → VPS `git reset --hard` → `docker compose up -d --build --no-deps backend`. Backup préventif effectué avant. Backend `Up (healthy)`, `/api/health` ok.
+- **Infra** : docker-compose rendu prod-safe (Mongo-auth optionnel/rétro-compatible ; l'auth réseau Mongo reste une migration infra coordonnée à part). `ENCRYPTION_KEY` forte ajoutée en prod (les 3 connecteurs existants avaient des credentials vides → aucune casse) ; `PUBLIC_BASE_URL` ajoutée.
+- **Smoke sécurité PROD (https://marcel-ppm.com)** : **26/26 PASS** — arbitrage 6/6 → 403 viewer ; apply-template/connectors-test/profiles-seed/engagement-attest/tenant-settings → 403 ; manager/admin légitimes 200/201 ; isolation tenant + IDOR ok ; login/auth ok ; JWT pv + MFA non régressés ; CRUD (risk create/delete) non régressé ; login uniforme + throttle IP 429.
+- **CI** : job `rbac-audit` (bloquant) ajouté à `.github/workflows/ci.yml` (mongo service + seed + normalisation mots de passe + uvicorn + pytest `test_rbac_audit_v2*`). S'exécute sur GitHub Actions au push.
+- ⚠️ **Divergence dépôt** : le VPS est sur `5adbbaf` (code audité), mais GitHub `origin/main` est sur une branche divergente (`2821879`). Avant tout futur `update.sh`, réconcilier GitHub sur `5adbbaf` (Save to GitHub) pour éviter un merge régressif et activer la CI.
+
+## PROD SECURITY GATE = PASS · GO RED TEAM
+Après déploiement et smoke prod 26/26, plus aucun Critical/High exploitable en production. Résiduels Medium/Low documentés (SSRF admin-gated désormais durci, CSP, énumération SSO résiduelle, chiffrement Mongo at-rest infra, PB vote) — non bloquants.
