@@ -119,21 +119,48 @@ jobs:
       - name: Seed altair tenant + accounts
         working-directory: backend
         run: python seed.py
-      - name: Normalize test-account passwords (suite expects distinct pw per account)
+      - name: Normalize test accounts + seed betacorp tenant (cross-tenant tests)
         working-directory: backend
         run: |
-          python -c "
-          import asyncio, bcrypt, os
+          python - <<'PY'
+          import asyncio, bcrypt, os, uuid
           from motor.motor_asyncio import AsyncIOMotorClient
           async def m():
               db = AsyncIOMotorClient(os.environ['MONGO_URL'])[os.environ['DB_NAME']]
               creds = [('admin@altair.fr','Admin2026!'),('manager@altair.fr','Altair2026!'),('viewer@altair.fr','View1234!')]
               for email, pwd in creds:
                   h = bcrypt.hashpw(pwd.encode(), bcrypt.gensalt()).decode()
-                  await db.users.update_one({'email': email}, {'\$set': {'password_hash': h, 'is_active': True}})
+                  await db.users.update_one({'email': email}, {'$set': {'password_hash': h, 'is_active': True}})
               print('test-account passwords normalized')
+              beta_tid = 'b7a9c1e2-0000-4000-8000-000000000001'
+              if not await db.tenants.find_one({'name': 'BetaCorp CI'}):
+                  await db.tenants.insert_one({
+                      'tenant_id': beta_tid, 'name': 'BetaCorp CI', 'plan': 'enterprise',
+                      'settings': {'currency': 'EUR', 'locale': 'fr-FR'},
+                      'created_at': '2024-01-01T00:00:00Z'})
+                  hb = bcrypt.hashpw(b'Beta2026!', bcrypt.gensalt()).decode()
+                  await db.users.insert_one({
+                      'user_id': str(uuid.uuid4()), 'tenant_id': beta_tid,
+                      'email': 'admin@betacorp.fr', 'name': 'Beta Admin',
+                      'role': 'TENANT_ADMIN', 'password_hash': hb, 'is_active': True})
+                  print('betacorp tenant + admin seeded')
+              # viewer CI = lecture seule + indicators.manage + export.ppt (parité Preview)
+              altair = 'a1b2c3d4-e5f6-7890-abcd-ef1234567890'
+              if not await db.profiles.find_one({'tenant_id': altair, 'code': 'CI_VIEWER_PLUS'}):
+                  vp_id = str(uuid.uuid4())
+                  await db.profiles.insert_one({
+                      'profile_id': vp_id, 'tenant_id': altair, 'is_system': False,
+                      'name': 'CI Viewer Plus', 'code': 'CI_VIEWER_PLUS',
+                      'description': 'Profil CI: lecture + indicators.manage + export.ppt',
+                      'permissions': ['dashboard.view', 'portfolio.view', 'roadmap.view', 'teams.view',
+                                      'risks.view', 'decisions.view', 'governance.view', 'compliance.view',
+                                      'demands.view_own', 'budget.view', 'raf.view', 'trains.view',
+                                      'indicators.manage', 'export.ppt'],
+                      'created_at': '2024-01-01T00:00:00Z', 'updated_at': '2024-01-01T00:00:00Z'})
+                  await db.users.update_one({'email': 'viewer@altair.fr'}, {'$set': {'profile_id': vp_id}})
+                  print('viewer profile CI_VIEWER_PLUS assigned')
           asyncio.run(m())
-          "
+          PY
       - name: Start API
         working-directory: backend
         run: |

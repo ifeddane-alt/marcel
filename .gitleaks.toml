@@ -1,0 +1,10 @@
+[extend]
+useDefault = true
+
+[allowlist]
+description = "Valeurs factices utilisées par les tests (non-secrets)"
+regexTarget = "line"
+regexes = [
+  '''ci_rbac_secret_key_min_32_chars_long_xx''',
+  '''projetenne-secret-key-2025''',
+]

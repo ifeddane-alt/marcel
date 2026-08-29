@@ -123,7 +123,7 @@ async def attest(project_id: str, data: dict, user: TokenPayload) -> dict:
         raise HTTPException(403, "Permission projects.edit requise")
     proj = await db.projects.find_one(
         {"project_id": project_id, "tenant_id": user.tenant_id}, {"_id": 0, "owner_id": 1})
-    if not proj:
+    if proj is None:
         raise HTTPException(404, "Projet introuvable")
     if is_ownership_restricted(user, "projects.edit_own") and proj.get("owner_id") != user.user_id:
         raise HTTPException(403, "Accès refusé — projet non assigné")
