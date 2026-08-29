@@ -52,11 +52,15 @@ Message clé : cockpit projet complet, borné à son périmètre (RBAC object-le
 2. **Personas incohérents** : les comptes démo tombaient sur le fallback rôle (cp@ n'était PAS scoping « ses projets »).
    → Assignation des profils métier (Direction SI / PMO Portefeuille / Chef de Projet) + compte DSI créé + mots de passe connus + perm_version bump.
 
-## Gaps fonctionnels observés (non corrigés — hors périmètre curation)
-- Menu « Capacité » visible au profil Direction SI mais sans données (pas de perm lecture capacité) → masquer l'entrée ou accorder une lecture. Mineur.
-- Module « Budget participatif » (/pb) vide (budget_cuts=0) → seeder un scénario si démo PB souhaitée. Mineur.
+## Gaps fonctionnels observés (mis à jour)
+- ✅ RÉSOLU — Capacité pour Direction SI : profil doté de `resources.view` (lecture seule) ; CIO voit indicateurs/heatmap/surcharges, toute mutation = 403.
+- ✅ RÉSOLU — Budget participatif (/pb) : 2 sessions démo réalistes (Innovation SI 2026 ouverte 500k€/6 candidats/6 votes ; Fonds Run 2026 clôturée 200k€/4 candidats/4 votes), lignes de coupe hétérogènes (4/6 et 3/4 financés).
 - Responsive/mobile limité (desktop-first). Important pour usage exécutif mobile.
 - i18n EN à compléter (toggle présent). Important pour comptes internationaux.
+
+## Quick wins démo (2026-06) — script /app/scripts/demo_quickwins.py (idempotent, tag demo_curation)
+- QW1 Capacité CIO : Direction SI + resources.view (lecture) ; validé live GET 200 / mutations 403.
+- QW2 Budget participatif : scénario seedé ; validé live (sessions visibles, résultats + cut line).
 
 ## Scores qualité démo
 - Avant : 72/100 (surcharge non démontrable, personas non représentatifs).
