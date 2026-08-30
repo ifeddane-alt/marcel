@@ -83,6 +83,7 @@ jobs:
             --ignore=tests/test_rbac_audit_v2.py \
             --ignore=tests/test_rbac_audit_v2_minperm.py \
             --ignore=tests/test_rbac_audit_v2_supplemental.py \
+            --ignore=tests/test_public_api.py \
             -k "not sap and not connector_sync" \
             || true
 
@@ -172,6 +173,9 @@ jobs:
       - name: RBAC audit suite (BLOCKING)
         working-directory: backend
         run: pytest tests/test_rbac_audit_v2.py tests/test_rbac_audit_v2_minperm.py tests/test_rbac_audit_v2_supplemental.py -q
+      - name: Public API v1 suite (read-only, scopes, isolation, rate-limit, audit)
+        working-directory: backend
+        run: pytest tests/test_public_api.py -q
 
   frontend:
     name: Frontend — build

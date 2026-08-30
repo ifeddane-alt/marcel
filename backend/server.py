@@ -100,6 +100,10 @@ from modules.capacity.router import router as capacity_router
 from modules.budget_ops.router import router as budget_ops_router
 from modules.exports.router import router as exports_router
 from modules.architecture.trajectory import router as trajectory_router
+from modules.public_api.router import router as public_api_router
+from modules.public_api.tokens_router import router as public_api_tokens_router
+from modules.public_api.docs import register_public_docs
+from core.public_api import init_public_api_indexes, log_api_call
 from starlette.middleware.base import BaseHTTPMiddleware
 
 app = FastAPI(title="MARCEL API")
@@ -201,8 +205,24 @@ for _router in [
     budget_ops_router,
     exports_router,
     trajectory_router,
+    public_api_router,
+    public_api_tokens_router,
 ]:
     app.include_router(_router, prefix="/api")
+
+# API publique v1 : documentation OpenAPI dédiée + Swagger UI (ne documente que /api/v1/*)
+register_public_docs(app)
+
+
+# API publique v1 : audit de chaque appel (statut réel capturé après réponse)
+@app.middleware("http")
+async def _public_api_audit(request, call_next):
+    path = request.url.path
+    is_public_api = path.startswith("/api/v1/") and not path.endswith(("/openapi.json", "/docs"))
+    response = await call_next(request)
+    if is_public_api:
+        await log_api_call(request, response.status_code)
+    return response
 
 
 @app.get("/api/health")
@@ -295,6 +315,12 @@ async def startup_event():
         # Ne pas bloquer en preview/dev, mais logger clairement
         if os.environ.get("SKIP_LICENSE_CHECK") != "true":
             import sys; sys.exit(1)
+
+    try:
+        await init_public_api_indexes()
+        logger.info("[Startup] Index API publique v1 initialisés")
+    except Exception as e:
+        logger.warning(f"[Startup] Init index API publique non critique : {e}")
 
     scheduler.start()
     await _schedule_connectors()
